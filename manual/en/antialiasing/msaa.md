@@ -3,28 +3,30 @@ title: MSAA
 order: 2
 ---
 
-# MSAA (Multisample AA)
+# MSAA
 
-**MSAA** (Multisample Antialiasing) is the most standard antialiasing method supported at the hardware (GPU) level. It smoothes geometry edges by sampling boundary areas multiple times.
+**MSAA** (Multisample Antialiasing) is a GPU hardware-based antialiasing technique that samples geometry boundaries
+(edges) multiple times to eliminate jagged outlines. It is enabled by default on standard displays
+(`devicePixelRatio <= 1.0`).
 
-## 1. Features & Pros
+## 1. Features and Usage
 
-- **Standard Quality**: A proven method that cleans up object outlines very well.
-- **Performance Balance**: Lighter than Super Sampling (SSAA) but consumes more memory than Post-Processing (FXAA).
-- **Cons**: Only smoothes geometry edges; it does not resolve aliasing within textures or shader artifacts.
+Enable MSAA via `redGPUContext.antialiasingManager.useMSAA`, which automatically disables `TAA` and `FXAA`.
 
-## 2. Usage
-
-Enabled via `antialiasingManager.useMSAA`. Enabling this automatically disables FXAA or TAA.
+- **Edge-Specialized**: Produces crisp and clean polygon outlines.
+- **Limitations**: Multi-sampling the entire G-Buffer consumes significant memory bandwidth, and it does not resolve
+  interior texture shimmering or shader aliasing.
 
 ```javascript
-// Enable MSAA (Other AAs are disabled)
+// Enable global MSAA (other AAs are automatically disabled)
 redGPUContext.antialiasingManager.useMSAA = true;
 ```
 
-## 3. Live Example: MSAA Application
+---
 
-Toggle MSAA on and off to compare the changes in geometry outlines and highlights.
+## 2. Live Example
+
+Toggle MSAA on and off to compare changes along geometry outlines.
 
 <ClientOnly>
 <CodePen title="RedGPU - MSAA Example" slugHash="antialiasing-msaa">
@@ -48,8 +50,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     light.x = 10; light.y = 10; light.z = 10;
     scene.lightManager.addDirectionalLight(light);
     
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.lux = 0.3;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Fine grid floor (To check pattern aliasing)
@@ -106,14 +107,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     });
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
-        if (manager.useMSAA) {
-            manager.useMSAA = false; // Turn off
-        } else {
-            manager.useMSAA = true; // Turn on
-        }
+        manager.useMSAA = !manager.useMSAA;
         
         btn.textContent = `MSAA: ${manager.useMSAA ? 'ON' : 'OFF (None)'}`;
-        btn.style.background = manager.useMSAA ? '#00aaff' : '#ccc';
+        btn.style.background = manager.useMSAA ? '#00aaff' : '#555';
     };
     document.body.appendChild(btn);
 
@@ -127,8 +124,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
+---
 
-- **Hardware Support**: Utilizes built-in GPU features.
-- **Edge-Specialized**: Excellent for smoothing object outlines.
-- **Default**: Enabled by default in standard display environments.
+## Next Steps
+
+- **[FXAA](./fxaa.md)**: Fast approximate post-processing antialiasing
+- **[TAA](./taa.md)**: Temporal accumulation antialiasing

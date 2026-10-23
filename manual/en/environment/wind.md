@@ -5,22 +5,24 @@ order: 4
 
 # Global Wind System
 
-`RedGPU.Wind.WindManager` (`scene.windManager`) is a global environment manager that controls wind direction, wind
-speed, and wind strength across the entire scene through a unified interface.
+`WindManager` is a global environment manager that controls wind direction, speed, and
+strength across the entire scene through a unified interface.
 
 ## 1. Integrated Systems
 
 Modifying properties on `scene.windManager` (owned by default by every `Scene` instance) immediately affects the
-following rendering systems:
+following systems:
 
-- **Large-Scale Foliage (`FoliageManager`)**: Direction and frequency of trunk bending (`trunkBendScale`) and leaf
-  flutter (`leafFlutterScale`)
-- **Procedural Grass (`GrassManager`)**: Travel direction and sway amplitude of wind gusts sweeping across meadows
-- **Physically Based Water (`Lake`)**: Flow direction and speed (`flowRateScale`) of lake surface normal maps
+- **`FoliageManager`**: Direction and frequency of trunk bending (`trunkBendScale`) and leaf flutter
+  (`leafFlutterScale`) for large-scale foliage
+- **`GrassManager`**: Travel direction and sway amplitude of wind gusts sweeping across procedural grass meadows
+- **`Lake`**: Flow direction and speed (`flowRateScale`) of physically based lake surface normal maps
 
-## 2. Usage and Key Properties
+---
 
-Access the manager directly via `scene.windManager` without creating a separate instance.
+## 2. Key Properties and Usage
+
+Control the manager directly via `scene.windManager` without creating a separate instance.
 
 | Property             | Type      | Default   | Description                                                                          |
 |:---------------------|:----------|:----------|:-------------------------------------------------------------------------------------|
@@ -32,7 +34,6 @@ Access the manager directly via `scene.windManager` without creating a separate 
 | **`directionZ`**     | `number`  | Read-only | Normalized Z-axis direction component computed from `directionAngle` (`sin`)         |
 
 ```javascript
-// Access the Scene's global wind manager
 const windManager = scene.windManager;
 
 // 1. Set wind direction angle (0 ~ 360 degrees)
@@ -48,9 +49,7 @@ windManager.strength = 1.5;
 
 ---
 
-## Next Step
+## Next Steps
 
-Now that you have configured the natural environment, move on to the Extended Objects category to learn how to load
-external 3D models and use specialized display objects.
-
-- **[Extended Objects](../extended-objects/index.md)**
+- **[Extended Objects](../extended-objects/index.md)**: Loading external 3D models and utilizing specialized display
+  objects

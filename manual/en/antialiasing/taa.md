@@ -3,35 +3,39 @@ title: TAA
 order: 1
 ---
 
-# TAA (Temporal AA)
+# TAA
 
-**TAA** (Temporal Antialiasing) is a time-based technique that blends information from previous frames with the current frame to eliminate jagged edges. It provides the highest quality among current antialiasing techniques, producing smooth, cinematic images.
+**TAA** (Temporal Antialiasing) is a temporal accumulation technique that jitters the camera at sub-pixel intervals each
+frame and blends previous frame history with the current frame to eliminate jagged edges. It suppresses aliasing not
+only on geometry outlines but also across textures and shader highlights.
 
-## 1. How it Works
+## 1. Features and Usage
 
-TAA works by slightly jittering the camera every frame and then accumulating and averaging multiple rendered frames. This process allows the engine to obtain resolution information more precise than a single pixel.
+Enable TAA globally via `redGPUContext.antialiasingManager.useTAA`, which automatically disables `MSAA` and `FXAA`. Any
+slight softening from temporal accumulation is restored through the built-in Contrast Adaptive Sharpening pass
+(`TAACASPass`), controlled per `View3D` via `view.taa`.
 
-- **Pros**: Provides near-perfect antialiasing quality in static or slow-moving scenes.
-- **Cons**: Ghosting artifacts (trails) may occur on fast-moving objects.
-
-## 2. Usage
-
-Enabled via `antialiasingManager.useTAA`. Enabling this automatically disables MSAA or FXAA.
+- **`view.taa.sharpness`** (`number`, default: `0.5`, range: `0.0 ~ 1.0`): Adjusts contrast adaptive sharpening
+  intensity per view.
+- **`view.taa.reset()`**: Immediately clears the temporal history buffer upon camera teleportation or scene cuts to
+  prevent ghosting trails.
 
 ```javascript
-// Enable TAA (Other AAs are disabled)
+// 1. Enable global TAA (other AAs are automatically disabled)
 redGPUContext.antialiasingManager.useTAA = true;
 
-// Adjust CAS sharpness per View3D (0.0 ~ 1.0, default: 0.5)
-view.taa.sharpness = 0.6;
+// 2. Adjust per-view sharpening intensity (0.0 ~ 1.0, default: 0.5)
+view.taa.sharpness = 0.5;
 
-// Reset temporal history when teleporting the camera or switching scenes
+// 3. Reset temporal history buffer when teleporting the camera
 view.taa.reset();
 ```
 
-## 3. Live Example: TAA Quality Check
+---
 
-Observe how TAA handles edges, textures, and fine patterns in the same scene. (Notice how it perfectly resolves the shimmering in the grid pattern and texture details.)
+## 2. Live Example
+
+Compare how TAA resolves aliasing on fine grid patterns, wireframe edges, and textured surfaces.
 
 <ClientOnly>
 <CodePen title="RedGPU - TAA Example" slugHash="antialiasing-taa">
@@ -55,8 +59,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     light.x = 10; light.y = 10; light.z = 10;
     scene.lightManager.addDirectionalLight(light);
     
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.lux = 0.3;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Fine grid floor (To check pattern aliasing)
@@ -103,12 +106,6 @@ RedGPU.init(canvas, (redGPUContext) => {
     // Initial state: TAA Enabled
     redGPUContext.antialiasingManager.useTAA = true;
 
-// Adjust CAS sharpness per View3D (0.0 ~ 1.0, default: 0.5)
-view.taa.sharpness = 0.6;
-
-// Reset temporal history when teleporting the camera or switching scenes
-view.taa.reset ();
-
     // UI: TAA Toggle Button
     const btn = document.createElement('button');
     btn.textContent = 'TAA: ON';
@@ -119,11 +116,7 @@ view.taa.reset ();
     });
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
-        if (manager.useTAA) {
-            manager.useTAA = false; // Turn off
-        } else {
-            manager.useTAA = true;  // Turn on
-        }
+        manager.useTAA = !manager.useTAA;
         
         btn.textContent = `TAA: ${manager.useTAA ? 'ON' : 'OFF (None)'}`;
         btn.style.background = manager.useTAA ? '#00aaff' : '#555';
@@ -140,8 +133,9 @@ view.taa.reset ();
 </CodePen>
 </ClientOnly>
 
-## Key Summary
+---
 
-- **Best Quality**: Almost completely eliminates jagged edges.
-- **Auto-Selection**: Automatically enabled on high-DPI displays (like Retina).
-- **High Cost**: Recommended for desktop environments due to per-frame computation and memory overhead.
+## Next Steps
+
+- **[MSAA](./msaa.md)**: Hardware multisample antialiasing
+- **[FXAA](./fxaa.md)**: Fast approximate post-processing antialiasing

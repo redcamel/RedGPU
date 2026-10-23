@@ -25,30 +25,30 @@ const loaderGraph = `
 
 # GLTF Loader
 
-**Primitive** 로 기본적인 형태를 만들 수 있지만, 정교한 캐릭터나 건물 같은 고품질 에셋은 외부 3D 툴 (Blender, Maya 등)에서 제작하여 가져와야 합니다.
-RedGPU는 웹 3D 표준 포맷인 **glTF**(GL Transmission Format) 2.0 로딩과 스켈레탈 (Skinning)/모프 (Morph Target) 애니메이션, 그리고 상태 머신 기반 모션
-블렌딩을 지원하는 **GLTFLoader** 를 제공합니다.
+`GLTFLoader` 는 웹 3D 표준 포맷인 **glTF**(GL Transmission Format) 2.0 파일 (`.gltf`, `.glb`)을 비동기로 로드하고, PBR
+재질, 스켈레탈 (Skinning)·모프 (Morph Target) 애니메이션, 상태 머신 기반 모션 블렌딩을 구성하는 로더입니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="loaderGraph" />
 </ClientOnly>
 
-## 1. 모델 불러오기
+---
 
-`RedGPU.GLTFLoader` 를 사용하여 `.gltf` 또는 `.glb` 파일을 로드할 수 있습니다. 로딩은 비동기적으로 진행되며, 완료 시 콜백 함수를 통해 결과를 전달받습니다.
+## 1. 모델 로드 및 주요 속성
+
+`RedGPU.GLTFLoader` 생성자에 파일 경로와 완료·진행·에러 콜백을 전달하여 모델을 비동기 로드합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
 new RedGPU.GLTFLoader(
-    redGPUContext, 
-    'https://.../DamagedHelmet.glb', // 모델 경로
+    redGPUContext,
+    'https://.../DamagedHelmet.glb',
     (loader) => {
-        // [로드 성공] loader.resultMesh가 최종 모델 객체입니다.
         scene.addChild(loader.resultMesh);
     },
     (progress) => {
-        // [선택] 로딩 진행 상태 확인 (progress.model.percent 등)
+        // 로딩 진행 상태 확인 (progress.model.percent 등)
     },
     (error) => {
         console.error('GLTF 로드 실패:', error);
@@ -56,31 +56,30 @@ new RedGPU.GLTFLoader(
 );
 ```
 
-### GLTFLoader 주요 속성 및 메서드
+| 속성 / 메서드                  | 타입                  | 설명                                                                                                                |
+|:-------------------------------|:----------------------|:--------------------------------------------------------------------------------------------------------------------|
+| **`resultMesh`**               | `Mesh`                | 로드된 모델의 계층 구조를 담고 있는 루트 `RedGPU.Display.Mesh` 컨테이너                                             |
+| **`parsingResult`**            | `Object`              | 파싱된 재질(`materials`), 그룹(`groups`), 텍스처(`textures`), 애니메이션 클립 배열(`animations`: `ClipAnimState[]`) |
+| **`playAnimation(clipState)`** | `(clipState) => void` | `parsingResult.animations` 에 포함된 특정 애니메이션 클립(`ClipAnimState`)을 재생합니다.                            |
+| **`stopAnimation()`**          | `() => void`          | 현재 재생 중인 모든 애니메이션을 즉시 중지합니다.                                                                   |
+| **`destroy()`**                | `() => void`          | 로더가 생성한 애니메이션 트랙 및 참조 리소스를 해제합니다.                                                          |
 
-- **`resultMesh`** (`Mesh`): 로드된 모델의 계층 구조를 담고 있는 루트 `RedGPU.Display.Mesh` 컨테이너입니다.
-- **`parsingResult`**: 재질 (`materials`), 그룹 (`groups`), 텍스처 (`textures`), 애니메이션 클립 배열 (`animations`: `ClipAnimState[]`)
-  등 파싱된 상세 데이터입니다.
-- **`playAnimation(clipState)`**: `loader.parsingResult.animations`에 포함된 특정 애니메이션 클립 (`ClipAnimState`)을 재생합니다.
-- **`stopAnimation()`**: 현재 재생 중인 모든 애니메이션을 즉시 중지합니다.
-- **`destroy()`**: 로더가 생성한 애니메이션 트랙 및 참조 리소스를 해제합니다.
+> [!TIP]
+> glTF 모델은 대부분 물리 기반 렌더링 재질 (`PBRMaterial`)을 사용하므로, `View3D` 에 `IBL` 을 함께 설정해야 금속 및 표면 반사가 정상적으로 표현됩니다.
 
 ---
 
-## 2. 애니메이션 재생 및 상태 머신 (`AnimStateMachine`)
+## 2. 애니메이션 재생 및 상태 머신
 
-glTF 파일에 스켈레탈 애니메이션이 포함되어 있으면 `loader.parsingResult.animations` 배열에 각 클립이 `RedGPU.ClipAnimState` 인스턴스로 자동 파싱됩니다.
-
-단일 클립 재생은 `loader.playAnimation(clip)`으로 제어하며, 캐릭터의 대기 (`Idle`) ↔ 걷기 (`Walk`) ↔ 달리기 (`Run`)처럼 조건에 따라 부드럽게 모션을 섞어 전환
-(Crossfade Blending)하려면 **`RedGPU.AnimStateMachine`** 을 사용합니다.
+모델에 포함된 애니메이션 클립은 `loader.parsingResult.animations` 에 `ClipAnimState` 배열로 파싱됩니다. 단일 클립은 `loader.playAnimation(clip)` 으로
+재생하며, 대기 (`Idle`) ↔ 걷기 (`Walk`) ↔ 달리기 (`Run`) 등 조건부 크로스페이드 전환 (Crossfade Blending)에는 `AnimStateMachine` 을 사용합니다.
 
 ```javascript
 new RedGPU.GLTFLoader(
     redGPUContext,
     'https://threejs.org/examples/models/gltf/Soldier.glb',
     (loader) => {
-        const mesh = loader.resultMesh;
-        scene.addChild(mesh);
+        scene.addChild(loader.resultMesh);
 
         const clips = loader.parsingResult.animations;
         if (clips.length > 0) {
@@ -97,7 +96,7 @@ new RedGPU.GLTFLoader(
             stateMachine.addState(walkState);
             stateMachine.addState(runState);
 
-            // 2. 상태 전이 규칙(duration: 크로스페이드 초 단위 시간, conditions: 전이 조건 함수) 등록
+            // 2. 상태 전이 규칙(duration: 크로스페이드 시간(초), conditions: 전이 조건 함수) 등록
             stateMachine.addTransition({
                 fromState: 'Idle',
                 toState: 'Walk',
@@ -122,55 +121,9 @@ new RedGPU.GLTFLoader(
 
 ---
 
-## 3. IBL과의 시너지
+## 3. 라이브 데모: IBL과 모델 로딩
 
-외부에서 가져온 고품질 모델들은 대부분 **물리 기반 렌더링**(PBR) 재질 (`PBRMaterial`)을 사용합니다. 이러한 재질은 주변 환경의 빛 정보를 반사하여 질감을 표현하기 때문에, 앞서 배운
-**IBL** 과 함께 사용할 때 가장 사실적인 결과를 얻을 수 있습니다.
-
-IBL이 없는 환경에서 PBR 모델을 로드하면 금속 질감이 검게 보이거나 매우 어색하게 출력될 수 있습니다.
-
-## 4. 실습 예제: 환경광과 모델 로딩
-
-IBL로 환경을 구성하고, 정교한 금속 헬멧 모델을 로드하는 전체 과정입니다. 카메라 컨트롤러의 `distance` 속성을 조절하여 모델을 적절한 크기로 관찰할 수 있습니다.
-
-```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    
-    // 1. 카메라 거리 설정 (모델 크기에 맞춰 조절)
-    controller.distance = 3; 
-
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
-
-    // 2. IBL 및 SkyBox 설정 (PBR 재질의 핵심)
-    const ibl = new RedGPU.Resource.IBL(
-        redGPUContext,
-        'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
-    );
-    view.ibl = ibl;
-    view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-
-    // 3. GLTF 모델 로딩
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
-        (loader) => {
-            scene.addChild(loader.resultMesh);
-        }
-    );
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext);
-});
-```
-
-### 라이브 데모
-
-IBL 환경광을 받아 정교하게 반사되는 금속 헬멧 모델을 확인해 보세요.
+`IBL` 환경광과 `SkyBox` 가 적용된 공간에 glTF 헬멧 모델을 로드한 예제입니다.
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - GLTF Loader with IBL" slugHash="gltf-loader">
@@ -215,14 +168,13 @@ const scene = new RedGPU.Display.Scene ();
             });
         }
     );
-
 });
 </pre>
 </CodePen>
 </ClientOnly>
 
+---
+
 ## 다음 단계
 
-텍스트와 함께 3D 공간을 풍성하게 채워줄 이미지 기반의 객체들에 대해 알아봅니다.
-
-- **[스프라이트](../sprite/index.md)**
+- **[Instancing Mesh](../instanced-mesh/index.md)** : 수만 개의 동일 객체를 단일 드로우 콜로 렌더링하기

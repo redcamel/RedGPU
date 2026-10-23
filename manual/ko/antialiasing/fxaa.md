@@ -5,26 +5,26 @@ order: 3
 
 # FXAA
 
-**FXAA**(Fast Approximate Antialiasing) 는 렌더링된 최종 이미지를 분석하여 경계를 찾고 흐리게 만드는 **후처리**(Post-Processing) 방식의 안티앨리어싱입니다.
+**FXAA**(Fast Approximate Antialiasing) 는 렌더링이 완료된 2D 이미지에서 명암 대비가 큰 경계선을 검출하여 부드럽게 블러링하는 후처리 (Post-Processing) 방식의
+안티앨리어싱 기법입니다.
 
-## 1. 특징 및 장점
+## 1. 특징 및 사용법
 
-- **초고속**: 연산 비용이 매우 적어 모바일 기기에서도 부담 없이 사용할 수 있습니다.
-- **메모리 절약**: MSAA처럼 추가적인 버퍼를 요구하지 않습니다.
-- **제약**: 화면 전체적으로 미세한 블러(Blur)가 발생하여 텍스처가 약간 흐려 보일 수 있습니다.
+`redGPUContext.antialiasingManager.useFXAA` 속성으로 활성화하며, 켜는 즉시 `TAA` 와 `MSAA` 는 자동 해제됩니다.
 
-## 2. 사용법
-
-`antialiasingManager.useFXAA` 를 통해 활성화합니다. 이를 켜면 MSAA나 TAA는 자동으로 비활성화됩니다.
+- **초경량 연산**: 추가적인 멀티샘플링 버퍼나 히스토리 버퍼를 요구하지 않아 모바일 및 저사양 기기에 적합합니다.
+- **제약 사항**: 이미지 픽셀 단위로 경계를 뭉개므로 고주파 텍스처 디테일이 미세하게 흐려질 수 있습니다.
 
 ```javascript
-// FXAA 활성화 (다른 AA는 꺼짐)
+// 전역 FXAA 활성화 (다른 AA는 자동 비활성화)
 redGPUContext.antialiasingManager.useFXAA = true;
 ```
 
-## 3. 실습 예제: FXAA 품질 확인
+---
 
-FXAA가 엣지뿐만 아니라 텍스처와 하이라이트의 자글거림을 어떻게 처리하는지 확인해 보세요.
+## 2. 실습 예제
+
+FXAA가 지오메트리 외곽선과 텍스처 경계를 어떻게 처리하는지 확인합니다.
 
 <ClientOnly>
 <CodePen title="RedGPU - FXAA Example" slugHash="antialiasing-fxaa">
@@ -92,7 +92,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 2. FXAA 활성화
+    // 초기 상태: FXAA 활성화
     redGPUContext.antialiasingManager.useFXAA = true;
 
     // UI: FXAA 토글
@@ -105,11 +105,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     });
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
-        if (manager.useFXAA) {
-             manager.useFXAA = false; 
-        } else {
-             manager.useFXAA = true;
-        }
+        manager.useFXAA = !manager.useFXAA;
         
         btn.textContent = `FXAA: ${manager.useFXAA ? 'ON' : 'OFF (None)'}`;
         btn.style.background = manager.useFXAA ? '#00aaff' : '#555';
@@ -118,18 +114,17 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
-        // 천천히 회전하며 텍스처 블러링 관찰
         scene.children.forEach(mesh => {
-            if(mesh instanceof RedGPU.Display.Mesh) mesh.rotationY += 0.01;
-        })
+            if (mesh instanceof RedGPU.Display.Mesh) mesh.rotationY += 0.01;
+        });
     });
 });
 </pre>
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+---
 
-- **후처리 방식**: 렌더링된 이미지 위에서 동작합니다.
-- **배타적 실행**: FXAA를 켜면 MSAA, TAA는 꺼집니다.
-- **전역 제어**: `redGPUContext` 단위로 제어됩니다.
+## 다음 단계
+
+- **[플러그인 시스템](../plugins/index.md)** : 외부 확장 기능 활용

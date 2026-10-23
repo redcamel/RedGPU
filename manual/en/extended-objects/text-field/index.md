@@ -5,39 +5,31 @@ order: 4
 
 # Text Field
 
-RedGPU provides a **TextField** system that allows you to conveniently render text in 3D space. It internally utilizes
-HTML/SVG technology to output complex font styles and effects based on GPU acceleration.
+RedGPU's text field system internally leverages HTML/SVG rendering to display CSS-styled text in both 3D world
+coordinates (`TextField3D`) and 2D screen coordinates (`TextField2D`). Textures automatically update when text content
+or styles change, and `TextField3D` includes built-in camera-facing **Billboard** support.
 
-## 1. Key Features
+## 1. Key Style Properties
 
-- **HTML/SVG Based**: You can use familiar CSS styles (font, color, alignment, etc.) directly.
-- **Spatial & 2D Placement**: Supports **TextField3D**, placed at 3D world coordinates, as well as **TextField2D**
-  (`RedGPU.Display.TextField2D`) for 2D UI views (`View2D`).
-- **Automatic Sizing**: The object's size is automatically updated according to the text content and style.
-- **Billboard Support**: Can be set so that text always faces the camera.
+Core style properties shared by `TextField3D` and `TextField2D`:
 
-## 2. Key Style Properties
+| Property         | Default         | Description                                               |
+|:-----------------|:----------------|:----------------------------------------------------------|
+| **`text`**       | `""`            | String to display (supports line breaks via `<br/>` tags) |
+| **`fontSize`**   | `24`            | Font size (`px`)                                          |
+| **`fontFamily`** | `"Arial"`       | Font family                                               |
+| **`color`**      | `"#fff"`        | Text color (Hex, RGB, etc.)                               |
+| **`background`** | `"transparent"` | Background color and opacity                              |
+| **`textAlign`**  | `"center"`      | Text alignment (`"left"`, `"center"`, `"right"`)          |
+| **`padding`**    | `0`             | Inner padding (`px`)                                      |
 
-Text field objects provide the following style properties.
+---
 
-| Property     | Description                                | Default Value   |
-|:-------------|:-------------------------------------------|:----------------|
-| `text`       | String to display (supports `<br/>`)       | `""`            |
-| `fontSize`   | Font size (px)                             | `24`            |
-| `fontFamily` | Font family                                | `"Arial"`       |
-| `color`      | Text color (Hex, RGB, etc.)                | `"#fff"`        |
-| `background` | Background color and transparency          | `"transparent"` |
-| `textAlign`  | Text alignment (`left`, `center`, `right`) | `"center"`      |
-| `padding`    | Padding (px)                               | `0`             |
+## Learning Roadmap
 
-::: info [HTML Tag Support]
-You can handle line breaks using the `<br/>` tag in the `text` property.
-:::
-
-## Next Learning Roadmap
-
-1. **[TextField3D](./textfield3d.md)**: Placing and controlling text in the 3D world
-2. **[Interaction](../../interaction/index.md)**: Learning interaction via mouse and touch
+1. **[TextField3D](./textfield3d.md)**: Placing text and controlling sizing modes in the 3D world
+2. **[Particle & Line](../particle/index.md)**: Rendering GPU particle emitters and 3D splines
+3. **[Interaction](../../interaction/index.md)**: Object interaction via mouse and touch input
 
 ---
 

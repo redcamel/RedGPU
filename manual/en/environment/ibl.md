@@ -31,32 +31,33 @@ const iblGraph = `
 
 # IBL
 
-IBL (Image-Based Lighting) is a method of lighting objects using images of the surrounding environment as light sources. It provides realistic reflections and global illumination effects that are difficult to express with simple light sources alone, maximizing the realism of 3D scenes.
+**Image-Based Lighting** (IBL, `RedGPU.Resource.IBL`) is a resource that analyzes surrounding environment images as
+light sources to provide realistic reflections and global diffuse illumination to Physically Based Rendering (PBR)
+materials.
 
-## 1. Core Components of IBL
+## 1. Core Components
 
-RedGPU's **Image-Based Lighting** (IBL) system analyzes HDR environment maps or cubemap images to automatically create the following three core resources.
+`IBL` takes an HDR environment map or cubemap images and automatically generates three cube texture resources.
 
 <ClientOnly>
   <MermaidResponsive :definition="iblGraph" />
 </ClientOnly>
 
-### 1.1 Irradiance Texture
-This acts as the basic shading and ambient light for objects, providing natural color even in areas without a direct light source. (**Diffuse Irradiance Map**, accessed via the `irradianceTexture` property)
+| Property                 | Role                  | Description                                                                                                           |
+|:-------------------------|:----------------------|:----------------------------------------------------------------------------------------------------------------------|
+| **`irradianceTexture`**  | Diffuse Ambient Light | Provides basic shading and ambient illumination, giving natural color even in areas without direct light sources.     |
+| **`prefilterTexture`**   | Specular Reflection   | A reflection map pre-filtered by roughness level, expressing environmental reflections on metallic or glass surfaces. |
+| **`environmentTexture`** | Visual Background     | A high-resolution cubemap converted from the source image, primarily used as the background texture for `SkyBox`.     |
 
-### 1.2 Specular Prefilter Texture
-This is responsible for the effect of the surrounding environment being reflected on an object's surface. It expresses reflections on surfaces like metal or glass in Physically Based Rendering (PBR) materials. (**Specular Prefilter Map**, accessed via the `prefilterTexture` property)
+> [!TIP]
+> Assigning an `IBL` instance to `view.ibl` automatically applies its `irradianceTexture` and `prefilterTexture` to all
+PBR objects (such as glTF models) rendered in that view.
 
-::: tip [Automatic Light Resource Application]
-When you assign an `IBL` instance to the `view.ibl` property, the internally generated **Irradiance Texture** and **Specular Prefilter Texture** are automatically applied to all PBR objects rendered in that view.
-:::
+---
 
-### 1.3 Environment Texture
-This data maintains the original image as a high-resolution cubemap, mainly used as a background texture for **SkyBox**. (Accessed via the `environmentTexture` property)
+## 2. Creation and Application
 
-## 2. Implementation: Creation and Application
-
-To apply IBL, you must create the resource and then register it with the **View3D**.
+Create an `IBL` resource and assign it to the `ibl` and `skybox` properties of a `View3D`.
 
 ```javascript
 // 1. Create an IBL resource (HDR file recommended)
@@ -65,16 +66,19 @@ const ibl = new RedGPU.Resource.IBL(
     'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
 );
 
-// 2. Apply IBL to the View (Lighting effect)
+// 2. Apply IBL lighting to the View
 view.ibl = ibl;
 
-// 3. Apply a SkyBox to the View (Visual background)
+// 3. Apply a SkyBox background to the View
 view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 ```
 
-## 3. Live Example: Environmental Setup
+---
 
-The example below shows the result of creating both IBL and a SkyBox from an HDR source. Currently, it just looks like a 360-degree background, but this space is already filled with physically accurate light data.
+## 3. Live Example
+
+The example below configures both `IBL` and `SkyBox` from an HDR source. When loading PBR assets such as external glTF
+models, this environment data drives photorealistic metallic reflections and ambient lighting.
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Environmental Setup" slugHash="env-setup">
@@ -113,14 +117,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 4. True Value: Synergy with GLTF
-
-Simply looking at the background (SkyBox) may not seem to make a significant difference. However, the true value of this environmental setup is revealed when loading **GLTF models**, which will be covered in the next chapter.
-
-Detailed models created externally mostly use PBR (Physically Based Rendering) materials. IBL provides these models with realistic reflection data and soft environment light, allowing them to achieve photorealistic textures as if they were actually present in that space.
+---
 
 ## Next Steps
 
-Learn how to add dynamic sky effects to a scene through real-time physically based atmospheric scattering simulation.
-
-- **[SkyAtmosphere](./skyatmosphere.md)**
+- **[SkyAtmosphere](./skyatmosphere.md)**: Creating dynamic sky effects via real-time physically based atmospheric
+  scattering simulation

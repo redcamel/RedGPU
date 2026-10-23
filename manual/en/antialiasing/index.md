@@ -5,50 +5,41 @@ order: 11
 
 # Antialiasing
 
-**Antialiasing** is a technique used to smooth out jagged edges (Aliasing) that occur during 3D rendering. RedGPU provides various techniques ranging from hardware-based **MSAA** to post-processing based **FXAA** and **TAA**.
+**Antialiasing** is a technique that smooths jagged pixel edges (aliasing) produced during 3D rendering. RedGPU supports
+temporal accumulation (`TAA`), hardware multisampling (`MSAA`), and post-processing filtering (`FXAA`), centrally
+controlled via `redGPUContext.antialiasingManager`.
 
-All settings are centrally controlled through the `antialiasingManager` built into `RedGPUContext`.
+## 1. Exclusive Operation and Auto-Selection
 
-## 1. Default Behavior & Activation Rules
+Antialiasing techniques operate exclusively: only one technique can be active at a time, and enabling one automatically
+disables the others. Upon initialization, the default technique is selected automatically based on the display's
+`devicePixelRatio`.
 
-RedGPU's antialiasing system operates **exclusively**. This means only one technique can be active at a time, and enabling a new technique automatically disables the existing one.
-
-### Auto-Selection at Initialization
-Upon initialization, the optimal technique is automatically selected based on the `devicePixelRatio` of the execution environment.
-
-- **High-DPI Display** (`devicePixelRatio > 1.0`): **TAA** is enabled by default.
-- **Standard Display**: **MSAA** is enabled by default.
+- **High-DPI Display** (`devicePixelRatio > 1.0`): **TAA** enabled by default
+- **Standard Display** (`devicePixelRatio <= 1.0`): **MSAA** enabled by default
 
 ```javascript
-// Check current settings
 const manager = redGPUContext.antialiasingManager;
 console.log(`TAA: ${manager.useTAA}, MSAA: ${manager.useMSAA}, FXAA: ${manager.useFXAA}`);
 ```
 
-## 2. Features & Recommendations
+---
 
-Choose the appropriate technique based on your rendering quality and performance goals.
+## 2. Technique Comparison
 
-| Technique | Method | Quality Traits | Cost | Recommended For |
-| :--- | :--- | :--- | :--- | :--- |
-| **[TAA](./taa.md)** | Temporal Accumulation | **Best** (Full Image) | **Medium** | Most high-quality Desktop/Web projects |
-| **[MSAA](./msaa.md)** | Hardware Sampling | **Excellent** (Edges Only) | **Very High** | Simple scenes where edge geometry is critical |
-| **[FXAA](./fxaa.md)** | Post-processing | **Good** (Full Image) | **Very Low** | Mobile, low-end devices, performance priority |
+Select the appropriate technique according to your quality and performance targets.
 
-### Detailed Comparison
-
-- **TAA**: The modern standard. Uses motion vectors to minimize ghosting on moving objects and resolves shader aliasing. **Especially effective on high-DPI displays** (`devicePixelRatio > 1.0`), where the slight softening of the image is virtually imperceptible.
-- **MSAA**: Consumes significant memory bandwidth due to G-Buffer multi-sampling. Provides the sharpest edge quality.
-- **FXAA**: Smoothes the entire image cost-effectively but may slightly blur texture details.
-
-## Learning Guide
-
-We recommend learning in order of quality.
-
-1. **[TAA (Temporal AA)](./taa.md)**: Choice for best quality
-2. **[MSAA (Multisample AA)](./msaa.md)**: Choice for stability and standard quality
-3. **[FXAA (Fast Approximate AA)](./fxaa.md)**: Choice for best performance
+| Technique             | Method                 | Quality & Characteristics                                                                                                                              | Cost      | Recommended Environment                            |
+|:----------------------|:-----------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------|:----------|:---------------------------------------------------|
+| **[TAA](./taa.md)**   | Temporal Accumulation  | **Best** — Uses motion vectors to suppress ghosting and resolves both geometry edges and shader/texture aliasing (optimal on `devicePixelRatio > 1.0`) | Medium    | High-quality desktop and high-DPI web environments |
+| **[MSAA](./msaa.md)** | Hardware Sampling      | **Excellent** — Multi-samples the G-Buffer for crisp geometry outlines (does not resolve interior shader aliasing)                                     | Very High | Simple scenes where geometric edges are critical   |
+| **[FXAA](./fxaa.md)** | Post-Processing Filter | **Moderate** — Smooths full-screen edges quickly without extra buffers (may slightly soften fine texture details)                                      | Very Low  | Mobile and low-end devices                         |
 
 ---
 
-[Next Step: Learn Plugin System](../plugins/index.md)
+## Next Steps
+
+- **[TAA](./taa.md)**: Temporal antialiasing and sharpening configuration
+- **[MSAA](./msaa.md)**: Hardware multisample antialiasing configuration
+- **[FXAA](./fxaa.md)**: Fast approximate post-processing antialiasing configuration
+- **[Plugin System](../plugins/index.md)**: Using external extension modules

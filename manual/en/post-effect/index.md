@@ -5,7 +5,9 @@ order: 9
 
 # Post-Effect
 
-Post-effect is a technique for adding visual effects to the final 2D image after the 3D scene rendering is complete. RedGPU's post-processing system provides a dualized interface for **configuration convenience** and **execution efficiency**.
+**Post-Effect** is a post-processing system that applies visual effects to the final 2D image after 3D scene rendering
+is complete. It consists of `ToneMappingManager` for color transformation and `PostEffectManager` for pipeline execution
+and effect control.
 
 <script setup>
 const postEffectGraph = `
@@ -32,7 +34,7 @@ const postEffectGraph = `
             AE --> GE --> TM
         end
 
-        AA["3. LDR Phase (FXAA / TAA)"]:::pipelineNode
+        AA["3. LDR Phase (FXAA / TAA & TAACASPass)"]:::pipelineNode
 
     TMM -.->|Inject Settings| TM
     PEM -.->|Manage & Execute| Transition
@@ -49,38 +51,42 @@ const postEffectGraph = `
 `
 </script>
 
-## 1. System Structure: Control and Execution
+## 1. System Structure
 
-Users control post-processing through two managers depending on their purpose, but the actual operations are executed sequentially within a single pipeline supervised by the `PostEffectManager`.
+Users configure post-processing through two managers depending on their purpose, while actual operations execute
+sequentially within a single pipeline supervised by `PostEffectManager`.
 
-*   **ToneMappingManager** (`view.toneMappingManager`): A dedicated window responsible for **color transformation settings** such as the basic hue, exposure, and contrast of the scene.
-*   **PostEffectManager** (`view.postEffectManager`): Responsible for adding or deleting general effects and the **overall execution** of the pipeline.
+- **`ToneMappingManager`**: Controls color transformation settings such as base hue,
+  exposure, and contrast via `view.toneMappingManager`.
+- **`PostEffectManager`**: Manages automatic exposure (`autoExposure`), built-in effects (`ssao`, `ssr`), general effect
+  registration, and overall pipeline execution via `view.postEffectManager`.
 
 <ClientOnly>
   <MermaidResponsive :definition="postEffectGraph" />
 </ClientOnly>
 
+---
+
 ## 2. Rendering Pipeline Flow
 
-All effects are processed in the following order. This sequence is fixed for graphics optimization and consistency of visual results.
+Post-processing effects are processed in a fixed sequence for graphics optimization and visual consistency.
 
-1. **HDR Phase (Scene Components)**: The stage for assembling physical scene components, including `SkyAtmosphere`,
-   `SSAO` (Screen Space Ambient Occlusion), and `SSR` (Screen Space Reflections).
-2. **Exposure & Transition (Exposure and Tone Mapping Transition)**:
-    * `AutoExposure` calculation is performed.
-    * The loop for **User General Effects** registered via `addEffect()` is executed.
-    * During this loop, **Tone Mapping** is performed immediately when the first LDR (Low Dynamic Range) effect is
-      encountered. If not triggered during the loop, it is executed at the end of the loop.
-3. **LDR Phase (Antialiasing)**: The final correction stage for the final image, where `FXAA` or `TAA` (along with
-   `TAACASPass`) is executed based on activation states.
+1. **HDR Phase**: Assembles scene components requiring depth information and HDR color gamut, such as `SkyAtmosphere`,
+   `SSAO`, and `SSR`.
+2. **Transition Phase**:
+   - When `camera.useAutoExposure` is enabled, the `AutoExposure` compute pass calculates optimal exposure.
+   - Executes the loop for general effects registered via `addEffect()`.
+   - Performs tone mapping immediately upon encountering the first LDR (Low Dynamic Range) effect in the loop, or at the
+     end of the loop if no LDR effect is present.
+3. **LDR Phase**: Executes `FXAA` or `TAA` (including `TAACASPass` sharpening) based on activation state to refine the
+   final image.
 
-### Automatic Exposure Control (`AutoExposure`)
+### Automatic Exposure Control
 
-`View3D` computes scene luminance histograms in a GPU compute shader every frame and adapts exposure smoothly via
-`view.postEffectManager.autoExposure` (`RedGPU.PostEffect.AutoExposure`). Automatic exposure is enabled when
-`camera.useAutoExposure = true` (default).
+When `camera.useAutoExposure = true` (default), `View3D` computes scene luminance histograms in a GPU compute shader
+every frame and adapts exposure smoothly via `view.postEffectManager.autoExposure`.
 
-| Property                          | Default        | Description                                                                                              |
+| Property / Method                 | Default        | Description                                                                                              |
 |:----------------------------------|:---------------|:---------------------------------------------------------------------------------------------------------|
 | **`minExposure` / `maxExposure`** | `0.15` / `4.0` | Minimum and maximum automatic exposure clamp limits                                                      |
 | **`speedUp` / `speedDown`**       | `3.0` / `1.0`  | Eye adaptation speed when transitioning from dark to bright (`speedUp`) and bright to dark (`speedDown`) |
@@ -95,13 +101,15 @@ autoExposure.exposureBias = 0.2;
 ```
 
 ::: tip [Live Demo]
-Check out all effects in action in real-time on
+Check out all effects in real-time on
 the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect).
 :::
 
-## 3. Learning Guide
+---
 
-*   **[General Effects](./general-effects.md)**: Adding various effects such as bloom, blur, and grayscale.
-*   **[Tone Mapping](./tone-mapping.md)**: Configuring basic scene color and exposure.
-*   **[Built-in Effects](./builtin-effects.md)**: Activating high-performance effects like SSAO and SSR.
-* **[Antialiasing](../antialiasing/index.md)**: Smoothing jagged edges.
+## Next Steps
+
+- **[General Effects](./general-effects.md)**: Building post-effect chains such as bloom, blur, and grayscale
+- **[Tone Mapping](./tone-mapping.md)**: Configuring base scene color and contrast
+- **[Built-in Effects](./builtin-effects.md)**: Activating and tuning `SSAO` and `SSR`
+- **[Antialiasing](../antialiasing/index.md)**: Smoothing jagged screen edges

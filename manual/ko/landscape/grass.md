@@ -5,20 +5,22 @@ order: 4
 
 # 절차적 잔디
 
-`RedGPU.Landscape.GrassManager`(`landscape.grassManager`)는 카메라 주변의 지형 표면 위에 수십만~수백만 개의 잔디 및 초목 클럼프를 **CPU 개입 없이 GPU 컴퓨트
-셰이더에서 실시간 베이킹 및 컬링**하여 렌더링하는 시스템입니다.
+`GrassManager` (`landscape.grassManager`)는 카메라 주변의 지형 표면 위에 수십만~수백만 개의 잔디 및 초목 클럼프를 GPU 컴퓨트 셰이더에서 실시간 베이킹 및 컬링하여 렌더링하는
+시스템입니다.
 
 ## 1. 동작 원리 및 주요 특징
 
 - **카메라 중심 16m 셀 GPU 베이킹**: 카메라가 일정 거리 (`16m` 셀 단위) 이상 이동할 때마다 GPU 컴퓨트 패스 (`GrassInstanceBaker`)가 VHT (고도), VNT (법선),
   VBT (지형 색상) 아틀라스와 스플래팅 가중치를 샘플링하여 잔디 인스턴스를 즉시 생성합니다.
-- **양면 식생 PBR 및 서브서피스 스캐터링**: 얇은 풀잎을 통과하는 태양광의 투과광 (**Subsurface Scattering**)과 지형 바닥 색상이 풀뿌리로 자연스럽게 스며드는 **지면 블렌딩**
+- **양면 식생 PBR 및 서브서피스 스캐터링**: 얇은 풀잎을 통과하는 태양광의 투과광 (**Subsurface Scattering**)과 지형 바닥 색상이 풀뿌리로 스며드는 **지면 블렌딩**
   (`groundBlendStrength`)을 지원합니다.
-- **전역 바람 연동**: `scene.windManager`의 풍향·풍속에 따라 파도처럼 일렁이는 정점 바람 애니메이션이 자동 적용됩니다.
+- **전역 바람 연동**: `scene.windManager` 의 풍향·풍속에 따라 일렁이는 정점 바람 애니메이션이 자동 적용됩니다.
 
-## 2. 잔디 타입 등록 (`grassManager.addType`)
+---
 
-잔디 클럼프 형태의 `Mesh`를 준비한 뒤 `landscape.grassManager.addType(options)`를 호출하여 등록합니다.
+## 2. 잔디 타입 등록
+
+잔디 클럼프 형태의 `Mesh` 를 준비한 뒤 `landscape.grassManager.addType(options)` 를 호출하여 등록합니다.
 
 ```javascript
 // 잔디 메시를 사용하여 지형 잔디 타입 등록
@@ -40,7 +42,9 @@ const meadowGrass = landscape.grassManager.addType({
 });
 ```
 
-## 3. `GrassOptions` 주요 설정 속성
+---
+
+## 3. `GrassOptions` 주요 속성
 
 | 속성명                             | 기본값                      | 설명                                                           |
 |:-----------------------------------|:----------------------------|:---------------------------------------------------------------|
@@ -64,8 +68,6 @@ const meadowGrass = landscape.grassManager.addType({
 
 ## 다음 단계
 
-지형과 식생 구성을 마쳤다면, 지형과 맞닿아 굴절·커스틱 및 실시간 물결 파동 인터랙션을 수행하는 물리 기반 수체 시스템을 알아봅니다.
-
-- **[수체 시스템 (Water)](../water/index.md)**
-- **[물리 기반 호수 (Lake)](../water/lake.md)**
-- **[전역 바람 시스템 (WindManager)](../environment/wind.md)**
+- **[수체 시스템](../water/index.md)** : 지형과 맞닿아 굴절·커스틱 및 실시간 물결 인터랙션을 수행하는 물리 기반 수체 시스템
+- **[물리 기반 호수](../water/lake.md)** : `Lake` 와 `LakeMaterial` 설정 가이드
+- **[전역 바람 시스템](../environment/wind.md)** : `WindManager` 를 통한 풍향·풍속 제어

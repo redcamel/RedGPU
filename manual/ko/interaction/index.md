@@ -5,35 +5,27 @@ order: 8
 
 # 인터렉션
 
-RedGPU는 다양한 사용자 입력을 직관적이고 손쉽게 처리할 수 있는 도구를 제공합니다:
+RedGPU의 **인터렉션** 시스템은 3D·2D 디스플레이 객체에 대한 마우스·터치 이벤트를 처리하는 **피킹**(Picking) 시스템과, 프레임 단위 키보드 입력 상태를 제공하는
+`keyboardKeyBuffer` 로 구성됩니다.
 
-- **피킹(Picking) 시스템**: 3D 및 2D 객체에 대한 마우스 및 터치 이벤트를 직관적으로 처리합니다.
-- **키보드 버퍼(keyboardKeyBuffer)**: 키보드 상태를 실시간으로 관리하여 프레임 단위의 세밀한 컨트롤을 지원합니다.
+## 1. 마우스 및 터치 인터렉션
 
-## 1. 마우스 및 터치 인터렉션 (Picking)
-
-RedGPU의 피킹 시스템은 `Mesh`, `Sprite3D`, `Sprite2D` 등 대부분의 디스플레이 객체에 대해 사용자 입력을 수신하고 반응할 수 있는 기능을 제공합니다.
-
-### 1.1 이벤트 리스너 등록
-
-객체에 이벤트를 등록하려면 `addListener` 메서드를 사용합니다. 이벤트가 발생하면 등록된 콜백 함수가 실행되며, 이벤트 정보 객체(`e`)가 전달됩니다.
+`Mesh`, `Sprite3D`, `Sprite2D`, `TextField3D` 등 디스플레이 객체에서 `addListener` 메서드로 마우스 및 터치 이벤트를 수신합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
-// 이벤트 타입 상수 참조
 const { PICKING_EVENT_TYPE } = RedGPU.Picking;
 
 mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
     console.log('클릭된 객체:', e.target);
-    // 클릭 시 회전
     e.target.rotationY += 45;
 });
 ```
 
-### 1.2 지원하는 이벤트 타입
+### 1.1 지원 이벤트 타입
 
-`RedGPU.Picking.PICKING_EVENT_TYPE` 에 정의된 6가지 기본 이벤트를 지원합니다.
+`RedGPU.Picking.PICKING_EVENT_TYPE` 에 정의된 6가지 이벤트를 지원합니다.
 
 | 이벤트 상수 | 문자열 값 | 설명 |
 | :--- | :--- | :--- |
@@ -44,29 +36,47 @@ mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
 | **`OUT`** | `'out'` | 마우스 커서가 객체 밖으로 벗어날 때 발생 (Hover Out) |
 | **`MOVE`** | `'move'` | 객체 위에서 마우스 포인터가 이동할 때 지속적으로 발생 |
 
-### 1.3 상세 이벤트 정보 (PickingEvent)
+### 1.2 `PickingEvent` 주요 속성
 
-이벤트 콜백에 전달되는 객체(`e`)는 발생 시점의 다양한 정보를 담고 있습니다. 이를 통해 정밀한 상호작용 로직을 구현할 수 있습니다.
+이벤트 콜백에 전달되는 `PickingEvent` 객체 (`e`)의 속성 목록입니다.
 
-| 속성명 | 타입 | 설명 |
-| :--- | :--- | :--- |
-| **`target`** | `Mesh` | 이벤트가 발생한 대상 객체입니다. |
-| **`type`** | `string` | 발생한 이벤트의 타입입니다. |
-| **`pickingId`** | `number` | 피킹에 사용되는 고유 ID입니다. |
-| **`mouseX`**, **`mouseY`** | `number` | 캔버스 내에서의 마우스/터치 좌표입니다. |
-| **`movementX`**, **`movementY`** | `number` | 이전 이벤트 대비 마우스 이동량입니다. |
-| **`point`** | `vec3` | 월드 공간상의 정확한 교차 지점 좌표입니다. |
-| **`localPoint`** | `vec3` | 객체의 로컬 공간상의 교차 지점 좌표입니다. |
-| **`localX`**, **`localY`**, **`localZ`** | `number` | 로컬 공간상의 개별 좌표값입니다. |
-| **`uv`** | `vec2` | 교차 지점의 텍스처 좌표(UV)입니다. |
-| **`distance`** | `number` | 카메라와 교차 지점 사이의 거리입니다. |
-| **`faceIndex`** | `number` | 교차된 삼각형(Polygon)의 인덱스입니다. (없을 경우 -1) |
-| **`time`** | `number` | 이벤트가 발생한 시간(ms)입니다. |
-| **`altKey`**, **`ctrlKey`**, **`shiftKey`** | `boolean` | 이벤트 발생 시 조합 키의 눌림 상태입니다. |
+| 속성명                                      | 타입      | 설명                                           |
+|:--------------------------------------------|:----------|:-----------------------------------------------|
+| **`target`**                                | `Mesh`    | 이벤트가 발생한 대상 객체                      |
+| **`type`**                                  | `string`  | 발생한 이벤트 타입                             |
+| **`pickingId`**                             | `number`  | 피킹 식별용 고유 ID                            |
+| **`mouseX`**, **`mouseY`**                  | `number`  | 캔버스 내 마우스/터치 좌표                     |
+| **`movementX`**, **`movementY`**            | `number`  | 이전 이벤트 대비 마우스 이동량                 |
+| **`point`**                                 | `vec3`    | 월드 공간상의 교차 지점 좌표                   |
+| **`localPoint`**                            | `vec3`    | 객체 로컬 공간상의 교차 지점 좌표              |
+| **`localX`**, **`localY`**, **`localZ`**    | `number`  | 로컬 공간상의 개별 좌표값                      |
+| **`uv`**                                    | `vec2`    | 교차 지점의 텍스처 좌표(UV)                    |
+| **`distance`**                              | `number`  | 카메라와 교차 지점 사이의 거리                 |
+| **`faceIndex`**                             | `number`  | 교차된 삼각형(Polygon) 인덱스 (없을 경우 `-1`) |
+| **`time`**                                  | `number`  | 이벤트 발생 시간 (ms)                          |
+| **`altKey`**, **`ctrlKey`**, **`shiftKey`** | `boolean` | 이벤트 발생 시 조합 키 눌림 상태               |
 
-### 1.4 실습 예제: 인터렉티브 큐브
+### 1.3 실습 예제: 인터렉티브 큐브
 
-마우스 오버 시 크기가 변하고, 클릭 시 색상이 바뀌며, 이동 시 좌표를 확인할 수 있는 인터렉티브 예제입니다.
+```javascript
+const {PICKING_EVENT_TYPE} = RedGPU.Picking;
+
+mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
+    e.target.material.color.setColorByRGB(
+        Math.floor(Math.random() * 255),
+        Math.floor(Math.random() * 255),
+        Math.floor(Math.random() * 255)
+    );
+});
+
+mesh.addListener(PICKING_EVENT_TYPE.OVER, (e) => {
+    e.target.setScale(1.2);
+});
+
+mesh.addListener(PICKING_EVENT_TYPE.OUT, (e) => {
+    e.target.setScale(1.0);
+});
+```
 
 <ClientOnly>
 <CodePen title="RedGPU - Interaction Example" slugHash="interaction-basic">
@@ -136,32 +146,25 @@ RedGPU.init(canvas, (redGPUContext) => {
     };
 
     // 3. 이벤트 리스너 등록
-    
-    // [CLICK] 클릭 시 랜덤 색상 변경 및 회전
     mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
         const r = Math.floor(Math.random() * 255);
         const g = Math.floor(Math.random() * 255);
         const b = Math.floor(Math.random() * 255);
         e.target.material.color.setColorByRGB(r, g, b);
-        
-        
         updateUI(e);
         typeEl.style.color = '#ffcc00';
     });
 
-    // [DOWN] 마우스 버튼을 눌렀을 때
     mesh.addListener(PICKING_EVENT_TYPE.DOWN, (e) => {
         e.target.scaleX = e.target.scaleY = e.target.scaleZ = 0.9;
         updateUI(e);
         typeEl.style.color = '#ff4444';
     });
 
-    // [MOVE] 객체 위에서 마우스 이동 시 좌표 표시
     mesh.addListener(PICKING_EVENT_TYPE.MOVE, (e) => {
         updateUI(e);
     });
 
-    // [OVER] 마우스 오버 시
     mesh.addListener(PICKING_EVENT_TYPE.OVER, (e) => {
         e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.2;
         document.body.style.cursor = 'pointer';
@@ -169,11 +172,10 @@ RedGPU.init(canvas, (redGPUContext) => {
         typeEl.style.color = '#00CC99';
     });
 
-    // [OUT] 마우스 아웃 시
     mesh.addListener(PICKING_EVENT_TYPE.OUT, (e) => {
         e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.0;
         document.body.style.cursor = 'default';
-        updateUI(e); // 마우스 아웃 시 UI 업데이트 (대시 표시)
+        updateUI(e);
         typeEl.innerText = 'Event: MOUSE_OUT';
         typeEl.style.color = '#ffffff';
     });
@@ -192,17 +194,18 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 2. 키보드 인터렉션 (keyboardKeyBuffer)
+---
 
-객체 피킹 외에도, `redGPUContext.keyboardKeyBuffer`를 통해 키보드의 실시간 눌림 상태를 확인할 수 있습니다. 이는 캐릭터 이동, 카메라 컨트롤 등 매 프레임마다 키 상태를 체크해야 하는 로직에 매우 유용합니다.
+## 2. 키보드 인터렉션
 
-### 2.1 기본 사용법
+`redGPUContext.keyboardKeyBuffer` 는 현재 눌려 있는 키의 이름 (`KeyboardEvent.key`)을 키 (Key)로, 눌림 여부를 불리언 값 (Value)으로 저장하는 실시간 상태
+버퍼입니다.
 
-`keyboardKeyBuffer`는 현재 눌려있는 키의 이름을 키(Key)로, 눌림 여부를 값(Value)으로 가지는 객체입니다.
+- 별도의 `keydown`, `keyup` 리스너 등록 없이 렌더 루프 내에서 프레임 단위로 키 상태를 조회합니다.
+- `e.key` 값을 그대로 사용하므로 대소문자를 구분하며 (`'w'` 와 `'W'`), `Shift`, `Control`, `Alt` 등 특수 키 상태도 동일하게 확인할 수 있습니다.
 
 ```javascript
 RedGPU.init(canvas, (redGPUContext) => {
-    // 렌더 루프 내에서 상태 확인
     const render = (time) => {
         const { keyboardKeyBuffer } = redGPUContext;
 
@@ -219,37 +222,18 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 ```
 
-### 2.2 주요 특징
-
-- **실시간 상태 관리**: 별도의 `keydown`, `keyup` 리스너를 직접 관리할 필요 없이 `redGPUContext`에서 통합 관리됩니다.
-- **대소문자 구분**: `e.key` 값을 그대로 사용하므로 대소문자를 구분합니다. 보편적인 입력을 위해서는 `'w'`와 `'W'`를 모두 체크하는 것이 좋습니다.
-- **조합 키 지원**: `Shift`, `Control`, `Alt` 등의 특수 키 상태도 동일하게 확인할 수 있습니다.
+---
 
 ## 3. 라이브 예제
 
-RedGPU가 제공하는 다양한 인터렉션 동작을 아래 예제들을 통해 직접 확인할 수 있습니다.
+- **마우스 및
+  터치**: [일반 메시](/RedGPU/examples/3d/interaction/mouseEvent/mesh/) · [스프라이트 3D](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/) · [스프라이트 시트 3D](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/) · [텍스트 필드 3D](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/) · [고정밀 레이캐스팅](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
+-
 
-### 3.1 마우스 및 터치 예제
+**키보드**: [3D 키보드 인터렉션](/RedGPU/examples/3d/interaction/keyboardEvent/) · [2D 키보드 인터렉션](/RedGPU/examples/2d/interaction/keyboardEvent/)
 
-- [일반 메시 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
-- [스프라이트 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
-- [스프라이트 시트 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
-- [텍스트 필드 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
-- [고정밀 레이캐스팅 (Raycasting)](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
+---
 
-### 3.2 키보드 인터렉션 예제
+## 다음 단계
 
-- [키보드 인터렉션 3D 예제](/RedGPU/examples/3d/interaction/keyboardEvent/)
-- [키보드 인터렉션 2D 예제](/RedGPU/examples/2d/interaction/keyboardEvent/)
-
-## 4. 핵심 요약
-
-- `addListener` 를 통해 객체별로 독립적인 이벤트 처리가 가능합니다.
-- `keyboardKeyBuffer` 를 통해 프레임 단위의 정밀한 키보드 상태 제어가 가능합니다.
-- 웹 표준 DOM API와 함께 사용하여 풍부한 사용자 경험(UX)을 제공할 수 있습니다.
-
-## 5. 다음 학습 추천
-
-인터렉션까지 더해진 풍성한 장면에 시각적인 완성도를 높여주는 후처리 효과를 적용해 봅니다.
-
-- **[포스트 이펙트](../post-effect/index.md)**
+- **[포스트 이펙트](../post-effect/index.md)** : 렌더링된 화면에 시각적 후처리 효과를 적용하는 방법

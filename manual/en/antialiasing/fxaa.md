@@ -3,28 +3,30 @@ title: FXAA
 order: 3
 ---
 
-# FXAA (Fast Approximate AA)
+# FXAA
 
-**FXAA** is a **post-processing** (Post-Processing) antialiasing technique that analyzes the rendered image to find edges and smooth them.
+**FXAA** (Fast Approximate Antialiasing) is a post-processing antialiasing technique that detects high-contrast edges in
+the final rendered 2D image and smooths them.
 
-## 1. Features & Pros
+## 1. Features and Usage
 
-- **Ultra-Fast**: Very low computational cost, making it ideal for mobile devices and low-end hardware.
-- **Memory Efficient**: Does not require additional buffers like MSAA.
-- **Cons**: The entire screen may appear slightly blurry, which can reduce texture sharpness.
+Enable FXAA via `redGPUContext.antialiasingManager.useFXAA`, which automatically disables `TAA` and `MSAA`.
 
-## 2. Usage
-
-Enabled via `antialiasingManager.useFXAA`. Enabling this automatically disables MSAA or TAA.
+- **Lightweight Execution**: Requires no additional multisampling or history buffers, making it suitable for mobile and
+  low-end devices.
+- **Limitations**: Because it blends pixels across detected edges in screen space, fine high-frequency texture details
+  may appear slightly softened.
 
 ```javascript
-// Enable FXAA (Other AAs are disabled)
+// Enable global FXAA (other AAs are automatically disabled)
 redGPUContext.antialiasingManager.useFXAA = true;
 ```
 
-## 3. Live Example: FXAA Quality Check
+---
 
-Observe how FXAA handles not only geometry edges but also shimmering in textures and highlights.
+## 2. Live Example
+
+Observe how FXAA processes geometry outlines and texture edges.
 
 <ClientOnly>
 <CodePen title="RedGPU - FXAA Example" slugHash="antialiasing-fxaa">
@@ -48,8 +50,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     light.x = 10; light.y = 10; light.z = 10;
     scene.lightManager.addDirectionalLight(light);
     
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.lux = 0.3;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Fine grid floor (To check pattern aliasing)
@@ -102,35 +103,30 @@ RedGPU.init(canvas, (redGPUContext) => {
     Object.assign(btn.style, {
         position: 'fixed', top: '20px', left: '20px',
         padding: '10px 20px', fontSize: '16px', fontWeight: 'bold',
-        cursor: 'pointer', background: '#00CC99', border: 'none', borderRadius: '8px'
+        cursor: 'pointer', background: '#00aaff', color: 'white', border: 'none', borderRadius: '8px'
     });
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
-        if (manager.useFXAA) {
-             manager.useFXAA = false;
-        } else {
-             manager.useFXAA = true;
-        }
+        manager.useFXAA = !manager.useFXAA;
         
         btn.textContent = `FXAA: ${manager.useFXAA ? 'ON' : 'OFF (None)'}`;
-        btn.style.background = manager.useFXAA ? '#00CC99' : '#555';
+        btn.style.background = manager.useFXAA ? '#00aaff' : '#555';
     };
     document.body.appendChild(btn);
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
-        // Slowly rotate to observe texture blurring
         scene.children.forEach(mesh => {
-            if(mesh instanceof RedGPU.Display.Mesh) mesh.rotationY += 0.01;
-        })
+            if (mesh instanceof RedGPU.Display.Mesh) mesh.rotationY += 0.01;
+        });
     });
 });
 </pre>
 </CodePen>
 </ClientOnly>
 
-## Key Summary
+---
 
-- **Post-Processing**: Works on top of the rendered image.
-- **Exclusive**: Enabling FXAA disables MSAA and TAA.
-- **Global Control**: Controlled via `redGPUContext`.
+## Next Steps
+
+- **[Plugin System](../plugins/index.md)**: Using external extension modules

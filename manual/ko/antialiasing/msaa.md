@@ -5,26 +5,26 @@ order: 2
 
 # MSAA
 
-**MSAA**(Multisample Antialiasing) 는 하드웨어(GPU) 레벨에서 지원하는 가장 표준적인 안티앨리어싱 방식입니다. 지오메트리의 경계(Edge) 부분을 여러 번 샘플링하여 부드럽게 처리합니다.
+**MSAA**(Multisample Antialiasing) 는 지오메트리의 경계 (Edge) 영역을 여러 번 샘플링하여 외곽선 계단 현상을 제거하는 GPU 하드웨어 기반 안티앨리어싱 기법입니다. 일반 디스플레이
+환경 (`devicePixelRatio <= 1.0`)에서 기본값으로 활성화됩니다.
 
-## 1. 특징 및 장점
+## 1. 특징 및 사용법
 
-- **표준 품질**: 오랫동안 사용되어 온 검증된 방식으로, 물체의 외곽선을 매우 깔끔하게 정리합니다.
-- **성능 밸런스**: 텍스처 내부까지 처리하는 슈퍼 샘플링(SSAA)보다는 가볍지만, 후처리 방식(FXAA)보다는 메모리를 더 사용합니다.
-- **제약**: 지오메트리의 외곽선만 부드럽게 처리하므로, 텍스처 내부의 자글거림이나 쉐이더 알리어싱은 해결하지 못합니다.
+`redGPUContext.antialiasingManager.useMSAA` 속성으로 활성화하며, 켜는 즉시 `TAA` 와 `FXAA` 는 자동 해제됩니다.
 
-## 2. 사용법
-
-`antialiasingManager.useMSAA` 를 통해 활성화합니다. 이를 켜면 FXAA나 TAA는 자동으로 비활성화됩니다.
+- **외곽선 특화**: 폴리곤 경계선을 선명하고 깔끔하게 정돈합니다.
+- **제약 사항**: G-Buffer 전체를 멀티샘플링하므로 메모리 대역폭 소모가 크며, 폴리곤 내부의 텍스처 자글거림이나 셰이더 알리어싱은 처리하지 않습니다.
 
 ```javascript
-// MSAA 활성화 (다른 AA는 꺼짐)
+// 전역 MSAA 활성화 (다른 AA는 자동 비활성화)
 redGPUContext.antialiasingManager.useMSAA = true;
 ```
 
-## 3. 실습 예제: MSAA 적용
+---
 
-MSAA를 켜고 끄면서 지오메트리 외곽선과 하이라이트의 변화를 비교해 보세요.
+## 2. 실습 예제
+
+MSAA를 켜고 끄면서 지오메트리 외곽선의 변화를 비교합니다.
 
 <ClientOnly>
 <CodePen title="RedGPU - MSAA Example" slugHash="antialiasing-msaa">
@@ -105,14 +105,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     });
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
-        if (manager.useMSAA) {
-            manager.useMSAA = false; // 끄기
-        } else {
-            manager.useMSAA = true; // 켜기
-        }
+        manager.useMSAA = !manager.useMSAA;
         
         btn.textContent = `MSAA: ${manager.useMSAA ? 'ON' : 'OFF (None)'}`;
-        btn.style.background = manager.useMSAA ? '#00aaff' : '#ccc';
+        btn.style.background = manager.useMSAA ? '#00aaff' : '#555';
     };
     document.body.appendChild(btn);
 
@@ -126,8 +122,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+---
 
-- **하드웨어 지원**: GPU의 내장 기능을 사용합니다.
-- **경계선 특화**: 물체의 테두리를 부드럽게 만드는 데 탁월합니다.
-- **기본값**: 일반 디스플레이 환경에서는 기본적으로 활성화됩니다.
+## 다음 단계
+
+- **[FXAA](./fxaa.md)** : 후처리 기반 고속 근사 안티앨리어싱
+- **[TAA](./taa.md)** : 시간축 누적 기반 안티앨리어싱

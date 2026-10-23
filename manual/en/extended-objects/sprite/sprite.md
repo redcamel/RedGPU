@@ -5,21 +5,13 @@ order: 2
 
 # Sprite3D
 
-**Sprite3D** is a 2D plane object placed within 3D space. Unlike general meshes, it has a built-in **Billboard**
-feature, making it optimized for implementing elements that must always face the front regardless of the camera's
-rotation (icons, name tags, special effects, etc.).
+`Sprite3D` is a 2D plane display object placed in 3D space. It provides built-in
+camera-facing **Billboard** behavior and automatic texture aspect ratio preservation, making it ideal for icons,
+markers, and visual effects.
 
-## 1. Key Features
+## 1. Basic Usage
 
-- **Billboard**: Supports the function to always face the camera by default.
-- **Automatic Aspect Ratio**: Automatically calculates the aspect ratio of the assigned texture to adjust the size of
-  the plane.
-- **UI Friendly**: Combines position in 3D space (World Position) with 2D expression methods to provide UI elements with
-  a sense of space.
-
-## 2. Basic Usage
-
-`Sprite3D` internally uses **Plane** geometry and is used with **BitmapMaterial** to output images.
+`Sprite3D` uses a plane geometry internally and is instantiated with a material such as `BitmapMaterial`.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -33,67 +25,39 @@ const sprite = new RedGPU.Display.Sprite3D(redGPUContext, material);
 scene.addChild(sprite);
 ```
 
-## 3. Key Property Control
+---
 
-Key properties controlling the sprite's billboard behavior and visual representation.
+## 2. Billboard and Size Control
 
-### Billboard Setup
+`Sprite3D` supports both perspective-aware world unit sizing (`worldSize`) and distance-independent fixed screen pixel
+sizing (`pixelSize`).
 
-| Property Name      | Description                       | Default Value |
-|:-------------------|:----------------------------------|:--------------|
-| **`useBillboard`** | Whether to always face the camera | `true`        |
-
-### Size and Rendering Mode
-
-`Sprite3D` provides options to render in world units or fixed pixel sizes.
-
-| Property Name      | Description                                                                                                  | Default Value |
-|:-------------------|:-------------------------------------------------------------------------------------------------------------|:--------------|
-| **`worldSize`**    | Vertical size in world space (Unit). Horizontal size is automatically adjusted.                              | `1`           |
-| **`usePixelSize`** | Whether to use fixed pixel size mode. If `true`, it renders at a constant pixel size regardless of distance. | `false`       |
-| **`pixelSize`**    | Fixed pixel size value (in `px`). Only applied when `usePixelSize` is `true`.                                | `0`           |
+| Property           | Type      | Default | Description                                                                                                                            |
+|:-------------------|:----------|:--------|:---------------------------------------------------------------------------------------------------------------------------------------|
+| **`useBillboard`** | `boolean` | `true`  | Whether the sprite always faces the camera                                                                                             |
+| **`worldSize`**    | `number`  | `1`     | Vertical height in world units when `usePixelSize` is `false` (horizontal width is scaled automatically by texture aspect ratio)       |
+| **`usePixelSize`** | `boolean` | `false` | Enables fixed pixel size mode (`true` ignores `worldSize` and renders at a constant screen size regardless of camera distance)         |
+| **`pixelSize`**    | `number`  | `0`     | Vertical height in screen pixels (`px`) when `usePixelSize` is `true` (automatically initialized to the source texture height on load) |
 
 ```javascript
-// 1. Set world unit size (shrinks with distance)
+// 1. World unit size mode (scales with camera distance)
 sprite.worldSize = 2;
 
-// 2. Set fixed pixel size (UI style, size remains constant regardless of distance)
+// 2. Fixed pixel size mode (remains 64px regardless of distance)
 sprite.usePixelSize = true;
 sprite.pixelSize = 64; 
 ```
 
-### 3.3 Relationship between World Size and Pixel Size
+> [!TIP]
+> When `usePixelSize: true` is active, adjust `pixelSize` instead of `worldSize` to change the rendered size. Setting
+`pixelSize` larger than the source texture resolution may cause blurring.
 
-Understanding the relationship between the key factors that determine size and clarity in `Sprite3D` allows for optimal
-presentation suited to each situation.
+---
 
-#### 3.3.1 Texture Resolution
+## 3. Practical Example: Comparison by Rendering Mode
 
-- **Role**: The size of the original image determines the **maximum clarity** of the sprite.
-- **Feature**: When using `usePixelSize` mode, setting `pixelSize` larger than the original resolution may result in a
-  blurry image.
-
-#### 3.3.2 World Size (`worldSize`)
-
-- **Role**: Determines the **physical vertical height** (in Units) within the 3D world space.
-- **Behavior**: Operates when `usePixelSize` is `false`, and perspective is applied based on distance like a general 3D
-  object.
-
-#### 3.3.3 Fixed Pixel Mode (`usePixelSize` & `pixelSize`)
-
-- **Role**: Placed in 3D space, but displayed on the screen at the **specified pixel size**.
-- **Feature**: When this mode is activated, `worldSize` is ignored. By default, the **original height** of the texture
-  when loaded is automatically assigned to `pixelSize`. Use this when constant size and readability must be maintained
-  regardless of distance, such as for icons or markers.
-
-::: tip [Adjusting Pixel Size]
-If the sprite appears too large or small while `usePixelSize` is active, adjust the `pixelSize` property directly
-instead of `worldSize`.
-:::
-
-## 4. Practical Example: Comparison by Rendering Mode
-
-Let's place sprites with different settings in 3D space to check the visual differences.
+Places world-sized (`worldSize`) and fixed-pixel-sized (`usePixelSize`) sprites side by side in 3D space to compare how
+they respond to camera distance.
 
 <ClientOnly>
 <CodePen title="RedGPU - Sprite3D Showcase" slugHash="sprite3d-showcase">
@@ -122,7 +86,7 @@ const scene = new RedGPU.Display.Scene ();
     sprite1.worldSize = 1.5;
     scene.addChild(sprite1);
 
-    // 2. Fixed Pixel Size - size remains same even when moving away
+    // 2. Fixed Pixel Size - size remains constant regardless of distance
     const sprite2 = new RedGPU.Display.Sprite3D(redGPUContext, material);
     sprite2.x = 3; sprite2.y = 1;
     sprite2.usePixelSize = true;
@@ -154,7 +118,6 @@ const scene = new RedGPU.Display.Scene ();
     // Start Rendering
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext);
-
 });
 </pre>
 </CodePen>
@@ -162,18 +125,6 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
-## Key Summary
-
-- **Sprite3D** provides a **Billboard** feature that faces the camera head-on while having a 3D coordinate system.
-- You can implement UI-style elements that appear at a constant size regardless of distance via the `usePixelSize`
-  property.
-- Geometry size is automatically adjusted according to the resolution and ratio of the texture, making it convenient to
-  use.
-
----
-
 ## Next Steps
 
-Learn about animation effects using sprites.
-
-- **[SpriteSheet3D](../sprite/spritesheet.md)**
+- **[SpriteSheet3D](./spritesheet.md)**: Implementing frame animations using sprite sheet images

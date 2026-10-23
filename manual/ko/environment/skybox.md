@@ -4,13 +4,13 @@ order: 1
 
 <script setup>
 const skyboxGraph = `
-    HDRSource["HDR Source (.hdr)"] -->|new| IBL["RedGPU.Resource.IBL"]
-    Images["6 Images"] -->|new| CubeTex["RedGPU.Resource.CubeTexture"]
+    HDRSource["HDR 원본 (.hdr)"] -->|생성| IBL["RedGPU.Resource.IBL"]
+    Images["6면 이미지"] -->|생성| CubeTex["RedGPU.Resource.CubeTexture"]
 
     IBL -->|.environmentTexture| Skybox["RedGPU.Display.SkyBox"]
     CubeTex --> Skybox
 
-    Skybox -->|view.skybox| View3D["RedGPU.Display.View3D"]
+    Skybox -->|view.skybox 등록| View3D["RedGPU.Display.View3D"]
 
     %% 회색조 스타일 적용
     style HDRSource fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
@@ -24,56 +24,50 @@ const skyboxGraph = `
 
 # Skybox
 
-Skybox는 3D 공간의 무한한 배경을 표현하는 기술입니다. **SkyBox** 객체를 생성하여 **View3D**의 `skybox` 속성에 할당하면 렌더링됩니다.
-
-## 1. 기본 사용법
-
-SkyBox는 일반적인 메쉬와 달리 씬(Scene)에 추가하지 않고, **View3D** 에 직접 연결하여 사용합니다.
+`SkyBox` 는 3D 공간의 무한한 360도 배경을 렌더링하는 디스플레이 객체입니다. 일반 메시와 달리 `Scene` 이 아닌 `View3D` 의 `skybox` 속성에
+직접 할당하여 사용합니다.
 
 ```javascript
-// 1. SkyBox 생성 (텍스처 필요)
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, texture);
-
-// 2. View에 적용 (필수)
 view.skybox = skybox;
 ```
 
-## 2. 텍스처 생성 방법
+---
 
-SkyBox에 적용할 텍스처를 생성하는 방법은 크게 두 가지로 나뉩니다. 가장 권장되는 방식인 **IBL** 부터 고전적인 **큐브맵** 순으로 살펴봅니다.
+## 1. 텍스처 생성 방식 비교
+
+`SkyBox` 에 적용할 텍스처는 `IBL` 을 통해 생성하거나 6장의 이미지를 결합한 `CubeTexture` 로 생성합니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="skyboxGraph" />
 </ClientOnly>
 
-### 2.1 IBL 리소스 활용 (권장)
+| 구분            | IBL 활용                                    | CubeTexture 활용                                    |
+|:----------------|:--------------------------------------------|:----------------------------------------------------|
+| **소스**        | 1장의 HDR 파노라마 이미지 (`.hdr`)          | 6장의 방향별 일반 이미지 (`px, nx, py, ny, pz, nz`) |
+| **텍스처 타입** | `IBLCubeTexture` (`ibl.environmentTexture`) | `CubeTexture`                                       |
+| **조명 데이터** | O (확산·반사 조명 맵 자동 생성)             | X                                                   |
+| **주요 용도**   | 배경 + 물리 기반 조명 (권장)                | 단순 시각적 배경                                    |
 
-`RedGPU.Resource.IBL` 객체를 생성하면 내부적으로 **환경 텍스처**(Environment Texture) 가 함께 생성됩니다. 이 텍스처를 Skybox에 활용하는 방식입니다.
+### 1.1 IBL 리소스 활용
 
-- **장점**: 배경과 완벽하게 일치하는 물리 기반 조명(Diffuse/Specular) 데이터를 함께 얻을 수 있습니다.
-- **활용**: 가장 사실적인 렌더링 결과를 얻기 위해 주로 사용되는 현대적인 방식입니다.
+`RedGPU.Resource.IBL` 생성 시 2D HDR 파노라마 이미지가 큐브맵 형태의 `environmentTexture` 로 자동 변환되며, 배경과 일치하는 물리 기반 조명 데이터도 함께 얻을 수 있습니다.
 
-::: info [HDR 파일 사용 가이드]
-RedGPU에서 한 장의 HDR(.hdr) 파노라마 이미지를 스카이박스로 사용하려면 반드시 `IBL`을 거쳐야 합니다. 스카이박스는 큐브 형태의 데이터를 요구하며, `IBL`이 2D 파노라마를 큐브맵으로 자동 변환해 줍니다.
-:::
+> [!NOTE]
+> 단일 HDR (`.hdr`) 파노라마 이미지를 스카이박스로 사용하려면 반드시 `IBL` 을 거쳐 큐브맵으로 변환해야 합니다.
 
 ```javascript
-// IBL 생성 (조명 데이터 + 배경 텍스처 생성됨)
 const ibl = new RedGPU.Resource.IBL(
     redGPUContext, 
     '/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
 );
-
-// IBL 내부의 environmentTexture를 Skybox로 사용
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 ```
 
-### 2.2 6장의 이미지 (CubeTexture)
+### 1.2 CubeTexture 활용
 
-상, 하, 좌, 우, 앞, 뒤 6장의 일반 이미지(JPG, PNG 등)를 결합하여 `CubeTexture`를 생성하는 고전적인 방식입니다. 이미지 배열은 반드시 **px, nx, py, ny, pz, nz** 순서로 전달해야 합니다.
-
-- **장점**: 리소스를 구하기 쉽고 직관적입니다.
-- **단점**: HDR 정보를 포함하지 않아 사실적인 광원 효과를 기대하기 어렵습니다.
+상, 하, 좌, 우, 앞, 뒤 6장의 일반 이미지 (JPG, PNG 등)를 결합하여 `CubeTexture` 를 생성합니다. 이미지 배열은 반드시 **`px, nx, py, ny, pz, nz`** 순서로 전달해야
+합니다.
 
 ```javascript
 const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, [
@@ -81,22 +75,14 @@ const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, [
     './posy.jpg', './negy.jpg', 
     './posz.jpg', './negz.jpg'
 ]);
-
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 ```
 
-## 3. 구현 방식 비교
+---
 
-| 구분 | IBL 활용 (권장) | CubeTexture |
-| :--- | :--- | :--- |
-| **소스** | 1장의 HDR 이미지 | 6장의 이미지 |
-| **타입** | `IBLCubeTexture` | `CubeTexture` |
-| **조명 데이터** | O (자동 생성) | X |
-| **주요 용도** | 배경 + 물리 기반 조명 | 단순 배경 |
+## 2. 라이브 데모
 
-## 4. 라이브 데모
-
-### A. IBL 활용 방식 (조명 포함)
+### A. IBL 활용 방식
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Skybox (IBL)" slugHash="skybox-ibl">
@@ -134,7 +120,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-### B. 큐브맵 방식 (6장 이미지)
+### B. CubeTexture 방식
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Skybox (CubeMap)" slugHash="skybox-cubemap">
@@ -177,12 +163,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+---
 
-- **SkyBox** 는 뷰(**View3D**)에 설정하여 배경을 렌더링합니다.
-- 사실적인 조명이 필요하다면 **IBL** 을 통해 생성된 환경 텍스처를 사용하는 것이 가장 좋습니다.
-- 단순 배경이 목적이라면 **CubeTexture** 를 사용합니다.
+## 다음 단계
 
-## 다음 학습 추천
-
-- **[IBL](./ibl.md)**
+- **[IBL](./ibl.md)** : 배경 이미지를 물리 기반 광원으로 활용하여 객체에 사실적인 반사와 조명 적용하기

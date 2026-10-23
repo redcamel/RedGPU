@@ -17,117 +17,91 @@ const shadowGraph = `
 
 # Shadow System
 
-In 3D space, shadows are a key element in determining an object's three-dimensionality and its spatial relationship with other objects. RedGPU provides a physically based shadow system, allowing you to express realistic shadows with simple configuration.
+RedGPU provides up to 4-stage **Cascaded Shadow Maps** (CSM), **sub-pixel texel snapping** to eliminate shadow edge
+shimmering during camera movement, and a **16-Tap Vogel Spiral PCSS** soft shadow pipeline.
 
 <ClientOnly>
   <MermaidResponsive :definition="shadowGraph" />
 </ClientOnly>
 
-## 1. 3 Elements of Shadow Generation
+---
 
-For shadows to appear on the screen, the following three elements must be configured properly:
+## 1. Three Elements of Shadow Generation
 
-1.  **Light**: The light source that will create the shadow. Currently, **DirectionalLight** supports shadow generation.
-2.  **Caster**: The object that **creates** the shadow. (e.g., character, building) -> `mesh.castShadow = true`
-3.  **Receiver**: The object that **receives** the shadow. (e.g., floor, wall) -> `mesh.receiveShadow = true`
+Shadow rendering requires configuring the light source, shadow caster (`castShadow`), and shadow receiver
+(`receiveShadow`).
 
-::: warning [Performance Note]
-Shadow calculations consume significant GPU resources. Therefore, rather than applying them to all objects, it is better for performance optimization to selectively apply them to visually important objects and surfaces.
-:::
-
-## 2. Object Configuration (Cast & Receive)
-
-Every **Mesh** object in RedGPU has independent properties that determine whether it creates or receives shadows.
+1. **Light**: `DirectionalLight` supports shadow generation.
+2. **Caster**: Object that casts shadows (`mesh.castShadow = true`)
+3. **Receiver**: Surface object that receives shadows (`mesh.receiveShadow = true`)
 
 ```javascript
-// 1. Object creating the shadow (Caster)
-const box = new RedGPU.Display.Mesh(redGPUContext, boxGeometry, boxMaterial);
-box.castShadow = true;
-
-// 2. Object receiving the shadow (Receiver)
-const floor = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
-floor.receiveShadow = true;
+box.castShadow = true;     // Shadow caster
+floor.receiveShadow = true; // Shadow receiver
 ```
 
-## 3. Shadow Quality Management (ShadowManager)
+> [!WARNING]
+> Shadow depth passes incur additional draw calls. Enable `castShadow` selectively on visually important objects for
+optimal performance.
 
-The **Scene** owns a **ShadowManager** and **DirectionalShadowManager** internally, allowing you to globally control up
-to 4-stage **Cascaded Shadow Maps** (CSM) and **PCSS** (Percentage-Closer Soft Shadows) quality.
+---
+
+## 2. Shadow Quality Control
+
+Globally control CSM cascades and PCSS soft shadow parameters via `scene.shadowManager.directionalShadowManager`.
+
+| Property                     | Default   | Description                                                                     |
+|:-----------------------------|:----------|:--------------------------------------------------------------------------------|
+| **`shadowDepthTextureSize`** | `2048`    | Resolution of each cascade shadow map (`256 ~ 8192`)                            |
+| **`cascadeCount`**           | `4`       | Number of CSM cascade splits (`1 ~ 4`)                                          |
+| **`maxShadowDistance`**      | `200`     | Maximum world distance from the camera where shadows are rendered               |
+| **`targetNearTexelSize`**    | `0.02`    | Target world texel size maintained by the first near cascade (Cascade 0)        |
+| **`pcssLightSize`**          | `1.0`     | Virtual light size for PCSS soft shadows (higher values produce wider penumbra) |
+| **`strength`**               | `0.9`     | Shadow opacity strength (`0.0 ~ 1.0`)                                           |
+| **`bias`**                   | `0.00015` | Depth bias offset to prevent surface shadow acne                                |
 
 ```javascript
 const dirShadowManager = scene.shadowManager.directionalShadowManager;
-
-// 1. Set shadow map resolution (Default: 2048)
-// Larger values produce sharper shadow edges but increase GPU memory and performance cost.
 dirShadowManager.shadowDepthTextureSize = 2048;
-
-// 2. Configure CSM cascade count (1 to 4, Default: 4) and maximum shadow distance
 dirShadowManager.cascadeCount = 4;
-dirShadowManager.maxShadowDistance = 300;
-
-// 3. Adjust PCSS soft shadow light size and shadow strength
-dirShadowManager.pcssLightSize = 0.08;
-dirShadowManager.strength = 0.85;
+dirShadowManager.maxShadowDistance = 200;
+dirShadowManager.pcssLightSize = 1.0;
+dirShadowManager.strength = 0.9;
 ```
 
-### Key Properties of `DirectionalShadowManager`
+---
 
-| Property                     | Default  | Description                                                                                         |
-|:-----------------------------|:---------|:----------------------------------------------------------------------------------------------------|
-| **`shadowDepthTextureSize`** | `2048`   | Shadow map depth texture resolution (`256 ~ 8192`)                                                  |
-| **`cascadeCount`**           | `4`      | Number of CSM cascades (`1 ~ 4`)                                                                    |
-| **`maxShadowDistance`**      | `200`    | Maximum shadow rendering distance from the camera                                                   |
-| **`pcssLightSize`**          | `0.05`   | Virtual light source size for 16-Tap Vogel Spiral PCSS soft shadows (`0.0 ~ 1.0`)                   |
-| **`strength`**               | `0.8`    | Shadow darkness strength (`0.0`: no shadow ~ `1.0`: pitch black)                                    |
-| **`bias`**                   | `0.0002` | Depth bias to prevent shadow acne (`0.0 ~ 0.01`)                                                    |
-| **`targetNearTexelSize`**    | `0.025`  | Target texel size in meters for the closest cascade (`0.005 ~ 1.0`), stabilized with texel snapping |
+## 3. Shadow Scene Example
 
-## 4. Practical Example: Configuring a Scene with Shadows
-
-An example of casting a rotating hexahedron's shadow onto the floor using a DirectionalLight.
+Below is an example projecting the shadow of a rotating box (`castShadow = true`) onto a floor (`receiveShadow = true`)
+under a `DirectionalLight`.
 
 ```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+// 1. Register directional light
+const light = new RedGPU.Light.DirectionalLight();
+light.x = -3;
+light.y = 5;
+light.z = 3;
+scene.lightManager.addDirectionalLight(light);
 
-const canvas = document.getElementById('redgpu-canvas');
+// 2. Create floor (Shadow Receiver)
+const floor = new RedGPU.Display.Mesh(
+    redGPUContext,
+    new RedGPU.Primitive.Ground(redGPUContext, 30, 30),
+    new RedGPU.Material.PhongMaterial(redGPUContext, '#555555')
+);
+floor.receiveShadow = true;
+scene.addChild(floor);
 
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    
-    // 1. Setup light and shadows
-    const light = new RedGPU.Light.DirectionalLight();
-    light.x = -5; light.y = 10; light.z = 5;
-    scene.lightManager.addDirectionalLight(light);
-
-    // 2. Create floor (Receiver)
-    const floor = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
-        new RedGPU.Material.PhongMaterial(redGPUContext, '#cccccc')
-    );
-    floor.receiveShadow = true; 
-    scene.addChild(floor);
-
-    // 3. Create box (Caster)
-    const box = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext),
-        new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
-    );
-    box.y = 2;
-    box.castShadow = true; 
-    scene.addChild(box);
-
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext, () => {
-        box.rotationX += 1;
-        box.rotationY += 1;
-    });
-});
+// 3. Create box (Shadow Caster)
+const box = new RedGPU.Display.Mesh(
+    redGPUContext,
+    new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2),
+    new RedGPU.Material.PhongMaterial(redGPUContext, '#ffcc00')
+);
+box.y = 3;
+box.castShadow = true;
+scene.addChild(box);
 ```
 
 ### Live Demo
@@ -149,12 +123,10 @@ const canvas = document.getElementById("redgpu-canvas");
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
-    // Light
     const light = new RedGPU.Light.DirectionalLight();
     light.x = -3; light.y = 5; light.z = 3;
     scene.lightManager.addDirectionalLight(light);
-
-    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.3);
+    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 50);
 
     // Floor (Receiver)
     const floor = new RedGPU.Display.Mesh(
@@ -189,14 +161,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
--   **castShadow**: Set an object to cast a shadow.
--   **receiveShadow**: Set a shadow to be cast on an object's surface.
--   **Quality Control**: You can adjust the balance between performance and sharpness through the `ShadowManager`.
+---
 
 ## Next Steps
 
-Learn how to add infinite backgrounds and photorealistic environment light to spaces where three-dimensionality has been brought to life with shadows.
-
-- **[Environment](../environment/index.md)**
+- **[PBR Material](./pbr-material.md)**: Configuring Metallic-Roughness Physically Based Rendering (PBR) materials

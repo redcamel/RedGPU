@@ -5,13 +5,15 @@ order: 2
 
 <script setup>
 const sceneGraph = `
-    Scene["Scene (Root)"] --> ParentMesh["Parent Mesh (Parent)"]
+    Scene["Scene (Root)"] --> Group["Group Container (Group3D)"]
+    Group --> ParentMesh["Parent Mesh (Parent)"]
     ParentMesh --> ChildMesh1["Child Mesh A (Child)"]
     ParentMesh --> ChildMesh2["Child Mesh B (Child)"]
     ChildMesh2 --> GrandChild["Grandchild Mesh (Grandchild)"]
 
     %% Grayscale styles applied
     style Scene fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Group fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
     style ParentMesh fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
     style ChildMesh1 fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
     style ChildMesh2 fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
@@ -21,66 +23,57 @@ const sceneGraph = `
 
 # Scene Graph
 
-**Scene Graph** refers to the hierarchical structure of objects placed in 3D space. In RedGPU, every **Mesh** can become a parent of another mesh, and the parent's transformation (position, rotation, scale) is inherited by its children.
-
-## 1. Mesh Hierarchy
-
-RedGPU's **Mesh** is an object with geometry and material, while simultaneously acting as a container that can hold other meshes.
-
-- **Parent Mesh**: A reference point containing child objects. If the parent moves, its children move with it, maintaining their relative distance from the parent.
-- **Child Mesh**: An object belonging to a parent. Its `x, y, z` coordinates are calculated as relative coordinates, with the parent's center point treated as `(0, 0, 0)`.
+The **Scene Graph** is a parent-child hierarchical tree structure of 3D objects in which spatial transformations
+(translation, rotation, scale) and opacity of a parent node (`Group3D`, `Mesh`) are automatically inherited by its child
+nodes.
 
 <ClientOnly>
   <MermaidResponsive :definition="sceneGraph" />
 </ClientOnly>
 
-## 2. Forming a Hierarchy: addChild
+---
 
-You can register a specific mesh as a child of another mesh using the `addChild()` method of **RedGPU.Display.Mesh**.
+## 1. Hierarchy Nodes and `Group3D`
 
-```javascript
-// Create Parent Mesh (Sun)
-const sun = new RedGPU.Display.Mesh(redGPUContext, sunGeo, sunMat);
-scene.addChild(sun);
+Every display object in RedGPU inherits from `Object3DContainer` and can hold child nodes. When you need to group
+multiple objects logically to control their translation, rotation, and scale together without rendering geometry or
+material of its own, use `RedGPU.Display.Group3D` (or `RedGPU.Display.Group2D` in 2D views).
 
-// Create Child Mesh (Earth)
-const earth = new RedGPU.Display.Mesh(redGPUContext, earthGeo, earthMat);
+| Component                  | Role and Characteristics                                                                                                                                                |
+|:---------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`Group3D` / `Group2D`**  | Lightweight container that is not rendered directly, serving only as a shared pivot and logical group for child objects                                                 |
+| **Parent Node (`Parent`)** | Reference coordinate space containing child objects. When the parent moves, rotates, or scales, its children transform together while maintaining their relative offset |
+| **Child Node (`Child`)**   | Object belonging to a parent. Its `x, y, z` coordinates are evaluated in **Local Space**, treating the parent's pivot as `(0, 0, 0)`                                    |
 
-// Register Earth as a child of Sun
-sun.addChild(earth);
+### Core Container Methods
 
-// Now, earth.x = 5 means a position 5 units away from the Sun.
-earth.x = 5;
-```
+- **`addChild(child)` / `removeChild(child)`**: Registers or removes a child object.
+- **`children` / `numChildren`**: Queries the array of registered child objects and their count.
 
-## 3. Transformation Inheritance
-
-### Grouping Without Geometry (`Group3D` & `Group2D`)
-
-When you need a logical pivot or container node to group multiple meshes without rendering geometry of its own, use **
-`RedGPU.Display.Group3D`** (or **`RedGPU.Display.Group2D`** in 2D views).
+> For index-based insertion (`addChildAt`), order manipulation (`setChildIndex`, `swapChildren`), bulk removal
+> (`removeAllChildren`), and other container methods, refer to the `Object3DContainer` API documentation.
 
 ```javascript
-// Create an empty 3D transform group (no geometry or material overhead)
-const solarSystemGroup = new RedGPU.Display.Group3D();
-solarSystemGroup.y = 10;
+// 1. Create a logical container Group3D
+const solarSystemGroup = new RedGPU.Display.Group3D('SolarSystem');
 scene.addChild(solarSystemGroup);
 
-// Add multiple meshes into the group
+// 2. Add Parent Mesh (Sun) to the group
+const sun = new RedGPU.Display.Mesh(redGPUContext, sunGeo, sunMat);
 solarSystemGroup.addChild(sun);
+
+// 3. Register Child Mesh (Earth) under Sun (local offset x = 5 from Sun's center)
+const earth = new RedGPU.Display.Mesh(redGPUContext, earthGeo, earthMat);
+earth.x = 5;
+sun.addChild(earth);
 ```
 
-## 3. Transformation Inheritance
+---
 
-State changes of the parent mesh affect all of its children.
+## 2. Practical Example: Orbit Model Using Hierarchy
 
-1. **Position**: If the parent moves, the child moves with it as if attached to the parent.
-2. **Rotation**: If the parent rotates around its own axis, the child rotates around the parent's center, as if orbiting.
-3. **Scale**: If the parent's size doubles, both the child's size and its distance from the parent also double.
-
-## 4. Practice: Orbit Model Using Hierarchy
-
-Let's observe how the rotation of a parent mesh affects its children.
+An example that registers `earth` as a child of `sun` and `moon` as a child of `earth`, implementing orbital motion
+purely through parent rotation.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -101,39 +94,36 @@ RedGPU.init(canvas, (redGPUContext) => {
     );
     scene.addChild(sun);
 
-    // 2. Create Earth (Child of Sun)
+    // 2. Create Earth (Child of Sun, relative distance 7)
     const earth = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext, 0.7),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#1890ff')
     );
-    earth.x = 7; // Position 7 units away from the Sun (Parent)
-    sun.addChild(earth); // Add Earth to the Sun
+    earth.x = 7;
+    sun.addChild(earth);
 
-    // 3. Create Moon (Child of Earth)
+    // 3. Create Moon (Child of Earth, relative distance 2)
     const moon = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext, 0.3),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff')
     );
-    moon.x = 2; // Position 2 units away from the Earth (Parent)
-    earth.addChild(moon); // Add Moon to the Earth
+    moon.x = 2;
+    earth.addChild(moon);
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
     redGPUContext.addView(view);
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
-        // Rotating the Sun causes its children, Earth and Moon, to orbit together.
-        sun.rotationY += 1;
-        
-        // Rotating the Earth causes its child, the Moon, to orbit around the Earth.
-        earth.rotationY += 2;
+        sun.rotationY += 1;   // Rotating Sun orbits both Earth and Moon
+        earth.rotationY += 2; // Rotating Earth orbits Moon around Earth
     });
 });
 ```
 
-## Live Demo
+### Live Demo
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Mesh Hierarchy" slugHash="mesh-hierarchy">
@@ -191,14 +181,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- Every **Mesh** can act as a parent container and include child meshes.
-- Child coordinates are always **relative coordinates** based on the parent's position.
-- A parent's rotation and scale transformations are physically inherited by its children, making it easy to implement complex linked animations.
+---
 
 ## Next Steps
 
-Learn about the texture system used to map images to materials and express detailed textures.
-
-- **[Texture](./texture.md)**
+- **[Texture](./texture.md)**: Loading external images and compressed textures to map onto materials

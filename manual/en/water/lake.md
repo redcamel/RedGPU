@@ -5,14 +5,14 @@ order: 1
 
 # Physically Based Lake Water
 
-`RedGPU.Water.Lake` is a lake water class that provides depth-based Beer-Lambert light attenuation, refraction,
-underwater caustics, real-time Screen Space Reflections (**SSR**), and **real-time 2D wave equation surface
-interactions** triggered by object collisions.
+`Lake` is a lake water class that provides depth-based Beer-Lambert light attenuation, refraction, underwater caustics,
+real-time Screen Space Reflections (**SSR**), and **real-time 2D wave equation surface interactions** triggered by
+object collisions.
 
 ## 1. Creating Water and Registering to Scene
 
 Because `Lake` captures the background color and depth buffers after opaque geometry and terrain rendering finish to
-compute refraction and shoreline depth fades, you must register it using the dedicated **`scene.addWater(lake)`** method
+compute refraction and shoreline depth fades, you must register it using the dedicated `scene.addWater(lake)` method
 rather than `scene.addChild()`.
 
 ```javascript
@@ -30,10 +30,11 @@ lake.waveWavelength = 16.0;   // Vertex wave wavelength (default: 16.0)
 scene.addWater(lake);
 ```
 
-## 2. Optical Water Material (`LakeMaterial`)
+---
 
-When a `Lake` instance is created, a `LakeMaterial` is automatically assigned to `lake.material`. You can finely tune
-depth colors, turbidity, normal maps, caustics, and SSR reflections.
+## 2. Optical Water Material
+
+When a `Lake` instance is created, a `LakeMaterial` is automatically assigned to `lake.material`.
 
 | Property                                    | Default         | Description                                                                                |
 |:--------------------------------------------|:----------------|:-------------------------------------------------------------------------------------------|
@@ -66,15 +67,17 @@ waterMat.causticsStrength = 1.2;
 waterMat.enableSSR = true;
 ```
 
+---
+
 ## 3. Real-Time 2D Wave Equation Surface Interaction
 
-RedGPU's `Lake` includes a built-in GPU 2D wave simulator (`LakeWaveSimulator`) that propagates concentric water ripples
-in real time when characters or objects walk through or enter the water.
+`Lake` includes a built-in GPU 2D wave simulator (`LakeWaveSimulator`) that propagates concentric water ripples in real
+time when characters or objects contact the water.
 
-1. **Configure Interactive Objects (`Mesh`)**: Set `mesh.enableWaterInteraction = true` on any mesh that should generate
+1. **Configure Interactive Objects**: Set `mesh.enableWaterInteraction = true` on any `Mesh` that should generate
    ripples. (Setting this on a glTF character root mesh automatically propagates it to all child meshes.)
-2. **Set Water (`Lake`) Follow Target**: Assign the main character mesh to `lake.interactionFollowTarget` to focus
-   simulation resolution around the character across a large lake.
+2. **Set Water Follow Target**: Assign the target mesh to `lake.interactionFollowTarget` so the wave simulation area
+   follows the target.
 
 ```javascript
 // 1. Enable water wave interaction on the character (or standard Mesh)
@@ -93,8 +96,6 @@ lake.rippleNormalStrength = 1.0;  // Ripple normal strength (default: 1.0)
 
 ---
 
-## Next Step
+## Next Steps
 
-Explore RedGPU's plugin system, including the WASM-powered Rapier physics engine.
-
-- **[Plugins](../plugins/index.md)**
+- **[Plugins](../plugins/index.md)**: RedGPU's plugin system, including the WASM-powered Rapier physics engine

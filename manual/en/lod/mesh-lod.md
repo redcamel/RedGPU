@@ -5,41 +5,37 @@ order: 2
 
 # Mesh LOD
 
-This section covers how to apply LOD to general **Mesh** objects.
-LOD for a `Mesh` works by calculating the distance from the camera on the CPU every frame and swapping to the **Geometry** that meets the specified distance condition.
+LOD for `Mesh` calculates the distance from the camera on the CPU each frame and swaps the rendering target to the
+matching geometry registered in `mesh.LODManager`.
 
-## 1. How it Works
+## 1. How It Works and Usage
 
-The `LODManager` within the `Mesh` iterates through the registered LOD levels and finds the level with the largest distance value that is less than or equal to the current camera distance.
-When a suitable level is found, the rendering target is swapped to the geometry registered at that level.
-
-## 2. Usage
-
-Use `mesh.LODManager.addLOD(distance, geometry)` to register geometry by distance.
+Register transition distances and replacement geometries using `mesh.LODManager.addLOD(distance, geometry)`.
+`LODManager` selects the geometry of the level with the largest threshold distance less than or equal to the current
+camera distance.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
-// 1. Create Base Mesh (Distance 0~10)
+// 1. Create base mesh (distance 0 ~ 10 range)
 const mesh = new RedGPU.Display.Mesh(
-    redGPUContext, 
-    new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 32), 
+    redGPUContext,
+    new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32),
     material
 );
 
-// 2. Add LOD Levels
-// Distance 10 or more: Sphere (16x16)
-mesh.LODManager.addLOD(10, new RedGPU.Primitive.Sphere(redGPUContext, 1, 16, 16));
-
-// Distance 20 or more: Box
-mesh.LODManager.addLOD(20, new RedGPU.Primitive.Box(redGPUContext));
+// 2. Register LOD levels by distance
+mesh.LODManager.addLOD(10, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8)); // Distance >= 10
+mesh.LODManager.addLOD(20, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));    // Distance >= 20
 
 scene.addChild(mesh);
 ```
 
-## 3. Live Example
+---
 
-Observe how the sphere shape becomes simpler and eventually turns into a box as the distance from the camera increases.
+## 2. Live Example
+
+Zoom in and out to observe the geometry transition from a high-detail sphere (32 segments ➔ 8 segments) to a box.
 
 <ClientOnly>
 <CodePen title="RedGPU - Mesh LOD Example" slugHash="lod-mesh-basic">
@@ -62,8 +58,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const light = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(light);
 
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.lux = 0.5;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 100);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Setup Material and Texture
@@ -72,7 +67,6 @@ RedGPU.init(canvas, (redGPUContext) => {
     material.diffuseTexture = texture;
 
     // 2. Create Base Mesh (Distance 0 ~ 10)
-    // High Detail: Sphere (radius 2, segments 32x32)
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32),
@@ -81,10 +75,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.addChild(mesh);
 
     // 3. Add LOD Levels
-    // Level 1: Distance 10 or more (Mid Detail - Sphere 2, 8x8)
     mesh.LODManager.addLOD(10, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8));
-    
-    // Level 2: Distance 20 or more (Low Detail - Box 3x3x3)
     mesh.LODManager.addLOD(20, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));
 
     // 4. Status Display UI
@@ -107,11 +98,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     // 6. Render Loop
     const renderer = new RedGPU.Renderer();
     const render = () => {
-        // Calculate distance and update UI (for visual confirmation)
         const dist = Math.sqrt(
-            Math.pow(view.camera.x - mesh.x, 2) +
-            Math.pow(view.camera.y - mesh.y, 2) +
-            Math.pow(view.camera.z - mesh.z, 2)
+            Math.pow(view.rawCamera.x - mesh.x, 2) +
+            Math.pow(view.rawCamera.y - mesh.y, 2) +
+            Math.pow(view.rawCamera.z - mesh.z, 2)
         );
         
         let currentLevel = "High (Sphere 32)";
@@ -126,3 +116,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 </pre>
 </CodePen>
 </ClientOnly>
+
+---
+
+## Next Steps
+
+- **[Instancing Mesh LOD](./instanced-lod.md)**: Applying GPU-driven LOD to massive instanced meshes

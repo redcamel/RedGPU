@@ -5,9 +5,9 @@ order: 3
 
 # Foliage & Impostors
 
-`RedGPU.Landscape.FoliageManager` (`landscape.foliageManager`) streams tens to hundreds of thousands of 3D meshes—such
-as trees, rocks, and shrubs—across sub-cells on the terrain, combining multi-distance mesh LODs with **Octahedral
-Impostors** for high-speed rendering.
+`FoliageManager` (`landscape.foliageManager`) streams tens to hundreds of thousands of 3D meshes—such as trees, rocks,
+and shrubs—across sub-cells on the terrain, combining multi-distance mesh LODs with **Octahedral Impostors** for
+high-speed rendering.
 
 ## 1. How It Works & Key Features
 
@@ -15,12 +15,13 @@ Impostors** for high-speed rendering.
   instance's position, rotation, and scale into 32 bytes inside a unified `FoliageMegaBuffer`.
 - **Automatic Octahedral Impostor Baking**: When `useImpostor: true` (default) is enabled, distant vegetation beyond the
   final 3D mesh LOD distance is automatically baked into a multi-angle hemispherical atlas (Albedo + Normal/Depth) and
-  rendered with depth-aware shading using just 2 triangles (a quad billboard).
-- **Terrain Layer & Slope Integration**: Automatically distributes vegetation only where a specific terrain splatting
-  layer (e.g., `'Grass'`, `'Forest'`) has high weight via `targetLayer`, and excludes steep cliffs using `minSlope` and
-  `maxSlope`.
+  rendered as a quad billboard.
+- **Terrain Layer & Slope Integration**: Automatically distributes vegetation only in areas matching the specified
+  splatting layer (`targetLayer`) and slope constraints (`minSlope` and `maxSlope`).
 
-## 2. Registering Foliage Types (`foliageManager.addType`)
+---
+
+## 2. Registering Foliage Types
 
 Pass a model loaded via `GLTFLoader` or `Mesh` to `landscape.foliageManager.addType(options)` to register a foliage type
 (`Foliage`).
@@ -54,6 +55,8 @@ new RedGPU.GLTFLoader(
 );
 ```
 
+---
+
 ## 3. `FoliageOptions` Key Properties
 
 | Property                           | Default         | Description                                                                               |
@@ -76,8 +79,6 @@ new RedGPU.GLTFLoader(
 
 ---
 
-## Next Step
+## Next Steps
 
-Learn how the high-density procedural grass system covers the ground beneath trees and rocks.
-
-- **[Procedural Grass](./grass.md)**
+- **[Procedural Grass](./grass.md)**: High-density grass scattering system covering the terrain surface

@@ -24,56 +24,51 @@ const skyboxGraph = `
 
 # Skybox
 
-Skybox is a technique for representing an infinite background in 3D space. It is rendered by creating a **SkyBox** object and assigning it to the `skybox` property of a **View3D**.
-
-## 1. Basic Usage
-
-Unlike general meshes, a SkyBox is not added to the Scene but is connected directly to a **View3D**.
+`SkyBox` is a display object that renders an infinite 360-degree background in 3D space.
+Unlike standard meshes, it is assigned directly to the `skybox` property of a `View3D` rather than added to a `Scene`.
 
 ```javascript
-// 1. Create a SkyBox (Texture required)
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, texture);
-
-// 2. Apply to a View (Required)
 view.skybox = skybox;
 ```
 
-## 2. Texture Creation Methods
+---
 
-There are two main methods for creating textures to be applied to a SkyBox. We'll look at them in order, starting with **IBL**, the most recommended method, followed by traditional **CubeMaps**.
+## 1. Texture Creation Comparison
+
+Textures for `SkyBox` can be generated via `IBL` or created as a `CubeTexture` combining 6 directional images.
 
 <ClientOnly>
   <MermaidResponsive :definition="skyboxGraph" />
 </ClientOnly>
 
-### 2.1 Using IBL Resources (Recommended)
+| Category          | Using IBL                                   | Using CubeTexture                                        |
+|:------------------|:--------------------------------------------|:---------------------------------------------------------|
+| **Source**        | 1 HDR panorama image (`.hdr`)               | 6 standard directional images (`px, nx, py, ny, pz, nz`) |
+| **Texture Type**  | `IBLCubeTexture` (`ibl.environmentTexture`) | `CubeTexture`                                            |
+| **Lighting Data** | Yes (Auto-generates diffuse/specular maps)  | No                                                       |
+| **Primary Usage** | Background + PBR lighting (Recommended)     | Simple visual background                                 |
 
-When a `RedGPU.Resource.IBL` object is created, an **Environment Texture** is automatically generated internally. This method utilizes that texture for the SkyBox.
+### 1.1 Using IBL Resources
 
-- **Pros**: You get Physically Based Lighting (Diffuse and Specular) data that perfectly matches the background.
-- **Usage**: A modern method mainly used to achieve the most realistic rendering results.
+Creating a `RedGPU.Resource.IBL` instance automatically converts a 2D HDR panorama image into a cubemap
+`environmentTexture` while generating physically based lighting data that matches the background.
 
-::: info [HDR File Usage Guide]
-To use a single HDR (.hdr) panorama image as a skybox in RedGPU, you must go through `IBL`. SkyBoxes require cube-formatted data, and `IBL` automatically converts 2D panoramas into cubemaps.
-:::
+> [!NOTE]
+> To use a single HDR (`.hdr`) panorama image as a skybox, you must pass it through `IBL` to convert it into a cubemap.
 
 ```javascript
-// Create IBL (Lighting data + background texture created)
 const ibl = new RedGPU.Resource.IBL(
     redGPUContext, 
     '/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
 );
-
-// Use the environmentTexture inside IBL as the SkyBox
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 ```
 
-### 2.2 6 Images (CubeTexture)
+### 1.2 Using CubeTexture
 
-A traditional method of combining 6 standard images (JPG, PNG, etc.)—top, bottom, left, right, front, and back—to create a `CubeTexture`. The image array must be passed in the following order: **px, nx, py, ny, pz, nz**.
-
-- **Pros**: Resources are easy to obtain and intuitive to understand.
-- **Cons**: It is difficult to achieve realistic lighting effects as it does not contain HDR information.
+Combines 6 standard images (JPG, PNG, etc.) representing the six faces of a cube into a `CubeTexture`. The image array
+must be passed in the exact order: **`px, nx, py, ny, pz, nz`**.
 
 ```javascript
 const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, [
@@ -81,22 +76,14 @@ const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, [
     './posy.jpg', './negy.jpg', 
     './posz.jpg', './negz.jpg'
 ]);
-
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 ```
 
-## 3. Comparison of Implementation Methods
+---
 
-| Category | Using IBL (Recommended) | CubeTexture |
-| :--- | :--- | :--- |
-| **Source** | 1 HDR image | 6 images |
-| **Type** | `IBLCubeTexture` | `CubeTexture` |
-| **Lighting Data** | Yes (Auto-generated) | No |
-| **Main Usage** | Background + PBR Lighting | Simple background |
+## 2. Live Demo
 
-## 4. Live Demo
-
-### A. IBL Method (Including Lighting)
+### A. IBL Method
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Skybox (IBL)" slugHash="skybox-ibl">
@@ -134,7 +121,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-### B. CubeMap Method (6 Images)
+### B. CubeTexture Method
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Skybox (CubeMap)" slugHash="skybox-cubemap">
@@ -177,12 +164,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- A **SkyBox** is set on a view (**View3D**) to render the background.
-- If realistic lighting is required, it is best to use an environment texture created via **IBL**.
-- Use **CubeTexture** for a simple background.
+---
 
 ## Next Steps
 
-- **[IBL](./ibl.md)**
+- **[IBL](./ibl.md)**: Applying realistic reflections and lighting to objects using background images as physically
+  based light sources

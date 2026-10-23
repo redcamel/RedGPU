@@ -5,13 +5,13 @@ order: 1
 
 # 물리 기반 호수 수체
 
-`RedGPU.Water.Lake`는 수심에 따른 Beer-Lambert 빛 감쇠, 굴절 (Refraction), 수중 커스틱 (Caustics), 실시간 화면 공간 반사 (**SSR**), 그리고 물체와의 충돌에
-의해 퍼져나가는 **실시간 2D 파동 방정식 수면 인터랙션**을 제공하는 호수 수체 클래스입니다.
+`Lake` 는 수심에 따른 Beer-Lambert 빛 감쇠, 굴절 (Refraction), 수중 커스틱 (Caustics), 실시간 화면 공간 반사 (**SSR**), 그리고 물체 충돌에 의한 **실시간 2D 파동
+방정식 수면 인터랙션**을 제공하는 호수 수체 클래스입니다.
 
 ## 1. 수체 생성 및 Scene 전용 등록
 
-`Lake`는 불투명 지오메트리 및 지형 렌더링이 완료된 후 배경 색상·깊이 버퍼를 캡처하여 굴절과 수심 페이드를 계산하므로, 일반 `scene.addChild()`가 아닌 **
-`scene.addWater(lake)`** 전용 메서드로 등록해야 합니다.
+`Lake` 는 불투명 지오메트리 및 지형 렌더링 완료 후 배경 색상·깊이 버퍼를 캡처하여 굴절과 수심 페이드를 계산하므로, 일반 `scene.addChild()` 가 아닌 `scene.addWater(lake)`
+전용 메서드로 등록해야 합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -28,9 +28,11 @@ lake.waveWavelength = 16.0;   // 정점 파동 파장 (기본값: 16.0)
 scene.addWater(lake);
 ```
 
-## 2. 광학 수체 재질 (`LakeMaterial`)
+---
 
-`Lake` 인스턴스 생성 시 `lake.material`에 `LakeMaterial`이 자동으로 할당됩니다. 수심 색상, 탁도, 노멀 맵, 커스틱, SSR 반사 등을 세밀하게 제어할 수 있습니다.
+## 2. 광학 수체 재질
+
+`Lake` 인스턴스 생성 시 `lake.material` 에 `LakeMaterial` 이 자동으로 할당됩니다.
 
 | 속성명                                      | 기본값          | 설명                                                                                    |
 |:--------------------------------------------|:----------------|:----------------------------------------------------------------------------------------|
@@ -63,13 +65,15 @@ waterMat.causticsStrength = 1.2;
 waterMat.enableSSR = true;
 ```
 
+---
+
 ## 3. 실시간 2D 파동 방정식 수면 인터랙션
 
-RedGPU의 `Lake`는 캐릭터나 물체가 물 위를 걷거나 빠질 때 실시간으로 동심원 물결 (Ripple)이 퍼져나가는 GPU 기반 2D 파동 시뮬레이터 (`LakeWaveSimulator`)를 내장하고 있습니다.
+`Lake` 는 캐릭터나 물체가 물과 접촉할 때 동심원 물결 (Ripple)을 전파하는 GPU 기반 2D 파동 시뮬레이터 (`LakeWaveSimulator`)를 내장하고 있습니다.
 
-1. **상호작용할 객체 (`Mesh`) 설정**: 물결을 일으킬 메시에서 `mesh.enableWaterInteraction = true`를 설정합니다. (glTF 캐릭터 루트 메시에 설정하면 하위 모든 자식
-   메시에 자동 전파됩니다.)
-2. **수체 (`Lake`) 추적 대상 설정**: 넓은 호수에서 시뮬레이션 해상도를 집중시키기 위해 `lake.interactionFollowTarget`에 주인공 캐릭터 메시를 지정할 수 있습니다.
+1. **상호작용할 객체 설정**: 물결을 일으킬 `Mesh` 에 `mesh.enableWaterInteraction = true` 를 설정합니다. (glTF 캐릭터 루트 메시에 설정 시 하위 자식 메시에 자동
+   전파됩니다.)
+2. **수체 추적 대상 설정**: `lake.interactionFollowTarget` 에 대상 메시를 지정하여 파동 시뮬레이션 영역이 대상을 따라다니도록 설정합니다.
 
 ```javascript
 // 1. 캐릭터(또는 일반 Mesh)의 수면 파동 인터랙션 활성화
@@ -90,6 +94,4 @@ lake.rippleNormalStrength = 1.0;  // 물결 노멀 강도 (기본값: 1.0)
 
 ## 다음 단계
 
-WASM 기반 물리 엔진 (Rapier)을 비롯한 RedGPU의 플러그인 시스템을 알아봅니다.
-
-- **[플러그인 (Plugins)](../plugins/index.md)**
+- **[플러그인](../plugins/index.md)** : WASM 기반 물리 엔진 (Rapier)을 비롯한 RedGPU의 플러그인 시스템

@@ -5,18 +5,20 @@ order: 10
 
 # LOD
 
-**LOD** (Level of Detail) is an optimization technique that shows different levels of detail (Geometry) depending on the distance between the camera and the object.
-By using high-resolution models for objects that are close and low-resolution models for objects that are far away, you can maximize rendering performance while maintaining visual quality.
+**LOD** (Level of Detail) is an optimization technique that switches between geometries with different vertex counts
+based on the distance between the camera and the object. RedGPU embeds `LODManager` in both `Mesh` and `InstancingMesh`
+to manage distance-based models through a unified interface.
 
-RedGPU supports LOD in a consistent way by embedding **`LODManager`** in both `Mesh` and `InstancingMesh`.
+## 1. LOD Method Comparison by Object Type
 
-## Learning Guide
-
-The way LOD works differs depending on the object type. Refer to the document that suits your situation.
-
-1. **[Mesh LOD](./mesh-lod.md)**: Applied to general single objects (CPU-based)
-2. **[Instancing Mesh LOD](./instanced-lod.md)**: Applied to massive instancing objects (GPU-based)
+| Type                                          | Target Class     | Distance Evaluation | Characteristics                                                                               |
+|:----------------------------------------------|:-----------------|:--------------------|:----------------------------------------------------------------------------------------------|
+| **[Mesh LOD](./mesh-lod.md)**                 | `Mesh`           | CPU                 | Evaluates camera distance per frame on the CPU and swaps the target geometry                  |
+| **[Instancing Mesh LOD](./instanced-lod.md)** | `InstancingMesh` | GPU Shader          | Evaluates per-instance camera distances in parallel on the GPU and renders via sub-draw calls |
 
 ---
 
-[Next Step: Learn Mesh LOD](./mesh-lod.md)
+## Next Steps
+
+- **[Mesh LOD](./mesh-lod.md)**: Applying distance-based LOD to single meshes
+- **[Instancing Mesh LOD](./instanced-lod.md)**: Applying GPU-driven LOD to massive instanced meshes

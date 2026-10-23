@@ -5,40 +5,37 @@ order: 3
 
 # Instancing Mesh LOD
 
-대량의 객체를 렌더링하는 **인스턴싱 메시**(Instancing Mesh) 에 LOD 를 적용하는 방법을 다룹니다.
-`InstancingMesh` 의 LOD 는 각 인스턴스별 거리 계산을 **GPU 쉐이더** 내부에서 병렬로 처리하므로, 수만 개의 객체에 대해 LOD 를 적용해도 CPU 부하가 거의 없는 것이 특징입니다.
+`InstancingMesh` 의 LOD는 각 인스턴스와 카메라 간의 거리를 GPU 셰이더에서 병렬로 판정하여 지오메트리 버퍼를 분기합니다. CPU 거리 계산 오버헤드 없이 수만 개의 인스턴스에 거리별 LOD를
+적용할 수 있습니다.
 
-## 1. 동작 원리
+## 1. 동작 원리 및 사용법
 
-`InstancingMesh` 에 LOD 를 등록하면, 내부적으로 LOD 개수만큼의 **서브 드로우 콜**(Sub Draw Call) 이 생성될 수 있습니다.
-하지만 렌더링 파이프라인 최적화를 통해, GPU 에서 각 인스턴스의 카메라 거리를 판단하고 적절한 지오메트리 버퍼를 참조하여 그립니다.
-
-## 2. 사용법
-
-일반 `Mesh` 와 동일하게 `LODManager.addLOD` 를 사용합니다.
+일반 `Mesh` 와 동일하게 `instancedMesh.LODManager.addLOD(distance, geometry)` 메서드를 사용합니다. 등록된 LOD 레벨 수만큼 내부 서브 드로우 콜 (Sub Draw
+Call)이 구성되며, GPU에서 인스턴스별 거리에 맞는 지오메트리로 분류하여 렌더링합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
-// 1. InstancingMesh 생성 (기본: Sphere High Poly)
+// 1. InstancingMesh 생성 (기본 거리 0 ~ 30 구간: Sphere 32x32)
 const instancedMesh = new RedGPU.Display.InstancingMesh(
-    redGPUContext, 
-    10000, 10000, 
+    redGPUContext,
+    2000, 2000,
     new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32), 
     material
 );
 
-// 2. LOD 레벨 추가
-// GPU가 각 인스턴스별로 거리를 계산하여 아래 지오메트리를 적용합니다.
-instancedMesh.LODManager.addLOD(20, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8));
-instancedMesh.LODManager.addLOD(40, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));
+// 2. 거리별 LOD 레벨 등록 (GPU에서 인스턴스별 거리 판정)
+instancedMesh.LODManager.addLOD(30, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8)); // 거리 30 이상
+instancedMesh.LODManager.addLOD(60, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));    // 거리 60 이상
 
 scene.addChild(instancedMesh);
 ```
 
-## 3. 실습 예제: 2,000개의 LOD 큐브
+---
 
-2,000개의 객체가 카메라 와의 거리에 따라 모양이 변하는 것을 확인해 보세요. 카메라를 줌인/줌아웃 하면 멀리 있는 객체들은 박스(Box) 로, 가까운 객체들은 구(Sphere) 로 표시됩니다.
+## 2. 실습 예제
+
+2,000개의 인스턴스가 카메라 거리에 따라 구 (Sphere)에서 박스 (Box)로 개별 전환되는 모습을 확인합니다.
 
 <ClientOnly>
 <CodePen title="RedGPU - Instancing LOD Example" slugHash="lod-instancing">
@@ -64,8 +61,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 100);
     scene.lightManager.ambientLight = ambientLight;
 
-    // 1. InstancingMesh 생성
-    // 기본(0~30): Sphere High (32x32)
+    // 1. InstancingMesh 생성 (기본 거리 0 ~ 30: Sphere 32x32)
     const maxCount = 2000;
     const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32);
     
@@ -83,10 +79,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.addChild(mesh);
 
     // 2. LOD 레벨 추가
-    // 30 이상: Sphere Low (8x8)
     mesh.LODManager.addLOD(30, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8));
-    
-    // 60 이상: Box
     mesh.LODManager.addLOD(60, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));
 
     // 3. 인스턴스 위치 랜덤 배치
@@ -109,10 +102,9 @@ RedGPU.init(canvas, (redGPUContext) => {
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 5. 렌더링
+    // 5. 렌더링 루프
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
-        // 전체 회전
         mesh.rotationY += 0.002;
     });
 });
@@ -120,7 +112,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+---
 
-- **GPU 가속**: CPU 연산 없이 GPU 에서 거리를 판단하므로 대량의 객체에도 성능 저하가 거의 없습니다.
-- **메모리 절약**: 멀리 있는 객체에 저해상도 모델을 사용하여 정점 처리 비용을 획기적으로 줄입니다.
+## 다음 단계
+
+- **[안티앨리어싱](../antialiasing/index.md)** : 화면 외곽선 계단 현상 제거

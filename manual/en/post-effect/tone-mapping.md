@@ -5,76 +5,58 @@ order: 3
 
 # Tone Mapping
 
-Tone mapping is an essential post-processing technique that naturally maps the wide brightness range of High Dynamic
-Range (HDR) images into the limited representation range of standard display devices (LDR). It determines the ultimate
-visual quality of your rendering by coordinating the scene's exposure, contrast, and overall color palette.
+**Tone Mapping** is a post-processing technique that maps the wide brightness range of HDR (High Dynamic Range) images
+into the displayable range of standard LDR devices while coordinating scene exposure, contrast, and color balance.
 
-## 1. Operating Principle: Smart Tone Mapping Transition
+## 1. Smart Transition Timing
 
-In RedGPU, tone mapping does not execute at a fixed position like simply at the beginning or the end of the pipeline.
-Instead, the `PostEffectManager` dynamically controls the timing internally to facilitate smooth transitions between
-efficient HDR calculations and LDR post-processing.
+Instead of executing at a fixed pipeline position, `PostEffectManager` automatically triggers tone mapping at the
+optimal point to preserve HDR calculations before transitioning to LDR post-processing.
 
-- **HDR Retention**: Immediately after scene rendering, effects that demand precise depth information and a wide color
-  gamut—such as `SkyAtmosphere`, `SSAO`, and `SSR`—are calculated on the **HDR source data** prior to tone mapping.
-- **Smart Transition Timing**: The engine iterates through the user general effects loop registered via
-  `view.postEffectManager.addEffect()`. **As soon as it encounters the first LDR (Low Dynamic Range) effect, it
-  immediately performs tone mapping.**
-- **Default Fallback**: If no LDR effects are registered in the general effect chain, tone mapping is automatically
-  applied at the very last step of the pipeline loop.
+- **HDR Retention**: Effects requiring depth information and wide color gamut (`SkyAtmosphere`, `SSAO`, `SSR`) are
+  calculated on raw HDR source data prior to tone mapping.
+- **Automatic Transition**: While iterating through the general effects loop registered via
+  `view.postEffectManager.addEffect()`, tone mapping executes **immediately upon encountering the first LDR effect**.
+- **Default Fallback**: If no LDR effects are registered in the chain, tone mapping is applied at the final step of the
+  loop.
 
 ---
 
 ## 2. ToneMappingManager Settings
 
-All tone mapping parameters can be dynamically adjusted using the properties of `view.toneMappingManager`. This manager
-is built-in upon the creation of a `View3D` instance, eliminating the need to instantiate it manually.
+Configure parameters through `view.toneMappingManager`, which is built into every `View3D`
+instance.
 
-### 2.1 Property Reference
-
-| Property Name    | Default Value         | Range           | Description                                                               |
-|:-----------------|:----------------------|:----------------|:--------------------------------------------------------------------------|
-| **`mode`**       | `KHRONOS_PBR_NEUTRAL` | -               | The tone mapping algorithm type (`RedGPU.ToneMapping.TONE_MAPPING_MODE`). |
-| **`contrast`**   | `1.0`                 | `0.0` to `2.0`  | Contrast intensity.                                                       |
-| **`brightness`** | `0.0`                 | `-1.0` to `1.0` | Additional brightness correction for shadow/highlight areas.              |
+| Property         | Default               | Range        | Description                                                          |
+|:-----------------|:----------------------|:-------------|:---------------------------------------------------------------------|
+| **`mode`**       | `KHRONOS_PBR_NEUTRAL` | -            | Tone mapping algorithm type (`RedGPU.ToneMapping.TONE_MAPPING_MODE`) |
+| **`contrast`**   | `1.0`                 | `0.0 ~ 2.0`  | Contrast intensity                                                   |
+| **`brightness`** | `0.0`                 | `-1.0 ~ 1.0` | Additional brightness offset                                         |
 
 ```javascript
-// Fine-tune contrast and brightness to emphasize visual impact
 const tm = view.toneMappingManager;
+tm.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
 tm.contrast = 1.05;
 tm.brightness = 0.02;
 ```
 
 ---
 
-## 3. Supported Algorithms (TONE_MAPPING_MODE)
+## 3. Supported Algorithms
 
-You can change the tone mapping mode in real-time depending on your target visual style. Constants are declared under
-the `RedGPU.ToneMapping.TONE_MAPPING_MODE` namespace.
+Mode constants are defined under `RedGPU.ToneMapping.TONE_MAPPING_MODE`. Use `KHRONOS_PBR_NEUTRAL` (default) when
+physical color accuracy is priority, and the `ACES_FILMIC_` variants for cinematic styling.
 
-```javascript
-// Apply ACES Filmic algorithm for a cinematic atmosphere
-view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
-```
-
-| Mode Constant               | Description                                                                                                                 | Comparison Image                        |
-|:----------------------------|:----------------------------------------------------------------------------------------------------------------------------|:----------------------------------------|
-| **`LINEAR`**                | Outputs straight to the device range without any correction. Highlights and shadow details may suffer significant clipping. | ![Linear](/toneMapping/linear.jpg)      |
-| **`KHRONOS_PBR_NEUTRAL`**   | Standard algorithm designed to preserve color fidelity for physically-based rendering (PBR) (Default)                       | ![Khronos](/toneMapping/khronos.jpg)    |
-| **`ACES_FILMIC_HILL`**      | Hill-approximation version of the ACES algorithm, a cinematic movie industry standard creating high contrast.               | ![ACES Hill](/toneMapping/acesHill.jpg) |
-| **`ACES_FILMIC_NARKOWICZ`** | Narkowicz-approximation version of the ACES algorithm creating dramatic contrast.                                           | ![ACES Nark](/toneMapping/acesNark.jpg) |
+| Mode Constant               | Description                                                                                       | Comparison Image                        |
+|:----------------------------|:--------------------------------------------------------------------------------------------------|:----------------------------------------|
+| **`LINEAR`**                | Outputs directly to the device range without correction. Highlight and shadow clipping may occur. | ![Linear](/toneMapping/linear.jpg)      |
+| **`KHRONOS_PBR_NEUTRAL`**   | Standard algorithm preserving color fidelity for physically-based rendering (PBR) (Default)       | ![Khronos](/toneMapping/khronos.jpg)    |
+| **`ACES_FILMIC_HILL`**      | Hill-approximation of the film industry standard ACES algorithm, producing high contrast.         | ![ACES Hill](/toneMapping/acesHill.jpg) |
+| **`ACES_FILMIC_NARKOWICZ`** | Narkowicz-approximation of the ACES algorithm, producing dramatic contrast.                       | ![ACES Nark](/toneMapping/acesNark.jpg) |
 
 ---
 
-## 4. Key Summary
+## Next Steps
 
-- Tone mapping settings are supervised by the `ToneMappingManager`, while execution and transition scheduling are
-  optimized automatically by the `PostEffectManager`.
-- It splits dynamically during the effect chain execution to preserve high-fidelity HDR operations (SSAO, SSR).
-- `KHRONOS_PBR_NEUTRAL` is recommended for scenes where physical correctness is paramount, whereas the `ACES_FILMIC_`
-  suite is ideal for artistic, cinematic rendering.
-
-## 5. Next Learning Recommendation
-
-- **[Built-in Effects](./builtin-effects.md)**: Activating SSAO and real-time SSR for physical depth.
-- **[General Effects](./general-effects.md)**: Adding bloom, blur, and grayscale before or after tone mapping.
+- **[Built-in Effects](./builtin-effects.md)**: Activating `SSAO` and real-time `SSR` for physical depth
+- **[General Effects](./general-effects.md)**: Adding bloom, blur, and grayscale before or after tone mapping

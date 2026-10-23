@@ -21,29 +21,30 @@ const instancingGraph = `
 
 # Instancing Mesh
 
-**Instancing Mesh** is a high-performance object that renders thousands or tens of thousands of objects sharing the same
-geometry and material in a single **Draw Call**. It is essential for representing forests (trees), grass, particles,
-crowds, etc.
+**Instancing Mesh** (`RedGPU.Display.InstancingMesh`) is a high-performance display object that bundles thousands or
+tens of thousands of objects sharing the same geometry and material into a single buffer and renders them in a single
+**Draw Call**.
 
 <ClientOnly>
   <MermaidResponsive :definition="instancingGraph" />
 </ClientOnly>
 
-## 1. Why Instancing?
+---
 
-Creating and adding 10,000 general **Mesh** instances to the scene results in 10,000 draw calls, which drops the frame
-rate significantly due to CPU overhead. On the other hand, `InstancingMesh` bundles these data into a single buffer and
-sends it to the GPU in a single draw call, providing outstanding rendering performance.
+## 1. Creation and Individual Instance Control
 
-## 2. Basic Usage
+Specify the maximum buffer capacity (`maxInstanceCount`) and the initial active render count (`instanceCount`) upon
+creation.
 
-When creating an `InstancingMesh`, you must specify the maximum number of instances (Capacity) and the initial count to
-use.
+| Property               | Type                       | Description                                                                                                          |
+|:-----------------------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------|
+| **`maxInstanceCount`** | `number`                   | Maximum allocated instance buffer capacity (immutable after creation, read-only)                                     |
+| **`instanceCount`**    | `number`                   | Number of active instances to render (`0 ~ maxInstanceCount`, dynamically adjustable)                                |
+| **`instanceChildren`** | `InstancingMeshObject3D[]` | Array of virtual delegate objects controlling individual instance transforms (position, rotation, scale) and opacity |
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
-// 1. Allocate space for up to 100,000 instances, set initial 5,000
 const maxCount = 100000;
 const initCount = 5000;
 
@@ -52,49 +53,35 @@ const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 
 const instancedMesh = new RedGPU.Display.InstancingMesh(
     redGPUContext,
-    maxCount,   // Maximum buffer capacity (immutable after creation)
-    initCount,  // Count to render currently (can be updated dynamically)
+    maxCount,   // Maximum buffer capacity
+    initCount,  // Initial render count
     geometry,
     material
 );
-
 scene.addChild(instancedMesh);
-```
 
-## 3. Individual Instance Control
-
-You can control each instance's transform (position, rotation, scale) individually through the
-`instancedMesh.instanceChildren` array.
-
-```javascript
-// Randomly position each instance
+// Configure individual instance transforms
 const instances = instancedMesh.instanceChildren;
-
 for (let i = 0; i < instancedMesh.instanceCount; i++) {
     const instance = instances[i];
-    
-    // Set position
     instance.setPosition(
         Math.random() * 100 - 50,
         Math.random() * 100 - 50,
         Math.random() * 100 - 50
     );
-    
-    // Set rotation and scale
     instance.rotationY = Math.random() * 360;
     instance.scale = Math.random() * 2 + 0.5;
 }
 ```
 
-::: warning [Child Hierarchy Restriction]
-Although the child instances of `InstancingMesh` (individual instance objects) have a similar interface to a standard
-`Mesh`, they are not actual independent 3D objects. Instead, they are virtual delegate objects that control the GPU
-instancing buffer data. Therefore, they cannot host hierarchical child objects via `addChild()`.
-:::
+> [!WARNING]
+> Although each element (`InstancingMeshObject3D`) in `instanceChildren` exposes a transform interface similar to
+`Mesh`, it is a virtual delegate object that directly updates GPU instancing buffer data and cannot host child objects
+via `addChild()`.
 
 ---
 
-## 4. Practical Example: 10,000 Cubes
+## 2. Practical Example: 10,000 Cubes
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -143,7 +130,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
-        // Gently rotate all instances every frame
         for (let i = 0; i < maxCount; i++) {
             instances[i].rotationY += 0.5;
         }
@@ -151,16 +137,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 ```
 
-## Key Summary
-
-- **Mass Rendering**: The best solution for rendering tens of thousands of objects in a single draw call.
-- **Performance Maximization**: Eliminates CPU-to-GPU communication overhead to maintain high frame rates.
-- **Dynamic Control**: You can control the active render count dynamically using the `instanceCount` property.
-
 ---
 
 ## Next Steps
 
-Learn how to use image-based objects that always face the camera or how to utilize lightweight 2D assets effectively.
-
-- **[Sprite](../sprite/index.md)**
+- **[Sprite](../sprite/index.md)**: Using camera-facing billboard sprites and frame-based animations

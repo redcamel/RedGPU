@@ -5,36 +5,25 @@ order: 3
 
 # View System
 
-If **RedGPUContext**—learned previously—is the 'environment' where the engine runs, the **View System** is the 'frame' that determines how actual content will be displayed within that environment.
-
-RedGPU's **View System** is the core architecture of the engine and performs the following roles:
-
-*   **Scene Composition**: Defining the hierarchical placement of objects and lights within 3D space.
-*   **Pipeline Control**: Managing the rendering process and data flow.
-*   **Screen Output**: Displaying the final results on the browser screen.
-
-## Core Components
-
-The four core modules that make up RedGPU's rendering pipeline are as follows:
-
-* **View3D** (`RedGPU.Display.View3D`)
-    * **Role**: Specifies the screen output area (Viewport/Scissor)
-    * **Features**: Applies skyboxes and post-effects, and manages debugging tools
-* **Scene** (`RedGPU.Display.Scene`)
-    * **Role**: Manages the hierarchical structure of objects to be rendered
-    * **Features**: Manages lighting data and the scene background color
-* **Camera** (`RedGPU.Camera.*`)
-    * **Role**: Converts 3D space to a 2D screen
-    * **Features**: Calculates projection and view matrices, and provides frustum information
-* **Controller** (`RedGPU.Camera.*Controller`)
-    * **Role**: Detects user input and links with the camera
-    * **Features**: Updates camera transform in real-time through mouse, touch, and keyboard inputs
+The **View System** is the rendering pipeline that combines a 3D scene (`Scene`) and a camera (`Camera`) to output
+frames to a designated region of the canvas.
 
 ---
 
-## Understanding Relationships
+## 1. Core Components
 
-Before learning more, it's important to understand how these elements are connected to each other.
+Below are the 4 core modules that make up RedGPU's rendering pipeline.
+
+| Module           | Class / Namespace           | Primary Role                                                                                                                                             |
+|:-----------------|:----------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`View3D`**     | `RedGPU.Display.View3D`     | Defines the screen output area (Viewport/Scissor) and manages environment lighting (`IBL`, `SkyBox`, `SkyAtmosphere`), post-effects, and debugging tools |
+| **`Scene`**      | `RedGPU.Display.Scene`      | Centrally manages the 3D object hierarchy (Scene Graph), lighting (`LightManager`), shadows (`ShadowManager`), terrain, and water bodies                 |
+| **`Camera`**     | `RedGPU.Camera.*`           | Computes projection and view matrices to transform 3D world space into 2D screen space, and controls physical exposure                                   |
+| **`Controller`** | `RedGPU.Camera.*Controller` | Detects mouse, touch, and keyboard inputs to update camera viewpoints and character transforms in real time                                              |
+
+---
+
+## 2. Architecture Relationships
 
 ```mermaid
 graph TD
@@ -73,21 +62,16 @@ graph TD
     style Camera2 fill:#d9534f,stroke:#fff,stroke-width:2px,color:#fff
 ```
 
-1.  **RedGPUContext** has one or more **View3D** instances (e.g., a game screen and a minimap).
-2.  Each **View3D** links what to show (**Scene**) and where to see it from (**Camera**).
-3.  A **Controller** receives user input and moves the **Camera**.
-
-Thanks to this structure, a single **Scene** can be observed from different angles simultaneously through multiple windows (**View3D**).
-
-
+1. **`RedGPUContext`** holds one or more `View3D` instances and renders them sequentially.
+2. Each **`View3D`** links what to render (`Scene`) with where to view it from (`Camera`).
+3. Multiple **`View3D`** instances can reference a single **`Scene`** simultaneously to render different viewpoints
+   (e.g., main screen and minimap).
 
 ---
 
-## Learning Roadmap
+## 3. Learning Roadmap
 
-It is recommended to learn the detailed usage and configuration methods of each module in the following order:
-
-1. **[View3D](./view3d.md)**: The basic unit of screen rendering and layout configuration methods.
-2. **[Scene](./scene.md)**: The container for composing the stage and managing lighting.
-3. **[Camera](./camera.md)**: Understanding viewpoints that convert 3D coordinates to screen coordinates.
-4. **[Controller](./controller.md)**: Interactive camera manipulation through mouse and touch.
+1. **[View3D](./view3d.md)**: Basic rendering unit and viewport layout configuration
+2. **[Scene](./scene.md)**: 3D object hierarchy and lighting/environment managers
+3. **[Camera](./camera.md)**: Perspective/orthographic projection and physical camera exposure
+4. **[Camera Controller](./controller.md)**: Interactive camera and character manipulation via mouse and keyboard

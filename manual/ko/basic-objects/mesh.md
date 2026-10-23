@@ -13,51 +13,44 @@ const meshGraph = `
     style Material fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
     style Mesh fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
 `
-
 </script>
 
 # Mesh
 
-**Mesh** 는 RedGPU의 3D 공간에서 시각적으로 표현되는 가장 기본적인 객체 단위입니다. 뼈대에 해당하는 **Geometry** 와 피부에 해당하는 **Material** 이 결합되어 하나의 완성된 객체를 형성합니다.
-
-## 1. 메시의 구성 요소
-
-**Mesh** 는 독립적으로 존재할 수 없으며, 반드시 다음 두 요소가 결합되어야 합니다.
-
-- **Geometry** (지오메트리): 점, 선, 면으로 이루어진 물체의 물리적인 **형태** 입니다.
-- **Material** (머티리얼): 색상, 질감, 반사광 등 물체의 **표면** 속성을 결정합니다.
+`Mesh` 는 정점 형태 데이터인 **지오메트리**(`Geometry`)와 표면 속성인 **머티리얼**(`Material`)을 결합하여 3D 공간에 렌더링되는 기본 디스플레이 객체입니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="meshGraph" />
 </ClientOnly>
 
-## 2. 지오메트리와 프리미티브
+---
 
-**지오메트리**(Geometry) 는 3D 공간 상의 수많은 **점**(Vertex) 데이터들의 집합입니다. 
+## 1. 지오메트리와 프리미티브
 
-RedGPU는 외부 모델 파일을 불러오기 전, **공간 구성이나 시각화 테스트** 를 빠르게 수행할 수 있도록 **프리미티브**(Primitive) 라는 기본 도형들을 제공합니다. 이를 사용하면 복잡한 데이터 계산 없이 즉시 3D 구조를 설계할 수 있습니다.
+**지오메트리**(Geometry)는 3D 공간의 정점 (Vertex), 법선 (Normal), UV 좌표 데이터 집합입니다. RedGPU는 별도의 외부 모델 파일 없이 즉시 생성할 수 있는 절차적 기본 도형인
+**프리미티브**(`RedGPU.Primitive.*`)를 제공합니다.
 
-| 종류                        | 설명                           |
-|:--------------------------|:-----------------------------|
-| **Box** / **RoundedBox**  | 육면체 상자 형태 또는 모서리가 둥근 상자 형태   |
-| **Sphere** / **Capsule**  | 매끄러운 구체 또는 캡슐 알약 형태          |
-| **Cone** / **Cylinder**   | 원뿔 또는 원기둥 형태                 |
-| **Plane** / **Ground**    | 2D 사각형 평면 또는 격자 지면 형태        |
-| **Circle** / **Ring**     | 채워진 원형 평면 또는 가운데가 뚫린 링 평면 형태 |
-| **Torus** / **TorusKnot** | 도넛 모양의 고리 또는 복잡하게 꼬인 매듭 형태   |
+| 클래스                    | 설명                                      |
+|:--------------------------|:------------------------------------------|
+| **`Box` / `RoundedBox`**  | 육면체 상자 또는 모서리가 둥근 상자 형태  |
+| **`Sphere` / `Capsule`**  | 구체 또는 캡슐 알약 형태                  |
+| **`Cone` / `Cylinder`**   | 원뿔 또는 원기둥 형태                     |
+| **`Plane` / `Ground`**    | 2D 사각형 평면 또는 격자 지면 형태        |
+| **`Circle` / `Ring`**     | 원형 평면 또는 가운데가 뚫린 링 평면 형태 |
+| **`Torus` / `TorusKnot`** | 도넛 모양의 고리 또는 꼬인 매듭 형태      |
 
-## 3. 표면 정의: 머티리얼
+---
 
-**Material** 은 물체의 표면이 어떻게 보일지를 결정하는 속성입니다. 단순한 색상뿐만 아니라 텍스처, 반사율, 투명도 등을 정의할 수 있습니다.
+## 2. 머티리얼 종류
 
-| 종류 | 특징 | 주요 용도 |
-| :--- | :--- | :--- |
-| **ColorMaterial** | 단색 및 투명도만 출력 (조명 무시) | 빠른 시각화, 프로토타이핑, 디버깅 |
-| **BitmapMaterial** | 이미지(**Texture**)를 물체 표면에 출력 | 배경, 단순 이미지 객체, 2D 스프라이트 |
-| **PhongMaterial** | 빛과 그림자, 하이라이트 표현 | 사실적인 3D 물체, 입체감 강조 |
-| **PBRMaterial** | 물리 기반 렌더링(**PBR**) 지원 | 고품질 실사 렌더링, 금속/거칠기 표현 |
+**머티리얼**(Material)은 물체 표면의 색상, 텍스처, 조명 반사율 및 투명도를 결정합니다.
 
-가장 기본적인 **ColorMaterial** 은 조명 연산 없이 색상 값(RGB)과 투명도(Alpha)만을 빠르게 렌더링합니다.
+| 클래스               | 특징                                                | 주요 용도                         |
+|:---------------------|:----------------------------------------------------|:----------------------------------|
+| **`ColorMaterial`**  | 조명 연산 없이 단색(RGB) 및 투명도만 출력           | 빠른 시각화, 프로토타이핑, 디버깅 |
+| **`BitmapMaterial`** | 단일 텍스처(`BitmapTexture`)를 표면에 매핑          | 배경, 비조명 이미지 객체          |
+| **`PhongMaterial`**  | 난반사(Diffuse) 및 정반사(Specular) 하이라이트 연산 | 표준 라이팅 기반 3D 객체          |
+| **`PBRMaterial`**    | 금속성(Metallic)·거칠기(Roughness) 및 KHR 확장 지원 | 고품질 물리 기반 실사 렌더링      |
 
 ```javascript
 // 1. 불투명 빨간색 재질
@@ -65,55 +58,45 @@ const redMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
 
 // 2. 반투명 파란색 재질 (alpha: 0.0 ~ 1.0)
 const blueAlphaMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#0000ff');
-blueAlphaMat.alpha = 0.5; 
+blueAlphaMat.alpha = 0.5;
 ```
-
-::: info [다양한 재질]
-이미지를 입히려면 **BitmapMaterial**, 빛과 그림자를 표현하려면 **PhongMaterial** 또는 **PBRMaterial** 등을 사용합니다. 이들은 이어지는 챕터에서 상세히 다룹니다.
-:::
-
-## 4. 메시 제어
-
-생성된 **Mesh** 객체는 3D 공간 안에서 자유롭게 변형할 수 있는 속성을 가집니다.
-
-- **Position** (`x`, `y`, `z`): 공간 상의 위치를 지정합니다.
-- **Rotation** (`rotationX`, `rotationY`, `rotationZ`): 객체의 회전값을 조절합니다. (단위: Degree)
-- **Scale** (`scaleX`, `scaleY`, `scaleZ`): 객체의 크기를 배수로 조절합니다.
-- **Pivot** (`pivotX`, `pivotY`, `pivotZ`): 위치·회전·스케일 변환의 기준점 좌표를 지정합니다.
-
-::: tip [중심점(Pivot) 안내]
-모든 위치 이동, 회전, 크기 조절은 객체의 **중심점**(Pivot) 을 기준으로 동작합니다. 프리미티브의 경우 각 도형의 기하학적 중심이 기준점이 됩니다.
-:::
-
-```javascript
-const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-
-mesh.x = 10;           // X축 이동
-mesh.rotationY = 45;   // Y축 45도 회전
-mesh.scaleX = 2;       // X축 방향으로 2배 확대
-```
-
-## 5. 주요 API 속성
-
-`Mesh` 인스턴스는 외형, 그림자, 컬링 최적화, 그리고 물리적 수면 상호작용을 조율하기 위한 핵심 속성을 가집니다.
-
-* **`geometry`** (`Geometry` | `Primitive`): 버텍스 (점, 선, 면) 데이터로 구성된 메시의 뼈대를 가져오거나 바인딩합니다.
-* **`material`** (`ABaseMaterial`): 조명 반사도, 이미지 매핑 등을 관장하는 메시의 표면 머티리얼을 설정하거나 가져옵니다.
-* **`opacity`** (`number`, 범위: `0 ~ 1`, 기본값: `1`): 메시의 투명도를 설정하거나 가져옵니다. 부모 메시의 투명도는 하위 자식 객체에도 곱연산으로 전파됩니다.
-* **`castShadow`** (`boolean`, 기본값: `false`): 이 메시가 빛을 받았을 때 다른 물체 위로 그림자를 드리울지(Casting) 여부를 결정합니다.
-* **`receiveShadow`** (`boolean`, 기본값: `true`): 다른 물체가 드리운 그림자가 이 메시의 표면 위에 맺히게 할지(Receiving) 여부를 결정합니다.
-* **`ignoreFrustumCulling`** (`boolean`, 기본값: `false`): 카메라 절두체 (Frustum) 컬링을 무시하고 항상 렌더링에 포함할지 여부를 설정합니다.
-* **`useScreenSpaceSizeCulling`** (`boolean`, 기본값: `true`): 화면에 투영된 객체의 크기 비율이 임계값보다 작을 때 드로우 콜을 생략하는 **투영 면적 컬링**
-  (Screen Space Size Culling) 사용 여부를 설정합니다.
-* **`minScreenSpaceSize`** (`number`, 기본값: `0.006`): 투영 면적 컬링을 수행할 최소 화면 크기 비율 임계값입니다.
-* **`enableWaterInteraction`** (`boolean`, 기본값: `false`): 수체 (`RedGPU.Water.Lake`) 표면과 닿거나 이동할 때 실시간 2D 파동 (물결)을 생성할지
-  여부를 설정합니다 (하위 자식 메시까지 재귀 적용).
-* **`waterWaveStrength`** (`number`, 기본값: `1.0`): 수체 (`Lake`)와 상호작용할 때 생성되는 물결 파동의 강도 배율을 설정합니다.
-* **`enableDebugger`** (`boolean`, 기본값: `false`): 바운딩 볼륨 및 법선 등을 시각적으로 확인하기 위한 디버그 메시 (`DrawDebuggerMesh`) 표시 여부를 설정합니다.
 
 ---
 
-## 6. 실습: 메시 생성 및 배치
+## 3. 공간 변환 및 주요 속성
+
+`Mesh` 의 위치, 회전, 스케일 변환은 객체의 **중심점**(Pivot)을 기준으로 동작합니다.
+
+| 구분         | 속성명                                    | 타입 / 기본값           | 설명                                                                                |
+|:-------------|:------------------------------------------|:------------------------|:------------------------------------------------------------------------------------|
+| **트랜스폼** | **`x`, `y`, `z`**                         | `number` (`0`)          | 3D 공간상의 로컬 좌표 (`setPosition(x, y, z)` 지원)                                 |
+| **트랜스폼** | **`rotationX`, `rotationY`, `rotationZ`** | `number` (`0`)          | 각 축 기준 회전 각도 (단위: Degree, `setRotation(x, y, z)` 지원)                    |
+| **트랜스폼** | **`scaleX`, `scaleY`, `scaleZ`**          | `number` (`1`)          | 각 축 기준 크기 배율 (`setScale(x, y, z)` 지원)                                     |
+| **트랜스폼** | **`pivotX`, `pivotY`, `pivotZ`**          | `number` (`0`)          | 이동·회전·스케일 변환의 기준점 오프셋 좌표                                          |
+| **외형**     | **`geometry`**                            | `Geometry \| Primitive` | 메시에 바인딩된 지오메트리 인스턴스                                                 |
+| **외형**     | **`material`**                            | `ABaseMaterial`         | 메시에 바인딩된 표면 머티리얼 인스턴스                                              |
+| **외형**     | **`opacity`**                             | `number` (`1.0`)        | 메시 투명도 (`0.0 ~ 1.0`, 하위 자식 노드에 곱연산으로 전파)                         |
+| **그림자**   | **`castShadow`**                          | `boolean` (`false`)     | 광원으로부터 다른 물체에 그림자를 투사(Cast)할지 여부                               |
+| **그림자**   | **`receiveShadow`**                       | `boolean` (`true`)      | 다른 물체가 드리운 그림자를 표면에 수신(Receive)할지 여부                           |
+| **컬링**     | **`ignoreFrustumCulling`**                | `boolean` (`false`)     | 카메라 절두체(Frustum) 컬링을 무시하고 항상 렌더링할지 여부                         |
+| **컬링**     | **`useScreenSpaceSizeCulling`**           | `boolean` (`true`)      | 화면 투영 크기 비율이 임계값 미만일 때 드로우 콜을 생략하는 컬링 활성화 여부        |
+| **컬링**     | **`minScreenSpaceSize`**                  | `number` (`0.006`)      | 투영 면적 컬링을 수행할 최소 화면 크기 비율 임계값                                  |
+| **상호작용** | **`enableWaterInteraction`**              | `boolean` (`false`)     | 수체(`Lake`) 표면과 충돌·이동 시 실시간 2D 물결 파동 생성 여부 (자식까지 재귀 적용) |
+| **상호작용** | **`waterWaveStrength`**                   | `number` (`1.0`)        | 수체(`Lake`)와 상호작용할 때 생성되는 물결 파동 강도 배율                           |
+| **디버그**   | **`enableDebugger`**                      | `boolean` (`false`)     | 바운딩 볼륨(`OBB`/`AABB`) 및 법선 시각화 디버거(`DrawDebuggerMesh`) 표시 여부       |
+
+```javascript
+const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+mesh.setPosition(10, 0, 0);
+mesh.rotationY = 45;
+mesh.scaleX = 2;
+```
+
+---
+
+## 4. 실습 예제: 메시 생성 및 배치
+
+다양한 프리미티브 도형과 `ColorMaterial` 을 결합하여 씬에 배치하고 회전시키는 예제입니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -123,11 +106,10 @@ const canvas = document.getElementById('redgpu-canvas');
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     const camera = new RedGPU.Camera.PerspectiveCamera();
-    camera.z = -15; 
-    camera.y = 5;
+    camera.setPosition(0, 5, -15);
     camera.lookAt(0, 0, 0);
 
-    // 1. 테스트용 박스 형태와 기본 재질 준비
+    // 1. 지오메트리와 기본 재질 준비
     const geometry = new RedGPU.Primitive.Box(redGPUContext);
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#00CC99');
 
@@ -218,15 +200,8 @@ const camera = new RedGPU.Camera.PerspectiveCamera ();
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+---
 
-- **Mesh** 는 **Geometry** 와 **Material** 이 결합된 3D 객체의 기본 단위입니다.
-- **Primitive** 는 시각화 테스트 및 구조 설계를 위한 표준 도형 데이터입니다.
-- **ColorMaterial** 은 성능이 가볍고 조명 없이 색상을 확인하기에 적합합니다.
-- 모든 변형(Transform)은 객체의 **중심점**(Pivot) 을 기준으로 이루어집니다.
+## 다음 단계
 
-## 다음 학습 추천
-
-메시들을 부모-자식 관계로 묶어 복잡한 구조를 만드는 방법을 알아봅니다.
-
-- **[Scene Graph](./scene-graph.md)**
+- **[Scene Graph](./scene-graph.md)** : 객체들을 부모-자식 관계로 묶어 복합 계층 구조와 연동 애니메이션을 구성하는 방법

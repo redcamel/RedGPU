@@ -5,8 +5,8 @@ order: 3
 
 <script setup>
 const textureGraph = `
-    Img["Image URL/File"] -->|Load| Texture["BitmapTexture (Resource)"]
-    Texture -->|Reference| Material["BitmapMaterial (Material)"]
+    Img["Image URL (.png / .jpg / .ktx2 / .svg)"] -->|Async Load & Transcode| Texture["BitmapTexture / TextureArray (Resource)"]
+    Texture -->|Reference| Material["BitmapMaterial / PhongMaterial / PBRMaterial"]
     Material -->|Apply| Mesh["Mesh (Display Object)"]
 
     %% Grayscale styles applied
@@ -19,88 +19,72 @@ const textureGraph = `
 
 # Texture
 
-By applying real photos or illustrations to an object's surface instead of simple colors, you can create much more realistic 3D objects. In RedGPU, image files are loaded as **BitmapTexture** and applied to objects using **BitmapMaterial**.
+A **Texture** converts external image files or compressed texture assets into GPU resources and maps them onto material
+surfaces (`BitmapMaterial`, `PhongMaterial`, `PBRMaterial`, etc.).
 
 <ClientOnly>
   <MermaidResponsive :definition="textureGraph" />
 </ClientOnly>
 
-## 1. Loading Images: BitmapTexture
+---
 
-To use an image in a 3D engine, you must first convert it into a texture object. Using **RedGPU.Resource.BitmapTexture**, you can create texture data from an image path on the web.
+## 1. Texture Classes and Supported Formats
+
+RedGPU provides 3 texture resource classes depending on the rendering use case, and automatically updates the rendering
+pipeline as soon as asynchronous network loading completes.
+
+| Class               | Supported Formats and Primary Role                                                                                                                                                                  |
+|:--------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`BitmapTexture`** | Standard 2D texture supporting web bitmaps (`.png`, `.jpg`, `.webp`, `.avif`), vector graphics (`.svg`), and **`.ktx2` GPU-compressed textures** (Basis Universal / UASTC & ETC1S auto-transcoding) |
+| **`TextureArray`**  | Bundles multiple images of identical resolution into a single `texture_2d_array` GPU resource to minimize bind group slot usage in multi-layer shaders (supports bitmaps and `.ktx2` arrays)        |
+| **`PackedTexture`** | Merges individual channels (R, G, B, A) from separate textures into a single ORM (Occlusion-Roughness-Metallic) packed texture on the GPU                                                           |
+
+---
+
+## 2. Creating BitmapTexture and Options
 
 ```javascript
-// Create texture data by specifying the image path
+// 1. Load a standard bitmap (JPG/PNG/WebP) or SVG
 const texture = new RedGPU.Resource.BitmapTexture(
     redGPUContext,
     'https://redcamel.github.io/RedGPU/examples/assets/UV_Grid_Sm.jpg'
 );
+
+// 2. Load a KTX2 (Basis Universal GPU-compressed texture)
+// Automatically transcoded to the optimal hardware format (BC7/ASTC/ETC2).
+const ktx2Texture = new RedGPU.Resource.BitmapTexture(
+    redGPUContext,
+    './assets/terrain/rock_diff.ktx2'
+);
+
+// 3. Bundle multiple image URLs into a single 2D TextureArray
+const layerTextureArray = new RedGPU.Resource.TextureArray(
+    redGPUContext,
+    ['./assets/layer0.ktx2', './assets/layer1.ktx2', './assets/layer2.ktx2'],
+    true // useMipmap
+);
 ```
 
-### BitmapTexture Constructor Parameter Options
+### Constructor Parameters and Event Listeners
 
-```javascript
-constructor(
-    redGPUContext
-:
-RedGPUContext,
-    src ? : string | {src: string, cacheKey: string},
-    useMipMap
-:
-boolean = true,
-    onLoad ? : (textureInstance?: BitmapTexture) => void,
-    onError ? : (error: Error) => void,
-    format ? : GPUTextureFormat,
-    usePremultiplyAlpha
-:
-boolean = false
-)
-```
+| Parameter                 | Type                          | Default        | Description                                                                    |
+|:--------------------------|:------------------------------|:---------------|:-------------------------------------------------------------------------------|
+| **`redGPUContext`**       | `RedGPUContext`               | Required       | Engine context instance                                                        |
+| **`src`**                 | `string \| { src, cacheKey }` | Optional       | Image URL path to load, or an object specifying a custom cache key             |
+| **`useMipMap`**           | `boolean`                     | `true`         | Enables multi-level mipmap generation to prevent distance aliasing (Moire)     |
+| **`onLoad`**              | `(textureInstance) => void`   | Optional       | Callback invoked when image loading and GPU upload complete                    |
+| **`onError`**             | `(error) => void`             | Optional       | Callback invoked when an error occurs (e.g., network load failure)             |
+| **`format`**              | `GPUTextureFormat`            | `'rgba8unorm'` | GPU texture format (automatically selects compressed format when loading KTX2) |
+| **`usePremultiplyAlpha`** | `boolean`                     | `false`        | Whether to apply premultiplied alpha                                           |
 
-| Parameter                 | Type                                | Description                                                                                     |
-|:--------------------------|:------------------------------------|:------------------------------------------------------------------------------------------------|
-| **`redGPUContext`**       | `RedGPUContext`                     | Engine context instance (Required)                                                              |
-| **`src`**                 | `string` or `{ src, cacheKey }`     | URL path of the image to load, or a source object with a defined cache key                      |
-| **`useMipMap`**           | `boolean` (Default: `true`)         | Whether to enable multi-level mipmap generation to prevent distance distortion                  |
-| **`onLoad`**              | `(texture?: BitmapTexture) => void` | Callback function when the image resource loading and GPU texture conversion are fully complete |
-| **`onError`**             | `(error: Error) => void`            | Callback function when an exception occurs, such as image network load failure                  |
-| **`usePremultiplyAlpha`** | `boolean` (Default: `false`)        | Whether to use premultiplied alpha format with alpha channel values pre-multiplied              |
-
-### Supported Formats & Advanced Texture Classes
-
-* **Supported Image Formats (`BitmapTexture`)**: Standard web formats (`.png`, `.jpg`, `.webp`, `.avif`), vector
-  graphics (`.svg`), and GPU-compressed **`.ktx2` (Basis Universal / UASTC & ETC1S)** textures.
-* **`addLoadListeners(onLoad, onError)`**: Registers additional load or error callbacks after creating a `BitmapTexture`
-  instance.
-* **`RedGPU.Resource.TextureArray`**: Bundles multiple 2D images of the same resolution into a single `2d-array` GPU
-  texture resource, minimizing bind group switches across multi-layer shaders.
-* **`RedGPU.Resource.PackedTexture`**: Packs separate R, G, B, A channel textures (such as Occlusion, Roughness, and
-  Metallic maps) into a single GPU texture on the fly.
+> You can also register additional load/error listeners after instantiation using
+> `texture.addLoadListeners(onLoad, onError)`.
 
 ---
 
-## 2. Applying to Material: BitmapMaterial
+## 3. Practical Example: Rendering a Textured Mesh
 
-The loaded texture is used as the mesh's appearance through **BitmapMaterial**. You can specify it directly in the constructor or assign it to the `diffuseTexture` property.
-
-```javascript
-// 1. Create a material using the texture
-const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
-
-// 2. Create a mesh and apply the material
-const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-```
-
-## 3. Understanding Asynchronous Loading
-
-Image files take time to load because they are downloaded over the network. RedGPU remains in a default state while the
-image is loading and **automatically displays the texture on the screen as soon as loading is complete**.
-
-This is highly convenient because the engine manages the state internally, so developers don't have to write separate logic to check for loading completion.
-
-## 4. Practice: Creating a Textured Box
-
-Let's load a real image and apply it to a rotating box.
+An example of creating a `BitmapTexture`, binding it to a `BitmapMaterial`, and rendering it on a mesh.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -116,7 +100,7 @@ RedGPU.init(canvas, (redGPUContext) => {
         'https://redcamel.github.io/RedGPU/examples/assets/UV_Grid_Sm.jpg'
     );
 
-    // 2. Create a Bitmap Material and link the texture
+    // 2. Create a BitmapMaterial and link the texture
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
 
     // 3. Create a Mesh (Box)
@@ -186,14 +170,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **BitmapTexture** converts external image files into resources for the 3D engine.
-- **BitmapMaterial** is a dedicated material for representing object surfaces using textures.
-- RedGPU provides convenience by automatically handling asynchronous image loading.
+---
 
 ## Next Steps
 
-Learn how to add depth to space by adding light and shadows, moving beyond simple images.
-
-- **[Lighting and Shadow](../lighting-and-shadow/index.md)**
+- **[Lighting and Shadow](../lighting-and-shadow/index.md)**: Configuring light sources (`Light`), lit materials
+  (`PhongMaterial`, `PBRMaterial`), and shadows (`Shadow`)

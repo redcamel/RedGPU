@@ -5,26 +5,21 @@ order: 4
 
 # Basic Objects
 
-This is the stage where you learn the most core elements that make up 3D space. It covers how to visually fill the world of RedGPU, apply realistic materials and lighting, and define relationships between objects.
-
-## Learning Objectives
-
-Upon completing this section, you will be able to perform the following tasks:
-
-- **Create Mesh**: Combine geometry and material to output 3D objects to the screen.
-- **Apply Texture**: Apply real images to object surfaces beyond simple colors.
-- **Design Scene Graph**: Create complex structures and control animations through parent-child relationships.
-
-## Learning Roadmap
-
-We recommend learning in the following order:
-
-1. **[Mesh](./mesh.md)**: Learn about Mesh, the most basic unit of RedGPU, and its components (Geometry, Material).
-2. **[Texture](./texture.md)**: Learn how to load bitmap images and apply them to objects.
-3. **[Scene Graph](./scene-graph.md)**: Understand the hierarchy between objects and the principle of transformation inheritance.
-
-Now, let's start with the first step, **Mesh**.
+Covers the core display objects that visually compose 3D space: `Mesh`, the hierarchical **Scene Graph**, and surface
+image mapping via `Texture`.
 
 ---
 
-[Next Step: Learn Mesh](./mesh.md)
+## Learning Roadmap
+
+1. **[Mesh](./mesh.md)**: Combining `Geometry` and `Material` to create 3D objects and control spatial transformations
+2. **[Scene Graph](./scene-graph.md)**: Designing parent-child hierarchies with `Group3D` and utilizing transform
+   inheritance
+3. **[Texture](./texture.md)**: Loading standard bitmaps, `.ktx2` GPU-compressed textures, and `TextureArray` resources
+   to apply to materials
+
+---
+
+## Next Steps
+
+- **[Mesh](./mesh.md)**: Creating and controlling `Mesh`, the fundamental 3D object unit in RedGPU

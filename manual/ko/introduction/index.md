@@ -4,11 +4,11 @@ order: 1
 ---
 <script setup>
 const systemGraph = `
-    Renderer["RedGPU.Renderer"] -->|Draws| View["RedGPU.Display.View3D"]
-    View -->|Composes| Scene["RedGPU.Display.Scene"]
-    View -->|Uses| Camera["RedGPU.Camera"]
-    Scene -->|Contains| Mesh["RedGPU.Display.Mesh"]
-    Mesh -->|Combines| Geo["Geometry"] & Mat["Material"]
+    Renderer["RedGPU.Renderer (렌더러)"] -->|뷰 렌더링| View["RedGPU.Display.View3D (뷰)"]
+    View -->|공간 참조| Scene["RedGPU.Display.Scene (씬)"]
+    View -->|시점 참조| Camera["RedGPU.Camera (카메라)"]
+    Scene -->|자식 포함| Mesh["RedGPU.Display.Mesh (메시)"]
+    Mesh -->|결합| Geo["Geometry (형상)"] & Mat["Material (재질)"]
 
     %% 회색조 스타일 적용
     style Renderer fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
@@ -26,7 +26,7 @@ const flowGraph = `
     Context --> Create["리소스 생성<br/>Scene, Camera, Mesh"]
     Create --> SetupView["View3D 설정"]
     SetupView --> StartLoop["렌더링 루프 시작"]
-    StartLoop -->|Loop| Update["프레임 업데이트"]
+    StartLoop -->|반복| Update["프레임 업데이트"]
     Update --> Render["화면 렌더링"]
     Render --> Update
 
@@ -44,33 +44,52 @@ const flowGraph = `
 
 # 시작하기
 
-RedGPU는 차세대 웹 그래픽 표준인 **WebGPU** 를 기반으로 설계된 고성능 3D 엔진입니다. 강력한 **컴퓨트 셰이더**(Compute Shader) 활용과 낮은 오버헤드를 통해 웹 환경에서 네이티브 수준의 몰입형 그래픽 경험을 제공합니다.
-
-이 가이드는 RedGPU를 사용하여 첫 번째 3D 애플리케이션을 구축하는 과정을 단계별로 안내합니다.
+**RedGPU** 는 **WebGPU** 기반의 웹 3D 그래픽스 엔진입니다. 캔버스 초기화부터 첫 번째 3D 메시를 화면에 렌더링하기까지의 기본 과정을 살펴봅니다.
 
 ## 1. 사전 준비
 
-WebGPU는 최신 기술이므로 시작하기 전에 아래 실행 환경을 확인해야 합니다.
+실행 전 아래 WebGPU 동작 환경을 확인합니다.
 
-- **브라우저 지원**: Chrome 113+, Edge 113+ 등 WebGPU를 지원하는 최신 브라우저가 필요합니다.
+- **브라우저 지원**: Chrome 113+, Edge 113+, Safari 26+, Firefox 141+ 등 WebGPU를 지원하는 브라우저가 필요합니다.
 - **지원 여부 확인**: [WebGPU Report](https://webgpureport.org/)에서 현재 브라우저와 하드웨어의 WebGPU 지원 상태를 확인할 수 있습니다.
 - **보안 컨텍스트**: WebGPU API는 보안 환경(`https://`) 또는 로컬 환경(`http://localhost`)에서만 작동합니다.
 
 ## 2. 엔진 도입
 
-RedGPU는 별도의 복잡한 설치 과정 없이, ES Module(ESM)을 통해 즉시 프로젝트에 통합할 수 있습니다.
+별도의 빌드 도구나 설치 없이 **ES Module**(ESM)로 즉시 가져올 수 있습니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 ```
 
-## 3. 첫 번째 3D 장면 구현
+## 3. 시스템 구조 및 실행 흐름
 
-가장 기본적인 형태인 '회전하는 정육면체'를 통해 RedGPU의 핵심 작동 방식을 살펴보겠습니다.
+### 실행 프로세스
 
-### HTML 구조 (`index.html`)
+<ClientOnly>
+  <MermaidResponsive :definition="flowGraph" />
+</ClientOnly>
 
-렌더링 결과가 출력될 `<canvas>` 엘리먼트를 구성합니다.
+### 주요 구성 요소
+
+| 클래스                      | 역할 정의                                                                   |
+|:----------------------------|:----------------------------------------------------------------------------|
+| **`RedGPU.init`**           | WebGPU 디바이스 권한을 요청하고 `RedGPUContext` 를 생성합니다.              |
+| **`RedGPU.Renderer`**       | 등록된 뷰들을 매 프레임 GPU에 렌더링하는 루프를 제어합니다.                 |
+| **`RedGPU.Display.Scene`**  | 메시, 조명 등 3D 객체가 배치되는 루트 컨테이너입니다.                       |
+| **`RedGPU.Display.View3D`** | 특정 `Scene` 을 지정된 `Camera` 시점으로 화면에 출력하는 뷰포트 단위입니다. |
+
+<ClientOnly>
+  <MermaidResponsive :definition="systemGraph" />
+</ClientOnly>
+
+## 4. 첫 번째 3D 장면 구현
+
+회전하는 정육면체 예제를 통해 **초기화**(Init) → **리소스 생성**(Scene/Camera/Mesh) → **뷰 설정**(View) → **렌더링 루프**(Start)로 이어지는 기본 흐름을 구성합니다.
+
+### HTML 구조
+
+렌더링 결과가 출력될 `<canvas>` 엘리먼트를 배치합니다.
 
 ```html
 <!DOCTYPE html>
@@ -91,9 +110,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 </html>
 ```
 
-### JavaScript 구현 (`main.js`)
-
-RedGPU는 **초기화**(Init) → **리소스 생성**(Scene/Camera/Mesh) → **뷰 설정**(View) → **렌더링 루프**(Start) 순으로 흐름이 진행됩니다.
+### JavaScript 구현
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -104,31 +121,28 @@ const canvas = document.getElementById('redgpu-canvas');
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 초기화 성공 시 엔진의 핵심인 redGPUContext 객체가 전달됩니다.
-
-        // 2. 씬(Scene) 생성: 3D 객체들이 배치될 가상 공간
+        // 2. 씬(Scene) 생성: 3D 객체가 배치될 공간
         const scene = new RedGPU.Display.Scene();
 
         // 3. 카메라 생성: 원근 투영(Perspective) 카메라 설정
         const camera = new RedGPU.Camera.PerspectiveCamera();
-        camera.z = -5; // 카메라를 원점으로부터 뒤로 이동
-        camera.lookAt(0, 0, 0)
+        camera.z = -5;
+        camera.lookAt(0, 0, 0);
 
-        // 4. 메시(Mesh) 생성: 형태(Box)와 재질(Color)의 결합
+        // 4. 메시(Mesh) 생성: 형태(Box)와 재질(Color) 결합
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
         const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#00CC99');
         const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-        
-        scene.addChild(mesh); // 씬에 메시 추가
 
-        // 5. 뷰(View3D) 설정: 특정 씬을 특정 카메라로 렌더링하도록 정의
+        scene.addChild(mesh);
+
+        // 5. 뷰(View3D) 설정 및 컨텍스트 등록
         const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-        redGPUContext.addView(view); // 컨텍스트에 뷰 등록
+        redGPUContext.addView(view);
 
-        // 6. 렌더러(Renderer) 실행 및 애니메이션 시작
+        // 6. 렌더러(Renderer) 실행 및 프레임 루프 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // 매 프레임마다 호출되어 애니메이션을 구현합니다.
             mesh.rotationX += 1;
             mesh.rotationY += 1;
         });
@@ -141,9 +155,7 @@ RedGPU.init(
 );
 ```
 
-## 라이브 데모 (Live Demo)
-
-아래 대화형 예제를 통해 코드를 직접 수정하며 결과를 실시간으로 확인할 수 있습니다.
+## 라이브 데모
 
 <ClientOnly>
   <CodePen title="RedGPU Quick Start - Rotating Cube" slugHash="getting-started">
@@ -163,9 +175,9 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const scene = new RedGPU.Display.Scene();
-const camera = new RedGPU.Camera.PerspectiveCamera();
+const camera = new RedGPU.Camera.PerspectiveCamera ();
         camera.z = -5;
-camera.lookAt(0,0,0)
+camera.lookAt (0, 0, 0);
 
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
         const material = new RedGPU.Material.ColorMaterial(redGPUContext, "#00CC99");
@@ -192,37 +204,12 @@ camera.lookAt(0,0,0)
 
 <br/>
 
-## 시스템 구조 및 실행 흐름
+## 다음 단계
 
-RedGPU의 주요 클래스 관계와 애플리케이션 생명 주기를 도식화한 내용입니다.
-
-### 실행 프로세스
-
-<ClientOnly>
-  <MermaidResponsive :definition="flowGraph" />
-</ClientOnly>
-
-### 주요 구성 요소
-
-| 클래스 | 역할 정의 |
-| :--- | :--- |
-| **`RedGPU.init`** | WebGPU 디바이스 권한을 요청하고 엔진의 핵심 컨텍스트를 생성합니다. |
-| **`RedGPU.Renderer`** | 등록된 뷰들을 GPU 하드웨어에 그리는 렌더링 루프를 관리합니다. |
-| **`RedGPU.Display.Scene`** | 메시, 조명 등 3D 객체들이 배치되는 가상 공간의 루트 컨테이너입니다. |
-| **`RedGPU.Display.View3D`** | 특정 씬을 어떤 시점(Camera)에서 화면에 출력할지 결정하는 단위입니다. |
-
-<ClientOnly>
-  <MermaidResponsive :definition="systemGraph" />
-</ClientOnly>
-
-## 다음 학습 추천
-
-기본적인 화면 구성을 익혔다면, 아래 주제들을 통해 RedGPU의 더 깊은 기능을 탐구해 보세요.
-
-- **[RedGPU Context](../context/index.md)** : 엔진 컨텍스트 상세 설정 및 옵션 가이드.
-- **[인스펙터](../inspector/index.md)** : 성능 분석 및 실시간 씬 디버깅을 위한 개발 도구.
-- **[메시](../basic-objects/mesh.md)** : 지오메트리와 머티리얼을 결합하여 물체를 만들고 제어하는 방법.
-- **[조명과 그림자](../lighting-and-shadow/phong-material.md)** : 빛에 반응하는 사실적인 질감과 그림자 표현.
-- **[환경 설정](../environment/skybox.md)** : 스카이박스 및 IBL 설정 방법.
-- **[확장 객체](../extended-objects/model-loading/index.md)** : 외부 3D 모델 및 스프라이트 사용 방법.
-
+- **[RedGPU Context](../context/index.md)** : 엔진 컨텍스트 상세 설정 및 옵션
+- **[View System](../view-system/index.md)** : 화면 렌더링 뷰포트, 씬 및 카메라 구성
+- **[기본 객체](../basic-objects/index.md)** : 지오메트리와 머티리얼을 결합한 메시 및 텍스처 제어
+- **[조명과 그림자](../lighting-and-shadow/index.md)** : 광원, 재질 및 그림자 표현
+- **[환경 설정](../environment/index.md)** : 스카이박스, IBL, 대기 산란 및 전역 바람 설정
+- **[확장 객체](../extended-objects/index.md)** : 외부 3D 모델, 인스턴싱, 스프라이트 및 파티클 활용
+- **[인스펙터](../inspector/index.md)** : 성능 분석 및 실시간 씬 디버깅 도구

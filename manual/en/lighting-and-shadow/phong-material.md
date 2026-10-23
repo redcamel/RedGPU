@@ -19,92 +19,57 @@ const phongGraph = `
 
 # Phong Material
 
-**Phong Material** is a material that implements the **Phong Reflection Model**, one of the most widely used lighting models in 3D graphics. Beyond simply painting colors, you can realistically adjust the texture of an object using various **Texture Maps**.
+`PhongMaterial` is a lighting material based on the Phong reflection model (combining Ambient, Diffuse, and Specular
+components) and supports multi-texture maps for surface relief and glossiness.
 
 <ClientOnly>
   <MermaidResponsive :definition="phongGraph" />
 </ClientOnly>
 
-## 1. Implementing Texture via Texture Maps
+---
 
-`PhongMaterial` completes the detail of an object by overlaying multiple texture layers. RedGPU supports various maps as follows:
+## 1. Key Properties and Texture Maps
 
-| Texture Map | Role | Effect |
-| :--- | :--- | :--- |
-| **diffuseTexture** | Basic pattern (Color Map) | Determines the basic color and pattern of the object surface |
-| **normalTexture** | Surface irregularities (Normal Map) | Expresses fine unevenness and three-dimensionality without having to subdivide actual faces |
-| **specularTexture** | Gloss map (Specular Map) | Defines which parts of the object will be shinier (metal, plastic, etc.) |
-| **emissiveTexture** | Light-emitting map (Emissive Map) | Specifies areas that emit light themselves, regardless of lighting |
-| **alphaTexture** | Transparency map (Alpha Map) | Specifies transparent or opaque areas based on texture brightness |
-| **displacementTexture** | Displacement map | Moves actual geometry vertices to create physical unevenness |
-
-## 2. Key Property Control
-
-You can control the intensity and sharpness of highlights through numerical adjustments.
+| Property                  | Type                  | Description                                                                           |
+|:--------------------------|:----------------------|:--------------------------------------------------------------------------------------|
+| **`color` / `alpha`**     | `ColorRGB` / `number` | Base surface color and opacity (`0.0 ~ 1.0`)                                          |
+| **`shininess`**           | `number`              | Sharpness of the specular highlight (default: `32`)                                   |
+| **`specularStrength`**    | `number`              | Specular highlight intensity multiplier (default: `1.0`)                              |
+| **`diffuseTexture`**      | `BitmapTexture`       | Base color and pattern map                                                            |
+| **`normalTexture`**       | `BitmapTexture`       | Normal map expressing fine surface relief without subdividing geometry                |
+| **`specularTexture`**     | `BitmapTexture`       | Specular map defining per-area reflectance differences                                |
+| **`emissiveTexture`**     | `BitmapTexture`       | Self-illuminating emissive map independent of lighting                                |
+| **`alphaTexture`**        | `BitmapTexture`       | Alpha mask map controlling transparency based on luminance                            |
+| **`displacementTexture`** | `BitmapTexture`       | Vertex displacement map creating physical protrusion (scaled via `displacementScale`) |
+| **`useSSR`**              | `boolean`             | Enables Screen Space Reflection on the material                                       |
 
 ```javascript
 const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-
-// 1. Basic color and transparency
 material.color.setColorByHEX('#00CC99');
-material.alpha = 1.0;
-
-// 2. Highlight (Specular) control
-material.shininess = 32;    // Sharpness of the highlight (Shininess)
-material.specularStrength = 1.0; // Intensity of the highlight
-
-// 3. Advanced properties
-material.displacementScale = 1.0; // Protrusion level of the displacement map
-material.useSSR = true;           // Use screen space reflection
+material.shininess = 32;
+material.specularStrength = 1.0;
+material.displacementScale = 0.5;
 ```
 
-## 3. Practical Example: Combining Textures
+---
 
-By applying multiple maps simultaneously, you can make a simple sphere look like a detailed planet or a complex mechanical part.
+## 2. Multi-Texture Combination Example
+
+Below is an example combining diffuse, normal, specular, and `displacementTexture` maps on a sphere.
 
 ```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+const material = new RedGPU.Material.PhongMaterial(redGPUContext);
+const assetPath = 'https://redcamel.github.io/RedGPU/examples/assets/phongMaterial/';
 
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    
-    // 1. Lighting Setup (PhongMaterial requires light to be visible)
-    const light = new RedGPU.Light.DirectionalLight();
-    scene.lightManager.addDirectionalLight(light);
-
-    // 2. Create a material
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    
-    // 3. Apply various texture maps
-    const assetPath = 'https://redcamel.github.io/RedGPU/examples/assets/phongMaterial/';
-    
-    material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_diffuseMap.jpg');
-    material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_normalMap.jpg');
-    material.specularTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_specularMap.jpg');
-    material.displacementTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_displacementMap.jpg');
-    
-    material.displacementScale = 0.5; // Adjust displacement intensity
-
-    const mesh = new RedGPU.Display.Mesh(
-        redGPUContext, 
-        new RedGPU.Primitive.Sphere(redGPUContext, 4, 64, 64), 
-        material
-    );
-    scene.addChild(mesh);
-
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
-
-    new RedGPU.Renderer().start(redGPUContext, () => {
-        mesh.rotationY += 1;
-    });
-});
+material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_diffuseMap.jpg');
+material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_normalMap.jpg');
+material.specularTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_specularMap.jpg');
+material.displacementTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_displacementMap.jpg');
+material.displacementScale = 0.5;
+material.shininess = 32;
 ```
 
 ### Live Demo
-
-Observe how **PhongMaterial** with applied texture maps reacts under lighting.
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Phong Material Texture" slugHash="phong-material-texture">
@@ -125,7 +90,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     
     const light = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(light);
-    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
+    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 50);
 
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     const assetPath = 'https://redcamel.github.io/RedGPU/examples/assets/phongMaterial/';
@@ -158,16 +123,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **Phong Material** is a lighting material that calculates light **Diffuse** and **Specular** reflections.
-- Using a **Normal Map** allows for expressing detailed surface textures without having to subdivide faces.
-- Physical three-dimensionality can be created by transforming actual geometry through a **Displacement Map**.
-
 ---
 
 ## Next Steps
 
-Learn how to implement shadows that are cast when light is blocked and add a realistic sense of space to the scene.
-
-- **[Shadow](./shadow.md)**
+- **[Shadow System](./shadow.md)**: Configuring Cascaded Shadow Maps (CSM) and soft shadows

@@ -5,85 +5,70 @@ order: 4
 
 # Camera
 
-If **Scene** is the 'stage' where all objects are placed, **Camera** is the 'observer's eye' looking at that stage. It is a core object that manages the **Projection Matrix** and **View Matrix** for converting from the **World Coordinate** system to the **Screen Coordinate** system.
-
-RedGPU supports three standard projection methods depending on the use case.
-
-## 1. PerspectiveCamera
-
-**PerspectiveCamera** uses the **Perspective Projection** method. Operating similarly to the human eye or a real camera
-lens, objects that are far away appear smaller and closer objects appear larger, providing a realistic sense of depth.
-
-In particular, RedGPU's **PerspectiveCamera** aims for **Physical Camera** modeling that simulates a real-world lens. It
-features **automatic exposure (`useAutoExposure`) enabled by default (`true`)**, which dynamically calculates and adapts
-the optimal screen brightness in real-time based on the environmental lighting.
-
-```javascript
-// Create an instance (Context injection not required)
-const camera = new RedGPU.Camera.PerspectiveCamera();
-
-// 1. Control automatic exposure activation (Default: true)
-camera.useAutoExposure = true;
-
-// 2. Field of View setup (Default: 60 degrees)
-// Larger values show a wider area but may result in more edge distortion.
-camera.fieldOfView = 45;
-
-// 3. Clipping Planes setup
-// Only objects between near and far are rendered on the screen.
-camera.nearClipping = 0.1; 
-camera.farClipping = 50000; // Default: 50000 (supports 16km+ open-world visibility)
-
-// 4. Transform setup
-camera.x = 0;
-camera.y = 5;
-camera.z = -15;
-```
-
-## 2. Camera2D
-
-### Physical Camera Exposure Parameters (`aperture`, `shutterSpeed`, `iso`)
-
-When manual physical exposure is used (`camera.useAutoExposure = false`), `PerspectiveCamera` calculates exposure value
-(**EV100**, `camera.ev100`) using real-world photographic parameters:
-
-| Property              | Default   | Description                                                                                          |
-|:----------------------|:----------|:-----------------------------------------------------------------------------------------------------|
-| **`useAutoExposure`** | `true`    | Enables automatic luminance-based exposure adaptation (`false` switches to manual physical exposure) |
-| **`aperture`**        | `16.0`    | Lens aperture f-stop number (`f/1.4 ~ f/22`, default: `16.0`)                                        |
-| **`shutterSpeed`**    | `0.008`   | Shutter exposure time in seconds (`0.008` = 1/125s)                                                  |
-| **`iso`**             | `100`     | Sensor light sensitivity (`ISO 100` standard)                                                        |
-| **`ev100`**           | Read-only | Exposure value at ISO 100 computed from `aperture`, `shutterSpeed`, and `iso`                        |
-
-## 2. Camera2D
-
-**Camera2D** is a 2D-dedicated camera optimized for rendering UI and 2D elements. This camera is not explicitly
-instantiated by the developer using the `new` keyword. Instead, it is **automatically created and registered internally
-** when initializing a **View2D** instance.
-
-## 3. OrthographicCamera
-
-**OrthographicCamera** uses the **Orthographic Projection** method, which preserves the actual dimensions of objects
-without distance-based perspective distortion. It is typically used for visualizations like blueprint drawings, 2.5D, or
-isometric gaming environments where perspective is not required.
+`Camera` is the viewpoint object that manages the **Projection Matrix** and **View Matrix** for transforming the 3D
+**World Coordinate** system into the 2D **Screen Coordinate** system.
 
 ---
 
-## 4. Gaze Control (lookAt)
+## 1. Camera Types
 
-To move the camera's position and then make it look directly at a specific point, use the `lookAt()` method. This method automatically recalculates the **View Matrix** to look at the target point.
+RedGPU provides three camera classes depending on the projection use case.
+
+| Class                    | Projection Method | Description and Primary Usage                                                                                                                                                               |
+|:-------------------------|:------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`PerspectiveCamera`**  | Perspective       | Standard 3D camera with realistic depth perception. Features physical exposure (`useAutoExposure`) and a default far clipping distance (`farClipping`) of `50000` for open-world rendering. |
+| **`OrthographicCamera`** | Orthographic      | Preserves exact object proportions without distance-based perspective distortion. Used for CAD/blueprint viewers and 2.5D isometric environments.                                           |
+| **`Camera2D`**           | 2D Orthographic   | Dedicated camera for UI and 2D element rendering. Automatically instantiated inside `View2D`; do not instantiate directly with `new`.                                                       |
 
 ```javascript
-// Set the camera to look at the world origin (0, 0, 0)
-camera.lookAt(0, 0, 0);
+// Create PerspectiveCamera (Context injection not required)
+const camera = new RedGPU.Camera.PerspectiveCamera();
 
-// When tracking a moving object (call every frame)
-// camera.lookAt(mesh.x, mesh.y, mesh.z);
+camera.fieldOfView = 45;     // Field of View (default: 60 degrees)
+camera.nearClipping = 0.1;   // Near clipping plane (default: 0.1)
+camera.farClipping = 50000;  // Far clipping plane (default: 50000)
+
+// Set position and gaze target (lookAt)
+camera.setPosition(0, 5, -15);
+camera.lookAt(0, 0, 0);
 ```
 
-## 4. Practical Example: Camera Orbit Rotation
+---
 
-An example of moving the camera's position in a circular orbit and using `lookAt()` to always gaze at the central object.
+## 2. Physical Camera Exposure and Auto Exposure Control
+
+`PerspectiveCamera` possesses physical photographic exposure parameters (`aperture`, `shutterSpeed`, `iso`). When
+`useAutoExposure = true` (default), it performs real-time screen luminance adaptation according to
+`view.postEffectManager.autoExposure`. When `false`, it operates on manual exposure (`ev100`).
+
+| Category           | Property                         | Default             | Description                                                                       |
+|:-------------------|:---------------------------------|:--------------------|:----------------------------------------------------------------------------------|
+| **`ACamera`**      | **`useAutoExposure`**            | `true`              | Enables real-time luminance-based automatic exposure adaptation                   |
+| **`ACamera`**      | **`aperture`**                   | `16.0`              | Lens aperture value (f-stop, range: `1.0 ~ 32.0`)                                 |
+| **`ACamera`**      | **`shutterSpeed`**               | `1 / 125`           | Shutter speed (exposure time in seconds)                                          |
+| **`ACamera`**      | **`iso`**                        | `100`               | Sensor light sensitivity (ISO, range: `50 ~ 25600`)                               |
+| **`ACamera`**      | **`ev100`**                      | Read-only           | EV100 exposure value automatically computed from aperture, shutter speed, and ISO |
+| **`AutoExposure`** | **`exposureCompensation`**       | `0.0`               | Exposure bias added to the auto exposure result (in EV units)                     |
+| **`AutoExposure`** | **`meteringMode`**               | `'center-weighted'` | Metering mode (`AVERAGE` full-screen average / `CENTER_WEIGHTED` center priority) |
+| **`AutoExposure`** | **`minEV100` / `maxEV100`**      | `6.0` / `15.0`      | Minimum and maximum EV100 adaptation limits                                       |
+| **`AutoExposure`** | **`adaptationSpeedUp` / `Down`** | `3.0` / `1.0`       | Eye adaptation speed when transitioning to bright or dark environments            |
+| **`AutoExposure`** | **`targetLuminance`**            | `0.18`              | Target average screen luminance for auto exposure (18% middle grey)               |
+
+```javascript
+// Example: Adjusting AutoExposure parameters
+const autoExposure = view.postEffectManager.autoExposure;
+autoExposure.exposureCompensation = 0.5; // +0.5 EV brighter
+autoExposure.meteringMode = RedGPU.Camera.AutoExposure.METERING_MODE.CENTER_WEIGHTED;
+autoExposure.minEV100 = 6.0;
+autoExposure.maxEV100 = 15.0;
+```
+
+---
+
+## 3. Practical Example: Camera Orbit Rotation and `lookAt()`
+
+An example of moving the camera along a circular orbit while calling `lookAt(0, 0, 0)` every frame to keep the view
+matrix aimed at the central object.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -95,9 +80,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     
     // 1. PerspectiveCamera setup
     const camera = new RedGPU.Camera.PerspectiveCamera();
-    camera.y = 8; // Look down from a slightly high position
-    
-    // Field of View setup
+    camera.y = 8;
     camera.fieldOfView = 45;
     camera.lookAt(0, 0, 0);
 
@@ -116,14 +99,12 @@ RedGPU.init(canvas, (redGPUContext) => {
     view.grid = true;
     redGPUContext.addView(view);
 
-    // 3. Animation: Change camera position in real-time
+    // 3. Animation: Update camera orbit position and gaze target
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, (time) => {
         const angle = time / 1000;
         camera.x = Math.sin(angle) * 15;
         camera.z = Math.cos(angle) * 15;
-        
-        // Update to always look at the origin (0, 0, 0) after moving
         camera.lookAt(0, 0, 0);
     });
 });
@@ -156,13 +137,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.addChild(mesh);
 
     const dirLight = new RedGPU.Light.DirectionalLight();
-    
     scene.lightManager.addDirectionalLight(dirLight);
 
     const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.y = 8;
-    
-    // Field of View setup
     camera.fieldOfView = 45;
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
@@ -185,6 +163,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-Instead of manually calculating camera positions in code, learn how to control it intuitively using a mouse or touch.
-
-- **[Camera Controller](./controller.md)**
+- **[Camera Controller](./controller.md)**: Interactive camera and character control using mouse, touch, and keyboard

@@ -5,36 +5,33 @@ order: 1
 
 # TAA
 
-**TAA**(Temporal Antialiasing) 는 이전 프레임의 결과물을 현재 프레임과 합성하여 계단 현상을 제거하는 시간축 기반 기법입니다.
-현존하는 안티앨리어싱 기법 중 가장 뛰어난 품질을 보여주며, 영화와 같은 부드러운 이미지를 만들어냅니다.
+**TAA**(Temporal Antialiasing) 는 카메라를 서브픽셀 단위로 미세하게 흔들며 (Jittering) 렌더링한 이전 프레임과 현재 프레임을 시간축으로 누적·합성하여 계단 현상을 제거하는
+기법입니다. 지오메트리 외곽선뿐만 아니라 텍스처와 셰이더 하이라이트의 자글거림까지 억제합니다.
 
-## 1. 동작 원리
+## 1. 특징 및 사용법
 
-카메라를 아주 미세하게 흔들면서(Jittering) 렌더링한 여러 프레임을 누적하여 평균을 냅니다. 이를 통해 픽셀 단위보다 더 정밀한 해상도 정보를 얻어냅니다.
+`redGPUContext.antialiasingManager.useTAA` 속성으로 전역 활성화하며, 켜는 즉시 `MSAA` 와 `FXAA` 는 자동 해제됩니다. 시간축 누적 과정에서 발생할 수 있는 미세한 흐림
+현상은 내장된 대비 적응형 샤프닝 패스 (`TAACASPass`)로 복원하며, 개별 `View3D` 의 `view.taa` 인스턴스에서 제어합니다.
 
-- **장점**: 움직임이 없는 정적인 장면에서 완벽에 가까운 안티앨리어싱 품질을 제공합니다.
-- **단점**: 빠르게 움직이는 물체에서 잔상(Ghosting) 현상이 발생할 수 있습니다.
-
-## 2. 사용법 및 세부 설정
-
-`antialiasingManager.useTAA` 를 통해 활성화합니다. 이를 켜면 MSAA나 FXAA는 자동으로 비활성화됩니다.
-또한 개별 **View3D** 의 `view.taa` 인스턴스를 통해 **대비 적응형 샤프닝**(Contrast Adaptive Sharpening, `TAACASPass`) 강도를 조절하거나 누적된 히스토리 버퍼를
-즉시 초기화할 수 있습니다.
+- **`view.taa.sharpness`** (`number`, 기본값: `0.5`, 범위: `0.0 ~ 1.0`): 뷰별 대비 적응형 샤프닝 강도를 조절합니다.
+- **`view.taa.reset()`**: 카메라 순간 이동이나 씬 전환 시 이전 프레임 히스토리 버퍼를 즉시 초기화하여 잔상 (Ghosting)을 방지합니다.
 
 ```javascript
-// 1. 전역 TAA 활성화 (다른 AA는 꺼짐)
+// 1. 전역 TAA 활성화 (다른 AA는 자동 비활성화)
 redGPUContext.antialiasingManager.useTAA = true;
 
-// 2. 뷰별 TAA 샤프닝 강도 조절 (0.0 ~ 1.0, 기본값: 0.5)
+// 2. 뷰별 샤프닝 강도 조절 (0.0 ~ 1.0, 기본값: 0.5)
 view.taa.sharpness = 0.5;
 
-// 3. 카메라 순간 이동 시 이전 프레임 잔상(히스토리) 즉시 초기화
+// 3. 카메라 순간 이동 시 히스토리 버퍼 초기화
 view.taa.reset();
 ```
 
-## 3. 실습 예제: TAA 품질 확인
+---
 
-동일한 씬에서 TAA가 엣지, 텍스처, 미세 패턴을 어떻게 처리하는지 확인해 보세요. (그리드 패턴과 텍스처의 자글거림까지 완벽하게 잡아내는 것을 볼 수 있습니다.)
+## 2. 실습 예제
+
+그리드 패턴, 와이어프레임 외곽선, 텍스처 표면에서 TAA 활성화 여부에 따른 품질 차이를 확인합니다.
 
 <ClientOnly>
 <CodePen title="RedGPU - TAA Example" slugHash="antialiasing-taa">
@@ -115,11 +112,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     });
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
-        if (manager.useTAA) {
-            manager.useTAA = false; // TAA 끔
-        } else {
-            manager.useTAA = true;  // TAA 켬
-        }
+        manager.useTAA = !manager.useTAA;
         
         btn.textContent = `TAA: ${manager.useTAA ? 'ON' : 'OFF (None)'}`;
         btn.style.background = manager.useTAA ? '#00aaff' : '#555';
@@ -136,9 +129,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+---
 
-- **최고 품질**: 계단 현상을 거의 완벽하게 제거합니다.
-- **샤프닝 내장**: `TAACASPass`를 통해 시간축 누적 시 발생할 수 있는 미세한 블러를 선명하게 복원합니다.
-- **자동 선택**: 고해상도 디스플레이(Retina 등)에서는 기본적으로 TAA가 활성화됩니다.
-- **고비용**: 매 프레임 연산 및 메모리 오버헤드가 발생하므로 데스크탑 환경에서 권장됩니다.
+## 다음 단계
+
+- **[MSAA](./msaa.md)** : 하드웨어 멀티샘플링 안티앨리어싱
+- **[FXAA](./fxaa.md)** : 후처리 기반 고속 근사 안티앨리어싱
