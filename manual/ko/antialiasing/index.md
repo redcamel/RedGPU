@@ -5,60 +5,49 @@ order: 10
 
 # 안티앨리어싱
 
-**안티앨리어싱**(Antialiasing) 은 3D 렌더링 시 발생하는 계단 현상 (Aliasing)을 제거하여 부드러운 외곽선을 만드는 기술입니다. RedGPU는 하드웨어 기반의 **MSAA**, 후처리 기반의
-**`FXAA`**, 시간축 기반의 **`TAA`** 를 제공합니다.
+**안티앨리어싱**(Antialiasing)은 3D 렌더링 시 발생하는 계단 현상 (Aliasing)을 제거하여 부드러운 외곽선과 화면을 만드는 기술입니다. RedGPU는 시간축 누적 기반의 **[
+`TAA`](./taa.md)**, 하드웨어 멀티샘플링 기반의 **[`MSAA`](./msaa.md)**, 후처리 필터 기반의 **[`FXAA`](./fxaa.md)** 를 제공하며, 모든 설정은
+`redGPUContext.antialiasingManager`(`AntialiasingManager`)를 통해 통합 제어됩니다.
 
-모든 설정은 `RedGPUContext` 의 `antialiasingManager` 를 통해 통합 제어됩니다.
+---
 
 ## 1. 기본 동작 및 활성화 규칙
 
-RedGPU의 안티앨리어싱 시스템은 **배타적**으로 동작합니다. 즉, 한 번에 하나의 기법만 활성화할 수 있으며, 새로운 기법을 켜면 기존 설정은 자동으로 해제됩니다.
+RedGPU의 안티앨리어싱 시스템은 **배타적**으로 동작합니다. 한 번에 하나의 기법만 활성화할 수 있으며, 새로운 기법을 켜면 기존 설정은 자동으로 해제됩니다.
 
-### 초기화 시 기본값 (Auto-Selection)
+### 초기화 시 자동 선택 (Auto-Selection)
 
-엔진 초기화 시 실행 환경의 `devicePixelRatio` 에 따라 최적의 기법이 자동으로 선택됩니다.
+엔진 초기화 시 디스플레이의 픽셀 밀도 (`window.devicePixelRatio`)를 감지하여 최적의 기법이 기본으로 활성화됩니다.
 
-- **고해상도 디스플레이** (`devicePixelRatio > 1.0`): **`TAA`** 가 기본으로 활성화됩니다.
-- **일반 디스플레이**: **MSAA** 가 기본으로 활성화됩니다.
+- **고해상도 디스플레이** (`devicePixelRatio > 1.0`): **`TAA`** 기본 활성화 (`useTAA = true`)
+- **일반 디스플레이** (`devicePixelRatio <= 1.0`): **`MSAA`** 기본 활성화 (`useMSAA = true`)
 
 ```javascript
-// 현재 설정 확인
-const manager = redGPUContext.antialiasingManager;
-console.log(`TAA: ${manager.useTAA}, MSAA: ${manager.useMSAA}, FXAA: ${manager.useFXAA}`);
+const { antialiasingManager } = redGPUContext;
+
+// 안티앨리어싱 모드 전환 (기존 활성 모드는 자동 해제됨)
+antialiasingManager.useTAA = true;
 ```
 
-## 2. 기법별 특징 및 추천
+---
 
-렌더링 품질과 성능 목표에 따라 적절한 기법을 선택하세요.
+## 2. 기법별 비교
 
-| 기법                  | 방식            | 품질 특성              | 성능 비용     | 추천 상황                            |
-|:----------------------|:----------------|:-----------------------|:--------------|:-------------------------------------|
-| **[TAA](./taa.md)**   | 시간축 누적     | **최상** (전체 영역)   | **중간**      | 대부분의 고품질 데스크탑/웹 프로젝트 |
-| **[MSAA](./msaa.md)** | 하드웨어 샘플링 | **우수** (외곽선 한정) | **매우 높음** | 기하학적 외곽선이 중요한 단순한 씬   |
-| **[FXAA](./fxaa.md)** | 후처리 필터     | **보통** (전체 영역)   | **매우 낮음** | 모바일, 저사양 기기, 성능 최우선     |
+렌더링 품질과 성능 목표에 따라 적절한 기법을 선택할 수 있습니다.
 
-### 상세 비교
+| 기법                  | 방식            | 품질 및 특징                                                                      | 성능 비용 | 비교 이미지                     |
+|:----------------------|:----------------|:----------------------------------------------------------------------------------|:----------|:--------------------------------|
+| **NONE**              | 미적용          | 안티앨리어싱을 적용하지 않은 원본 상태 (계단 현상 발생)                           | 없음      | ![None](/antialiasing/none.jpg) |
+| **[TAA](./taa.md)**   | 시간축 누적     | 지오메트리 외곽선과 셰이더/텍스처 내부 알리어싱까지 제거                          | 중간      | ![TAA](/antialiasing/taa.jpg)   |
+| **[MSAA](./msaa.md)** | 하드웨어 샘플링 | 지오메트리 외곽선만 선명하게 처리 (텍스처 내부 패턴 및 알파 컷오프 경계는 미적용) | 높음      | ![MSAA](/antialiasing/msaa.jpg) |
+| **[FXAA](./fxaa.md)** | 후처리 필터     | 최종 이미지의 경계를 빠르게 보정 (미세한 블러 동반)                               | 매우 낮음 | ![FXAA](/antialiasing/fxaa.jpg) |
 
-- **`TAA`**: 모션 벡터를 활용하여 움직이는 물체의 잔상을 최소화하며, 쉐이더 알리어싱까지 잡아주는 최신 표준 기법입니다. **특히 고해상도 디스플레이**(`devicePixelRatio > 1.0`) 에서
-  화면 흐려짐 현상이 거의 느껴지지 않아 가장 효율적입니다.
-- **MSAA**: G-Buffer 전체를 멀티샘플링하므로 메모리 대역폭 소모가 매우 큽니다. 외곽선 품질은 가장 확실합니다.
-- **`FXAA`**: 화면 전체를 부드럽게 뭉개주어 가성비가 좋지만, 텍스처의 디테일이 다소 흐려질 수 있습니다.
-
-## 학습 가이드
-
-품질 순서대로 학습하는 것을 권장합니다.
-
-1. **[TAA (Temporal AA)](./taa.md)** : 최고의 품질을 위한 선택
-2. **[MSAA (Multisample AA)](./msaa.md)** : 표준적이고 안정적인 선택
-3. **[FXAA (Fast Approximate AA)](./fxaa.md)** : 최고의 성능을 위한 선택
+> [!TIP]
+> **실시간 테스트 안내**: RedGPU의 모든 예제 화면 UI에 위치한 **`ANTIALIASING`** 드롭다운 메뉴를 통해 현재 실행 중인 씬에서 `TAA`, `MSAA`, `FXAA`, `NONE` 모드를
+즉시 전환하며 비교해 볼 수 있습니다.
+>
+> ![Antialiasing Control](/toneMapping/toneMappingControl.png)
 
 ---
 
-## 관련 예제
-
-- [Hello World 3D (기본 안티앨리어싱 확인)](/RedGPU/examples/3d/helloWorld/)
-- [DamagedHelmet PBR](/RedGPU/examples/gltf/models/helmets/)
-
----
-
-[다음 단계: 플러그인 시스템 배우기](../plugins/index.md)
+[다음 단계: TAA 배우기](./taa.md)

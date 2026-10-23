@@ -5,13 +5,14 @@ order: 3
 
 # FXAA (Fast Approximate AA)
 
-**`FXAA`** 는 렌더링된 최종 이미지를 분석하여 경계를 찾고 흐리게 만드는 **후처리**(Post-Processing) 방식의 안티앨리어싱입니다.
+**`FXAA`** 는 렌더링된 최종 이미지를 분석하여 경계를 부드럽게 보정하는 **후처리**(Post-Processing) 방식의 안티앨리어싱 기법입니다.
 
-## 1. 특징 및 장점
+## 1. 장점 및 단점
 
-- **초고속**: 연산 비용이 매우 적어 모바일 기기에서도 부담 없이 사용할 수 있습니다.
-- **메모리 절약**: MSAA처럼 추가적인 버퍼를 요구하지 않습니다.
-- **제약**: 화면 전체적으로 미세한 블러 (Blur)가 발생하여 텍스처가 약간 흐려 보일 수 있습니다.
+- **장점**:
+    - 연산 비용이 매우 적고 별도의 멀티샘플 버퍼를 요구하지 않아 모바일 및 저사양 기기에서도 부담 없이 사용할 수 있습니다.
+- **단점**:
+    - 최종 이미지의 픽셀 경계를 흐리게 보정하므로 화면 전체의 텍스처나 세밀한 디테일이 약간 흐려질 (Blur) 수 있습니다.
 
 ## 2. 사용법
 
@@ -22,114 +23,13 @@ order: 3
 redGPUContext.antialiasingManager.useFXAA = true;
 ```
 
-## 3. 실습 예제: FXAA 품질 확인
+## 3. 품질 비교
 
-FXAA가 엣지뿐만 아니라 텍스처와 하이라이트의 자글거림을 어떻게 처리하는지 확인해 보세요.
+| 상태              | 결과 이미지                     |
+|:------------------|:--------------------------------|
+| **미적용 (NONE)** | ![None](/antialiasing/none.jpg) |
+| **FXAA 적용**     | ![FXAA](/antialiasing/fxaa.jpg) |
 
-<ClientOnly>
-<CodePen title="RedGPU - FXAA Example" slugHash="antialiasing-fxaa">
-<pre data-lang="html">
-&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
-</pre>
-<pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #000; }
-canvas { display: block; width: 100vw; height: 100vh; }
-</pre>
-<pre data-lang="js">
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+---
 
-const canvas = document.getElementById("redgpu-canvas");
-
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    
-    // 조명 추가
-    const light = new RedGPU.Light.DirectionalLight();
-    light.x = 10; light.y = 10; light.z = 10;
-    scene.lightManager.addDirectionalLight(light);
-    
-    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
-    scene.lightManager.ambientLight = ambientLight;
-
-    // 1. 미세한 그리드 바닥 (패턴 알리어싱 확인용)
-    const grid = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Ground(redGPUContext, 100, 100, 50, 50),
-        new RedGPU.Material.PhongMaterial(redGPUContext, '#999999')
-    );
-    grid.drawMode = 'lines';
-    scene.addChild(grid);
-
-    // 2. 와이어프레임 구체 (지오메트리 엣지 확인용)
-    const sphere = new RedGPU.Display.Mesh(
-        redGPUContext, 
-        new RedGPU.Primitive.Sphere(redGPUContext, 5, 32, 32),
-        new RedGPU.Material.PhongMaterial(redGPUContext, '#00aaff')
-    );
-    sphere.y = 5;
-    sphere.x = -6;
-    sphere.drawMode = 'lines';
-    scene.addChild(sphere);
-
-    // 3. 텍스처 박스 (텍스처 선명도 확인용)
-    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'https://redcamel.github.io/RedGPU/examples/assets/UV_Grid_Sm.jpg');
-    const boxMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-    boxMaterial.diffuseTexture = texture;
-    
-    const box = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 6, 6, 6),
-        boxMaterial
-    );
-    box.y = 5;
-    box.x = 6;
-    scene.addChild(box);
-
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 25;
-    controller.tilt = -15;
-    
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
-
-    // 2. FXAA 활성화
-    redGPUContext.antialiasingManager.useFXAA = true;
-
-    // UI: FXAA 토글
-    const btn = document.createElement('button');
-    btn.textContent = 'FXAA: ON';
-    Object.assign(btn.style, {
-        position: 'fixed', top: '20px', left: '20px',
-        padding: '10px 20px', fontSize: '16px', fontWeight: 'bold',
-        cursor: 'pointer', background: '#00aaff', color: 'white', border: 'none', borderRadius: '8px'
-    });
-    btn.onclick = () => {
-        const manager = redGPUContext.antialiasingManager;
-        if (manager.useFXAA) {
-             manager.useFXAA = false; 
-        } else {
-             manager.useFXAA = true;
-        }
-        
-        btn.textContent = `FXAA: ${manager.useFXAA ? 'ON' : 'OFF (None)'}`;
-        btn.style.background = manager.useFXAA ? '#00aaff' : '#555';
-    };
-    document.body.appendChild(btn);
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext, () => {
-        // 천천히 회전하며 텍스처 블러링 관찰
-        scene.children.forEach(mesh => {
-            if(mesh instanceof RedGPU.Display.Mesh) mesh.rotationY += 0.01;
-        })
-    });
-});
-</pre>
-</CodePen>
-</ClientOnly>
-
-
-## 관련 예제
-
-- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
-- [샤픈 필터 (Sharpen)](/RedGPU/examples/postEffect/sharpen/)
+[다음 단계: 플러그인 시스템 배우기](../plugins/index.md)

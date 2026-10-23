@@ -5,14 +5,21 @@ order: 2
 
 # MSAA (Multisample AA)
 
-**MSAA** (Multisample Antialiasing) is the most standard antialiasing method supported at the hardware (GPU) level. It
-smoothes geometry edges by sampling boundary areas multiple times.
+**MSAA** (Multisample Antialiasing) is a standard hardware-level (GPU) antialiasing technique that multi-samples polygon
+edges to produce smooth outlines.
 
-## 1. Features & Pros
+## 1. Pros & Cons
 
-- **Standard Quality**: A proven method that cleans up object outlines very well.
-- **Performance Balance**: Lighter than Super Sampling (SSAA) but consumes more memory than Post-Processing (FXAA).
-- **Cons**: Only smoothes geometry edges; it does not resolve aliasing within textures or shader artifacts.
+- **Pros**:
+    - Cleanly smooths actual geometry (polygon) outlines without the slight blur of post-processing filters (FXAA) or
+      temporal ghosting (TAA).
+- **Cons**:
+    - **Does Not Resolve Internal Aliasing**: Does not smooth high-contrast texture patterns inside polygons or PBR
+      specular highlight shimmering.
+    - **Does Not Resolve Alpha Cutoff (`MASK` / Cutoff) Edges**: Boundaries created by alpha testing (such as foliage,
+      fences, or `Cutoff` panels) are not actual polygon edges, so jagged edges remain.
+    - **Higher Memory Usage**: Requires additional multi-sampled buffers (4x MSAA), increasing memory and bandwidth
+      consumption.
 
 ## 2. Usage
 
@@ -23,113 +30,13 @@ Enabled via `antialiasingManager.useMSAA`. Enabling this automatically disables 
 redGPUContext.antialiasingManager.useMSAA = true;
 ```
 
-## 3. Live Example: MSAA Application
+## 3. Quality Comparison
 
-Toggle MSAA on and off to compare the changes in geometry outlines and highlights.
+| State               | Result Image                    |
+|:--------------------|:--------------------------------|
+| **Disabled (NONE)** | ![None](/antialiasing/none.jpg) |
+| **MSAA Enabled**    | ![MSAA](/antialiasing/msaa.jpg) |
 
-<ClientOnly>
-<CodePen title="RedGPU - MSAA Example" slugHash="antialiasing-msaa">
-<pre data-lang="html">
-&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
-</pre>
-<pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #000; }
-canvas { display: block; width: 100vw; height: 100vh; }
-</pre>
-<pre data-lang="js">
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+---
 
-const canvas = document.getElementById("redgpu-canvas");
-
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    
-    // Add Lights
-    const light = new RedGPU.Light.DirectionalLight();
-    light.x = 10; light.y = 10; light.z = 10;
-    scene.lightManager.addDirectionalLight(light);
-    
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensity = 0.3;
-    scene.lightManager.ambientLight = ambientLight;
-
-    // 1. Fine grid floor (To check pattern aliasing)
-    const grid = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Ground(redGPUContext, 100, 100, 50, 50),
-        new RedGPU.Material.PhongMaterial(redGPUContext, '#999999')
-    );
-    grid.drawMode = 'lines';
-    scene.addChild(grid);
-
-    // 2. Wireframe Sphere (To check geometry edges)
-    const sphere = new RedGPU.Display.Mesh(
-        redGPUContext, 
-        new RedGPU.Primitive.Sphere(redGPUContext, 5, 32, 32),
-        new RedGPU.Material.PhongMaterial(redGPUContext, '#00aaff')
-    );
-    sphere.y = 5;
-    sphere.x = -6;
-    sphere.drawMode = 'lines';
-    scene.addChild(sphere);
-
-    // 3. Texture Box (To check texture sharpness)
-    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'https://redcamel.github.io/RedGPU/examples/assets/UV_Grid_Sm.jpg');
-    const boxMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-    boxMaterial.diffuseTexture = texture;
-    
-    const box = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 6, 6, 6),
-        boxMaterial
-    );
-    box.y = 5;
-    box.x = 6;
-    scene.addChild(box);
-
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 25;
-    controller.tilt = -15;
-    
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
-
-    // Initial state: MSAA Enabled
-    redGPUContext.antialiasingManager.useMSAA = true;
-
-    // UI: MSAA Toggle
-    const btn = document.createElement('button');
-    btn.textContent = 'MSAA: ON';
-    Object.assign(btn.style, {
-        position: 'fixed', top: '20px', left: '20px',
-        padding: '10px 20px', fontSize: '16px', fontWeight: 'bold',
-        cursor: 'pointer', background: '#00aaff', color: 'white', border: 'none', borderRadius: '8px'
-    });
-    btn.onclick = () => {
-        const manager = redGPUContext.antialiasingManager;
-        if (manager.useMSAA) {
-            manager.useMSAA = false; // Turn off
-        } else {
-            manager.useMSAA = true; // Turn on
-        }
-        
-        btn.textContent = `MSAA: ${manager.useMSAA ? 'ON' : 'OFF (None)'}`;
-        btn.style.background = manager.useMSAA ? '#00aaff' : '#ccc';
-    };
-    document.body.appendChild(btn);
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext, () => {
-        sphere.rotationY += 0.01;
-        box.rotationY += 0.01;
-    });
-});
-</pre>
-</CodePen>
-</ClientOnly>
-
-
-## Related Examples
-
-- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
-- [Built-in Primitives](/RedGPU/examples/3d/primitive/primitives/)
+[Next Step: Learn FXAA](./fxaa.md)
