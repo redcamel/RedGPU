@@ -101,6 +101,15 @@ autoExposure.exposureBias = 0.2;
 
 ---
 
+## 관련 예제
+
+- [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/ssao/)
+- [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/ssr/)
+- [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/lens/dof/)
+- [블룸 (Bloom)](/RedGPU/examples/postEffect/oldBloom/)
+
+---
+
 ## 다음 단계
 
 - **[일반 이펙트](./general-effects.md)** : 블룸, 블러, 흑백 등 후처리 효과 체인 구성

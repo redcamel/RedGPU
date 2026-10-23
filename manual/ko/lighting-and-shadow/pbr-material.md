@@ -68,6 +68,16 @@ scene.addChild(sphere);
 
 ---
 
+## 관련 예제
+
+- [금속성·거칠기 구체 비교](/RedGPU/examples/gltf/basic/metalRoughSpheres/)
+- [투과율 및 굴절 (Transmission)](/RedGPU/examples/gltf/gltfExtensions/transmission/transmissionTest/)
+- [클리어코트 (Clearcoat)](/RedGPU/examples/gltf/gltfExtensions/clearcoat/clearCoatCarPaint/)
+- [광택 직물 (Sheen)](/RedGPU/examples/gltf/gltfExtensions/sheen/glamVelvetSofa/)
+- [무지개빛 박막 간섭 (Iridescence)](/RedGPU/examples/gltf/gltfExtensions/iridescence/iridescenceLamp/)
+
+---
+
 ## 다음 단계
 
 - **[Environment](../environment/index.md)** : `IBL`, `SkyBox`, `SkyAtmosphere` 를 활용한 배경 및 환경광 구성

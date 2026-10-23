@@ -92,6 +92,16 @@ lake.rippleNormalStrength = 1.0;  // 물결 노멀 강도 (기본값: 1.0)
 
 ---
 
+## 관련 예제
+
+- [기본 호수 (Basic Lake)](/RedGPU/examples/3d/water/lake/basicLake/)
+- [호수 광학 재질 설정 (Lake Material)](/RedGPU/examples/3d/water/lake/lakeMaterial/)
+- [수면 물결 인터랙션 (Water Interaction)](/RedGPU/examples/3d/water/lake/interaction/)
+- [캐릭터 수면 보행 파동 (Character Walking)](/RedGPU/examples/3d/water/lake/characterWalking/)
+- [다중 호수 (Multi Lake)](/RedGPU/examples/3d/water/lake/multiLake/)
+
+---
+
 ## 다음 단계
 
 - **[플러그인](../plugins/index.md)** : WASM 기반 물리 엔진 (Rapier)을 비롯한 RedGPU의 플러그인 시스템

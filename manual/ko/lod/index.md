@@ -17,6 +17,15 @@ order: 10
 
 ---
 
+## 관련 예제
+
+- [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
+- [Mesh CPU LOD (재질 분리)](/RedGPU/examples/3d/lod/MeshCPULOD_material/)
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+- [InstancingMesh GPU LOD (재질 분리)](/RedGPU/examples/3d/lod/InstanceMeshGPULOD_material/)
+
+---
+
 ## 다음 단계
 
 - **[Mesh LOD](./mesh-lod.md)** : 일반 단일 메시에 거리별 LOD 적용

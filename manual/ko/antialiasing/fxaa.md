@@ -125,6 +125,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
+- [샤픈 필터 (Sharpen)](/RedGPU/examples/postEffect/sharpen/)
+
+---
+
 ## 다음 단계
 
 - **[플러그인 시스템](../plugins/index.md)** : 외부 확장 기능 활용

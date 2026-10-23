@@ -158,6 +158,16 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [명도·대비 (Brightness & Contrast)](/RedGPU/examples/postEffect/adjustments/brightnessContrast/)
+- [가우시안 블러 (Gaussian Blur)](/RedGPU/examples/postEffect/blur/gaussianBlur/)
+- [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/lens/dof/)
+- [색수차 (Chromatic Aberration)](/RedGPU/examples/postEffect/lens/chromaticAberration/)
+- [고도 안개 (Height Fog)](/RedGPU/examples/postEffect/fog/heightFog/)
+
+---
+
 ## 다음 단계
 
 - **[톤 매핑](./tone-mapping.md)** : HDR에서 LDR로의 색상 변환과 노출 제어

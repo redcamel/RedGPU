@@ -107,6 +107,15 @@ the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/i
 
 ---
 
+## Related Examples
+
+- [SSAO (Screen Space Ambient Occlusion)](/RedGPU/examples/postEffect/ssao/)
+- [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/ssr/)
+- [Depth of Field (DoF)](/RedGPU/examples/postEffect/lens/dof/)
+- [Bloom](/RedGPU/examples/postEffect/oldBloom/)
+
+---
+
 ## Next Steps
 
 - **[General Effects](./general-effects.md)**: Building post-effect chains such as bloom, blur, and grayscale

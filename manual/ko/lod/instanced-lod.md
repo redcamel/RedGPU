@@ -114,6 +114,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+- [InstancingMesh GPU LOD (레벨별 재질 변경)](/RedGPU/examples/3d/lod/InstanceMeshGPULOD_material/)
+
+---
+
 ## 다음 단계
 
 - **[안티앨리어싱](../antialiasing/index.md)** : 화면 외곽선 계단 현상 제거

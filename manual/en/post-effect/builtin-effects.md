@@ -50,6 +50,13 @@ ssr.maxSteps = 64;             // Ray marching step precision
 
 ---
 
+## Related Examples
+
+- [SSAO (Screen Space Ambient Occlusion)](/RedGPU/examples/postEffect/ssao/)
+- [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/ssr/)
+
+---
+
 ## Next Steps
 
 - **[LOD](../lod/index.md)**: Optimizing mesh detail based on camera distance

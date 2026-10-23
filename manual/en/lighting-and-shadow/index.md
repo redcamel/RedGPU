@@ -22,6 +22,16 @@ that create depth and realism in 3D space.
 
 ---
 
+## Related Examples
+
+- [DirectionalLight](/RedGPU/examples/3d/light/directionalLight/)
+- [PointLight](/RedGPU/examples/3d/light/pointLight/)
+- [SpotLight](/RedGPU/examples/3d/light/spotLight/)
+- [PhongMaterial Multi-Textures](/RedGPU/examples/3d/material/phongMaterialTextures/)
+- [Cascaded Directional Shadow](/RedGPU/examples/3d/shadow/directionalShadow/)
+
+---
+
 ## Next Steps
 
 - **[Light](./light.md)**: Creating light sources and registering them in `LightManager`

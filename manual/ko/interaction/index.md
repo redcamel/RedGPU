@@ -224,13 +224,12 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
-## 3. 라이브 예제
+## 관련 예제
 
 - **마우스 및
   터치**: [일반 메시](/RedGPU/examples/3d/interaction/mouseEvent/mesh/) · [스프라이트 3D](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/) · [스프라이트 시트 3D](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/) · [텍스트 필드 3D](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/) · [고정밀 레이캐스팅](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 -
-
-**키보드**: [3D 키보드 인터렉션](/RedGPU/examples/3d/interaction/keyboardEvent/) · [2D 키보드 인터렉션](/RedGPU/examples/2d/interaction/keyboardEvent/)
+**키보드**: [3D 키보드 인터랙션](/RedGPU/examples/3d/interaction/keyboardEvent/) · [2D 키보드 인터랙션](/RedGPU/examples/2d/interaction/keyboardEvent/)
 
 ---
 

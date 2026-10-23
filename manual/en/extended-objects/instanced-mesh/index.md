@@ -139,6 +139,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [InstancingMesh Basics](/RedGPU/examples/3d/instancedMesh/simple/)
+- [InstancingMesh Sphere Grid](/RedGPU/examples/3d/instancedMesh/sphere/)
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+
+---
+
 ## Next Steps
 
 - **[Sprite](../sprite/index.md)**: Using camera-facing billboard sprites and frame-based animations

@@ -179,6 +179,15 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## Related Examples
+
+- [glTF Basic Animations](/RedGPU/examples/gltf/animation/basicAnimations/)
+- [Animation State Machine Motion Blending](/RedGPU/examples/gltf/animation/motionBlending/)
+- [Keyboard Character Animation Control](/RedGPU/examples/gltf/animation/keyboardCharacterControl/)
+- [Sponza Scene Model](/RedGPU/examples/gltf/models/sponza/)
+
+---
+
 ## Next Steps
 
 - **[Instancing Mesh](../instanced-mesh/index.md)**: Rendering tens of thousands of identical objects in a single draw

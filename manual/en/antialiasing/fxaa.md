@@ -127,6 +127,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
+- [Sharpen Post-Effect](/RedGPU/examples/postEffect/sharpen/)
+
+---
+
 ## Next Steps
 
 - **[Plugin System](../plugins/index.md)**: Using external extension modules

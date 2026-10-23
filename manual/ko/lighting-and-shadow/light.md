@@ -171,6 +171,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [방향광 (DirectionalLight)](/RedGPU/examples/3d/light/directionalLight/)
+- [점광원 (PointLight)](/RedGPU/examples/3d/light/pointLight/)
+- [다중 점광원 성능 테스트](/RedGPU/examples/3d/light/pointLightPerformance/)
+- [집중광 (SpotLight)](/RedGPU/examples/3d/light/spotLight/)
+
+---
+
 ## 다음 단계
 
 - **[Phong Material](./phong-material.md)** : 조명에 반응하는 표면 질감과 다중 텍스처 맵 설정 방법

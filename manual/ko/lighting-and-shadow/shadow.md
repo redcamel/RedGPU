@@ -160,6 +160,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [방향광 그림자 (Directional Shadow)](/RedGPU/examples/3d/shadow/directionalShadow/)
+- [glTF 모델 그림자](/RedGPU/examples/3d/shadow/gltfDirectionalShadow/)
+
+---
+
 ## 다음 단계
 
 - **[PBR Material](./pbr-material.md)** : 금속성·거칠기 기반 물리 기반 렌더링 (PBR) 재질 설정 방법

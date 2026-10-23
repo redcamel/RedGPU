@@ -173,6 +173,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [DirectionalLight](/RedGPU/examples/3d/light/directionalLight/)
+- [PointLight](/RedGPU/examples/3d/light/pointLight/)
+- [Multi-PointLight Performance](/RedGPU/examples/3d/light/pointLightPerformance/)
+- [SpotLight](/RedGPU/examples/3d/light/spotLight/)
+
+---
+
 ## Next Steps
 
 - **[Phong Material](./phong-material.md)**: Configuring surface shading and multi-texture maps that react to light

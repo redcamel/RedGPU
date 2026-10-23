@@ -125,6 +125,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [PhongMaterial 기본](/RedGPU/examples/3d/material/phongMaterial/)
+- [PhongMaterial 다중 텍스처 맵](/RedGPU/examples/3d/material/phongMaterialTextures/)
+- [텍스처 UV 변환 (UV Transform)](/RedGPU/examples/3d/material/uvTransform/)
+- [투명도 제어 (Opacity)](/RedGPU/examples/3d/material/opacity/)
+
+---
+
 ## 다음 단계
 
 - **[Shadow System](./shadow.md)** : 캐스케이드 그림자 맵 (CSM)과 소프트 그림자 설정 방법

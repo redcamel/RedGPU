@@ -19,4 +19,14 @@ RedGPU는 3D 씬의 배경 렌더링, 이미지 기반 전역 조명, 물리 기
 
 ---
 
-[다음 단계: SkyBox 배우기](./skybox.md)
+## 관련 예제
+
+- [SkyBox 기본](/RedGPU/examples/3d/skybox/skybox/)
+- [SkyBox + IBL 환경광](/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)
+- [실시간 대기 산란 (SkyAtmosphere)](/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
+
+---
+
+## 다음 단계
+
+- **[SkyBox](./skybox.md)** : 360도 배경 큐브맵 설정 및 스카이박스 트랜지션 배우기

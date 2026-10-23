@@ -79,6 +79,13 @@ new RedGPU.GLTFLoader(
 
 ---
 
+## Related Examples
+
+- [Foliage & Impostors](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
+- [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
 ## Next Steps
 
 - **[Procedural Grass](./grass.md)**: High-density grass scattering system covering the terrain surface

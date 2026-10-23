@@ -175,6 +175,15 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## 관련 예제
+
+- [glTF 기본 애니메이션](/RedGPU/examples/gltf/animation/basicAnimations/)
+- [애니메이션 상태 머신 모션 블렌딩](/RedGPU/examples/gltf/animation/motionBlending/)
+- [키보드 캐릭터 애니메이션 제어](/RedGPU/examples/gltf/animation/keyboardCharacterControl/)
+- [Sponza 씬 모델](/RedGPU/examples/gltf/models/sponza/)
+
+---
+
 ## 다음 단계
 
 - **[Instancing Mesh](../instanced-mesh/index.md)** : 수만 개의 동일 객체를 단일 드로우 콜로 렌더링하기

@@ -19,6 +19,15 @@ RedGPU의 **물리 기반 수체**(Water) 시스템은 불투명 지오메트리
 
 ---
 
+## 관련 예제
+
+- [기본 호수 (Basic Lake)](/RedGPU/examples/3d/water/lake/basicLake/)
+- [호수 광학 재질 (Lake Material)](/RedGPU/examples/3d/water/lake/lakeMaterial/)
+- [수면 파동 인터랙션 (Water Interaction)](/RedGPU/examples/3d/water/lake/interaction/)
+- [지형과 호수 통합 (Lake with Landscape)](/RedGPU/examples/3d/water/lake/lakeWithLandscape/)
+
+---
+
 ## 다음 단계
 
 - **[물리 기반 호수 수체](./lake.md)** : `Lake` 와 `LakeMaterial` 을 활용한 광학 수면 재질 제어 및 실시간 파동 인터랙션 설정

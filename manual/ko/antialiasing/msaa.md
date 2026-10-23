@@ -124,6 +124,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
+- [내장 프리미티브 모음](/RedGPU/examples/3d/primitive/primitives/)
+
+---
+
 ## 다음 단계
 
 - **[FXAA](./fxaa.md)** : 후처리 기반 고속 근사 안티앨리어싱

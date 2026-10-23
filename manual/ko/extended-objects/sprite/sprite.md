@@ -121,6 +121,14 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## 관련 예제
+
+- [Sprite3D 기본](/RedGPU/examples/3d/sprite/sprite3D/)
+- [Sprite3D 옵션 비교](/RedGPU/examples/3d/sprite/sprite3DCompare/)
+- [Sprite3D 마우스 이벤트](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
+
+---
+
 ## 다음 단계
 
 - **[SpriteSheet3D](./spritesheet.md)** : 스프라이트 시트 이미지를 활용한 프레임 애니메이션 구현하기

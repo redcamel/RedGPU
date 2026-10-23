@@ -166,6 +166,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [SkyBox Basics](/RedGPU/examples/3d/skybox/skybox/)
+- [SkyBox Transition](/RedGPU/examples/3d/skybox/transition/skyboxTransition/)
+- [SkyBox Transition with Noise Texture](/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/)
+
+---
+
 ## Next Steps
 
 - **[IBL](./ibl.md)**: Applying realistic reflections and lighting to objects using background images as physically

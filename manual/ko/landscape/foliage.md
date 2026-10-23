@@ -75,6 +75,13 @@ new RedGPU.GLTFLoader(
 
 ---
 
+## 관련 예제
+
+- [대규모 식생과 임포스터 (Foliage & Impostors)](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
+- [오픈월드 통합 (Open World Integration)](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
 ## 다음 단계
 
 - **[절차적 잔디](./grass.md)** : 지표면을 채우는 고밀도 잔디 스캐터링 시스템

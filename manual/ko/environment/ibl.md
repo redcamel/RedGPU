@@ -116,6 +116,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [IBL 테스트](/RedGPU/examples/3d/skybox/ibl/iblTest/)
+- [SkyBox + IBL 연동](/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)
+- [IBL 텍스처 해상도 비교](/RedGPU/examples/3d/skybox/ibl/iblTextureSize/)
+
+---
+
 ## 다음 단계
 
 - **[스카이 대기](./skyatmosphere.md)** : 실시간 물리 기반 대기 산란 시뮬레이션으로 동적인 하늘 효과 구성하기

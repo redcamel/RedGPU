@@ -51,6 +51,13 @@ tm.brightness = 0.02;
 
 ---
 
+## 관련 예제
+
+- [DamagedHelmet PBR & 톤 매핑](/RedGPU/examples/gltf/models/helmets/)
+- [Sponza HDR 노출 & 톤 매핑](/RedGPU/examples/gltf/models/sponza/)
+
+---
+
 ## 다음 단계
 
 - **[빌트인 이펙트](./builtin-effects.md)** : 물리 기반 입체감을 부여하는 `SSAO` 및 실시간 `SSR` 활성화

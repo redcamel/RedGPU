@@ -165,6 +165,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [SkyBox 기본](/RedGPU/examples/3d/skybox/skybox/)
+- [SkyBox 트랜지션](/RedGPU/examples/3d/skybox/transition/skyboxTransition/)
+- [노이즈 텍스처 기반 SkyBox 트랜지션](/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/)
+
+---
+
 ## 다음 단계
 
 - **[IBL](./ibl.md)** : 배경 이미지를 물리 기반 광원으로 활용하여 객체에 사실적인 반사와 조명 적용하기

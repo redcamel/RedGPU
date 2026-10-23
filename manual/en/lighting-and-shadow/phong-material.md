@@ -125,6 +125,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [PhongMaterial Basics](/RedGPU/examples/3d/material/phongMaterial/)
+- [PhongMaterial Multi-Texture Maps](/RedGPU/examples/3d/material/phongMaterialTextures/)
+- [UV Transform](/RedGPU/examples/3d/material/uvTransform/)
+- [Opacity Control](/RedGPU/examples/3d/material/opacity/)
+
+---
+
 ## Next Steps
 
 - **[Shadow System](./shadow.md)**: Configuring Cascaded Shadow Maps (CSM) and soft shadows

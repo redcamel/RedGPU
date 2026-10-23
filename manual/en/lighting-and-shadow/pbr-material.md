@@ -71,6 +71,16 @@ surroundings. Configure **[IBL](../environment/ibl.md)** on `view.ibl` or enable
 
 ---
 
+## Related Examples
+
+- [Metallic-Roughness Spheres](/RedGPU/examples/gltf/basic/metalRoughSpheres/)
+- [Transmission & Refraction](/RedGPU/examples/gltf/gltfExtensions/transmission/transmissionTest/)
+- [Clearcoat](/RedGPU/examples/gltf/gltfExtensions/clearcoat/clearCoatCarPaint/)
+- [Sheen](/RedGPU/examples/gltf/gltfExtensions/sheen/glamVelvetSofa/)
+- [Iridescence](/RedGPU/examples/gltf/gltfExtensions/iridescence/iridescenceLamp/)
+
+---
+
 ## Next Steps
 
 - **[Environment](../environment/index.md)**: Configuring backgrounds and environment lighting with `IBL`, `SkyBox`, and

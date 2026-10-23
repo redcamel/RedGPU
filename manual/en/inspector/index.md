@@ -57,3 +57,11 @@ The Inspector panel is organized into 5 sections that display frame performance 
     into an `InstancedMesh` to reduce draw calls.
 > - **Memory Leak Detection**: If resource counts (`count`) in the **GPU Memory Resources** tab keep increasing after
     scene transitions or object removal, check whether unused resources are missing `destroy()` calls.
+
+---
+
+## Related Examples
+
+- [Draw Debugger](/RedGPU/examples/3d/drawDebugger/basic/)
+- [Mesh BoundBox Visualization](/RedGPU/examples/3d/mesh/boundBox/meshBoundBox/)
+- [Indirect Draw Test](/RedGPU/examples/3d/indirectDrawTest/)

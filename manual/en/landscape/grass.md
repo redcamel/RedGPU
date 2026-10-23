@@ -69,6 +69,13 @@ const meadowGrass = landscape.grassManager.addType({
 
 ---
 
+## Related Examples
+
+- [Procedural Grass](/RedGPU/examples/3d/landscape/proceduralGrass/)
+- [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
 ## Next Steps
 
 - **[Water System](../water/index.md)**: Physically based water system interacting with terrain for refraction,

@@ -46,6 +46,14 @@ windManager.strength = 1.5;
 
 ---
 
+## 관련 예제
+
+- [절차적 잔디 및 바람 연동](/RedGPU/examples/3d/landscape/proceduralGrass/)
+- [대규모 식생 및 바람 연동](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
+- [오픈월드 통합 환경](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
 ## 다음 단계
 
 - **[확장 객체](../extended-objects/index.md)** : 외부 3D 모델 로딩 및 다양한 특수 디스플레이 객체 활용하기

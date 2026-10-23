@@ -117,6 +117,15 @@ Provides a viewpoint that smoothly follows characters or moving objects.
 
 ---
 
+## Related Examples
+
+- [OrbitController](/RedGPU/examples/3d/controller/orbitController/)
+- [FreeController](/RedGPU/examples/3d/controller/freeController/)
+- [FollowController](/RedGPU/examples/3d/controller/followController/)
+- [IsometricController](/RedGPU/examples/3d/controller/isometricController/)
+
+---
+
 ## Next Steps
 
 - **[Basic Objects Overview](../basic-objects/index.md)**: Composing 3D objects using `Mesh`, `Scene Graph`, and

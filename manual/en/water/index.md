@@ -21,6 +21,15 @@ interactions.
 
 ---
 
+## Related Examples
+
+- [Basic Lake](/RedGPU/examples/3d/water/lake/basicLake/)
+- [Lake Material](/RedGPU/examples/3d/water/lake/lakeMaterial/)
+- [Water Wave Interaction](/RedGPU/examples/3d/water/lake/interaction/)
+- [Lake with Landscape](/RedGPU/examples/3d/water/lake/lakeWithLandscape/)
+
+---
+
 ## Next Steps
 
 - **[Physically Based Lake Water](./lake.md)**: Controlling optical water materials and real-time wave interactions

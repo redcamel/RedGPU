@@ -126,6 +126,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
+- [Built-in Primitives](/RedGPU/examples/3d/primitive/primitives/)
+
+---
+
 ## Next Steps
 
 - **[FXAA](./fxaa.md)**: Fast approximate post-processing antialiasing

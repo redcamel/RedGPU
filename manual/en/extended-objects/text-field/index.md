@@ -33,4 +33,14 @@ Core style properties shared by `TextField3D` and `TextField2D`:
 
 ---
 
-[Next Step: Learn TextField3D](./textfield3d.md)
+## Related Examples
+
+- [TextField3D Basics](/RedGPU/examples/3d/textField/textField3D/)
+- [TextField3D Sizing Mode Comparison](/RedGPU/examples/3d/textField/textField3DCompare/)
+- [TextField2D Basics](/RedGPU/examples/2d/textField2D/basic/)
+
+---
+
+## Next Steps
+
+- **[TextField3D](./textfield3d.md)**: Placing text and controlling sizing modes in the 3D world

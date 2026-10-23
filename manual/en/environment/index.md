@@ -24,4 +24,14 @@ physically based atmospheric scattering, and a global wind system.
 
 ---
 
-[Next Step: Learn SkyBox](./skybox.md)
+## Related Examples
+
+- [SkyBox Basics](/RedGPU/examples/3d/skybox/skybox/)
+- [SkyBox + IBL Environment Lighting](/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)
+- [Real-time Atmospheric Scattering (SkyAtmosphere)](/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
+
+---
+
+## Next Steps
+
+- **[SkyBox](./skybox.md)**: Configuring 360-degree background cubemaps and skybox transitions

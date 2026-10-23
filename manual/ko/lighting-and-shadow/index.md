@@ -18,6 +18,16 @@ order: 5
 
 ---
 
+## 관련 예제
+
+- [방향광 (DirectionalLight)](/RedGPU/examples/3d/light/directionalLight/)
+- [점광원 (PointLight)](/RedGPU/examples/3d/light/pointLight/)
+- [집중광 (SpotLight)](/RedGPU/examples/3d/light/spotLight/)
+- [PhongMaterial 다중 텍스처](/RedGPU/examples/3d/material/phongMaterialTextures/)
+- [캐스케이드 방향광 그림자](/RedGPU/examples/3d/shadow/directionalShadow/)
+
+---
+
 ## 다음 단계
 
 - **[Light](./light.md)** : 광원 생성과 `LightManager` 등록 방법

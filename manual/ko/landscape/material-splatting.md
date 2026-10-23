@@ -106,6 +106,13 @@ landscape.removeLayer('Rock');
 
 ---
 
+## 관련 예제
+
+- [다중 레이어 스플래팅 (Multi-Layer Splatting)](/RedGPU/examples/3d/landscape/multiLayerSplatting/)
+- [오픈월드 통합 (Open World Integration)](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
 ## 다음 단계
 
 - **[대규모 식생과 임포스터](./foliage.md)** : 지형 레이어 가중치 (`targetLayer`)와 경사도를 기반으로 나무와 바위를 배치하는 식생 시스템

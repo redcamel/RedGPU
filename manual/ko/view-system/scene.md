@@ -164,6 +164,13 @@ const subView = new RedGPU.Display.View3D(redGPUContext, sharedScene, subCamera)
 
 ---
 
+## 관련 예제
+
+- [Scene 기본 구성](/RedGPU/examples/3d/scene/)
+- [다중 뷰 Scene 공유](/RedGPU/examples/3d/view/multiView/)
+
+---
+
 ## 다음 단계
 
 - **[Camera](./camera.md)** : 3D 공간을 2D 화면으로 투영하는 카메라와 물리 노출 제어

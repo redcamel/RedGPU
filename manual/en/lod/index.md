@@ -18,6 +18,15 @@ to manage distance-based models through a unified interface.
 
 ---
 
+## Related Examples
+
+- [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
+- [Mesh CPU LOD (Per-Level Material)](/RedGPU/examples/3d/lod/MeshCPULOD_material/)
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+- [InstancingMesh GPU LOD (Per-Level Material)](/RedGPU/examples/3d/lod/InstanceMeshGPULOD_material/)
+
+---
+
 ## Next Steps
 
 - **[Mesh LOD](./mesh-lod.md)**: Applying distance-based LOD to single meshes

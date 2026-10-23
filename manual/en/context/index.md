@@ -132,6 +132,13 @@ const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
 ---
 
+## Related Examples
+
+- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
+- [Multi Canvas](/RedGPU/examples/3d/multiCanvas/)
+
+---
+
 ## Next Steps
 
 - **[View System](../view-system/index.md)**: Combining `View3D`, `Scene`, and `Camera` to render a 3D stage on screen

@@ -125,6 +125,14 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## Related Examples
+
+- [Sprite3D Basics](/RedGPU/examples/3d/sprite/sprite3D/)
+- [Sprite3D Option Comparison](/RedGPU/examples/3d/sprite/sprite3DCompare/)
+- [Sprite3D Mouse Events](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
+
+---
+
 ## Next Steps
 
 - **[SpriteSheet3D](./spritesheet.md)**: Implementing frame animations using sprite sheet images

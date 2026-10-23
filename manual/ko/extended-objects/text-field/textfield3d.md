@@ -111,6 +111,14 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## 관련 예제
+
+- [TextField3D 기본](/RedGPU/examples/3d/textField/textField3D/)
+- [TextField3D 크기 모드 비교](/RedGPU/examples/3d/textField/textField3DCompare/)
+- [TextField3D 마우스 이벤트](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
+
+---
+
 ## 다음 단계
 
 - **[파티클 및 라인](../particle/index.md)** : GPU 컴퓨트 셰이더 기반 파티클 (`ParticleEmitter`) 및 3D 곡선 렌더러 (`Line3D`) 활용하기

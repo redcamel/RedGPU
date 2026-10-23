@@ -168,6 +168,13 @@ const subView = new RedGPU.Display.View3D(redGPUContext, sharedScene, subCamera)
 
 ---
 
+## Related Examples
+
+- [Basic Scene Setup](/RedGPU/examples/3d/scene/)
+- [Multi View Shared Scene](/RedGPU/examples/3d/view/multiView/)
+
+---
+
 ## Next Steps
 
 - **[Camera](./camera.md)**: Projecting 3D space onto a 2D screen and configuring physical camera exposure

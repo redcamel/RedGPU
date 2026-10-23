@@ -112,6 +112,14 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## Related Examples
+
+- [TextField3D Basics](/RedGPU/examples/3d/textField/textField3D/)
+- [TextField3D Sizing Mode Comparison](/RedGPU/examples/3d/textField/textField3DCompare/)
+- [TextField3D Mouse Events](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
+
+---
+
 ## Next Steps
 
 - **[Particle & Line](../particle/index.md)**: Using GPU compute shader particles (`ParticleEmitter`) and 3D spline

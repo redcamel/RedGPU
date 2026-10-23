@@ -109,6 +109,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [SkyAtmosphere Basics](/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
+- [Atmospheric Scattering Parameter Test](/RedGPU/examples/3d/skyAtmosphere/scatteringTest/)
+- [SkyAtmosphere + glTF Model](/RedGPU/examples/3d/skyAtmosphere/gltf/)
+
+---
+
 ## Next Steps
 
 - **[Global Wind System](./wind.md)**: Controlling scene-wide wind direction and strength with `WindManager`

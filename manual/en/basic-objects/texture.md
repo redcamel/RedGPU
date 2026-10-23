@@ -172,6 +172,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [BitmapTexture Sampler Options](/RedGPU/examples/3d/texture/bitmapTextureSampler/)
+- [Anisotropic Filtering (Max Anisotropy)](/RedGPU/examples/3d/texture/maxAnisotropy/)
+- [KTX2 Compressed Texture Basics](/RedGPU/examples/3d/texture/ktx2/basic/)
+- [KTX2 Texture Array & CubeMap](/RedGPU/examples/3d/texture/ktx2/arrayCube3d/)
+
+---
+
 ## Next Steps
 
 - **[Lighting and Shadow](../lighting-and-shadow/index.md)**: Configuring light sources (`Light`), lit materials

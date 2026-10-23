@@ -119,6 +119,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [IBL Test](/RedGPU/examples/3d/skybox/ibl/iblTest/)
+- [SkyBox + IBL Integration](/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)
+- [IBL Texture Size Comparison](/RedGPU/examples/3d/skybox/ibl/iblTextureSize/)
+
+---
+
 ## Next Steps
 
 - **[SkyAtmosphere](./skyatmosphere.md)**: Creating dynamic sky effects via real-time physically based atmospheric

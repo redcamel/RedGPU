@@ -136,6 +136,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [InstancingMesh 기본 예제](/RedGPU/examples/3d/instancedMesh/simple/)
+- [InstancingMesh 구체 배열](/RedGPU/examples/3d/instancedMesh/sphere/)
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+
+---
+
 ## 다음 단계
 
 - **[스프라이트](../sprite/index.md)** : 항상 카메라를 바라보는 빌보드 스프라이트와 프레임 애니메이션 활용하기

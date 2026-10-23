@@ -87,14 +87,13 @@ body.applyImpulse([0, 10, 0]);
 
 ---
 
-## 4. 라이브 예제
+## 관련 예제
 
 - **기초 및
   형상**: [기본 시뮬레이션 및 중력](/RedGPU/examples/physics/basic/) · [충돌체 형상](/RedGPU/examples/physics/shapes/) · [지형 Heightfield](/RedGPU/examples/physics/heightField/)
 - **컨트롤러 및
   상호작용**: [키네마틱 캐릭터 제어](/RedGPU/examples/physics/characterController/) · [고급 캐릭터 컨트롤러](/RedGPU/examples/physics/advancedCharacterController/) · [클릭 및 레이캐스트](/RedGPU/examples/physics/raycast/)
 -
-
 **조인트**: [기본 조인트](/RedGPU/examples/physics/joints/) · [회전 조인트](/RedGPU/examples/physics/revoluteJoint/) · [스프링 조인트](/RedGPU/examples/physics/springJoint/)
 
 ---

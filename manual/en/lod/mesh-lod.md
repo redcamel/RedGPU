@@ -119,6 +119,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
+- [Mesh CPU LOD (Per-Level Material)](/RedGPU/examples/3d/lod/MeshCPULOD_material/)
+- [Distance Culling](/RedGPU/examples/3d/frustumCulling/distanceCulling/)
+
+---
+
 ## Next Steps
 
 - **[Instancing Mesh LOD](./instanced-lod.md)**: Applying GPU-driven LOD to massive instanced meshes

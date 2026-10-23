@@ -116,6 +116,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+- [InstancingMesh GPU LOD (Per-Level Material)](/RedGPU/examples/3d/lod/InstanceMeshGPULOD_material/)
+
+---
+
 ## Next Steps
 
 - **[Antialiasing](../antialiasing/index.md)**: Smoothing jagged screen edges

@@ -111,6 +111,13 @@ landscape.removeLayer('Rock');
 
 ---
 
+## Related Examples
+
+- [Multi-Layer Splatting](/RedGPU/examples/3d/landscape/multiLayerSplatting/)
+- [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
 ## Next Steps
 
 - **[Foliage & Impostors](./foliage.md)**: Foliage system for scattering trees and rocks based on terrain layer weights

@@ -163,6 +163,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## Related Examples
+
+- [Directional Shadow](/RedGPU/examples/3d/shadow/directionalShadow/)
+- [glTF Model Directional Shadow](/RedGPU/examples/3d/shadow/gltfDirectionalShadow/)
+
+---
+
 ## Next Steps
 
 - **[PBR Material](./pbr-material.md)**: Configuring Metallic-Roughness Physically Based Rendering (PBR) materials

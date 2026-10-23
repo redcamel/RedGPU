@@ -226,12 +226,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
-## 3. Live Examples
+## Related Examples
 
 - **Mouse &
   Touch**: [Mesh](/RedGPU/examples/3d/interaction/mouseEvent/mesh/) · [Sprite3D](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/) · [SpriteSheet3D](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/) · [TextField3D](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/) · [High-Precision Raycasting](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 -
-
 **Keyboard**: [3D Keyboard Interaction](/RedGPU/examples/3d/interaction/keyboardEvent/) · [2D Keyboard Interaction](/RedGPU/examples/2d/interaction/keyboardEvent/)
 
 ---

@@ -133,6 +133,14 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## Related Examples
+
+- [SpriteSheet3D Basics](/RedGPU/examples/3d/sprite/spriteSheet3D/)
+- [SpriteSheet3D Option Comparison](/RedGPU/examples/3d/sprite/spriteSheet3DCompare/)
+- [SpriteSheet3D Mouse Events](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
+
+---
+
 ## Next Steps
 
 - **[TextField3D](../text-field/textfield3d.md)**: Constructing and placing text labels in 3D space

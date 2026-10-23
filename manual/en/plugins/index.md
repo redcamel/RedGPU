@@ -18,6 +18,14 @@ engines—into `Scene` and the rendering loop while keeping the core engine bund
 
 ---
 
+## Related Examples
+
+- [Basic Physics Simulation](/RedGPU/examples/physics/basic/)
+- [Collider Shapes](/RedGPU/examples/physics/shapes/)
+- [Kinematic Character Controller](/RedGPU/examples/physics/characterController/)
+
+---
+
 ## Next Steps
 
 - **[Physics Plugin](./physics.md)**: Initializing `RapierPhysics` and binding physics bodies (`createBody`)

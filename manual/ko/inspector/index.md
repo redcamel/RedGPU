@@ -52,3 +52,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 > [!TIP]
 > - **드로우 콜 최적화**: `Draw Calls` 수치가 높다면 동일한 지오메트리·재질을 공유하는 객체들을 `InstancedMesh` 로 묶어 드로우 콜을 절감하세요.
 > - **메모리 누수 탐지**: 씬 전환이나 객체 제거 후에도 **GPU 메모리 리소스** 탭의 리소스 개수 (`count`)가 계속 증가한다면, 미사용 리소스의 `destroy()` 가 누락되었는지 점검하세요.
+
+---
+
+## 관련 예제
+
+- [드로우 디버거 (Draw Debugger)](/RedGPU/examples/3d/drawDebugger/basic/)
+- [바운딩 박스 시각화 (Mesh BoundBox)](/RedGPU/examples/3d/mesh/boundBox/meshBoundBox/)
+- [간접 드로우 테스트 (Indirect Draw)](/RedGPU/examples/3d/indirectDrawTest/)

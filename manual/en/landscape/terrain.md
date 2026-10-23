@@ -92,6 +92,14 @@ landscape.debuggerManager.landscapeLodColoration = true;
 
 ---
 
+## Related Examples
+
+- [Basic Terrain](/RedGPU/examples/3d/landscape/basicTerrain/)
+- [Tile Streaming](/RedGPU/examples/3d/landscape/tileStreaming/)
+- [Landscape & Water Integration](/RedGPU/examples/3d/landscape/landscapeAndWater/)
+
+---
+
 ## Next Steps
 
 - **[Multi-Layer Splatting](./material-splatting.md)**: Splatting system for blending multi-layer PBR materials such as

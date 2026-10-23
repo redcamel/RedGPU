@@ -23,4 +23,16 @@ GPU particle and line renderers.
 
 ---
 
-[Next Step: Learn GLTF Loader](./model-loading/index.md)
+## Related Examples
+
+- [glTF Model Loading (DamagedHelmet)](/RedGPU/examples/gltf/models/helmets/)
+- [InstancingMesh](/RedGPU/examples/3d/instancedMesh/simple/)
+- [Sprite3D](/RedGPU/examples/3d/sprite/sprite3D/)
+- [TextField3D](/RedGPU/examples/3d/textField/textField3D/)
+- [GPU Particle Basics](/RedGPU/examples/3d/particle/basic/)
+
+---
+
+## Next Steps
+
+- **[GLTF Loader](./model-loading/index.md)**: Loading external `.gltf` / `.glb` models and playing skeletal animations

@@ -72,6 +72,16 @@ scene.addChild(line);
 
 ---
 
+## Related Examples
+
+- [GPU Particle Basics](/RedGPU/examples/3d/particle/basic/)
+- [Large-Scale Particle Performance](/RedGPU/examples/3d/particle/performance/)
+- [Line3D Linear](/RedGPU/examples/3d/line3D/linear/)
+- [Line3D Bezier Curve](/RedGPU/examples/3d/line3D/bezier/)
+- [Line3D Catmull-Rom Spline](/RedGPU/examples/3d/line3D/catmullRom/)
+
+---
+
 ## Next Steps
 
 - **[Interaction](../../interaction/index.md)**: Event system for clicking and controlling scene objects via mouse and

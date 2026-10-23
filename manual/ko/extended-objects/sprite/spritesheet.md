@@ -132,6 +132,14 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## 관련 예제
+
+- [SpriteSheet3D 기본](/RedGPU/examples/3d/sprite/spriteSheet3D/)
+- [SpriteSheet3D 옵션 비교](/RedGPU/examples/3d/sprite/spriteSheet3DCompare/)
+- [SpriteSheet3D 마우스 이벤트](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
+
+---
+
 ## 다음 단계
 
 - **[TextField3D](../text-field/textfield3d.md)** : 3D 공간 내에 텍스트 레이블 구성 및 배치하기

@@ -19,4 +19,16 @@ order: 7
 
 ---
 
-[다음 단계: GLTF Loader 배우기](./model-loading/index.md)
+## 관련 예제
+
+- [glTF 모델 로딩 (DamagedHelmet)](/RedGPU/examples/gltf/models/helmets/)
+- [인스턴싱 메시 (InstancingMesh)](/RedGPU/examples/3d/instancedMesh/simple/)
+- [3D 스프라이트 (Sprite3D)](/RedGPU/examples/3d/sprite/sprite3D/)
+- [3D 텍스트 필드 (TextField3D)](/RedGPU/examples/3d/textField/textField3D/)
+- [GPU 파티클 기본](/RedGPU/examples/3d/particle/basic/)
+
+---
+
+## 다음 단계
+
+- **[GLTF Loader](./model-loading/index.md)** : 외부 `.gltf` / `.glb` 모델 로드 및 스켈레탈 애니메이션 재생 배우기

@@ -90,14 +90,13 @@ body.applyImpulse([0, 10, 0]);
 
 ---
 
-## 4. Live Examples
+## Related Examples
 
 - **Basics &
   Shapes**: [Basic Simulation & Gravity](/RedGPU/examples/physics/basic/) · [Collider Shapes](/RedGPU/examples/physics/shapes/) · [Terrain Heightfield](/RedGPU/examples/physics/heightField/)
 - **Controllers &
   Interaction**: [Kinematic Character Control](/RedGPU/examples/physics/characterController/) · [Advanced Character Controller](/RedGPU/examples/physics/advancedCharacterController/) · [Click & Raycast](/RedGPU/examples/physics/raycast/)
 -
-
 **Joints**: [Basic Joints](/RedGPU/examples/physics/joints/) · [Revolute Joint](/RedGPU/examples/physics/revoluteJoint/) · [Spring Joint](/RedGPU/examples/physics/springJoint/)
 
 ---

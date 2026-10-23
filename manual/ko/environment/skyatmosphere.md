@@ -104,6 +104,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [SkyAtmosphere 기본](/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
+- [대기 산란 파라미터 테스트](/RedGPU/examples/3d/skyAtmosphere/scatteringTest/)
+- [SkyAtmosphere + glTF 모델](/RedGPU/examples/3d/skyAtmosphere/gltf/)
+
+---
+
 ## 다음 단계
 
 - **[전역 바람 시스템](./wind.md)** : `WindManager` 로 씬 전체의 바람 방향과 세기 제어하기

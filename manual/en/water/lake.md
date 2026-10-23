@@ -96,6 +96,16 @@ lake.rippleNormalStrength = 1.0;  // Ripple normal strength (default: 1.0)
 
 ---
 
+## Related Examples
+
+- [Basic Lake](/RedGPU/examples/3d/water/lake/basicLake/)
+- [Lake Material](/RedGPU/examples/3d/water/lake/lakeMaterial/)
+- [Water Wave Interaction](/RedGPU/examples/3d/water/lake/interaction/)
+- [Character Walking Ripples](/RedGPU/examples/3d/water/lake/characterWalking/)
+- [Multi Lake](/RedGPU/examples/3d/water/lake/multiLake/)
+
+---
+
 ## Next Steps
 
 - **[Plugins](../plugins/index.md)**: RedGPU's plugin system, including the WASM-powered Rapier physics engine

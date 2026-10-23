@@ -66,6 +66,13 @@ const meadowGrass = landscape.grassManager.addType({
 
 ---
 
+## 관련 예제
+
+- [절차적 잔디 (Procedural Grass)](/RedGPU/examples/3d/landscape/proceduralGrass/)
+- [오픈월드 통합 (Open World Integration)](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
 ## 다음 단계
 
 - **[수체 시스템](../water/index.md)** : 지형과 맞닿아 굴절·커스틱 및 실시간 물결 인터랙션을 수행하는 물리 기반 수체 시스템

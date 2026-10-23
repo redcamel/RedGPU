@@ -58,3 +58,14 @@ and the Hierarchical Z-Buffer (**HZB**) within a single **Unified Compute Pass**
 3. **[Foliage & Impostors](./foliage.md)**: Scattering trees and rocks, multi-level LOD, and octahedral impostors with
    `FoliageManager`
 4. **[Procedural Grass](./grass.md)**: High-density vegetation scattering and wind synchronization with `GrassManager`
+
+---
+
+## Related Examples
+
+- [Basic Terrain](/RedGPU/examples/3d/landscape/basicTerrain/)
+- [Tile Streaming](/RedGPU/examples/3d/landscape/tileStreaming/)
+- [Multi-Layer Splatting](/RedGPU/examples/3d/landscape/multiLayerSplatting/)
+- [Foliage & Impostors](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
+- [Procedural Grass](/RedGPU/examples/3d/landscape/proceduralGrass/)
+- [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)

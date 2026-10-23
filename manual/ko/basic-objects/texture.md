@@ -170,6 +170,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
+## 관련 예제
+
+- [BitmapTexture 샘플러 옵션](/RedGPU/examples/3d/texture/bitmapTextureSampler/)
+- [비등방성 필터링 (Max Anisotropy)](/RedGPU/examples/3d/texture/maxAnisotropy/)
+- [KTX2 압축 텍스처 기본](/RedGPU/examples/3d/texture/ktx2/basic/)
+- [KTX2 텍스처 배열 및 큐브맵](/RedGPU/examples/3d/texture/ktx2/arrayCube3d/)
+
+---
+
 ## 다음 단계
 
 - **[조명과 그림자](../lighting-and-shadow/index.md)** : 광원 (`Light`), 라이팅 재질 (`PhongMaterial`, `PBRMaterial`), 그림자 (`Shadow`)

@@ -46,6 +46,13 @@ ssr.maxSteps = 64;             // 레이 마칭 계산 정밀도 (스텝 수)
 
 ---
 
+## 관련 예제
+
+- [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/ssao/)
+- [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/ssr/)
+
+---
+
 ## 다음 단계
 
 - **[LOD](../lod/index.md)** : 카메라 거리에 따른 메시 정밀도 최적화

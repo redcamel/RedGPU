@@ -49,6 +49,14 @@ windManager.strength = 1.5;
 
 ---
 
+## Related Examples
+
+- [Procedural Grass & Wind Integration](/RedGPU/examples/3d/landscape/proceduralGrass/)
+- [Foliage & Wind Integration](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
+- [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
 ## Next Steps
 
 - **[Extended Objects](../extended-objects/index.md)**: Loading external 3D models and utilizing specialized display

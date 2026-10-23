@@ -160,6 +160,16 @@ the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/i
 
 ---
 
+## Related Examples
+
+- [Brightness & Contrast](/RedGPU/examples/postEffect/adjustments/brightnessContrast/)
+- [Gaussian Blur](/RedGPU/examples/postEffect/blur/gaussianBlur/)
+- [Depth of Field (DoF)](/RedGPU/examples/postEffect/lens/dof/)
+- [Chromatic Aberration](/RedGPU/examples/postEffect/lens/chromaticAberration/)
+- [Height Fog](/RedGPU/examples/postEffect/fog/heightFog/)
+
+---
+
 ## Next Steps
 
 - **[Tone Mapping](./tone-mapping.md)**: HDR-to-LDR color conversion and exposure control

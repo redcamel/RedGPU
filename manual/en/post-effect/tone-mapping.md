@@ -56,6 +56,13 @@ physical color accuracy is priority, and the `ACES_FILMIC_` variants for cinemat
 
 ---
 
+## Related Examples
+
+- [DamagedHelmet PBR & Tone Mapping](/RedGPU/examples/gltf/models/helmets/)
+- [Sponza HDR Exposure & Tone Mapping](/RedGPU/examples/gltf/models/sponza/)
+
+---
+
 ## Next Steps
 
 - **[Built-in Effects](./builtin-effects.md)**: Activating `SSAO` and real-time `SSR` for physical depth
