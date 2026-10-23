@@ -22,8 +22,7 @@ const instancingGraph = `
 # Instancing Mesh
 
 **Instancing Mesh** is a high-performance object that renders thousands or tens of thousands of objects sharing the same
-geometry and material in a single **Draw Call**. It is essential for representing forests (trees), grass, particles,
-crowds, etc.
+geometry and material in a single **Draw Call**. It is essential for representing forests (trees), grass, crowds, etc.
 
 <ClientOnly>
   <MermaidResponsive :definition="instancingGraph" />
@@ -37,8 +36,8 @@ sends it to the GPU in a single draw call, providing outstanding rendering perfo
 
 ## 2. Basic Usage
 
-When creating an `InstancingMesh`, you must specify the maximum number of instances (Capacity) and the initial count to
-use.
+When creating an `InstancingMesh`, you must specify the maximum number of instances (`maxInstanceCount`) and the initial
+active count (`instanceCount`).
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -53,7 +52,7 @@ const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 const instancedMesh = new RedGPU.Display.InstancingMesh(
     redGPUContext,
     maxCount,   // Maximum buffer capacity (immutable after creation)
-    initCount,  // Count to render currently (can be updated dynamically)
+    initCount,  // Count to render currently (can be updated dynamically via `instanceCount`)
     geometry,
     material
 );
@@ -63,11 +62,11 @@ scene.addChild(instancedMesh);
 
 ## 3. Individual Instance Control
 
-You can control each instance's transform (position, rotation, scale) individually through the
-`instancedMesh.instanceChildren` array.
+You can control each instance's (`InstancingMeshObject3D`) transform (position, rotation, scale) and `opacity`
+individually through the `instancedMesh.instanceChildren` array.
 
 ```javascript
-// Randomly position each instance
+// Set position, rotation, scale, and opacity for each instance
 const instances = instancedMesh.instanceChildren;
 
 for (let i = 0; i < instancedMesh.instanceCount; i++) {
@@ -80,77 +79,26 @@ for (let i = 0; i < instancedMesh.instanceCount; i++) {
         Math.random() * 100 - 50
     );
     
-    // Set rotation and scale
+    // Set rotation, scale, and opacity
     instance.rotationY = Math.random() * 360;
     instance.scale = Math.random() * 2 + 0.5;
+    instance.opacity = Math.random() * 0.5 + 0.5;
 }
 ```
 
 ::: warning [Child Hierarchy Restriction]
-Although the child instances of `InstancingMesh` (individual instance objects) have a similar interface to a standard
-`Mesh`, they are not actual independent 3D objects. Instead, they are virtual delegate objects that control the GPU
-instancing buffer data. Therefore, they cannot host hierarchical child objects via `addChild()`.
+Although the child instances of `InstancingMesh` (`InstancingMeshObject3D`) have a transform interface similar to a
+standard `Mesh`, they are not independent 3D objects. Instead, they are delegate objects that control the GPU instancing
+buffer data. Therefore, they cannot host hierarchical child objects via `addChild()`.
 :::
 
+## 4. Practical Example: Controlling Mass Instances
+
+Use the sliders to change the active instance count (`instanceCount`) in real time and observe the performance.
+
+<iframe src="/RedGPU/examples/3d/instancedMesh/simple/" style="width:100%; height:500px;"></iframe>
+
 ---
-
-## 4. Practical Example: 10,000 Cubes
-
-```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
-const canvas = document.getElementById("redgpu-canvas");
-
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    
-    // 1. Set up lighting
-    const light = new RedGPU.Light.DirectionalLight();
-    light.x = 10; light.y = 20; light.z = 10;
-    scene.lightManager.addDirectionalLight(light);
-
-    // 2. Create Instancing Mesh (10,000 instances)
-    const maxCount = 10000;
-    const geometry = new RedGPU.Primitive.Box(redGPUContext);
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    
-    const instancedMesh = new RedGPU.Display.InstancingMesh(
-        redGPUContext,
-        maxCount,
-        maxCount,
-        geometry,
-        material
-    );
-    scene.addChild(instancedMesh);
-
-    // 3. Randomly distribute instances
-    const instances = instancedMesh.instanceChildren;
-    for (let i = 0; i < maxCount; i++) {
-        const item = instances[i];
-        item.x = Math.random() * 80 - 40;
-        item.y = Math.random() * 80 - 40;
-        item.z = Math.random() * 80 - 40;
-        
-        item.rotationX = Math.random() * 360;
-        item.rotationY = Math.random() * 360;
-        item.rotationZ = Math.random() * 360;
-    }
-
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 60;
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext, () => {
-        // Gently rotate all instances every frame
-        for (let i = 0; i < maxCount; i++) {
-            instances[i].rotationY += 0.5;
-        }
-    });
-});
-```
-
 
 ## Related Examples
 
