@@ -5,8 +5,8 @@ order: 3
 
 <script setup>
 const textureGraph = `
-    Img["이미지 URL (.png / .jpg / .ktx2 / .svg)"] -->|비동기 로드 및 트랜스코딩| Texture["BitmapTexture / TextureArray (리소스)"]
-    Texture -->|참조| Material["BitmapMaterial / PhongMaterial / PBRMaterial"]
+    Img["이미지 URL/파일"] -->|로드| Texture["BitmapTexture (리소스)"]
+    Texture -->|참조| Material["BitmapMaterial (머티리얼)"]
     Material -->|적용| Mesh["Mesh (디스플레이 객체)"]
 
     %% 회색조 스타일 적용
@@ -19,70 +19,77 @@ const textureGraph = `
 
 # Texture
 
-**Texture** 는 외부 이미지 파일이나 압축 텍스처를 GPU 리소스로 변환하여 머티리얼 (`BitmapMaterial`, `PhongMaterial`, `PBRMaterial` 등)의 표면에 매핑하는
-객체입니다.
+단순한 색상을 넘어 실제 사진이나 그림 파일을 물체의 표면에 입히면 훨씬 현실적인 3D 객체를 만들 수 있습니다. RedGPU 에서는 이미지 파일을 `BitmapTexture` 로 불러와
+`BitmapMaterial` 을 사용하여 물체에 적용합니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="textureGraph" />
 </ClientOnly>
 
----
+## 1. 이미지 불러오기: BitmapTexture
 
-## 1. 텍스처 클래스 및 지원 포맷
-
-RedGPU는 용도에 따라 3가지 텍스처 리소스 클래스를 제공하며, 네트워크 비동기 로딩이 완료되는 즉시 렌더링 파이프라인을 자동으로 갱신합니다.
-
-| 클래스              | 지원 포맷 및 주요 역할                                                                                                                                                   |
-|:--------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`BitmapTexture`** | 일반 비트맵(`.png`, `.jpg`, `.webp`, `.avif`), 벡터(`.svg`), 그리고 **`.ktx2` GPU 압축 텍스처**(Basis Universal / UASTC·ETC1S 자동 트랜스코딩)를 로드하는 표준 2D 텍스처 |
-| **`TextureArray`**  | 동일한 해상도의 여러 이미지를 단일 `texture_2d_array` GPU 리소스로 묶어 다중 레이어 셰이더의 바인딩 슬롯 소모를 최소화 (비트맵 및 `.ktx2` 배열 지원)                     |
-| **`PackedTexture`** | 서로 다른 텍스처의 개별 채널(R, G, B, A)을 GPU에서 하나의 ORM(Occlusion-Roughness-Metallic) 패킹 텍스처로 실시간 병합                                                    |
-
----
-
-## 2. BitmapTexture 생성 및 옵션
+이미지를 3D 엔진에서 사용하려면 먼저 텍스처 객체로 변환해야 합니다. `BitmapTexture` 를 사용하면 웹상의 이미지 경로를 통해 텍스처 데이터를 생성할 수 있습니다.
 
 ```javascript
-// 1. 일반 비트맵(JPG/PNG/WebP) 또는 SVG 로드
+// 이미지 경로를 지정하여 텍스처 데이터 생성
 const texture = new RedGPU.Resource.BitmapTexture(
     redGPUContext,
     'https://redcamel.github.io/RedGPU/examples/assets/UV_Grid_Sm.jpg'
 );
-
-// 2. KTX2 (Basis Universal GPU 압축 텍스처) 로드
-// 디바이스가 지원하는 최적의 BC7/ASTC/ETC2 포맷으로 자동 트랜스코딩됩니다.
-const ktx2Texture = new RedGPU.Resource.BitmapTexture(
-    redGPUContext,
-    './assets/terrain/rock_diff.ktx2'
-);
-
-// 3. 여러 이미지 URL을 단일 2D 텍스처 배열(TextureArray)로 생성
-const layerTextureArray = new RedGPU.Resource.TextureArray(
-    redGPUContext,
-    ['./assets/layer0.ktx2', './assets/layer1.ktx2', './assets/layer2.ktx2'],
-    true // useMipmap
-);
 ```
 
-### 생성자 매개변수 및 이벤트 리스너
+### BitmapTexture 생성자 매개변수 옵션
 
-| 파라미터명                | 타입                          | 기본값         | 설명                                                      |
-|:--------------------------|:------------------------------|:---------------|:----------------------------------------------------------|
-| **`redGPUContext`**       | `RedGPUContext`               | 필수           | 엔진 컨텍스트 인스턴스                                    |
-| **`src`**                 | `string \| { src, cacheKey }` | 선택           | 로드할 이미지 URL 경로 또는 캐시 키 지정 객체             |
-| **`useMipMap`**           | `boolean`                     | `true`         | 원거리 모아레(Moire) 방지를 위한 멀티 레벨 밉맵 생성 여부 |
-| **`onLoad`**              | `(textureInstance) => void`   | 선택           | 이미지 로드 및 GPU 업로드 완료 시 호출되는 콜백           |
-| **`onError`**             | `(error) => void`             | 선택           | 네트워크 로드 실패 등 예외 발생 시 호출되는 콜백          |
-| **`format`**              | `GPUTextureFormat`            | `'rgba8unorm'` | GPU 텍스처 포맷 (KTX2 로드 시 압축 포맷 자동 선택)        |
-| **`usePremultiplyAlpha`** | `boolean`                     | `false`        | 프리멀티플 알파(Premultiplied Alpha) 적용 여부            |
+```typescript
+constructor(
+    redGPUContext
+:
+RedGPUContext,
+    src ? : string | {src: string, cacheKey: string},
+    useMipMap
+:
+boolean = true,
+    onLoad ? : (textureInstance?: BitmapTexture) => void,
+    onError ? : (error: Error) => void,
+    format ? : GPUTextureFormat,
+    usePremultiplyAlpha
+:
+boolean = false
+)
+```
 
-> 생성 후에도 `texture.addLoadListeners(onLoad, onError)` 메서드를 통해 로드 완료/실패 리스너를 추가 등록할 수 있습니다.
+| 파라미터명                | 타입                                | 설명                                                                        |
+|:--------------------------|:------------------------------------|:----------------------------------------------------------------------------|
+| **`redGPUContext`**       | `RedGPUContext`                     | 엔진의 컨텍스트 인스턴스 (필수)                                             |
+| **`src`**                 | `string` 또는 `{ src, cacheKey }`   | 로드할 이미지의 URL 경로 혹은 캐시 키가 지정된 소스 객체                    |
+| **`useMipMap`**           | `boolean` (기본값: `true`)          | 원거리 왜곡을 막기 위한 멀티 레벨 밉맵(Mipmap) 생성 활성화 여부             |
+| **`onLoad`**              | `(texture?: BitmapTexture) => void` | 이미지 리소스 로드 및 GPU 텍스처 변환이 완전히 끝났을 때의 콜백 함수        |
+| **`onError`**             | `(error: Error) => void`            | 이미지 네트워크 로드 실패 등의 예외 발생 시 호출될 콜백 함수                |
+| **`usePremultiplyAlpha`** | `boolean` (기본값: `false`)         | 알파 채널 값이 곱해진 프리멀티플 알파(Premultiplied Alpha) 포맷의 사용 여부 |
 
 ---
 
-## 3. 실습 예제: 텍스처를 입힌 메시 렌더링
+## 2. 재질에 적용하기: BitmapMaterial
 
-`BitmapTexture` 를 생성하여 `BitmapMaterial` 에 연결하고 화면에 출력하는 예제입니다.
+불러온 텍스처는 `BitmapMaterial` 을 통해 메시의 외관으로 사용됩니다. 생성자에서 바로 지정하거나 `diffuseTexture` 속성에 할당할 수 있습니다.
+
+```javascript
+// 1. 텍스처를 사용하는 재질 생성
+const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+
+// 2. 메시 생성 및 재질 적용
+const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+```
+
+## 3. 비동기 로딩의 이해
+
+이미지 파일은 네트워크를 통해 다운로드되므로 불러오는 데 시간이 걸립니다. RedGPU 는 이미지가 로드되는 동안 기본 상태로 대기하다가, **로딩이 완료되는 즉시 자동으로 화면에 텍스처를 출력**합니다.
+
+개발자가 별도의 로딩 완료 체크 로직을 작성하지 않아도 엔진이 내부적으로 상태를 관리하므로 매우 편리합니다.
+
+## 4. 실습: 텍스처를 입힌 상자 만들기
+
+실제 이미지를 불러와 회전하는 상자에 입혀보겠습니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -168,18 +175,25 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
+## 핵심 요약
+
+- **`BitmapTexture`** 는 외부 이미지 파일을 3D 엔진용 리소스로 변환합니다.
+- **`BitmapMaterial`** 은 텍스처를 사용하여 물체의 표면을 표현하는 전용 재질입니다.
+- RedGPU 는 이미지의 비동기 로딩을 자동으로 처리하여 관리의 편의성을 제공합니다.
+
 ---
 
 ## 관련 예제
 
-- [BitmapTexture 샘플러 옵션](/RedGPU/examples/3d/texture/bitmapTextureSampler/)
-- [비등방성 필터링 (Max Anisotropy)](/RedGPU/examples/3d/texture/maxAnisotropy/)
-- [KTX2 압축 텍스처 기본](/RedGPU/examples/3d/texture/ktx2/basic/)
-- [KTX2 텍스처 배열 및 큐브맵](/RedGPU/examples/3d/texture/ktx2/arrayCube3d/)
+- [BitmapMaterial 기본](/RedGPU/examples/3d/material/bitmapMaterial/)
+- [BitmapTexture 샘플러 조합](/RedGPU/examples/3d/texture/bitmapTextureSampler/)
+- [밉맵 생성 옵션 비교](/RedGPU/examples/3d/texture/mipmapGenerator/)
+- [투명 텍스처 알파 블렌딩](/RedGPU/examples/3d/transparent/alphaBlend/)
 
 ---
 
-## 다음 단계
+## 다음 학습 추천
 
-- **[조명과 그림자](../lighting-and-shadow/index.md)** : 광원 (`Light`), 라이팅 재질 (`PhongMaterial`, `PBRMaterial`), 그림자 (`Shadow`)
-  설정 방법
+단순한 이미지를 넘어, 빛과 그림자를 추가하여 공간에 입체감을 불어넣는 방법을 알아봅니다.
+
+- **[조명과 그림자](../lighting-and-shadow/index.md)**

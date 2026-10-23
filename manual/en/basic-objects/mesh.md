@@ -13,46 +13,56 @@ const meshGraph = `
     style Material fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
     style Mesh fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
 `
+
 </script>
 
 # Mesh
 
-`Mesh` is the fundamental display object rendered in 3D space, combining vertex shape data (`Geometry`) with surface
-properties (`Material`).
+`Mesh` is the most basic object unit visually represented in RedGPU's 3D space. `Geometry`, which acts as the skeleton,
+and **Material**, which acts as the skin, are combined to form a complete object.
+
+## 1. Components of a Mesh
+
+A `Mesh` cannot exist independently and must combine the following two elements:
+
+- **`Geometry`**: The physical **shape** of the object consisting of points, lines, and faces.
+- **Material**: Determines the **surface** properties of the object, such as color, texture, and reflection.
 
 <ClientOnly>
   <MermaidResponsive :definition="meshGraph" />
 </ClientOnly>
 
----
+## 2. Geometry & Primitive
 
-## 1. Geometry and Primitives
+**Geometry** (`Geometry`) is a collection of numerous **Vertex** data points in 3D space.
 
-**Geometry** is a collection of vertex positions, normals, and UV coordinates in 3D space. RedGPU provides procedural
-built-in shapes called **Primitives** (`RedGPU.Primitive.*`) that can be instantiated immediately without external model
-files.
+RedGPU provides basic shapes called **Primitives** to allow for quick **space configuration or visualization testing**
+before loading external model files. Using these allows you to design 3D structures immediately without complex data
+calculations.
 
-| Class                     | Description                                     |
-|:--------------------------|:------------------------------------------------|
-| **`Box` / `RoundedBox`**  | Hexahedral box or box with rounded corners      |
-| **`Sphere` / `Capsule`**  | Smooth sphere or capsule pill shape             |
-| **`Cone` / `Cylinder`**   | Cone or cylinder shape                          |
-| **`Plane` / `Ground`**    | 2D rectangular plane or subdivided ground plane |
-| **`Circle` / `Ring`**     | Filled circular plane or hollow ring plane      |
-| **`Torus` / `TorusKnot`** | Donut-shaped torus or twisted torus knot        |
+| Type                          | Description                                            |
+|:------------------------------|:-------------------------------------------------------|
+| **`Box`** / **`RoundedBox`**  | Hexahedral box shape or box shape with rounded corners |
+| **`Sphere`** / **`Capsule`**  | Smooth spherical shape or capsule pill shape           |
+| **`Cone`** / **`Cylinder`**   | Cone or cylindrical shape                              |
+| **`Plane`** / **`Ground`**    | 2D rectangular plane or grid ground shape              |
+| **`Circle`** / **`Ring`**     | Filled circular plane or hollow ring plane shape       |
+| **`Torus`** / **`TorusKnot`** | Donut-like ring or complexly twisted knot shape        |
 
----
+## 3. Defining the Surface: Material
 
-## 2. Material Types
+**Material** is a property that determines how an object's surface looks. It can define not only simple colors but also
+textures, reflectance, transparency, and more.
 
-**Material** determines the surface color, textures, light reflectance, and transparency of an object.
+| Type                 | Features                                                     | Main Usage                                                        |
+|:---------------------|:-------------------------------------------------------------|:------------------------------------------------------------------|
+| **`ColorMaterial`**  | Outputs only solid color and transparency (ignores lighting) | Quick visualization, prototyping, debugging                       |
+| **`BitmapMaterial`** | Outputs an image (`BitmapTexture`) on the object surface     | Backgrounds, simple image objects, 2D sprites                     |
+| **`PhongMaterial`**  | Expresses light, shadow, and highlights                      | Realistic 3D objects, emphasizing three-dimensionality            |
+| **`PBRMaterial`**    | Supports Physically Based Rendering (**PBR**)                | High-quality photorealistic rendering, metal/roughness expression |
 
-| Class                | Features                                                          | Primary Usage                                          |
-|:---------------------|:------------------------------------------------------------------|:-------------------------------------------------------|
-| **`ColorMaterial`**  | Outputs solid color (RGB) and alpha without lighting calculations | Rapid visualization, prototyping, debugging            |
-| **`BitmapMaterial`** | Maps a single texture (`BitmapTexture`) onto the surface          | Backgrounds, unlit textured objects                    |
-| **`PhongMaterial`**  | Computes diffuse and specular highlight reflections               | Standard lit 3D objects                                |
-| **`PBRMaterial`**    | Supports Metallic-Roughness workflow and glTF KHR extensions      | High-quality physically based photorealistic rendering |
+The most basic `ColorMaterial` quickly renders only color values (RGB) and transparency (Alpha) without lighting
+calculations.
 
 ```javascript
 // 1. Opaque red material
@@ -60,45 +70,50 @@ const redMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
 
 // 2. Translucent blue material (alpha: 0.0 ~ 1.0)
 const blueAlphaMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#0000ff');
-blueAlphaMat.alpha = 0.5;
+blueAlphaMat.alpha = 0.5; 
 ```
 
----
+::: info [Various Materials]
+Use `BitmapMaterial` to apply images, `PhongMaterial` to express light and shadow, and so on. These are covered in
+detail in the following chapters.
+:::
 
-## 3. Spatial Transform and Key Properties
+## 4. Controlling the Mesh (Transformation)
 
-Position, rotation, and scale transformations of a `Mesh` operate relative to the object's **Pivot** point.
+The created `Mesh` object has properties that can be freely transformed within 3D space.
 
-| Category        | Property                                  | Type / Default          | Description                                                                                                         |
-|:----------------|:------------------------------------------|:------------------------|:--------------------------------------------------------------------------------------------------------------------|
-| **Transform**   | **`x`, `y`, `z`**                         | `number` (`0`)          | Local coordinates in 3D space (supports `setPosition(x, y, z)`)                                                     |
-| **Transform**   | **`rotationX`, `rotationY`, `rotationZ`** | `number` (`0`)          | Rotation angles per axis in degrees (supports `setRotation(x, y, z)`)                                               |
-| **Transform**   | **`scaleX`, `scaleY`, `scaleZ`**          | `number` (`1`)          | Scale multipliers per axis (supports `setScale(x, y, z)`)                                                           |
-| **Transform**   | **`pivotX`, `pivotY`, `pivotZ`**          | `number` (`0`)          | Reference pivot offset coordinates for translation, rotation, and scaling                                           |
-| **Appearance**  | **`geometry`**                            | `Geometry \| Primitive` | Geometry instance bound to the mesh                                                                                 |
-| **Appearance**  | **`material`**                            | `ABaseMaterial`         | Surface material instance bound to the mesh                                                                         |
-| **Appearance**  | **`opacity`**                             | `number` (`1.0`)        | Mesh opacity (`0.0 ~ 1.0`, multiplied down to child nodes)                                                          |
-| **Shadow**      | **`castShadow`**                          | `boolean` (`false`)     | Whether this mesh casts shadows onto other objects                                                                  |
-| **Shadow**      | **`receiveShadow`**                       | `boolean` (`true`)      | Whether this mesh receives shadows cast by other objects                                                            |
-| **Culling**     | **`ignoreFrustumCulling`**                | `boolean` (`false`)     | Bypasses camera frustum culling so the mesh is always rendered                                                      |
-| **Culling**     | **`useScreenSpaceSizeCulling`**           | `boolean` (`true`)      | Skips draw calls when the projected screen-space size ratio falls below the threshold                               |
-| **Culling**     | **`minScreenSpaceSize`**                  | `number` (`0.006`)      | Minimum screen-space size ratio threshold for screen-space culling                                                  |
-| **Interaction** | **`enableWaterInteraction`**              | `boolean` (`false`)     | Generates real-time 2D water ripples when colliding or moving on a `Lake` surface (applied recursively to children) |
-| **Interaction** | **`waterWaveStrength`**                   | `number` (`1.0`)        | Intensity multiplier for water ripples generated on a `Lake`                                                        |
-| **Debug**       | **`enableDebugger`**                      | `boolean` (`false`)     | Displays the bounding volume (`OBB`/`AABB`) and normal debugger (`DrawDebuggerMesh`)                                |
+- **Position** (`x`, `y`, `z`): Specifies the position in space.
+- **Rotation** (`rotationX`, `rotationY`, `rotationZ`): Adjusts the rotation value of the object. (Unit: Degree)
+- **Scale** (`scaleX`, `scaleY`, `scaleZ`): Adjusts the size of the object by a multiplier.
+
+::: tip [Pivot Guide]
+All movement, rotation, and scaling operations are based on the object's **Pivot** point. For primitives, the geometric
+center of each shape becomes the reference point.
+:::
 
 ```javascript
 const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-mesh.setPosition(10, 0, 0);
-mesh.rotationY = 45;
-mesh.scaleX = 2;
+
+mesh.x = 10;           // Move along X-axis
+mesh.rotationY = 45;   // Rotate 45 degrees around Y-axis
+mesh.scaleX = 2;       // Scale 2x along X-axis
 ```
+
+## 5. Key API Properties
+
+A `Mesh` instance has several key properties for adjusting its appearance and rendering options.
+
+* **`geometry`** (`Geometry`): Gets or binds the skeleton of the mesh composed of vertex (points, lines, faces) data.
+* **`material`** (`ABaseMaterial`): Gets or sets the surface material of the mesh, which controls lighting reflections,
+  image mapping, etc.
+* **`castShadow`** (`boolean`, default: `false`): Determines whether this mesh casts shadows onto other objects when
+  illuminated.
+* **`receiveShadow`** (`boolean`, default: `true`): Determines whether shadows cast by other objects will be rendered
+  onto the surface of this mesh.
 
 ---
 
-## 4. Practical Example: Creating and Placing a Mesh
-
-An example of combining primitive geometries with `ColorMaterial`, placing them in a scene, and rotating them.
+## 6. Practice: Creating and Placing a Mesh
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -108,10 +123,11 @@ const canvas = document.getElementById('redgpu-canvas');
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     const camera = new RedGPU.Camera.PerspectiveCamera();
-    camera.setPosition(0, 5, -15);
+    camera.z = -15; 
+    camera.y = 5;
     camera.lookAt(0, 0, 0);
 
-    // 1. Prepare geometry and basic material
+    // 1. Prepare box shape and basic material for testing
     const geometry = new RedGPU.Primitive.Box(redGPUContext);
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#00CC99');
 
@@ -202,6 +218,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
+## Key Summary
+
+- **`Mesh`** is the basic unit of a 3D object, combining **`Geometry`** and **Material**.
+- **Primitive** refers to standard shape data for visualization testing and structural design.
+- **`ColorMaterial`** is lightweight and suitable for checking colors without lighting.
+- All transformations are based on the object's **Pivot** point.
+
 ---
 
 ## Related Examples
@@ -216,5 +239,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-- **[Scene Graph](./scene-graph.md)**: Grouping objects into parent-child hierarchies for composite structures and
-  linked animations
+Learn how to group meshes into parent-child relationships to create complex structures.
+
+- **[Scene Graph](./scene-graph.md)**
