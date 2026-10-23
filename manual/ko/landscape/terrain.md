@@ -9,9 +9,18 @@ order: 1
 
 ---
 
-## 1. 지형 생성 및 Scene 등록
+## 1. 지형 생성 및 전역 하이트맵 (`globalHeightmapUrl`)
 
-`Landscape` 인스턴스를 생성한 뒤 `scene.landscape` 속성에 할당하면 씬의 렌더링 파이프라인에 즉시 통합됩니다.
+`Landscape` 인스턴스를 생성한 뒤 `globalHeightmapUrl`과 `heightScale`을 지정하고 `scene.landscape`에 할당하면 지형이 생성됩니다.
+
+### 전역 하이트맵 (`globalHeightmapUrl`)의 역할
+
+- **단독 지형 구성 및 원거리 베이스 (Macro Base)**: 별도의 타일 스트리밍 없이 `globalHeightmapUrl` 하나만으로도 전체 지형을 즉시 렌더링할 수 있으며, 타일 스트리밍 사용 시에는
+  아직 고해상도 타일이 로드되지 않은 원거리 지역의 기본 윤곽 (Fallback) 역할을 수행합니다.
+- **16비트 (16-bit) PNG 정밀도 지원**: 일반 8비트 이미지 (256단계)에서 발생하는 계단 현상 (Terracing) 없이 매끄러운 경사면을 표현할 수 있도록 **16비트 그레이스케일 PNG (
+  65,536단계)** 파싱을 기본 지원합니다.
+- **즉각적인 고도 쿼리 및 생태계 연동**: 로드와 동시에 GPU 가상 아틀라스 (고도·법선)에 베이킹될 뿐 아니라 CPU 메모리에도 캐싱되어, 전 지역에서 `getHeightAt(x, z)` 고도 조회와 식생
+  (`Foliage`)·잔디 (`Grass`) 배치가 즉시 작동합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -19,7 +28,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 // 1. 4000m x 4000m 월드 크기의 지형 생성 (단일 수치 또는 [width, depth] 배열)
 const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
 
-// 2. 전역 하이트맵 URL 및 최대 고도 스케일(미터 단위) 설정
+// 2. 전역 하이트맵(16비트 PNG 권장) 및 최대 고도 스케일(미터 단위) 설정
 landscape.globalHeightmapUrl = './assets/terrain/global_heightmap_1024.png';
 landscape.heightScale = 300;
 

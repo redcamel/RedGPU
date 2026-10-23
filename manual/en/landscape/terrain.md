@@ -10,10 +10,21 @@ continuous LOD morphing, elevation queries (`getHeightAt`), and the terrain debu
 
 ---
 
-## 1. Creating Terrain and Registering to Scene
+## 1. Terrain Creation & Global Heightmap (`globalHeightmapUrl`)
 
-Create a `Landscape` instance and assign it to `scene.landscape` to integrate it directly into the scene rendering
-pipeline.
+Create a `Landscape` instance, configure `globalHeightmapUrl` and `heightScale`, and assign it to `scene.landscape` to
+render the terrain.
+
+### Role of the Global Heightmap (`globalHeightmapUrl`)
+
+- **Standalone Terrain & Distant Macro Base**: A single `globalHeightmapUrl` is sufficient to render the entire terrain
+  on its own. When combined with tile streaming, it serves as the baseline elevation (fallback) for distant regions
+  where high-resolution tiles have not yet been streamed.
+- **16-Bit PNG Precision Support**: Natively parses **16-bit grayscale PNGs (65,536 levels)** to produce smooth slopes
+  without the stair-stepping (terracing) artifacts typical of 8-bit images (256 levels).
+- **Immediate Elevation Queries & Ecosystem Sync**: Upon loading, it is baked into the GPU virtual height/normal atlases
+  and cached on the CPU, enabling `getHeightAt(x, z)` elevation queries as well as `Foliage` and `Grass` placement
+  across the entire world immediately.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -21,7 +32,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 // 1. Create a 4000m x 4000m terrain (single number or [width, depth] array)
 const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
 
-// 2. Configure global heightmap URL and maximum elevation scale (in meters)
+// 2. Configure global heightmap (16-bit PNG recommended) and maximum elevation scale (in meters)
 landscape.globalHeightmapUrl = './assets/terrain/global_heightmap_1024.png';
 landscape.heightScale = 300;
 
