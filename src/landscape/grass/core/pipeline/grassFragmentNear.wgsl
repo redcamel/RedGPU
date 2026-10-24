@@ -61,30 +61,41 @@ fn main(input: VertexOutput) -> OutputFragment {
     let firstNDotL = dot(N, firstLightDir);
 
     var shadowFactor: f32 = 1.0;
-    if (input.shadowData.x > 0.001) {
-        let shadowInfo = systemUniforms.shadow;
-        let viewDepth = input.shadowData.y;
-        let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
-        let cascadeIndex = select(0u, min(1u, cascadeCount - 1u), viewDepth > shadowInfo.cascadeSplitDepths[0]);
-        let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+    let effectiveShadowWeight = input.shadowData.x;
+    if (effectiveShadowWeight > 0.001) {
+        if (firstNDotL <= -0.08) {
+            shadowFactor = 1.0 - effectiveShadowWeight;
+        } else {
+            let shadowInfo = systemUniforms.shadow;
+            let viewDepth = input.shadowData.y;
+            let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
+            var cascadeIndex = select(0u, min(1u, cascadeCount - 1u), viewDepth > shadowInfo.cascadeSplitDepths[0]);
+            if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) {
+                cascadeIndex = 2u;
+            }
+            let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
 
-        let normalOffset = N * select(0.025, 0.07, cascadeIndex > 0u);
-        let shadowCoord = getShadowCoord(input.worldPos + normalOffset, lightVP);
+            let slopeBias = saturate(1.0 - firstNDotL);
+            let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
+            let normalOffset = N * ((0.35 + slopeBias * 0.65) * worldTexelSize);
+            let shadowCoord = getShadowCoord(input.worldPos + normalOffset, lightVP);
 
-        let tUV = shadowCoord.xy;
-        if (all(tUV >= vec2<f32>(0.0)) && all(tUV <= vec2<f32>(1.0)) && shadowCoord.z >= 0.0 && shadowCoord.z <= 1.0) {
-            let cascadeBias = shadowInfo.directionalShadowBias * (1.0 + f32(cascadeIndex) * 0.8) + 0.0003;
-            let rawVisibility = textureSampleCompareLevel(
-                directionalShadowMap,
-                directionalShadowMapSampler,
-                tUV,
-                cascadeIndex,
-                saturate(shadowCoord.z - cascadeBias)
-            );
-            let horizonFade = saturate(firstNDotL * 6.25 + 0.5);
-            let csmStrength = shadowInfo.directionalShadowStrength * materialUniforms.shadowStrength;
-            let pureShadow = mix(1.0 - csmStrength, 1.0, rawVisibility * horizonFade);
-            shadowFactor = mix(1.0, pureShadow, input.shadowData.x);
+            let tUV = shadowCoord.xy;
+            if (all(tUV >= vec2<f32>(0.0)) && all(tUV <= vec2<f32>(1.0)) && shadowCoord.z >= 0.0 && shadowCoord.z <= 1.0) {
+                let absPos = abs(input.worldPos);
+                let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
+                let driftBias = max(maxCoord * 0.00000035, 0.0001);
+                let cascadeBias = shadowInfo.directionalShadowBias * (1.0 + f32(cascadeIndex) * 0.5) + 0.0002 + driftBias;
+                let rawVisibility = textureSampleCompareLevel(
+                    directionalShadowMap,
+                    directionalShadowMapSampler,
+                    tUV,
+                    cascadeIndex,
+                    saturate(shadowCoord.z - cascadeBias)
+                );
+                let horizonFade = saturate(firstNDotL * 6.25 + 0.5);
+                shadowFactor = 1.0 - effectiveShadowWeight * (1.0 - rawVisibility * horizonFade);
+            }
         }
     }
 

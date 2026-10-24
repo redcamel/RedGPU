@@ -64,13 +64,27 @@ fn main(input: VertexInput) -> VertexOutput {
 
     let viewDepth = -viewPos.z;
     var shadowWeight = 0.0;
-    if (grassUniforms.receiveShadow != 0u && systemUniforms.directionalLightCount > 0u) {
-        let distToCam = length(relPos);
-        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
-        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+    let shadowInfo = systemUniforms.shadow;
+    let csmStrength = shadowInfo.directionalShadowStrength * grassUniforms.shadowStrength;
+    let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
+
+    if (grassUniforms.receiveShadow != 0u && systemUniforms.directionalLightCount > 0u && csmStrength > 0.001 && casterRadiusSq != 0.0 && viewDepth > 0.0) {
+        let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
+        let maxCSMDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
         let maxDist = min(maxCSMDist, grassUniforms.shadowCullDistance);
-        let fadeLinear = saturate((maxDist - distToCam) * grassUniforms.invShadowFadeRange);
-        shadowWeight = select(0.0, smoothstep(0.0, 1.0, fadeLinear), distToCam < maxDist);
+        let distSq = dot(relPos, relPos);
+        if (distSq < maxDist * maxDist) {
+            var inCasterBounds = true;
+            if (casterRadiusSq > 0.0) {
+                let casterDiff = xform.worldPos - shadowInfo.casterBoundingCenter;
+                inCasterBounds = dot(casterDiff, casterDiff) <= casterRadiusSq;
+            }
+            if (inCasterBounds) {
+                let distToCam = sqrt(distSq);
+                let fadeLinear = saturate((maxDist - distToCam) * grassUniforms.invShadowFadeRange);
+                shadowWeight = smoothstep(0.0, 1.0, fadeLinear) * csmStrength;
+            }
+        }
     }
     output.shadowData = vec2<f32>(shadowWeight, viewDepth);
 
