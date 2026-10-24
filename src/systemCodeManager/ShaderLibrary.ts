@@ -49,6 +49,7 @@ import getViewNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getVi
 import getShadowCoord_wgsl from './shader/shadow/getShadowCoord.wgsl';
 import getShadowClipPosition_wgsl from './shader/shadow/getShadowClipPosition.wgsl';
 import getDirectionalShadowVisibility_wgsl from './shader/shadow/getDirectionalShadowVisibility.wgsl';
+import getDirectionalShadowVisibilityLandscape_wgsl from './shader/shadow/getDirectionalShadowVisibilityLandscape.wgsl';
 import getDirectionalShadowVisibilityFoliage_wgsl from './shader/shadow/getDirectionalShadowVisibilityFoliage.wgsl';
 import getMotionVector_wgsl from './shader/math/getMotionVector.wgsl';
 import getBillboardMatrix_wgsl from './shader/math/billboard/getBillboardMatrix.wgsl';
@@ -1154,6 +1155,11 @@ export namespace ShadowLibrary {
      * ```
      */
     export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
+    /**
+     * // [KO] 지형(Landscape) 전용 적응형 CSM 그림자 가시성 함수입니다. (12 / 4 / 1 / 1)
+     * // [EN] Adaptive CSM shadow visibility function dedicated to Landscape. (12 / 4 / 1 / 1)
+     */
+    export const getDirectionalShadowVisibilityLandscape = getDirectionalShadowVisibilityLandscape_wgsl;
     /**
      * // 🌟 [식생(Foliage) 초근경(Cascade 0) 전용 비회전 6-Tap 등방성 원형 가우시안 디스크]
      * // - 기존 9-Tap 5x5 Tent PCF 대비 텍스처 샘플링을 33.3%(9-Tap -> 6-Tap) 절감하고 부동소수점 나눗셈(fdiv) 6회를 100% 제거합니다.
