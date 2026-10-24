@@ -263,8 +263,6 @@ const renderTestPane = ({
             placementFolder.refresh();
         });
         placementFolder.addBinding(type, 'densityScaleByWeight');
-        placementFolder.addBinding(type, 'renderUnitCount', {readonly: true});
-        placementFolder.addBinding(type, 'drawCallCount', {readonly: true, interval: 200});
         placementFolder.addButton({title: 'rebake'}).on('click', () => {
             type.rebake();
         });
@@ -337,7 +335,8 @@ const renderTestPane = ({
             const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: false});
             managerFolder.addBinding(foliageManager, 'enabled');
             managerFolder.addBinding(foliageManager, 'subCellSize', {readonly: true});
-            managerFolder.addBinding(foliageManager, 'typeCount', {readonly: true, interval: 200});
+            managerFolder.addBinding(foliageManager, 'totalInstanceCount', {readonly: true, interval: 200});
+            managerFolder.addBinding(foliageManager, 'instanceCapacity', {readonly: true, interval: 200});
             managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true, interval: 200});
             managerFolder.addBinding(foliageManager, 'depthPrepassDrawCalls', {readonly: true, interval: 200});
             managerFolder.addBinding(foliageManager, 'mainPassDrawCalls', {readonly: true, interval: 200});

@@ -198,8 +198,6 @@ const renderTestPane = ({
             return;
         }
         const typeFolder = grassFolder.addFolder({title: type.name, expanded: isDefaultExpanded});
-        typeFolder.addBinding(type, 'renderUnitCount', {readonly: true});
-        typeFolder.addBinding(type, 'drawCallCount', {readonly: true});
 
         const cullingFolder = typeFolder.addFolder({title: 'Culling & Distance', expanded: true});
         cullingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5}).on('change', () => {
