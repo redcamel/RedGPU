@@ -119,6 +119,27 @@
             line-height: 1.6;
         }
 
+        .hero-version {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.25rem 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .hero-version[hidden] {
+            display: none;
+        }
+
+
+
         .hero-buttons {
             display: flex;
             gap: 1.5rem;
@@ -325,7 +346,7 @@
 
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(calc(50% - 1rem), 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
@@ -713,6 +734,8 @@
     </div>
     <div class="hero-container">
         <div class="hero-content-left">
+            <a class="hero-version" hidden href="https://github.com/redcamel/RedGPU/releases" id="heroVersion"><span
+                    class="hero-version-number"></span></a>
             <h1 class="hero-title">RedGPU</h1>
             <p class="hero-subtitle">A powerful JavaScript WebGPU library for creating stunning 2D/3D graphics and
                 high-performance web applications. Experience the next generation of web graphics today.</p>
@@ -767,18 +790,6 @@
                     about classes, methods, and properties.</p>
                 <span class="feature-link">
                     Browse API →
-                </span>
-            </a>
-
-            <a href="https://github.com/redcamel/RedGPU" class="feature-card">
-                <div class="feature-icon">
-                    <img alt="" src="manual/public/icon-performance-dark.svg">
-                </div>
-                <h3 class="feature-title">High Performance</h3>
-                <p class="feature-description">Built for speed and efficiency, leveraging the power of WebGPU for
-                    next-generation web graphics.</p>
-                <span class="feature-link">
-                    View on GitHub →
                 </span>
             </a>
         </div>
@@ -887,6 +898,20 @@
             link.href = link.dataset.hrefKo;
         });
     }
+</script>
+<script>
+    // Show the current version (package.json SSOT) near the hero title; stays hidden on failure
+    fetch('./package.json')
+        .then((response) => (response.ok ? response.json() : null))
+        .then((pkg) => {
+            const version = pkg && pkg.version;
+            if (!version) return;
+            const badge = document.getElementById('heroVersion');
+            badge.querySelector('.hero-version-number').textContent = 'v' + version;
+            badge.hidden = false;
+        })
+        .catch(() => {
+        });
 </script>
 </body>
 </html>
