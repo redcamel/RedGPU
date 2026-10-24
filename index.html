@@ -745,7 +745,7 @@
                 </span>
             </a>
 
-            <a href="/RedGPU/manual/" class="feature-card">
+            <a class="feature-card" data-href-ko="/RedGPU/manual/ko/" href="/RedGPU/manual/">
                 <div class="feature-icon">
                     <img alt="" src="manual/public/readme-dark.svg">
                 </div>
@@ -757,7 +757,8 @@
                 </span>
             </a>
 
-            <a href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html" class="feature-card">
+            <a class="feature-card"
+               data-href-ko="/RedGPU/manual/ko/api/RedGPU-API/namespaces/RedGPU/README.html" href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html">
                 <div class="feature-icon">
                     <img alt="" src="manual/public/icon-api-dark.svg">
                 </div>
@@ -836,10 +837,11 @@
                 <a href="/RedGPU/examples/">
                     <img alt="" class="link-icon" src="manual/public/icon-showcase-dark.svg"> Examples
                 </a>
-                <a href="/RedGPU/manual/">
+                <a data-href-ko="/RedGPU/manual/ko/" href="/RedGPU/manual/">
                     <img alt="" class="link-icon" src="manual/public/readme-dark.svg"> Documentation
                 </a>
-                <a href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html">
+                <a data-href-ko="/RedGPU/manual/ko/api/RedGPU-API/namespaces/RedGPU/README.html"
+                   href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html">
                     <img alt="" class="link-icon" src="manual/public/icon-api-dark.svg"> API Reference
                 </a>
                 <a href="https://github.com/redcamel/RedGPU/releases">
@@ -878,5 +880,13 @@
         </p>
     </div>
 </footer>
+<script>
+    // Route manual / API links to the Korean docs when the browser locale is Korean
+    if ((navigator.language || '').toLowerCase().startsWith('ko')) {
+        document.querySelectorAll('a[data-href-ko]').forEach((link) => {
+            link.href = link.dataset.hrefKo;
+        });
+    }
+</script>
 </body>
 </html>
