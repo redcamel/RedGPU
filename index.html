@@ -75,17 +75,8 @@
             radial-gradient(circle at 75% 75%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
             radial-gradient(circle at 50% 50%, rgba(255, 100, 0, 0.05) 0%, transparent 50%);
             z-index: -1;
-            animation: backgroundMove 15s ease-in-out infinite;
         }
 
-        @keyframes backgroundMove {
-            0%, 100% {
-                transform: scale(1) rotate(0deg);
-            }
-            50% {
-                transform: scale(4.1) rotate(180deg);
-            }
-        }
 
         .hero {
             padding: 4rem 2rem;
@@ -278,9 +269,6 @@
         .section {
             margin-bottom: 0;
             padding: 6rem 0;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.8s ease-out forwards;
             position: relative;
         }
 
@@ -324,24 +312,9 @@
             padding: 3rem 2rem 6rem;
         }
 
-        .section:nth-child(2) {
-            animation-delay: 0.2s;
-        }
 
-        .section:nth-child(3) {
-            animation-delay: 0.4s;
-        }
 
-        .section:nth-child(4) {
-            animation-delay: 0.6s;
-        }
 
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
 
         .section-title {
             font-family: 'Inter', sans-serif;
@@ -856,8 +829,8 @@
                     <img src="https://img.shields.io/github/release-date/redcamel/RedGPU?style=for-the-badge&logo=github&label=Release%20Date"
                          alt="Release Date">
                 </a>
-                <a href="LICENSE.md">
-                    <img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"
+                <a href="https://github.com/redcamel/RedGPU/blob/master/LICENCE.md">
+                    <img src="https://img.shields.io/github/license/redcamel/RedGPU?colorB=ff0000"
                          alt="License">
                 </a>
                 <img src="https://img.shields.io/github/last-commit/redcamel/RedGPU" alt="Last Commit">
