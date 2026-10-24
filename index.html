@@ -128,7 +128,7 @@
             gap: 1.5rem;
         }
 
-        .iframes {
+        .hero-canvas {
             position: absolute;
             bottom: 0;
             right: 0;
@@ -140,10 +140,10 @@
             opacity: 1
         }
 
-        iframe {
+        .hero-canvas canvas {
+            display: block;
             width: 100%;
             height: 100%;
-            border: none;
         }
 
         @media (max-width: 1100px) {
@@ -157,7 +157,7 @@
                 max-width: 550px;
             }
 
-            .iframes {
+            .hero-canvas {
                 width: 350px;
                 height: 400px;
             }
@@ -178,7 +178,7 @@
                 max-width: 420px;
             }
 
-            .iframes {
+            .hero-canvas {
                 transform: translate(20px, 0);
                 height: 280px;
                 bottom: 220px
@@ -207,7 +207,7 @@
                 justify-content: center;
             }
 
-            .iframes {
+            .hero-canvas {
                 opacity:0
             }
         }
@@ -665,19 +665,55 @@
 
     </style>
     <script type="module">
-        window.onload = () => {
-            const iframes = document.querySelector('.iframes');
-            const t0 = document.createElement('iframe');
-            t0.src = './examples/assets/indexSample.html';
-            iframes.appendChild(t0);
+        window.addEventListener('load', async () => {
+            const canvas = document.getElementById('heroCanvas');
+            const RedGPU = await import('./dist/index.js');
+            RedGPU.init(
+                canvas,
+                (redGPUContext) => {
+                    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+                    controller.speedDistance = 0.1;
+                    controller.tilt = 0;
+                    // Lock distance to prevent zooming
+                    controller.distance =
+                        controller.minDistance =
+                            controller.maxDistance = 0.9;
 
-        };
+                    const scene = new RedGPU.Display.Scene();
+                    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+                    redGPUContext.backgroundColor.a = 0;
+                    redGPUContext.addView(view);
+
+                    const modelURL = redGPUContext.detector.isMobile ?
+                        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoomBox/glTF-Binary/BoomBox.glb' :
+                        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/FlightHelmet/glTF/FlightHelmet.gltf';
+                    new RedGPU.GLTFLoader(redGPUContext, modelURL, (result) => {
+                        const mesh = result.resultMesh;
+                        mesh.y = -0.3;
+                        scene.addChild(mesh);
+                    });
+
+                    view.ibl = new RedGPU.Resource.IBL(redGPUContext, './examples/assets/hdr/Cannon_Exterior.hdr');
+
+                    const renderer = new RedGPU.Renderer();
+                    renderer.start(redGPUContext, () => {
+                        if (scene.numChildren) {
+                            scene.getChildAt(0).rotationY += 0.1;
+                        }
+                    });
+                },
+                (failReason) => {
+                }
+            );
+        });
     </script>
 </head>
 <body>
 
 <section class="hero">
-    <div class="iframes"></div>
+    <div aria-hidden="true" class="hero-canvas">
+        <canvas id="heroCanvas"></canvas>
+    </div>
     <div class="hero-container">
         <div class="hero-content-left">
             <h1 class="hero-title">RedGPU</h1>
