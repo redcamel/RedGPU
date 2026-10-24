@@ -49,8 +49,6 @@ class DirectionalShadowManager {
     #strength: number = 0.9;
     #maxShadowDistance: number = 200;
     #cascadeCount: number = 4;
-    #pcssLightSize: number = 1.0;
-    #targetNearTexelSize: number = 0.01;
 
     #shadowDepthTexture: GPUTexture;
     #shadowDepthTextureView: GPUTextureView;
@@ -250,31 +248,6 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 카메라 근경(Cascade 0)에서 보장할 물리적 목표 텍셀 크기(단위: m, 기본값: 0.01m = 1cm)를 반환합니다.
-     * [EN] Returns the target physical texel size (in meters, default: 0.01m = 1cm) guaranteed at near camera range (Cascade 0).
-     *
-     * @returns
-     * [KO] 목표 텍셀 크기 (m)
-     * [EN] Target texel size in meters
-     */
-    get targetNearTexelSize(): number {
-        return this.#targetNearTexelSize;
-    }
-
-    /**
-     * [KO] 카메라 근경(Cascade 0)에서 보장할 물리적 목표 텍셀 크기(단위: m, 0.001 ~ 0.1)를 설정합니다.
-     * [EN] Sets the target physical texel size (in meters, 0.001 to 0.1) guaranteed at near camera range (Cascade 0).
-     *
-     * @param value -
-     * [KO] 목표 텍셀 크기 (m)
-     * [EN] Target texel size in meters
-     */
-    set targetNearTexelSize(value: number) {
-        validatePositiveNumberRange(value, 0.001, 0.1);
-        this.#targetNearTexelSize = value;
-    }
-
-    /**
      * [KO] 각 캐스케이드의 분할 깊이(Split Depth) 배열(길이 4)을 반환합니다.
      * [EN] Returns the array of split depths for each cascade (length 4).
      *
@@ -321,23 +294,6 @@ class DirectionalShadowManager {
     set shadowDepthTextureSize(value: number) {
         validateUintRange(value, 1);
         this.#shadowDepthTextureSize = value;
-    }
-
-    /**
-     * [KO] PCSS 광원의 가상 크기(Light Radius / Angular Size, 기본값: 2.0)를 반환합니다.
-     * [EN] Returns the virtual light size for PCSS (Light Radius / Angular Size, default: 2.0).
-     */
-    get pcssLightSize(): number {
-        return this.#pcssLightSize;
-    }
-
-    /**
-     * [KO] PCSS 광원의 가상 크기(Light Radius / Angular Size, 기본값: 2.0)를 설정합니다. (0.0 이상)
-     * [EN] Sets the virtual light size for PCSS (Light Radius / Angular Size, default: 2.0). (0.0 or greater)
-     */
-    set pcssLightSize(value: number) {
-        validatePositiveNumberRange(value, 0);
-        this.#pcssLightSize = value;
     }
 
     /**
@@ -420,7 +376,7 @@ class DirectionalShadowManager {
 
         const tanHalfFov = Math.tan(fov * 0.5);
         const k = tanHalfFov * Math.sqrt(1.0 + aspect * aspect);
-        const kSafe = Math.max(k, 0.001);
+        const kSq = k * k;
 
         if (cascadeCount === 1) {
             g_cascadeSplits[1] = shadowFar;
@@ -429,25 +385,18 @@ class DirectionalShadowManager {
                 splitDepths[i] = shadowFar * 2.0;
             }
         } else {
-            const maxD0 = shadowFar / cascadeCount;
-            const minD0 = Math.min(Math.max(near + 0.5, 2.0), maxD0 * 0.5);
-            const refK = Math.max(tanHalfFov * 2.0155644370746373, 0.001);
-            const calculatedD0 = (textureSize * this.#targetNearTexelSize) / (2.0 * refK);
-            const d0 = Math.min(Math.max(calculatedD0, minD0), maxD0);
+            const lambda = 0.82;
+            const effectiveNear = Math.min(Math.max(near, 1.0), shadowFar * 0.25);
+            const ratio = shadowFar / effectiveNear;
+            const range = shadowFar - near;
 
-            g_cascadeSplits[1] = d0;
-            splitDepths[0] = d0;
-
-            const remainingCount = cascadeCount - 1;
-            const ratio = Math.pow(shadowFar / d0, 1.0 / remainingCount);
-
-            for (let j = 1; j <= remainingCount; j++) {
-                const cascadeIndex = j + 1;
-                const dist = (j === remainingCount) ? shadowFar : d0 * Math.pow(ratio, j);
-                g_cascadeSplits[cascadeIndex] = dist;
-                if (cascadeIndex - 1 < 4) {
-                    splitDepths[cascadeIndex - 1] = dist;
-                }
+            for (let i = 1; i <= cascadeCount; i++) {
+                const p = i / cascadeCount;
+                const logSplit = effectiveNear * Math.pow(ratio, p);
+                const uniformSplit = near + range * p;
+                const dist = (i === cascadeCount) ? shadowFar : (lambda * logSplit + (1.0 - lambda) * uniformSplit);
+                g_cascadeSplits[i] = dist;
+                splitDepths[i - 1] = dist;
             }
 
             for (let i = cascadeCount; i < 4; i++) {
@@ -459,14 +408,13 @@ class DirectionalShadowManager {
             const subNear = g_cascadeSplits[c];
             const subFar = g_cascadeSplits[c + 1];
 
-            const cz = (subFar + subNear) * 0.5;
-            const halfDepth = (subFar - subNear) * 0.5;
+            const cz = Math.min((subNear + subFar) * 0.5 * (1.0 + kSq), subFar);
+            const farDz = subFar - cz;
             const farDiag = subFar * k;
-            let sphereRadius = Math.sqrt(halfDepth * halfDepth + farDiag * farDiag);
+            let sphereRadius = Math.sqrt(farDz * farDz + farDiag * farDiag);
 
             const rawWorldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
-            sphereRadius += rawWorldUnitsPerTexel * 6.0;
-
+            sphereRadius += rawWorldUnitsPerTexel * 2.0;
             sphereRadius = Math.ceil(sphereRadius / rawWorldUnitsPerTexel) * rawWorldUnitsPerTexel;
 
             vec3.set(g_localCenter, 0, 0, -cz);

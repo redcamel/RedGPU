@@ -167,10 +167,6 @@ class SystemUniformUpdater {
                     value: tempCascadeTexelSizes,
                 },
                 {
-                    key: 'pcssLightSize',
-                    value: directionalShadowManager.pcssLightSize,
-                },
-                {
                     key: 'casterBoundingCenter',
                     value: directionalShadowManager.casterBoundingCenter,
                 },
