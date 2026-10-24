@@ -5,7 +5,7 @@
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
-#redgpu_include shadow.getDirectionalShadowVisibilityLandscape;
+#redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include math.getInterleavedGradientNoise;
 #redgpu_include landscape.struct.LandscapeLayerParams;
 #redgpu_include landscape.struct.LandscapeUniforms;
@@ -25,7 +25,6 @@ struct InputData {
     @location(5) instanceColor: vec4<f32>,
     @location(6) @interpolate(flat) lodLevel: f32,
     @location(7) @interpolate(flat) receiveShadow: f32,
-    @location(8) viewDepth: f32,
 };
 
 struct MaterialUniforms {
@@ -719,13 +718,13 @@ fn main(inputData: InputData) -> OutputFragment {
         if (geoNdotL <= 0.0) {
             csmVisibility = 1.0 - shadowStrength;
         } else if (rawViewDistSq < maxCSMDistSq && !isDeepTerrainShadow && inCasterVolume) {
-            let rawVisibility: f32 = getDirectionalShadowVisibilityLandscape(
+            let rawVisibility: f32 = getDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
                 input_vertexPosition,
                 baseNormal,
                 L,
-                inputData.viewDepth
+                inputData.position.xy
             );
             csmVisibility = mix(1.0 - shadowStrength, 1.0, rawVisibility);
         }
