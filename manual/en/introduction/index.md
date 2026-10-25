@@ -115,6 +115,8 @@ RedGPU.init(
         // 3. Create a Camera: Set up a Perspective projection camera
         const camera = new RedGPU.Camera.PerspectiveCamera();
         camera.z = -5; // Move the camera back from the origin
+        camera.lookAt(0,0,0)
+        
 
         // 4. Create a Mesh: A combination of a shape (Box) and a material (Color)
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
@@ -167,6 +169,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
 const camera = new RedGPU.Camera.PerspectiveCamera ();
         camera.z = -5;
+camera.lookAt (0,0,0)
 
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
         const material = new RedGPU.Material.ColorMaterial(redGPUContext, "#00CC99");
