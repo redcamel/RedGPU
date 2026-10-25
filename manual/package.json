@@ -22,6 +22,7 @@
     "vitepress-sidebar": "^1.40.0"
   },
   "overrides": {
-    "qsu": "1.12.0"
+    "qsu": "1.12.0",
+    "katex": "^0.19.1"
   }
 }
