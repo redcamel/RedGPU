@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RedGPU - Javascript WebGPU Library</title>
+    <title>RedGPU - WebGPU 3D Engine for JavaScript &amp; TypeScript</title>
     <meta content="RedGPU is a high-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for building next-generation web graphics applications."
           name="description">
     <meta content="RedGPU, WebGPU, 3D Engine, Graphics, JavaScript, TypeScript, WebGL, Computer Graphics"
@@ -14,7 +14,7 @@
     <!-- Open Graph / Facebook -->
     <meta content="website" property="og:type">
     <meta content="https://redcamel.github.io/RedGPU/" property="og:url">
-    <meta content="RedGPU - Javascript WebGPU Library" property="og:title">
+    <meta content="RedGPU - WebGPU 3D Engine for JavaScript &amp; TypeScript" property="og:title">
     <meta content="RedGPU is a high-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for building next-generation web graphics applications."
           property="og:description">
     <meta content="https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e"
@@ -23,7 +23,7 @@
     <!-- Twitter -->
     <meta content="summary_large_image" name="twitter:card">
     <meta content="https://redcamel.github.io/RedGPU/" name="twitter:url">
-    <meta content="RedGPU - Javascript WebGPU Library" name="twitter:title">
+    <meta content="RedGPU - WebGPU 3D Engine for JavaScript &amp; TypeScript" name="twitter:title">
     <meta content="RedGPU is a high-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for building next-generation web graphics applications."
           name="twitter:description">
     <meta content="https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e"
@@ -32,17 +32,54 @@
     <!-- Structured Data -->
     <script type="application/ld+json">{
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "RedGPU",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Web",
-        "description": "High-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for next-generation web graphics.",
-        "url": "https://redcamel.github.io/RedGPU/",
-        "codeRepository": "https://github.com/redcamel/RedGPU",
-        "author": {
-            "@type": "Person",
-            "name": "redcamel"
-        }
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "@id": "https://redcamel.github.io/RedGPU/#website",
+                "url": "https://redcamel.github.io/RedGPU/",
+                "name": "RedGPU",
+                "description": "RedGPU is a high-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for building next-generation web graphics applications.",
+                "inLanguage": "en",
+                "publisher": {
+                    "@id": "https://redcamel.github.io/RedGPU/#author"
+                }
+            },
+            {
+                "@type": "Person",
+                "@id": "https://redcamel.github.io/RedGPU/#author",
+                "name": "redcamel",
+                "url": "https://github.com/redcamel",
+                "sameAs": [
+                    "https://github.com/redcamel",
+                    "https://twitter.com/redcamel15"
+                ]
+            },
+            {
+                "@type": "SoftwareSourceCode",
+                "@id": "https://redcamel.github.io/RedGPU/#software",
+                "name": "RedGPU",
+                "alternateName": "redgpu",
+                "description": "High-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for next-generation web graphics.",
+                "url": "https://redcamel.github.io/RedGPU/",
+                "codeRepository": "https://github.com/redcamel/RedGPU",
+                "programmingLanguage": [
+                    "TypeScript",
+                    "JavaScript",
+                    "WGSL"
+                ],
+                "runtimePlatform": "Web browser with WebGPU support",
+                "license": "https://opensource.org/licenses/MIT",
+                "keywords": "WebGPU, 3D Engine, JavaScript, TypeScript, WGSL, glTF, PBR, Computer Graphics",
+                "image": "https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e",
+                "copyrightYear": 2019,
+                "author": {
+                    "@id": "https://redcamel.github.io/RedGPU/#author"
+                },
+                "isPartOf": {
+                    "@id": "https://redcamel.github.io/RedGPU/#website"
+                }
+            }
+        ]
     }</script>
 
     <style>
@@ -798,14 +835,14 @@
     <section class="section">
         <h2 class="section-title">Visual Showcase</h2>
         <div class="video-card">
-            <video autoplay loop muted playsinline controls>
+            <video class="lazy-video" controls loop muted playsinline preload="none">
                 <source src="https://github.com/user-attachments/assets/e46b2e21-3173-43fb-948f-a68f6fcfb424"
                         type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
         <div class="video-card">
-            <video autoplay controls loop muted playsinline>
+            <video class="lazy-video" controls loop muted playsinline preload="none">
                 <source src="https://github.com/user-attachments/assets/3115b699-9b3e-45f2-9e3b-682db04bcc03"
                         type="video/mp4">
                 Your browser does not support the video tag.
@@ -813,7 +850,7 @@
         </div>
         <br/>
         <div class="video-card">
-            <video autoplay loop muted playsinline controls>
+            <video class="lazy-video" controls loop muted playsinline preload="none">
                 <source src="https://github.com/user-attachments/assets/2bb100e7-fb48-43c8-8144-963cec280de9" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
@@ -912,6 +949,46 @@
         })
         .catch(() => {
         });
+</script>
+<script>
+    // Lazy autoplay: videos stay preload="none" and only load/play while visible; paused off-screen.
+    // A manual pause by the user is respected until the user plays the video again.
+    (() => {
+        const videos = document.querySelectorAll('video.lazy-video');
+        if (!('IntersectionObserver' in window)) {
+            videos.forEach((video) => video.play().catch(() => {
+            }));
+            return;
+        }
+        const visible = new WeakSet();
+        const userPaused = new WeakSet();
+        const onPause = (event) => {
+            if (visible.has(event.target)) userPaused.add(event.target);
+        };
+        const onPlay = (event) => {
+            userPaused.delete(event.target);
+        };
+        const ignorePlayError = () => {
+        };
+        const observer = new IntersectionObserver((entries) => {
+            for (let i = 0; i < entries.length; i++) {
+                const entry = entries[i];
+                const video = entry.target;
+                if (entry.isIntersecting) {
+                    visible.add(video);
+                    if (video.paused && !userPaused.has(video)) video.play().catch(ignorePlayError);
+                } else {
+                    visible.delete(video);
+                    if (!video.paused) video.pause();
+                }
+            }
+        }, {threshold: 0.25});
+        videos.forEach((video) => {
+            video.addEventListener('pause', onPause);
+            video.addEventListener('play', onPlay);
+            observer.observe(video);
+        });
+    })();
 </script>
 </body>
 </html>
