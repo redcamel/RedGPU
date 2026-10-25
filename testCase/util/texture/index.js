@@ -42,18 +42,18 @@ redUnit.testGroup(
 );
 
 redUnit.testGroup(
-    'RedGPU.Util.loadAndCreateBitmapImage',
+    'RedGPU.Util.TextureParser.loadImageToImageBitmap',
     (runner) => {
         runner.defineTest('Success Test: Valid URL', (run) => {
             // This test needs an actual image file. We use a known asset from examples.
             const url = '../../../examples/assets/UV_Grid_Sm.jpg';
-            RedGPU.Util.loadAndCreateBitmapImage(url).then(bitmap => {
+            RedGPU.Util.TextureParser.loadImageToImageBitmap(url).then(bitmap => {
                 run(bitmap instanceof ImageBitmap && bitmap.width > 0);
             }).catch(e => run(false, e));
         }, true);
 
         runner.defineTest('Failure Test: Invalid URL', (run) => {
-            RedGPU.Util.loadAndCreateBitmapImage('invalid-url.png').then(() => {
+            RedGPU.Util.TextureParser.loadImageToImageBitmap('invalid-url.png').then(() => {
                 run(true);
             }).catch(() => run(false));
         }, false);
