@@ -73,6 +73,20 @@ const topics = computed(() => {
               muted
               playsinline
           >
+            <source src="https://github.com/user-attachments/assets/e46b2e21-3173-43fb-948f-a68f6fcfb424"
+                    type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="hero-video-container">
+          <video
+              autoplay
+              class="hero-video"
+              controls
+              loop
+              muted
+              playsinline
+          >
             <source src="https://github.com/user-attachments/assets/3115b699-9b3e-45f2-9e3b-682db04bcc03"
                     type="video/mp4">
             Your browser does not support the video tag.
