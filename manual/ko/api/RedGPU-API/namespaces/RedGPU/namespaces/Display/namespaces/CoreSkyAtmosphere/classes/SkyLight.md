@@ -6,7 +6,7 @@
 
 # Class: SkyLight
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L21)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L21)
 
 SkyAtmosphere의 대기 산란 데이터를 기반으로 실시간 간접 조명(IBL)용 난반사(Irradiance) 및 정반사(Reflection) 큐브맵을 생성하는 클래스입니다.
 
@@ -28,7 +28,7 @@ SkyAtmosphere의 대기 산란 데이터를 기반으로 실시간 간접 조명
 
 > **new SkyLight**(`redGPUContext`, `sharedUniformBuffer`, `sampler`): `SkyLight`
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L39)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:39](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L39)
 
 SkyLight 인스턴스를 생성합니다.
 
@@ -60,7 +60,7 @@ SkyLight 인스턴스를 생성합니다.
 
 > <span class="readonly-badge">readonly</span> **get** **irradianceLUT**(): [`DirectCubeTexture`](../../../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L53)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L53)
 
 간접 난반사 조명용 Irradiance 큐브 텍스처를 반환합니다.
 
@@ -80,7 +80,7 @@ Irradiance 큐브 텍스처
 
 > <span class="readonly-badge">readonly</span> **get** **reflectionLUT**(): [`DirectCubeTexture`](../../../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L65)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L65)
 
 간접 정반사 조명용 Reflection 큐브 텍스처를 반환합니다.
 
@@ -102,7 +102,7 @@ Reflection 큐브 텍스처
 
 > **destroy**(): `void`
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L87)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:87](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L87)
 
 SkyLight 인스턴스 및 내부 IBL 생성기 리소스를 해제합니다.
 
@@ -118,7 +118,7 @@ SkyLight 인스턴스 및 내부 IBL 생성기 리소스를 해제합니다.
 
 > **update**(`skyAtmosphere`): `void`
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L77)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:77](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L77)
 
 SkyAtmosphere의 LUT 데이터를 기반으로 난반사 및 정반사 IBL 큐브맵을 베이킹합니다.
 
@@ -145,7 +145,7 @@ SkyAtmosphere의 LUT 데이터를 기반으로 난반사 및 정반사 IBL 큐�
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -169,7 +169,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -193,7 +193,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
@@ -217,7 +217,7 @@ Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -241,7 +241,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -255,7 +255,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -281,7 +281,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -305,7 +305,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -329,7 +329,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

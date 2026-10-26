@@ -6,7 +6,7 @@
 
 # Class: SystemUniformUpdater
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L21)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L21)
 
 Utility class that updates system-wide WGSL uniform structure data such as camera, lights, shadows, sky atmosphere, and wind to `Float32Array`/`Uint32Array` buffers.
 
@@ -26,7 +26,7 @@ Utility class that updates system-wide WGSL uniform structure data such as camer
 
 > `static` **updateAmbientLight**(`ambientLight`, `ambientLightMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:431](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L431)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:431](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L431)
 
 Updates `AmbientLight` information to the system uniform buffer.
 
@@ -49,7 +49,7 @@ Updates `AmbientLight` information to the system uniform buffer.
 
 > `static` **updateCamera**(`camera`, `cameraMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L39)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:39](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L39)
 
 Updates camera information to the system uniform buffer.
 
@@ -72,7 +72,7 @@ Updates camera information to the system uniform buffer.
 
 > `static` **updateDirectionalLights**(`directionalLights`, `directionalLightsMemberList`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:386](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L386)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:386](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L386)
 
 Updates `DirectionalLight` array information to the system uniform buffer.
 
@@ -95,7 +95,7 @@ Updates `DirectionalLight` array information to the system uniform buffer.
 
 > `static` **updateProjection**(`projectionInfo`, `projectionMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:320](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L320)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:320](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L320)
 
 Updates projection and view-projection matrix information to the system uniform buffer.
 
@@ -125,7 +125,7 @@ Updates projection and view-projection matrix information to the system uniform 
 
 > `static` **updateShadow**(`shadowManager`, `shadowMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L116)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L116)
 
 Updates shadow configuration and cascade matrix information to the system uniform buffer.
 
@@ -148,7 +148,7 @@ Updates shadow configuration and cascade matrix information to the system unifor
 
 > `static` **updateSkyAtmosphere**(`skyAtmosphere`, `systemMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:206](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L206)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:206](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L206)
 
 Updates `SkyAtmosphere` information to the system uniform buffer.
 
@@ -171,7 +171,7 @@ Updates `SkyAtmosphere` information to the system uniform buffer.
 
 > `static` **updateTime**(`timeInfo`, `timeMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:269](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L269)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:269](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L269)
 
 Updates time and frame-related information to the system uniform buffer.
 
@@ -194,7 +194,7 @@ Updates time and frame-related information to the system uniform buffer.
 
 > `static` **updateWind**(`windManager`, `windMembersInfo`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:469](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L469)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:469](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L469)
 
 Updates `WindManager` environmental information by directly copying it into the system uniform buffer.
 

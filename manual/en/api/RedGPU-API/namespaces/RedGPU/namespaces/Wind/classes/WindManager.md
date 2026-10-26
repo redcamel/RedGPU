@@ -6,7 +6,7 @@
 
 # Class: WindManager
 
-Defined in: [src/wind/WindManager.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L24)
+Defined in: [src/wind/WindManager.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L24)
 
 Class that manages scene-wide wind direction, speed, and strength; automatically created internally by the Scene.
 
@@ -29,7 +29,7 @@ windManager.strength = 1.5;
 
 > **new WindManager**(`scene`): `WindManager`
 
-Defined in: [src/wind/WindManager.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L41)
+Defined in: [src/wind/WindManager.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L41)
 
 Creates a WindManager instance. (Internal system only)
 
@@ -51,7 +51,7 @@ Creates a WindManager instance. (Internal system only)
 
 > **get** **directionAngle**(): `number`
 
-Defined in: [src/wind/WindManager.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L70)
+Defined in: [src/wind/WindManager.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L70)
 
 Horizontal wind direction angle on the XZ plane. (Unit: degree, 0 ~ 360, default: 0)
 
@@ -70,7 +70,7 @@ Direction angle (degree)
 
 > **set** **directionAngle**(`deg`): `void`
 
-Defined in: [src/wind/WindManager.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L74)
+Defined in: [src/wind/WindManager.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L74)
 
 ##### Parameters
 
@@ -90,7 +90,7 @@ Defined in: [src/wind/WindManager.ts:74](https://github.com/redcamel/RedGPU/blob
 
 > <span class="readonly-badge">readonly</span> **get** **directionX**(): `number`
 
-Defined in: [src/wind/WindManager.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L89)
+Defined in: [src/wind/WindManager.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L89)
 
 Returns the normalized X component (`cos(directionAngle)`) of the wind direction.
 
@@ -108,7 +108,7 @@ Normalized X direction component
 
 > <span class="readonly-badge">readonly</span> **get** **directionZ**(): `number`
 
-Defined in: [src/wind/WindManager.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L101)
+Defined in: [src/wind/WindManager.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L101)
 
 Returns the normalized Z component (`sin(directionAngle)`) of the wind direction.
 
@@ -126,7 +126,7 @@ Normalized Z direction component
 
 > **get** **enabled**(): `boolean`
 
-Defined in: [src/wind/WindManager.ts:145](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L145)
+Defined in: [src/wind/WindManager.ts:145](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L145)
 
 Whether the wind effect is enabled. (default: true)
 
@@ -140,7 +140,7 @@ Enabled state
 
 > **set** **enabled**(`value`): `void`
 
-Defined in: [src/wind/WindManager.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L149)
+Defined in: [src/wind/WindManager.ts:149](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L149)
 
 ##### Parameters
 
@@ -160,7 +160,7 @@ Defined in: [src/wind/WindManager.ts:149](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **scene**(): [`Scene`](../../Display/classes/Scene.md)
 
-Defined in: [src/wind/WindManager.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L53)
+Defined in: [src/wind/WindManager.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L53)
 
 Returns the parent Scene instance.
 
@@ -178,7 +178,7 @@ Parent Scene
 
 > **get** **speed**(): `number`
 
-Defined in: [src/wind/WindManager.ts:113](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L113)
+Defined in: [src/wind/WindManager.ts:113](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L113)
 
 Time multiplier of the wind animation. (default: 1.0)
 
@@ -192,7 +192,7 @@ Speed multiplier
 
 > **set** **speed**(`value`): `void`
 
-Defined in: [src/wind/WindManager.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L117)
+Defined in: [src/wind/WindManager.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L117)
 
 ##### Parameters
 
@@ -212,7 +212,7 @@ Defined in: [src/wind/WindManager.ts:117](https://github.com/redcamel/RedGPU/blo
 
 > **get** **strength**(): `number`
 
-Defined in: [src/wind/WindManager.ts:129](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L129)
+Defined in: [src/wind/WindManager.ts:129](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L129)
 
 Base wind strength (force). (default: 1.0)
 
@@ -226,7 +226,7 @@ Wind strength
 
 > **set** **strength**(`value`): `void`
 
-Defined in: [src/wind/WindManager.ts:133](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L133)
+Defined in: [src/wind/WindManager.ts:133](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L133)
 
 ##### Parameters
 

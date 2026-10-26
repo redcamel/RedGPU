@@ -8,7 +8,7 @@
 
 > **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct?`, `sourceTextureConfigs?`, `earlyExit?`): `object`
 
-Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/createBasicPostEffectCode.ts#L90)
+Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:90](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/createBasicPostEffectCode.ts#L90)
 
 단일 패스 후처리 이펙트용 MSAA/Non-MSAA WGSL 컴퓨트 셰이더 코드를 생성합니다.
 
@@ -32,5 +32,5 @@ MSAA 및 Non-MSAA용 WGSL 코드 객체 (`{ msaa: string, nonMsaa: string }`)
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:98](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/createBasicPostEffectCode.ts#L98) |
-| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:99](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/createBasicPostEffectCode.ts#L99) |
+| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:98](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/createBasicPostEffectCode.ts#L98) |
+| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:99](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/createBasicPostEffectCode.ts#L99) |

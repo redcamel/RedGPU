@@ -6,7 +6,7 @@
 
 # Class: Landscape
 
-Defined in: [src/landscape/Landscape.ts:52](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L52)
+Defined in: [src/landscape/Landscape.ts:52](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L52)
 
 Core class that integrates and manages tile streaming, GPU-driven frustum/HZB occlusion culling, continuous LOD morphing, multi-layer splatting, and vegetation (`FoliageManager`) and grass (`GrassManager`) ecosystems for large-scale terrains.
 
@@ -45,7 +45,7 @@ scene.landscape = landscape;
 
 > **new Landscape**(`redGPUContext`, `worldSize?`): `Landscape`
 
-Defined in: [src/landscape/Landscape.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L109)
+Defined in: [src/landscape/Landscape.ts:109](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L109)
 
 Creates a `Landscape` instance.
 
@@ -82,7 +82,7 @@ const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [4000, 4000]);
 
 > <span class="readonly-badge">readonly</span> **get** **baseColor**(): [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/landscape/Landscape.ts:561](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L561)
+Defined in: [src/landscape/Landscape.ts:561](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L561)
 
 Returns the default base color (`ColorRGBA`) of the terrain material.
 
@@ -102,7 +102,7 @@ Returns the default base color (`ColorRGBA`) of the terrain material.
 
 > **get** **castHeightmapShadow**(): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:755](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L755)
+Defined in: [src/landscape/Landscape.ts:755](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L755)
 
 Gets or sets whether heightmap raymarching-based terrain self-shadowing is enabled. (Default: `false`)
 
@@ -116,7 +116,7 @@ Whether heightmap self-shadowing is enabled
 
 > **set** **castHeightmapShadow**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:759](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L759)
+Defined in: [src/landscape/Landscape.ts:759](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L759)
 
 ##### Parameters
 
@@ -138,7 +138,7 @@ Defined in: [src/landscape/Landscape.ts:759](https://github.com/redcamel/RedGPU/
 
 > **get** **componentCount**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/Landscape.ts:365](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L365)
+Defined in: [src/landscape/Landscape.ts:365](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L365)
 
 Gets or sets the number of tiles (components) `[countX, countZ]` dividing the terrain along the X and Z axes.
 
@@ -152,7 +152,7 @@ Component count tuple `[number, number]`
 
 > **set** **componentCount**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:369](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L369)
+Defined in: [src/landscape/Landscape.ts:369](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L369)
 
 ##### Parameters
 
@@ -174,7 +174,7 @@ Defined in: [src/landscape/Landscape.ts:369](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **components**(): [`LandscapeComponent`](../namespaces/Core/namespaces/Spatial/classes/LandscapeComponent.md)[]
 
-Defined in: [src/landscape/Landscape.ts:489](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L489)
+Defined in: [src/landscape/Landscape.ts:489](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L489)
 
 Returns the array of all `LandscapeComponent` instances belonging to the terrain spatial grid.
 
@@ -194,7 +194,7 @@ Array of `LandscapeComponent` instances
 
 > **get** **componentSizeQuads**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:432](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L432)
+Defined in: [src/landscape/Landscape.ts:432](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L432)
 
 Gets or sets the base quad subdivision count per side of a standard tile component. (Only values from `LANDSCAPE_BASE_GRID_SIZE` are allowed)
 
@@ -208,7 +208,7 @@ Number of quads per side of a component
 
 > **set** **componentSizeQuads**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:436](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L436)
+Defined in: [src/landscape/Landscape.ts:436](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L436)
 
 ##### Parameters
 
@@ -230,7 +230,7 @@ Defined in: [src/landscape/Landscape.ts:436](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **debuggerManager**(): [`LandscapeDebuggerManager`](../namespaces/Debugger/classes/LandscapeDebuggerManager.md)
 
-Defined in: [src/landscape/Landscape.ts:214](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L214)
+Defined in: [src/landscape/Landscape.ts:214](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L214)
 
 Returns the `LandscapeDebuggerManager` that controls terrain debug visualization and wireframe states.
 
@@ -250,7 +250,7 @@ Returns the `LandscapeDebuggerManager` that controls terrain debug visualization
 
 > <span class="readonly-badge">readonly</span> **get** **foliageManager**(): [`FoliageManager`](../namespaces/Foliage/classes/FoliageManager.md)
 
-Defined in: [src/landscape/Landscape.ts:226](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L226)
+Defined in: [src/landscape/Landscape.ts:226](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L226)
 
 Returns the `FoliageManager` that manages vegetation (3D mesh) scattering on the terrain.
 
@@ -270,7 +270,7 @@ Returns the `FoliageManager` that manages vegetation (3D mesh) scattering on the
 
 > **get** **globalHeightmapUrl**(): `string`
 
-Defined in: [src/landscape/Landscape.ts:601](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L601)
+Defined in: [src/landscape/Landscape.ts:601](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L601)
 
 Gets or sets the global heightmap image URL that provides base elevation across the entire terrain.
 
@@ -284,7 +284,7 @@ Global heightmap URL string
 
 > **set** **globalHeightmapUrl**(`val`): `void`
 
-Defined in: [src/landscape/Landscape.ts:605](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L605)
+Defined in: [src/landscape/Landscape.ts:605](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L605)
 
 ##### Parameters
 
@@ -306,7 +306,7 @@ Defined in: [src/landscape/Landscape.ts:605](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **grassManager**(): [`GrassManager`](../namespaces/Grass/classes/GrassManager.md)
 
-Defined in: [src/landscape/Landscape.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L238)
+Defined in: [src/landscape/Landscape.ts:238](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L238)
 
 Returns the `GrassManager` that manages procedural grass and vegetation clumps on the terrain.
 
@@ -326,7 +326,7 @@ Returns the `GrassManager` that manages procedural grass and vegetation clumps o
 
 > <span class="readonly-badge">readonly</span> **get** **halfWorldSizeX**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:341](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L341)
+Defined in: [src/landscape/Landscape.ts:341](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L341)
 
 Returns half of the X-axis world size (`worldSizeX * 0.5`).
 
@@ -346,7 +346,7 @@ Half of the X-axis world size
 
 > <span class="readonly-badge">readonly</span> **get** **halfWorldSizeZ**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:353](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L353)
+Defined in: [src/landscape/Landscape.ts:353](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L353)
 
 Returns half of the Z-axis world size (`worldSizeZ * 0.5`).
 
@@ -366,7 +366,7 @@ Half of the Z-axis world size
 
 > <span class="readonly-badge">readonly</span> **get** **hasValidScatterAtlas**(): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:687](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L687)
+Defined in: [src/landscape/Landscape.ts:687](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L687)
 
 Returns whether both the VHT/VBT atlases and loaded tiles required for foliage and grass scattering are valid.
 
@@ -386,7 +386,7 @@ Whether the scatter atlases are valid
 
 > <span class="readonly-badge">readonly</span> **get** **hasValidVbtAtlas**(): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:704](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L704)
+Defined in: [src/landscape/Landscape.ts:704](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L704)
 
 Returns whether the VBT base color atlas and loaded tiles are valid.
 
@@ -406,7 +406,7 @@ Whether the VBT atlas is valid
 
 > **get** **heightmapShadowDistance**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:774](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L774)
+Defined in: [src/landscape/Landscape.ts:774](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L774)
 
 Gets or sets the maximum trace distance (in world units, minimum: `10.0`, default: `1000.0`) for heightmap self-shadow raymarching.
 
@@ -420,7 +420,7 @@ Maximum heightmap shadow trace distance
 
 > **set** **heightmapShadowDistance**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:778](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L778)
+Defined in: [src/landscape/Landscape.ts:778](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L778)
 
 ##### Parameters
 
@@ -442,7 +442,7 @@ Defined in: [src/landscape/Landscape.ts:778](https://github.com/redcamel/RedGPU/
 
 > **get** **heightmapShadowSoftness**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:812](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L812)
+Defined in: [src/landscape/Landscape.ts:812](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L812)
 
 Gets or sets the softness factor (minimum: `0.1`, default: `8.0`) for heightmap self-shadow edges.
 
@@ -456,7 +456,7 @@ Heightmap shadow softness factor
 
 > **set** **heightmapShadowSoftness**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:816](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L816)
+Defined in: [src/landscape/Landscape.ts:816](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L816)
 
 ##### Parameters
 
@@ -478,7 +478,7 @@ Defined in: [src/landscape/Landscape.ts:816](https://github.com/redcamel/RedGPU/
 
 > **get** **heightmapShadowSteps**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:793](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L793)
+Defined in: [src/landscape/Landscape.ts:793](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L793)
 
 Gets or sets the number of sampling steps (range: `4 to 64`, default: `16`) for heightmap self-shadow raymarching.
 
@@ -492,7 +492,7 @@ Number of heightmap shadow raymarching steps
 
 > **set** **heightmapShadowSteps**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:797](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L797)
+Defined in: [src/landscape/Landscape.ts:797](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L797)
 
 ##### Parameters
 
@@ -514,7 +514,7 @@ Defined in: [src/landscape/Landscape.ts:797](https://github.com/redcamel/RedGPU/
 
 > **get** **heightScale**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:409](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L409)
+Defined in: [src/landscape/Landscape.ts:409](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L409)
 
 Gets or sets the maximum elevation scale (in world units, default: `200.0`) multiplied by normalized heightmap values (`0.0 to 1.0`).
 
@@ -528,7 +528,7 @@ Maximum height scale
 
 > **set** **heightScale**(`val`): `void`
 
-Defined in: [src/landscape/Landscape.ts:413](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L413)
+Defined in: [src/landscape/Landscape.ts:413](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L413)
 
 ##### Parameters
 
@@ -550,7 +550,7 @@ Defined in: [src/landscape/Landscape.ts:413](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **instanceBuffer**(): `LandscapeInstanceBuffer`
 
-Defined in: [src/landscape/Landscape.ts:190](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L190)
+Defined in: [src/landscape/Landscape.ts:190](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L190)
 
 Returns the `LandscapeInstanceBuffer` managing tile instance and indirect draw GPU buffers.
 
@@ -570,7 +570,7 @@ Returns the `LandscapeInstanceBuffer` managing tile instance and indirect draw G
 
 > <span class="readonly-badge">readonly</span> **get** **invWorldSizeX**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:317](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L317)
+Defined in: [src/landscape/Landscape.ts:317](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L317)
 
 Returns the reciprocal of the X-axis world size (`1 / worldSizeX`).
 
@@ -590,7 +590,7 @@ Reciprocal of the X-axis world size
 
 > <span class="readonly-badge">readonly</span> **get** **invWorldSizeZ**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L329)
+Defined in: [src/landscape/Landscape.ts:329](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L329)
 
 Returns the reciprocal of the Z-axis world size (`1 / worldSizeZ`).
 
@@ -610,7 +610,7 @@ Reciprocal of the Z-axis world size
 
 > <span class="readonly-badge">readonly</span> **get** **layers**(): [`LandscapeLayer`](LandscapeLayer.md)[]
 
-Defined in: [src/landscape/Landscape.ts:573](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L573)
+Defined in: [src/landscape/Landscape.ts:573](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L573)
 
 Returns the array of `LandscapeLayer` instances registered in the terrain material.
 
@@ -630,7 +630,7 @@ Array of `LandscapeLayer` instances
 
 > **get** **lod0SizeQuads**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:460](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L460)
+Defined in: [src/landscape/Landscape.ts:460](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L460)
 
 Gets or sets the quad subdivision count per side for the highest-resolution LOD 0 tile.
 
@@ -644,7 +644,7 @@ Number of quads per side for LOD 0 tiles
 
 > **set** **lod0SizeQuads**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:464](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L464)
+Defined in: [src/landscape/Landscape.ts:464](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L464)
 
 ##### Parameters
 
@@ -666,7 +666,7 @@ Defined in: [src/landscape/Landscape.ts:464](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **lodDistancesSq**(): `number`[]
 
-Defined in: [src/landscape/Landscape.ts:549](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L549)
+Defined in: [src/landscape/Landscape.ts:549](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L549)
 
 Returns the array of squared threshold distances for each LOD level transition.
 
@@ -686,7 +686,7 @@ Array of squared LOD transition distances (`number[]`)
 
 > **get** **lodMaxLevel**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:520](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L520)
+Defined in: [src/landscape/Landscape.ts:520](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L520)
 
 Gets or sets the maximum number of LOD levels used for the terrain mesh (range: `1 to 8`, default: `5`).
 
@@ -700,7 +700,7 @@ Maximum number of LOD levels
 
 > **set** **lodMaxLevel**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:524](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L524)
+Defined in: [src/landscape/Landscape.ts:524](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L524)
 
 ##### Parameters
 
@@ -722,7 +722,7 @@ Defined in: [src/landscape/Landscape.ts:524](https://github.com/redcamel/RedGPU/
 
 > **get** **lodMetric**(): `"distance"` \| `"screenSize"`
 
-Defined in: [src/landscape/Landscape.ts:501](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L501)
+Defined in: [src/landscape/Landscape.ts:501](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L501)
 
 Gets or sets the tile LOD determination metric (`'distance'` or `'screenSize'`, default: `'screenSize'`).
 
@@ -736,7 +736,7 @@ LOD determination metric (`'distance' | 'screenSize'`)
 
 > **set** **lodMetric**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:505](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L505)
+Defined in: [src/landscape/Landscape.ts:505](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L505)
 
 ##### Parameters
 
@@ -758,7 +758,7 @@ Defined in: [src/landscape/Landscape.ts:505](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **material**(): [`LandscapeMaterial`](LandscapeMaterial.md)
 
-Defined in: [src/landscape/Landscape.ts:250](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L250)
+Defined in: [src/landscape/Landscape.ts:250](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L250)
 
 Returns the `LandscapeMaterial` responsible for terrain surface layers and texture blending.
 
@@ -778,7 +778,7 @@ Returns the `LandscapeMaterial` responsible for terrain surface layers and textu
 
 > **get** **nearDetailDistance**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:585](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L585)
+Defined in: [src/landscape/Landscape.ts:585](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L585)
 
 Gets or sets the distance (in world units) within which high-resolution near-detail textures are applied.
 
@@ -792,7 +792,7 @@ Near-detail blending distance
 
 > **set** **nearDetailDistance**(`val`): `void`
 
-Defined in: [src/landscape/Landscape.ts:589](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L589)
+Defined in: [src/landscape/Landscape.ts:589](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L589)
 
 ##### Parameters
 
@@ -814,7 +814,7 @@ Defined in: [src/landscape/Landscape.ts:589](https://github.com/redcamel/RedGPU/
 
 > **get** **receiveShadow**(): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:736](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L736)
+Defined in: [src/landscape/Landscape.ts:736](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L736)
 
 Gets or sets whether the terrain receives directional light shadow maps. (Default: `true`)
 
@@ -828,7 +828,7 @@ Whether shadow receiving is enabled
 
 > **set** **receiveShadow**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:740](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L740)
+Defined in: [src/landscape/Landscape.ts:740](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L740)
 
 ##### Parameters
 
@@ -850,7 +850,7 @@ Defined in: [src/landscape/Landscape.ts:740](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **sharedGeometry**(): `LandscapeSharedGeometry`
 
-Defined in: [src/landscape/Landscape.ts:178](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L178)
+Defined in: [src/landscape/Landscape.ts:178](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L178)
 
 Returns the shared LOD grid geometry (`LandscapeSharedGeometry`) used by terrain tiles.
 
@@ -870,7 +870,7 @@ Returns the shared LOD grid geometry (`LandscapeSharedGeometry`) used by terrain
 
 > <span class="readonly-badge">readonly</span> **get** **tileLoadedCount**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:651](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L651)
+Defined in: [src/landscape/Landscape.ts:651](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L651)
 
 Returns the number of terrain tiles currently loaded and active.
 
@@ -890,7 +890,7 @@ Number of loaded tiles
 
 > **get** **tileLoadingRadius**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:619](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L619)
+Defined in: [src/landscape/Landscape.ts:619](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L619)
 
 Gets or sets the radius (in world units, default: `2500.0`) around the camera position within which high-resolution tile heightmaps are streamed.
 
@@ -904,7 +904,7 @@ Tile streaming loading radius
 
 > **set** **tileLoadingRadius**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:623](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L623)
+Defined in: [src/landscape/Landscape.ts:623](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L623)
 
 ##### Parameters
 
@@ -926,7 +926,7 @@ Defined in: [src/landscape/Landscape.ts:623](https://github.com/redcamel/RedGPU/
 
 > **get** **tileMaxLoadsPerFrame**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:635](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L635)
+Defined in: [src/landscape/Landscape.ts:635](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L635)
 
 Gets or sets the maximum number of tiles to start decoding and baking per single frame.
 
@@ -940,7 +940,7 @@ Maximum tile loads per frame
 
 > **set** **tileMaxLoadsPerFrame**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:639](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L639)
+Defined in: [src/landscape/Landscape.ts:639](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L639)
 
 ##### Parameters
 
@@ -962,7 +962,7 @@ Defined in: [src/landscape/Landscape.ts:639](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **tileSize**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/Landscape.ts:397](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L397)
+Defined in: [src/landscape/Landscape.ts:397](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L397)
 
 Returns the world size `[tileSizeX, tileSizeZ]` of a single tile (component).
 
@@ -982,7 +982,7 @@ Tile size tuple `[number, number]`
 
 > **get** **tileUrlResolver**(): [`LandscapeTileUrlResolver`](../namespaces/Core/namespaces/Spatial/type-aliases/LandscapeTileUrlResolver.md)
 
-Defined in: [src/landscape/Landscape.ts:720](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L720)
+Defined in: [src/landscape/Landscape.ts:720](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L720)
 
 Gets or sets the resolver function that returns individual tile heightmap image URLs based on tile row and column indices (`row`, `col`).
 
@@ -996,7 +996,7 @@ Tile URL resolver function or `null`
 
 > **set** **tileUrlResolver**(`resolver`): `void`
 
-Defined in: [src/landscape/Landscape.ts:724](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L724)
+Defined in: [src/landscape/Landscape.ts:724](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L724)
 
 ##### Parameters
 
@@ -1018,7 +1018,7 @@ Defined in: [src/landscape/Landscape.ts:724](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **vbtTextureView**(): `GPUTextureView`
 
-Defined in: [src/landscape/Landscape.ts:675](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L675)
+Defined in: [src/landscape/Landscape.ts:675](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L675)
 
 Returns the `GPUTextureView` of the Virtual Blend Texture (VBT) base color atlas.
 
@@ -1038,7 +1038,7 @@ VBT base color atlas `GPUTextureView` or `null`
 
 > <span class="readonly-badge">readonly</span> **get** **vertexShaderModule**(): `GPUShaderModule`
 
-Defined in: [src/landscape/Landscape.ts:202](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L202)
+Defined in: [src/landscape/Landscape.ts:202](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L202)
 
 Returns the vertex shader module (`GPUShaderModule`) used for terrain rendering.
 
@@ -1058,7 +1058,7 @@ Returns the vertex shader module (`GPUShaderModule`) used for terrain rendering.
 
 > <span class="readonly-badge">readonly</span> **get** **vhtTextureView**(): `GPUTextureView`
 
-Defined in: [src/landscape/Landscape.ts:663](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L663)
+Defined in: [src/landscape/Landscape.ts:663](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L663)
 
 Returns the `GPUTextureView` of the Virtual Height Texture (VHT) atlas.
 
@@ -1078,7 +1078,7 @@ VHT atlas `GPUTextureView` or `null`
 
 > **get** **worldSize**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/Landscape.ts:262](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L262)
+Defined in: [src/landscape/Landscape.ts:262](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L262)
 
 Gets or sets the total world size `[worldSizeX, worldSizeZ]` of the terrain.
 
@@ -1092,7 +1092,7 @@ World size tuple `[number, number]`
 
 > **set** **worldSize**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:266](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L266)
+Defined in: [src/landscape/Landscape.ts:266](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L266)
 
 ##### Parameters
 
@@ -1114,7 +1114,7 @@ Defined in: [src/landscape/Landscape.ts:266](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **worldSizeX**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:293](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L293)
+Defined in: [src/landscape/Landscape.ts:293](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L293)
 
 Returns the total world size of the terrain along the X-axis.
 
@@ -1134,7 +1134,7 @@ World size along the X-axis
 
 > <span class="readonly-badge">readonly</span> **get** **worldSizeZ**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:305](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L305)
+Defined in: [src/landscape/Landscape.ts:305](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L305)
 
 Returns the total world size of the terrain along the Z-axis.
 
@@ -1154,7 +1154,7 @@ World size along the Z-axis
 
 > **addLayer**(`options`): [`LandscapeLayer`](LandscapeLayer.md)
 
-Defined in: [src/landscape/Landscape.ts:889](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L889)
+Defined in: [src/landscape/Landscape.ts:889](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L889)
 
 Creates, adds, and returns a new splatting layer (`LandscapeLayer`) to the terrain material. Up to 8 PBR material layers can be registered, sharing a single RGBA weight map texture (`weightTexture`, 4 channels: `'R' | 'G' | 'B' | 'A'`) across the terrain.
 
@@ -1189,7 +1189,7 @@ Created and added `LandscapeLayer` instance
 
 > **clearLayers**(): `void`
 
-Defined in: [src/landscape/Landscape.ts:920](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L920)
+Defined in: [src/landscape/Landscape.ts:920](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L920)
 
 Removes all splatting layers registered in the terrain material.
 
@@ -1205,7 +1205,7 @@ Removes all splatting layers registered in the terrain material.
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/Landscape.ts:1052](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L1052)
+Defined in: [src/landscape/Landscape.ts:1052](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L1052)
 
 Releases all sub-managers (foliage, grass, tile streamer, culler, renderer, geometry, etc.) and GPU resources belonging to the terrain.
 
@@ -1221,7 +1221,7 @@ Releases all sub-managers (foliage, grass, tile streamer, culler, renderer, geom
 
 > **getHeightAt**(`x`, `z`): `number`
 
-Defined in: [src/landscape/Landscape.ts:844](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L844)
+Defined in: [src/landscape/Landscape.ts:844](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L844)
 
 Computes and returns the terrain surface height (Y coordinate, in world units) at the specified world X, Z coordinates from the CPU heightmap cache.
 
@@ -1252,7 +1252,7 @@ Interpolated terrain surface height in world units
 
 > **getLayer**(`name`): [`LandscapeLayer`](LandscapeLayer.md)
 
-Defined in: [src/landscape/Landscape.ts:935](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L935)
+Defined in: [src/landscape/Landscape.ts:935](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L935)
 
 Finds and returns the `LandscapeLayer` with the specified name.
 
@@ -1276,7 +1276,7 @@ Matching `LandscapeLayer` instance or `undefined`
 
 > **isTileLoaded**(`row`, `col`): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:862](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L862)
+Defined in: [src/landscape/Landscape.ts:862](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L862)
 
 Returns whether the terrain tile at the specified `row` and `col` indices has finished loading.
 
@@ -1301,7 +1301,7 @@ Whether the tile is loaded
 
 > **removeLayer**(`layer`): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:911](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L911)
+Defined in: [src/landscape/Landscape.ts:911](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L911)
 
 Removes the specified `LandscapeLayer` instance or layer name from the terrain material.
 
@@ -1325,7 +1325,7 @@ Whether the layer was successfully removed
 
 > **render**(`view`, `passEncoder?`): `void`
 
-Defined in: [src/landscape/Landscape.ts:1044](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L1044)
+Defined in: [src/landscape/Landscape.ts:1044](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L1044)
 
 Renders the terrain mesh into the current render pass via the internal `LandscapeRenderer`.
 
@@ -1348,7 +1348,7 @@ Renders the terrain mesh into the current render pass via the internal `Landscap
 
 > **update**(`renderViewStateData`): `void`
 
-Defined in: [src/landscape/Landscape.ts:948](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L948)
+Defined in: [src/landscape/Landscape.ts:948](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L948)
 
 Updates tile streaming, GPU culling, foliage (`FoliageManager`), and grass (`GrassManager`) compute passes each frame based on the camera view state.
 
@@ -1375,7 +1375,7 @@ Updates tile streaming, GPU culling, foliage (`FoliageManager`), and grass (`Gra
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -1399,7 +1399,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -1423,7 +1423,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -1447,7 +1447,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -1471,7 +1471,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -1485,7 +1485,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -1511,7 +1511,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -1535,7 +1535,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -1559,7 +1559,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

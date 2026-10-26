@@ -6,7 +6,7 @@
 
 # Interface: WeightMapPixelData
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L7)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:7](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L7)
 
 CPU 측 가중치 맵 이미지의 픽셀 데이터 구조체입니다.
 
@@ -16,7 +16,7 @@ CPU 측 가중치 맵 이미지의 픽셀 데이터 구조체입니다.
 
 > **data**: `Uint8ClampedArray`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L22)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:22](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L22)
 
 RGBA 픽셀 바이트 배열 (`Uint8ClampedArray`)
 
@@ -26,7 +26,7 @@ RGBA 픽셀 바이트 배열 (`Uint8ClampedArray`)
 
 > **height**: `number`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L17)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:17](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L17)
 
 이미지 세로 픽셀 크기
 
@@ -36,6 +36,6 @@ Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:17](https:
 
 > **width**: `number`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L12)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:12](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L12)
 
 이미지 가로 픽셀 크기

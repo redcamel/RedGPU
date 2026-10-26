@@ -6,7 +6,7 @@
 
 # Class: LakeCapturePass
 
-Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeCapturePass.ts#L23)
+Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeCapturePass.ts#L23)
 
 Render pass class that captures water penetration depth and wave impulse data of active meshes.
 
@@ -30,7 +30,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new LakeCapturePass**(`redGPUContext`, `textureSize?`): `LakeCapturePass`
 
-Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeCapturePass.ts#L87)
+Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:87](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeCapturePass.ts#L87)
 
 Creates a `LakeCapturePass` instance.
 
@@ -59,7 +59,7 @@ Creates a `LakeCapturePass` instance.
 
 > **captureTexture**: `GPUTexture`
 
-Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeCapturePass.ts#L34)
+Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeCapturePass.ts#L34)
 
 `GPUTexture` where penetration depth and velocity impulses are recorded.
 
@@ -71,7 +71,7 @@ Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:34](https://githu
 
 > **captureTextureView**: `GPUTextureView`
 
-Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeCapturePass.ts#L39)
+Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:39](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeCapturePass.ts#L39)
 
 `GPUTextureView` of `captureTexture`.
 
@@ -83,7 +83,7 @@ Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:39](https://githu
 
 > **textureSize**: `number` = `512`
 
-Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeCapturePass.ts#L28)
+Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeCapturePass.ts#L28)
 
 Width and height resolution of the capture texture in pixels. (Default: `512`)
 
@@ -101,7 +101,7 @@ Width and height resolution of the capture texture in pixels. (Default: `512`)
 
 > **destroy**(): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:211](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeCapturePass.ts#L211)
+Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:211](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeCapturePass.ts#L211)
 
 Releases all allocated GPU resources.
 
@@ -117,7 +117,7 @@ Releases all allocated GPU resources.
 
 > **render**(`commandEncoder`, `activeMeshes`, `domainCenterX`, `domainCenterZ`, `domainSize`, `waterLevel`, `maxPenetration?`): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:121](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeCapturePass.ts#L121)
+Defined in: [src/water/lakeCore/interaction/LakeCapturePass.ts:121](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeCapturePass.ts#L121)
 
 Renders the active mesh list to record water penetration depth into the capture texture.
 
@@ -150,7 +150,7 @@ Renders the active mesh list to record water penetration depth into the capture 
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -174,7 +174,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -198,7 +198,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -222,7 +222,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -246,7 +246,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -260,7 +260,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -286,7 +286,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -310,7 +310,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -334,7 +334,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

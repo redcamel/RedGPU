@@ -6,7 +6,7 @@
 
 # Class: VertexInterleavedStructElement
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L14)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L14)
 
 정점 인터리브 구조체의 개별 속성 요소를 정의하는 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructEleme
 
 > **new VertexInterleavedStructElement**(`attributeName`, `attributeStride`, `interleaveType`): `VertexInterleavedStructElement`
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L45)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:45](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L45)
 
 VertexInterleavedStructElement 인스턴스를 생성합니다.
 
@@ -42,7 +42,7 @@ VertexInterleavedStructElement 인스턴스를 생성합니다.
 
 > **attributeName**: `string`
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L19)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L19)
 
 정점 속성 이름
 
@@ -52,7 +52,7 @@ Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructEleme
 
 > **attributeStride**: `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L24)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L24)
 
 정점 속성 스트라이드 (바이트 단위)
 
@@ -62,6 +62,6 @@ Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructEleme
 
 > **interleaveType**: [`TypeInterleave`](../../../type-aliases/TypeInterleave.md)
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L29)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:29](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L29)
 
 인터리브 포맷 정보

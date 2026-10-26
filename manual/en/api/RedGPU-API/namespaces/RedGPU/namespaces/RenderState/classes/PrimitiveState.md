@@ -6,7 +6,7 @@
 
 # Class: PrimitiveState
 
-Defined in: [src/renderState/PrimitiveState.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L31)
+Defined in: [src/renderState/PrimitiveState.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L31)
 
 Render state class that controls primitive topology, front-face orientation, and face culling mode for objects.
 
@@ -27,7 +27,7 @@ primitiveState.cullMode = RedGPU.GPU_CULL_MODE.BACK;
 
 > **new PrimitiveState**(`targetObject3D`): `PrimitiveState`
 
-Defined in: [src/renderState/PrimitiveState.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L57)
+Defined in: [src/renderState/PrimitiveState.ts:57](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L57)
 
 Creates a PrimitiveState instance.
 
@@ -47,7 +47,7 @@ Creates a PrimitiveState instance.
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/renderState/PrimitiveState.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L36)
+Defined in: [src/renderState/PrimitiveState.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L36)
 
 Whether the pipeline requires an update
 
@@ -57,7 +57,7 @@ Whether the pipeline requires an update
 
 > **state**: `GPUPrimitiveState`
 
-Defined in: [src/renderState/PrimitiveState.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L41)
+Defined in: [src/renderState/PrimitiveState.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L41)
 
 Final generated `GPUPrimitiveState` state object
 
@@ -69,7 +69,7 @@ Final generated `GPUPrimitiveState` state object
 
 > **get** **cullMode**(): `GPUCullMode`
 
-Defined in: [src/renderState/PrimitiveState.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L127)
+Defined in: [src/renderState/PrimitiveState.ts:127](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L127)
 
 Gets or sets the face culling mode.
 
@@ -83,7 +83,7 @@ Currently configured `GPUCullMode` value
 
 > **set** **cullMode**(`mode`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L131)
+Defined in: [src/renderState/PrimitiveState.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L131)
 
 ##### Parameters
 
@@ -103,7 +103,7 @@ Defined in: [src/renderState/PrimitiveState.ts:131](https://github.com/redcamel/
 
 > **get** **frontFace**(): `GPUFrontFace`
 
-Defined in: [src/renderState/PrimitiveState.ts:108](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L108)
+Defined in: [src/renderState/PrimitiveState.ts:108](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L108)
 
 Gets or sets the winding order that defines the front face of polygons.
 
@@ -117,7 +117,7 @@ Currently configured `GPUFrontFace` value
 
 > **set** **frontFace**(`face`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:112](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L112)
+Defined in: [src/renderState/PrimitiveState.ts:112](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L112)
 
 ##### Parameters
 
@@ -137,7 +137,7 @@ Defined in: [src/renderState/PrimitiveState.ts:112](https://github.com/redcamel/
 
 > **get** **stripIndexFormat**(): `GPUIndexFormat`
 
-Defined in: [src/renderState/PrimitiveState.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L89)
+Defined in: [src/renderState/PrimitiveState.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L89)
 
 Gets or sets the index format when using strip topology.
 
@@ -151,7 +151,7 @@ Currently configured `GPUIndexFormat` value
 
 > **set** **stripIndexFormat**(`format`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L93)
+Defined in: [src/renderState/PrimitiveState.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L93)
 
 ##### Parameters
 
@@ -171,7 +171,7 @@ Defined in: [src/renderState/PrimitiveState.ts:93](https://github.com/redcamel/R
 
 > **get** **topology**(): `GPUPrimitiveTopology`
 
-Defined in: [src/renderState/PrimitiveState.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L70)
+Defined in: [src/renderState/PrimitiveState.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L70)
 
 Gets or sets the primitive topology.
 
@@ -185,7 +185,7 @@ Currently configured `GPUPrimitiveTopology` value
 
 > **set** **topology**(`value`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L74)
+Defined in: [src/renderState/PrimitiveState.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L74)
 
 ##### Parameters
 
@@ -205,7 +205,7 @@ Defined in: [src/renderState/PrimitiveState.ts:74](https://github.com/redcamel/R
 
 > **get** **unclippedDepth**(): `boolean`
 
-Defined in: [src/renderState/PrimitiveState.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L146)
+Defined in: [src/renderState/PrimitiveState.ts:146](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L146)
 
 Gets or sets whether depth clipping is disabled.
 
@@ -219,7 +219,7 @@ Whether depth clipping is disabled
 
 > **set** **unclippedDepth**(`state`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L150)
+Defined in: [src/renderState/PrimitiveState.ts:150](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L150)
 
 ##### Parameters
 

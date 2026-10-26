@@ -6,7 +6,7 @@
 
 # Class: PrimitiveUtils
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L18)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:18](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L18)
 
 Static utility class that generates vertex, index, normal, and tangent data for primitive geometries.
 
@@ -30,7 +30,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > `static` **calculateTangents**(`interleaveData`, `indexData`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:1087](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L1087)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:1087](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L1087)
 
 Calculates vertex tangents (`vertexTangent`) from the interleaved vertex and index arrays and writes them in place.
 
@@ -51,7 +51,7 @@ Calculates vertex tangents (`vertexTangent`) from the interleaved vertex and ind
 
 > `static` **finalize**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L60)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:60](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L60)
 
 Calculates tangents for the interleaved vertex data and creates a `Geometry` instance.
 
@@ -76,7 +76,7 @@ Created `Geometry` instance
 
 > `static` **generateBoxData**(`redGPUContext`, `width`, `height`, `depth`, `widthSegments`, `heightSegments`, `depthSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:154](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L154)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:154](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L154)
 
 Generates box geometry data.
 
@@ -105,7 +105,7 @@ Created `Geometry` instance
 
 > `static` **generateCapsuleData**(`redGPUContext`, `radius`, `height`, `radialSegments`, `heightSegments`, `capSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:1032](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L1032)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:1032](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L1032)
 
 Generates Capsule geometry data.
 
@@ -133,7 +133,7 @@ Created `Geometry` instance
 
 > `static` **generateCircleEntryData**(`redGPUContext`, `radius`, `radialSegments`, `thetaStart`, `thetaLength`, `isRadial`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:611](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L611)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:611](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L611)
 
 Generates Circle geometry data.
 
@@ -161,7 +161,7 @@ Created `Geometry` instance
 
 > `static` **generateConeData**(`redGPUContext`, `radius`, `height`, `radialSegments`, `heightSegments`, `capBottom`, `thetaStart`, `thetaLength`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:498](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L498)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:498](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L498)
 
 Generates cone geometry data.
 
@@ -191,7 +191,7 @@ Created `Geometry` instance
 
 > `static` **generateCylinderData**(`redGPUContext`, `radiusTop`, `radiusBottom`, `height`, `radialSegments`, `heightSegments`, `capTop`, `capBottom`, `thetaStart`, `thetaLength`, `isRadialTop`, `isRadialBottom`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:446](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L446)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:446](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L446)
 
 Generates cylinder geometry data.
 
@@ -225,7 +225,7 @@ Created `Geometry` instance
 
 > `static` **generateCylinderTorsoData**(`interleaveData`, `indexData`, `radiusTop`, `radiusBottom`, `height`, `radialSegments`, `heightSegments`, `thetaStart`, `thetaLength`, `center`, `uV`, `vV`, `axisVector?`, `skipIndices?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:975](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L975)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:975](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L975)
 
 Appends cylinder torso vertex and index data to the buffer arrays.
 
@@ -272,7 +272,7 @@ Appends cylinder torso vertex and index data to the buffer arrays.
 
 > `static` **generateGrid**(`interleaveData`, `indexData`, `resolutionX`, `resolutionY`, `vertexCallback`, `skipIndices?`, `reverseIndices?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L91)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:91](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L91)
 
 Iterates over a 2D UV grid, executes the vertex callback, and generates grid indices.
 
@@ -298,7 +298,7 @@ Iterates over a 2D UV grid, executes the vertex callback, and generates grid ind
 
 > `static` **generateGridIndices**(`indexData`, `vertexOffset`, `gridX`, `gridY`, `gridX1`, `reverse?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:1066](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L1066)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:1066](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L1066)
 
 Generates triangle indices from a 2D grid vertex offset and resolution.
 
@@ -323,7 +323,7 @@ Generates triangle indices from a 2D grid vertex offset and resolution.
 
 > `static` **generateGroundData**(`redGPUContext`, `width`, `height`, `widthSegments`, `heightSegments`, `flipY`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:571](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L571)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:571](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L571)
 
 Generates Ground geometry data on the XZ plane.
 
@@ -351,7 +351,7 @@ Created `Geometry` instance
 
 > `static` **generatePlaneData**(`interleaveData`, `indexData`, `width`, `height`, `mainSegmentsX`, `mainSegmentsY`, `center`, `uV`, `vV`, `normal`, `radius?`, `radiusSegments?`, `boxDim?`, `flipY?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:282](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L282)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:282](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L282)
 
 Appends plane (or rounded box face) vertex and index data to the buffer arrays based on basis vectors and center point.
 
@@ -384,7 +384,7 @@ Appends plane (or rounded box face) vertex and index data to the buffer arrays b
 
 > `static` **generatePlaneEntryData**(`redGPUContext`, `width`, `height`, `widthSegments`, `heightSegments`, `flipY`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:531](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L531)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:531](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L531)
 
 Generates Plane geometry data on the XY plane.
 
@@ -412,7 +412,7 @@ Created `Geometry` instance
 
 > `static` **generateRingData**(`interleaveData`, `indexData`, `innerRadius`, `outerRadius`, `thetaSegments`, `phiSegments`, `thetaStart`, `thetaLength`, `center`, `uV`, `vV`, `normal`, `isFront?`, `isRadial?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:847](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L847)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:847](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L847)
 
 Appends ring or disc cap vertex and index data to the buffer arrays.
 
@@ -459,7 +459,7 @@ Appends ring or disc cap vertex and index data to the buffer arrays.
 
 > `static` **generateRingEntryData**(`redGPUContext`, `innerRadius`, `outerRadius`, `thetaSegments`, `phiSegments`, `thetaStart`, `thetaLength`, `isRadial`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:653](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L653)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:653](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L653)
 
 Generates Ring geometry data.
 
@@ -489,7 +489,7 @@ Created `Geometry` instance
 
 > `static` **generateRoundedBoxData**(`redGPUContext`, `width`, `height`, `depth`, `widthSegments`, `heightSegments`, `depthSegments`, `radius`, `radiusSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:196](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L196)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:196](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L196)
 
 Generates rounded box geometry data.
 
@@ -520,7 +520,7 @@ Created `Geometry` instance
 
 > `static` **generateSphereData**(`redGPUContext`, `radius`, `widthSegments`, `heightSegments`, `phiStart`, `phiLength`, `thetaStart`, `thetaLength`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:392](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L392)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:392](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L392)
 
 Generates sphere geometry data.
 
@@ -550,7 +550,7 @@ Created `Geometry` instance
 
 > `static` **generateSphericalData**(`interleaveData`, `indexData`, `radius`, `widthSegments`, `heightSegments`, `phiStart`, `phiLength`, `thetaStart`, `thetaLength`, `yOffset?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:912](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L912)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:912](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L912)
 
 Appends spherical coordinate-based vertex and index data to the buffer arrays.
 
@@ -581,7 +581,7 @@ Appends spherical coordinate-based vertex and index data to the buffer arrays.
 
 > `static` **generateTorusData**(`redGPUContext`, `radius`, `thickness`, `radialSegments`, `tubularSegments`, `thetaStart`, `thetaLength`, `capStart`, `capEnd`, `isRadialCapStart`, `isRadialCapEnd`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:704](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L704)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:704](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L704)
 
 Generates Torus geometry data.
 
@@ -614,7 +614,7 @@ Created `Geometry` instance
 
 > `static` **generateTorusKnotData**(`redGPUContext`, `radius`, `tubeRadius`, `tubularSegments`, `radialSegments`, `windingsAroundAxis`, `windingsAroundCircle`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:769](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L769)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:769](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L769)
 
 Generates TorusKnot geometry data.
 
@@ -643,7 +643,7 @@ Created `Geometry` instance
 
 > `static` **getEmptyGeometry**(`redGPUContext`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L116)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L116)
 
 Returns an empty `Geometry` instance with minimal vertex data for invalid dimensions.
 
@@ -666,7 +666,7 @@ Empty `Geometry` instance
 
 > `static` **interleavePacker**(`interleaveData`, `px`, `py`, `pz`, `nx`, `ny`, `nz`, `u`, `v`, `tx?`, `ty?`, `tz?`, `tw?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:1157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L1157)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:1157](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L1157)
 
 Appends position, normal, UV, and tangent components of a single vertex to the interleaved array.
 

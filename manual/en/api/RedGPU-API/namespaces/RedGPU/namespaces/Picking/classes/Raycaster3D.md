@@ -6,7 +6,7 @@
 
 # Class: Raycaster3D
 
-Defined in: [src/picking/Raycaster3D.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L23)
+Defined in: [src/picking/Raycaster3D.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster3D.ts#L23)
 
 Class that casts a `Ray` in 3D space based on camera and screen coordinates to perform precise triangle-level intersection tests with meshes.
 
@@ -28,7 +28,7 @@ const intersects = raycaster.intersectObjects(scene.children);
 
 > **new Raycaster3D**(): `Raycaster3D`
 
-Defined in: [src/picking/Raycaster3D.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L53)
+Defined in: [src/picking/Raycaster3D.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster3D.ts#L53)
 
 Creates a `Raycaster3D` instance.
 
@@ -42,7 +42,7 @@ Creates a `Raycaster3D` instance.
 
 > **far**: `number` = `Infinity`
 
-Defined in: [src/picking/Raycaster3D.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L40)
+Defined in: [src/picking/Raycaster3D.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster3D.ts#L40)
 
 Maximum distance from the camera to consider for intersection (default: `Infinity`)
 
@@ -52,7 +52,7 @@ Maximum distance from the camera to consider for intersection (default: `Infinit
 
 > **near**: `number` = `0`
 
-Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L34)
+Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster3D.ts#L34)
 
 Minimum distance from the camera to consider for intersection (default: `0`)
 
@@ -62,7 +62,7 @@ Minimum distance from the camera to consider for intersection (default: `0`)
 
 > <span class="readonly-badge">readonly</span> **ray**: [`Ray`](../../Math/classes/Ray.md)
 
-Defined in: [src/picking/Raycaster3D.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L28)
+Defined in: [src/picking/Raycaster3D.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster3D.ts#L28)
 
 Internally managed `Ray` object
 
@@ -72,7 +72,7 @@ Internally managed `Ray` object
 
 > **intersectObject**(`mesh`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster3D.ts:122](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L122)
+Defined in: [src/picking/Raycaster3D.ts:122](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster3D.ts#L122)
 
 Checks for intersection with a single mesh object.
 
@@ -100,7 +100,7 @@ Array of intersection results sorted by distance (`RayIntersectResult[]`)
 
 > **intersectObjects**(`meshes`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster3D.ts:147](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L147)
+Defined in: [src/picking/Raycaster3D.ts:147](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster3D.ts#L147)
 
 Checks for intersections with multiple mesh objects.
 
@@ -128,7 +128,7 @@ Array of intersection results sorted by distance (`RayIntersectResult[]`)
 
 > **setFromCamera**(`screenX`, `screenY`, `view`): `void`
 
-Defined in: [src/picking/Raycaster3D.ts:76](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L76)
+Defined in: [src/picking/Raycaster3D.ts:76](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster3D.ts#L76)
 
 Sets the ray based on screen coordinates and camera information of `View3D`.
 

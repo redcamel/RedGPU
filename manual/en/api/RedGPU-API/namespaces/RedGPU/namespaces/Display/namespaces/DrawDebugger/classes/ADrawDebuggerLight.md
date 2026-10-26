@@ -6,7 +6,7 @@
 
 # Abstract Class: ADrawDebuggerLight\<T\>
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L29)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:29](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L29)
 
 Abstract class for rendering light visual guides and label icons for light debuggers.
 
@@ -40,7 +40,7 @@ This class is an abstract class, so you cannot create an instance directly.<br/>
 
 > **new ADrawDebuggerLight**\<`T`\>(`redGPUContext`, `target`, `labelIcon`, `color`, `maxLines?`): `ADrawDebuggerLight`\<`T`\>
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:55](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L55)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:55](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L55)
 
 Creates an `ADrawDebuggerLight` instance.
 
@@ -74,7 +74,7 @@ Creates an `ADrawDebuggerLight` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **label**(): [`TextField3D`](../../../classes/TextField3D.md)
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L92)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L92)
 
 Returns the 3D text label object indicating the light position.
 
@@ -94,7 +94,7 @@ Returns the 3D text label object indicating the light position.
 
 > <span class="readonly-badge">readonly</span> **get** **lightDebugMesh**(): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L104)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:104](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L104)
 
 Returns the debug mesh object that draws the light guide.
 
@@ -114,7 +114,7 @@ Light debug mesh object
 
 > <span class="readonly-badge">readonly</span> **get** **target**(): `T`
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L80)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L80)
 
 Returns the target light object being debugged.
 
@@ -136,7 +136,7 @@ Target light object
 
 > `abstract` **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:161](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L161)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:161](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L161)
 
 Renders the light debug guide.
 
@@ -158,7 +158,7 @@ Renders the light debug guide.
 
 > **updateVertexBuffer**(`lines`, `vertexBuffer`): `void`
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L119)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:119](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L119)
 
 Updates the vertex buffer data of the debug mesh based on the list of line segment coordinates.
 
@@ -186,7 +186,7 @@ Updates the vertex buffer data of the debug mesh based on the list of line segme
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -210,7 +210,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -234,7 +234,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -258,7 +258,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -282,7 +282,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -296,7 +296,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -322,7 +322,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -346,7 +346,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -370,7 +370,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

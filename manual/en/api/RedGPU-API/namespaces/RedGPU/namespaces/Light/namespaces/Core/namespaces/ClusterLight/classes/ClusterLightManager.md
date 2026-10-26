@@ -6,7 +6,7 @@
 
 # Class: ClusterLightManager
 
-Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/clusterLight/ClusterLightManager.ts#L27)
+Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:27](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/clusterLight/ClusterLightManager.ts#L27)
 
 Internal system class that manages 3D frustum cluster subdivision and multi-light (`PointLight`, `SpotLight`) GPU culling passes for a `View3D`.
 
@@ -41,7 +41,7 @@ const clusterLightManager = view.clusterLightManager;
 
 > **new ClusterLightManager**(`view`): `ClusterLightManager`
 
-Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/clusterLight/ClusterLightManager.ts#L46)
+Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/clusterLight/ClusterLightManager.ts#L46)
 
 Initializes the ClusterLightManager instance.
 
@@ -71,7 +71,7 @@ Initializes the ClusterLightManager instance.
 
 > <span class="readonly-badge">readonly</span> **get** **clusterLightsBuffer**(): `GPUBuffer`
 
-Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:95](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/clusterLight/ClusterLightManager.ts#L95)
+Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:95](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/clusterLight/ClusterLightManager.ts#L95)
 
 Returns the GPU storage buffer storing cluster light data.
 
@@ -91,7 +91,7 @@ Cluster light `GPUBuffer`
 
 > <span class="readonly-badge">readonly</span> **get** **passClusterLightBound**(): [`PassClusterLightBound`](PassClusterLightBound.md)
 
-Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/clusterLight/ClusterLightManager.ts#L71)
+Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:71](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/clusterLight/ClusterLightManager.ts#L71)
 
 Returns the cluster AABB bound calculation compute pass (`PassClusterLightBound`).
 
@@ -111,7 +111,7 @@ Returns the cluster AABB bound calculation compute pass (`PassClusterLightBound`
 
 > <span class="readonly-badge">readonly</span> **get** **passClustersLight**(): [`PassClustersLight`](PassClustersLight.md)
 
-Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/clusterLight/ClusterLightManager.ts#L83)
+Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:83](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/clusterLight/ClusterLightManager.ts#L83)
 
 Returns the per-cluster light intersection culling compute pass (`PassClustersLight`).
 
@@ -133,7 +133,7 @@ Returns the per-cluster light intersection culling compute pass (`PassClustersLi
 
 > **destroy**(): `void`
 
-Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:176](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/clusterLight/ClusterLightManager.ts#L176)
+Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:176](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/clusterLight/ClusterLightManager.ts#L176)
 
 Releases all allocated GPU buffers and sub-compute pass resources.
 
@@ -149,7 +149,7 @@ Releases all allocated GPU buffers and sub-compute pass resources.
 
 > **updateClusterLights**(): `void`
 
-Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/clusterLight/ClusterLightManager.ts#L103)
+Defined in: [src/light/core/clusterLight/ClusterLightManager.ts:103](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/clusterLight/ClusterLightManager.ts#L103)
 
 Uploads `PointLight` and `SpotLight` data from the scene to the GPU buffer and executes the clustered lighting compute passes.
 
@@ -170,7 +170,7 @@ Uploads `PointLight` and `SpotLight` data from the scene to the GPU buffer and e
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -194,7 +194,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -218,7 +218,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -242,7 +242,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -266,7 +266,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -280,7 +280,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -306,7 +306,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -330,7 +330,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -354,7 +354,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

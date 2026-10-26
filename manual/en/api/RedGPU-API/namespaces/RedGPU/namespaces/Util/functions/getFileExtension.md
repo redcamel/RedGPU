@@ -8,7 +8,7 @@
 
 > **getFileExtension**(`url`): `string`
 
-Defined in: [src/utils/file/getFileExtension.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/file/getFileExtension.ts#L23)
+Defined in: [src/utils/file/getFileExtension.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/utils/file/getFileExtension.ts#L23)
 
 Extracts the lowercase file extension from the last segment of a URL or path. Returns an empty string if there is no extension.
 

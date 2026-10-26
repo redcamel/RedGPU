@@ -6,7 +6,7 @@
 
 # Class: Geometry
 
-Defined in: [src/geometry/Geometry.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/geometry/Geometry.ts#L21)
+Defined in: [src/geometry/Geometry.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/geometry/Geometry.ts#L21)
 
 정점 버퍼(`VertexBuffer`)와 인덱스 버퍼(`IndexBuffer`)를 결합하여 GPU 렌더링 레이아웃 및 AABB 경계 상자 정보를 관리하는 지오메트리 클래스입니다.
 
@@ -32,7 +32,7 @@ const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
 > **new Geometry**(`redGPUContext`, `vertexBuffer`, `indexBuffer?`): `Geometry`
 
-Defined in: [src/geometry/Geometry.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/geometry/Geometry.ts#L45)
+Defined in: [src/geometry/Geometry.ts:45](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/geometry/Geometry.ts#L45)
 
 Geometry 인스턴스를 생성합니다.
 
@@ -62,7 +62,7 @@ Geometry 인스턴스를 생성합니다.
 
 > **gpuRenderInfo**: [`GeometryGPURenderInfo`](../namespaces/Primitive/namespaces/Core/classes/GeometryGPURenderInfo.md)
 
-Defined in: [src/geometry/Geometry.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/geometry/Geometry.ts#L26)
+Defined in: [src/geometry/Geometry.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/geometry/Geometry.ts#L26)
 
 GPU 파이프라인 구성에 필요한 정점 버퍼 레이아웃 정보
 
@@ -78,7 +78,7 @@ GPU 파이프라인 구성에 필요한 정점 버퍼 레이아웃 정보
 
 > <span class="readonly-badge">readonly</span> **get** **indexBuffer**(): [`IndexBuffer`](../namespaces/Resource/classes/IndexBuffer.md)
 
-Defined in: [src/geometry/Geometry.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/geometry/Geometry.ts#L80)
+Defined in: [src/geometry/Geometry.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/geometry/Geometry.ts#L80)
 
 인덱스 버퍼를 반환합니다.
 
@@ -98,7 +98,7 @@ Defined in: [src/geometry/Geometry.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **vertexBuffer**(): [`VertexBuffer`](../namespaces/Resource/classes/VertexBuffer.md)
 
-Defined in: [src/geometry/Geometry.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/geometry/Geometry.ts#L68)
+Defined in: [src/geometry/Geometry.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/geometry/Geometry.ts#L68)
 
 정점 버퍼를 반환합니다.
 
@@ -118,7 +118,7 @@ Defined in: [src/geometry/Geometry.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **volume**(): [`AABB`](../namespaces/Bound/classes/AABB.md)
 
-Defined in: [src/geometry/Geometry.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/geometry/Geometry.ts#L92)
+Defined in: [src/geometry/Geometry.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/geometry/Geometry.ts#L92)
 
 정점 버퍼 기준 AABB(축 정렬 경계 상자) 정보를 반환합니다. 최초 접근 시 계산 후 캐싱됩니다.
 
@@ -138,7 +138,7 @@ Defined in: [src/geometry/Geometry.ts:92](https://github.com/redcamel/RedGPU/blo
 
 > **destroy**(): `void`
 
-Defined in: [src/geometry/Geometry.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/geometry/Geometry.ts#L103)
+Defined in: [src/geometry/Geometry.ts:103](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/geometry/Geometry.ts#L103)
 
 Geometry 인스턴스를 파기하고 할당된 정점 및 인덱스 GPU 버퍼를 해제합니다.
 
@@ -161,7 +161,7 @@ Geometry 인스턴스를 파기하고 할당된 정점 및 인덱스 GPU 버퍼�
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../namespaces/Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -185,7 +185,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L61)
 
 캐시 키를 반환하거나 설정합니다.
 
@@ -199,7 +199,7 @@ Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L65)
 
 ##### Parameters
 
@@ -225,7 +225,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../namespaces/CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -249,7 +249,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L89)
 
 연관된 GPUDevice를 반환합니다.
 
@@ -273,7 +273,7 @@ GPUDevice 인스턴스
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -297,7 +297,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -311,7 +311,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -337,7 +337,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -361,7 +361,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -385,7 +385,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L77)
 
 리소스 매니저 키를 반환합니다.
 
@@ -409,7 +409,7 @@ Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L49)
+Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L49)
 
 리소스의 리비전(업데이트 횟수)을 반환합니다.
 
@@ -433,7 +433,7 @@ Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -463,7 +463,7 @@ Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L102)
+Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L102)
 
 리소스 변경 시 호출될 파이프라인 더티 리스너를 추가합니다.
 
@@ -489,7 +489,7 @@ Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L115)
+Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L115)
 
 등록된 파이프라인 더티 리스너를 제거합니다.
 
@@ -515,7 +515,7 @@ Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L131)
+Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L131)
 
 리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
 

@@ -6,7 +6,7 @@
 
 # Class: ShaderVariantGenerator
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L14)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L14)
 
 조건부 블록과 define 문자열을 기반으로 WGSL 셰이더의 다양한 변형(Variant) 코드를 동적으로 생성하고 캐싱하는 유틸리티 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:14](https:/
 
 > **new ShaderVariantGenerator**(`defines`, `conditionalBlocks`): `ShaderVariantGenerator`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L33)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:33](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L33)
 
 ShaderVariantGenerator 인스턴스를 생성합니다. (내부 시스템 전용)
 
@@ -41,7 +41,7 @@ ShaderVariantGenerator 인스턴스를 생성합니다. (내부 시스템 전용
 
 > **addConditionalInfo**(`uniformName`, `textures`, `samplers`): `void`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L69)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L69)
 
 특정 유니폼 키에 연결된 텍스처 및 샘플러 정보를 추가합니다.
 
@@ -63,7 +63,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:69](https:/
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:192](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L192)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:192](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L192)
 
 캐시된 변형 코드 및 내부 텍스처/샘플러 맵들의 참조를 명시적으로 해제합니다.
 
@@ -77,7 +77,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:192](https:
 
 > **getCachedVariants**(): `string`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L184)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:184](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L184)
 
 현재 캐시된 변형 키 목록을 반환합니다.
 
@@ -93,7 +93,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:184](https:
 
 > **getUnionSamplers**(): `any`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L146)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:146](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L146)
 
 모든 가능한 샘플러 목록(합집합)을 반환합니다.
 
@@ -109,7 +109,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:146](https:
 
 > **getUnionTextures**(): `any`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:129](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L129)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:129](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L129)
 
 모든 가능한 텍스처 목록(합집합)을 반환합니다.
 
@@ -125,7 +125,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:129](https:
 
 > **getVariant**(`variantKey`): `string`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L166)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:166](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L166)
 
 특정 변형 키에 대한 셰이더 코드를 지연 생성(Lazy generate)합니다.
 
@@ -147,7 +147,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:166](https:
 
 > **getVariantSamplers**(`variantKey`): `any`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:108](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L108)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:108](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L108)
 
 특정 변형 키에 활성화된 샘플러 목록을 반환합니다.
 
@@ -169,7 +169,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:108](https:
 
 > **getVariantTextures**(`variantKey`): `any`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L84)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:84](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L84)
 
 특정 변형 키에 활성화된 텍스처 목록을 반환합니다.
 
@@ -191,7 +191,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:84](https:/
 
 > **setBaseInfo**(`textures`, `samplers`): `void`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L51)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L51)
 
 기본 텍스처 및 샘플러 정보를 설정합니다.
 

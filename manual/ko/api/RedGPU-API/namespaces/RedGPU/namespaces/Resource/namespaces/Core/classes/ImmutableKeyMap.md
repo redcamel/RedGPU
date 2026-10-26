@@ -6,7 +6,7 @@
 
 # Class: ImmutableKeyMap
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1380](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1380)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1380](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/ResourceManager.ts#L1380)
 
 한 번 등록된 키의 값을 변경할 수 없는 불변 키 맵 클래스입니다.
 
@@ -28,7 +28,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1380](https:/
 
 > **new ImmutableKeyMap**(`initValues?`): `ImmutableKeyMap`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1389](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1389)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1389](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/ResourceManager.ts#L1389)
 
 ImmutableKeyMap 인스턴스를 생성합니다.
 
@@ -60,7 +60,7 @@ ImmutableKeyMap 인스턴스를 생성합니다.
 
 > **set**(`key`, `value`): `this`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1411](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1411)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1411](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/ResourceManager.ts#L1411)
 
 새로운 키와 값을 등록합니다. 이미 존재하는 키의 값은 변경할 수 없습니다.
 

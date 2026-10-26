@@ -6,7 +6,7 @@
 
 # Interface: FoliageAssemblyResult
 
-Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:153](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L153)
+Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:153](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L153)
 
 Result data interface for foliage mesh assembly and impostor baking.
 
@@ -16,7 +16,7 @@ Result data interface for foliage mesh assembly and impostor baking.
 
 > **boundingHeight**: `number`
 
-Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:178](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L178)
+Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:178](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L178)
 
 Overall bounding height of the foliage in meters
 
@@ -26,7 +26,7 @@ Overall bounding height of the foliage in meters
 
 > **boundingRadius**: `number`
 
-Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L173)
+Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:173](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L173)
 
 Overall bounding sphere radius of the foliage in meters
 
@@ -36,7 +36,7 @@ Overall bounding sphere radius of the foliage in meters
 
 > **lodInfoList**: [`FoliageLODInfo`](FoliageLODInfo.md)[]
 
-Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:168](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L168)
+Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:168](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L168)
 
 List of distance and render unit range metadata per LOD level
 
@@ -46,7 +46,7 @@ List of distance and render unit range metadata per LOD level
 
 > **renderUnits**: [`FoliageRenderUnit`](../classes/FoliageRenderUnit.md)[]
 
-Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:158](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L158)
+Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:158](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L158)
 
 List of render units for main and depth prepass rendering
 
@@ -56,6 +56,6 @@ List of render units for main and depth prepass rendering
 
 > **shadowMergedRenderUnits**: [`FoliageRenderUnit`](../classes/FoliageRenderUnit.md)[]
 
-Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:163](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L163)
+Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:163](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L163)
 
 List of merged render units dedicated to the shadow pass

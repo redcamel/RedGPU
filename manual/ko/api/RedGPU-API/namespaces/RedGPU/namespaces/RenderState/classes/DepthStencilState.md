@@ -6,7 +6,7 @@
 
 # Class: DepthStencilState
 
-Defined in: [src/renderState/DepthStencilState.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L26)
+Defined in: [src/renderState/DepthStencilState.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L26)
 
 객체의 깊이(Depth) 및 스텐실(Stencil) 테스트 상태를 관리하는 클래스입니다.
 
@@ -27,7 +27,7 @@ depthStencilState.depthCompare = RedGPU.GPU_COMPARE_FUNCTION.LESS_EQUAL;
 
 > **new DepthStencilState**(`targetObject3D`): `DepthStencilState`
 
-Defined in: [src/renderState/DepthStencilState.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L48)
+Defined in: [src/renderState/DepthStencilState.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L48)
 
 DepthStencilState 인스턴스를 생성합니다.
 
@@ -49,7 +49,7 @@ DepthStencilState 인스턴스를 생성합니다.
 
 > **get** **depthBias**(): `number`
 
-Defined in: [src/renderState/DepthStencilState.ts:183](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L183)
+Defined in: [src/renderState/DepthStencilState.ts:183](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L183)
 
 깊이 바이어스(Depth Bias) 값을 반환하거나 설정합니다.
 
@@ -63,7 +63,7 @@ Defined in: [src/renderState/DepthStencilState.ts:183](https://github.com/redcam
 
 > **set** **depthBias**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L187)
+Defined in: [src/renderState/DepthStencilState.ts:187](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L187)
 
 ##### Parameters
 
@@ -83,7 +83,7 @@ Defined in: [src/renderState/DepthStencilState.ts:187](https://github.com/redcam
 
 > **get** **depthBiasClamp**(): `number`
 
-Defined in: [src/renderState/DepthStencilState.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L217)
+Defined in: [src/renderState/DepthStencilState.ts:217](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L217)
 
 깊이 바이어스 클램프(Clamp) 값을 반환하거나 설정합니다.
 
@@ -97,7 +97,7 @@ Defined in: [src/renderState/DepthStencilState.ts:217](https://github.com/redcam
 
 > **set** **depthBiasClamp**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L221)
+Defined in: [src/renderState/DepthStencilState.ts:221](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L221)
 
 ##### Parameters
 
@@ -117,7 +117,7 @@ Defined in: [src/renderState/DepthStencilState.ts:221](https://github.com/redcam
 
 > **get** **depthBiasSlopeScale**(): `number`
 
-Defined in: [src/renderState/DepthStencilState.ts:200](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L200)
+Defined in: [src/renderState/DepthStencilState.ts:200](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L200)
 
 깊이 바이어스 기울기 스케일(Slope Scale) 값을 반환하거나 설정합니다.
 
@@ -131,7 +131,7 @@ Defined in: [src/renderState/DepthStencilState.ts:200](https://github.com/redcam
 
 > **set** **depthBiasSlopeScale**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:204](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L204)
+Defined in: [src/renderState/DepthStencilState.ts:204](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L204)
 
 ##### Parameters
 
@@ -151,7 +151,7 @@ Defined in: [src/renderState/DepthStencilState.ts:204](https://github.com/redcam
 
 > **get** **depthCompare**(): `GPUCompareFunction`
 
-Defined in: [src/renderState/DepthStencilState.ts:96](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L96)
+Defined in: [src/renderState/DepthStencilState.ts:96](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L96)
 
 깊이 비교 함수를 반환하거나 설정합니다.
 
@@ -165,7 +165,7 @@ Defined in: [src/renderState/DepthStencilState.ts:96](https://github.com/redcame
 
 > **set** **depthCompare**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:100](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L100)
+Defined in: [src/renderState/DepthStencilState.ts:100](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L100)
 
 ##### Parameters
 
@@ -185,7 +185,7 @@ Defined in: [src/renderState/DepthStencilState.ts:100](https://github.com/redcam
 
 > **get** **depthWriteEnabled**(): `boolean`
 
-Defined in: [src/renderState/DepthStencilState.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L79)
+Defined in: [src/renderState/DepthStencilState.ts:79](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L79)
 
 깊이 버퍼 쓰기 활성화 여부를 반환하거나 설정합니다.
 
@@ -199,7 +199,7 @@ Defined in: [src/renderState/DepthStencilState.ts:79](https://github.com/redcame
 
 > **set** **depthWriteEnabled**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L83)
+Defined in: [src/renderState/DepthStencilState.ts:83](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L83)
 
 ##### Parameters
 
@@ -219,7 +219,7 @@ Defined in: [src/renderState/DepthStencilState.ts:83](https://github.com/redcame
 
 > **get** **format**(): `GPUTextureFormat`
 
-Defined in: [src/renderState/DepthStencilState.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L60)
+Defined in: [src/renderState/DepthStencilState.ts:60](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L60)
 
 깊이/스텐실 텍스처 포맷을 반환하거나 설정합니다.
 
@@ -233,7 +233,7 @@ Defined in: [src/renderState/DepthStencilState.ts:60](https://github.com/redcame
 
 > **set** **format**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L64)
+Defined in: [src/renderState/DepthStencilState.ts:64](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L64)
 
 ##### Parameters
 
@@ -253,7 +253,7 @@ Defined in: [src/renderState/DepthStencilState.ts:64](https://github.com/redcame
 
 > <span class="readonly-badge">readonly</span> **get** **state**(): `object`
 
-Defined in: [src/renderState/DepthStencilState.ts:234](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L234)
+Defined in: [src/renderState/DepthStencilState.ts:234](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L234)
 
 현재 설정된 값들을 기반으로 `GPUDepthStencilState` 형식의 상태 객체를 반환합니다.
 
@@ -265,16 +265,16 @@ Defined in: [src/renderState/DepthStencilState.ts:234](https://github.com/redcam
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `depthBias` | `number` | [src/renderState/DepthStencilState.ts:249](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L249) |
-| `depthBiasClamp` | `number` | [src/renderState/DepthStencilState.ts:251](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L251) |
-| `depthBiasSlopeScale` | `number` | [src/renderState/DepthStencilState.ts:250](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L250) |
-| `depthCompare` | `GPUCompareFunction` | [src/renderState/DepthStencilState.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L244) |
-| `depthWriteEnabled` | `boolean` | [src/renderState/DepthStencilState.ts:243](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L243) |
-| `format` | `GPUTextureFormat` | [src/renderState/DepthStencilState.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L242) |
-| `stencilBack` | `GPUStencilFaceState` | [src/renderState/DepthStencilState.ts:246](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L246) |
-| `stencilFront` | `GPUStencilFaceState` | [src/renderState/DepthStencilState.ts:245](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L245) |
-| `stencilReadMask` | `number` | [src/renderState/DepthStencilState.ts:247](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L247) |
-| `stencilWriteMask` | `number` | [src/renderState/DepthStencilState.ts:248](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L248) |
+| `depthBias` | `number` | [src/renderState/DepthStencilState.ts:249](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L249) |
+| `depthBiasClamp` | `number` | [src/renderState/DepthStencilState.ts:251](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L251) |
+| `depthBiasSlopeScale` | `number` | [src/renderState/DepthStencilState.ts:250](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L250) |
+| `depthCompare` | `GPUCompareFunction` | [src/renderState/DepthStencilState.ts:244](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L244) |
+| `depthWriteEnabled` | `boolean` | [src/renderState/DepthStencilState.ts:243](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L243) |
+| `format` | `GPUTextureFormat` | [src/renderState/DepthStencilState.ts:242](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L242) |
+| `stencilBack` | `GPUStencilFaceState` | [src/renderState/DepthStencilState.ts:246](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L246) |
+| `stencilFront` | `GPUStencilFaceState` | [src/renderState/DepthStencilState.ts:245](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L245) |
+| `stencilReadMask` | `number` | [src/renderState/DepthStencilState.ts:247](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L247) |
+| `stencilWriteMask` | `number` | [src/renderState/DepthStencilState.ts:248](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L248) |
 
 ***
 
@@ -284,7 +284,7 @@ Defined in: [src/renderState/DepthStencilState.ts:234](https://github.com/redcam
 
 > **get** **stencilBack**(): `GPUStencilFaceState`
 
-Defined in: [src/renderState/DepthStencilState.ts:132](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L132)
+Defined in: [src/renderState/DepthStencilState.ts:132](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L132)
 
 후면(Back) 스텐실 상태를 반환하거나 설정합니다.
 
@@ -298,7 +298,7 @@ Defined in: [src/renderState/DepthStencilState.ts:132](https://github.com/redcam
 
 > **set** **stencilBack**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L136)
+Defined in: [src/renderState/DepthStencilState.ts:136](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L136)
 
 ##### Parameters
 
@@ -318,7 +318,7 @@ Defined in: [src/renderState/DepthStencilState.ts:136](https://github.com/redcam
 
 > **get** **stencilFront**(): `GPUStencilFaceState`
 
-Defined in: [src/renderState/DepthStencilState.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L115)
+Defined in: [src/renderState/DepthStencilState.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L115)
 
 전면(Front) 스텐실 상태를 반환하거나 설정합니다.
 
@@ -332,7 +332,7 @@ Defined in: [src/renderState/DepthStencilState.ts:115](https://github.com/redcam
 
 > **set** **stencilFront**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L119)
+Defined in: [src/renderState/DepthStencilState.ts:119](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L119)
 
 ##### Parameters
 
@@ -352,7 +352,7 @@ Defined in: [src/renderState/DepthStencilState.ts:119](https://github.com/redcam
 
 > **get** **stencilReadMask**(): `number`
 
-Defined in: [src/renderState/DepthStencilState.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L149)
+Defined in: [src/renderState/DepthStencilState.ts:149](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L149)
 
 스텐실 읽기 마스크를 반환하거나 설정합니다.
 
@@ -366,7 +366,7 @@ Defined in: [src/renderState/DepthStencilState.ts:149](https://github.com/redcam
 
 > **set** **stencilReadMask**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:153](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L153)
+Defined in: [src/renderState/DepthStencilState.ts:153](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L153)
 
 ##### Parameters
 
@@ -386,7 +386,7 @@ Defined in: [src/renderState/DepthStencilState.ts:153](https://github.com/redcam
 
 > **get** **stencilWriteMask**(): `number`
 
-Defined in: [src/renderState/DepthStencilState.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L166)
+Defined in: [src/renderState/DepthStencilState.ts:166](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L166)
 
 스텐실 쓰기 마스크를 반환하거나 설정합니다.
 
@@ -400,7 +400,7 @@ Defined in: [src/renderState/DepthStencilState.ts:166](https://github.com/redcam
 
 > **set** **stencilWriteMask**(`value`): `void`
 
-Defined in: [src/renderState/DepthStencilState.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/DepthStencilState.ts#L170)
+Defined in: [src/renderState/DepthStencilState.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/DepthStencilState.ts#L170)
 
 ##### Parameters
 

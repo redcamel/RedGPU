@@ -6,7 +6,7 @@
 
 # Class: LandscapeVBTGenerator
 
-Defined in: [src/landscape/core/generator/LandscapeVBTGenerator.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/LandscapeVBTGenerator.ts#L22)
+Defined in: [src/landscape/core/generator/LandscapeVBTGenerator.ts:22](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/LandscapeVBTGenerator.ts#L22)
 
 Class that composites multiple terrain material layers to generate Virtual Blend Texture (VBT: BaseColor, Normal, ORM) atlases and mipmap chains.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new LandscapeVBTGenerator**(`redGPUContext`): `LandscapeVBTGenerator`
 
-Defined in: [src/landscape/core/generator/LandscapeVBTGenerator.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/LandscapeVBTGenerator.ts#L46)
+Defined in: [src/landscape/core/generator/LandscapeVBTGenerator.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/LandscapeVBTGenerator.ts#L46)
 
 Initializes a `LandscapeVBTGenerator` instance.
 
@@ -58,9 +58,9 @@ Initializes a `LandscapeVBTGenerator` instance.
 
 ### bakeAtlas()
 
-> **bakeAtlas**(`vntAtlas`, `vbtBaseColorArray`, `vbtNormalArray`, `vbtORMArray`, `material`, `singleTilePixels?`): `void`
+> **bakeAtlas**(`vntAtlas`, `vbtAtlas`, `material`, `singleTilePixels?`): `void`
 
-Defined in: [src/landscape/core/generator/LandscapeVBTGenerator.ts:75](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/LandscapeVBTGenerator.ts#L75)
+Defined in: [src/landscape/core/generator/LandscapeVBTGenerator.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/LandscapeVBTGenerator.ts#L69)
 
 Bakes the full VBT atlases (BaseColor, Normal, ORM) and mipmaps based on the VNT atlas and layer data of `LandscapeMaterial`.
 
@@ -69,9 +69,7 @@ Bakes the full VBT atlases (BaseColor, Normal, ORM) and mipmaps based on the VNT
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `vntAtlas` | [`DirectTexture`](../../../../../../Resource/classes/DirectTexture.md) | `undefined` | Virtual Normal Texture (VNT) atlas |
-| `vbtBaseColorArray` | [`DirectTexture`](../../../../../../Resource/classes/DirectTexture.md) | `undefined` | VBT BaseColor atlas texture to store the baked result |
-| `vbtNormalArray` | [`DirectTexture`](../../../../../../Resource/classes/DirectTexture.md) | `undefined` | VBT Normal atlas texture to store the baked result |
-| `vbtORMArray` | [`DirectTexture`](../../../../../../Resource/classes/DirectTexture.md) | `undefined` | VBT ORM (Occlusion, Roughness, Metallic) atlas texture to store the baked result |
+| `vbtAtlas` | [`DirectTexture`](../../../../../../Resource/classes/DirectTexture.md) | `undefined` | 3-layer VBT (BaseColor, Normal, ORM) atlas texture to store the baked result |
 | `material` | [`LandscapeMaterial`](../../../../../classes/LandscapeMaterial.md) | `undefined` | `LandscapeMaterial` instance containing layer information to composite |
 | `singleTilePixels?` | `number` | `256` | Pixel resolution per single tile (default: `256`) |
 
@@ -87,7 +85,7 @@ Bakes the full VBT atlases (BaseColor, Normal, ORM) and mipmaps based on the VNT
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/core/generator/LandscapeVBTGenerator.ts:162](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/LandscapeVBTGenerator.ts#L162)
+Defined in: [src/landscape/core/generator/LandscapeVBTGenerator.ts:153](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/LandscapeVBTGenerator.ts#L153)
 
 Releases all GPU buffers and caches used for VBT baking and tile mipmap generation.
 
@@ -114,7 +112,7 @@ Releases all GPU buffers and caches used for VBT baking and tile mipmap generati
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -138,7 +136,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **bindGroupLayout**(): `GPUBindGroupLayout`
 
-Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:66](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L66)
+Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:66](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L66)
 
 Returns the bind group layout of the atlas baking compute pipeline.
 
@@ -162,7 +160,7 @@ Bind group layout or `null`
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -186,7 +184,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **computePipeline**(): `GPUComputePipeline`
 
-Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L54)
+Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L54)
 
 Returns the base compute pipeline used for atlas baking.
 
@@ -210,7 +208,7 @@ Compute pipeline or `null`
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -234,7 +232,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -258,7 +256,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -272,7 +270,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -298,7 +296,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -322,7 +320,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -346,7 +344,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -374,7 +372,7 @@ UUID string of the object
 
 > **acquireUniformBuffer**(`byteLength`): `GPUBuffer`
 
-Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L81)
+Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:81](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L81)
 
 Acquires and returns an available uniform buffer with at least the specified byte length from the pool for the current frame.
 
@@ -402,7 +400,7 @@ Allocated `GPUBuffer` instance
 
 > **dispatchBakePass**(`bindGroup`, `pixelW`, `pixelH`, `pixelX`, `pixelZ`): `void`
 
-Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L136)
+Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:136](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L136)
 
 Dispatches an atlas baking compute pass with the specified bind group and pixel region dimensions.
 
@@ -432,7 +430,7 @@ Dispatches an atlas baking compute pass with the specified bind group and pixel 
 
 > **initBaseComputePipeline**(`shaderModuleKey`, `shaderCode`, `layoutEntries`, `defaultUniformByteLength?`): `void`
 
-Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:178](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L178)
+Defined in: [src/landscape/core/generator/ALandscapeAtlasGenerator.ts:178](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/generator/ALandscapeAtlasGenerator.ts#L178)
 
 Initializes the base compute pipeline and uniform buffer pool based on the shader module and bind group layout entries.
 

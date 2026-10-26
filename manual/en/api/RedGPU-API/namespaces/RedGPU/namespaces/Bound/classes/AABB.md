@@ -6,7 +6,7 @@
 
 # Class: AABB
 
-Defined in: [src/bound/AABB.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L18)
+Defined in: [src/bound/AABB.ts:18](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L18)
 
 3D Axis-Aligned Bounding Box (AABB) class.
 
@@ -24,7 +24,7 @@ const intersects = aabb.intersects(otherAABB);
 
 > **new AABB**(`minX?`, `maxX?`, `minY?`, `maxY?`, `minZ?`, `maxZ?`): `AABB`
 
-Defined in: [src/bound/AABB.ts:113](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L113)
+Defined in: [src/bound/AABB.ts:113](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L113)
 
 Creates an `AABB` instance.
 
@@ -54,7 +54,7 @@ const aabb = new RedGPU.Bound.AABB(-5, 5, -5, 5, -5, 5);
 
 > <span class="readonly-badge">readonly</span> **centerX**: `number`
 
-Defined in: [src/bound/AABB.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L53)
+Defined in: [src/bound/AABB.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L53)
 
 Center X coordinate.
 
@@ -64,7 +64,7 @@ Center X coordinate.
 
 > <span class="readonly-badge">readonly</span> **centerY**: `number`
 
-Defined in: [src/bound/AABB.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L58)
+Defined in: [src/bound/AABB.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L58)
 
 Center Y coordinate.
 
@@ -74,7 +74,7 @@ Center Y coordinate.
 
 > <span class="readonly-badge">readonly</span> **centerZ**: `number`
 
-Defined in: [src/bound/AABB.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L63)
+Defined in: [src/bound/AABB.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L63)
 
 Center Z coordinate.
 
@@ -84,7 +84,7 @@ Center Z coordinate.
 
 > <span class="readonly-badge">readonly</span> **geometryRadius**: `number`
 
-Defined in: [src/bound/AABB.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L83)
+Defined in: [src/bound/AABB.ts:83](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L83)
 
 Euclidean distance from the center of the bounding box to a corner vertex (bounding sphere radius).
 
@@ -94,7 +94,7 @@ Euclidean distance from the center of the bounding box to a corner vertex (bound
 
 > <span class="readonly-badge">readonly</span> **maxX**: `number`
 
-Defined in: [src/bound/AABB.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L28)
+Defined in: [src/bound/AABB.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L28)
 
 Maximum X coordinate.
 
@@ -104,7 +104,7 @@ Maximum X coordinate.
 
 > <span class="readonly-badge">readonly</span> **maxY**: `number`
 
-Defined in: [src/bound/AABB.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L38)
+Defined in: [src/bound/AABB.ts:38](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L38)
 
 Maximum Y coordinate.
 
@@ -114,7 +114,7 @@ Maximum Y coordinate.
 
 > <span class="readonly-badge">readonly</span> **maxZ**: `number`
 
-Defined in: [src/bound/AABB.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L48)
+Defined in: [src/bound/AABB.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L48)
 
 Maximum Z coordinate.
 
@@ -124,7 +124,7 @@ Maximum Z coordinate.
 
 > <span class="readonly-badge">readonly</span> **minX**: `number`
 
-Defined in: [src/bound/AABB.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L23)
+Defined in: [src/bound/AABB.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L23)
 
 Minimum X coordinate.
 
@@ -134,7 +134,7 @@ Minimum X coordinate.
 
 > <span class="readonly-badge">readonly</span> **minY**: `number`
 
-Defined in: [src/bound/AABB.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L33)
+Defined in: [src/bound/AABB.ts:33](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L33)
 
 Minimum Y coordinate.
 
@@ -144,7 +144,7 @@ Minimum Y coordinate.
 
 > <span class="readonly-badge">readonly</span> **minZ**: `number`
 
-Defined in: [src/bound/AABB.ts:43](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L43)
+Defined in: [src/bound/AABB.ts:43](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L43)
 
 Minimum Z coordinate.
 
@@ -154,7 +154,7 @@ Minimum Z coordinate.
 
 > <span class="readonly-badge">readonly</span> **xSize**: `number`
 
-Defined in: [src/bound/AABB.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L68)
+Defined in: [src/bound/AABB.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L68)
 
 Total size along the X-axis (`maxX - minX`).
 
@@ -164,7 +164,7 @@ Total size along the X-axis (`maxX - minX`).
 
 > <span class="readonly-badge">readonly</span> **ySize**: `number`
 
-Defined in: [src/bound/AABB.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L73)
+Defined in: [src/bound/AABB.ts:73](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L73)
 
 Total size along the Y-axis (`maxY - minY`).
 
@@ -174,7 +174,7 @@ Total size along the Y-axis (`maxY - minY`).
 
 > <span class="readonly-badge">readonly</span> **zSize**: `number`
 
-Defined in: [src/bound/AABB.ts:78](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L78)
+Defined in: [src/bound/AABB.ts:78](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L78)
 
 Total size along the Z-axis (`maxZ - minZ`).
 
@@ -184,7 +184,7 @@ Total size along the Z-axis (`maxZ - minZ`).
 
 > **clone**(): `AABB`
 
-Defined in: [src/bound/AABB.ts:279](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L279)
+Defined in: [src/bound/AABB.ts:279](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L279)
 
 Clones and returns a new `AABB` instance with the same bounding values as the current `AABB`.
 
@@ -205,7 +205,7 @@ Cloned `AABB` instance
 
 > **contains**(`pointOrX`, `y?`, `z?`): `boolean`
 
-Defined in: [src/bound/AABB.ts:253](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L253)
+Defined in: [src/bound/AABB.ts:253](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L253)
 
 Checks whether the specified 3D coordinate or point is contained within the `AABB`.
 
@@ -235,7 +235,7 @@ const isPointInside = aabb.contains([0, 0, 0]);
 
 > **copy**(`other`): `this`
 
-Defined in: [src/bound/AABB.ts:201](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L201)
+Defined in: [src/bound/AABB.ts:201](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L201)
 
 Copies the bounding values of another `AABB` instance into the current instance.
 
@@ -262,7 +262,7 @@ Updated current `AABB` instance
 
 > **intersects**(`other`): `boolean`
 
-Defined in: [src/bound/AABB.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L221)
+Defined in: [src/bound/AABB.ts:221](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L221)
 
 Determines whether this box intersects with another `AABB` instance.
 
@@ -289,7 +289,7 @@ const isIntersecting = aabb.intersects(otherAABB);
 
 > **set**(`minX`, `maxX`, `minY`, `maxY`, `minZ`, `maxZ`): `this`
 
-Defined in: [src/bound/AABB.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/AABB.ts#L155)
+Defined in: [src/bound/AABB.ts:155](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/AABB.ts#L155)
 
 Updates the bounding coordinates and derived properties of the current `AABB` instance in-place.
 

@@ -6,7 +6,7 @@
 
 # Class: ImmutableKeyMap
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1380](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1380)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1380](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/ResourceManager.ts#L1380)
 
 Map class with immutable keys whose values cannot be changed once set.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ImmutableKeyMap**(`initValues?`): `ImmutableKeyMap`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1389](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1389)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1389](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/ResourceManager.ts#L1389)
 
 Creates an ImmutableKeyMap instance.
 
@@ -60,7 +60,7 @@ Creates an ImmutableKeyMap instance.
 
 > **set**(`key`, `value`): `this`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1411](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1411)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1411](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/ResourceManager.ts#L1411)
 
 Sets a new key and value. Values of existing keys cannot be modified.
 

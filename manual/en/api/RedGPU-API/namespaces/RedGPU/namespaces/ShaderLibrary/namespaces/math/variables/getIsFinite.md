@@ -8,7 +8,7 @@
 
 > `const` **getIsFinite**: `string` = `getIsFinite_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:481](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L481)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:481](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L481)
 
 Checks if a single scalar value is finite. (Checks for NaN and Inf)
 

@@ -6,7 +6,7 @@
 
 # Class: VertexGPURenderInfo
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L16)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L16)
 
 Class that manages GPU vertex rendering pipeline and resource information.
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new VertexGPURenderInfo**(`vertexShaderModule`, `vertexShaderSourceVariant`, `vertexShaderVariantConditionalBlocks`, `vertexUniformInfo`, `vertexBindGroupLayout`, `vertexUniformBuffer`, `vertexUniformBindGroup`, `pipeline`, `shadowPipeline?`, `pickingPipeline?`): `VertexGPURenderInfo`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:108](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L108)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:108](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L108)
 
 Creates a VertexGPURenderInfo instance.
 
@@ -49,7 +49,7 @@ Creates a VertexGPURenderInfo instance.
 
 > **pickingPipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L71)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:71](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L71)
 
 Picking render pipeline
 
@@ -59,7 +59,7 @@ Picking render pipeline
 
 > **pipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L61)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L61)
 
 Base render pipeline
 
@@ -69,7 +69,7 @@ Base render pipeline
 
 > **shadowPipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:66](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L66)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:66](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L66)
 
 Shadow render pipeline
 
@@ -79,7 +79,7 @@ Shadow render pipeline
 
 > **vertexBindGroupLayout**: `GPUBindGroupLayout`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L46)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L46)
 
 Vertex bind group layout
 
@@ -89,7 +89,7 @@ Vertex bind group layout
 
 > **vertexShaderModule**: `GPUShaderModule`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L21)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L21)
 
 Vertex shader module
 
@@ -99,7 +99,7 @@ Vertex shader module
 
 > **vertexShaderSourceVariant**: [`ShaderVariantGenerator`](../../../../Resource/namespaces/CoreWGSLParser/classes/ShaderVariantGenerator.md)
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L26)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L26)
 
 Vertex shader variant generator
 
@@ -109,7 +109,7 @@ Vertex shader variant generator
 
 > **vertexShaderVariantConditionalBlocks**: `string`[]
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L31)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L31)
 
 List of vertex shader conditional blocks
 
@@ -119,7 +119,7 @@ List of vertex shader conditional blocks
 
 > **vertexStructInfo**: `any`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L36)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L36)
 
 Vertex structure parsing information
 
@@ -129,7 +129,7 @@ Vertex structure parsing information
 
 > **vertexUniformBindGroup**: `GPUBindGroup`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L51)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L51)
 
 Vertex uniform bind group
 
@@ -139,7 +139,7 @@ Vertex uniform bind group
 
 > **vertexUniformBuffer**: [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md) \| [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L56)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L56)
 
 Vertex uniform or storage buffer
 
@@ -149,6 +149,6 @@ Vertex uniform or storage buffer
 
 > **vertexUniformInfo**: `any`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L41)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L41)
 
 Vertex uniform information

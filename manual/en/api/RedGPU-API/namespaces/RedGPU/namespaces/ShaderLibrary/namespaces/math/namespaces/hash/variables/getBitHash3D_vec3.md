@@ -8,7 +8,7 @@
 
 > `const` **getBitHash3D\_vec3**: `string` = `getBitHash3D_vec3_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:354](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L354)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:354](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L354)
 
 Generates a 3D random vector by preserving the bit structure of a 3D vector. (Ultra-precise)
 

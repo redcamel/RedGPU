@@ -6,7 +6,7 @@
 
 # Interface: DefineUintInfo
 
-Defined in: [src/defineProperty/funcs/number/defineUint.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/defineUint.ts#L12)
+Defined in: [src/defineProperty/funcs/number/defineUint.ts:12](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/number/defineUint.ts#L12)
 
 Interface for property definition options passed to the `defineUint` function.
 
@@ -16,7 +16,7 @@ Interface for property definition options passed to the `defineUint` function.
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/number/defineUint.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/defineUint.ts#L17)
+Defined in: [src/defineProperty/funcs/number/defineUint.ts:17](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/number/defineUint.ts#L17)
 
 Property key name to define on the target object's prototype
 
@@ -26,7 +26,7 @@ Property key name to define on the target object's prototype
 
 > `optional` **max?**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineUint.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/defineUint.ts#L32)
+Defined in: [src/defineProperty/funcs/number/defineUint.ts:32](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/number/defineUint.ts#L32)
 
 Optional maximum allowed value. Values above this limit log a warning and are clamped.
 
@@ -36,7 +36,7 @@ Optional maximum allowed value. Values above this limit log a warning and are cl
 
 > `optional` **min?**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineUint.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/defineUint.ts#L27)
+Defined in: [src/defineProperty/funcs/number/defineUint.ts:27](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/number/defineUint.ts#L27)
 
 Optional minimum allowed value (default: 0). Values below this limit log a warning and are clamped.
 
@@ -46,6 +46,6 @@ Optional minimum allowed value (default: 0). Values below this limit log a warni
 
 > **value**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineUint.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/defineUint.ts#L22)
+Defined in: [src/defineProperty/funcs/number/defineUint.ts:22](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/number/defineUint.ts#L22)
 
 Initial unsigned integer (Uint) value of the property

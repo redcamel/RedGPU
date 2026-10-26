@@ -6,7 +6,7 @@
 
 # Class: LandscapeSpatialGrid
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L14)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L14)
 
 지형(Landscape)의 전체 월드 영역을 2D 타일 그리드로 분할하고 공간 질의(Spatial Query)를 처리하는 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:14](https://gith
 
 > **new LandscapeSpatialGrid**(`tileCountX`, `tileCountZ`, `tileSizeX`, `tileSizeZ`): `LandscapeSpatialGrid`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L47)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:47](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L47)
 
 `LandscapeSpatialGrid` 인스턴스를 생성합니다.
 
@@ -45,7 +45,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:47](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** **componentCount**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L77)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:77](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L77)
 
 타일 컴포넌트 개수 튜플(`[tileCountX, tileCountZ]`)을 반환합니다.
 
@@ -63,7 +63,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:77](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** **flatCells**(): [`LandscapeComponent`](LandscapeComponent.md)[]
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L149)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:149](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L149)
 
 그리드 내 모든 타일 컴포넌트의 1차원 배열(`Array<LandscapeComponent>`)을 반환합니다.
 
@@ -81,7 +81,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:149](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **halfWorldSizeX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:209](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L209)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:209](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L209)
 
 전체 지형 가로 월드 크기의 절반(`worldSizeX / 2`)을 반환합니다.
 
@@ -99,7 +99,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:209](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **halfWorldSizeZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L221)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:221](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L221)
 
 전체 지형 세로 월드 크기의 절반(`worldSizeZ / 2`)을 반환합니다.
 
@@ -117,7 +117,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:221](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **invWorldSizeX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L125)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:125](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L125)
 
 전체 지형 가로 월드 크기의 역수(`1 / worldSizeX`)를 반환합니다.
 
@@ -135,7 +135,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:125](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **invWorldSizeZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:137](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L137)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:137](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L137)
 
 전체 지형 세로 월드 크기의 역수(`1 / worldSizeZ`)를 반환합니다.
 
@@ -153,7 +153,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:137](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **tileCountX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:161](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L161)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:161](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L161)
 
 가로(X) 방향 타일 개수를 반환합니다.
 
@@ -171,7 +171,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:161](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **tileCountZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L173)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:173](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L173)
 
 세로(Z) 방향 타일 개수를 반환합니다.
 
@@ -189,7 +189,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:173](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **tileSize**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L89)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L89)
 
 단일 타일의 월드 크기 튜플(`[tileSizeX, tileSizeZ]`)을 반환합니다.
 
@@ -207,7 +207,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:89](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** **tileSizeX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:185](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L185)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:185](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L185)
 
 단일 타일의 가로(X) 월드 크기를 반환합니다.
 
@@ -225,7 +225,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:185](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **tileSizeZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:197](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L197)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:197](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L197)
 
 단일 타일의 세로(Z) 월드 크기를 반환합니다.
 
@@ -243,7 +243,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:197](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **worldSize**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L65)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L65)
 
 전체 지형의 월드 크기 튜플(`[worldSizeX, worldSizeZ]`)을 반환합니다.
 
@@ -261,7 +261,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:65](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** **worldSizeX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L101)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L101)
 
 전체 지형의 가로(X) 월드 크기를 반환합니다.
 
@@ -279,7 +279,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:101](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **worldSizeZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:113](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L113)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:113](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L113)
 
 전체 지형의 세로(Z) 월드 크기를 반환합니다.
 
@@ -295,7 +295,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:113](https://git
 
 > **getActiveComponentsInRadius**(`camX`, `camZ`, `tileLoadingRadius`, `outArray`): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:357](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L357)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:357](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L357)
 
 주어진 카메라 월드 좌표 반경 내에 포함되는 활성 타일 컴포넌트들을 검색하여 출력 배열에 담습니다.
 
@@ -320,7 +320,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:357](https://git
 
 > **getCellCoordinates**(`x`, `z`, `outBuffer`): `void`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L329)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:329](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L329)
 
 월드 `(x, z)` 좌표를 그리드 셀 좌표(`[col, row]`)로 변환하여 출력 버퍼에 기록합니다.
 
@@ -342,7 +342,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:329](https://git
 
 > **getComponent**(`row`, `col`): [`LandscapeComponent`](LandscapeComponent.md)
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:310](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L310)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:310](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L310)
 
 지정된 행(Row)과 열(Column) 인덱스에 위치한 타일 컴포넌트를 반환합니다.
 
@@ -365,7 +365,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:310](https://git
 
 > **rebuildTiles**(`onTileCreated?`): `void`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:261](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L261)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:261](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L261)
 
 현재 그리드 설정에 맞춰 모든 `LandscapeComponent` 타일 인스턴스를 재생성합니다.
 
@@ -385,7 +385,7 @@ Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:261](https://git
 
 > **setConfig**(`tileCountX`, `tileCountZ`, `tileSizeX`, `tileSizeZ`): `void`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L242)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:242](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L242)
 
 그리드의 타일 개수 및 타일 크기 설정을 변경하고 기존 셀 목록을 초기화합니다.
 

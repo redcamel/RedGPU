@@ -6,7 +6,7 @@
 
 # Interface: FoliageSubCell
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L61)
+Defined in: [src/landscape/foliage/core/Foliage.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L61)
 
 Interface representing the state information of a sub-cell, the minimum spatial unit for foliage streaming.
 
@@ -16,7 +16,7 @@ Interface representing the state information of a sub-cell, the minimum spatial 
 
 > **centerX**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L81)
+Defined in: [src/landscape/foliage/core/Foliage.ts:81](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L81)
 
 World X coordinate of the sub-cell center
 
@@ -26,7 +26,7 @@ World X coordinate of the sub-cell center
 
 > **centerZ**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L86)
+Defined in: [src/landscape/foliage/core/Foliage.ts:86](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L86)
 
 World Z coordinate of the sub-cell center
 
@@ -36,7 +36,7 @@ World Z coordinate of the sub-cell center
 
 > **instanceCount**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L91)
+Defined in: [src/landscape/foliage/core/Foliage.ts:91](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L91)
 
 Number of valid instances to be placed in the sub-cell (`-1` if not yet computed)
 
@@ -46,7 +46,7 @@ Number of valid instances to be placed in the sub-cell (`-1` if not yet computed
 
 > **isMounted**: `boolean`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:96](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L96)
+Defined in: [src/landscape/foliage/core/Foliage.ts:96](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L96)
 
 Whether the sub-cell is currently mounted in the GPU mega buffer
 
@@ -56,7 +56,7 @@ Whether the sub-cell is currently mounted in the GPU mega buffer
 
 > **mountedSlotIndex**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L101)
+Defined in: [src/landscape/foliage/core/Foliage.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L101)
 
 Starting slot offset within the mounted GPU mega buffer (`-1` if unmounted)
 
@@ -66,7 +66,7 @@ Starting slot offset within the mounted GPU mega buffer (`-1` if unmounted)
 
 > **subCellKey**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:66](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L66)
+Defined in: [src/landscape/foliage/core/Foliage.ts:66](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L66)
 
 Unique key packed from sub-cell grid coordinates (`subCellX`, `subCellZ`)
 
@@ -76,7 +76,7 @@ Unique key packed from sub-cell grid coordinates (`subCellX`, `subCellZ`)
 
 > **subCellX**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L71)
+Defined in: [src/landscape/foliage/core/Foliage.ts:71](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L71)
 
 Grid X index of the sub-cell
 
@@ -86,6 +86,6 @@ Grid X index of the sub-cell
 
 > **subCellZ**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:76](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L76)
+Defined in: [src/landscape/foliage/core/Foliage.ts:76](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L76)
 
 Grid Z index of the sub-cell

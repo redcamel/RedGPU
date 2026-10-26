@@ -8,7 +8,7 @@
 
 > **getComputeBindGroupLayoutDescriptorFromShaderInfo**(`SHADER_INFO`, `targetGroupIndex`, `useMSAAOrOverride?`, `overrideEntries?`): `GPUBindGroupLayoutDescriptor`
 
-Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:273](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L273)
+Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:273](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L273)
 
 파싱된 셰이더 정보로부터 컴퓨트 스테이지(GPUShaderStage.COMPUTE)용 바인드 그룹 레이아웃 디스크립터를 생성합니다.
 

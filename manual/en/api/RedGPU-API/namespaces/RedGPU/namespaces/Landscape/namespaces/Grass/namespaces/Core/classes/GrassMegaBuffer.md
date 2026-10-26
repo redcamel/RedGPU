@@ -6,7 +6,7 @@
 
 # Class: GrassMegaBuffer
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L45)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:45](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L45)
 
 Internal system mega buffer class that manages raw grass instance buffers, culled result buffers, and indirect draw argument buffers.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new GrassMegaBuffer**(`redGPUContext`, `initialCapacity?`, `maxTypes?`): `GrassMegaBuffer`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L65)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L65)
 
 Creates a `GrassMegaBuffer` instance.
 
@@ -60,7 +60,7 @@ Creates a `GrassMegaBuffer` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **isReady**(): `boolean`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:99](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L99)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:99](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L99)
 
 Returns whether both the mega buffer and culled result buffer are ready.
 
@@ -86,7 +86,7 @@ Whether the buffers are ready
 
 > **allocateType**(`typeId`, `maxInstances`, `renderUnits`): `GrassTypeAllocation`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L120)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:120](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L120)
 
 Allocates a mega buffer segment and near/far indirect draw slots for a specific grass type.
 
@@ -112,7 +112,7 @@ Allocated grass type segment information (`GrassTypeAllocation`)
 
 > **freeType**(`typeId`): `void`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L184)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:184](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L184)
 
 Frees and resets the allocation information and type parameter buffer data for the specified grass type.
 
@@ -134,7 +134,7 @@ Frees and resets the allocation information and type parameter buffer data for t
 
 > **getAllocation**(`typeId`): `GrassTypeAllocation`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L221)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:221](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L221)
 
 Returns the allocation information for the specified grass type ID.
 
@@ -158,7 +158,7 @@ Allocation information object (`GrassTypeAllocation`), or `undefined` if not all
 
 > **getOrCreateUnifiedCullingBindGroup**(`bindGroupLayout`, `globalUniformBuffer`): `GPUBindGroup`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:326](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L326)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:326](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L326)
 
 Returns or creates the bind group for the unified culling compute pass.
 
@@ -183,7 +183,7 @@ Created `GPUBindGroup`, or `null` if buffers are not ready
 
 > **invalidateUnifiedCullingBindGroup**(): `void`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:306](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L306)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:306](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L306)
 
 Invalidates the cached unified culling bind group.
 
@@ -203,7 +203,7 @@ Invalidates the cached unified culling bind group.
 
 > **onDestroy**(): `void`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:397](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L397)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:397](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L397)
 
 Cleans up bind group caches and allocation maps when the mega buffer is destroyed.
 
@@ -223,7 +223,7 @@ Cleans up bind group caches and allocation maps when the mega buffer is destroye
 
 > **onResizeBuffers**(`newCapacity`): `void`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:376](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L376)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:376](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L376)
 
 Recreates the culled result GPU buffer to match the new capacity when the mega buffer expands.
 
@@ -249,7 +249,7 @@ Recreates the culled result GPU buffer to match the new capacity when the mega b
 
 > **updateTypeParams**(`typeId`, `grass`, `alloc`): `void`
 
-Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L239)
+Defined in: [src/landscape/grass/core/buffer/GrassMegaBuffer.ts:239](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/buffer/GrassMegaBuffer.ts#L239)
 
 Updates culling distance and offset parameters for a specific grass type to the GPU buffer.
 
@@ -278,7 +278,7 @@ Updates culling distance and offset parameters for a specific grass type to the 
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -302,7 +302,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -326,7 +326,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **cpuTypeParamsBuffer**(): `Float32Array`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:261](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L261)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:261](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L261)
 
 Returns the CPU-side type parameter `Float32Array` buffer.
 
@@ -350,7 +350,7 @@ CPU type parameter `Float32Array` buffer
 
 > <span class="readonly-badge">readonly</span> **get** **cpuTypeParamsUint32**(): `Uint32Array`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:273](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L273)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:273](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L273)
 
 Returns the `Uint32Array` view of the CPU-side type parameter buffer.
 
@@ -374,7 +374,7 @@ CPU type parameter `Uint32Array` view
 
 > **get** **culledGPUBuffer**(): `GPUBuffer`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:309](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L309)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:309](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L309)
 
 Gets or sets the GPU buffer holding culled instance data for the main pass.
 
@@ -388,7 +388,7 @@ Culled instance `GPUBuffer`, or `null` if unallocated
 
 > **set** **culledGPUBuffer**(`buffer`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L313)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:313](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L313)
 
 ##### Parameters
 
@@ -414,7 +414,7 @@ Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:313](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -438,7 +438,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **indirectGPUBuffer**(): `GPUBuffer`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:325](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L325)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:325](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L325)
 
 Returns the GPU buffer holding `drawIndexedIndirect` command arguments for the main pass.
 
@@ -462,7 +462,7 @@ Indirect draw `GPUBuffer`, or `null` if destroyed
 
 > <span class="readonly-badge">readonly</span> **get** **instanceCapacity**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:249](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L249)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:249](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L249)
 
 Returns the currently allocated maximum instance capacity.
 
@@ -486,7 +486,7 @@ Current maximum instance capacity
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -510,7 +510,7 @@ Per-class unique instance ID
 
 > <span class="readonly-badge">readonly</span> **get** **maxRenderUnits**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:225](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L225)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:225](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L225)
 
 Returns the maximum number of render unit slots supported by the mega buffer.
 
@@ -534,7 +534,7 @@ Maximum render unit slot count
 
 > <span class="readonly-badge">readonly</span> **get** **maxTypes**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:237](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L237)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:237](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L237)
 
 Returns the maximum number of scatter types supported by the mega buffer.
 
@@ -558,7 +558,7 @@ Maximum scatter type count
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -572,7 +572,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -598,7 +598,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **onRecreated**(): () => `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:349](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L349)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:349](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L349)
 
 Gets or sets the callback function invoked when GPU buffers are recreated due to capacity expansion.
 
@@ -612,7 +612,7 @@ Recreation callback function (`(() => void)`), or `null`
 
 > **set** **onRecreated**(`cb`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:353](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L353)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:353](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L353)
 
 ##### Parameters
 
@@ -638,7 +638,7 @@ Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:353](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** **rawGPUBuffer**(): `GPUBuffer`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:297](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L297)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:297](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L297)
 
 Returns the GPU buffer holding baked raw instance data.
 
@@ -662,7 +662,7 @@ Raw instance `GPUBuffer`, or `null` if destroyed
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -686,7 +686,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -710,7 +710,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **strideBytes**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:201](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L201)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:201](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L201)
 
 Returns the stride size in bytes for a single instance data entry.
 
@@ -734,7 +734,7 @@ Byte stride per instance
 
 > <span class="readonly-badge">readonly</span> **get** **totalAllocatedInstances**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:365](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L365)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:365](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L365)
 
 Returns the total number of raw instances allocated across segments so far.
 
@@ -758,7 +758,7 @@ Total allocated raw instance count
 
 > <span class="readonly-badge">readonly</span> **get** **totalIndirectDrawCalls**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:377](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L377)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:377](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L377)
 
 Returns the total number of indirect draw call slots allocated so far.
 
@@ -782,7 +782,7 @@ Total allocated indirect draw call slot count
 
 > <span class="readonly-badge">readonly</span> **get** **typeParamFloats**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:213](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L213)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:213](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L213)
 
 Returns the number of `Float32` elements for a single type parameter struct.
 
@@ -806,7 +806,7 @@ Number of `Float32` elements per type parameter struct
 
 > <span class="readonly-badge">readonly</span> **get** **typeParamsGPUBuffer**(): `GPUBuffer`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:337](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L337)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:337](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L337)
 
 Returns the GPU buffer holding per-type culling parameters.
 
@@ -830,7 +830,7 @@ Type parameter `GPUBuffer`, or `null` if unused
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -858,7 +858,7 @@ UUID string of the object
 
 > **allocateBaseSegment**(`typeIdOrName`, `maxInstances`, `renderUnitCount`, `culledMultiplier?`): [`ScatterBaseSegmentAllocation`](../../../../Core/namespaces/Scatter/interfaces/ScatterBaseSegmentAllocation.md)
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:401](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L401)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:401](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L401)
 
 Allocates raw, culled, and indirect buffer segment regions for a scatter type and returns the allocation info.
 
@@ -889,7 +889,7 @@ Allocated segment offset and capacity information (`ScatterBaseSegmentAllocation
 
 > **clearBaseAllocations**(): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:581](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L581)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:581](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L581)
 
 Resets the allocated raw/culled instance counters and indirect draw counter to `0`.
 
@@ -909,7 +909,7 @@ Resets the allocated raw/culled instance counters and indirect draw counter to `
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:643](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L643)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:643](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L643)
 
 Destroys all base and derived GPU buffers held by the mega buffer.
 
@@ -929,7 +929,7 @@ Destroys all base and derived GPU buffers held by the mega buffer.
 
 > **ensureCapacity**(`requiredCapacity`): `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:598](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L598)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:598](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L598)
 
 Checks the mega buffer size to satisfy the requested instance capacity, expanding and reallocating GPU buffers if insufficient.
 
@@ -957,7 +957,7 @@ Whether buffer expansion was actually performed (`true`: reallocated, `false`: k
 
 > **onResetMultiIndirectCommands**(`commandEncoder`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:574](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L574)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:574](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L574)
 
 Hook method for subclasses to reset additional indirect buffers (e.g., shadow cascade buffers) when `resetMultiIndirectCommands` runs.
 
@@ -983,7 +983,7 @@ Hook method for subclasses to reset additional indirect buffers (e.g., shadow ca
 
 > **registerIndirectDrawSlot**(`slotIndex`, `indexCount`, `firstIndex?`, `baseVertex?`, `firstInstance?`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:453](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L453)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:453](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L453)
 
 Writes the initial template arguments (`indexCount`, `firstIndex`, `baseVertex`, `firstInstance`) for the specified indirect draw slot into the CPU template buffer.
 
@@ -1013,7 +1013,7 @@ Writes the initial template arguments (`indexCount`, `firstIndex`, `baseVertex`,
 
 > **resetMultiIndirectCommands**(`commandEncoder?`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:539](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L539)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:539](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L539)
 
 Resets the instance counts of the indirect draw buffer to the template state prior to executing the culling pass each frame.
 
@@ -1039,7 +1039,7 @@ Resets the instance counts of the indirect draw buffer to the template state pri
 
 > **syncIndirectResetTemplateToGPU**(`slotIndex?`, `slotCount?`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:480](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterMegaBuffer.ts#L480)
+Defined in: [src/landscape/core/scatter/AScatterMegaBuffer.ts:480](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterMegaBuffer.ts#L480)
 
 Synchronizes the CPU indirect reset template data to the indirect GPU buffer and template GPU buffer.
 

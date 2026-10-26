@@ -6,7 +6,7 @@
 
 # Class: LandscapeComponent
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L12)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:12](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L12)
 
 지형(Landscape) 공간 그리드를 구성하는 개별 타일 컴포넌트 데이터를 관리하는 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:12](https://github
 
 > **new LandscapeComponent**(`worldX?`, `worldZ?`, `componentX?`, `componentZ?`, `minHeightNorm?`, `maxHeightNorm?`): `LandscapeComponent`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L44)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L44)
 
 `LandscapeComponent` 인스턴스를 생성합니다.
 
@@ -47,7 +47,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:44](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **componentX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:105](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L105)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:105](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L105)
 
 그리드 내 타일의 열(Column) 인덱스를 반환합니다.
 
@@ -65,7 +65,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:105](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** **componentZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L117)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L117)
 
 그리드 내 타일의 행(Row) 인덱스를 반환합니다.
 
@@ -83,7 +83,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:117](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** **key**(): `string`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L69)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L69)
 
 타일 컴포넌트를 식별하는 고유 키(`{componentZ}_{componentX}`)를 반환합니다.
 
@@ -101,7 +101,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:69](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **maxHeightNorm**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:141](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L141)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:141](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L141)
 
 타일의 정규화된 최대 높이값을 반환합니다.
 
@@ -119,7 +119,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:141](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** **minHeightNorm**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:129](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L129)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:129](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L129)
 
 타일의 정규화된 최소 높이값을 반환합니다.
 
@@ -137,7 +137,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:129](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** **worldX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L81)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:81](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L81)
 
 타일 중심의 월드 X 좌표를 반환합니다.
 
@@ -155,7 +155,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:81](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **worldZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L93)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L93)
 
 타일 중심의 월드 Z 좌표를 반환합니다.
 
@@ -171,7 +171,7 @@ Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:93](https://github
 
 > **setHeightBounds**(`minHeightNorm`, `maxHeightNorm`): `void`
 
-Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:156](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeComponent.ts#L156)
+Defined in: [src/landscape/core/spatial/LandscapeComponent.ts:156](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeComponent.ts#L156)
 
 타일의 정규화된 최소 및 최대 높이 경계값을 설정합니다.
 

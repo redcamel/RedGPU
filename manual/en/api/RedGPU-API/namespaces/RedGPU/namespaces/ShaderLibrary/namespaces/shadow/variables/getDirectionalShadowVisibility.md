@@ -8,7 +8,7 @@
 
 > `const` **getDirectionalShadowVisibility**: `string` = `getDirectionalShadowVisibility_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L1187)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1187](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L1187)
 
 // 🌟 [비회전 12-Tap 등방성 원형 가우시안 디스크 (Cascade 0 ~ 3 전 구간 공용)]
 // - 직교 격자(U/V 축)에 종속된 Tent PCF의 대각선 계단(Stair-stepping) 한계와 IGN 회전의 모래알 노이즈를 동시에 해결합니다.

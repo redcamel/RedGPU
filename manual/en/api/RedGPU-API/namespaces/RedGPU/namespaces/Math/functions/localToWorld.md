@@ -8,7 +8,7 @@
 
 > **localToWorld**(`targetMatrix`, `x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/math/coordinates/localToWorld.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/localToWorld.ts#L35)
+Defined in: [src/math/coordinates/localToWorld.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/coordinates/localToWorld.ts#L35)
 
 Transforms local coordinates (`[x, y, z]`) into 3D world coordinates (`[x, y, z]`) using a 4x4 transformation matrix (`targetMatrix`).
 

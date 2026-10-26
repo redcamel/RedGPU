@@ -6,7 +6,7 @@
 
 # Class: PickingManager
 
-Defined in: [src/picking/core/PickingManager.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L37)
+Defined in: [src/picking/core/PickingManager.ts:37](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L37)
 
 Manager class that processes mouse interactions with objects in a view by combining a GPU offscreen picking pass and raycasting.
 
@@ -36,7 +36,7 @@ const pickingManager = view.pickingManager;
 
 > **new PickingManager**(`view`): `PickingManager`
 
-Defined in: [src/picking/core/PickingManager.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L74)
+Defined in: [src/picking/core/PickingManager.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L74)
 
 Creates a PickingManager instance.
 
@@ -64,7 +64,7 @@ Creates a PickingManager instance.
 
 > **lastMouseClickEvent**: `MouseEvent`
 
-Defined in: [src/picking/core/PickingManager.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L47)
+Defined in: [src/picking/core/PickingManager.ts:47](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L47)
 
 Last received mouse click event
 
@@ -76,7 +76,7 @@ Last received mouse click event
 
 > **lastMouseEvent**: `MouseEvent`
 
-Defined in: [src/picking/core/PickingManager.ts:42](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L42)
+Defined in: [src/picking/core/PickingManager.ts:42](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L42)
 
 Last received mouse move/button event
 
@@ -92,7 +92,7 @@ Last received mouse move/button event
 
 > <span class="readonly-badge">readonly</span> **get** **castingList**(): ([`Mesh`](../../Display/classes/Mesh.md) \| [`InstancingMesh`](../../Display/classes/InstancingMesh.md))[]
 
-Defined in: [src/picking/core/PickingManager.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L131)
+Defined in: [src/picking/core/PickingManager.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L131)
 
 Returns the list of picking target objects collected in the current frame.
 
@@ -112,7 +112,7 @@ Array of picking target meshes
 
 > **get** **mouseX**(): `number`
 
-Defined in: [src/picking/core/PickingManager.ts:99](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L99)
+Defined in: [src/picking/core/PickingManager.ts:99](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L99)
 
 Gets or sets the current logical mouse X coordinate.
 
@@ -126,7 +126,7 @@ Logical mouse X coordinate
 
 > **set** **mouseX**(`value`): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L103)
+Defined in: [src/picking/core/PickingManager.ts:103](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L103)
 
 ##### Parameters
 
@@ -148,7 +148,7 @@ Defined in: [src/picking/core/PickingManager.ts:103](https://github.com/redcamel
 
 > **get** **mouseY**(): `number`
 
-Defined in: [src/picking/core/PickingManager.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L115)
+Defined in: [src/picking/core/PickingManager.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L115)
 
 Gets or sets the current logical mouse Y coordinate.
 
@@ -162,7 +162,7 @@ Logical mouse Y coordinate
 
 > **set** **mouseY**(`value`): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L119)
+Defined in: [src/picking/core/PickingManager.ts:119](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L119)
 
 ##### Parameters
 
@@ -184,7 +184,7 @@ Defined in: [src/picking/core/PickingManager.ts:119](https://github.com/redcamel
 
 > <span class="readonly-badge">readonly</span> **get** **pickingDepthGPUTextureView**(): `GPUTextureView`
 
-Defined in: [src/picking/core/PickingManager.ts:167](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L167)
+Defined in: [src/picking/core/PickingManager.ts:167](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L167)
 
 Returns the GPU texture view of the picking depth texture.
 
@@ -204,7 +204,7 @@ Returns the GPU texture view of the picking depth texture.
 
 > <span class="readonly-badge">readonly</span> **get** **pickingGPUTexture**(): `GPUTexture`
 
-Defined in: [src/picking/core/PickingManager.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L143)
+Defined in: [src/picking/core/PickingManager.ts:143](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L143)
 
 Returns the GPU texture used for picking color rendering.
 
@@ -224,7 +224,7 @@ Returns the GPU texture used for picking color rendering.
 
 > <span class="readonly-badge">readonly</span> **get** **pickingGPUTextureView**(): `GPUTextureView`
 
-Defined in: [src/picking/core/PickingManager.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L155)
+Defined in: [src/picking/core/PickingManager.ts:155](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L155)
 
 Returns the GPU texture view of the picking color texture.
 
@@ -244,7 +244,7 @@ Returns the GPU texture view of the picking color texture.
 
 > <span class="readonly-badge">readonly</span> **get** **pickingPassDescriptor**(): `GPURenderPassDescriptor`
 
-Defined in: [src/picking/core/PickingManager.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L179)
+Defined in: [src/picking/core/PickingManager.ts:179](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L179)
 
 Returns the picking render pass descriptor.
 
@@ -264,7 +264,7 @@ Returns the picking render pass descriptor.
 
 > <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/picking/core/PickingManager.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L87)
+Defined in: [src/picking/core/PickingManager.ts:87](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L87)
 
 Returns the total video memory size (in bytes) occupied by picking textures.
 
@@ -284,7 +284,7 @@ Video memory usage (unit: bytes)
 
 > **checkEvents**(`view`, `time`): `Promise`\<`void`\>
 
-Defined in: [src/picking/core/PickingManager.ts:268](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L268)
+Defined in: [src/picking/core/PickingManager.ts:268](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L268)
 
 Asynchronously reads the pixel color value to identify the picked object and dispatches registered mouse events.
 
@@ -307,7 +307,7 @@ Asynchronously reads the pixel color value to identify the picked object and dis
 
 > **destroy**(): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L242)
+Defined in: [src/picking/core/PickingManager.ts:242](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L242)
 
 Destroys the picking manager's GPU textures and pixel readback buffer.
 
@@ -323,7 +323,7 @@ Destroys the picking manager's GPU textures and pixel readback buffer.
 
 > **render**(`view`): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L191)
+Defined in: [src/picking/core/PickingManager.ts:191](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L191)
 
 Records collected picking target objects into the picking render pass and schedules pixel readback copy.
 
@@ -345,7 +345,7 @@ Records collected picking target objects into the picking render pass and schedu
 
 > **resetCastingList**(): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:234](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingManager.ts#L234)
+Defined in: [src/picking/core/PickingManager.ts:234](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingManager.ts#L234)
 
 Clears the picking casting list.
 
@@ -366,7 +366,7 @@ Clears the picking casting list.
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -390,7 +390,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -414,7 +414,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -438,7 +438,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -462,7 +462,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -476,7 +476,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -502,7 +502,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -526,7 +526,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -550,7 +550,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

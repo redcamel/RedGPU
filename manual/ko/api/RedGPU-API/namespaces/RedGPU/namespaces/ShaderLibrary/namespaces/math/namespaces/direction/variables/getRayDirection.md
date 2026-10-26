@@ -8,7 +8,7 @@
 
 > `const` **getRayDirection**: `string` = `getRayDirection_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:660](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L660)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:660](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L660)
 
 카메라 위치와 월드 좌표를 사용하여 정규화된 광선 방향 벡터(픽셀을 향하는 벡터)를 계산합니다.
 

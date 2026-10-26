@@ -6,7 +6,7 @@
 
 # Class: ToneMappingManager
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L31)
+Defined in: [src/toneMapping/ToneMappingManager.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L31)
 
 톤 매핑, 대비, 밝기 설정을 통합 관리하는 클래스입니다.
 
@@ -37,7 +37,7 @@ toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
 
 > **new ToneMappingManager**(`redGPUContext`): `ToneMappingManager`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L46)
+Defined in: [src/toneMapping/ToneMappingManager.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L46)
 
 ToneMappingManager 인스턴스를 생성합니다. (내부 시스템 전용)
 
@@ -67,7 +67,7 @@ ToneMappingManager 인스턴스를 생성합니다. (내부 시스템 전용)
 
 > **get** **brightness**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:106](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L106)
+Defined in: [src/toneMapping/ToneMappingManager.ts:106](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L106)
 
 밝기(Brightness)를 반환하거나 설정합니다. (-1.0 ~ 1.0, 기본값: 0.0)
 
@@ -81,7 +81,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:106](https://github.com/redca
 
 > **set** **brightness**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:110](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L110)
+Defined in: [src/toneMapping/ToneMappingManager.ts:110](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L110)
 
 ##### Parameters
 
@@ -103,7 +103,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:110](https://github.com/redca
 
 > **get** **contrast**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L89)
+Defined in: [src/toneMapping/ToneMappingManager.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L89)
 
 명암 대비(Contrast)를 반환하거나 설정합니다. (0.0 ~ 2.0, 기본값: 1.0)
 
@@ -117,7 +117,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:89](https://github.com/redcam
 
 > **set** **contrast**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L93)
+Defined in: [src/toneMapping/ToneMappingManager.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L93)
 
 ##### Parameters
 
@@ -139,7 +139,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:93](https://github.com/redcam
 
 > **get** **mode**(): [`TONE_MAPPING_MODE`](../type-aliases/TONE_MAPPING_MODE.md)
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L71)
+Defined in: [src/toneMapping/ToneMappingManager.ts:71](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L71)
 
 현재 적용된 톤 매핑 모드를 반환하거나 설정합니다.
 
@@ -153,7 +153,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:71](https://github.com/redcam
 
 > **set** **mode**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:75](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L75)
+Defined in: [src/toneMapping/ToneMappingManager.ts:75](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L75)
 
 ##### Parameters
 
@@ -175,7 +175,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:75](https://github.com/redcam
 
 > <span class="readonly-badge">readonly</span> **get** **toneMapping**(): `AToneMappingEffect`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L58)
+Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L58)
 
 현재 활성화된 톤 매핑 이펙트 인스턴스를 반환합니다.
 
@@ -197,7 +197,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcam
 
 > **clear**(): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L119)
+Defined in: [src/toneMapping/ToneMappingManager.ts:119](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L119)
 
 현재 톤 매핑 이펙트 리소스를 해제합니다.
 
@@ -213,7 +213,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:119](https://github.com/redca
 
 > **destroy**(): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L155)
+Defined in: [src/toneMapping/ToneMappingManager.ts:155](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L155)
 
 ToneMappingManager 인스턴스를 파기하고 관련 리소스를 해제합니다.
 
@@ -229,7 +229,7 @@ ToneMappingManager 인스턴스를 파기하고 관련 리소스를 해제합니
 
 > **render**(`view`, `width`, `height`, `currentTextureView`): [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/toneMapping/ToneMappingManager.ts#L146)
+Defined in: [src/toneMapping/ToneMappingManager.ts:146](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/toneMapping/ToneMappingManager.ts#L146)
 
 톤 매핑을 렌더링합니다.
 
@@ -261,7 +261,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:146](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -285,7 +285,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -309,7 +309,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
@@ -333,7 +333,7 @@ Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -357,7 +357,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -371,7 +371,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -397,7 +397,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -421,7 +421,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -445,7 +445,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

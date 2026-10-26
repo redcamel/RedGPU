@@ -6,7 +6,7 @@
 
 # Class: LandscapeSpatialGrid
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L14)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L14)
 
 Class that partitions the entire world area of the Landscape into a 2D tile grid and processes spatial queries.
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new LandscapeSpatialGrid**(`tileCountX`, `tileCountZ`, `tileSizeX`, `tileSizeZ`): `LandscapeSpatialGrid`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L47)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:47](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L47)
 
 Creates a `LandscapeSpatialGrid` instance.
 
@@ -45,7 +45,7 @@ Creates a `LandscapeSpatialGrid` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **componentCount**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L77)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:77](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L77)
 
 Returns the tile component count tuple (`[tileCountX, tileCountZ]`).
 
@@ -63,7 +63,7 @@ Tile component count tuple (`[number, number]`)
 
 > <span class="readonly-badge">readonly</span> **get** **flatCells**(): [`LandscapeComponent`](LandscapeComponent.md)[]
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L149)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:149](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L149)
 
 Returns the 1D array (`Array<LandscapeComponent>`) of all tile components in the grid.
 
@@ -81,7 +81,7 @@ Returns the 1D array (`Array<LandscapeComponent>`) of all tile components in the
 
 > <span class="readonly-badge">readonly</span> **get** **halfWorldSizeX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:209](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L209)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:209](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L209)
 
 Returns half of the total terrain world width (`worldSizeX / 2`).
 
@@ -99,7 +99,7 @@ Half of the total terrain world width
 
 > <span class="readonly-badge">readonly</span> **get** **halfWorldSizeZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L221)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:221](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L221)
 
 Returns half of the total terrain world depth (`worldSizeZ / 2`).
 
@@ -117,7 +117,7 @@ Half of the total terrain world depth
 
 > <span class="readonly-badge">readonly</span> **get** **invWorldSizeX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L125)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:125](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L125)
 
 Returns the reciprocal of the total terrain world width (`1 / worldSizeX`).
 
@@ -135,7 +135,7 @@ Reciprocal of the world width
 
 > <span class="readonly-badge">readonly</span> **get** **invWorldSizeZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:137](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L137)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:137](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L137)
 
 Returns the reciprocal of the total terrain world depth (`1 / worldSizeZ`).
 
@@ -153,7 +153,7 @@ Reciprocal of the world depth
 
 > <span class="readonly-badge">readonly</span> **get** **tileCountX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:161](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L161)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:161](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L161)
 
 Returns the number of tiles along the X axis.
 
@@ -171,7 +171,7 @@ Number of tiles along the X axis
 
 > <span class="readonly-badge">readonly</span> **get** **tileCountZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L173)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:173](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L173)
 
 Returns the number of tiles along the Z axis.
 
@@ -189,7 +189,7 @@ Number of tiles along the Z axis
 
 > <span class="readonly-badge">readonly</span> **get** **tileSize**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L89)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L89)
 
 Returns the single tile world size tuple (`[tileSizeX, tileSizeZ]`).
 
@@ -207,7 +207,7 @@ Single tile world size tuple (`[number, number]`)
 
 > <span class="readonly-badge">readonly</span> **get** **tileSizeX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:185](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L185)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:185](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L185)
 
 Returns the world width (X) of a single tile.
 
@@ -225,7 +225,7 @@ Single tile world width (X)
 
 > <span class="readonly-badge">readonly</span> **get** **tileSizeZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:197](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L197)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:197](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L197)
 
 Returns the world depth (Z) of a single tile.
 
@@ -243,7 +243,7 @@ Single tile world depth (Z)
 
 > <span class="readonly-badge">readonly</span> **get** **worldSize**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L65)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L65)
 
 Returns the world size tuple (`[worldSizeX, worldSizeZ]`) of the entire terrain.
 
@@ -261,7 +261,7 @@ Entire terrain world size tuple (`[number, number]`)
 
 > <span class="readonly-badge">readonly</span> **get** **worldSizeX**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L101)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L101)
 
 Returns the total world width (X) of the terrain.
 
@@ -279,7 +279,7 @@ Total terrain world width (X)
 
 > <span class="readonly-badge">readonly</span> **get** **worldSizeZ**(): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:113](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L113)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:113](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L113)
 
 Returns the total world depth (Z) of the terrain.
 
@@ -295,7 +295,7 @@ Total terrain world depth (Z)
 
 > **getActiveComponentsInRadius**(`camX`, `camZ`, `tileLoadingRadius`, `outArray`): `number`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:357](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L357)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:357](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L357)
 
 Searches for active tile components within the given radius around the camera world coordinates and populates the output array.
 
@@ -320,7 +320,7 @@ Number of tile components found within the radius
 
 > **getCellCoordinates**(`x`, `z`, `outBuffer`): `void`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L329)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:329](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L329)
 
 Converts world `(x, z)` coordinates to grid cell coordinates (`[col, row]`) and writes them into the output buffer.
 
@@ -342,7 +342,7 @@ Converts world `(x, z)` coordinates to grid cell coordinates (`[col, row]`) and 
 
 > **getComponent**(`row`, `col`): [`LandscapeComponent`](LandscapeComponent.md)
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:310](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L310)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:310](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L310)
 
 Returns the tile component located at the specified row and column indices.
 
@@ -365,7 +365,7 @@ Returns the tile component located at the specified row and column indices.
 
 > **rebuildTiles**(`onTileCreated?`): `void`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:261](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L261)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:261](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L261)
 
 Rebuilds all `LandscapeComponent` tile instances according to the current grid configuration.
 
@@ -385,7 +385,7 @@ Rebuilds all `LandscapeComponent` tile instances according to the current grid c
 
 > **setConfig**(`tileCountX`, `tileCountZ`, `tileSizeX`, `tileSizeZ`): `void`
 
-Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L242)
+Defined in: [src/landscape/core/spatial/LandscapeSpatialGrid.ts:242](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeSpatialGrid.ts#L242)
 
 Updates the tile count and tile size configuration of the grid and clears the existing cell list.
 

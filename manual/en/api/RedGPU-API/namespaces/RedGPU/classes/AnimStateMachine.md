@@ -6,7 +6,7 @@
 
 # Class: AnimStateMachine
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:167](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L167)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:167](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L167)
 
 State machine class that manages animation state transitions and blending weights.
 
@@ -16,7 +16,7 @@ State machine class that manages animation state transitions and blending weight
 
 > **new AnimStateMachine**(`initialState?`): `AnimStateMachine`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L191)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:191](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L191)
 
 Creates an AnimStateMachine instance.
 
@@ -36,7 +36,7 @@ Creates an AnimStateMachine instance.
 
 > **currentState**: [`AnimState`](AnimState.md) = `null`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:172](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L172)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:172](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L172)
 
 Currently active animation state
 
@@ -46,7 +46,7 @@ Currently active animation state
 
 > **targetState**: [`AnimState`](AnimState.md) = `null`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:177](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L177)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:177](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L177)
 
 Target animation state for transition
 
@@ -56,7 +56,7 @@ Target animation state for transition
 
 > **addState**(`state`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:206](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L206)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:206](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L206)
 
 Registers a new animation state.
 
@@ -76,7 +76,7 @@ Registers a new animation state.
 
 > **addTransition**(`transition`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:218](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L218)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:218](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L218)
 
 Adds a state transition rule.
 
@@ -96,7 +96,7 @@ Adds a state transition rule.
 
 > **update**(`deltaTime`, `timestamp`, `playInfo`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:236](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L236)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:236](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L236)
 
 Updates the state machine every frame and calculates motion blending weights.
 

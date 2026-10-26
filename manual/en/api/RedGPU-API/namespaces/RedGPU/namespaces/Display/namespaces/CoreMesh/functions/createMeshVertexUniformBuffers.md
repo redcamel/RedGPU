@@ -8,7 +8,7 @@
 
 > **createMeshVertexUniformBuffers**(`mesh`, `skin?`): `void`
 
-Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L22)
+Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:22](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L22)
 
 Creates the vertex uniform buffer and bind group layout for the mesh.
 

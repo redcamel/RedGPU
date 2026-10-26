@@ -6,7 +6,7 @@
 
 # Class: PostEffectTexturePool
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L24)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L24)
 
 Texture pool class that reuses temporary textures generated during post-processing to reduce video memory occupancy and allocation overhead.
 
@@ -36,7 +36,7 @@ const texturePool = view.postEffectManager.texturePool;
 
 > **new PostEffectTexturePool**(`redGPUContext`): `PostEffectTexturePool`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L45)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:45](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L45)
 
 Creates a PostEffectTexturePool instance.
 
@@ -66,7 +66,7 @@ Creates a PostEffectTexturePool instance.
 
 > <span class="readonly-badge">readonly</span> **get** **activeCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L81)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:81](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L81)
 
 Returns the number of currently active textures.
 
@@ -86,7 +86,7 @@ Active texture count
 
 > <span class="readonly-badge">readonly</span> **get** **allocationCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L119)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:119](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L119)
 
 Returns the total number of newly allocated textures.
 
@@ -106,7 +106,7 @@ Total allocation count
 
 > <span class="readonly-badge">readonly</span> **get** **hitRate**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L131)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L131)
 
 Returns the texture reuse hit rate (0 ~ 1).
 
@@ -126,7 +126,7 @@ Hit rate (0 ~ 1)
 
 > <span class="readonly-badge">readonly</span> **get** **idleCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L93)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L93)
 
 Returns the number of idle textures waiting in the pool.
 
@@ -146,7 +146,7 @@ Idle texture count
 
 > <span class="readonly-badge">readonly</span> **get** **peakActiveCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:107](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L107)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:107](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L107)
 
 Returns the historical peak number of concurrently active textures.
 
@@ -166,7 +166,7 @@ Peak active texture count
 
 > <span class="readonly-badge">readonly</span> **get** **totalCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L69)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L69)
 
 Returns the total number of textures in the pool (active + idle).
 
@@ -186,7 +186,7 @@ Total texture count
 
 > <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L57)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:57](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L57)
 
 Returns the total video memory usage (in bytes) in the pool.
 
@@ -206,7 +206,7 @@ Video memory usage (unit: bytes)
 
 > **allocResult**(`width`, `height`, `format?`): [`IPostEffectResult`](../interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:175](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L175)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:175](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L175)
 
 Retrieves a texture of the specified size and format from the pool or allocates a new one.
 
@@ -232,7 +232,7 @@ Allocated texture and view result object (`IPostEffectResult`)
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:216](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L216)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:216](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L216)
 
 Destroys all textures in the pool and resets statistics.
 
@@ -248,7 +248,7 @@ Destroys all textures in the pool and resets statistics.
 
 > **getDetails**(): `any`[]
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L144)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:144](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L144)
 
 Returns the detailed status list of the texture pool by resolution and format key.
 
@@ -266,7 +266,7 @@ Array of detailed pool status objects
 
 > **release**(`texture`): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L188)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L188)
 
 Releases a specific texture back to the pool.
 
@@ -288,7 +288,7 @@ Releases a specific texture back to the pool.
 
 > **releaseAll**(): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:202](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/PostEffectTexturePool.ts#L202)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:202](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/PostEffectTexturePool.ts#L202)
 
 Releases all currently active textures back to the pool.
 
@@ -309,7 +309,7 @@ Releases all currently active textures back to the pool.
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -333,7 +333,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -357,7 +357,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -381,7 +381,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -405,7 +405,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -419,7 +419,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -445,7 +445,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -469,7 +469,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -493,7 +493,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

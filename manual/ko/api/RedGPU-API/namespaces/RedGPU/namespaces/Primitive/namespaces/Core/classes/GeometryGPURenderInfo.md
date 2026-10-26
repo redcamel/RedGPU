@@ -6,7 +6,7 @@
 
 # Class: GeometryGPURenderInfo
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L12)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:12](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/GeometryGPURenderInfo.ts#L12)
 
 지오메트리의 GPU 정점 버퍼 레이아웃 정보를 보관하는 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:12](https://github.com/
 
 > **new GeometryGPURenderInfo**(`buffers`): `GeometryGPURenderInfo`
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L27)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:27](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/GeometryGPURenderInfo.ts#L27)
 
 GeometryGPURenderInfo 인스턴스를 생성합니다.
 
@@ -40,6 +40,6 @@ GeometryGPURenderInfo 인스턴스를 생성합니다.
 
 > **buffers**: `GPUVertexBufferLayout`[]
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L17)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:17](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/GeometryGPURenderInfo.ts#L17)
 
 GPU 정점 버퍼 레이아웃(`GPUVertexBufferLayout`) 배열입니다.

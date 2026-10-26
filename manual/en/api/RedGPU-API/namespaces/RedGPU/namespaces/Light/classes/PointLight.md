@@ -6,7 +6,7 @@
 
 # Class: PointLight
 
-Defined in: [src/light/lights/PointLight.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L26)
+Defined in: [src/light/lights/PointLight.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L26)
 
 Point light class that emits light uniformly in all directions from a single point. Light intensity attenuates with distance within the configured `radius`.
 
@@ -42,7 +42,7 @@ scene.lightManager.addPointLight(pointLight);
 
 > **new PointLight**(`color?`, `lumen?`): `PointLight`
 
-Defined in: [src/light/lights/PointLight.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L50)
+Defined in: [src/light/lights/PointLight.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L50)
 
 Creates a PointLight instance.
 
@@ -78,7 +78,7 @@ const light = new RedGPU.Light.PointLight('#ffffff', 1000);
 
 > <span class="readonly-badge">readonly</span> **get** **drawDebugger**(): [`DrawDebuggerPointLight`](../../Display/namespaces/DrawDebugger/classes/DrawDebuggerPointLight.md)
 
-Defined in: [src/light/lights/PointLight.ts:190](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L190)
+Defined in: [src/light/lights/PointLight.ts:190](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L190)
 
 Returns the visual debugger (`DrawDebuggerPointLight`) instance for the point light.
 
@@ -98,7 +98,7 @@ Debugger instance (`DrawDebuggerPointLight`)
 
 > **get** **lumen**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L63)
+Defined in: [src/light/lights/PointLight.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L63)
 
 Gets or sets the luminous flux (Lumen) of the point light.
 
@@ -112,7 +112,7 @@ Luminous flux value (Lumen)
 
 > **set** **lumen**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:67](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L67)
+Defined in: [src/light/lights/PointLight.ts:67](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L67)
 
 ##### Parameters
 
@@ -134,7 +134,7 @@ Defined in: [src/light/lights/PointLight.ts:67](https://github.com/redcamel/RedG
 
 > <span class="readonly-badge">readonly</span> **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/PointLight.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L127)
+Defined in: [src/light/lights/PointLight.ts:127](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L127)
 
 Returns the world position coordinates (`[x, y, z]`) of the light source.
 
@@ -154,7 +154,7 @@ Position coordinate tuple (`[number, number, number]`)
 
 > **get** **radius**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:139](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L139)
+Defined in: [src/light/lights/PointLight.ts:139](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L139)
 
 Gets or sets the maximum attenuation radius (`radius`) of the light.
 
@@ -168,7 +168,7 @@ Light radius
 
 > **set** **radius**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L143)
+Defined in: [src/light/lights/PointLight.ts:143](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L143)
 
 ##### Parameters
 
@@ -190,7 +190,7 @@ Defined in: [src/light/lights/PointLight.ts:143](https://github.com/redcamel/Red
 
 > **get** **x**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L79)
+Defined in: [src/light/lights/PointLight.ts:79](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L79)
 
 Gets or sets the world X coordinate of the light source.
 
@@ -204,7 +204,7 @@ X-axis coordinate
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L83)
+Defined in: [src/light/lights/PointLight.ts:83](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L83)
 
 ##### Parameters
 
@@ -226,7 +226,7 @@ Defined in: [src/light/lights/PointLight.ts:83](https://github.com/redcamel/RedG
 
 > **get** **y**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:95](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L95)
+Defined in: [src/light/lights/PointLight.ts:95](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L95)
 
 Gets or sets the world Y coordinate of the light source.
 
@@ -240,7 +240,7 @@ Y-axis coordinate
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:99](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L99)
+Defined in: [src/light/lights/PointLight.ts:99](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L99)
 
 ##### Parameters
 
@@ -262,7 +262,7 @@ Defined in: [src/light/lights/PointLight.ts:99](https://github.com/redcamel/RedG
 
 > **get** **z**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:111](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L111)
+Defined in: [src/light/lights/PointLight.ts:111](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L111)
 
 Gets or sets the world Z coordinate of the light source.
 
@@ -276,7 +276,7 @@ Z-axis coordinate
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L115)
+Defined in: [src/light/lights/PointLight.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L115)
 
 ##### Parameters
 
@@ -298,7 +298,7 @@ Defined in: [src/light/lights/PointLight.ts:115](https://github.com/redcamel/Red
 
 > **render**(`debugViewRenderState`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:202](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L202)
+Defined in: [src/light/lights/PointLight.ts:202](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L202)
 
 Renders the point light debugger gizmo when the debugger is enabled.
 
@@ -320,7 +320,7 @@ Renders the point light debugger gizmo when the debugger is enabled.
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:172](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/PointLight.ts#L172)
+Defined in: [src/light/lights/PointLight.ts:172](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/lights/PointLight.ts#L172)
 
 Sets the world position of the light source.
 
@@ -358,7 +358,7 @@ pointLight.setPosition([10, 5, -3]);
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L61)
+Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L61)
 
 Gets or sets the color (`ColorRGB`) instance of the light.
 
@@ -372,7 +372,7 @@ Gets or sets the color (`ColorRGB`) instance of the light.
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L65)
+Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L65)
 
 ##### Parameters
 
@@ -398,7 +398,7 @@ Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L45)
+Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L45)
 
 Gets or sets whether the visual light debugger is enabled.
 
@@ -412,7 +412,7 @@ Whether the debugger is enabled
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L49)
+Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L49)
 
 ##### Parameters
 
@@ -438,7 +438,7 @@ Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L80)
+Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L80)
 
 Gets or sets the light intensity multiplier (real number `0` or greater).
 
@@ -452,7 +452,7 @@ Light intensity multiplier
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L84)
 
 ##### Parameters
 

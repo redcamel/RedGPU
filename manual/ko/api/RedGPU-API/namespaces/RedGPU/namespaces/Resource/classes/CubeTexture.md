@@ -6,7 +6,7 @@
 
 # Class: CubeTexture
 
-Defined in: [src/resources/texture/CubeTexture.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L35)
+Defined in: [src/resources/texture/CubeTexture.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L35)
 
 6면(+X, -X, +Y, -Y, +Z, -Z) 이미지를 로드하여 GPU 큐브맵(`cube`) 텍스처로 관리하는 클래스입니다.
 
@@ -40,7 +40,7 @@ const texture = new RedGPU.Resource.CubeTexture(redGPUContext, [
 
 > **new CubeTexture**(`redGPUContext`, `srcList`, `useMipMap?`, `onLoad?`, `onError?`, `format?`): `CubeTexture`
 
-Defined in: [src/resources/texture/CubeTexture.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L92)
+Defined in: [src/resources/texture/CubeTexture.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L92)
 
 CubeTexture 인스턴스를 생성합니다. 동일한 `cacheKey`가 이미 존재할 경우 기존 캐시된 인스턴스를 반환합니다.
 
@@ -85,7 +85,7 @@ const cubeTexture = new RedGPU.Resource.CubeTexture(
 
 > `static` **defaultViewDescriptor**: `GPUTextureViewDescriptor`
 
-Defined in: [src/resources/texture/CubeTexture.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L40)
+Defined in: [src/resources/texture/CubeTexture.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L40)
 
 큐브 텍스처의 기본 `GPUTextureViewDescriptor` 설정입니다.
 
@@ -101,7 +101,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:40](https://github.com/redcame
 
 > <span class="readonly-badge">readonly</span> **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/CubeTexture.ts:156](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L156)
+Defined in: [src/resources/texture/CubeTexture.ts:156](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L156)
 
 생성된 `GPUTexture` 인스턴스를 반환합니다.
 
@@ -121,7 +121,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:156](https://github.com/redcam
 
 > <span class="readonly-badge">readonly</span> **get** **mipLevelCount**(): `number`
 
-Defined in: [src/resources/texture/CubeTexture.ts:168](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L168)
+Defined in: [src/resources/texture/CubeTexture.ts:168](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L168)
 
 생성된 밉맵 레벨 개수를 반환합니다.
 
@@ -141,7 +141,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:168](https://github.com/redcam
 
 > **get** **srcList**(): `string`[]
 
-Defined in: [src/resources/texture/CubeTexture.ts:180](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L180)
+Defined in: [src/resources/texture/CubeTexture.ts:180](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L180)
 
 6면 이미지 소스 경로 배열을 반환하거나 설정합니다. 값을 변경하면 큐브 텍스처를 비동기로 다시 로드합니다.
 
@@ -155,7 +155,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:180](https://github.com/redcam
 
 > **set** **srcList**(`value`): `void`
 
-Defined in: [src/resources/texture/CubeTexture.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L184)
+Defined in: [src/resources/texture/CubeTexture.ts:184](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L184)
 
 ##### Parameters
 
@@ -177,7 +177,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:184](https://github.com/redcam
 
 > **get** **useMipmap**(): `boolean`
 
-Defined in: [src/resources/texture/CubeTexture.ts:198](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L198)
+Defined in: [src/resources/texture/CubeTexture.ts:198](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L198)
 
 밉맵 사용 여부를 반환하거나 설정합니다. 값을 변경하면 텍스처를 재생성합니다.
 
@@ -191,7 +191,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:198](https://github.com/redcam
 
 > **set** **useMipmap**(`value`): `void`
 
-Defined in: [src/resources/texture/CubeTexture.ts:202](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L202)
+Defined in: [src/resources/texture/CubeTexture.ts:202](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L202)
 
 ##### Parameters
 
@@ -213,7 +213,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:202](https://github.com/redcam
 
 > <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/CubeTexture.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L144)
+Defined in: [src/resources/texture/CubeTexture.ts:144](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L144)
 
 텍스처가 점유 중인 비디오 메모리 크기(Byte)를 반환합니다.
 
@@ -233,7 +233,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:144](https://github.com/redcam
 
 > <span class="readonly-badge">readonly</span> **get** **viewDescriptor**(): `object`
 
-Defined in: [src/resources/texture/CubeTexture.ts:129](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L129)
+Defined in: [src/resources/texture/CubeTexture.ts:129](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L129)
 
 현재 밉맵 레벨 개수가 반영된 `GPUTextureViewDescriptor` 객체를 반환합니다.
 
@@ -250,7 +250,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:129](https://github.com/redcam
 | `dimension?` | `GPUTextureViewDimension` | The dimension to view the texture as. | node\_modules/@webgpu/types/dist/index.d.ts:1818 |
 | `format?` | `GPUTextureFormat` | The format of the texture view. Must be either the GPUTextureDescriptor#format of the texture or one of the GPUTextureDescriptor#viewFormats specified during its creation. | node\_modules/@webgpu/types/dist/index.d.ts:1814 |
 | `label?` | `string` | The initial value of GPUObjectBase#label \| GPUObjectBase.label. | node\_modules/@webgpu/types/dist/index.d.ts:1062 |
-| `mipLevelCount` | `number` | - | [src/resources/texture/CubeTexture.ts:132](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L132) |
+| `mipLevelCount` | `number` | - | [src/resources/texture/CubeTexture.ts:132](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L132) |
 | `swizzle?` | `string` | A string of length four, with each character mapping to the texture view's red/green/blue/alpha channels, respectively. When accessed by a shader, the red/green/blue/alpha channels are replaced by the value corresponding to the component specified in `swizzle[0]`, `swizzle[1]`, `swizzle[2]`, and `swizzle[3]`, respectively: - `"r"`: Take its value from the red channel of the texture. - `"g"`: Take its value from the green channel of the texture. - `"b"`: Take its value from the blue channel of the texture. - `"a"`: Take its value from the alpha channel of the texture. - `"0"`: Force its value to 0. - `"1"`: Force its value to 1. Requires the GPUFeatureName `"texture-component-swizzle"` feature to be enabled. | node\_modules/@webgpu/types/dist/index.d.ts:1864 |
 | `usage?` | `number` | The allowed GPUTextureUsage \| usage(s) for the texture view. Must be a subset of the GPUTexture#usage flags of the texture. If 0, defaults to the full set of GPUTexture#usage flags of the texture. Note: If the view's GPUTextureViewDescriptor#format doesn't support all of the texture's GPUTextureDescriptor#usages, the default will fail, and the view's GPUTextureViewDescriptor#usage must be specified explicitly. | node\_modules/@webgpu/types/dist/index.d.ts:1827 |
 
@@ -264,7 +264,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:129](https://github.com/redcam
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/CubeTexture.ts:212](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L212)
+Defined in: [src/resources/texture/CubeTexture.ts:212](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L212)
 
 텍스처 GPU 리소스를 해제하고 리소스 매니저 등록을 취소합니다.
 
@@ -280,7 +280,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:212](https://github.com/redcam
 
 > **setGPUTextureDirectly**(`gpuTexture`, `cacheKey?`, `useMipmap?`): `void`
 
-Defined in: [src/resources/texture/CubeTexture.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L238)
+Defined in: [src/resources/texture/CubeTexture.ts:238](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/CubeTexture.ts#L238)
 
 외부에서 생성된 `GPUTexture` 객체를 직접 주입하여 설정합니다.
 
@@ -309,7 +309,7 @@ Defined in: [src/resources/texture/CubeTexture.ts:238](https://github.com/redcam
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -333,7 +333,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L61)
 
 캐시 키를 반환하거나 설정합니다.
 
@@ -347,7 +347,7 @@ Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L65)
 
 ##### Parameters
 
@@ -373,7 +373,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -397,7 +397,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L89)
 
 연관된 GPUDevice를 반환합니다.
 
@@ -421,7 +421,7 @@ GPUDevice 인스턴스
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -445,7 +445,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -459,7 +459,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -485,7 +485,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -509,7 +509,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -533,7 +533,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L77)
 
 리소스 매니저 키를 반환합니다.
 
@@ -557,7 +557,7 @@ Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L49)
+Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L49)
 
 리소스의 리비전(업데이트 횟수)을 반환합니다.
 
@@ -581,7 +581,7 @@ Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ManagementResourceBase.ts#L50)
+Defined in: [src/resources/core/ManagementResourceBase.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ManagementResourceBase.ts#L50)
 
 리소스의 관리 상태 정보를 반환합니다.
 
@@ -605,7 +605,7 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:50](https://github.com
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -635,7 +635,7 @@ Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L102)
+Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L102)
 
 리소스 변경 시 호출될 파이프라인 더티 리스너를 추가합니다.
 
@@ -661,7 +661,7 @@ Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L115)
+Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L115)
 
 등록된 파이프라인 더티 리스너를 제거합니다.
 
@@ -687,7 +687,7 @@ Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L131)
+Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L131)
 
 리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
 

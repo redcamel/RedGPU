@@ -8,7 +8,7 @@
 
 > **getMipLevelCount**(`width`, `height`): `number`
 
-Defined in: [src/utils/texture/getMipLevelCount.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/texture/getMipLevelCount.ts#L25)
+Defined in: [src/utils/texture/getMipLevelCount.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/utils/texture/getMipLevelCount.ts#L25)
 
 주어진 해상도에 대해 생성 가능한 최대 Mipmap 레벨 수를 계산합니다.
 

@@ -6,7 +6,7 @@
 
 # Class: ClipAnimState
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:75](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L75)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:75](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L75)
 
 Animation state class wrapping a single glTF animation clip.
 
@@ -24,7 +24,7 @@ Animation state class wrapping a single glTF animation clip.
 
 > **new ClipAnimState**(`name`, `clip`): `ClipAnimState`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L93)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L93)
 
 Creates a ClipAnimState instance.
 
@@ -53,7 +53,7 @@ Creates a ClipAnimState instance.
 
 > **clip**: `GLTFParsedSingleClip`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L80)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L80)
 
 Parsed single glTF animation clip
 
@@ -69,7 +69,7 @@ Parsed single glTF animation clip
 
 > **enter**(`timestamp`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:106](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L106)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:106](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L106)
 
 Records the start timestamp when entering the state.
 
@@ -95,7 +95,7 @@ Records the start timestamp when entering the state.
 
 > **exit**(): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:128](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L128)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:128](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L128)
 
 Called when the state is deactivated.
 
@@ -115,7 +115,7 @@ Called when the state is deactivated.
 
 > **update**(`deltaTime`, `timestamp`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:121](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L121)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:121](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L121)
 
 Updates the single animation state per frame.
 
@@ -145,7 +145,7 @@ Updates the single animation state per frame.
 
 > **name**: `string`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L20)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:20](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L20)
 
 Animation state name
 
@@ -161,7 +161,7 @@ Animation state name
 
 > **startTime**: `number` = `0`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L25)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L25)
 
 State entry start time (ms)
 

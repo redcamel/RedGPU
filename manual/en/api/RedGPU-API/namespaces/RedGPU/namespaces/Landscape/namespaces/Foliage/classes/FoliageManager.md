@@ -6,7 +6,7 @@
 
 # Class: FoliageManager
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L41)
+Defined in: [src/landscape/foliage/FoliageManager.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L41)
 
 Class that manages foliage type registration, sub-cell streaming, GPU culling, and rendering on a `Landscape`.
 
@@ -44,7 +44,7 @@ const foliage = landscape.foliageManager.addType({
 
 > **new FoliageManager**(`landscape`): `FoliageManager`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L64)
+Defined in: [src/landscape/foliage/FoliageManager.ts:64](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L64)
 
 Creates a `FoliageManager` instance.
 
@@ -74,7 +74,7 @@ Creates a `FoliageManager` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **depthPrepassDrawCalls**(): `number`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L125)
+Defined in: [src/landscape/foliage/FoliageManager.ts:125](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L125)
 
 Returns the total number of draw calls issued in the depth prepass.
 
@@ -94,7 +94,7 @@ Number of depth prepass draw calls
 
 > <span class="readonly-badge">readonly</span> **get** **instanceCapacity**(): `number`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:193](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L193)
+Defined in: [src/landscape/foliage/FoliageManager.ts:193](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L193)
 
 Returns the maximum instance capacity of the mega buffer (`FoliageMegaBuffer`).
 
@@ -118,7 +118,7 @@ Maximum instance capacity
 
 > <span class="readonly-badge">readonly</span> **get** **mainPassDrawCalls**(): `number`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:152](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L152)
+Defined in: [src/landscape/foliage/FoliageManager.ts:152](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L152)
 
 Returns the total number of draw calls issued in the main render pass.
 
@@ -138,7 +138,7 @@ Number of main pass draw calls
 
 > <span class="readonly-badge">readonly</span> **get** **subCellSize**(): `number`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L205)
+Defined in: [src/landscape/foliage/FoliageManager.ts:205](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L205)
 
 Returns the side length of a foliage streaming sub-cell in meters.
 
@@ -158,7 +158,7 @@ Sub-cell size in meters
 
 > <span class="readonly-badge">readonly</span> **get** **totalInstanceCount**(): `number`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:174](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L174)
+Defined in: [src/landscape/foliage/FoliageManager.ts:174](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L174)
 
 Returns the total number of active instances across all foliage types.
 
@@ -184,7 +184,7 @@ Total active instance count
 
 > **addType**(`options`): [`Foliage`](Foliage.md)
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:419](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L419)
+Defined in: [src/landscape/foliage/FoliageManager.ts:419](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L419)
 
 Creates a new `Foliage` type and registers it with the manager.
 
@@ -212,7 +212,7 @@ Created and registered `Foliage` instance
 
 > **clearTypes**(): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:402](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L402)
+Defined in: [src/landscape/foliage/FoliageManager.ts:402](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L402)
 
 Removes all registered foliage types and resets internal dirty masks.
 
@@ -232,7 +232,7 @@ Removes all registered foliage types and resets internal dirty masks.
 
 > **computeTypeDrawCalls**(`foliage`): `number`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:328](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L328)
+Defined in: [src/landscape/foliage/FoliageManager.ts:328](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L328)
 
 Computes the number of main and depth prepass draw calls for a single foliage type.
 
@@ -260,7 +260,7 @@ Number of draw calls
 
 > **computeTypeShadowDrawCalls**(`foliage`): `number`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:488](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L488)
+Defined in: [src/landscape/foliage/FoliageManager.ts:488](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L488)
 
 Computes the number of shadow pass draw calls for a single foliage type.
 
@@ -288,7 +288,7 @@ Number of shadow pass draw calls
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:237](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L237)
+Defined in: [src/landscape/foliage/FoliageManager.ts:237](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L237)
 
 Releases all foliage types and GPU resources held by the manager.
 
@@ -308,7 +308,7 @@ Releases all foliage types and GPU resources held by the manager.
 
 > **dispatchCullingPass**(`computePass`): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:229](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L229)
+Defined in: [src/landscape/foliage/FoliageManager.ts:229](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L229)
 
 Records foliage GPU culling dispatch commands into the shared compute pass encoder.
 
@@ -330,7 +330,7 @@ Records foliage GPU culling dispatch commands into the shared compute pass encod
 
 > **rebakeAll**(): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:464](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L464)
+Defined in: [src/landscape/foliage/FoliageManager.ts:464](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L464)
 
 Immediately rebakes mounted sub-cells for all registered foliage types.
 
@@ -350,7 +350,7 @@ Immediately rebakes mounted sub-cells for all registered foliage types.
 
 > **recordResetCommands**(`encoder`): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L217)
+Defined in: [src/landscape/foliage/FoliageManager.ts:217](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L217)
 
 Records commands to reset indirect draw buffer counters into the command encoder.
 
@@ -372,7 +372,7 @@ Records commands to reset indirect draw buffer counters into the command encoder
 
 > **removeType**(`target`): `boolean`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:384](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L384)
+Defined in: [src/landscape/foliage/FoliageManager.ts:384](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L384)
 
 Removes and destroys the foliage type matching the specified instance or name from the manager.
 
@@ -400,7 +400,7 @@ Whether the removal succeeded
 
 > **render**(`view`, `passEncoder`): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:350](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L350)
+Defined in: [src/landscape/foliage/FoliageManager.ts:350](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L350)
 
 Renders all registered foliage types in the main render pass.
 
@@ -427,7 +427,7 @@ Renders all registered foliage types in the main render pass.
 
 > **renderShadow**(`view`, `passEncoder`): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:367](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L367)
+Defined in: [src/landscape/foliage/FoliageManager.ts:367](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L367)
 
 Renders shadows for all registered foliage types in the directional shadow pass.
 
@@ -454,7 +454,7 @@ Renders shadows for all registered foliage types in the directional shadow pass.
 
 > **repopulateAll**(): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:448](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L448)
+Defined in: [src/landscape/foliage/FoliageManager.ts:448](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L448)
 
 Clears sub-cell caches for all registered foliage types and schedules instance repopulation.
 
@@ -470,7 +470,7 @@ Clears sub-cell caches for all registered foliage types and schedules instance r
 
 > **update**(`renderViewStateData`, `standalone?`): `void`
 
-Defined in: [src/landscape/foliage/FoliageManager.ts:257](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/FoliageManager.ts#L257)
+Defined in: [src/landscape/foliage/FoliageManager.ts:257](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/FoliageManager.ts#L257)
 
 Updates foliage sub-cell streaming, uniform buffers, and culling state every frame.
 
@@ -502,7 +502,7 @@ Updates foliage sub-cell streaming, uniform buffers, and culling state every fra
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -526,7 +526,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -550,7 +550,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > **get** **enabled**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L69)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L69)
 
 Gets or sets whether the scatter manager is enabled.
 
@@ -564,7 +564,7 @@ Whether enabled
 
 > **set** **enabled**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L73)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:73](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L73)
 
 ##### Parameters
 
@@ -590,7 +590,7 @@ Defined in: [src/landscape/core/scatter/AScatterManager.ts:73](https://github.co
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -614,7 +614,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -638,7 +638,7 @@ Per-class unique instance ID
 
 > <span class="readonly-badge">readonly</span> **get** **landscape**(): [`Landscape`](../../../classes/Landscape.md)
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L57)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:57](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L57)
 
 Returns the `Landscape` instance to which this scatter manager belongs.
 
@@ -662,7 +662,7 @@ Owner `Landscape` instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -676,7 +676,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -702,7 +702,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -726,7 +726,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -750,7 +750,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **shadowDrawCalls**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L136)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:136](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L136)
 
 Returns the total number of shadow pass draw calls across all scatter types with `castShadow` enabled.
 
@@ -774,7 +774,7 @@ Total shadow pass draw call count
 
 > <span class="readonly-badge">readonly</span> **get** **totalDrawCalls**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L117)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L117)
 
 Returns the total number of main pass draw calls across all registered scatter types when enabled.
 
@@ -798,7 +798,7 @@ Total main pass draw call count
 
 > <span class="readonly-badge">readonly</span> **get** **types**(): `TType`[]
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L85)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:85](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L85)
 
 Returns the list of all currently registered scatter types (`TType[]`).
 
@@ -822,7 +822,7 @@ Array of registered scatter types (`TType[]`)
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -850,7 +850,7 @@ UUID string of the object
 
 > **getTypeByName**(`name`): [`Foliage`](Foliage.md)
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L187)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:187](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L187)
 
 Looks up a registered scatter type instance by its unique name.
 
@@ -878,7 +878,7 @@ Matching scatter type instance, or `undefined` if not found
 
 > **registerTypeInternal**(`type`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L285)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:285](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L285)
 
 Registers a scatter type instance into the internal array and name map (`Map<string, TType>`).
 
@@ -904,7 +904,7 @@ Registers a scatter type instance into the internal array and name map (`Map<str
 
 > **unregisterTypeInternal**(`target`): [`Foliage`](Foliage.md)
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:302](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L302)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:302](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L302)
 
 Unregisters and returns the target scatter type from the internal array and name map (`Map<string, TType>`).
 

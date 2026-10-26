@@ -6,7 +6,7 @@
 
 # Class: PostEffectManager
 
-Defined in: [src/postEffect/PostEffectManager.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L37)
+Defined in: [src/postEffect/PostEffectManager.ts:37](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L37)
 
 Class that manages the HDR/LDR post-processing pipeline (SSAO, SSR, TAA, ToneMapping, FXAA, and user effects) of a `View3D`.
 
@@ -37,7 +37,7 @@ postEffectManager.addEffect(new RedGPU.PostEffect.Sharpen(redGPUContext));
 
 > **new PostEffectManager**(`view`): `PostEffectManager`
 
-Defined in: [src/postEffect/PostEffectManager.ts:72](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L72)
+Defined in: [src/postEffect/PostEffectManager.ts:72](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L72)
 
 Creates a PostEffectManager instance.
 
@@ -67,7 +67,7 @@ Creates a PostEffectManager instance.
 
 > <span class="readonly-badge">readonly</span> **get** **autoExposure**(): [`AutoExposure`](../../Camera/namespaces/Core/classes/AutoExposure.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:124](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L124)
+Defined in: [src/postEffect/PostEffectManager.ts:124](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L124)
 
 Returns the `AutoExposure` instance.
 
@@ -87,7 +87,7 @@ Returns the `AutoExposure` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **effectList**(): ([`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md) \| [`AMultiPassPostEffect`](../namespaces/Core/classes/AMultiPassPostEffect.md))[]
 
-Defined in: [src/postEffect/PostEffectManager.ts:229](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L229)
+Defined in: [src/postEffect/PostEffectManager.ts:229](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L229)
 
 Returns the array of registered user post-processing effects.
 
@@ -107,7 +107,7 @@ Array of post-processing effects (`Array<ASinglePassPostEffect | AMultiPassPostE
 
 > <span class="readonly-badge">readonly</span> **get** **gbufferBindGroup**(): `GPUBindGroup`
 
-Defined in: [src/postEffect/PostEffectManager.ts:100](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L100)
+Defined in: [src/postEffect/PostEffectManager.ts:100](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L100)
 
 Returns the shared G-Buffer bind group for the current swap buffer index.
 
@@ -127,7 +127,7 @@ Shared G-Buffer `GPUBindGroup`
 
 > <span class="readonly-badge">readonly</span> **get** **gbufferBindGroupLayout**(): `GPUBindGroupLayout`
 
-Defined in: [src/postEffect/PostEffectManager.ts:88](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L88)
+Defined in: [src/postEffect/PostEffectManager.ts:88](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L88)
 
 Returns the shared G-Buffer bind group layout matching the current MSAA state.
 
@@ -147,7 +147,7 @@ G-Buffer `GPUBindGroupLayout`
 
 > <span class="readonly-badge">readonly</span> **get** **postEffectSystemUniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L205)
+Defined in: [src/postEffect/PostEffectManager.ts:205](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L205)
 
 Returns the post-effect system common uniform buffer.
 
@@ -167,7 +167,7 @@ System `UniformBuffer` instance
 
 > <span class="readonly-badge">readonly</span> **get** **ssao**(): `SSAO`
 
-Defined in: [src/postEffect/PostEffectManager.ts:157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L157)
+Defined in: [src/postEffect/PostEffectManager.ts:157](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L157)
 
 Returns the SSAO effect instance.
 
@@ -187,7 +187,7 @@ Returns the SSAO effect instance.
 
 > <span class="readonly-badge">readonly</span> **get** **ssr**(): `SSR`
 
-Defined in: [src/postEffect/PostEffectManager.ts:190](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L190)
+Defined in: [src/postEffect/PostEffectManager.ts:190](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L190)
 
 Returns the SSR effect instance.
 
@@ -207,7 +207,7 @@ Returns the SSR effect instance.
 
 > <span class="readonly-badge">readonly</span> **get** **texturePool**(): [`PostEffectTexturePool`](../namespaces/Core/classes/PostEffectTexturePool.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:112](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L112)
+Defined in: [src/postEffect/PostEffectManager.ts:112](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L112)
 
 Returns the post-effect texture pool instance.
 
@@ -227,7 +227,7 @@ Returns the post-effect texture pool instance.
 
 > **get** **useSSAO**(): `boolean` = `false`
 
-Defined in: [src/postEffect/PostEffectManager.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L140)
+Defined in: [src/postEffect/PostEffectManager.ts:140](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L140)
 
 Whether SSAO (Screen Space Ambient Occlusion) is enabled.
 
@@ -241,7 +241,7 @@ Whether SSAO is enabled
 
 > **set** **useSSAO**(`value`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L144)
+Defined in: [src/postEffect/PostEffectManager.ts:144](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L144)
 
 ##### Parameters
 
@@ -263,7 +263,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:144](https://github.com/redcame
 
 > **get** **useSSR**(): `boolean` = `false`
 
-Defined in: [src/postEffect/PostEffectManager.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L173)
+Defined in: [src/postEffect/PostEffectManager.ts:173](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L173)
 
 Whether SSR (Screen Space Reflection) is enabled.
 
@@ -277,7 +277,7 @@ Whether SSR is enabled
 
 > **set** **useSSR**(`value`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:177](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L177)
+Defined in: [src/postEffect/PostEffectManager.ts:177](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L177)
 
 ##### Parameters
 
@@ -299,7 +299,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:177](https://github.com/redcame
 
 > <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/PostEffectManager.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L241)
+Defined in: [src/postEffect/PostEffectManager.ts:241](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L241)
 
 Returns the total video memory usage (in bytes) of the texture pool and registered effects.
 
@@ -319,7 +319,7 @@ Video memory usage (unit: bytes)
 
 > <span class="readonly-badge">readonly</span> **get** **view**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L217)
+Defined in: [src/postEffect/PostEffectManager.ts:217](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L217)
 
 Returns the bound `View3D` instance.
 
@@ -339,7 +339,7 @@ Returns the bound `View3D` instance.
 
 > **addEffect**(`v`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:294](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L294)
+Defined in: [src/postEffect/PostEffectManager.ts:294](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L294)
 
 Adds an effect to the post-processing pipeline.
 
@@ -366,7 +366,7 @@ view.postEffectManager.addEffect(new RedGPU.PostEffect.Sharpen(redGPUContext));
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:439](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L439)
+Defined in: [src/postEffect/PostEffectManager.ts:439](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L439)
 
 Clears cached resources of all registered effects and the texture pool.
 
@@ -382,7 +382,7 @@ Clears cached resources of all registered effects and the texture pool.
 
 > **destroy**(): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:250](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L250)
+Defined in: [src/postEffect/PostEffectManager.ts:250](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L250)
 
 Destroys all registered post-processing effects, texture pool, and system buffers.
 
@@ -398,7 +398,7 @@ Destroys all registered post-processing effects, texture pool, and system buffer
 
 > **getEffectAt**(`index`): [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md) \| [`AMultiPassPostEffect`](../namespaces/Core/classes/AMultiPassPostEffect.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:309](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L309)
+Defined in: [src/postEffect/PostEffectManager.ts:309](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L309)
 
 Returns the post-processing effect at the specified index.
 
@@ -422,7 +422,7 @@ Post-processing effect instance at the specified index
 
 > **removeAllEffect**(): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:348](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L348)
+Defined in: [src/postEffect/PostEffectManager.ts:348](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L348)
 
 Removes all registered post-processing effects and clears their resources.
 
@@ -438,7 +438,7 @@ Removes all registered post-processing effects and clears their resources.
 
 > **removeEffect**(`v`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:321](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L321)
+Defined in: [src/postEffect/PostEffectManager.ts:321](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L321)
 
 Removes a specific post-processing effect from the pipeline and clears its resources.
 
@@ -460,7 +460,7 @@ Removes a specific post-processing effect from the pipeline and clears its resou
 
 > **removeEffectAt**(`index`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:337](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L337)
+Defined in: [src/postEffect/PostEffectManager.ts:337](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L337)
 
 Removes the post-processing effect at the specified index from the pipeline and clears its resources.
 
@@ -482,7 +482,7 @@ Removes the post-processing effect at the specified index from the pipeline and 
 
 > **render**(): [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:363](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/PostEffectManager.ts#L363)
+Defined in: [src/postEffect/PostEffectManager.ts:363](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/PostEffectManager.ts#L363)
 
 Executes the entire post-processing pipeline and returns the final output texture information.
 
@@ -505,7 +505,7 @@ Final rendering result texture information (`IPostEffectResult`)
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -529,7 +529,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -553,7 +553,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -577,7 +577,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -601,7 +601,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -615,7 +615,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -641,7 +641,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -665,7 +665,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -689,7 +689,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

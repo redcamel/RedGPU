@@ -6,7 +6,7 @@
 
 # Class: AntialiasingManager
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L25)
+Defined in: [src/antialiasing/AntialiasingManager.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L25)
 
 컨텍스트 전역의 안티앨리어싱(Anti-aliasing) 모드를 통합 관리하는 클래스입니다.
 
@@ -29,7 +29,7 @@ antialiasingManager.useTAA = true;
 
 > **new AntialiasingManager**(): `AntialiasingManager`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L35)
+Defined in: [src/antialiasing/AntialiasingManager.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L35)
 
 `AntialiasingManager` 인스턴스를 초기화하고 디스플레이 픽셀 밀도에 따라 기본 안티앨리어싱 모드를 설정합니다.
 
@@ -45,7 +45,7 @@ Defined in: [src/antialiasing/AntialiasingManager.ts:35](https://github.com/redc
 
 > <span class="readonly-badge">readonly</span> **get** **msaaID**(): `string`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L127)
+Defined in: [src/antialiasing/AntialiasingManager.ts:127](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L127)
 
 MSAA 상태 변경을 추적하기 위한 고유 식별자(UUID)를 반환합니다.
 
@@ -63,7 +63,7 @@ MSAA 상태 식별용 UUID 문자열
 
 > **get** **useFXAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L109)
+Defined in: [src/antialiasing/AntialiasingManager.ts:109](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L109)
 
 FXAA(Fast Approximate Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다. 활성화 시 기존 `useMSAA` 및 `useTAA`는 자동으로 해제됩니다.
 
@@ -83,7 +83,7 @@ FXAA 활성화 여부
 
 > **set** **useFXAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:113](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L113)
+Defined in: [src/antialiasing/AntialiasingManager.ts:113](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L113)
 
 ##### Parameters
 
@@ -103,7 +103,7 @@ Defined in: [src/antialiasing/AntialiasingManager.ts:113](https://github.com/red
 
 > **get** **useMSAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L83)
+Defined in: [src/antialiasing/AntialiasingManager.ts:83](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L83)
 
 MSAA(Multi-Sample Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다. 상태 변경 시 새로운 `msaaID`가 발급되며 기존 `useFXAA` 및 `useTAA`는 자동으로 해제됩니다.
 
@@ -123,7 +123,7 @@ MSAA 활성화 여부
 
 > **set** **useMSAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L87)
+Defined in: [src/antialiasing/AntialiasingManager.ts:87](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L87)
 
 ##### Parameters
 
@@ -143,7 +143,7 @@ Defined in: [src/antialiasing/AntialiasingManager.ts:87](https://github.com/redc
 
 > **get** **useTAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L58)
+Defined in: [src/antialiasing/AntialiasingManager.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L58)
 
 TAA(Temporal Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다. 활성화 시 기존 `useMSAA` 및 `useFXAA`는 자동으로 해제됩니다.
 
@@ -163,7 +163,7 @@ TAA 활성화 여부
 
 > **set** **useTAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L62)
+Defined in: [src/antialiasing/AntialiasingManager.ts:62](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L62)
 
 ##### Parameters
 
@@ -181,7 +181,7 @@ Defined in: [src/antialiasing/AntialiasingManager.ts:62](https://github.com/redc
 
 > **resetHistory**(`view?`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/AntialiasingManager.ts#L146)
+Defined in: [src/antialiasing/AntialiasingManager.ts:146](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/antialiasing/AntialiasingManager.ts#L146)
 
 지정된 뷰(`View3D`)의 TAA 누적 히스토리 프레임을 초기화합니다. 카메라가 컷 전환(순간 이동)되거나 씬 구성이 급격히 변경될 때 호출하면 이전 프레임 잔상(Ghosting)을 즉시 제거할 수 있습니다.
 

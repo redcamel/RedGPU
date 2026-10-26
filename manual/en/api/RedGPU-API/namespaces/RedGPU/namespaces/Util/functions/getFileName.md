@@ -8,7 +8,7 @@
 
 > **getFileName**(`url`, `withExtension?`): `string`
 
-Defined in: [src/utils/file/getFileName.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/file/getFileName.ts#L26)
+Defined in: [src/utils/file/getFileName.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/utils/file/getFileName.ts#L26)
 
 Returns the part after the last `/` of a URL or path as the file name.
 

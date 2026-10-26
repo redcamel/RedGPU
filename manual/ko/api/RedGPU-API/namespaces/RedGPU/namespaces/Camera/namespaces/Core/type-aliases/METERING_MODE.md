@@ -8,6 +8,6 @@
 
 > **METERING\_MODE** = *typeof* [`METERING_MODE`](../variables/METERING_MODE.md)\[keyof *typeof* [`METERING_MODE`](../variables/METERING_MODE.md)\]
 
-Defined in: [src/camera/core/METERING\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/METERING_MODE.ts#L7)
+Defined in: [src/camera/core/METERING\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/camera/core/METERING_MODE.ts#L7)
 
 `METERING_MODE`의 유니온 타입 정의입니다.

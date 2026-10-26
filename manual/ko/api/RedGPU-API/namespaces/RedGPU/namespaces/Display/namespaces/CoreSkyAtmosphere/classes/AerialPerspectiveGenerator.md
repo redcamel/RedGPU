@@ -6,7 +6,7 @@
 
 # Class: AerialPerspectiveGenerator
 
-Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L23)
+Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L23)
 
 카메라와 물체 사이의 거리에 따른 대기 산란 및 투과율 감쇠를 저장하는 대기 원근(Aerial Perspective) 3D LUT 생성기입니다.
 
@@ -28,7 +28,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPe
 
 > **new AerialPerspectiveGenerator**(`redGPUContext`, `sharedUniformBuffer`, `sampler`): `AerialPerspectiveGenerator`
 
-Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:43](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L43)
+Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:43](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L43)
 
 AerialPerspectiveGenerator 인스턴스를 생성합니다.
 
@@ -60,7 +60,7 @@ AerialPerspectiveGenerator 인스턴스를 생성합니다.
 
 > <span class="readonly-badge">readonly</span> **get** **lutTexture**(): [`DirectCubeTexture`](../../../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L56)
+Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L56)
 
 생성된 대기 원근(Aerial Perspective) 3D LUT 텍스처를 반환합니다.
 
@@ -86,7 +86,7 @@ DirectCubeTexture 인스턴스
 
 > **destroy**(): `void`
 
-Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L101)
+Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L101)
 
 생성기 및 내부 리소스를 해제합니다.
 
@@ -106,7 +106,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPe
 
 > **render**(`view`, `transmittance`, `multiScat`): `void`
 
-Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L74)
+Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPerspectiveGenerator.ts#L74)
 
 현재 뷰와 투과율 및 다중 산란 LUT를 기반으로 대기 원근(Aerial Perspective) LUT를 계산합니다.
 
@@ -135,7 +135,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/aerialPerspective/AerialPe
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -159,7 +159,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -183,7 +183,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
@@ -207,7 +207,7 @@ Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **height**(): `number`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L115)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L115)
 
 LUT 텍스처의 높이를 반환합니다.
 
@@ -231,7 +231,7 @@ LUT 텍스처의 높이를 반환합니다.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -255,7 +255,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -269,7 +269,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -295,7 +295,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -319,7 +319,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -343,7 +343,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **sampler**(): [`Sampler`](../../../../Resource/classes/Sampler.md)
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L91)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:91](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L91)
 
 LUT 샘플링용 샘플러를 반환합니다.
 
@@ -367,7 +367,7 @@ Sampler 인스턴스
 
 > <span class="readonly-badge">readonly</span> **get** **sharedUniformBuffer**(): [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L79)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:79](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L79)
 
 대기 파라미터 공유 유니폼 버퍼를 반환합니다.
 
@@ -391,7 +391,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -415,7 +415,7 @@ Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **width**(): `number`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L103)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:103](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L103)
 
 LUT 텍스처의 너비를 반환합니다.
 
@@ -443,7 +443,7 @@ LUT 텍스처의 너비를 반환합니다.
 
 > **createBindGroup**(`label`, `pipeline`, `entries`): `GPUBindGroup`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:254](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L254)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:254](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L254)
 
 컴퓨트 파이프라인의 첫 번째 레이아웃을 기반으로 바인드 그룹을 생성합니다.
 
@@ -473,7 +473,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > **createComputePipeline**(`label`, `shaderCode`): `GPUComputePipeline`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:225](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L225)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:225](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L225)
 
 WGSL 셰이더 코드로부터 컴퓨트 파이프라인을 생성합니다.
 
@@ -502,7 +502,7 @@ WGSL 셰이더 코드로부터 컴퓨트 파이프라인을 생성합니다.
 
 > **createLUTTexture**(`is3D?`, `format?`): `GPUTexture`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L187)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:187](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L187)
 
 LUT 저장용 GPU 텍스처를 생성합니다.
 
@@ -531,7 +531,7 @@ LUT 저장용 GPU 텍스처를 생성합니다.
 
 > **executeComputePass**(`pipeline`, `bindGroup`, `workgroupSizeX?`, `workgroupSizeY?`, `workgroupSizeZ?`, `notifyUpdate?`): `void`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:152](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L152)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:152](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L152)
 
 컴퓨트 패스를 실행하여 LUT 데이터를 갱신합니다.
 

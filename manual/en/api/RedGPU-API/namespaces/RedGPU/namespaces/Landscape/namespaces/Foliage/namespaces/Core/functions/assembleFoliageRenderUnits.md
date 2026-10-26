@@ -8,7 +8,7 @@
 
 > **assembleFoliageRenderUnits**(`redGPUContext`, `options`, `slotPooler?`): [`FoliageAssemblyResult`](../interfaces/FoliageAssemblyResult.md)
 
-Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:199](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L199)
+Defined in: [src/landscape/foliage/core/assembleFoliageRenderUnits.ts:199](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/assembleFoliageRenderUnits.ts#L199)
 
 Merges LOD meshes defined in foliage options and bakes an octahedral impostor to assemble render unit lists.
 

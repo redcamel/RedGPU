@@ -6,7 +6,7 @@
 
 # Class: PrimitiveUtils
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L18)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:18](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L18)
 
 기본 도형(Primitive)의 정점, 인덱스, 법선, 탄젠트 데이터를 생성하는 정적 유틸리티 클래스입니다.
 
@@ -30,7 +30,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:18](https://github.com/redcame
 
 > `static` **calculateTangents**(`interleaveData`, `indexData`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:1087](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L1087)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:1087](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L1087)
 
 인터리브 정점 배열과 인덱스 배열로부터 정점 탄젠트(`vertexTangent`)를 계산하여 제자리에 기록합니다.
 
@@ -51,7 +51,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:1087](https://github.com/redca
 
 > `static` **finalize**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L60)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:60](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L60)
 
 인터리브 정점 데이터에 탄젠트를 계산하여 반영한 뒤 `Geometry` 인스턴스를 생성합니다.
 
@@ -76,7 +76,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:60](https://github.com/redcame
 
 > `static` **generateBoxData**(`redGPUContext`, `width`, `height`, `depth`, `widthSegments`, `heightSegments`, `depthSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:154](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L154)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:154](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L154)
 
 직육면체(Box) 지오메트리 데이터를 생성합니다.
 
@@ -105,7 +105,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:154](https://github.com/redcam
 
 > `static` **generateCapsuleData**(`redGPUContext`, `radius`, `height`, `radialSegments`, `heightSegments`, `capSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:1032](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L1032)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:1032](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L1032)
 
 캡슐(Capsule) 지오메트리 데이터를 생성합니다.
 
@@ -133,7 +133,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:1032](https://github.com/redca
 
 > `static` **generateCircleEntryData**(`redGPUContext`, `radius`, `radialSegments`, `thetaStart`, `thetaLength`, `isRadial`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:611](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L611)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:611](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L611)
 
 원판(Circle) 지오메트리 데이터를 생성합니다.
 
@@ -161,7 +161,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:611](https://github.com/redcam
 
 > `static` **generateConeData**(`redGPUContext`, `radius`, `height`, `radialSegments`, `heightSegments`, `capBottom`, `thetaStart`, `thetaLength`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:498](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L498)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:498](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L498)
 
 원뿔(Cone) 지오메트리 데이터를 생성합니다.
 
@@ -191,7 +191,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:498](https://github.com/redcam
 
 > `static` **generateCylinderData**(`redGPUContext`, `radiusTop`, `radiusBottom`, `height`, `radialSegments`, `heightSegments`, `capTop`, `capBottom`, `thetaStart`, `thetaLength`, `isRadialTop`, `isRadialBottom`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:446](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L446)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:446](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L446)
 
 원기둥(Cylinder) 지오메트리 데이터를 생성합니다.
 
@@ -225,7 +225,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:446](https://github.com/redcam
 
 > `static` **generateCylinderTorsoData**(`interleaveData`, `indexData`, `radiusTop`, `radiusBottom`, `height`, `radialSegments`, `heightSegments`, `thetaStart`, `thetaLength`, `center`, `uV`, `vV`, `axisVector?`, `skipIndices?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:975](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L975)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:975](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L975)
 
 원기둥 옆면(Torso) 정점 및 인덱스 데이터를 버퍼 배열에 추가합니다.
 
@@ -272,7 +272,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:975](https://github.com/redcam
 
 > `static` **generateGrid**(`interleaveData`, `indexData`, `resolutionX`, `resolutionY`, `vertexCallback`, `skipIndices?`, `reverseIndices?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L91)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:91](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L91)
 
 2D UV 그리드를 순회하며 정점 콜백을 실행하고 그리드 인덱스를 생성합니다.
 
@@ -298,7 +298,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:91](https://github.com/redcame
 
 > `static` **generateGridIndices**(`indexData`, `vertexOffset`, `gridX`, `gridY`, `gridX1`, `reverse?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:1066](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L1066)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:1066](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L1066)
 
 2D 그리드 정점 오프셋과 해상도를 기반으로 삼각형 인덱스 배열을 생성합니다.
 
@@ -323,7 +323,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:1066](https://github.com/redca
 
 > `static` **generateGroundData**(`redGPUContext`, `width`, `height`, `widthSegments`, `heightSegments`, `flipY`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:571](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L571)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:571](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L571)
 
 XZ 평면 기준의 Ground 지오메트리 데이터를 생성합니다.
 
@@ -351,7 +351,7 @@ XZ 평면 기준의 Ground 지오메트리 데이터를 생성합니다.
 
 > `static` **generatePlaneData**(`interleaveData`, `indexData`, `width`, `height`, `mainSegmentsX`, `mainSegmentsY`, `center`, `uV`, `vV`, `normal`, `radius?`, `radiusSegments?`, `boxDim?`, `flipY?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:282](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L282)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:282](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L282)
 
 기저 벡터와 중심점을 기준으로 평면(또는 둥근 박스 면) 정점 및 인덱스 데이터를 버퍼 배열에 추가합니다.
 
@@ -384,7 +384,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:282](https://github.com/redcam
 
 > `static` **generatePlaneEntryData**(`redGPUContext`, `width`, `height`, `widthSegments`, `heightSegments`, `flipY`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:531](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L531)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:531](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L531)
 
 XY 평면 기준의 Plane 지오메트리 데이터를 생성합니다.
 
@@ -412,7 +412,7 @@ XY 평면 기준의 Plane 지오메트리 데이터를 생성합니다.
 
 > `static` **generateRingData**(`interleaveData`, `indexData`, `innerRadius`, `outerRadius`, `thetaSegments`, `phiSegments`, `thetaStart`, `thetaLength`, `center`, `uV`, `vV`, `normal`, `isFront?`, `isRadial?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:847](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L847)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:847](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L847)
 
 고리(Ring) 또는 원판 캡 형태의 정점 및 인덱스 데이터를 버퍼 배열에 추가합니다.
 
@@ -459,7 +459,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:847](https://github.com/redcam
 
 > `static` **generateRingEntryData**(`redGPUContext`, `innerRadius`, `outerRadius`, `thetaSegments`, `phiSegments`, `thetaStart`, `thetaLength`, `isRadial`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:653](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L653)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:653](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L653)
 
 고리(Ring) 지오메트리 데이터를 생성합니다.
 
@@ -489,7 +489,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:653](https://github.com/redcam
 
 > `static` **generateRoundedBoxData**(`redGPUContext`, `width`, `height`, `depth`, `widthSegments`, `heightSegments`, `depthSegments`, `radius`, `radiusSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:196](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L196)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:196](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L196)
 
 모서리가 둥근 직육면체(RoundedBox) 지오메트리 데이터를 생성합니다.
 
@@ -520,7 +520,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:196](https://github.com/redcam
 
 > `static` **generateSphereData**(`redGPUContext`, `radius`, `widthSegments`, `heightSegments`, `phiStart`, `phiLength`, `thetaStart`, `thetaLength`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:392](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L392)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:392](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L392)
 
 구(Sphere) 지오메트리 데이터를 생성합니다.
 
@@ -550,7 +550,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:392](https://github.com/redcam
 
 > `static` **generateSphericalData**(`interleaveData`, `indexData`, `radius`, `widthSegments`, `heightSegments`, `phiStart`, `phiLength`, `thetaStart`, `thetaLength`, `yOffset?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:912](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L912)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:912](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L912)
 
 구면(Spherical) 좌표계 기반의 정점 및 인덱스 데이터를 버퍼 배열에 추가합니다.
 
@@ -581,7 +581,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:912](https://github.com/redcam
 
 > `static` **generateTorusData**(`redGPUContext`, `radius`, `thickness`, `radialSegments`, `tubularSegments`, `thetaStart`, `thetaLength`, `capStart`, `capEnd`, `isRadialCapStart`, `isRadialCapEnd`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:704](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L704)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:704](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L704)
 
 토러스(Torus) 지오메트리 데이터를 생성합니다.
 
@@ -614,7 +614,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:704](https://github.com/redcam
 
 > `static` **generateTorusKnotData**(`redGPUContext`, `radius`, `tubeRadius`, `tubularSegments`, `radialSegments`, `windingsAroundAxis`, `windingsAroundCircle`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:769](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L769)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:769](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L769)
 
 매듭 토러스(TorusKnot) 지오메트리 데이터를 생성합니다.
 
@@ -643,7 +643,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:769](https://github.com/redcam
 
 > `static` **getEmptyGeometry**(`redGPUContext`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L116)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L116)
 
 유효하지 않은 치수일 때 사용할 최소 정점의 빈 `Geometry` 인스턴스를 반환합니다.
 
@@ -666,7 +666,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:116](https://github.com/redcam
 
 > `static` **interleavePacker**(`interleaveData`, `px`, `py`, `pz`, `nx`, `ny`, `nz`, `u`, `v`, `tx?`, `ty?`, `tz?`, `tw?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:1157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/PrimitiveUtils.ts#L1157)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:1157](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/PrimitiveUtils.ts#L1157)
 
 단일 정점의 위치, 법선, UV, 탄젠트 성분을 인터리브 배열에 순서대로 추가합니다.
 

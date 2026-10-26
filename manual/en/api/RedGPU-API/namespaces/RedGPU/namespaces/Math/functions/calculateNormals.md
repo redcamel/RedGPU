@@ -8,7 +8,7 @@
 
 > **calculateNormals**(`vertexArray`, `indexArray`): `number`[]
 
-Defined in: [src/math/calculateNormals.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/calculateNormals.ts#L21)
+Defined in: [src/math/calculateNormals.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/calculateNormals.ts#L21)
 
 Calculates a normalized vertex normal vector array from vertex position and triangle index arrays.
 

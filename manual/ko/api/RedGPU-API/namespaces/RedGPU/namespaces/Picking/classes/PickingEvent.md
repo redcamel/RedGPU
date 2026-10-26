@@ -6,7 +6,7 @@
 
 # Class: PickingEvent
 
-Defined in: [src/picking/core/PickingEvent.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L26)
+Defined in: [src/picking/core/PickingEvent.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L26)
 
 마우스 피킹 및 레이캐스팅 교차 결과 정보를 담는 이벤트 클래스입니다.
 
@@ -29,7 +29,7 @@ mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
 
 > **new PickingEvent**(`pickingId`, `mouseX`, `mouseY`, `target`, `time`, `type`, `nativeEvent`, `hit?`): `PickingEvent`
 
-Defined in: [src/picking/core/PickingEvent.ts:157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L157)
+Defined in: [src/picking/core/PickingEvent.ts:157](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L157)
 
 PickingEvent 인스턴스를 생성합니다.
 
@@ -56,7 +56,7 @@ PickingEvent 인스턴스를 생성합니다.
 
 > **altKey**: `boolean` = `false`
 
-Defined in: [src/picking/core/PickingEvent.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L116)
+Defined in: [src/picking/core/PickingEvent.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L116)
 
 이벤트 발생 시 `Alt` 키 눌림 여부 (기본값: `false`)
 
@@ -66,7 +66,7 @@ Defined in: [src/picking/core/PickingEvent.ts:116](https://github.com/redcamel/R
 
 > **ctrlKey**: `boolean` = `false`
 
-Defined in: [src/picking/core/PickingEvent.ts:121](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L121)
+Defined in: [src/picking/core/PickingEvent.ts:121](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L121)
 
 이벤트 발생 시 `Ctrl` 키 눌림 여부 (기본값: `false`)
 
@@ -76,7 +76,7 @@ Defined in: [src/picking/core/PickingEvent.ts:121](https://github.com/redcamel/R
 
 > **distance**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:76](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L76)
+Defined in: [src/picking/core/PickingEvent.ts:76](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L76)
 
 카메라와 교차 지점 사이의 거리
 
@@ -86,7 +86,7 @@ Defined in: [src/picking/core/PickingEvent.ts:76](https://github.com/redcamel/Re
 
 > **faceIndex**: `number` = `-1`
 
-Defined in: [src/picking/core/PickingEvent.ts:111](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L111)
+Defined in: [src/picking/core/PickingEvent.ts:111](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L111)
 
 교차된 삼각형 면의 인덱스 (기본값: `-1`)
 
@@ -96,7 +96,7 @@ Defined in: [src/picking/core/PickingEvent.ts:111](https://github.com/redcamel/R
 
 > **localPoint**: [`vec3`](../../Math/type-aliases/vec3.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L81)
+Defined in: [src/picking/core/PickingEvent.ts:81](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L81)
 
 대상 객체 로컬 공간상의 교차 지점 좌표
 
@@ -106,7 +106,7 @@ Defined in: [src/picking/core/PickingEvent.ts:81](https://github.com/redcamel/Re
 
 > **localX**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L86)
+Defined in: [src/picking/core/PickingEvent.ts:86](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L86)
 
 로컬 교차 지점의 X 좌표 (기본값: `0`)
 
@@ -116,7 +116,7 @@ Defined in: [src/picking/core/PickingEvent.ts:86](https://github.com/redcamel/Re
 
 > **localY**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L91)
+Defined in: [src/picking/core/PickingEvent.ts:91](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L91)
 
 로컬 교차 지점의 Y 좌표 (기본값: `0`)
 
@@ -126,7 +126,7 @@ Defined in: [src/picking/core/PickingEvent.ts:91](https://github.com/redcamel/Re
 
 > **localZ**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:96](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L96)
+Defined in: [src/picking/core/PickingEvent.ts:96](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L96)
 
 로컬 교차 지점의 Z 좌표 (기본값: `0`)
 
@@ -136,7 +136,7 @@ Defined in: [src/picking/core/PickingEvent.ts:96](https://github.com/redcamel/Re
 
 > **mouseX**: `number`
 
-Defined in: [src/picking/core/PickingEvent.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L36)
+Defined in: [src/picking/core/PickingEvent.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L36)
 
 캔버스 기준 마우스 X 좌표
 
@@ -146,7 +146,7 @@ Defined in: [src/picking/core/PickingEvent.ts:36](https://github.com/redcamel/Re
 
 > **mouseY**: `number`
 
-Defined in: [src/picking/core/PickingEvent.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L41)
+Defined in: [src/picking/core/PickingEvent.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L41)
 
 캔버스 기준 마우스 Y 좌표
 
@@ -156,7 +156,7 @@ Defined in: [src/picking/core/PickingEvent.ts:41](https://github.com/redcamel/Re
 
 > **movementX**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L61)
+Defined in: [src/picking/core/PickingEvent.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L61)
 
 이전 이벤트 대비 마우스 X축 이동량 (기본값: `0`)
 
@@ -166,7 +166,7 @@ Defined in: [src/picking/core/PickingEvent.ts:61](https://github.com/redcamel/Re
 
 > **movementY**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:66](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L66)
+Defined in: [src/picking/core/PickingEvent.ts:66](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L66)
 
 이전 이벤트 대비 마우스 Y축 이동량 (기본값: `0`)
 
@@ -176,7 +176,7 @@ Defined in: [src/picking/core/PickingEvent.ts:66](https://github.com/redcamel/Re
 
 > **pickingId**: `number`
 
-Defined in: [src/picking/core/PickingEvent.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L31)
+Defined in: [src/picking/core/PickingEvent.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L31)
 
 색상 기반 피킹에 사용되는 고유 피킹 ID
 
@@ -186,7 +186,7 @@ Defined in: [src/picking/core/PickingEvent.ts:31](https://github.com/redcamel/Re
 
 > **point**: [`vec3`](../../Math/type-aliases/vec3.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L71)
+Defined in: [src/picking/core/PickingEvent.ts:71](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L71)
 
 월드 공간상의 교차 지점 좌표
 
@@ -196,7 +196,7 @@ Defined in: [src/picking/core/PickingEvent.ts:71](https://github.com/redcamel/Re
 
 > **ray**: [`Ray`](../../Math/classes/Ray.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:106](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L106)
+Defined in: [src/picking/core/PickingEvent.ts:106](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L106)
 
 교차 검사에 사용된 월드 광선(`Ray`)
 
@@ -206,7 +206,7 @@ Defined in: [src/picking/core/PickingEvent.ts:106](https://github.com/redcamel/R
 
 > **shiftKey**: `boolean` = `false`
 
-Defined in: [src/picking/core/PickingEvent.ts:126](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L126)
+Defined in: [src/picking/core/PickingEvent.ts:126](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L126)
 
 이벤트 발생 시 `Shift` 키 눌림 여부 (기본값: `false`)
 
@@ -216,7 +216,7 @@ Defined in: [src/picking/core/PickingEvent.ts:126](https://github.com/redcamel/R
 
 > **target**: [`Mesh`](../../Display/classes/Mesh.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L46)
+Defined in: [src/picking/core/PickingEvent.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L46)
 
 이벤트가 발생한 대상 메시
 
@@ -226,7 +226,7 @@ Defined in: [src/picking/core/PickingEvent.ts:46](https://github.com/redcamel/Re
 
 > **time**: `number`
 
-Defined in: [src/picking/core/PickingEvent.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L51)
+Defined in: [src/picking/core/PickingEvent.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L51)
 
 이벤트 발생 시각 (ms)
 
@@ -236,7 +236,7 @@ Defined in: [src/picking/core/PickingEvent.ts:51](https://github.com/redcamel/Re
 
 > **type**: `string`
 
-Defined in: [src/picking/core/PickingEvent.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L56)
+Defined in: [src/picking/core/PickingEvent.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L56)
 
 피킹 이벤트 타입 (`PICKING_EVENT_TYPE`)
 
@@ -246,6 +246,6 @@ Defined in: [src/picking/core/PickingEvent.ts:56](https://github.com/redcamel/Re
 
 > **uv**: [`vec2`](../../Math/type-aliases/vec2.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/core/PickingEvent.ts#L101)
+Defined in: [src/picking/core/PickingEvent.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/core/PickingEvent.ts#L101)
 
 교차 지점의 텍스처 UV 좌표

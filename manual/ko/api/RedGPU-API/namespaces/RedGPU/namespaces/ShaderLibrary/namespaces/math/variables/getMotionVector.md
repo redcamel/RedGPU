@@ -8,7 +8,7 @@
 
 > `const` **getMotionVector**: `string` = `getMotionVector_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:449](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L449)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:449](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L449)
 
 현재 프레임과 이전 프레임의 클립 공간 좌표를 비교하여 모션 벡터(UV 단위)를 계산합니다.
 

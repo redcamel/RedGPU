@@ -8,7 +8,7 @@
 
 > **getFilePath**(`url`): `string`
 
-Defined in: [src/utils/file/getFilePath.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/file/getFilePath.ts#L23)
+Defined in: [src/utils/file/getFilePath.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/utils/file/getFilePath.ts#L23)
 
 URL 또는 경로에서 마지막 `/`까지 포함한 디렉터리 경로를 반환합니다.
 

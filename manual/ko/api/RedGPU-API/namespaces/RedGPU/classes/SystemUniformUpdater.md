@@ -6,7 +6,7 @@
 
 # Class: SystemUniformUpdater
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L21)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L21)
 
 카메라, 조명, 그림자, 대기 산란, 바람 등 시스템 전역 WGSL 유니폼 구조체 데이터를 `Float32Array`/`Uint32Array` 버퍼에 업데이트하는 유틸리티 클래스입니다.
 
@@ -26,7 +26,7 @@ Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:21](https://github.
 
 > `static` **updateAmbientLight**(`ambientLight`, `ambientLightMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:431](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L431)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:431](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L431)
 
 환경광(`AmbientLight`) 정보를 시스템 유니폼 버퍼에 업데이트합니다.
 
@@ -49,7 +49,7 @@ Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:431](https://github
 
 > `static` **updateCamera**(`camera`, `cameraMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L39)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:39](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L39)
 
 카메라 정보를 시스템 유니폼 버퍼에 업데이트합니다.
 
@@ -72,7 +72,7 @@ Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:39](https://github.
 
 > `static` **updateDirectionalLights**(`directionalLights`, `directionalLightsMemberList`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:386](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L386)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:386](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L386)
 
 직사광(`DirectionalLight`) 배열 정보를 시스템 유니폼 버퍼에 업데이트합니다.
 
@@ -95,7 +95,7 @@ Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:386](https://github
 
 > `static` **updateProjection**(`projectionInfo`, `projectionMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:320](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L320)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:320](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L320)
 
 투영 및 뷰-투영 행렬 정보를 시스템 유니폼 버퍼에 업데이트합니다.
 
@@ -125,7 +125,7 @@ Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:320](https://github
 
 > `static` **updateShadow**(`shadowManager`, `shadowMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L116)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L116)
 
 그림자 설정 및 캐스케이드 행렬 정보를 시스템 유니폼 버퍼에 업데이트합니다.
 
@@ -148,7 +148,7 @@ Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:116](https://github
 
 > `static` **updateSkyAtmosphere**(`skyAtmosphere`, `systemMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:206](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L206)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:206](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L206)
 
 대기 산란(`SkyAtmosphere`) 정보를 시스템 유니폼 버퍼에 업데이트합니다.
 
@@ -171,7 +171,7 @@ Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:206](https://github
 
 > `static` **updateTime**(`timeInfo`, `timeMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:269](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L269)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:269](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L269)
 
 시간 및 프레임 관련 정보를 시스템 유니폼 버퍼에 업데이트합니다.
 
@@ -194,7 +194,7 @@ Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:269](https://github
 
 > `static` **updateWind**(`windManager`, `windMembersInfo`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:469](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L469)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:469](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderer/helperFunc/SystemUniformUpdater.ts#L469)
 
 바람(`WindManager`) 환경 정보를 시스템 유니폼 버퍼에 직접 복사하여 업데이트합니다.
 

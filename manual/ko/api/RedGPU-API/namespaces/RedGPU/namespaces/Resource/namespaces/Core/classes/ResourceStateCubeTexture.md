@@ -6,7 +6,7 @@
 
 # Class: ResourceStateCubeTexture
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L15)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:15](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L15)
 
 큐브 텍스처(`CubeTexture`, `DirectCubeTexture`)의 리소스 관리 상태를 나타내는 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **new ResourceStateCubeTexture**(`cubeTexture`): `ResourceStateCubeTexture`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L50)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L50)
 
 ResourceStateCubeTexture 인스턴스를 생성합니다.
 
@@ -40,7 +40,7 @@ ResourceStateCubeTexture 인스턴스를 생성합니다.
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L30)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L30)
 
 리소스 캐시 키
 
@@ -50,7 +50,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **srcList**: `string`[]
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L25)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L25)
 
 큐브맵 6면 소스 경로 배열
 
@@ -60,7 +60,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **texture**: [`CubeTexture`](../../../classes/CubeTexture.md) \| [`DirectCubeTexture`](../../../classes/DirectCubeTexture.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L20)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:20](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L20)
 
 관리 대상 큐브 텍스처 인스턴스
 
@@ -70,7 +70,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **useNum**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L35)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L35)
 
 리소스 참조 횟수
 
@@ -80,6 +80,6 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L40)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L40)
 
 고유 식별자(UUID)

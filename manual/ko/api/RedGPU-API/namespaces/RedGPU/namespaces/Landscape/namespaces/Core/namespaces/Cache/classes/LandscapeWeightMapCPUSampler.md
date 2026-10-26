@@ -6,7 +6,7 @@
 
 # Class: LandscapeWeightMapCPUSampler
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L36)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L36)
 
 지형 레이어의 가중치 맵 이미지를 CPU 메모리로 로드하여 이중 선형 보간 샘플링을 수행하는 클래스입니다.
 
@@ -30,7 +30,7 @@ Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:36](https:
 
 > **clear**(): `void`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L179)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:179](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L179)
 
 캐시된 모든 가중치 맵 데이터와 진행 중인 로딩 상태를 초기화합니다.
 
@@ -44,7 +44,7 @@ Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:179](https
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L188)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L188)
 
 샘플러의 내부 캐시 리소스를 해제합니다.
 
@@ -58,7 +58,7 @@ Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:188](https
 
 > **getWeight**(`src`, `u`, `v`, `channelIndex?`): `number`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L140)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:140](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L140)
 
 정규화된 UV 좌표(`0.0` ~ `1.0`)와 채널 인덱스에 해당하는 가중치 값을 이중 선형 보간하여 반환합니다.
 
@@ -83,7 +83,7 @@ Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:140](https
 
 > **load**(`src`): `Promise`\<[`WeightMapPixelData`](../interfaces/WeightMapPixelData.md)\>
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L51)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L51)
 
 지정된 이미지 경로의 가중치 맵 픽셀 데이터를 비동기로 로드하고 캐싱합니다.
 

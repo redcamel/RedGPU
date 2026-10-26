@@ -8,7 +8,7 @@
 
 > `const` **getNDCFromDepth**: `string` = `getNDCFromDepth_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:702](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L702)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:702](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L702)
 
 스크린 UV와 깊이 값을 WebGPU 표준 NDC(Normalized Device Coordinates) 좌표로 변환합니다.
 

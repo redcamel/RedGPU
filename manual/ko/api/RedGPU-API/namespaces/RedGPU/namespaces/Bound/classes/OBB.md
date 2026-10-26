@@ -6,7 +6,7 @@
 
 # Class: OBB
 
-Defined in: [src/bound/OBB.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L19)
+Defined in: [src/bound/OBB.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L19)
 
 3차원 방향성 경계 상자(Oriented Bounding Box) 클래스입니다.
 
@@ -24,7 +24,7 @@ const intersects = obb.intersects(otherOBB);
 
 > **new OBB**(`center`, `halfExtents`, `orientation`): `OBB`
 
-Defined in: [src/bound/OBB.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L90)
+Defined in: [src/bound/OBB.ts:90](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L90)
 
 `OBB` 인스턴스를 생성합니다.
 
@@ -51,7 +51,7 @@ const obb = new RedGPU.Bound.OBB([0, 0, 0], [1, 2, 1], orientationMatrix);
 
 > <span class="readonly-badge">readonly</span> **center**: \[`number`, `number`, `number`\]
 
-Defined in: [src/bound/OBB.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L59)
+Defined in: [src/bound/OBB.ts:59](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L59)
 
 경계 상자의 중심 좌표 `[x, y, z]` 튜플입니다.
 
@@ -61,7 +61,7 @@ Defined in: [src/bound/OBB.ts:59](https://github.com/redcamel/RedGPU/blob/1e5994
 
 > <span class="readonly-badge">readonly</span> **centerX**: `number`
 
-Defined in: [src/bound/OBB.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L24)
+Defined in: [src/bound/OBB.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L24)
 
 X축 중심 좌표입니다.
 
@@ -71,7 +71,7 @@ X축 중심 좌표입니다.
 
 > <span class="readonly-badge">readonly</span> **centerY**: `number`
 
-Defined in: [src/bound/OBB.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L29)
+Defined in: [src/bound/OBB.ts:29](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L29)
 
 Y축 중심 좌표입니다.
 
@@ -81,7 +81,7 @@ Y축 중심 좌표입니다.
 
 > <span class="readonly-badge">readonly</span> **centerZ**: `number`
 
-Defined in: [src/bound/OBB.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L34)
+Defined in: [src/bound/OBB.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L34)
 
 Z축 중심 좌표입니다.
 
@@ -91,7 +91,7 @@ Z축 중심 좌표입니다.
 
 > <span class="readonly-badge">readonly</span> **geometryRadius**: `number`
 
-Defined in: [src/bound/OBB.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L69)
+Defined in: [src/bound/OBB.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L69)
 
 경계 상자의 중심에서 꼭짓점까지의 유클리드 거리(외접 구 반지름)입니다.
 
@@ -101,7 +101,7 @@ Defined in: [src/bound/OBB.ts:69](https://github.com/redcamel/RedGPU/blob/1e5994
 
 > <span class="readonly-badge">readonly</span> **halfExtents**: \[`number`, `number`, `number`\]
 
-Defined in: [src/bound/OBB.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L64)
+Defined in: [src/bound/OBB.ts:64](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L64)
 
 경계 상자의 세 축 반치수 `[x, y, z]` 튜플입니다.
 
@@ -111,7 +111,7 @@ Defined in: [src/bound/OBB.ts:64](https://github.com/redcamel/RedGPU/blob/1e5994
 
 > <span class="readonly-badge">readonly</span> **halfExtentX**: `number`
 
-Defined in: [src/bound/OBB.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L39)
+Defined in: [src/bound/OBB.ts:39](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L39)
 
 로컬 X축 방향의 반치수(Half Extent)입니다.
 
@@ -121,7 +121,7 @@ Defined in: [src/bound/OBB.ts:39](https://github.com/redcamel/RedGPU/blob/1e5994
 
 > <span class="readonly-badge">readonly</span> **halfExtentY**: `number`
 
-Defined in: [src/bound/OBB.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L44)
+Defined in: [src/bound/OBB.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L44)
 
 로컬 Y축 방향의 반치수(Half Extent)입니다.
 
@@ -131,7 +131,7 @@ Defined in: [src/bound/OBB.ts:44](https://github.com/redcamel/RedGPU/blob/1e5994
 
 > <span class="readonly-badge">readonly</span> **halfExtentZ**: `number`
 
-Defined in: [src/bound/OBB.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L49)
+Defined in: [src/bound/OBB.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L49)
 
 로컬 Z축 방향의 반치수(Half Extent)입니다.
 
@@ -141,7 +141,7 @@ Defined in: [src/bound/OBB.ts:49](https://github.com/redcamel/RedGPU/blob/1e5994
 
 > <span class="readonly-badge">readonly</span> **orientation**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/bound/OBB.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L54)
+Defined in: [src/bound/OBB.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L54)
 
 경계 상자의 회전 방향을 나타내는 4x4 행렬(`mat4`)입니다.
 
@@ -151,7 +151,7 @@ Defined in: [src/bound/OBB.ts:54](https://github.com/redcamel/RedGPU/blob/1e5994
 
 > **clone**(): `OBB`
 
-Defined in: [src/bound/OBB.ts:204](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L204)
+Defined in: [src/bound/OBB.ts:204](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L204)
 
 현재 `OBB`와 동일한 속성을 가진 새 `OBB` 인스턴스를 복제하여 반환합니다.
 
@@ -172,7 +172,7 @@ const clonedOBB = obb.clone();
 
 > **contains**(`pointOrX`, `y?`, `z?`): `boolean`
 
-Defined in: [src/bound/OBB.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L173)
+Defined in: [src/bound/OBB.ts:173](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L173)
 
 지정한 3차원 좌표 또는 점이 `OBB` 내부에 포함되는지 확인합니다.
 
@@ -202,7 +202,7 @@ const isPointInside = obb.contains([0, 0, 0]);
 
 > **intersects**(`other`): `boolean`
 
-Defined in: [src/bound/OBB.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L127)
+Defined in: [src/bound/OBB.ts:127](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/OBB.ts#L127)
 
 분리축 정리(SAT)를 사용하여 다른 `OBB` 인스턴스와의 교차 여부를 판정합니다.
 

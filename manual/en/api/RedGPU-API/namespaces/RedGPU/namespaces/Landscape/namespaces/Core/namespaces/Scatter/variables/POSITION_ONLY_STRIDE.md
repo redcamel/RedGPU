@@ -8,6 +8,6 @@
 
 > `const` **POSITION\_ONLY\_STRIDE**: `3` = `3`
 
-Defined in: [src/landscape/core/scatter/ScatterVertexFormats.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterVertexFormats.ts#L57)
+Defined in: [src/landscape/core/scatter/ScatterVertexFormats.ts:57](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterVertexFormats.ts#L57)
 
 Number of `Float32` elements per vertex (`3`) for the `PositionOnly` vertex format.

@@ -6,7 +6,7 @@
 
 # Class: DownSampleCubeMapGenerator
 
-Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L18)
+Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:18](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L18)
 
 Generator class responsible for cubemap downsampling and mipmap generation.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new DownSampleCubeMapGenerator**(`redGPUContext`): `DownSampleCubeMapGenerator`
 
-Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L36)
+Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L36)
 
 Creates an instance of DownSampleCubeMapGenerator.
 
@@ -60,7 +60,7 @@ Creates an instance of DownSampleCubeMapGenerator.
 
 > **createBindGroup**(`bindGroupLayout`, `sourceView`, `targetView`, `uniformBuffer`): `GPUBindGroup`
 
-Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L117)
+Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L117)
 
 Creates or retrieves from cache the bind group to be used for cubemap downsampling.
 
@@ -87,7 +87,7 @@ Created or cached bind group
 
 > **createSourceTextureView**(`sourceCubemap`, `sourceMipLevel`): `GPUTextureView`
 
-Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L54)
+Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L54)
 
 Creates or retrieves from cache the source cubemap texture view for the specified mip level.
 
@@ -112,7 +112,7 @@ Cubemap texture view
 
 > **createTargetTextureView**(`targetCubemap`, `targetMipLevel`): `GPUTextureView`
 
-Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:82](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L82)
+Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:82](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L82)
 
 Creates or retrieves from cache the target 2D array texture view for the specified mip level.
 
@@ -137,7 +137,7 @@ Creates or retrieves from cache the target 2D array texture view for the specifi
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:201](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L201)
+Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:201](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L201)
 
 Releases all caches and GPU resources.
 
@@ -153,7 +153,7 @@ Releases all caches and GPU resources.
 
 > **downsampleCubemap**(`sourceCubemap`, `targetSize?`, `format?`): `Promise`\<`GPUTexture`\>
 
-Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:158](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L158)
+Defined in: [src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts:158](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator.ts#L158)
 
 Performs cubemap downsampling.
 
@@ -184,7 +184,7 @@ Downsampled cubemap GPUTexture
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -208,7 +208,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -232,7 +232,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -256,7 +256,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -280,7 +280,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -294,7 +294,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -320,7 +320,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -344,7 +344,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -368,7 +368,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

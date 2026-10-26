@@ -6,7 +6,7 @@
 
 # Interface: CharacterKeyMap
 
-Defined in: [src/charactor/SimpleCharacterController.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L16)
+Defined in: [src/charactor/SimpleCharacterController.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L16)
 
 Keyboard input mapping specification interface for `SimpleCharacterController`.
 
@@ -16,7 +16,7 @@ Keyboard input mapping specification interface for `SimpleCharacterController`.
 
 > `optional` **jump?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L51)
+Defined in: [src/charactor/SimpleCharacterController.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L51)
 
 Keys for jumping
 
@@ -26,7 +26,7 @@ Keys for jumping
 
 > `optional` **moveBackward?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L26)
+Defined in: [src/charactor/SimpleCharacterController.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L26)
 
 Keys for moving backward
 
@@ -36,7 +36,7 @@ Keys for moving backward
 
 > `optional` **moveForward?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L21)
+Defined in: [src/charactor/SimpleCharacterController.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L21)
 
 Keys for moving forward
 
@@ -46,7 +46,7 @@ Keys for moving forward
 
 > `optional` **run?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L56)
+Defined in: [src/charactor/SimpleCharacterController.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L56)
 
 Keys for running
 
@@ -56,7 +56,7 @@ Keys for running
 
 > `optional` **strafeLeft?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L31)
+Defined in: [src/charactor/SimpleCharacterController.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L31)
 
 Keys for strafing left
 
@@ -66,7 +66,7 @@ Keys for strafing left
 
 > `optional` **strafeRight?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L36)
+Defined in: [src/charactor/SimpleCharacterController.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L36)
 
 Keys for strafing right
 
@@ -76,7 +76,7 @@ Keys for strafing right
 
 > `optional` **turnLeft?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L41)
+Defined in: [src/charactor/SimpleCharacterController.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L41)
 
 Keys for turning left
 
@@ -86,6 +86,6 @@ Keys for turning left
 
 > `optional` **turnRight?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L46)
+Defined in: [src/charactor/SimpleCharacterController.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L46)
 
 Keys for turning right

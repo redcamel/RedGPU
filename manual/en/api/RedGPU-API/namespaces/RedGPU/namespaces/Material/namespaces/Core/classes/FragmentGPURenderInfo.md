@@ -6,7 +6,7 @@
 
 # Class: FragmentGPURenderInfo
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L25)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L25)
 
 Class that holds GPU rendering resources and pipeline state information for a fragment shader.
 
@@ -28,7 +28,7 @@ const renderInfo = material.gpuRenderInfo;
 
 > **new FragmentGPURenderInfo**(`fragmentShaderModule`, `fragmentShaderSourceVariant`, `fragmentShaderVariantConditionalBlocks`, `fragmentUniformInfo`, `fragmentBindGroupLayout`, `fragmentUniformBuffer`, `fragmentUniformBindGroup?`, `fragmentState?`): `FragmentGPURenderInfo`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:96](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L96)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:96](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L96)
 
 Creates a FragmentGPURenderInfo instance.
 
@@ -55,7 +55,7 @@ Creates a FragmentGPURenderInfo instance.
 
 > **fragmentBindGroupLayout**: `GPUBindGroupLayout`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L50)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L50)
 
 Fragment bind group layout (GPUBindGroupLayout)
 
@@ -65,7 +65,7 @@ Fragment bind group layout (GPUBindGroupLayout)
 
 > **fragmentShaderModule**: `GPUShaderModule`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L30)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L30)
 
 Compiled fragment GPUShaderModule
 
@@ -75,7 +75,7 @@ Compiled fragment GPUShaderModule
 
 > **fragmentShaderSourceVariant**: [`ShaderVariantGenerator`](../../../../Resource/namespaces/CoreWGSLParser/classes/ShaderVariantGenerator.md)
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L35)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L35)
 
 Fragment shader source variant generator
 
@@ -85,7 +85,7 @@ Fragment shader source variant generator
 
 > **fragmentShaderVariantConditionalBlocks**: `string`[]
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L40)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L40)
 
 List of fragment shader conditional branch block identifiers
 
@@ -95,7 +95,7 @@ List of fragment shader conditional branch block identifiers
 
 > **fragmentState**: `GPUFragmentState`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L65)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L65)
 
 Fragment render state (GPUFragmentState) used for pipeline creation
 
@@ -105,7 +105,7 @@ Fragment render state (GPUFragmentState) used for pipeline creation
 
 > **fragmentUniformBindGroup**: `GPUBindGroup`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L60)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:60](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L60)
 
 Fragment uniform bind group (GPUBindGroup)
 
@@ -115,7 +115,7 @@ Fragment uniform bind group (GPUBindGroup)
 
 > **fragmentUniformBuffer**: [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:55](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L55)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:55](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L55)
 
 Fragment uniform buffer (UniformBuffer)
 
@@ -125,7 +125,7 @@ Fragment uniform buffer (UniformBuffer)
 
 > **fragmentUniformInfo**: `any`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L45)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:45](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L45)
 
 Parsed fragment uniform structure information
 
@@ -135,7 +135,7 @@ Parsed fragment uniform structure information
 
 > **destroy**(): `void`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/FragmentGPURenderInfo.ts#L120)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:120](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/FragmentGPURenderInfo.ts#L120)
 
 Destroys the managed fragment uniform buffer and releases all references.
 

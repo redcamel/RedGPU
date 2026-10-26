@@ -8,7 +8,7 @@
 
 > **updateObject3DMatrix**(`targetMesh`, `view`): `void`
 
-Defined in: [src/math/updateObject3DMatrix.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/updateObject3DMatrix.ts#L25)
+Defined in: [src/math/updateObject3DMatrix.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/updateObject3DMatrix.ts#L25)
 
 Updates the `localMatrix` and `modelMatrix` of a target 3D object (`Mesh` or `Group3D`) using its position, rotation (in degrees), scale, pivot, and parent matrix.
 

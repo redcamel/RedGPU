@@ -6,7 +6,7 @@
 
 # Class: ResourceStateBitmapTexture
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L16)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L16)
 
 Class representing the resource management state of 2D bitmap textures (`BitmapTexture`, `ANoiseTexture`, `DirectTexture`).
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ResourceStateBitmapTexture**(`texture`): `ResourceStateBitmapTexture`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L51)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L51)
 
 Creates a ResourceStateBitmapTexture instance.
 
@@ -40,7 +40,7 @@ Creates a ResourceStateBitmapTexture instance.
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L31)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L31)
 
 Resource cache key
 
@@ -50,7 +50,7 @@ Resource cache key
 
 > **src**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L26)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L26)
 
 Texture source path
 
@@ -60,7 +60,7 @@ Texture source path
 
 > **texture**: [`BitmapTexture`](../../../classes/BitmapTexture.md) \| [`ANoiseTexture`](../../CoreNoiseTexture/classes/ANoiseTexture.md) \| [`DirectTexture`](../../../classes/DirectTexture.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L21)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L21)
 
 Managed texture instance
 
@@ -70,7 +70,7 @@ Managed texture instance
 
 > **useNum**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L36)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L36)
 
 Resource reference count
 
@@ -80,6 +80,6 @@ Resource reference count
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L41)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L41)
 
 Unique identifier (UUID)

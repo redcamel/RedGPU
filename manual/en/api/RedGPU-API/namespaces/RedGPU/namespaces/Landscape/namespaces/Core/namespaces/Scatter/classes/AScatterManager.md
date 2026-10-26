@@ -6,7 +6,7 @@
 
 # Abstract Class: AScatterManager\<TType, TOptions\>
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L26)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L26)
 
 Abstract manager class that oversees registration, lifecycle, GPU baking/culling updates, and rendering of terrain scatter (foliage, grass, etc.) types.
 
@@ -40,7 +40,7 @@ This class is an abstract class, so you cannot create an instance directly.<br/>
 
 > **new AScatterManager**\<`TType`, `TOptions`\>(`landscape`): `AScatterManager`\<`TType`, `TOptions`\>
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L44)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L44)
 
 Initializes an `AScatterManager` instance.
 
@@ -70,7 +70,7 @@ Initializes an `AScatterManager` instance.
 
 > **get** **enabled**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L69)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L69)
 
 Gets or sets whether the scatter manager is enabled.
 
@@ -84,7 +84,7 @@ Whether enabled
 
 > **set** **enabled**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L73)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:73](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L73)
 
 ##### Parameters
 
@@ -106,7 +106,7 @@ Defined in: [src/landscape/core/scatter/AScatterManager.ts:73](https://github.co
 
 > <span class="readonly-badge">readonly</span> **get** `abstract` **instanceCapacity**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:107](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L107)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:107](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L107)
 
 Returns the maximum instance capacity allocated in the mega buffer.
 
@@ -126,7 +126,7 @@ Maximum instance capacity
 
 > <span class="readonly-badge">readonly</span> **get** **landscape**(): [`Landscape`](../../../../../classes/Landscape.md)
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L57)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:57](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L57)
 
 Returns the `Landscape` instance to which this scatter manager belongs.
 
@@ -146,7 +146,7 @@ Owner `Landscape` instance
 
 > <span class="readonly-badge">readonly</span> **get** **shadowDrawCalls**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L136)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:136](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L136)
 
 Returns the total number of shadow pass draw calls across all scatter types with `castShadow` enabled.
 
@@ -166,7 +166,7 @@ Total shadow pass draw call count
 
 > <span class="readonly-badge">readonly</span> **get** **totalDrawCalls**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L117)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L117)
 
 Returns the total number of main pass draw calls across all registered scatter types when enabled.
 
@@ -186,7 +186,7 @@ Total main pass draw call count
 
 > <span class="readonly-badge">readonly</span> **get** `abstract` **totalInstanceCount**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:97](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L97)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:97](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L97)
 
 Returns the total number of allocated scatter instances.
 
@@ -206,7 +206,7 @@ Total instance count
 
 > <span class="readonly-badge">readonly</span> **get** **types**(): `TType`[]
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L85)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:85](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L85)
 
 Returns the list of all currently registered scatter types (`TType[]`).
 
@@ -228,7 +228,7 @@ Array of registered scatter types (`TType[]`)
 
 > `abstract` **addType**(`options`): `TType`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:214](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L214)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:214](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L214)
 
 Creates a new scatter type and registers it with the manager.
 
@@ -252,7 +252,7 @@ Created and registered scatter type instance
 
 > **clearTypes**(): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:195](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L195)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:195](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L195)
 
 Sequentially removes all registered scatter types and clears the internal map.
 
@@ -268,7 +268,7 @@ Sequentially removes all registered scatter types and clears the internal map.
 
 > `abstract` **computeTypeDrawCalls**(`type`): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:161](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L161)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:161](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L161)
 
 Computes the number of main render pass draw calls for an individual scatter type.
 
@@ -292,7 +292,7 @@ Main pass draw call count for the type
 
 > `abstract` **computeTypeShadowDrawCalls**(`type`): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:174](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L174)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:174](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L174)
 
 Computes the number of shadow render pass draw calls for an individual scatter type.
 
@@ -316,7 +316,7 @@ Shadow pass draw call count for the type
 
 > `abstract` **destroy**(): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:275](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L275)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:275](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L275)
 
 Destroys all scatter types and GPU resources managed by the manager.
 
@@ -332,7 +332,7 @@ Destroys all scatter types and GPU resources managed by the manager.
 
 > **getTypeByName**(`name`): `TType`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L187)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:187](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L187)
 
 Looks up a registered scatter type instance by its unique name.
 
@@ -356,7 +356,7 @@ Matching scatter type instance, or `undefined` if not found
 
 > `abstract` **rebakeAll**(): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:233](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L233)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:233](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L233)
 
 Requests a full rebake of instance placements for all registered scatter types.
 
@@ -372,7 +372,7 @@ Requests a full rebake of instance placements for all registered scatter types.
 
 > **registerTypeInternal**(`type`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L285)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:285](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L285)
 
 Registers a scatter type instance into the internal array and name map (`Map<string, TType>`).
 
@@ -394,7 +394,7 @@ Registers a scatter type instance into the internal array and name map (`Map<str
 
 > `abstract` **removeType**(`target`): `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:227](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L227)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:227](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L227)
 
 Removes the specified scatter type instance or the type matching the given name from the manager.
 
@@ -418,7 +418,7 @@ Whether the removal succeeded
 
 > `abstract` **render**(`view`, `passEncoder`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:256](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L256)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:256](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L256)
 
 Renders visible scatter instances in the main render pass.
 
@@ -441,7 +441,7 @@ Renders visible scatter instances in the main render pass.
 
 > `abstract` **renderShadow**(`view`, `passEncoder`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:269](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L269)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:269](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L269)
 
 Renders shadow-casting scatter instances in the directional shadow render pass.
 
@@ -464,7 +464,7 @@ Renders shadow-casting scatter instances in the directional shadow render pass.
 
 > **unregisterTypeInternal**(`target`): `TType`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:302](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L302)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:302](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L302)
 
 Unregisters and returns the target scatter type from the internal array and name map (`Map<string, TType>`).
 
@@ -488,7 +488,7 @@ Unregistered scatter type instance, or `null` if not found
 
 > `abstract` **update**(`renderViewStateData`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterManager.ts:243](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L243)
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:243](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterManager.ts#L243)
 
 Updates the scatter baking and GPU culling pipelines every frame based on the view state data.
 
@@ -515,7 +515,7 @@ Updates the scatter baking and GPU culling pipelines every frame based on the vi
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -539,7 +539,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -563,7 +563,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -587,7 +587,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -611,7 +611,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -625,7 +625,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -651,7 +651,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -675,7 +675,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -699,7 +699,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

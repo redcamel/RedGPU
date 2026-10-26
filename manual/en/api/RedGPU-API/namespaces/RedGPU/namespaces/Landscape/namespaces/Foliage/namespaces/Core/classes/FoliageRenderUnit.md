@@ -6,7 +6,7 @@
 
 # Class: FoliageRenderUnit
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L62)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:62](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L62)
 
 Render unit class representing an individual submesh or impostor draw unit of foliage.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new FoliageRenderUnit**(`init`): `FoliageRenderUnit`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L79)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:79](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L79)
 
 Creates a `FoliageRenderUnit` instance.
 
@@ -58,7 +58,7 @@ Creates a `FoliageRenderUnit` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **isImpostor**(): `boolean`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L144)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:144](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L144)
 
 Returns whether this render unit is an octahedral impostor unit.
 
@@ -78,7 +78,7 @@ Whether this is an impostor render unit
 
 > <span class="readonly-badge">readonly</span> **get** **mainDepthMode**(): `FoliageDepthPassMode`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:132](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L132)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:132](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L132)
 
 Returns the depth test mode used in the main pass.
 
@@ -98,7 +98,7 @@ Depth pass mode (`FoliageDepthPassMode`)
 
 > <span class="readonly-badge">readonly</span> **get** **slotIndex**(): `number`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L120)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:120](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L120)
 
 Returns the allocated dynamic uniform slot index.
 
@@ -120,7 +120,7 @@ Slot index (`-1` if unallocated)
 
 > **canRenderInPass**(`passType`): `boolean`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:249](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L249)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:249](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L249)
 
 Checks whether this render unit can be rendered in the specified render pass type.
 
@@ -144,7 +144,7 @@ Whether rendering is allowed in the specified pass
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:229](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L229)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:229](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L229)
 
 Frees the allocated uniform slot and releases render unit resources.
 
@@ -164,7 +164,7 @@ Frees the allocated uniform slot and releases render unit resources.
 
 > **flushSlotUBO**(): `void`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:219](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L219)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:219](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L219)
 
 Uploads changes from the CPU slot buffer to the GPU uniform buffer.
 
@@ -180,7 +180,7 @@ Uploads changes from the CPU slot buffer to the GPU uniform buffer.
 
 > **getPipeline**(`registry`, `sampleCount`, `msaaID`, `depthPassMode`, `renderUnitBindGroupLayout`): `GPURenderPipeline`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:284](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L284)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:284](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L284)
 
 Retrieves or creates a `GPURenderPipeline` matching the current material and render state.
 
@@ -208,7 +208,7 @@ Created or cached `GPURenderPipeline` instance (`null` if material is absent)
 
 > **updateGroundBlendParams**(`groundBlendStrength`, `groundBlendRange`): `void`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L188)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L188)
 
 Updates ground surface color blend strength and range in the slot buffer.
 
@@ -231,7 +231,7 @@ Updates ground surface color blend strength and range in the slot buffer.
 
 > **updateReceiveShadow**(`receiveShadow`): `void`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:209](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L209)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:209](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L209)
 
 Updates the shadow receiving flag in the slot buffer.
 
@@ -253,7 +253,7 @@ Updates the shadow receiving flag in the slot buffer.
 
 > **updateWindScales**(`trunkBendScale`, `leafFlutterScale`, `foliageHeight`): `void`
 
-Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:162](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/FoliageRenderUnit.ts#L162)
+Defined in: [src/landscape/foliage/core/FoliageRenderUnit.ts:162](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/FoliageRenderUnit.ts#L162)
 
 Updates wind trunk bend and leaf flutter scale parameters in the slot buffer.
 
@@ -282,7 +282,7 @@ Updates wind trunk bend and leaf flutter scale parameters in the slot buffer.
 
 > **get** **baseColorTexture**(): [`BitmapTexture`](../../../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:300](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L300)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:300](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L300)
 
 Gets or sets the base color `BitmapTexture` of the render unit.
 
@@ -296,7 +296,7 @@ Base color `BitmapTexture`, `null`, or `undefined`
 
 > **set** **baseColorTexture**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L304)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L304)
 
 ##### Parameters
 
@@ -322,7 +322,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **firstIndex**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:208](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L208)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:208](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L208)
 
 Returns the starting index offset within the unified index buffer.
 
@@ -346,7 +346,7 @@ Starting index offset
 
 > <span class="readonly-badge">readonly</span> **get** **geometry**(): [`Geometry`](../../../../../../../classes/Geometry.md)
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:172](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L172)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:172](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L172)
 
 Returns the `Geometry` instance of the render unit.
 
@@ -370,7 +370,7 @@ Returns the `Geometry` instance of the render unit.
 
 > <span class="readonly-badge">readonly</span> **get** **indexCount**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:196](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L196)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:196](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L196)
 
 Returns the index count of the render unit.
 
@@ -394,7 +394,7 @@ Index count
 
 > <span class="readonly-badge">readonly</span> **get** **indexFormat**(): `GPUIndexFormat`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:232](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L232)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:232](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L232)
 
 Returns the `GPUIndexFormat` of the index buffer.
 
@@ -418,7 +418,7 @@ Index format (`GPUIndexFormat`)
 
 > **get** **indirectOffsetBytes**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:256](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L256)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:256](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L256)
 
 Gets or sets the byte offset within the indirect draw buffer.
 
@@ -432,7 +432,7 @@ Byte offset within the indirect buffer
 
 > **set** **indirectOffsetBytes**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L260)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L260)
 
 ##### Parameters
 
@@ -458,7 +458,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github
 
 > **get** **instanceBufferOffset**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:272](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L272)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:272](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L272)
 
 Gets or sets the starting instance offset within the culled instance buffer.
 
@@ -472,7 +472,7 @@ Starting instance offset
 
 > **set** **instanceBufferOffset**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L276)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L276)
 
 ##### Parameters
 
@@ -498,7 +498,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **isIndexed**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L220)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:220](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L220)
 
 Returns whether rendering is index-buffer based.
 
@@ -522,7 +522,7 @@ Whether an index buffer is used
 
 > <span class="readonly-badge">readonly</span> **get** **isMasked**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:328](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L328)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:328](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L328)
 
 Returns whether an alpha mask (alpha cutoff) material is used.
 
@@ -546,7 +546,7 @@ Whether alpha masking is used
 
 > <span class="readonly-badge">readonly</span> **get** **lodIndex**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:316](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L316)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:316](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L316)
 
 Returns the LOD level index to which this render unit belongs.
 
@@ -570,7 +570,7 @@ LOD level index
 
 > <span class="readonly-badge">readonly</span> **get** **material**(): `any`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:288](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L288)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:288](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L288)
 
 Returns the material instance associated with the render unit.
 
@@ -594,7 +594,7 @@ Material instance
 
 > <span class="readonly-badge">readonly</span> **get** **strideBytes**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L244)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:244](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L244)
 
 Returns the byte stride per vertex.
 
@@ -618,7 +618,7 @@ Byte stride per vertex
 
 > <span class="readonly-badge">readonly</span> **get** **vertexCount**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L184)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:184](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L184)
 
 Returns the vertex count of the render unit.
 
@@ -646,7 +646,7 @@ Vertex count
 
 > **draw**(`passEncoder`, `indirectGPUBuffer`, `offsetBytes?`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:346](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L346)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:346](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L346)
 
 Records a `drawIndexedIndirect` command onto the provided render pass or render bundle encoder.
 

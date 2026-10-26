@@ -8,7 +8,7 @@
 
 > **defineTexture**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineTexture.ts#L77)
+Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:77](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/texture/defineTexture.ts#L77)
 
 지정된 대상의 프로토타입에 GPU 바인드 그룹 및 유니폼 버퍼와 연동되는 텍스처 속성을 정의합니다.
 

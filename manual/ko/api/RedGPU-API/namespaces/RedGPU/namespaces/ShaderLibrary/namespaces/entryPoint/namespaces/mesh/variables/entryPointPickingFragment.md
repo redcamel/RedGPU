@@ -8,7 +8,7 @@
 
 > `const` **entryPointPickingFragment**: `string` = `meshEntryPointPickingFragment_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2170)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L2170)
 
 메쉬 피킹 프래그먼트 셰이더 엔트리 포인트입니다.
 

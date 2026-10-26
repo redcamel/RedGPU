@@ -6,7 +6,7 @@
 
 # Class: SimpleCharacterController
 
-Defined in: [src/charactor/SimpleCharacterController.ts:154](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L154)
+Defined in: [src/charactor/SimpleCharacterController.ts:154](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L154)
 
 Controller class that handles keyboard-based movement, rotation interpolation, jumping, and gravity for a 3D character.
 
@@ -43,7 +43,7 @@ const controller = new RedGPU.Charactor.SimpleCharacterController(
 
 > **new SimpleCharacterController**(`redGPUContext`, `targetMesh`, `camera`, `options?`): `SimpleCharacterController`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:256](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L256)
+Defined in: [src/charactor/SimpleCharacterController.ts:256](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L256)
 
 Creates an instance of `SimpleCharacterController`.
 
@@ -84,7 +84,7 @@ const controller = new RedGPU.Charactor.SimpleCharacterController(
 
 > **floorHeight**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L184)
+Defined in: [src/charactor/SimpleCharacterController.ts:184](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L184)
 
 Base floor Y-axis height
 
@@ -96,7 +96,7 @@ Base floor Y-axis height
 
 > **floorOffset**: `number` = `0.0`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:189](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L189)
+Defined in: [src/charactor/SimpleCharacterController.ts:189](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L189)
 
 Additional vertical offset applied when grounded (default: `0.0`)
 
@@ -108,7 +108,7 @@ Additional vertical offset applied when grounded (default: `0.0`)
 
 > **getFloorHeight**: (`x`, `z`) => `number` = `null`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:214](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L214)
+Defined in: [src/charactor/SimpleCharacterController.ts:214](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L214)
 
 Callback function returning the dynamic floor height at `(x, z)` coordinates
 
@@ -131,7 +131,7 @@ Callback function returning the dynamic floor height at `(x, z)` coordinates
 
 > **gravity**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:174](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L174)
+Defined in: [src/charactor/SimpleCharacterController.ts:174](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L174)
 
 Gravity acceleration
 
@@ -143,7 +143,7 @@ Gravity acceleration
 
 > **jumpForce**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L179)
+Defined in: [src/charactor/SimpleCharacterController.ts:179](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L179)
 
 Initial jump velocity
 
@@ -155,7 +155,7 @@ Initial jump velocity
 
 > **keyMap**: `Required`\<[`CharacterKeyMap`](../interfaces/CharacterKeyMap.md)\>
 
-Defined in: [src/charactor/SimpleCharacterController.ts:219](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L219)
+Defined in: [src/charactor/SimpleCharacterController.ts:219](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L219)
 
 Keyboard input mapping configuration object
 
@@ -167,7 +167,7 @@ Keyboard input mapping configuration object
 
 > **modelRotationOffset**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:199](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L199)
+Defined in: [src/charactor/SimpleCharacterController.ts:199](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L199)
 
 Default rotation offset angle of the 3D model in degrees
 
@@ -179,7 +179,7 @@ Default rotation offset angle of the 3D model in degrees
 
 > **orientRotationToMovement**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:209](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L209)
+Defined in: [src/charactor/SimpleCharacterController.ts:209](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L209)
 
 Whether to automatically orient character rotation toward the movement direction
 
@@ -191,7 +191,7 @@ Whether to automatically orient character rotation toward the movement direction
 
 > **rotationSpeed**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:169](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L169)
+Defined in: [src/charactor/SimpleCharacterController.ts:169](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L169)
 
 Rotation interpolation speed
 
@@ -203,7 +203,7 @@ Rotation interpolation speed
 
 > **runSpeed**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:164](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L164)
+Defined in: [src/charactor/SimpleCharacterController.ts:164](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L164)
 
 Running movement speed
 
@@ -215,7 +215,7 @@ Running movement speed
 
 > **speed**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:159](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L159)
+Defined in: [src/charactor/SimpleCharacterController.ts:159](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L159)
 
 Default movement speed
 
@@ -227,7 +227,7 @@ Default movement speed
 
 > **useControllerRotationYaw**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:204](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L204)
+Defined in: [src/charactor/SimpleCharacterController.ts:204](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L204)
 
 Whether to always align character rotation with camera yaw
 
@@ -239,7 +239,7 @@ Whether to always align character rotation with camera yaw
 
 > **useKeyboard**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:194](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L194)
+Defined in: [src/charactor/SimpleCharacterController.ts:194](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L194)
 
 Whether keyboard control is enabled
 
@@ -255,7 +255,7 @@ Whether keyboard control is enabled
 
 > **get** **camera**(): [`ACamera`](../../Camera/namespaces/Core/classes/ACamera.md)
 
-Defined in: [src/charactor/SimpleCharacterController.ts:322](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L322)
+Defined in: [src/charactor/SimpleCharacterController.ts:322](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L322)
 
 Returns or sets the reference camera for movement direction.
 
@@ -269,7 +269,7 @@ Reference camera instance
 
 > **set** **camera**(`value`): `void`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:326](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L326)
+Defined in: [src/charactor/SimpleCharacterController.ts:326](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L326)
 
 ##### Parameters
 
@@ -291,7 +291,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:326](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **isGrounded**(): `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:363](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L363)
+Defined in: [src/charactor/SimpleCharacterController.ts:363](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L363)
 
 Returns whether the character is on the ground.
 
@@ -311,7 +311,7 @@ Whether grounded
 
 > <span class="readonly-badge">readonly</span> **get** **isMoving**(): `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:339](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L339)
+Defined in: [src/charactor/SimpleCharacterController.ts:339](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L339)
 
 Returns whether the character is currently moving.
 
@@ -331,7 +331,7 @@ Whether moving
 
 > <span class="readonly-badge">readonly</span> **get** **isRunning**(): `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:351](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L351)
+Defined in: [src/charactor/SimpleCharacterController.ts:351](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L351)
 
 Returns whether the character is currently running.
 
@@ -351,7 +351,7 @@ Whether running
 
 > **get** **targetMesh**(): [`Mesh`](../../Display/classes/Mesh.md)
 
-Defined in: [src/charactor/SimpleCharacterController.ts:305](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L305)
+Defined in: [src/charactor/SimpleCharacterController.ts:305](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L305)
 
 Returns or sets the controlled target character mesh.
 
@@ -365,7 +365,7 @@ Controlled target mesh
 
 > **set** **targetMesh**(`value`): `void`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:309](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L309)
+Defined in: [src/charactor/SimpleCharacterController.ts:309](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L309)
 
 ##### Parameters
 
@@ -389,7 +389,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:309](https://github.com/
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:383](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/charactor/SimpleCharacterController.ts#L383)
+Defined in: [src/charactor/SimpleCharacterController.ts:383](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/charactor/SimpleCharacterController.ts#L383)
 
 Updates character movement, rotation, floor height synchronization, and gravity each frame.
 
@@ -422,7 +422,7 @@ controller.update(view, timestamp);
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -446,7 +446,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -470,7 +470,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -494,7 +494,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -518,7 +518,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -532,7 +532,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -558,7 +558,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -582,7 +582,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -606,7 +606,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

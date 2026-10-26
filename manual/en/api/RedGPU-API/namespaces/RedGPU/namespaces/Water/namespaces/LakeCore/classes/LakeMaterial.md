@@ -6,7 +6,7 @@
 
 # Class: LakeMaterial
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L19)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L19)
 
 Material class representing lake water refraction, depth extinction, underwater caustics, and screen-space reflection (SSR).
 
@@ -46,7 +46,7 @@ const material = lake.material;
 
 > **new LakeMaterial**(`redGPUContext`, `baseColor?`, `deepColor?`, `opacity?`): `LakeMaterial`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:226](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L226)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:226](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L226)
 
 Creates a `LakeMaterial` instance.
 
@@ -77,7 +77,7 @@ Creates a `LakeMaterial` instance.
 
 > **baseColor**: [`ColorRGB`](../../../../Color/classes/ColorRGB.md)
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L24)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L24)
 
 Base color of shallow water. (Default: `'#18d8b6'`)
 
@@ -89,7 +89,7 @@ Base color of shallow water. (Default: `'#18d8b6'`)
 
 > **causticsScale**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:134](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L134)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:134](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L134)
 
 Underwater caustics pattern scale multiplier. (Range: `0.1` ~ `5`, default: `1.0`)
 
@@ -101,7 +101,7 @@ Underwater caustics pattern scale multiplier. (Range: `0.1` ~ `5`, default: `1.0
 
 > **causticsSpeed**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:139](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L139)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:139](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L139)
 
 Underwater caustics animation speed. (Range: `0` ~ `5`, default: `1.0`)
 
@@ -113,7 +113,7 @@ Underwater caustics animation speed. (Range: `0` ~ `5`, default: `1.0`)
 
 > **causticsStrength**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:129](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L129)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:129](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L129)
 
 Underwater caustics strength. (Range: `0` ~ `2`, default: `1.0`)
 
@@ -125,7 +125,7 @@ Underwater caustics strength. (Range: `0` ~ `2`, default: `1.0`)
 
 > **debugMaxDepth**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:114](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L114)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:114](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L114)
 
 Reference maximum depth for depth debug visualization. (Default: `5.0`)
 
@@ -137,7 +137,7 @@ Reference maximum depth for depth debug visualization. (Default: `5.0`)
 
 > **debugMode**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L109)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:109](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L109)
 
 Debug visualization mode. (Default: `0`)
 
@@ -149,7 +149,7 @@ Debug visualization mode. (Default: `0`)
 
 > **deepColor**: [`ColorRGB`](../../../../Color/classes/ColorRGB.md)
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L29)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:29](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L29)
 
 Color at deep water depth. (Default: `'#065279'`)
 
@@ -161,7 +161,7 @@ Color at deep water depth. (Default: `'#065279'`)
 
 > **depthFadeDistance**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:94](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L94)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:94](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L94)
 
 Depth distance over which the shoreline fades out. (Default: `0.8`)
 
@@ -173,7 +173,7 @@ Depth distance over which the shoreline fades out. (Default: `0.8`)
 
 > **enableSSR**: `boolean`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L144)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:144](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L144)
 
 Whether screen-space reflection (SSR) is enabled. (Default: `true`)
 
@@ -185,7 +185,7 @@ Whether screen-space reflection (SSR) is enabled. (Default: `true`)
 
 > **extinctionFactor**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L84)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:84](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L84)
 
 Light extinction factor over depth. (Default: `0.22`)
 
@@ -197,7 +197,7 @@ Light extinction factor over depth. (Default: `0.22`)
 
 > **flowRateScale**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L74)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L74)
 
 Flow speed multiplier of the normal textures. (Default: `0.025`)
 
@@ -209,7 +209,7 @@ Flow speed multiplier of the normal textures. (Default: `0.025`)
 
 > **invertNormalDetailY**: `boolean`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:124](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L124)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:124](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L124)
 
 Whether to invert the Y channel of the detail normal texture. (Default: `false`)
 
@@ -221,7 +221,7 @@ Whether to invert the Y channel of the detail normal texture. (Default: `false`)
 
 > **invertNormalY**: `boolean`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L119)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:119](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L119)
 
 Whether to invert the Y channel of the primary normal texture. (Default: `false`)
 
@@ -233,7 +233,7 @@ Whether to invert the Y channel of the primary normal texture. (Default: `false`
 
 > **normalDetailScale**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L59)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:59](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L59)
 
 Strength of the detail normal texture. (Range: `0` ~ `1`, default: `0.5`)
 
@@ -245,7 +245,7 @@ Strength of the detail normal texture. (Range: `0` ~ `1`, default: `0.5`)
 
 > **normalDetailTexture**: [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L44)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L44)
 
 Detail normal texture representing fine ripples.
 
@@ -257,7 +257,7 @@ Detail normal texture representing fine ripples.
 
 > **normalDetailTiling**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L69)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L69)
 
 Tiling repeat count of the detail normal texture per `100m` world scale. (Default: `40.0`)
 
@@ -269,7 +269,7 @@ Tiling repeat count of the detail normal texture per `100m` world scale. (Defaul
 
 > **normalScale**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L54)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L54)
 
 Strength of the primary normal texture. (Range: `0` ~ `1`, default: `1.0`)
 
@@ -281,7 +281,7 @@ Strength of the primary normal texture. (Range: `0` ~ `1`, default: `1.0`)
 
 > **normalTexture**: [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L34)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L34)
 
 Primary normal texture representing surface undulation.
 
@@ -293,7 +293,7 @@ Primary normal texture representing surface undulation.
 
 > **normalTextureSampler**: [`Sampler`](../../../../Resource/classes/Sampler.md)
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L39)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:39](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L39)
 
 Sampler for normal textures.
 
@@ -305,7 +305,7 @@ Sampler for normal textures.
 
 > **normalTiling**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L64)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:64](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L64)
 
 Tiling repeat count of the primary normal texture per `100m` world scale. (Default: `20.0`)
 
@@ -317,7 +317,7 @@ Tiling repeat count of the primary normal texture per `100m` world scale. (Defau
 
 > **refractionStrength**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L79)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:79](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L79)
 
 Refraction distortion strength of the underwater background. (Range: `0` ~ `1`, default: `1.0`)
 
@@ -329,7 +329,7 @@ Refraction distortion strength of the underwater background. (Range: `0` ~ `1`, 
 
 > **rippleDomainCenter**: \[`number`, `number`\]
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:169](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L169)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:169](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L169)
 
 World XZ center coordinates of the interaction ripple domain. (Default: `[0.0, 0.0]`)
 
@@ -341,7 +341,7 @@ World XZ center coordinates of the interaction ripple domain. (Default: `[0.0, 0
 
 > **rippleDomainSize**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:174](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L174)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:174](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L174)
 
 Side length of the interaction ripple domain in world units. (Min: `1.0`, default: `20.0`)
 
@@ -353,7 +353,7 @@ Side length of the interaction ripple domain in world units. (Min: `1.0`, defaul
 
 > **rippleNormalStrength**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L179)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:179](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L179)
 
 Strength of interaction ripples applied to the surface normal. (Min: `0.0`, default: `1.0`)
 
@@ -365,7 +365,7 @@ Strength of interaction ripples applied to the surface normal. (Min: `0.0`, defa
 
 > **rippleTexture**: `GPUTexture` \| [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md) \| [`DirectTexture`](../../../../Resource/classes/DirectTexture.md)
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L49)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L49)
 
 Ripple normal texture storing the interaction wave simulation result.
 
@@ -377,7 +377,7 @@ Ripple normal texture storing the interaction wave simulation result.
 
 > **roughness**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:99](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L99)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:99](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L99)
 
 Surface roughness. (Range: `0` ~ `1`, default: `0.07`)
 
@@ -389,7 +389,7 @@ Surface roughness. (Range: `0` ~ `1`, default: `0.07`)
 
 > **specularFactor**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L104)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:104](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L104)
 
 Specular reflection strength. (Range: `0` ~ `2`, default: `1.0`)
 
@@ -401,7 +401,7 @@ Specular reflection strength. (Range: `0` ~ `2`, default: `1.0`)
 
 > **ssrMaxDistance**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L149)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:149](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L149)
 
 Maximum SSR ray marching distance. (Range: `2` ~ `300`, default: `100.0`)
 
@@ -413,7 +413,7 @@ Maximum SSR ray marching distance. (Range: `2` ~ `300`, default: `100.0`)
 
 > **ssrStepCount**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:154](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L154)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:154](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L154)
 
 Number of SSR ray marching steps. (Default: `64`)
 
@@ -425,7 +425,7 @@ Number of SSR ray marching steps. (Default: `64`)
 
 > **ssrThickness**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:159](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L159)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:159](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L159)
 
 Depth thickness for SSR hit testing. (Range: `0.05` ~ `5`, default: `1.0`)
 
@@ -437,7 +437,7 @@ Depth thickness for SSR hit testing. (Range: `0.05` ~ `5`, default: `1.0`)
 
 > **turbidity**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:164](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L164)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:164](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L164)
 
 Water turbidity. (Range: `0` ~ `1`, default: `0.35`)
 
@@ -462,7 +462,7 @@ Water turbidity. (Range: `0` ~ `1`, default: `0.35`)
 
 > **\_\_packingList**: `any`[]
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABitmapBaseMaterial.ts#L24)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABitmapBaseMaterial.ts#L24)
 
 List of texture packing callback functions executed when updating fragment state
 
@@ -478,7 +478,7 @@ List of texture packing callback functions executed when updating fragment state
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L74)
+Defined in: [src/material/core/ABaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L74)
 
 Flag indicating whether the pipeline needs updating
 
@@ -494,7 +494,7 @@ Flag indicating whether the pipeline needs updating
 
 > **gpuRenderInfo**: [`FragmentGPURenderInfo`](../../../../Material/namespaces/Core/classes/FragmentGPURenderInfo.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L69)
+Defined in: [src/material/core/ABaseMaterial.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L69)
 
 Fragment GPU render pipeline information object
 
@@ -510,7 +510,7 @@ Fragment GPU render pipeline information object
 
 > **isInstanceofMaterial**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:42](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L42)
+Defined in: [src/material/core/ABaseMaterial.ts:42](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L42)
 
 Flag indicating whether it is a material instance
 
@@ -526,7 +526,7 @@ Flag indicating whether it is a material instance
 
 > **opacity**: `number`
 
-Defined in: [src/water/lakeCore/LakeMaterial.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/LakeMaterial.ts#L89)
+Defined in: [src/water/lakeCore/LakeMaterial.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/LakeMaterial.ts#L89)
 
 Water surface opacity. (Range: `0` ~ `1`, default: `1.0`)
 
@@ -542,7 +542,7 @@ Water surface opacity. (Range: `0` ~ `1`, default: `1.0`)
 
 > **tint**: [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L32)
+Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L32)
 
 Tint color of the material (ColorRGBA)
 
@@ -558,7 +558,7 @@ Tint color of the material (ColorRGBA)
 
 > **transparent**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L79)
+Defined in: [src/material/core/ABaseMaterial.ts:79](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L79)
 
 Whether transparent rendering is enabled for the material
 
@@ -574,7 +574,7 @@ Whether transparent rendering is enabled for the material
 
 > **use2PathRender**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L64)
+Defined in: [src/material/core/ABaseMaterial.ts:64](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L64)
 
 Whether to use 2-pass rendering
 
@@ -590,7 +590,7 @@ Whether to use 2-pass rendering
 
 > **useTint**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L37)
+Defined in: [src/material/core/ABaseMaterial.ts:37](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L37)
 
 Whether to apply tint color
 
@@ -606,7 +606,7 @@ Whether to apply tint color
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -630,7 +630,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **blendAlphaState**(): [`BlendState`](../../../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:277](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L277)
+Defined in: [src/material/core/ABaseMaterial.ts:277](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L277)
 
 Returns the alpha blend state object.
 
@@ -654,7 +654,7 @@ Alpha BlendState instance
 
 > <span class="readonly-badge">readonly</span> **get** **blendColorState**(): [`BlendState`](../../../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L265)
+Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L265)
 
 Returns the color blend state object.
 
@@ -678,7 +678,7 @@ Color BlendState instance
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L61)
 
 Gets or sets the cache key.
 
@@ -692,7 +692,7 @@ Cache key string
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L65)
 
 ##### Parameters
 
@@ -718,7 +718,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -742,7 +742,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L217)
+Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L217)
 
 Returns the fragment bind group descriptor name.
 
@@ -766,7 +766,7 @@ Bind group descriptor name
 
 > <span class="readonly-badge">readonly</span> **get** **FRAGMENT\_SHADER\_MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L205)
+Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L205)
 
 Returns the fragment shader module name.
 
@@ -790,7 +790,7 @@ Fragment shader module name
 
 > <span class="readonly-badge">readonly</span> **get** **globalFragmentSlotIndex**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:305](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L305)
+Defined in: [src/material/core/ABaseMaterial.ts:305](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L305)
 
 Returns the allocated slot index within the global fragment SSBO.
 
@@ -814,7 +814,7 @@ Allocated slot index (`-1` if unallocated)
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L89)
 
 Returns the associated GPUDevice.
 
@@ -838,7 +838,7 @@ GPUDevice instance
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -862,7 +862,7 @@ Per-class unique instance ID
 
 > <span class="readonly-badge">readonly</span> **get** **MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:193](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L193)
+Defined in: [src/material/core/ABaseMaterial.ts:193](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L193)
 
 Returns the material module name.
 
@@ -886,7 +886,7 @@ Module name
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -900,7 +900,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -926,7 +926,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -950,7 +950,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -974,7 +974,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L77)
 
 Returns the resource manager key.
 
@@ -998,7 +998,7 @@ Resource manager key string
 
 > <span class="readonly-badge">readonly</span> **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L49)
+Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L49)
 
 Returns the revision (update count) of the resource.
 
@@ -1022,7 +1022,7 @@ Resource revision number
 
 > <span class="readonly-badge">readonly</span> **get** **SHADER\_INFO**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L241)
+Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L241)
 
 Returns the complete parsed WGSL shader information.
 
@@ -1046,7 +1046,7 @@ Parsed shader information object
 
 > <span class="readonly-badge">readonly</span> **get** **STORAGE\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L229)
+Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L229)
 
 Returns the parsed shader storage structure information.
 
@@ -1070,7 +1070,7 @@ Storage structure information
 
 > **get** **tintBlendMode**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:160](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L160)
+Defined in: [src/material/core/ABaseMaterial.ts:160](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L160)
 
 Returns the key name of the currently set tint blend mode or sets a new mode.
 
@@ -1088,7 +1088,7 @@ Tint blend mode key string (e.g., `'MULTIPLY'`)
 
 > **set** **tintBlendMode**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:168](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L168)
+Defined in: [src/material/core/ABaseMaterial.ts:168](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L168)
 
 ##### Parameters
 
@@ -1114,7 +1114,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:168](https://github.com/redcamel
 
 > <span class="readonly-badge">readonly</span> **get** **UNIFORM\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L253)
+Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L253)
 
 Returns the parsed shader uniform structure information.
 
@@ -1138,7 +1138,7 @@ Uniform structure information
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -1162,7 +1162,7 @@ UUID string of the object
 
 > **get** **writeMaskState**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L289)
+Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L289)
 
 Returns or sets the color write mask (GPUColorWrite) state.
 
@@ -1176,7 +1176,7 @@ GPUFlagsConstant value
 
 > **set** **writeMaskState**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:293](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L293)
+Defined in: [src/material/core/ABaseMaterial.ts:293](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L293)
 
 ##### Parameters
 
@@ -1206,7 +1206,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:293](https://github.com/redcamel
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L102)
+Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L102)
 
 Adds a pipeline dirty listener to be called when the resource changes.
 
@@ -1232,7 +1232,7 @@ Adds a pipeline dirty listener to be called when the resource changes.
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L115)
+Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L115)
 
 Removes a registered pipeline dirty listener.
 
@@ -1258,7 +1258,7 @@ Removes a registered pipeline dirty listener.
 
 > **\_updateBaseProperty**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:461](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L461)
+Defined in: [src/material/core/ABaseMaterial.ts:461](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L461)
 
 Synchronizes basic material properties (uniforms, colors, tint, etc.) to the uniform buffer and global SSBO.
 
@@ -1278,7 +1278,7 @@ Synchronizes basic material properties (uniforms, colors, tint, etc.) to the uni
 
 > **\_updateFragmentState**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:357](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L357)
+Defined in: [src/material/core/ABaseMaterial.ts:357](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L357)
 
 Checks shader variants and updates the fragment bind group and render state.
 
@@ -1298,7 +1298,7 @@ Checks shader variants and updates the fragment bind group and render state.
 
 > **destroy**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:510](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L510)
+Defined in: [src/material/core/ABaseMaterial.ts:510](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L510)
 
 Destroys the material instance and releases allocated uniform buffers and global fragment slots.
 
@@ -1318,7 +1318,7 @@ Destroys the material instance and releases allocated uniform buffers and global
 
 > **getFragmentRenderState**(`entryPoint?`): `GPUFragmentState`
 
-Defined in: [src/material/core/ABaseMaterial.ts:430](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L430)
+Defined in: [src/material/core/ABaseMaterial.ts:430](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L430)
 
 Creates and returns a GPU fragment render state (GPUFragmentState) object.
 
@@ -1346,7 +1346,7 @@ Configured GPUFragmentState object
 
 > **getGPUResourceSampler**(`sampler`): `GPUSampler`
 
-Defined in: [src/material/core/ABaseMaterial.ts:502](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L502)
+Defined in: [src/material/core/ABaseMaterial.ts:502](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L502)
 
 Returns the GPUSampler from a Sampler instance, or the default GPUSampler if not provided.
 
@@ -1374,7 +1374,7 @@ GPUSampler instance
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABaseMaterial.ts#L313)
+Defined in: [src/material/core/ABaseMaterial.ts:313](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABaseMaterial.ts#L313)
 
 Initializes GPU fragment render pipeline information and uniform buffers.
 
@@ -1394,7 +1394,7 @@ Initializes GPU fragment render pipeline information and uniform buffers.
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L131)
+Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/ResourceBase.ts#L131)
 
 Notifies registered listeners that the resource has been updated.
 
@@ -1420,7 +1420,7 @@ Notifies registered listeners that the resource has been updated.
 
 > **updateSampler**(`prevSampler`, `newSampler`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABitmapBaseMaterial.ts#L80)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABitmapBaseMaterial.ts#L80)
 
 Updates pipeline dirty listeners upon sampler change and refreshes the fragment state.
 
@@ -1447,7 +1447,7 @@ Updates pipeline dirty listeners upon sampler change and refreshes the fragment 
 
 > **updateTexture**(`prevTexture`, `texture`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/ABitmapBaseMaterial.ts#L63)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/ABitmapBaseMaterial.ts#L63)
 
 Updates pipeline dirty listeners upon texture change and refreshes the fragment state.
 

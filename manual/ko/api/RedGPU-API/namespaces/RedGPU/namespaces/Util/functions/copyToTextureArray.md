@@ -8,7 +8,7 @@
 
 > **copyToTextureArray**(`commandEncoder`, `sourceTexture`, `targetArrayTexture`, `sliceIndex`): `void`
 
-Defined in: [src/utils/texture/copyToTextureArray.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/texture/copyToTextureArray.ts#L26)
+Defined in: [src/utils/texture/copyToTextureArray.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/utils/texture/copyToTextureArray.ts#L26)
 
 소스 텍스처를 배열 텍스처의 특정 슬라이스(Slice)로 복사합니다.
 

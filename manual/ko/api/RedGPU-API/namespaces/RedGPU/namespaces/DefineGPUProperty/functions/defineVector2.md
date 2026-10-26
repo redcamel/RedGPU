@@ -8,7 +8,7 @@
 
 > **defineVector2**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector2.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector2.ts#L53)
+Defined in: [src/defineProperty/funcs/vector/defineVector2.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/vector/defineVector2.ts#L53)
 
 지정된 대상의 프로토타입에 GPU 유니폼 버퍼와 연동되는 2차원 벡터(`[number, number]`) 속성을 정의합니다.
 

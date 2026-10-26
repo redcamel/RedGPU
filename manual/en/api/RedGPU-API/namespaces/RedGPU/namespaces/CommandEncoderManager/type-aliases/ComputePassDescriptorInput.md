@@ -8,6 +8,6 @@
 
 > **ComputePassDescriptorInput** = `string` \| `GPUComputePassDescriptor`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L87)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:87](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L87)
 
 Input type for compute pass creation (label string or `GPUComputePassDescriptor` object).

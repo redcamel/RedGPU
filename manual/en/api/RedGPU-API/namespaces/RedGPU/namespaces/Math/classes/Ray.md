@@ -6,7 +6,7 @@
 
 # Class: Ray
 
-Defined in: [src/math/Ray.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L16)
+Defined in: [src/math/Ray.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L16)
 
 Ray class with a 3D `origin` and `direction` vector that performs intersection tests against AABBs and triangles.
 
@@ -25,7 +25,7 @@ const ray = new RedGPU.Math.Ray([0, 0, 0], [0, 0, -1]);
 
 > **new Ray**(`origin?`, `direction?`): `Ray`
 
-Defined in: [src/math/Ray.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L44)
+Defined in: [src/math/Ray.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L44)
 
 Creates a `Ray` instance with the specified origin and direction vector.
 
@@ -51,7 +51,7 @@ const ray = new RedGPU.Math.Ray([0, 0, 0], [0, 0, -1]);
 
 > **direction**: [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L26)
+Defined in: [src/math/Ray.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L26)
 
 Normalized direction vector of the ray (`vec3`)
 
@@ -61,7 +61,7 @@ Normalized direction vector of the ray (`vec3`)
 
 > **origin**: [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L21)
+Defined in: [src/math/Ray.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L21)
 
 Origin coordinates of the ray (`vec3`)
 
@@ -71,7 +71,7 @@ Origin coordinates of the ray (`vec3`)
 
 > **applyMatrix4**(`matrix`): `Ray`
 
-Defined in: [src/math/Ray.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L93)
+Defined in: [src/math/Ray.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L93)
 
 Applies a 4x4 transformation matrix to the ray's origin and direction vector in-place and normalizes the direction vector.
 
@@ -106,7 +106,7 @@ The transformed current `Ray` instance (`this`)
 
 > **clone**(): `Ray`
 
-Defined in: [src/math/Ray.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L62)
+Defined in: [src/math/Ray.ts:62](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L62)
 
 Returns a new `Ray` instance with copied origin and direction.
 
@@ -127,7 +127,7 @@ Cloned `Ray` instance
 
 > **intersectBox**(`aabb`): `boolean`
 
-Defined in: [src/math/Ray.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L120)
+Defined in: [src/math/Ray.ts:120](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L120)
 
 Determines whether the ray intersects an `AABB` bounding box using the Slabs algorithm.
 
@@ -154,7 +154,7 @@ Whether the ray intersects the box (`boolean`)
 
 > **intersectTriangle**(`v0`, `v1`, `v2`, `backfaceCulling?`): [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L170)
+Defined in: [src/math/Ray.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L170)
 
 Calculates the intersection point between the ray and a triangle using the Möller-Trumbore algorithm.
 
@@ -184,7 +184,7 @@ Intersection point coordinates (`vec3`) or `null` if no intersection
 
 > **intersectTriangleBarycentric**(`v0`, `v1`, `v2`, `backfaceCulling?`): `object`
 
-Defined in: [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L238)
+Defined in: [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L238)
 
 Calculates the intersection point, distance (`t`), and barycentric coordinates (`u`, `v`) between the ray and a triangle.
 
@@ -213,7 +213,7 @@ Intersection info object (`{ point: vec3, t: number, u: number, v: number }`) or
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `point` | [`vec3`](../type-aliases/vec3.md) | [src/math/Ray.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L239) |
-| `t` | `number` | [src/math/Ray.ts:240](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L240) |
-| `u` | `number` | [src/math/Ray.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L241) |
-| `v` | `number` | [src/math/Ray.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L242) |
+| `point` | [`vec3`](../type-aliases/vec3.md) | [src/math/Ray.ts:239](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L239) |
+| `t` | `number` | [src/math/Ray.ts:240](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L240) |
+| `u` | `number` | [src/math/Ray.ts:241](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L241) |
+| `v` | `number` | [src/math/Ray.ts:242](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L242) |

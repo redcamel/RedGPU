@@ -8,7 +8,7 @@
 
 > **computeFrustumPlanes**(`projectionMatrix`, `viewMatrix`, `out?`): `number`[][]
 
-Defined in: [src/math/computeFrustumPlanes.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/computeFrustumPlanes.ts#L28)
+Defined in: [src/math/computeFrustumPlanes.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/computeFrustumPlanes.ts#L28)
 
 투영 행렬과 뷰 행렬을 곱하여 정규화된 6개의 뷰 프러스텀 평면 방정식(`[A, B, C, D]`) 배열을 계산합니다.
 

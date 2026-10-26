@@ -6,7 +6,7 @@
 
 # Class: ResourceStateStorageBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L14)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L14)
 
 Class that represents the resource management state of `StorageBuffer`.
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ResourceStateStorageBuffer**(`buffer`): `ResourceStateStorageBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L35)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L35)
 
 Creates a ResourceStateStorageBuffer instance.
 
@@ -40,7 +40,7 @@ Creates a ResourceStateStorageBuffer instance.
 
 > **buffer**: [`StorageBuffer`](../../../classes/StorageBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L19)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L19)
 
 Managed storage buffer instance
 
@@ -50,7 +50,7 @@ Managed storage buffer instance
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L24)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L24)
 
 Unique identifier (UUID)
 
@@ -62,7 +62,7 @@ Unique identifier (UUID)
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L48)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L48)
 
 Gets or sets the resource reference count.
 
@@ -76,7 +76,7 @@ Current reference count
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L52)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L52)
 
 ##### Parameters
 

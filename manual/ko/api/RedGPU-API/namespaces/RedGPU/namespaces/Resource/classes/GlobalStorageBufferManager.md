@@ -6,7 +6,7 @@
 
 # Class: GlobalStorageBufferManager
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L31)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L31)
 
 글로벌 SSBO(Storage Buffer)의 슬롯 할당·해제와 CPU→GPU 데이터 업로드를 관리하는 매니저입니다.
 
@@ -38,7 +38,7 @@ const globalVertexSSBO = redGPUContext.globalVertexSSBO;
 
 > **new GlobalStorageBufferManager**(`redGPUContext`, `elementSize`, `initialSlotCount?`, `label?`): `GlobalStorageBufferManager`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:82](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L82)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:82](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L82)
 
 지정한 슬롯 크기와 수용량으로 GPU 스토리지 버퍼와 CPU 미러 버퍼를 생성합니다.
 
@@ -73,7 +73,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> `static` **RESIZE\_LINEAR\_ADDITION\_BYTES**: `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:42](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L42)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:42](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L42)
 
 임계 크기 초과 후 선형 성장 시 추가되는 바이트 크기 (8MB)
 
@@ -85,7 +85,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> `static` **RESIZE\_THRESHOLD\_BYTES**: `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L36)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L36)
 
 2배 성장에서 선형 성장으로 전환되는 임계 버퍼 크기 (32MB)
 
@@ -101,7 +101,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **activeSlotCount**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:200](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L200)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:200](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L200)
 
 현재 사용 중인 슬롯 개수를 반환합니다.
 
@@ -121,7 +121,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **cpuData**(): `ArrayBuffer`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:152](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L152)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:152](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L152)
 
 CPU 측 미러 버퍼를 반환합니다. (디버그·테스트 용도)
 
@@ -141,7 +141,7 @@ CPU 미러 `ArrayBuffer`
 
 > <span class="readonly-badge">readonly</span> **get** **dirtyMax**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:176](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L176)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:176](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L176)
 
 더티로 추적 중인 최대 슬롯 인덱스를 반환합니다. (디버그·테스트 용도)
 
@@ -161,7 +161,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **dirtyMin**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:164](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L164)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:164](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L164)
 
 더티로 추적 중인 최소 슬롯 인덱스를 반환합니다. (디버그·테스트 용도)
 
@@ -181,7 +181,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **elementSize**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:128](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L128)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:128](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L128)
 
 단일 슬롯 원소의 바이트 크기를 반환합니다.
 
@@ -201,7 +201,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **gpuBuffer**(): `GPUBuffer`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L104)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:104](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L104)
 
 GPU 스토리지 버퍼를 반환합니다. 리사이즈 시 새 버퍼로 교체됩니다.
 
@@ -221,7 +221,7 @@ GPUBuffer 객체
 
 > <span class="readonly-badge">readonly</span> **get** **label**(): `string`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L140)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:140](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L140)
 
 버퍼 디버그 레이블을 반환합니다.
 
@@ -241,7 +241,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **remainingSlotCount**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:212](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L212)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:212](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L212)
 
 남은 사용 가능 슬롯 개수를 반환합니다.
 
@@ -261,7 +261,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **safeMaxBufferSize**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L188)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L188)
 
 허용되는 최대 버퍼 바이트 크기를 반환합니다. (`maxStorageBufferBindingSize`와 128MB 중 작은 값)
 
@@ -281,7 +281,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **totalSlotCount**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L116)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L116)
 
 버퍼의 전체 슬롯 수용량을 반환합니다.
 
@@ -303,7 +303,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > **allocateSlot**(): [`BufferSlot`](../interfaces/BufferSlot.md)
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:257](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L257)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:257](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L257)
 
 버퍼 슬롯을 할당합니다. 해제된 슬롯이 있으면 우선 재사용하고, 용량이 부족하면 버퍼를 확장합니다.
 
@@ -331,7 +331,7 @@ console.log(slot.index, slot.byteOffset);
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L220)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:220](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L220)
 
 GPU 버퍼를 파괴하고 CPU 미러 데이터와 슬롯 풀을 해제합니다.
 
@@ -347,7 +347,7 @@ GPU 버퍼를 파괴하고 CPU 미러 데이터와 슬롯 풀을 해제합니다
 
 > **flush**(): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:360](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L360)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:360](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L360)
 
 더티 슬롯 범위만 GPU 버퍼로 업로드하고 더티 상태를 초기화합니다.
 
@@ -363,7 +363,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > **freeSlot**(`index`): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:292](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L292)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:292](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L292)
 
 슬롯 인덱스를 재사용 풀에 반환합니다.
 
@@ -385,7 +385,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > **setOnResize**(`callback`): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:236](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L236)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:236](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L236)
 
 버퍼 리사이즈 완료 후 호출될 콜백을 등록합니다. 주로 바인드 그룹 재생성에 사용됩니다.
 
@@ -407,7 +407,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > **updateFloatData**(`index`, `data`, `floatOffsetInsideElement?`): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L313)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:313](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L313)
 
 슬롯에 Float32 데이터를 CPU 미러 버퍼에 기록하고 더티로 표시합니다. 실제 업로드는 `flush()`에서 수행됩니다.
 
@@ -435,7 +435,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > **updateUintData**(`index`, `data`, `uintOffsetInsideElement?`): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:343](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L343)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:343](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L343)
 
 슬롯에 Uint32 데이터를 CPU 미러 버퍼에 기록하고 더티로 표시합니다. 실제 업로드는 `flush()`에서 수행됩니다.
 
@@ -468,7 +468,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -492,7 +492,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -516,7 +516,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
@@ -540,7 +540,7 @@ Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -564,7 +564,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -578,7 +578,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -604,7 +604,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -628,7 +628,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -652,7 +652,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

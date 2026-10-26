@@ -6,7 +6,7 @@
 
 # Class: DrawDebuggerGrid
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L49)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L49)
 
 Debugger class that renders a procedural anti-aliased grid on the base ground plane (XZ plane) of a 3D scene.
 
@@ -42,7 +42,7 @@ view.grid = true;
 
 > **new DrawDebuggerGrid**(`redGPUContext`): `DrawDebuggerGrid`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:96](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L96)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:96](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L96)
 
 Creates a `DrawDebuggerGrid` instance.
 
@@ -72,7 +72,7 @@ Creates a `DrawDebuggerGrid` instance.
 
 > **get** **axisLineWidth**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:312](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L312)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:312](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L312)
 
 Gets or sets the screen pixel line width for X/Z axis lines (default: 2.0).
 
@@ -86,7 +86,7 @@ Axis line width
 
 > **set** **axisLineWidth**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:335](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L335)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:335](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L335)
 
 ##### Parameters
 
@@ -108,7 +108,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:335](https://gith
 
 > **get** **fadeEnd**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:350](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L350)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:350](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L350)
 
 Gets or sets the camera distance where distance fade ends (unit: m, default: 60.0).
 
@@ -122,7 +122,7 @@ Fade end distance
 
 > **set** **fadeEnd**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:373](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L373)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:373](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L373)
 
 ##### Parameters
 
@@ -144,7 +144,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:373](https://gith
 
 > **get** **fadeStart**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:331](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L331)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:331](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L331)
 
 Gets or sets the camera distance where distance fade starts (unit: m, default: 25.0).
 
@@ -158,7 +158,7 @@ Fade start distance
 
 > **set** **fadeStart**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:354](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L354)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:354](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L354)
 
 ##### Parameters
 
@@ -180,7 +180,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:354](https://gith
 
 > **get** **gridSize**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:236](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L236)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:236](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L236)
 
 Gets or sets the minor grid spacing (unit: m, default: 1.0).
 
@@ -194,7 +194,7 @@ Minor grid spacing
 
 > **set** **gridSize**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:259](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L259)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:259](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L259)
 
 ##### Parameters
 
@@ -216,7 +216,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:259](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** **lineColor**(): [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:369](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L369)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:369](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L369)
 
 Returns the minor grid line color.
 
@@ -236,7 +236,7 @@ Minor grid color instance
 
 > **get** **lineWidth**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:274](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L274)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:274](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L274)
 
 Gets or sets the screen pixel line width for minor grid lines (default: 1.0).
 
@@ -250,7 +250,7 @@ Minor grid line width
 
 > **set** **lineWidth**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:297](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L297)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:297](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L297)
 
 ##### Parameters
 
@@ -272,7 +272,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:297](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** **majorLineColor**(): [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:388](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L388)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:388](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L388)
 
 Returns the major grid line color.
 
@@ -292,7 +292,7 @@ Major grid color instance
 
 > **get** **majorLineWidth**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:293](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L293)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:293](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L293)
 
 Gets or sets the screen pixel line width for major grid lines (default: 1.5).
 
@@ -306,7 +306,7 @@ Major grid line width
 
 > **set** **majorLineWidth**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:316](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L316)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:316](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L316)
 
 ##### Parameters
 
@@ -328,7 +328,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:316](https://gith
 
 > **get** **majorStep**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:255](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L255)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:255](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L255)
 
 Gets or sets the major grid spacing (unit: m, default: 10.0).
 
@@ -342,7 +342,7 @@ Major grid spacing
 
 > **set** **majorStep**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:278](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L278)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:278](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L278)
 
 ##### Parameters
 
@@ -364,7 +364,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:278](https://gith
 
 > **get** **size**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:224](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L224)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:224](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L224)
 
 Gets or sets the width and length of the grid plane (unit: m, default: 100).
 
@@ -378,7 +378,7 @@ Grid plane size
 
 > **set** **size**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:240](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L240)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:240](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L240)
 
 ##### Parameters
 
@@ -400,7 +400,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:240](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** **xAxisColor**(): [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:400](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L400)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:400](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L400)
 
 Returns the X-axis (Red) center line color.
 
@@ -420,7 +420,7 @@ X-axis center line color instance
 
 > <span class="readonly-badge">readonly</span> **get** **zAxisColor**(): [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:412](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L412)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:412](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L412)
 
 Returns the Z-axis (Blue) center line color.
 
@@ -440,7 +440,7 @@ Z-axis center line color instance
 
 > **destroy**(): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:471](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L471)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:471](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L471)
 
 Destroys the `DrawDebuggerGrid` instance and releases allocated GPU resources and draw command slots.
 
@@ -456,7 +456,7 @@ Destroys the `DrawDebuggerGrid` instance and releases allocated GPU resources an
 
 > **render**(`view`, `targetTextureView`, `depthTextureView`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:430](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L430)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:430](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L430)
 
 Renders the debug grid.
 
@@ -485,7 +485,7 @@ Renders the debug grid.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -509,7 +509,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -523,7 +523,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -549,7 +549,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

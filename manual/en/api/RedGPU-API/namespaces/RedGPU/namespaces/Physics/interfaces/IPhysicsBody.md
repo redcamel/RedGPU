@@ -6,7 +6,7 @@
 
 # Interface: IPhysicsBody
 
-Defined in: [src/physics/IPhysicsBody.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L15)
+Defined in: [src/physics/IPhysicsBody.ts:15](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/physics/IPhysicsBody.ts#L15)
 
 **`Experimental`**
 
@@ -22,7 +22,7 @@ This feature is currently in the experimental stage. The API may change in the f
 
 > **nativeBody**: `any`
 
-Defined in: [src/physics/IPhysicsBody.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L20)
+Defined in: [src/physics/IPhysicsBody.ts:20](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/physics/IPhysicsBody.ts#L20)
 
 **`Experimental`**
 
@@ -34,7 +34,7 @@ Native body object of the physics engine
 
 > **position**: [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L26)
+Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/physics/IPhysicsBody.ts#L26)
 
 **`Experimental`**
 
@@ -46,7 +46,7 @@ Current position of the physics body
 
 > **rotation**: [`quat`](../../Math/type-aliases/quat.md) \| \{ `w`: `number`; `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L32)
+Defined in: [src/physics/IPhysicsBody.ts:32](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/physics/IPhysicsBody.ts#L32)
 
 **`Experimental`**
 
@@ -58,7 +58,7 @@ Current rotation (quaternion) of the physics body
 
 > **velocity**: [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L38)
+Defined in: [src/physics/IPhysicsBody.ts:38](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/physics/IPhysicsBody.ts#L38)
 
 **`Experimental`**
 
@@ -70,7 +70,7 @@ Current linear velocity of the physics body
 
 > **applyImpulse**(`force`): `void`
 
-Defined in: [src/physics/IPhysicsBody.ts:55](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L55)
+Defined in: [src/physics/IPhysicsBody.ts:55](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/physics/IPhysicsBody.ts#L55)
 
 **`Experimental`**
 
@@ -98,7 +98,7 @@ body.applyImpulse([0, 5, 0]);
 
 > **syncToMesh**(): `void`
 
-Defined in: [src/physics/IPhysicsBody.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L61)
+Defined in: [src/physics/IPhysicsBody.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/physics/IPhysicsBody.ts#L61)
 
 **`Experimental`**
 

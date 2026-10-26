@@ -6,7 +6,7 @@
 
 # Class: FoliagePipelineRegistry
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L34)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L34)
 
 식생(Foliage)의 메인 패스, 깊이 프리패스, 그림자 패스용 인스턴싱 `GPURenderPipeline`을 생성하고 캐싱하는 레지스트리 클래스입니다.
 
@@ -28,7 +28,7 @@ Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:34](
 
 > **new FoliagePipelineRegistry**(`redGPUContext`): `FoliagePipelineRegistry`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L48)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L48)
 
 `FoliagePipelineRegistry` 인스턴스를 생성합니다.
 
@@ -60,7 +60,7 @@ Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:48](
 
 > **clearCache**(): `void`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:460](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L460)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:460](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L460)
 
 캐싱된 모든 렌더 파이프라인을 초기화합니다.
 
@@ -76,7 +76,7 @@ Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:460]
 
 > **getOrCreatePipeline**(`material`, `sampleCount`, `msaaID`, `strideBytes?`, `cullMode?`, `depthPassMode?`, `renderUnitBindGroupLayout?`, `isMasked?`): `GPURenderPipeline`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:111](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L111)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:111](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L111)
 
 메인 패스 또는 깊이 프리패스용 식생 렌더 파이프라인을 조회하거나 새로 생성하여 반환합니다.
 
@@ -107,7 +107,7 @@ Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:111]
 
 > **getOrCreateShadowMaskedPipeline**(`material`, `strideBytes?`, `cullMode?`, `renderUnitBindGroupLayout?`): `GPURenderPipeline`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:379](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L379)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:379](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L379)
 
 알파 마스크(컷오프)가 적용된 식생 또는 임포스터용 그림자 패스 렌더 파이프라인을 조회하거나 생성하여 반환합니다.
 
@@ -134,7 +134,7 @@ Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:379]
 
 > **getOrCreateShadowMergedPipeline**(`strideBytes?`, `cullMode?`, `renderUnitBindGroupLayout?`): `GPURenderPipeline`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:299](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L299)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:299](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L299)
 
 불투명 병합 지오메트리 전용 그림자 패스 렌더 파이프라인을 조회하거나 새로 생성하여 반환합니다.
 
@@ -165,7 +165,7 @@ Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:299]
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -189,7 +189,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -213,7 +213,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
@@ -237,7 +237,7 @@ Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -261,7 +261,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -275,7 +275,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -301,7 +301,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -325,7 +325,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -349,7 +349,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

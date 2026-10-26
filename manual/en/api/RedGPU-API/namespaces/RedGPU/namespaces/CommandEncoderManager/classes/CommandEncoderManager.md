@@ -6,7 +6,7 @@
 
 # Class: CommandEncoderManager
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:100](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L100)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:100](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L100)
 
 Class that manages the lifecycle of GPU command encoders and render/compute passes by phase. Shares a single encoder per phase and automatically spawns a new encoder when nested pass calls occur.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new CommandEncoderManager**(`redGPUContext`): `CommandEncoderManager`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L119)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:119](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L119)
 
 Creates a CommandEncoderManager instance.
 
@@ -60,7 +60,7 @@ Creates a CommandEncoderManager instance.
 
 > **addDeferredDestroy**(`resource`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L136)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:136](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L136)
 
 Registers a resource to the deferred destroy list to be safely destroyed after command submission completes.
 
@@ -88,7 +88,7 @@ context.commandEncoderManager.addDeferredDestroy(tempBuffer);
 
 > **addMainComputePass**(`labelOrDescriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:276](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L276)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:276](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L276)
 
 Adds and executes a compute pass for the `MAIN` phase.
 
@@ -119,7 +119,7 @@ context.commandEncoderManager.addMainComputePass('MainCullingCompute', (pass) =>
 
 > **addMainRenderPass**(`descriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:253](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L253)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:253](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L253)
 
 Adds and executes a render pass for the `MAIN` phase.
 
@@ -150,7 +150,7 @@ context.commandEncoderManager.addMainRenderPass(mainRenderPassDescriptor, (pass)
 
 > **addPostProcessComputePass**(`labelOrDescriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:322](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L322)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:322](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L322)
 
 Adds and executes a compute pass for the `POST_PROCESS` phase.
 
@@ -181,7 +181,7 @@ context.commandEncoderManager.addPostProcessComputePass('BloomCompute', (pass) =
 
 > **addPostProcessRenderPass**(`descriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:299](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L299)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:299](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L299)
 
 Adds and executes a render pass for the `POST_PROCESS` phase.
 
@@ -212,7 +212,7 @@ context.commandEncoderManager.addPostProcessRenderPass(postRenderPassDescriptor,
 
 > **addPreProcessComputePass**(`labelOrDescriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:230](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L230)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:230](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L230)
 
 Adds and executes a compute pass for the `PRE_PROCESS` phase.
 
@@ -243,7 +243,7 @@ context.commandEncoderManager.addPreProcessComputePass('ParticleSimulation', (pa
 
 > **addPreProcessRenderPass**(`descriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:207](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L207)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:207](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L207)
 
 Adds and executes a render pass for the `PRE_PROCESS` phase.
 
@@ -274,7 +274,7 @@ context.commandEncoderManager.addPreProcessRenderPass(shadowPassDescriptor, (pas
 
 > **addResourceComputePass**(`labelOrDescriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L184)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:184](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L184)
 
 Adds and executes a compute pass for the `RESOURCE` phase.
 
@@ -306,7 +306,7 @@ context.commandEncoderManager.addResourceComputePass('MyResourceComputePass', (p
 
 > **addResourceRenderPass**(`descriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:160](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L160)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:160](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L160)
 
 Adds and executes a render pass for the `RESOURCE` phase.
 
@@ -338,7 +338,7 @@ context.commandEncoderManager.addResourceRenderPass(renderPassDescriptor, (pass)
 
 > **destroy**(): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:550](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L550)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:550](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L550)
 
 Destroys the CommandEncoderManager instance and cleans up all command encoder and deferred destroy resource references.
 
@@ -354,7 +354,7 @@ Destroys the CommandEncoderManager instance and cleans up all command encoder an
 
 > **immediateComputePass**(`labelOrDescriptor`, `executor`, `afterExecutor?`): `Promise`\<`void`\>
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:407](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L407)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:407](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L407)
 
 Immediately executes a compute pass with an independent command encoder and awaits GPU submission completion.
 
@@ -386,7 +386,7 @@ await context.commandEncoderManager.immediateComputePass('ImmediateMipmapGen', (
 
 > **immediateRenderPass**(`descriptor`, `executor`, `afterExecutor?`): `Promise`\<`void`\>
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:371](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L371)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:371](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L371)
 
 Immediately executes a render pass with an independent command encoder and awaits GPU submission completion.
 
@@ -417,7 +417,7 @@ await context.commandEncoderManager.immediateRenderPass(descriptor, (pass) => {
 
 > **immediateSubmit**(`label`, `executor`): `Promise`\<`void`\>
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:440](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L440)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:440](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L440)
 
 Immediately submits commands with an independent command encoder and awaits GPU work completion.
 
@@ -447,7 +447,7 @@ await context.commandEncoderManager.immediateSubmit('InitializeBuffer', (encoder
 
 > **resetAll**(): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:537](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L537)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:537](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L537)
 
 Resets all encoder states and statistics, and processes registered deferred destroy resources.
 
@@ -468,7 +468,7 @@ context.commandEncoderManager.resetAll();
 
 > **submit**(`type`): [`CommandPhaseStats`](../interfaces/CommandPhaseStats.md)
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:463](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L463)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:463](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L463)
 
 Finishes all encoders for the specified phase and immediately submits them to the queue.
 
@@ -497,7 +497,7 @@ Statistics for the submitted phase (`null` if no buffers were submitted)
 
 > **submitAll**(): [`CommandBatchStats`](../interfaces/CommandBatchStats.md)
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:493](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L493)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:493](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L493)
 
 Finishes encoders across all phases (`RESOURCE` -> `PRE_PROCESS` -> `MAIN` -> `POST_PROCESS`) in order and submits them in a single batch.
 
@@ -520,7 +520,7 @@ Batch submission statistics (`null` if no buffers were submitted and no deferred
 
 > **useEncoder**(`type`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:344](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L344)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:344](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L344)
 
 Directly accesses the command encoder of a specific phase to record commands such as resource copies.
 
@@ -555,7 +555,7 @@ context.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -579,7 +579,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): `CommandEncoderManager`
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -603,7 +603,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -627,7 +627,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -651,7 +651,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -665,7 +665,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -691,7 +691,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -715,7 +715,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -739,7 +739,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

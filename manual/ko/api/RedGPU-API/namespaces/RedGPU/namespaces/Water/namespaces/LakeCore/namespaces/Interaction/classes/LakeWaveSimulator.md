@@ -6,7 +6,7 @@
 
 # Class: LakeWaveSimulator
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L19)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L19)
 
 호수 수면의 파동 전파를 시뮬레이션하고 리플 노멀 텍스처를 생성하는 클래스입니다.
 
@@ -30,7 +30,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:19](https://git
 
 > **new LakeWaveSimulator**(`redGPUContext`, `textureSize?`): `LakeWaveSimulator`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L80)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L80)
 
 `LakeWaveSimulator` 인스턴스를 생성합니다.
 
@@ -59,7 +59,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:80](https://git
 
 > **damping**: `number` = `0.012`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L46)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L46)
 
 프레임당 파동 에너지 감쇠율입니다. (기본값: `0.012`)
 
@@ -71,7 +71,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:46](https://git
 
 > **normalStrength**: `number` = `1.0`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L51)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L51)
 
 생성되는 리플 노멀의 강도입니다. (기본값: `1.0`)
 
@@ -83,7 +83,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:51](https://git
 
 > **rippleNormalTexture**: `GPUTexture`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L30)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L30)
 
 시뮬레이션 결과 리플 노멀이 저장되는 `GPUTexture`입니다.
 
@@ -95,7 +95,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:30](https://git
 
 > **rippleNormalTextureView**: `GPUTextureView`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L35)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L35)
 
 `rippleNormalTexture`의 `GPUTextureView`입니다.
 
@@ -107,7 +107,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:35](https://git
 
 > **textureSize**: `number` = `512`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L24)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L24)
 
 파동 시뮬레이션 텍스처의 가로·세로 해상도(픽셀)입니다. (기본값: `512`)
 
@@ -119,7 +119,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:24](https://git
 
 > **waveSpeed**: `number` = `0.32`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L41)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L41)
 
 파동 전파 속도입니다. (기본값: `0.32`)
 
@@ -137,7 +137,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:41](https://git
 
 > **clear**(`commandEncoder`): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:175](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L175)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:175](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L175)
 
 파동 버퍼와 리플 노멀 텍스처를 0으로 초기화합니다.
 
@@ -159,7 +159,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:175](https://gi
 
 > **destroy**(): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:185](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L185)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:185](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L185)
 
 할당된 GPU 리소스를 모두 해제합니다.
 
@@ -175,7 +175,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:185](https://gi
 
 > **simulate**(`commandEncoder`, `shiftX?`, `shiftZ?`): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L140)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:140](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L140)
 
 파동 시뮬레이션 컴퓨트 패스를 실행합니다.
 
@@ -199,7 +199,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:140](https://gi
 
 > **updateCaptureBinding**(`captureTextureView`): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:97](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L97)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:97](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L97)
 
 캡처 패스의 침투 깊이 텍스처 뷰를 바인드 그룹에 연결합니다.
 
@@ -226,7 +226,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:97](https://git
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -250,7 +250,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -274,7 +274,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
@@ -298,7 +298,7 @@ Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -322,7 +322,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -336,7 +336,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -362,7 +362,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -386,7 +386,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -410,7 +410,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

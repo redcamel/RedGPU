@@ -8,7 +8,7 @@
 
 > `const` **POST\_EFFECT\_SYSTEM\_UNIFORM\_MSAA**: `string` = `POST_EFFECT_SYSTEM_UNIFORM_MSAA_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:3128](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L3128)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:3128](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L3128)
 
 Post effect system uniform structure. (MSAA)
 

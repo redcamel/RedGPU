@@ -6,7 +6,7 @@
 
 # Class: Landscape
 
-Defined in: [src/landscape/Landscape.ts:52](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L52)
+Defined in: [src/landscape/Landscape.ts:52](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L52)
 
 대규모 지형의 타일 스트리밍, GPU 기반 절두체/HZB 오클루전 컬링, 연속적 LOD 모핑, 멀티 레이어 스플래팅, 식생(`FoliageManager`) 및 잔디(`GrassManager`) 생태계를 통합 관리하는 핵심 클래스입니다.
 
@@ -45,7 +45,7 @@ scene.landscape = landscape;
 
 > **new Landscape**(`redGPUContext`, `worldSize?`): `Landscape`
 
-Defined in: [src/landscape/Landscape.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L109)
+Defined in: [src/landscape/Landscape.ts:109](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L109)
 
 `Landscape` 인스턴스를 생성합니다.
 
@@ -82,7 +82,7 @@ const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [4000, 4000]);
 
 > <span class="readonly-badge">readonly</span> **get** **baseColor**(): [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/landscape/Landscape.ts:561](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L561)
+Defined in: [src/landscape/Landscape.ts:561](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L561)
 
 지형 머티리얼의 기본 베이스 컬러(`ColorRGBA`)를 반환합니다.
 
@@ -102,7 +102,7 @@ Defined in: [src/landscape/Landscape.ts:561](https://github.com/redcamel/RedGPU/
 
 > **get** **castHeightmapShadow**(): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:755](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L755)
+Defined in: [src/landscape/Landscape.ts:755](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L755)
 
 하이트맵 레이마칭 기반의 지형 자체 그림자(Heightmap Self-Shadow) 활성화 여부를 반환하거나 설정합니다. (기본값: `false`)
 
@@ -116,7 +116,7 @@ Defined in: [src/landscape/Landscape.ts:755](https://github.com/redcamel/RedGPU/
 
 > **set** **castHeightmapShadow**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:759](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L759)
+Defined in: [src/landscape/Landscape.ts:759](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L759)
 
 ##### Parameters
 
@@ -138,7 +138,7 @@ Defined in: [src/landscape/Landscape.ts:759](https://github.com/redcamel/RedGPU/
 
 > **get** **componentCount**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/Landscape.ts:365](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L365)
+Defined in: [src/landscape/Landscape.ts:365](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L365)
 
 지형을 분할하는 X/Z축 타일(컴포넌트) 개수 `[countX, countZ]`를 반환하거나 설정합니다.
 
@@ -152,7 +152,7 @@ Defined in: [src/landscape/Landscape.ts:365](https://github.com/redcamel/RedGPU/
 
 > **set** **componentCount**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:369](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L369)
+Defined in: [src/landscape/Landscape.ts:369](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L369)
 
 ##### Parameters
 
@@ -174,7 +174,7 @@ Defined in: [src/landscape/Landscape.ts:369](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **components**(): [`LandscapeComponent`](../namespaces/Core/namespaces/Spatial/classes/LandscapeComponent.md)[]
 
-Defined in: [src/landscape/Landscape.ts:489](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L489)
+Defined in: [src/landscape/Landscape.ts:489](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L489)
 
 지형 공간 그리드에 속한 모든 `LandscapeComponent` 배열을 반환합니다.
 
@@ -194,7 +194,7 @@ Defined in: [src/landscape/Landscape.ts:489](https://github.com/redcamel/RedGPU/
 
 > **get** **componentSizeQuads**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:432](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L432)
+Defined in: [src/landscape/Landscape.ts:432](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L432)
 
 일반 타일 컴포넌트의 한 변당 기본 쿼드(Quad) 분할 수를 반환하거나 설정합니다. (`LANDSCAPE_BASE_GRID_SIZE` 규격 값만 허용)
 
@@ -208,7 +208,7 @@ Defined in: [src/landscape/Landscape.ts:432](https://github.com/redcamel/RedGPU/
 
 > **set** **componentSizeQuads**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:436](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L436)
+Defined in: [src/landscape/Landscape.ts:436](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L436)
 
 ##### Parameters
 
@@ -230,7 +230,7 @@ Defined in: [src/landscape/Landscape.ts:436](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **debuggerManager**(): [`LandscapeDebuggerManager`](../namespaces/Debugger/classes/LandscapeDebuggerManager.md)
 
-Defined in: [src/landscape/Landscape.ts:214](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L214)
+Defined in: [src/landscape/Landscape.ts:214](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L214)
 
 지형 디버그 시각화 및 와이어프레임 상태를 제어하는 `LandscapeDebuggerManager`를 반환합니다.
 
@@ -250,7 +250,7 @@ Defined in: [src/landscape/Landscape.ts:214](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **foliageManager**(): [`FoliageManager`](../namespaces/Foliage/classes/FoliageManager.md)
 
-Defined in: [src/landscape/Landscape.ts:226](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L226)
+Defined in: [src/landscape/Landscape.ts:226](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L226)
 
 지형 위 식생(3D 메시) 산포를 관리하는 `FoliageManager`를 반환합니다.
 
@@ -270,7 +270,7 @@ Defined in: [src/landscape/Landscape.ts:226](https://github.com/redcamel/RedGPU/
 
 > **get** **globalHeightmapUrl**(): `string`
 
-Defined in: [src/landscape/Landscape.ts:601](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L601)
+Defined in: [src/landscape/Landscape.ts:601](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L601)
 
 전체 지형에 걸쳐 기본 고도를 제공하는 전역 하이트맵 이미지 URL을 반환하거나 설정합니다.
 
@@ -284,7 +284,7 @@ Defined in: [src/landscape/Landscape.ts:601](https://github.com/redcamel/RedGPU/
 
 > **set** **globalHeightmapUrl**(`val`): `void`
 
-Defined in: [src/landscape/Landscape.ts:605](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L605)
+Defined in: [src/landscape/Landscape.ts:605](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L605)
 
 ##### Parameters
 
@@ -306,7 +306,7 @@ Defined in: [src/landscape/Landscape.ts:605](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **grassManager**(): [`GrassManager`](../namespaces/Grass/classes/GrassManager.md)
 
-Defined in: [src/landscape/Landscape.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L238)
+Defined in: [src/landscape/Landscape.ts:238](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L238)
 
 지형 위 절차적 잔디 및 초목 클럼프를 관리하는 `GrassManager`를 반환합니다.
 
@@ -326,7 +326,7 @@ Defined in: [src/landscape/Landscape.ts:238](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **halfWorldSizeX**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:341](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L341)
+Defined in: [src/landscape/Landscape.ts:341](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L341)
 
 X축 월드 크기의 절반(`worldSizeX * 0.5`)을 반환합니다.
 
@@ -346,7 +346,7 @@ X축 월드 크기의 절반
 
 > <span class="readonly-badge">readonly</span> **get** **halfWorldSizeZ**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:353](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L353)
+Defined in: [src/landscape/Landscape.ts:353](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L353)
 
 Z축 월드 크기의 절반(`worldSizeZ * 0.5`)을 반환합니다.
 
@@ -366,7 +366,7 @@ Z축 월드 크기의 절반
 
 > <span class="readonly-badge">readonly</span> **get** **hasValidScatterAtlas**(): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:687](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L687)
+Defined in: [src/landscape/Landscape.ts:687](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L687)
 
 식생 및 잔디 산포에 필요한 VHT/VBT 아틀라스와 로드된 타일이 모두 유효한 상태인지 여부를 반환합니다.
 
@@ -386,7 +386,7 @@ Defined in: [src/landscape/Landscape.ts:687](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **hasValidVbtAtlas**(): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:704](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L704)
+Defined in: [src/landscape/Landscape.ts:704](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L704)
 
 VBT 베이스 컬러 아틀라스와 로드된 타일이 유효한 상태인지 여부를 반환합니다.
 
@@ -406,7 +406,7 @@ VBT 아틀라스 유효 여부
 
 > **get** **heightmapShadowDistance**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:774](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L774)
+Defined in: [src/landscape/Landscape.ts:774](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L774)
 
 하이트맵 자체 그림자 레이마칭의 최대 추적 거리(월드 단위, 최솟값: `10.0`, 기본값: `1000.0`)를 반환하거나 설정합니다.
 
@@ -420,7 +420,7 @@ Defined in: [src/landscape/Landscape.ts:774](https://github.com/redcamel/RedGPU/
 
 > **set** **heightmapShadowDistance**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:778](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L778)
+Defined in: [src/landscape/Landscape.ts:778](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L778)
 
 ##### Parameters
 
@@ -442,7 +442,7 @@ Defined in: [src/landscape/Landscape.ts:778](https://github.com/redcamel/RedGPU/
 
 > **get** **heightmapShadowSoftness**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:812](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L812)
+Defined in: [src/landscape/Landscape.ts:812](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L812)
 
 하이트맵 자체 그림자 경계의 부드러움(Softness) 계수(최솟값: `0.1`, 기본값: `8.0`)를 반환하거나 설정합니다.
 
@@ -456,7 +456,7 @@ Defined in: [src/landscape/Landscape.ts:812](https://github.com/redcamel/RedGPU/
 
 > **set** **heightmapShadowSoftness**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:816](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L816)
+Defined in: [src/landscape/Landscape.ts:816](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L816)
 
 ##### Parameters
 
@@ -478,7 +478,7 @@ Defined in: [src/landscape/Landscape.ts:816](https://github.com/redcamel/RedGPU/
 
 > **get** **heightmapShadowSteps**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:793](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L793)
+Defined in: [src/landscape/Landscape.ts:793](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L793)
 
 하이트맵 자체 그림자 레이마칭의 샘플링 스텝 수(범위: `4 ~ 64`, 기본값: `16`)를 반환하거나 설정합니다.
 
@@ -492,7 +492,7 @@ Defined in: [src/landscape/Landscape.ts:793](https://github.com/redcamel/RedGPU/
 
 > **set** **heightmapShadowSteps**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:797](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L797)
+Defined in: [src/landscape/Landscape.ts:797](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L797)
 
 ##### Parameters
 
@@ -514,7 +514,7 @@ Defined in: [src/landscape/Landscape.ts:797](https://github.com/redcamel/RedGPU/
 
 > **get** **heightScale**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:409](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L409)
+Defined in: [src/landscape/Landscape.ts:409](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L409)
 
 정규화된 하이트맵 값(`0.0 ~ 1.0`)에 곱해지는 최대 고도 스케일(월드 단위, 기본값: `200.0`)을 반환하거나 설정합니다.
 
@@ -528,7 +528,7 @@ Defined in: [src/landscape/Landscape.ts:409](https://github.com/redcamel/RedGPU/
 
 > **set** **heightScale**(`val`): `void`
 
-Defined in: [src/landscape/Landscape.ts:413](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L413)
+Defined in: [src/landscape/Landscape.ts:413](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L413)
 
 ##### Parameters
 
@@ -550,7 +550,7 @@ Defined in: [src/landscape/Landscape.ts:413](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **instanceBuffer**(): `LandscapeInstanceBuffer`
 
-Defined in: [src/landscape/Landscape.ts:190](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L190)
+Defined in: [src/landscape/Landscape.ts:190](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L190)
 
 타일 인스턴스 및 간접 드로우 GPU 버퍼를 관리하는 `LandscapeInstanceBuffer`를 반환합니다.
 
@@ -570,7 +570,7 @@ Defined in: [src/landscape/Landscape.ts:190](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **invWorldSizeX**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:317](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L317)
+Defined in: [src/landscape/Landscape.ts:317](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L317)
 
 X축 월드 크기의 역수(`1 / worldSizeX`)를 반환합니다.
 
@@ -590,7 +590,7 @@ X축 월드 크기의 역수
 
 > <span class="readonly-badge">readonly</span> **get** **invWorldSizeZ**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L329)
+Defined in: [src/landscape/Landscape.ts:329](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L329)
 
 Z축 월드 크기의 역수(`1 / worldSizeZ`)를 반환합니다.
 
@@ -610,7 +610,7 @@ Z축 월드 크기의 역수
 
 > <span class="readonly-badge">readonly</span> **get** **layers**(): [`LandscapeLayer`](LandscapeLayer.md)[]
 
-Defined in: [src/landscape/Landscape.ts:573](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L573)
+Defined in: [src/landscape/Landscape.ts:573](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L573)
 
 지형 머티리얼에 등록된 `LandscapeLayer` 배열을 반환합니다.
 
@@ -630,7 +630,7 @@ Defined in: [src/landscape/Landscape.ts:573](https://github.com/redcamel/RedGPU/
 
 > **get** **lod0SizeQuads**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:460](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L460)
+Defined in: [src/landscape/Landscape.ts:460](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L460)
 
 최고 해상도인 LOD 0 타일의 한 변당 쿼드(Quad) 분할 수를 반환하거나 설정합니다.
 
@@ -644,7 +644,7 @@ LOD 0 타일의 한 변당 쿼드 개수
 
 > **set** **lod0SizeQuads**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:464](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L464)
+Defined in: [src/landscape/Landscape.ts:464](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L464)
 
 ##### Parameters
 
@@ -666,7 +666,7 @@ Defined in: [src/landscape/Landscape.ts:464](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **lodDistancesSq**(): `number`[]
 
-Defined in: [src/landscape/Landscape.ts:549](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L549)
+Defined in: [src/landscape/Landscape.ts:549](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L549)
 
 각 LOD 레벨 전환 임계 거리의 제곱값 배열을 반환합니다.
 
@@ -686,7 +686,7 @@ LOD 전환 거리 제곱값 배열 (`number[]`)
 
 > **get** **lodMaxLevel**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:520](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L520)
+Defined in: [src/landscape/Landscape.ts:520](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L520)
 
 지형 메시에 사용할 최대 LOD 단계 수(범위: `1 ~ 8`, 기본값: `5`)를 반환하거나 설정합니다.
 
@@ -700,7 +700,7 @@ Defined in: [src/landscape/Landscape.ts:520](https://github.com/redcamel/RedGPU/
 
 > **set** **lodMaxLevel**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:524](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L524)
+Defined in: [src/landscape/Landscape.ts:524](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L524)
 
 ##### Parameters
 
@@ -722,7 +722,7 @@ Defined in: [src/landscape/Landscape.ts:524](https://github.com/redcamel/RedGPU/
 
 > **get** **lodMetric**(): `"distance"` \| `"screenSize"`
 
-Defined in: [src/landscape/Landscape.ts:501](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L501)
+Defined in: [src/landscape/Landscape.ts:501](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L501)
 
 타일 LOD 결정 기준(`'distance'` 또는 `'screenSize'`, 기본값: `'screenSize'`)을 반환하거나 설정합니다.
 
@@ -736,7 +736,7 @@ LOD 결정 기준 (`'distance' | 'screenSize'`)
 
 > **set** **lodMetric**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:505](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L505)
+Defined in: [src/landscape/Landscape.ts:505](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L505)
 
 ##### Parameters
 
@@ -758,7 +758,7 @@ Defined in: [src/landscape/Landscape.ts:505](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **material**(): [`LandscapeMaterial`](LandscapeMaterial.md)
 
-Defined in: [src/landscape/Landscape.ts:250](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L250)
+Defined in: [src/landscape/Landscape.ts:250](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L250)
 
 지형의 표면 레이어와 텍스처 블렌딩을 담당하는 `LandscapeMaterial`을 반환합니다.
 
@@ -778,7 +778,7 @@ Defined in: [src/landscape/Landscape.ts:250](https://github.com/redcamel/RedGPU/
 
 > **get** **nearDetailDistance**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:585](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L585)
+Defined in: [src/landscape/Landscape.ts:585](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L585)
 
 근접 고해상도 텍스처 디테일이 적용되는 거리(월드 단위)를 반환하거나 설정합니다.
 
@@ -792,7 +792,7 @@ Defined in: [src/landscape/Landscape.ts:585](https://github.com/redcamel/RedGPU/
 
 > **set** **nearDetailDistance**(`val`): `void`
 
-Defined in: [src/landscape/Landscape.ts:589](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L589)
+Defined in: [src/landscape/Landscape.ts:589](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L589)
 
 ##### Parameters
 
@@ -814,7 +814,7 @@ Defined in: [src/landscape/Landscape.ts:589](https://github.com/redcamel/RedGPU/
 
 > **get** **receiveShadow**(): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:736](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L736)
+Defined in: [src/landscape/Landscape.ts:736](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L736)
 
 지형이 방향성 광원의 그림자 맵(Shadow Map)을 수신할지 여부를 반환하거나 설정합니다. (기본값: `true`)
 
@@ -828,7 +828,7 @@ Defined in: [src/landscape/Landscape.ts:736](https://github.com/redcamel/RedGPU/
 
 > **set** **receiveShadow**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:740](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L740)
+Defined in: [src/landscape/Landscape.ts:740](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L740)
 
 ##### Parameters
 
@@ -850,7 +850,7 @@ Defined in: [src/landscape/Landscape.ts:740](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **sharedGeometry**(): `LandscapeSharedGeometry`
 
-Defined in: [src/landscape/Landscape.ts:178](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L178)
+Defined in: [src/landscape/Landscape.ts:178](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L178)
 
 지형 타일들이 공유하는 LOD 격자 지오메트리(`LandscapeSharedGeometry`)를 반환합니다.
 
@@ -870,7 +870,7 @@ Defined in: [src/landscape/Landscape.ts:178](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **tileLoadedCount**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:651](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L651)
+Defined in: [src/landscape/Landscape.ts:651](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L651)
 
 현재 로드가 완료되어 활성화된 지형 타일의 개수를 반환합니다.
 
@@ -890,7 +890,7 @@ Defined in: [src/landscape/Landscape.ts:651](https://github.com/redcamel/RedGPU/
 
 > **get** **tileLoadingRadius**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:619](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L619)
+Defined in: [src/landscape/Landscape.ts:619](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L619)
 
 카메라 위치를 중심으로 고해상도 타일 하이트맵을 스트리밍 로드할 반경(월드 단위, 기본값: `2500.0`)을 반환하거나 설정합니다.
 
@@ -904,7 +904,7 @@ Defined in: [src/landscape/Landscape.ts:619](https://github.com/redcamel/RedGPU/
 
 > **set** **tileLoadingRadius**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:623](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L623)
+Defined in: [src/landscape/Landscape.ts:623](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L623)
 
 ##### Parameters
 
@@ -926,7 +926,7 @@ Defined in: [src/landscape/Landscape.ts:623](https://github.com/redcamel/RedGPU/
 
 > **get** **tileMaxLoadsPerFrame**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:635](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L635)
+Defined in: [src/landscape/Landscape.ts:635](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L635)
 
 단일 프레임당 동시에 디코딩 및 베이킹을 시작할 최대 타일 개수를 반환하거나 설정합니다.
 
@@ -940,7 +940,7 @@ Defined in: [src/landscape/Landscape.ts:635](https://github.com/redcamel/RedGPU/
 
 > **set** **tileMaxLoadsPerFrame**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:639](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L639)
+Defined in: [src/landscape/Landscape.ts:639](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L639)
 
 ##### Parameters
 
@@ -962,7 +962,7 @@ Defined in: [src/landscape/Landscape.ts:639](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **tileSize**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/Landscape.ts:397](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L397)
+Defined in: [src/landscape/Landscape.ts:397](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L397)
 
 단일 타일(컴포넌트)의 월드 크기 `[tileSizeX, tileSizeZ]`를 반환합니다.
 
@@ -982,7 +982,7 @@ Defined in: [src/landscape/Landscape.ts:397](https://github.com/redcamel/RedGPU/
 
 > **get** **tileUrlResolver**(): [`LandscapeTileUrlResolver`](../namespaces/Core/namespaces/Spatial/type-aliases/LandscapeTileUrlResolver.md)
 
-Defined in: [src/landscape/Landscape.ts:720](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L720)
+Defined in: [src/landscape/Landscape.ts:720](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L720)
 
 타일 행/열 인덱스(`row`, `col`)를 기반으로 개별 타일 하이트맵 이미지 URL을 반환하는 리졸버 함수를 반환하거나 설정합니다.
 
@@ -996,7 +996,7 @@ Defined in: [src/landscape/Landscape.ts:720](https://github.com/redcamel/RedGPU/
 
 > **set** **tileUrlResolver**(`resolver`): `void`
 
-Defined in: [src/landscape/Landscape.ts:724](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L724)
+Defined in: [src/landscape/Landscape.ts:724](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L724)
 
 ##### Parameters
 
@@ -1018,7 +1018,7 @@ Defined in: [src/landscape/Landscape.ts:724](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **vbtTextureView**(): `GPUTextureView`
 
-Defined in: [src/landscape/Landscape.ts:675](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L675)
+Defined in: [src/landscape/Landscape.ts:675](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L675)
 
 가상 블렌드 텍스처(VBT) 베이스 컬러 아틀라스의 `GPUTextureView`를 반환합니다.
 
@@ -1038,7 +1038,7 @@ VBT 베이스 컬러 아틀라스 `GPUTextureView` 또는 `null`
 
 > <span class="readonly-badge">readonly</span> **get** **vertexShaderModule**(): `GPUShaderModule`
 
-Defined in: [src/landscape/Landscape.ts:202](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L202)
+Defined in: [src/landscape/Landscape.ts:202](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L202)
 
 지형 렌더링에 사용되는 정점 셰이더 모듈(`GPUShaderModule`)을 반환합니다.
 
@@ -1058,7 +1058,7 @@ Defined in: [src/landscape/Landscape.ts:202](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **vhtTextureView**(): `GPUTextureView`
 
-Defined in: [src/landscape/Landscape.ts:663](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L663)
+Defined in: [src/landscape/Landscape.ts:663](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L663)
 
 가상 하이트 텍스처(VHT) 아틀라스의 `GPUTextureView`를 반환합니다.
 
@@ -1078,7 +1078,7 @@ VHT 아틀라스 `GPUTextureView` 또는 `null`
 
 > **get** **worldSize**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/Landscape.ts:262](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L262)
+Defined in: [src/landscape/Landscape.ts:262](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L262)
 
 지형의 전체 월드 크기 `[worldSizeX, worldSizeZ]`를 반환하거나 설정합니다.
 
@@ -1092,7 +1092,7 @@ Defined in: [src/landscape/Landscape.ts:262](https://github.com/redcamel/RedGPU/
 
 > **set** **worldSize**(`value`): `void`
 
-Defined in: [src/landscape/Landscape.ts:266](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L266)
+Defined in: [src/landscape/Landscape.ts:266](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L266)
 
 ##### Parameters
 
@@ -1114,7 +1114,7 @@ Defined in: [src/landscape/Landscape.ts:266](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **worldSizeX**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:293](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L293)
+Defined in: [src/landscape/Landscape.ts:293](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L293)
 
 지형의 X축 방향 전체 월드 크기를 반환합니다.
 
@@ -1134,7 +1134,7 @@ X축 월드 크기
 
 > <span class="readonly-badge">readonly</span> **get** **worldSizeZ**(): `number`
 
-Defined in: [src/landscape/Landscape.ts:305](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L305)
+Defined in: [src/landscape/Landscape.ts:305](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L305)
 
 지형의 Z축 방향 전체 월드 크기를 반환합니다.
 
@@ -1154,7 +1154,7 @@ Z축 월드 크기
 
 > **addLayer**(`options`): [`LandscapeLayer`](LandscapeLayer.md)
 
-Defined in: [src/landscape/Landscape.ts:889](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L889)
+Defined in: [src/landscape/Landscape.ts:889](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L889)
 
 지형 머티리얼에 새로운 스플래팅 레이어(`LandscapeLayer`)를 생성하여 추가하고 반환합니다. PBR 재질 레이어는 최대 8개까지 등록할 수 있으며, 가중치 맵(`weightTexture`)은 지형 전체에서 단일 RGBA 텍스처 1장(4채널: `'R' | 'G' | 'B' | 'A'`)을 공유하여 사용합니다.
 
@@ -1189,7 +1189,7 @@ const grassLayer = landscape.addLayer({
 
 > **clearLayers**(): `void`
 
-Defined in: [src/landscape/Landscape.ts:920](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L920)
+Defined in: [src/landscape/Landscape.ts:920](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L920)
 
 지형 머티리얼에 등록된 모든 스플래팅 레이어를 제거합니다.
 
@@ -1205,7 +1205,7 @@ Defined in: [src/landscape/Landscape.ts:920](https://github.com/redcamel/RedGPU/
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/Landscape.ts:1052](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L1052)
+Defined in: [src/landscape/Landscape.ts:1052](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L1052)
 
 지형에 속한 모든 하위 매니저(식생, 잔디, 타일 스트리머, 컬러, 렌더러, 지오메트리 등)와 GPU 리소스를 해제합니다.
 
@@ -1221,7 +1221,7 @@ Defined in: [src/landscape/Landscape.ts:1052](https://github.com/redcamel/RedGPU
 
 > **getHeightAt**(`x`, `z`): `number`
 
-Defined in: [src/landscape/Landscape.ts:844](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L844)
+Defined in: [src/landscape/Landscape.ts:844](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L844)
 
 지정된 월드 X, Z 좌표에서의 지형 표면 높이(Y 좌표, 월드 단위)를 CPU 하이트맵 캐시로부터 계산하여 반환합니다.
 
@@ -1252,7 +1252,7 @@ const groundY = landscape.getHeightAt(120, -45);
 
 > **getLayer**(`name`): [`LandscapeLayer`](LandscapeLayer.md)
 
-Defined in: [src/landscape/Landscape.ts:935](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L935)
+Defined in: [src/landscape/Landscape.ts:935](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L935)
 
 지정된 이름을 가진 `LandscapeLayer`를 찾아 반환합니다.
 
@@ -1276,7 +1276,7 @@ Defined in: [src/landscape/Landscape.ts:935](https://github.com/redcamel/RedGPU/
 
 > **isTileLoaded**(`row`, `col`): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:862](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L862)
+Defined in: [src/landscape/Landscape.ts:862](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L862)
 
 지정된 행(`row`)과 열(`col`) 인덱스의 지형 타일이 로드 완료되었는지 여부를 반환합니다.
 
@@ -1301,7 +1301,7 @@ Defined in: [src/landscape/Landscape.ts:862](https://github.com/redcamel/RedGPU/
 
 > **removeLayer**(`layer`): `boolean`
 
-Defined in: [src/landscape/Landscape.ts:911](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L911)
+Defined in: [src/landscape/Landscape.ts:911](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L911)
 
 지정된 `LandscapeLayer` 인스턴스 또는 레이어 이름을 지형 머티리얼에서 제거합니다.
 
@@ -1325,7 +1325,7 @@ Defined in: [src/landscape/Landscape.ts:911](https://github.com/redcamel/RedGPU/
 
 > **render**(`view`, `passEncoder?`): `void`
 
-Defined in: [src/landscape/Landscape.ts:1044](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L1044)
+Defined in: [src/landscape/Landscape.ts:1044](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L1044)
 
 내부 `LandscapeRenderer`를 통해 지형 메시를 현재 렌더 패스에 렌더링합니다.
 
@@ -1348,7 +1348,7 @@ Defined in: [src/landscape/Landscape.ts:1044](https://github.com/redcamel/RedGPU
 
 > **update**(`renderViewStateData`): `void`
 
-Defined in: [src/landscape/Landscape.ts:948](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/Landscape.ts#L948)
+Defined in: [src/landscape/Landscape.ts:948](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/Landscape.ts#L948)
 
 매 프레임 카메라 뷰 상태를 기반으로 타일 스트리밍, GPU 컬링, 식생(`FoliageManager`) 및 잔디(`GrassManager`) 컴퓨트 패스를 갱신합니다.
 
@@ -1375,7 +1375,7 @@ Defined in: [src/landscape/Landscape.ts:948](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -1399,7 +1399,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -1423,7 +1423,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
@@ -1447,7 +1447,7 @@ Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -1471,7 +1471,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -1485,7 +1485,7 @@ Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -1511,7 +1511,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -1535,7 +1535,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -1559,7 +1559,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

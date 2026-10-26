@@ -6,7 +6,7 @@
 
 # Class: LODManager
 
-Defined in: [src/display/mesh/core/LODManager.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/LODManager.ts#L58)
+Defined in: [src/display/mesh/core/LODManager.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/LODManager.ts#L58)
 
 Class that manages distance-based LOD (Level of Detail).
 
@@ -36,7 +36,7 @@ lodManager.addLOD(10, nearGeometry, material);
 
 > **new LODManager**(`owner`, `callback`): `LODManager`
 
-Defined in: [src/display/mesh/core/LODManager.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/LODManager.ts#L74)
+Defined in: [src/display/mesh/core/LODManager.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/LODManager.ts#L74)
 
 Creates a LODManager instance.
 
@@ -59,7 +59,7 @@ Creates a LODManager instance.
 
 > <span class="readonly-badge">readonly</span> **get** **LODList**(): `LODEntry`[]
 
-Defined in: [src/display/mesh/core/LODManager.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/LODManager.ts#L89)
+Defined in: [src/display/mesh/core/LODManager.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/LODManager.ts#L89)
 
 Returns a copy of all registered LOD levels.
 
@@ -75,7 +75,7 @@ Copy of the LOD level entry array
 
 > **addLOD**(`distance`, `geometry`, `material`): `void`
 
-Defined in: [src/display/mesh/core/LODManager.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/LODManager.ts#L115)
+Defined in: [src/display/mesh/core/LODManager.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/LODManager.ts#L115)
 
 Adds a new LOD level. Up to 8 levels can be registered, and duplicate distances are not allowed.
 
@@ -106,7 +106,7 @@ Throws Error if LOD levels exceed 8 or if a LOD with the same distance already e
 
 > **clearLOD**(): `void`
 
-Defined in: [src/display/mesh/core/LODManager.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/LODManager.ts#L179)
+Defined in: [src/display/mesh/core/LODManager.ts:179](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/LODManager.ts#L179)
 
 Removes all registered LOD levels.
 
@@ -120,7 +120,7 @@ Removes all registered LOD levels.
 
 > **getLOD**(`currentDistance`): `LODEntry`
 
-Defined in: [src/display/mesh/core/LODManager.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/LODManager.ts#L155)
+Defined in: [src/display/mesh/core/LODManager.ts:155](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/LODManager.ts#L155)
 
 Returns the LOD entry corresponding to the current distance value.
 
@@ -142,7 +142,7 @@ Selected LOD entry (`undefined` if no LOD is registered)
 
 > **removeLOD**(`distance`): `void`
 
-Defined in: [src/display/mesh/core/LODManager.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/LODManager.ts#L170)
+Defined in: [src/display/mesh/core/LODManager.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/LODManager.ts#L170)
 
 Removes the LOD level with the specified threshold distance.
 

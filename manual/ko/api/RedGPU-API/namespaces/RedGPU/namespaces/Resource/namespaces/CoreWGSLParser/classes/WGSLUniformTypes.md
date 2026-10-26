@@ -6,7 +6,7 @@
 
 # Class: WGSLUniformTypes
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L37)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:37](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L37)
 
 WGSL 셰이더 변수 및 유니폼 구조체의 타입 메타데이터(크기, 정렬, TypedArray 매핑 등)를 제공하는 정적 클래스입니다.
 
@@ -28,7 +28,7 @@ WGSL 셰이더 변수 및 유니폼 구조체의 타입 메타데이터(크기, 
 
 > <span class="readonly-badge">readonly</span> **get** `static` **f16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:66](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L66)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:66](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L66)
 
 `f16` 스칼라 타입 메타데이터
 
@@ -44,7 +44,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:66](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** `static` **f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L58)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L58)
 
 `f32` 스칼라 타입 메타데이터
 
@@ -60,7 +60,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:58](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** `static` **i32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:42](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L42)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:42](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L42)
 
 `i32` 스칼라 타입 메타데이터
 
@@ -76,7 +76,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:42](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat2x2f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L170)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L170)
 
 `mat2x2<f32>` 행렬 타입 메타데이터
 
@@ -92,7 +92,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:170](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat2x2u16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:178](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L178)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:178](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L178)
 
 `mat2x2<u16>` 행렬 타입 메타데이터
 
@@ -108,7 +108,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:178](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat2x3f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:226](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L226)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:226](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L226)
 
 `mat2x3<f32>` 행렬 타입 메타데이터
 
@@ -124,7 +124,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:226](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat2x3u16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:234](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L234)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:234](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L234)
 
 `mat2x3<u16>` 행렬 타입 메타데이터
 
@@ -140,7 +140,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:234](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat3x2f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:186](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L186)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:186](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L186)
 
 `mat3x2<f32>` 행렬 타입 메타데이터
 
@@ -156,7 +156,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:186](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat3x2u16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:194](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L194)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:194](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L194)
 
 `mat3x2<u16>` 행렬 타입 메타데이터
 
@@ -172,7 +172,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:194](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat3x3f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:202](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L202)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:202](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L202)
 
 `mat3x3<f32>` 행렬 타입 메타데이터
 
@@ -188,7 +188,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:202](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat4x2f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:210](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L210)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:210](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L210)
 
 `mat4x2<f32>` 행렬 타입 메타데이터
 
@@ -204,7 +204,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:210](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat4x2u16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:218](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L218)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:218](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L218)
 
 `mat4x2<u16>` 행렬 타입 메타데이터
 
@@ -220,7 +220,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:218](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat4x4f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L242)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:242](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L242)
 
 `mat4x4<f32>` 행렬 타입 메타데이터
 
@@ -236,7 +236,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:242](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **mat4x4u16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:250](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L250)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:250](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L250)
 
 `mat4x4<u16>` 행렬 타입 메타데이터
 
@@ -252,7 +252,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:250](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **u32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L50)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L50)
 
 `u32` 스칼라 타입 메타데이터
 
@@ -268,7 +268,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:50](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec2f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L74)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L74)
 
 `vec2<f32>` 벡터 타입 메타데이터
 
@@ -284,7 +284,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:74](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec2i32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:82](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L82)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:82](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L82)
 
 `vec2<i32>` 벡터 타입 메타데이터
 
@@ -300,7 +300,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:82](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec2u16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:98](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L98)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:98](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L98)
 
 `vec2<u16>` 벡터 타입 메타데이터
 
@@ -316,7 +316,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:98](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec2u32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L90)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:90](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L90)
 
 `vec2<u32>` 벡터 타입 메타데이터
 
@@ -332,7 +332,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:90](https://githu
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec3f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:122](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L122)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:122](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L122)
 
 `vec3<f32>` 벡터 타입 메타데이터
 
@@ -348,7 +348,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:122](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec3i32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:106](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L106)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:106](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L106)
 
 `vec3<i32>` 벡터 타입 메타데이터
 
@@ -364,7 +364,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:106](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec3u16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L130)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:130](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L130)
 
 `vec3<u16>` 벡터 타입 메타데이터
 
@@ -380,7 +380,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:130](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec3u32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:114](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L114)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:114](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L114)
 
 `vec3<u32>` 벡터 타입 메타데이터
 
@@ -396,7 +396,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:114](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec4f32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:154](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L154)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:154](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L154)
 
 `vec4<f32>` 벡터 타입 메타데이터
 
@@ -412,7 +412,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:154](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec4i32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:138](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L138)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:138](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L138)
 
 `vec4<i32>` 벡터 타입 메타데이터
 
@@ -428,7 +428,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:138](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec4u16**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:162](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L162)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:162](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L162)
 
 `vec4<u16>` 벡터 타입 메타데이터
 
@@ -444,7 +444,7 @@ Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:162](https://gith
 
 > <span class="readonly-badge">readonly</span> **get** `static` **vec4u32**(): [`TypeUniform`](../type-aliases/TypeUniform.md)
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L146)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:146](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/wgslParser/core/WGSLUniformTypes.ts#L146)
 
 `vec4<u32>` 벡터 타입 메타데이터
 

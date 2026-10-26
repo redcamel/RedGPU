@@ -6,7 +6,7 @@
 
 # Interface: ScatterAssemblyResult
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L125)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:125](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L125)
 
 Result interface containing render units, unified geometry, and bounding volume metrics produced by `assembleScatterRenderUnits` after merging a mesh hierarchy.
 
@@ -16,7 +16,7 @@ Result interface containing render units, unified geometry, and bounding volume 
 
 > **boundingHeight**: `number`
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:160](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L160)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:160](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L160)
 
 Total Y-axis height of the bounding box (`maxY - minY`)
 
@@ -26,7 +26,7 @@ Total Y-axis height of the bounding box (`maxY - minY`)
 
 > **boundingRadius**: `number`
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L155)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:155](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L155)
 
 Maximum bounding sphere radius of all vertices from the origin
 
@@ -36,7 +36,7 @@ Maximum bounding sphere radius of all vertices from the origin
 
 > **groups**: [`AssembledMeshGroup`](AssembledMeshGroup.md)[]
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L130)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:130](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L130)
 
 List of mesh groups (`AssembledMeshGroup[]`) merged by material
 
@@ -46,7 +46,7 @@ List of mesh groups (`AssembledMeshGroup[]`) merged by material
 
 > **minY**: `number`
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L170)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L170)
 
 Minimum Y coordinate of the bounding box after alignment
 
@@ -56,7 +56,7 @@ Minimum Y coordinate of the bounding box after alignment
 
 > **renderUnits**: [`ScatterRenderUnit`](../classes/ScatterRenderUnit.md)[]
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:135](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L135)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:135](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L135)
 
 Array of `ScatterRenderUnit[]` instances to use for scatter rendering
 
@@ -66,7 +66,7 @@ Array of `ScatterRenderUnit[]` instances to use for scatter rendering
 
 > `optional` **shadowMergedGeometry?**: [`Geometry`](../../../../../../../classes/Geometry.md)
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:165](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L165)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:165](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L165)
 
 Position-only `Geometry` instance merged for the shadow pass (when generated)
 
@@ -76,7 +76,7 @@ Position-only `Geometry` instance merged for the shadow pass (when generated)
 
 > **totalIndexCount**: `number`
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L150)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:150](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L150)
 
 Total merged index count
 
@@ -86,7 +86,7 @@ Total merged index count
 
 > **totalVertexCount**: `number`
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:145](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L145)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:145](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L145)
 
 Total merged vertex count
 
@@ -96,6 +96,6 @@ Total merged vertex count
 
 > **unifiedGeometry**: [`Geometry`](../../../../../../../classes/Geometry.md)
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L140)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:140](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L140)
 
 Unified `Geometry` instance with vertices and indices of all groups merged into one

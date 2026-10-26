@@ -8,6 +8,6 @@
 
 > `const` **PBR\_INTERLEAVED\_STRUCT**: [`VertexInterleavedStruct`](../../../../../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/landscape/core/scatter/ScatterVertexFormats.ts:10](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterVertexFormats.ts#L10)
+Defined in: [src/landscape/core/scatter/ScatterVertexFormats.ts:10](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterVertexFormats.ts#L10)
 
 Standard interleaved vertex layout (`position`, `vertexNormal`, `uv`, `uv1`, `vertexColor_0`, `vertexTangent`) used for scatter main pass PBR rendering.

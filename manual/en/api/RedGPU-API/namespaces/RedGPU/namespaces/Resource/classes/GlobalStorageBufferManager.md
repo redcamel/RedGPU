@@ -6,7 +6,7 @@
 
 # Class: GlobalStorageBufferManager
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L31)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L31)
 
 Manager that handles slot allocation/release and CPU-to-GPU data upload for a global SSBO (Storage Buffer).
 
@@ -38,7 +38,7 @@ const globalVertexSSBO = redGPUContext.globalVertexSSBO;
 
 > **new GlobalStorageBufferManager**(`redGPUContext`, `elementSize`, `initialSlotCount?`, `label?`): `GlobalStorageBufferManager`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:82](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L82)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:82](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L82)
 
 Creates the GPU storage buffer and CPU mirror buffer with the given slot size and capacity.
 
@@ -73,7 +73,7 @@ Throws an error if the initial buffer size exceeds the hardware-allowed maximum 
 
 > <span class="readonly-badge">readonly</span> `static` **RESIZE\_LINEAR\_ADDITION\_BYTES**: `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:42](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L42)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:42](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L42)
 
 Bytes added per linear growth step after exceeding the threshold (8MB)
 
@@ -85,7 +85,7 @@ Bytes added per linear growth step after exceeding the threshold (8MB)
 
 > <span class="readonly-badge">readonly</span> `static` **RESIZE\_THRESHOLD\_BYTES**: `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L36)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L36)
 
 Buffer size threshold for switching from 2x growth to linear growth (32MB)
 
@@ -101,7 +101,7 @@ Buffer size threshold for switching from 2x growth to linear growth (32MB)
 
 > <span class="readonly-badge">readonly</span> **get** **activeSlotCount**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:200](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L200)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:200](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L200)
 
 Returns the number of slots currently in use.
 
@@ -121,7 +121,7 @@ Active slot count
 
 > <span class="readonly-badge">readonly</span> **get** **cpuData**(): `ArrayBuffer`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:152](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L152)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:152](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L152)
 
 Returns the CPU-side mirror buffer. (For debugging and testing)
 
@@ -141,7 +141,7 @@ CPU mirror `ArrayBuffer`
 
 > <span class="readonly-badge">readonly</span> **get** **dirtyMax**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:176](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L176)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:176](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L176)
 
 Returns the maximum dirty slot index being tracked. (For debugging and testing)
 
@@ -161,7 +161,7 @@ Maximum dirty index (-Infinity if none)
 
 > <span class="readonly-badge">readonly</span> **get** **dirtyMin**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:164](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L164)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:164](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L164)
 
 Returns the minimum dirty slot index being tracked. (For debugging and testing)
 
@@ -181,7 +181,7 @@ Minimum dirty index (Infinity if none)
 
 > <span class="readonly-badge">readonly</span> **get** **elementSize**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:128](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L128)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:128](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L128)
 
 Returns the byte size of a single slot element.
 
@@ -201,7 +201,7 @@ Slot byte size
 
 > <span class="readonly-badge">readonly</span> **get** **gpuBuffer**(): `GPUBuffer`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L104)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:104](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L104)
 
 Returns the GPU storage buffer. It is replaced with a new buffer on resize.
 
@@ -221,7 +221,7 @@ GPUBuffer object
 
 > <span class="readonly-badge">readonly</span> **get** **label**(): `string`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L140)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:140](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L140)
 
 Returns the buffer debug label.
 
@@ -241,7 +241,7 @@ Label string
 
 > <span class="readonly-badge">readonly</span> **get** **remainingSlotCount**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:212](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L212)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:212](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L212)
 
 Returns the number of remaining available slots.
 
@@ -261,7 +261,7 @@ Remaining slot count
 
 > <span class="readonly-badge">readonly</span> **get** **safeMaxBufferSize**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L188)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L188)
 
 Returns the maximum allowed buffer byte size. (The smaller of `maxStorageBufferBindingSize` and 128MB)
 
@@ -281,7 +281,7 @@ Maximum buffer byte size
 
 > <span class="readonly-badge">readonly</span> **get** **totalSlotCount**(): `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L116)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L116)
 
 Returns the total slot capacity of the buffer.
 
@@ -303,7 +303,7 @@ Total slot count
 
 > **allocateSlot**(): [`BufferSlot`](../interfaces/BufferSlot.md)
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:257](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L257)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:257](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L257)
 
 Allocates a buffer slot. Reuses freed slots first and grows the buffer when capacity runs out.
 
@@ -331,7 +331,7 @@ Throws an error if the grown size exceeds the maximum allowed size.
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L220)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:220](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L220)
 
 Destroys the GPU buffer and releases the CPU mirror data and slot pool.
 
@@ -347,7 +347,7 @@ Destroys the GPU buffer and releases the CPU mirror data and slot pool.
 
 > **flush**(): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:360](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L360)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:360](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L360)
 
 Uploads only the dirty slot range to the GPU buffer and resets the dirty state.
 
@@ -363,7 +363,7 @@ Uploads only the dirty slot range to the GPU buffer and resets the dirty state.
 
 > **freeSlot**(`index`): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:292](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L292)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:292](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L292)
 
 Returns a slot index to the reuse pool.
 
@@ -385,7 +385,7 @@ Returns a slot index to the reuse pool.
 
 > **setOnResize**(`callback`): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:236](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L236)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:236](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L236)
 
 Registers a callback invoked after buffer resizing. Mainly used to recreate bind groups.
 
@@ -407,7 +407,7 @@ Registers a callback invoked after buffer resizing. Mainly used to recreate bind
 
 > **updateFloatData**(`index`, `data`, `floatOffsetInsideElement?`): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L313)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:313](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L313)
 
 Writes Float32 data for a slot into the CPU mirror buffer and marks it dirty. The actual upload happens in `flush()`.
 
@@ -435,7 +435,7 @@ Throws an error if offset plus data length exceeds the slot size.
 
 > **updateUintData**(`index`, `data`, `uintOffsetInsideElement?`): `void`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:343](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L343)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:343](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L343)
 
 Writes Uint32 data for a slot into the CPU mirror buffer and marks it dirty. The actual upload happens in `flush()`.
 
@@ -468,7 +468,7 @@ Throws an error if offset plus data length exceeds the slot size.
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -492,7 +492,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -516,7 +516,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -540,7 +540,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -564,7 +564,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -578,7 +578,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -604,7 +604,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -628,7 +628,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -652,7 +652,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

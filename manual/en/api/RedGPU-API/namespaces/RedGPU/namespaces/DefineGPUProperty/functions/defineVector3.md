@@ -8,7 +8,7 @@
 
 > **defineVector3**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector3.ts#L53)
+Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/vector/defineVector3.ts#L53)
 
 Defines 3D vector (`[number, number, number]`) properties on the target's prototype that synchronize with the GPU uniform buffer.
 

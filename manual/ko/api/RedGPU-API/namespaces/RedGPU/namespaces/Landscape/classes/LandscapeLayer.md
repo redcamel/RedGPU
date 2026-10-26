@@ -6,7 +6,7 @@
 
 # Class: LandscapeLayer
 
-Defined in: [src/landscape/LandscapeLayer.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L131)
+Defined in: [src/landscape/LandscapeLayer.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L131)
 
 지형 멀티 레이어 스플래팅에 사용되는 개별 재질 레이어의 텍스처, UV 변환, PBR 속성 및 가중치 채널을 정의하는 클래스입니다. `landscape.addLayer()`를 통해 내부적으로 자동 생성됩니다.
 
@@ -36,7 +36,7 @@ const rockLayer = landscape.addLayer({
 
 > **new LandscapeLayer**(`redGPUContextOrOptions`, `options?`): `LandscapeLayer`
 
-Defined in: [src/landscape/LandscapeLayer.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L188)
+Defined in: [src/landscape/LandscapeLayer.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L188)
 
 `LandscapeLayer` 인스턴스를 생성합니다.
 
@@ -57,7 +57,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:188](https://github.com/redcamel/Re
 
 > `optional` **onChange?**: () => `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L170)
+Defined in: [src/landscape/LandscapeLayer.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L170)
 
 레이어의 텍스처 또는 베이킹 관련 속성이 변경될 때 호출되는 콜백 함수입니다.
 
@@ -71,7 +71,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:170](https://github.com/redcamel/Re
 
 > `optional` **onUniformChange?**: () => `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:175](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L175)
+Defined in: [src/landscape/LandscapeLayer.ts:175](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L175)
 
 VBT 리베이킹 없이 유니폼 버퍼 데이터만 갱신해야 할 때 호출되는 콜백 함수입니다.
 
@@ -85,7 +85,7 @@ VBT 리베이킹 없이 유니폼 버퍼 데이터만 갱신해야 할 때 호�
 
 > <span class="readonly-badge">readonly</span> `static` **UNIFORM\_FLOAT\_COUNT**: `16` = `16`
 
-Defined in: [src/landscape/LandscapeLayer.ts:165](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L165)
+Defined in: [src/landscape/LandscapeLayer.ts:165](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L165)
 
 단일 레이어 유니폼 구조체가 차지하는 `f32` 요소 개수(16 floats = 64 bytes)입니다.
 
@@ -97,7 +97,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:165](https://github.com/redcamel/Re
 
 > **get** **aoIntensity**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:573](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L573)
+Defined in: [src/landscape/LandscapeLayer.ts:573](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L573)
 
 레이어의 앰비언트 오클루전(AO) 강도를 반환하거나 설정합니다.
 
@@ -111,7 +111,7 @@ AO 강도
 
 > **set** **aoIntensity**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:552](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L552)
+Defined in: [src/landscape/LandscapeLayer.ts:552](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L552)
 
 ##### Parameters
 
@@ -131,7 +131,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:552](https://github.com/redcamel/Re
 
 > **get** **baseColorTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:316](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L316)
+Defined in: [src/landscape/LandscapeLayer.ts:316](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L316)
 
 레이어의 베이스 컬러(BaseColor) 텍스처를 반환하거나 설정합니다.
 
@@ -145,7 +145,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:316](https://github.com/redcamel/Re
 
 > **set** **baseColorTexture**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:292](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L292)
+Defined in: [src/landscape/LandscapeLayer.ts:292](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L292)
 
 ##### Parameters
 
@@ -165,7 +165,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:292](https://github.com/redcamel/Re
 
 > **get** **enabled**(): `boolean`
 
-Defined in: [src/landscape/LandscapeLayer.ts:416](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L416)
+Defined in: [src/landscape/LandscapeLayer.ts:416](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L416)
 
 레이어 활성화 여부를 반환하거나 설정합니다.
 
@@ -179,7 +179,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:416](https://github.com/redcamel/Re
 
 > **set** **enabled**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:420](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L420)
+Defined in: [src/landscape/LandscapeLayer.ts:420](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L420)
 
 ##### Parameters
 
@@ -199,7 +199,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:420](https://github.com/redcamel/Re
 
 > **get** **heightBlendFactor**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:585](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L585)
+Defined in: [src/landscape/LandscapeLayer.ts:585](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L585)
 
 높이 기반 레이어 블렌딩 대비 계수(범위: `0.0 ~ 5.0`)를 반환하거나 설정합니다.
 
@@ -213,7 +213,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:585](https://github.com/redcamel/Re
 
 > **set** **heightBlendFactor**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:589](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L589)
+Defined in: [src/landscape/LandscapeLayer.ts:589](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L589)
 
 ##### Parameters
 
@@ -233,7 +233,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:589](https://github.com/redcamel/Re
 
 > <span class="readonly-badge">readonly</span> **get** **name**(): `string`
 
-Defined in: [src/landscape/LandscapeLayer.ts:288](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L288)
+Defined in: [src/landscape/LandscapeLayer.ts:288](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L288)
 
 레이어의 고유 이름을 반환합니다.
 
@@ -251,7 +251,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:288](https://github.com/redcamel/Re
 
 > **get** **nearUVScaleMultiplier**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:474](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L474)
+Defined in: [src/landscape/LandscapeLayer.ts:474](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L474)
 
 근접 디테일 영역에 적용되는 UV 스케일 배율을 반환하거나 설정합니다. (최솟값: `0.1`)
 
@@ -265,7 +265,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:474](https://github.com/redcamel/Re
 
 > **set** **nearUVScaleMultiplier**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:478](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L478)
+Defined in: [src/landscape/LandscapeLayer.ts:478](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L478)
 
 ##### Parameters
 
@@ -285,7 +285,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:478](https://github.com/redcamel/Re
 
 > **get** **normalIntensity**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:542](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L542)
+Defined in: [src/landscape/LandscapeLayer.ts:542](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L542)
 
 레이어의 노멀 맵 강도를 반환하거나 설정합니다.
 
@@ -299,7 +299,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:542](https://github.com/redcamel/Re
 
 > **set** **normalIntensity**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:546](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L546)
+Defined in: [src/landscape/LandscapeLayer.ts:546](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L546)
 
 ##### Parameters
 
@@ -319,7 +319,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:546](https://github.com/redcamel/Re
 
 > **get** **normalTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:344](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L344)
+Defined in: [src/landscape/LandscapeLayer.ts:344](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L344)
 
 레이어의 노멀(Normal) 텍스처를 반환하거나 설정합니다.
 
@@ -333,7 +333,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:344](https://github.com/redcamel/Re
 
 > **set** **normalTexture**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:320](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L320)
+Defined in: [src/landscape/LandscapeLayer.ts:320](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L320)
 
 ##### Parameters
 
@@ -353,7 +353,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:320](https://github.com/redcamel/Re
 
 > **get** **ormTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:372](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L372)
+Defined in: [src/landscape/LandscapeLayer.ts:372](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L372)
 
 레이어의 ORM(Occlusion, Roughness, Metallic) 텍스처를 반환하거나 설정합니다.
 
@@ -367,7 +367,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:372](https://github.com/redcamel/Re
 
 > **set** **ormTexture**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:348](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L348)
+Defined in: [src/landscape/LandscapeLayer.ts:348](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L348)
 
 ##### Parameters
 
@@ -387,7 +387,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:348](https://github.com/redcamel/Re
 
 > **get** **roughness**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:524](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L524)
+Defined in: [src/landscape/LandscapeLayer.ts:524](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L524)
 
 레이어의 표면 거칠기(Roughness) 계수를 반환하거나 설정합니다.
 
@@ -401,7 +401,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:524](https://github.com/redcamel/Re
 
 > **set** **roughness**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:528](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L528)
+Defined in: [src/landscape/LandscapeLayer.ts:528](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L528)
 
 ##### Parameters
 
@@ -421,7 +421,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:528](https://github.com/redcamel/Re
 
 > **get** **stochasticScale**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:629](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L629)
+Defined in: [src/landscape/LandscapeLayer.ts:629](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L629)
 
 스토캐스틱 타일링 셀 스케일(최솟값: `0.01`)을 반환하거나 설정합니다.
 
@@ -435,7 +435,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:629](https://github.com/redcamel/Re
 
 > **set** **stochasticScale**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:633](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L633)
+Defined in: [src/landscape/LandscapeLayer.ts:633](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L633)
 
 ##### Parameters
 
@@ -455,7 +455,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:633](https://github.com/redcamel/Re
 
 > **get** **stochasticTiling**(): `boolean`
 
-Defined in: [src/landscape/LandscapeLayer.ts:609](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L609)
+Defined in: [src/landscape/LandscapeLayer.ts:609](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L609)
 
 반복 패턴 억제를 위한 스토캐스틱 타일링 활성화 여부를 반환하거나 설정합니다.
 
@@ -469,7 +469,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:609](https://github.com/redcamel/Re
 
 > **set** **stochasticTiling**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:613](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L613)
+Defined in: [src/landscape/LandscapeLayer.ts:613](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L613)
 
 ##### Parameters
 
@@ -489,7 +489,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:613](https://github.com/redcamel/Re
 
 > **get** **uvOffset**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/LandscapeLayer.ts:454](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L454)
+Defined in: [src/landscape/LandscapeLayer.ts:454](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L454)
 
 레이어 텍스처의 UV 오프셋 `[u, v]`를 반환하거나 설정합니다.
 
@@ -503,7 +503,7 @@ UV 오프셋 튜플 `[number, number]`
 
 > **set** **uvOffset**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:458](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L458)
+Defined in: [src/landscape/LandscapeLayer.ts:458](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L458)
 
 ##### Parameters
 
@@ -523,7 +523,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:458](https://github.com/redcamel/Re
 
 > **get** **uvScale**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/LandscapeLayer.ts:434](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L434)
+Defined in: [src/landscape/LandscapeLayer.ts:434](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L434)
 
 레이어 텍스처의 UV 타일링 스케일 `[u, v]`를 반환하거나 설정합니다.
 
@@ -537,7 +537,7 @@ UV 스케일 튜플 `[number, number]`
 
 > **set** **uvScale**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:438](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L438)
+Defined in: [src/landscape/LandscapeLayer.ts:438](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L438)
 
 ##### Parameters
 
@@ -557,7 +557,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:438](https://github.com/redcamel/Re
 
 > **get** **weightChannel**(): [`LandscapeWeightMapChannel`](../type-aliases/LandscapeWeightMapChannel.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:493](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L493)
+Defined in: [src/landscape/LandscapeLayer.ts:493](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L493)
 
 가중치 텍스처에서 참조하는 색상 채널 식별자를 반환하거나 설정합니다.
 
@@ -571,7 +571,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:493](https://github.com/redcamel/Re
 
 > **set** **weightChannel**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:497](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L497)
+Defined in: [src/landscape/LandscapeLayer.ts:497](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L497)
 
 ##### Parameters
 
@@ -591,7 +591,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:497](https://github.com/redcamel/Re
 
 > <span class="readonly-badge">readonly</span> **get** **weightChannelIndex**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:512](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L512)
+Defined in: [src/landscape/LandscapeLayer.ts:512](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L512)
 
 현재 설정된 가중치 채널의 숫자 인덱스(0: R, 1: G, 2: B, 3: A)를 반환합니다.
 
@@ -609,7 +609,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:512](https://github.com/redcamel/Re
 
 > **get** **weightMapCPUSampler**(): [`LandscapeWeightMapCPUSampler`](../namespaces/Core/namespaces/Cache/classes/LandscapeWeightMapCPUSampler.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:649](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L649)
+Defined in: [src/landscape/LandscapeLayer.ts:649](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L649)
 
 레이어의 CPU 측 가중치 맵 샘플러를 반환하거나 설정합니다.
 
@@ -623,7 +623,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:649](https://github.com/redcamel/Re
 
 > **set** **weightMapCPUSampler**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:653](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L653)
+Defined in: [src/landscape/LandscapeLayer.ts:653](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L653)
 
 ##### Parameters
 
@@ -643,7 +643,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:653](https://github.com/redcamel/Re
 
 > **get** **weightTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:404](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L404)
+Defined in: [src/landscape/LandscapeLayer.ts:404](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L404)
 
 레이어의 스플래팅 가중치(Weight) 텍스처를 반환하거나 설정합니다. (지형 전체에서 단일 RGBA 가중치 맵 1장만 공유 지원)
 
@@ -657,7 +657,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:404](https://github.com/redcamel/Re
 
 > **set** **weightTexture**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:376](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L376)
+Defined in: [src/landscape/LandscapeLayer.ts:376](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L376)
 
 ##### Parameters
 
@@ -675,7 +675,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:376](https://github.com/redcamel/Re
 
 > **getWeightAtUV**(`u`, `v`): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:718](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L718)
+Defined in: [src/landscape/LandscapeLayer.ts:718](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L718)
 
 지정된 정규화 지형 UV 좌표(`0.0 ~ 1.0`)에서 이 레이어의 스플래팅 가중치를 반환합니다.
 
@@ -698,7 +698,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:718](https://github.com/redcamel/Re
 
 > **resolvePendingTextures**(`context`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:684](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L684)
+Defined in: [src/landscape/LandscapeLayer.ts:684](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L684)
 
 문자열 URL로 보류 중이던 텍스처 경로들을 주어진 `RedGPUContext`를 사용하여 `BitmapTexture` 인스턴스로 생성합니다.
 
@@ -718,7 +718,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:684](https://github.com/redcamel/Re
 
 > **writeUniformData**(`targetBuffer`, `offset`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:736](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L736)
+Defined in: [src/landscape/LandscapeLayer.ts:736](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L736)
 
 현재 레이어의 속성 데이터를 대상 `Float32Array` 유니폼 버퍼의 지정된 오프셋에 기록합니다.
 
@@ -739,7 +739,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:736](https://github.com/redcamel/Re
 
 > `static` **writeZeroUniformData**(`targetBuffer`, `offset`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:672](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L672)
+Defined in: [src/landscape/LandscapeLayer.ts:672](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L672)
 
 대상 `Float32Array` 버퍼의 지정된 오프셋부터 단일 레이어 유니폼 영역(16 floats)을 0으로 초기화합니다.
 

@@ -6,7 +6,7 @@
 
 # Class: RapierBody
 
-Defined in: [src/plugins/rapier/RapierBody.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L14)
+Defined in: [src/plugins/rapier/RapierBody.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L14)
 
 **`Experimental`**
 
@@ -22,7 +22,7 @@ Rapier 강체(`RigidBody`)와 RedGPU `Mesh` 간의 트랜스폼을 동기화하�
 
 > **new RapierBody**(`mesh`, `body`, `collider`): `RapierBody`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L33)
+Defined in: [src/plugins/rapier/RapierBody.ts:33](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L33)
 
 **`Experimental`**
 
@@ -48,7 +48,7 @@ RapierBody 인스턴스를 생성합니다.
 
 > <span class="readonly-badge">readonly</span> **get** **mesh**(): [`Mesh`](../../../../Display/classes/Mesh.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L47)
+Defined in: [src/plugins/rapier/RapierBody.ts:47](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L47)
 
 **`Experimental`**
 
@@ -68,7 +68,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:47](https://github.com/redcamel/Re
 
 > <span class="readonly-badge">readonly</span> **get** **nativeBody**(): `RigidBody`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L59)
+Defined in: [src/plugins/rapier/RapierBody.ts:59](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L59)
 
 **`Experimental`**
 
@@ -92,7 +92,7 @@ Rapier `RigidBody` 객체
 
 > <span class="readonly-badge">readonly</span> **get** **nativeCollider**(): `Collider`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L71)
+Defined in: [src/plugins/rapier/RapierBody.ts:71](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L71)
 
 **`Experimental`**
 
@@ -112,7 +112,7 @@ Rapier `Collider` 객체
 
 > **get** **position**(): [`vec3`](../../../../Math/type-aliases/vec3.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L83)
+Defined in: [src/plugins/rapier/RapierBody.ts:83](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L83)
 
 **`Experimental`**
 
@@ -128,7 +128,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:83](https://github.com/redcamel/Re
 
 > **set** **position**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:88](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L88)
+Defined in: [src/plugins/rapier/RapierBody.ts:88](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L88)
 
 **`Experimental`**
 
@@ -156,7 +156,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:88](https://github.com/redcamel/Re
 
 > **get** **rotation**(): [`quat`](../../../../Math/type-aliases/quat.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L104)
+Defined in: [src/plugins/rapier/RapierBody.ts:104](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L104)
 
 **`Experimental`**
 
@@ -172,7 +172,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:104](https://github.com/redcamel/R
 
 > **set** **rotation**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L109)
+Defined in: [src/plugins/rapier/RapierBody.ts:109](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L109)
 
 **`Experimental`**
 
@@ -200,7 +200,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:109](https://github.com/redcamel/R
 
 > **get** **velocity**(): [`vec3`](../../../../Math/type-aliases/vec3.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L125)
+Defined in: [src/plugins/rapier/RapierBody.ts:125](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L125)
 
 **`Experimental`**
 
@@ -216,7 +216,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:125](https://github.com/redcamel/R
 
 > **set** **velocity**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L130)
+Defined in: [src/plugins/rapier/RapierBody.ts:130](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L130)
 
 **`Experimental`**
 
@@ -242,7 +242,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:130](https://github.com/redcamel/R
 
 > **applyImpulse**(`force`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:151](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L151)
+Defined in: [src/plugins/rapier/RapierBody.ts:151](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L151)
 
 **`Experimental`**
 
@@ -273,7 +273,7 @@ body.applyImpulse([0, 10, 0]);
 
 > **syncToMesh**(): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:163](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L163)
+Defined in: [src/plugins/rapier/RapierBody.ts:163](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierBody.ts#L163)
 
 **`Experimental`**
 

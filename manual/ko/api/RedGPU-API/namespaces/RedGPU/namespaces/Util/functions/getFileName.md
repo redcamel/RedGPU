@@ -8,7 +8,7 @@
 
 > **getFileName**(`url`, `withExtension?`): `string`
 
-Defined in: [src/utils/file/getFileName.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/file/getFileName.ts#L26)
+Defined in: [src/utils/file/getFileName.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/utils/file/getFileName.ts#L26)
 
 URL 또는 경로의 마지막 `/` 이후 부분을 파일 이름으로 반환합니다.
 

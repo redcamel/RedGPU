@@ -8,6 +8,6 @@
 
 > **TINT\_BLEND\_MODE** = *typeof* [`TINT_BLEND_MODE`](../variables/TINT_BLEND_MODE.md)\[keyof *typeof* [`TINT_BLEND_MODE`](../variables/TINT_BLEND_MODE.md)\]
 
-Defined in: [src/material/TINT\_BLEND\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L15)
+Defined in: [src/material/TINT\_BLEND\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L15)
 
 TINT_BLEND_MODE 상수 값의 유니온 타입입니다.

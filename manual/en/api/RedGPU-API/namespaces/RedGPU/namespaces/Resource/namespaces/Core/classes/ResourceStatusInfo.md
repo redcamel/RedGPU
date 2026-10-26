@@ -6,7 +6,7 @@
 
 # Class: ResourceStatusInfo
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L12)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:12](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L12)
 
 Status information class that manages the cache table and video memory usage per resource category.
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ResourceStatusInfo**(): `ResourceStatusInfo`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L28)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L28)
 
 Creates a ResourceStatusInfo instance.
 
@@ -34,7 +34,7 @@ Creates a ResourceStatusInfo instance.
 
 > **table**: `Map`\<`string`, `any`\>
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L17)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:17](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L17)
 
 Map storing resource states by cache key (`Map<string, any>`)
 
@@ -44,6 +44,6 @@ Map storing resource states by cache key (`Map<string, any>`)
 
 > **videoMemory**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L22)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:22](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L22)
 
 Total video memory usage (in bytes) of the resource category

@@ -8,7 +8,7 @@
 
 > `const` **getDirectionalShadowVisibilityFoliage**: `string` = `getDirectionalShadowVisibilityFoliage_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1654](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L1654)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1654](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L1654)
 
 // 🌟 [식생(Foliage) 초근경(Cascade 0) 전용 비회전 6-Tap 등방성 원형 가우시안 디스크]
 // - 기존 9-Tap 5x5 Tent PCF 대비 텍스처 샘플링을 33.3%(9-Tap -> 6-Tap) 절감하고 부동소수점 나눗셈(fdiv) 6회를 100% 제거합니다.

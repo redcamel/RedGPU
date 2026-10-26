@@ -8,7 +8,7 @@
 
 > `const` **entryPointPickingVertex**: `string` = `emptyEntryPointPickingVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2329)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2329](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L2329)
 
 Empty vertex shader entry point for picking.
 

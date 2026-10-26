@@ -6,7 +6,7 @@
 
 # Class: ResourceStateUniformBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L14)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L14)
 
 `UniformBuffer`의 리소스 관리 상태를 나타내는 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUnifo
 
 > **new ResourceStateUniformBuffer**(`buffer`): `ResourceStateUniformBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L35)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L35)
 
 ResourceStateUniformBuffer 인스턴스를 생성합니다.
 
@@ -40,7 +40,7 @@ ResourceStateUniformBuffer 인스턴스를 생성합니다.
 
 > **buffer**: [`UniformBuffer`](../../../classes/UniformBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L19)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L19)
 
 관리 대상 유니폼 버퍼 인스턴스
 
@@ -50,7 +50,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUnifo
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L24)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L24)
 
 고유 식별자(UUID)
 
@@ -62,7 +62,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUnifo
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L48)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L48)
 
 리소스 참조 횟수를 반환하거나 설정합니다.
 
@@ -76,7 +76,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUnifo
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L52)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L52)
 
 ##### Parameters
 

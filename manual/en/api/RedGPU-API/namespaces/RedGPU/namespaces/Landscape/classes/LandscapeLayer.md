@@ -6,7 +6,7 @@
 
 # Class: LandscapeLayer
 
-Defined in: [src/landscape/LandscapeLayer.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L131)
+Defined in: [src/landscape/LandscapeLayer.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L131)
 
 Class that defines the textures, UV transform, PBR properties, and weight channel of an individual material layer used in terrain multi-layer splatting. Automatically created internally via `landscape.addLayer()`.
 
@@ -36,7 +36,7 @@ const rockLayer = landscape.addLayer({
 
 > **new LandscapeLayer**(`redGPUContextOrOptions`, `options?`): `LandscapeLayer`
 
-Defined in: [src/landscape/LandscapeLayer.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L188)
+Defined in: [src/landscape/LandscapeLayer.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L188)
 
 Creates a `LandscapeLayer` instance.
 
@@ -57,7 +57,7 @@ Creates a `LandscapeLayer` instance.
 
 > `optional` **onChange?**: () => `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L170)
+Defined in: [src/landscape/LandscapeLayer.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L170)
 
 Callback function invoked when a layer's texture or baking-related property changes.
 
@@ -71,7 +71,7 @@ Callback function invoked when a layer's texture or baking-related property chan
 
 > `optional` **onUniformChange?**: () => `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:175](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L175)
+Defined in: [src/landscape/LandscapeLayer.ts:175](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L175)
 
 Callback function invoked when only uniform buffer data needs to be updated without VBT rebaking.
 
@@ -85,7 +85,7 @@ Callback function invoked when only uniform buffer data needs to be updated with
 
 > <span class="readonly-badge">readonly</span> `static` **UNIFORM\_FLOAT\_COUNT**: `16` = `16`
 
-Defined in: [src/landscape/LandscapeLayer.ts:165](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L165)
+Defined in: [src/landscape/LandscapeLayer.ts:165](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L165)
 
 Number of `f32` elements occupied by a single layer uniform struct (16 floats = 64 bytes).
 
@@ -97,7 +97,7 @@ Number of `f32` elements occupied by a single layer uniform struct (16 floats = 
 
 > **get** **aoIntensity**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:573](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L573)
+Defined in: [src/landscape/LandscapeLayer.ts:573](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L573)
 
 Gets or sets the ambient occlusion (AO) intensity of the layer.
 
@@ -111,7 +111,7 @@ AO intensity
 
 > **set** **aoIntensity**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:552](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L552)
+Defined in: [src/landscape/LandscapeLayer.ts:552](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L552)
 
 ##### Parameters
 
@@ -131,7 +131,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:552](https://github.com/redcamel/Re
 
 > **get** **baseColorTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:316](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L316)
+Defined in: [src/landscape/LandscapeLayer.ts:316](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L316)
 
 Gets or sets the base color texture of the layer.
 
@@ -145,7 +145,7 @@ Gets or sets the base color texture of the layer.
 
 > **set** **baseColorTexture**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:292](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L292)
+Defined in: [src/landscape/LandscapeLayer.ts:292](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L292)
 
 ##### Parameters
 
@@ -165,7 +165,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:292](https://github.com/redcamel/Re
 
 > **get** **enabled**(): `boolean`
 
-Defined in: [src/landscape/LandscapeLayer.ts:416](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L416)
+Defined in: [src/landscape/LandscapeLayer.ts:416](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L416)
 
 Gets or sets whether the layer is enabled.
 
@@ -179,7 +179,7 @@ Enabled state (`boolean`)
 
 > **set** **enabled**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:420](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L420)
+Defined in: [src/landscape/LandscapeLayer.ts:420](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L420)
 
 ##### Parameters
 
@@ -199,7 +199,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:420](https://github.com/redcamel/Re
 
 > **get** **heightBlendFactor**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:585](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L585)
+Defined in: [src/landscape/LandscapeLayer.ts:585](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L585)
 
 Gets or sets the height-based layer blending contrast factor (range: `0.0 to 5.0`).
 
@@ -213,7 +213,7 @@ Height blend factor
 
 > **set** **heightBlendFactor**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:589](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L589)
+Defined in: [src/landscape/LandscapeLayer.ts:589](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L589)
 
 ##### Parameters
 
@@ -233,7 +233,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:589](https://github.com/redcamel/Re
 
 > <span class="readonly-badge">readonly</span> **get** **name**(): `string`
 
-Defined in: [src/landscape/LandscapeLayer.ts:288](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L288)
+Defined in: [src/landscape/LandscapeLayer.ts:288](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L288)
 
 Returns the unique name of the layer.
 
@@ -251,7 +251,7 @@ Layer name
 
 > **get** **nearUVScaleMultiplier**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:474](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L474)
+Defined in: [src/landscape/LandscapeLayer.ts:474](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L474)
 
 Gets or sets the UV scale multiplier applied to the near-detail region. (Minimum: `0.1`)
 
@@ -265,7 +265,7 @@ Near-detail UV scale multiplier
 
 > **set** **nearUVScaleMultiplier**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:478](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L478)
+Defined in: [src/landscape/LandscapeLayer.ts:478](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L478)
 
 ##### Parameters
 
@@ -285,7 +285,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:478](https://github.com/redcamel/Re
 
 > **get** **normalIntensity**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:542](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L542)
+Defined in: [src/landscape/LandscapeLayer.ts:542](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L542)
 
 Gets or sets the normal map intensity of the layer.
 
@@ -299,7 +299,7 @@ Normal map intensity
 
 > **set** **normalIntensity**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:546](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L546)
+Defined in: [src/landscape/LandscapeLayer.ts:546](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L546)
 
 ##### Parameters
 
@@ -319,7 +319,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:546](https://github.com/redcamel/Re
 
 > **get** **normalTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:344](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L344)
+Defined in: [src/landscape/LandscapeLayer.ts:344](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L344)
 
 Gets or sets the normal texture of the layer.
 
@@ -333,7 +333,7 @@ Gets or sets the normal texture of the layer.
 
 > **set** **normalTexture**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:320](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L320)
+Defined in: [src/landscape/LandscapeLayer.ts:320](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L320)
 
 ##### Parameters
 
@@ -353,7 +353,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:320](https://github.com/redcamel/Re
 
 > **get** **ormTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:372](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L372)
+Defined in: [src/landscape/LandscapeLayer.ts:372](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L372)
 
 Gets or sets the ORM (Occlusion, Roughness, Metallic) texture of the layer.
 
@@ -367,7 +367,7 @@ Gets or sets the ORM (Occlusion, Roughness, Metallic) texture of the layer.
 
 > **set** **ormTexture**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:348](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L348)
+Defined in: [src/landscape/LandscapeLayer.ts:348](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L348)
 
 ##### Parameters
 
@@ -387,7 +387,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:348](https://github.com/redcamel/Re
 
 > **get** **roughness**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:524](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L524)
+Defined in: [src/landscape/LandscapeLayer.ts:524](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L524)
 
 Gets or sets the surface roughness factor of the layer.
 
@@ -401,7 +401,7 @@ Roughness factor
 
 > **set** **roughness**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:528](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L528)
+Defined in: [src/landscape/LandscapeLayer.ts:528](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L528)
 
 ##### Parameters
 
@@ -421,7 +421,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:528](https://github.com/redcamel/Re
 
 > **get** **stochasticScale**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:629](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L629)
+Defined in: [src/landscape/LandscapeLayer.ts:629](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L629)
 
 Gets or sets the stochastic tiling cell scale (minimum: `0.01`).
 
@@ -435,7 +435,7 @@ Stochastic tiling scale
 
 > **set** **stochasticScale**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:633](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L633)
+Defined in: [src/landscape/LandscapeLayer.ts:633](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L633)
 
 ##### Parameters
 
@@ -455,7 +455,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:633](https://github.com/redcamel/Re
 
 > **get** **stochasticTiling**(): `boolean`
 
-Defined in: [src/landscape/LandscapeLayer.ts:609](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L609)
+Defined in: [src/landscape/LandscapeLayer.ts:609](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L609)
 
 Gets or sets whether stochastic tiling is enabled to suppress repetitive patterns.
 
@@ -469,7 +469,7 @@ Whether stochastic tiling is enabled
 
 > **set** **stochasticTiling**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:613](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L613)
+Defined in: [src/landscape/LandscapeLayer.ts:613](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L613)
 
 ##### Parameters
 
@@ -489,7 +489,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:613](https://github.com/redcamel/Re
 
 > **get** **uvOffset**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/LandscapeLayer.ts:454](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L454)
+Defined in: [src/landscape/LandscapeLayer.ts:454](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L454)
 
 Gets or sets the UV offset `[u, v]` of the layer texture.
 
@@ -503,7 +503,7 @@ UV offset tuple `[number, number]`
 
 > **set** **uvOffset**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:458](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L458)
+Defined in: [src/landscape/LandscapeLayer.ts:458](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L458)
 
 ##### Parameters
 
@@ -523,7 +523,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:458](https://github.com/redcamel/Re
 
 > **get** **uvScale**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/LandscapeLayer.ts:434](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L434)
+Defined in: [src/landscape/LandscapeLayer.ts:434](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L434)
 
 Gets or sets the UV tiling scale `[u, v]` of the layer texture.
 
@@ -537,7 +537,7 @@ UV scale tuple `[number, number]`
 
 > **set** **uvScale**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:438](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L438)
+Defined in: [src/landscape/LandscapeLayer.ts:438](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L438)
 
 ##### Parameters
 
@@ -557,7 +557,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:438](https://github.com/redcamel/Re
 
 > **get** **weightChannel**(): [`LandscapeWeightMapChannel`](../type-aliases/LandscapeWeightMapChannel.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:493](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L493)
+Defined in: [src/landscape/LandscapeLayer.ts:493](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L493)
 
 Gets or sets the color channel identifier referenced in the weight texture.
 
@@ -571,7 +571,7 @@ Weight channel identifier (`LandscapeWeightMapChannel`)
 
 > **set** **weightChannel**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:497](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L497)
+Defined in: [src/landscape/LandscapeLayer.ts:497](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L497)
 
 ##### Parameters
 
@@ -591,7 +591,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:497](https://github.com/redcamel/Re
 
 > <span class="readonly-badge">readonly</span> **get** **weightChannelIndex**(): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:512](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L512)
+Defined in: [src/landscape/LandscapeLayer.ts:512](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L512)
 
 Returns the numeric index (0: R, 1: G, 2: B, 3: A) of the currently configured weight channel.
 
@@ -609,7 +609,7 @@ Channel index (`0 to 3`)
 
 > **get** **weightMapCPUSampler**(): [`LandscapeWeightMapCPUSampler`](../namespaces/Core/namespaces/Cache/classes/LandscapeWeightMapCPUSampler.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:649](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L649)
+Defined in: [src/landscape/LandscapeLayer.ts:649](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L649)
 
 Gets or sets the CPU-side weight map sampler for the layer.
 
@@ -623,7 +623,7 @@ Gets or sets the CPU-side weight map sampler for the layer.
 
 > **set** **weightMapCPUSampler**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:653](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L653)
+Defined in: [src/landscape/LandscapeLayer.ts:653](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L653)
 
 ##### Parameters
 
@@ -643,7 +643,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:653](https://github.com/redcamel/Re
 
 > **get** **weightTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/LandscapeLayer.ts:404](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L404)
+Defined in: [src/landscape/LandscapeLayer.ts:404](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L404)
 
 Gets or sets the splatting weight texture of the layer. (Supports a single shared RGBA weight map across the terrain)
 
@@ -657,7 +657,7 @@ Gets or sets the splatting weight texture of the layer. (Supports a single share
 
 > **set** **weightTexture**(`val`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:376](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L376)
+Defined in: [src/landscape/LandscapeLayer.ts:376](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L376)
 
 ##### Parameters
 
@@ -675,7 +675,7 @@ Defined in: [src/landscape/LandscapeLayer.ts:376](https://github.com/redcamel/Re
 
 > **getWeightAtUV**(`u`, `v`): `number`
 
-Defined in: [src/landscape/LandscapeLayer.ts:718](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L718)
+Defined in: [src/landscape/LandscapeLayer.ts:718](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L718)
 
 Returns the splatting weight of this layer at the specified normalized terrain UV coordinates (`0.0 to 1.0`).
 
@@ -698,7 +698,7 @@ Sampled weight value (`0.0 to 1.0`)
 
 > **resolvePendingTextures**(`context`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:684](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L684)
+Defined in: [src/landscape/LandscapeLayer.ts:684](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L684)
 
 Instantiates pending string URL texture paths into `BitmapTexture` instances using the provided `RedGPUContext`.
 
@@ -718,7 +718,7 @@ Instantiates pending string URL texture paths into `BitmapTexture` instances usi
 
 > **writeUniformData**(`targetBuffer`, `offset`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:736](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L736)
+Defined in: [src/landscape/LandscapeLayer.ts:736](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L736)
 
 Writes the current layer's property data into the target `Float32Array` uniform buffer at the specified offset.
 
@@ -739,7 +739,7 @@ Writes the current layer's property data into the target `Float32Array` uniform 
 
 > `static` **writeZeroUniformData**(`targetBuffer`, `offset`): `void`
 
-Defined in: [src/landscape/LandscapeLayer.ts:672](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/LandscapeLayer.ts#L672)
+Defined in: [src/landscape/LandscapeLayer.ts:672](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/LandscapeLayer.ts#L672)
 
 Fills a single layer uniform region (16 floats) with zeros starting at the specified offset in the target `Float32Array` buffer.
 

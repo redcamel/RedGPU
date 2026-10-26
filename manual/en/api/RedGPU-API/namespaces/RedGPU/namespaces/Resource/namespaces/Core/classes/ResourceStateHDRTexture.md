@@ -6,7 +6,7 @@
 
 # Class: ResourceStateHDRTexture
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L14)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L14)
 
 Class representing the resource management state of HDR textures (`HDRTexture`).
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ResourceStateHDRTexture**(`texture`): `ResourceStateHDRTexture`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L49)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L49)
 
 Creates a ResourceStateHDRTexture instance.
 
@@ -40,7 +40,7 @@ Creates a ResourceStateHDRTexture instance.
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L29)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:29](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L29)
 
 Resource cache key
 
@@ -50,7 +50,7 @@ Resource cache key
 
 > **src**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L24)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L24)
 
 Texture source path
 
@@ -60,7 +60,7 @@ Texture source path
 
 > **texture**: [`HDRTexture`](../../../classes/HDRTexture.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L19)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L19)
 
 Managed HDR texture instance
 
@@ -70,7 +70,7 @@ Managed HDR texture instance
 
 > **useNum**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L34)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L34)
 
 Resource reference count
 
@@ -80,6 +80,6 @@ Resource reference count
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L39)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:39](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L39)
 
 Unique identifier (UUID)

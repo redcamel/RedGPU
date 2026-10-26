@@ -6,7 +6,7 @@
 
 # Class: GLTFLoader
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L116)
+Defined in: [src/loader/gltf/GLTFLoader.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L116)
 
 Loader class that loads 3D model files in GLTF 2.0 format (`.gltf`, `.glb`) and parses meshes, materials, textures, animations, and skins into RedGPU objects.
 
@@ -48,7 +48,7 @@ const loader = new RedGPU.GLTFLoader(
 
 > **new GLTFLoader**(`redGPUContext`, `url`, `onLoad`, `onProgress`, `onError`): `GLTFLoader`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L170)
+Defined in: [src/loader/gltf/GLTFLoader.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L170)
 
 Creates a GLTFLoader instance and starts file loading.
 
@@ -80,7 +80,7 @@ Creates a GLTFLoader instance and starts file loading.
 
 > **activeAnimations**: `any`[] = `[]`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L136)
+Defined in: [src/loader/gltf/GLTFLoader.ts:136](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L136)
 
 List of currently playing animation information
 
@@ -92,7 +92,7 @@ List of currently playing animation information
 
 > **parsingOption**: `any`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L131)
+Defined in: [src/loader/gltf/GLTFLoader.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L131)
 
 GLTF parsing options
 
@@ -104,7 +104,7 @@ GLTF parsing options
 
 > **parsingResult**: `GLTFParsingResult`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:121](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L121)
+Defined in: [src/loader/gltf/GLTFLoader.ts:121](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L121)
 
 GLTF parsing result data
 
@@ -116,7 +116,7 @@ GLTF parsing result data
 
 > **resultMesh**: [`Mesh`](../namespaces/Display/classes/Mesh.md)
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:126](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L126)
+Defined in: [src/loader/gltf/GLTFLoader.ts:126](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L126)
 
 Root mesh container containing the parsed result
 
@@ -132,7 +132,7 @@ Root mesh container containing the parsed result
 
 > <span class="readonly-badge">readonly</span> **get** **fileName**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:245](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L245)
+Defined in: [src/loader/gltf/GLTFLoader.ts:245](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L245)
 
 Returns the file name.
 
@@ -152,7 +152,7 @@ File name string
 
 > <span class="readonly-badge">readonly</span> **get** **filePath**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L217)
+Defined in: [src/loader/gltf/GLTFLoader.ts:217](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L217)
 
 Returns the file path.
 
@@ -172,7 +172,7 @@ File directory path string
 
 > **get** **gltfData**(): `GLTF`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:229](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L229)
+Defined in: [src/loader/gltf/GLTFLoader.ts:229](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L229)
 
 Gets or sets the raw GLTF data.
 
@@ -186,7 +186,7 @@ Raw GLTF data object
 
 > **set** **gltfData**(`value`): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:233](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L233)
+Defined in: [src/loader/gltf/GLTFLoader.ts:233](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L233)
 
 ##### Parameters
 
@@ -208,7 +208,7 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:233](https://github.com/redcamel/RedG
 
 > <span class="readonly-badge">readonly</span> **get** **loadingProgressInfo**(): `GLTFLoadingProgressInfo`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L205)
+Defined in: [src/loader/gltf/GLTFLoader.ts:205](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L205)
 
 Returns the current loading progress information.
 
@@ -228,7 +228,7 @@ Loading progress info object
 
 > <span class="readonly-badge">readonly</span> **get** **url**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:257](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L257)
+Defined in: [src/loader/gltf/GLTFLoader.ts:257](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L257)
 
 Returns the file URL.
 
@@ -250,7 +250,7 @@ File URL string
 
 > **destroy**(): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L313)
+Defined in: [src/loader/gltf/GLTFLoader.ts:313](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L313)
 
 Releases and destroys the GLTFLoader instance, parsed animation tracks, and referenced resources.
 
@@ -266,7 +266,7 @@ Releases and destroys the GLTFLoader instance, parsed animation tracks, and refe
 
 > **playAnimation**(`clipState`): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:288](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L288)
+Defined in: [src/loader/gltf/GLTFLoader.ts:288](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L288)
 
 Plays a specific animation clip.
 
@@ -294,7 +294,7 @@ loader.playAnimation(clip);
 
 > **stopAnimation**(): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:270](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/GLTFLoader.ts#L270)
+Defined in: [src/loader/gltf/GLTFLoader.ts:270](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/GLTFLoader.ts#L270)
 
 Stops all active animations.
 
@@ -320,7 +320,7 @@ loader.stopAnimation();
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../namespaces/Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -344,7 +344,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../namespaces/CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -368,7 +368,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -392,7 +392,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -416,7 +416,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -430,7 +430,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -456,7 +456,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -480,7 +480,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -504,7 +504,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

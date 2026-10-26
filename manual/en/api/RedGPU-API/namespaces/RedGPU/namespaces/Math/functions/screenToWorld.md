@@ -8,7 +8,7 @@
 
 > **screenToWorld**(`screenX`, `screenY`, `view`): `number`[]
 
-Defined in: [src/math/coordinates/screenToWorld.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/screenToWorld.ts#L34)
+Defined in: [src/math/coordinates/screenToWorld.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/coordinates/screenToWorld.ts#L34)
 
 Converts 2D screen pixel coordinates (`screenX`, `screenY`) into 3D world coordinates (`[x, y, z]`) using the inverse view-projection matrix of the view (`AView`).
 

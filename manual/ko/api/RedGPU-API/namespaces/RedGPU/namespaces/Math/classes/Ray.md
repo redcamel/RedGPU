@@ -6,7 +6,7 @@
 
 # Class: Ray
 
-Defined in: [src/math/Ray.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L16)
+Defined in: [src/math/Ray.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L16)
 
 3D 공간의 시작점(`origin`)과 방향 벡터(`direction`)를 가지며 AABB 및 삼각형과의 교차 판정을 수행하는 광선(Ray) 클래스입니다.
 
@@ -25,7 +25,7 @@ const ray = new RedGPU.Math.Ray([0, 0, 0], [0, 0, -1]);
 
 > **new Ray**(`origin?`, `direction?`): `Ray`
 
-Defined in: [src/math/Ray.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L44)
+Defined in: [src/math/Ray.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L44)
 
 지정된 시작점과 방향 벡터로 `Ray` 인스턴스를 생성합니다.
 
@@ -51,7 +51,7 @@ const ray = new RedGPU.Math.Ray([0, 0, 0], [0, 0, -1]);
 
 > **direction**: [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L26)
+Defined in: [src/math/Ray.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L26)
 
 광선의 정규화된 방향 벡터 (`vec3`)
 
@@ -61,7 +61,7 @@ Defined in: [src/math/Ray.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941
 
 > **origin**: [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L21)
+Defined in: [src/math/Ray.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L21)
 
 광선의 시작점 좌표 (`vec3`)
 
@@ -71,7 +71,7 @@ Defined in: [src/math/Ray.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941
 
 > **applyMatrix4**(`matrix`): `Ray`
 
-Defined in: [src/math/Ray.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L93)
+Defined in: [src/math/Ray.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L93)
 
 4x4 변환 행렬을 현재 광선의 시작점과 방향 벡터에 인플레이스(In-place)로 적용하고 방향 벡터를 정규화합니다.
 
@@ -106,7 +106,7 @@ const transformedRay = ray.clone().applyMatrix4(matrix);
 
 > **clone**(): `Ray`
 
-Defined in: [src/math/Ray.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L62)
+Defined in: [src/math/Ray.ts:62](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L62)
 
 현재 광선의 시작점과 방향을 복사한 새 `Ray` 인스턴스를 반환합니다.
 
@@ -127,7 +127,7 @@ const clonedRay = ray.clone();
 
 > **intersectBox**(`aabb`): `boolean`
 
-Defined in: [src/math/Ray.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L120)
+Defined in: [src/math/Ray.ts:120](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L120)
 
 Slabs 알고리즘을 사용하여 광선과 `AABB` 바운딩 박스의 교차 여부를 판별합니다.
 
@@ -154,7 +154,7 @@ const isHit = ray.intersectBox(aabb);
 
 > **intersectTriangle**(`v0`, `v1`, `v2`, `backfaceCulling?`): [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L170)
+Defined in: [src/math/Ray.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L170)
 
 Möller-Trumbore 알고리즘을 사용하여 광선과 삼각형의 교차 지점 좌표를 계산합니다.
 
@@ -184,7 +184,7 @@ const hitPoint = ray.intersectTriangle(v0, v1, v2, true);
 
 > **intersectTriangleBarycentric**(`v0`, `v1`, `v2`, `backfaceCulling?`): `object`
 
-Defined in: [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L238)
+Defined in: [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L238)
 
 광선과 삼각형의 교차 지점 좌표, 거리(`t`), 및 무게중심 좌표(`u`, `v`)를 계산합니다.
 
@@ -213,7 +213,7 @@ if (hit) {
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `point` | [`vec3`](../type-aliases/vec3.md) | [src/math/Ray.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L239) |
-| `t` | `number` | [src/math/Ray.ts:240](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L240) |
-| `u` | `number` | [src/math/Ray.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L241) |
-| `v` | `number` | [src/math/Ray.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L242) |
+| `point` | [`vec3`](../type-aliases/vec3.md) | [src/math/Ray.ts:239](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L239) |
+| `t` | `number` | [src/math/Ray.ts:240](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L240) |
+| `u` | `number` | [src/math/Ray.ts:241](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L241) |
+| `v` | `number` | [src/math/Ray.ts:242](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/Ray.ts#L242) |

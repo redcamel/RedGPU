@@ -6,7 +6,7 @@
 
 # Class: RapierPhysics
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L25)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L25)
 
 **`Experimental`**
 
@@ -44,7 +44,7 @@ WASM 기반의 Rapier 엔진을 통합하여 강체 생성, 충돌 감지, 캐�
 
 > **onCollisionStarted**: (`handle1`, `handle2`) => `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L37)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:37](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L37)
 
 **`Experimental`**
 
@@ -73,7 +73,7 @@ Defined in: [src/plugins/rapier/RapierPhysics.ts:37](https://github.com/redcamel
 
 > <span class="readonly-badge">readonly</span> **get** **bodies**(): [`RapierBody`](RapierBody.md)[]
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L74)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L74)
 
 **`Experimental`**
 
@@ -97,7 +97,7 @@ Defined in: [src/plugins/rapier/RapierPhysics.ts:74](https://github.com/redcamel
 
 > **get** **gravity**(): `object`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L93)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L93)
 
 **`Experimental`**
 
@@ -117,15 +117,15 @@ X, Y, Z 축 중력 가속도 벡터
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L93) |
-| `y` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L93) |
-| `z` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L93) |
+| `x` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L93) |
+| `y` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L93) |
+| `z` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L93) |
 
 #### Set Signature
 
 > **set** **gravity**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:97](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L97)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:97](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L97)
 
 **`Experimental`**
 
@@ -156,7 +156,7 @@ Defined in: [src/plugins/rapier/RapierPhysics.ts:97](https://github.com/redcamel
 
 > <span class="readonly-badge">readonly</span> **get** **nativeWorld**(): `World`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L50)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L50)
 
 **`Experimental`**
 
@@ -180,7 +180,7 @@ Rapier 원본 월드 객체
 
 > <span class="readonly-badge">readonly</span> **get** **RAPIER**(): `__module`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L62)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:62](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L62)
 
 **`Experimental`**
 
@@ -202,7 +202,7 @@ Rapier 네임스페이스 객체
 
 > **createBody**(`mesh`, `params`): [`RapierBody`](RapierBody.md)
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L191)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:191](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L191)
 
 **`Experimental`**
 
@@ -240,7 +240,7 @@ const body = physicsEngine.createBody(mesh, {
 
 > **createCharacterController**(`offset`): `KinematicCharacterController`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L241)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:241](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L241)
 
 **`Experimental`**
 
@@ -273,7 +273,7 @@ const controller = physicsEngine.createCharacterController(0.1);
 
 > **getBodyByColliderHandle**(`handle`): [`RapierBody`](RapierBody.md)
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L117)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L117)
 
 **`Experimental`**
 
@@ -302,7 +302,7 @@ const body = physicsEngine.getBodyByColliderHandle(handle);
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:134](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L134)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:134](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L134)
 
 **`Experimental`**
 
@@ -329,7 +329,7 @@ await physicsEngine.init();
 
 > **removeBody**(`body`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L220)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:220](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L220)
 
 **`Experimental`**
 
@@ -361,7 +361,7 @@ physicsEngine.removeBody(body);
 
 > **step**(`deltaTime`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L157)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:157](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/plugins/rapier/RapierPhysics.ts#L157)
 
 **`Experimental`**
 

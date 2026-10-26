@@ -6,7 +6,7 @@
 
 # Class: LandscapeWeightMapCPUSampler
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L36)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L36)
 
 Class that loads terrain layer weight map images into CPU memory and performs bilinear interpolation sampling.
 
@@ -30,7 +30,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **clear**(): `void`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L179)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:179](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L179)
 
 Clears all cached weight map data and ongoing loading states.
 
@@ -44,7 +44,7 @@ Clears all cached weight map data and ongoing loading states.
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L188)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L188)
 
 Releases the internal cache resources of the sampler.
 
@@ -58,7 +58,7 @@ Releases the internal cache resources of the sampler.
 
 > **getWeight**(`src`, `u`, `v`, `channelIndex?`): `number`
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L140)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:140](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L140)
 
 Returns the bilinearly interpolated weight value at the normalized UV coordinates (`0.0` to `1.0`) and channel index.
 
@@ -83,7 +83,7 @@ Sampled weight value (`0.0` to `1.0`)
 
 > **load**(`src`): `Promise`\<[`WeightMapPixelData`](../interfaces/WeightMapPixelData.md)\>
 
-Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L51)
+Defined in: [src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/cache/LandscapeWeightMapCPUSampler.ts#L51)
 
 Asynchronously loads and caches weight map pixel data from the specified image path.
 

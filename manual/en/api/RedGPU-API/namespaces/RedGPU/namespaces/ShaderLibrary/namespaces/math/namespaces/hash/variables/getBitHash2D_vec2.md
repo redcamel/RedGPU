@@ -8,7 +8,7 @@
 
 > `const` **getBitHash2D\_vec2**: `string` = `getBitHash2D_vec2_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:326](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L326)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:326](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L326)
 
 Generates a 2D random vector by preserving the bit structure of a 2D vector. (Ultra-precise)
 

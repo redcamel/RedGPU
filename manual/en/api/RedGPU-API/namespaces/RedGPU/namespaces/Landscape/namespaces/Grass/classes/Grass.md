@@ -6,7 +6,7 @@
 
 # Class: Grass
 
-Defined in: [src/landscape/grass/core/Grass.ts:110](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L110)
+Defined in: [src/landscape/grass/core/Grass.ts:110](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L110)
 
 Class that manages geometry, shading properties, and baking parameters for a single large-scale grass type placed on a `Landscape`.
 
@@ -45,7 +45,7 @@ const grass = landscape.grassManager.addType({
 
 > **new Grass**(`redGPUContext`, `options`): `Grass`
 
-Defined in: [src/landscape/grass/core/Grass.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L144)
+Defined in: [src/landscape/grass/core/Grass.ts:144](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L144)
 
 Creates a `Grass` instance.
 
@@ -76,7 +76,7 @@ Creates a `Grass` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **activeInstanceCount**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:630](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L630)
+Defined in: [src/landscape/grass/core/Grass.ts:630](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L630)
 
 Returns the total number of currently baked and active grass instances.
 
@@ -96,7 +96,7 @@ Active instance count
 
 > **get** **alphaCutoff**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:440](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L440)
+Defined in: [src/landscape/grass/core/Grass.ts:440](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L440)
 
 Gets or sets the alpha cutoff threshold (`0.01` to `1.0`).
 
@@ -110,7 +110,7 @@ Alpha cutoff value
 
 > **set** **alphaCutoff**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:425](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L425)
+Defined in: [src/landscape/grass/core/Grass.ts:425](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L425)
 
 ##### Parameters
 
@@ -132,7 +132,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:425](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **bakeRadius**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:607](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L607)
+Defined in: [src/landscape/grass/core/Grass.ts:607](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L607)
 
 Returns the radius in meters around the camera within which grass instances are baked.
 
@@ -152,7 +152,7 @@ Bake radius in meters
 
 > <span class="readonly-badge">readonly</span> **get** **baseColorTexture**(): [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/grass/core/Grass.ts:318](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L318)
+Defined in: [src/landscape/grass/core/Grass.ts:318](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L318)
 
 Returns the base color `BitmapTexture` of the grass.
 
@@ -172,7 +172,7 @@ Returns the base color `BitmapTexture` of the grass.
 
 > <span class="readonly-badge">readonly</span> **get** **baseColorTextureView**(): `GPUTextureView`
 
-Defined in: [src/landscape/grass/core/Grass.ts:329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L329)
+Defined in: [src/landscape/grass/core/Grass.ts:329](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L329)
 
 Returns the `GPUTextureView` of the grass base color texture.
 
@@ -192,7 +192,7 @@ Returns the `GPUTextureView` of the grass base color texture.
 
 > **get** **exposureBoost**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:421](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L421)
+Defined in: [src/landscape/grass/core/Grass.ts:421](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L421)
 
 Gets or sets the brightness exposure boost multiplier.
 
@@ -206,7 +206,7 @@ Exposure boost multiplier
 
 > **set** **exposureBoost**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:395](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L395)
+Defined in: [src/landscape/grass/core/Grass.ts:395](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L395)
 
 ##### Parameters
 
@@ -228,7 +228,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:395](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **farDistance**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:307](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L307)
+Defined in: [src/landscape/grass/core/Grass.ts:307](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L307)
 
 Returns the threshold distance in meters separating near and far grass buckets.
 
@@ -248,7 +248,7 @@ Near/far separation distance in meters
 
 > <span class="readonly-badge">readonly</span> **get** **geometry**(): [`Geometry`](../../../../../classes/Geometry.md) \| [`Primitive`](../../../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/landscape/grass/core/Grass.ts:274](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L274)
+Defined in: [src/landscape/grass/core/Grass.ts:274](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L274)
 
 Returns the assembled and unified grass `Geometry` or `Primitive` instance.
 
@@ -268,7 +268,7 @@ Returns the assembled and unified grass `Geometry` or `Primitive` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **instancesPerCell**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:343](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L343)
+Defined in: [src/landscape/grass/core/Grass.ts:343](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L343)
 
 Returns the number of instances generated per grass grid cell.
 
@@ -288,7 +288,7 @@ Number of instances per cell
 
 > <span class="readonly-badge">readonly</span> **get** **maxInstances**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:619](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L619)
+Defined in: [src/landscape/grass/core/Grass.ts:619](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L619)
 
 Returns the maximum instance capacity allocated to this grass type.
 
@@ -308,7 +308,7 @@ Maximum instance count, or `undefined` if unallocated
 
 > **get** **maxScale**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/grass/core/Grass.ts:391](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L391)
+Defined in: [src/landscape/grass/core/Grass.ts:391](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L391)
 
 Gets or sets the maximum random instance scale `[width, height]`.
 
@@ -322,7 +322,7 @@ Maximum scale tuple `[width, height]`
 
 > **set** **maxScale**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:371](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L371)
+Defined in: [src/landscape/grass/core/Grass.ts:371](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L371)
 
 ##### Parameters
 
@@ -344,7 +344,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:371](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **mesh**(): [`Mesh`](../../../../Display/classes/Mesh.md)
 
-Defined in: [src/landscape/grass/core/Grass.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L285)
+Defined in: [src/landscape/grass/core/Grass.ts:285](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L285)
 
 Returns the source `Mesh` instance used to create the grass.
 
@@ -364,7 +364,7 @@ Source `Mesh` instance
 
 > **get** **minScale**(): \[`number`, `number`\]
 
-Defined in: [src/landscape/grass/core/Grass.ts:367](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L367)
+Defined in: [src/landscape/grass/core/Grass.ts:367](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L367)
 
 Gets or sets the minimum random instance scale `[width, height]`.
 
@@ -378,7 +378,7 @@ Minimum scale tuple `[width, height]`
 
 > **set** **minScale**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:347](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L347)
+Defined in: [src/landscape/grass/core/Grass.ts:347](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L347)
 
 ##### Parameters
 
@@ -400,7 +400,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:347](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **minY**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:410](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L410)
+Defined in: [src/landscape/grass/core/Grass.ts:410](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L410)
 
 Returns the minimum Y offset of the mesh local bounding box.
 
@@ -420,7 +420,7 @@ Minimum Y offset
 
 > **set** **onRepopulateRequired**(`cb`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:596](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L596)
+Defined in: [src/landscape/grass/core/Grass.ts:596](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L596)
 
 Sets the callback function to be invoked when instance rebaking (repopulation) is required.
 
@@ -444,7 +444,7 @@ Sets the callback function to be invoked when instance rebaking (repopulation) i
 
 > **set** **onUniformDirty**(`cb`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:584](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L584)
+Defined in: [src/landscape/grass/core/Grass.ts:584](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L584)
 
 Sets the callback function to be invoked when uniform parameters change.
 
@@ -468,7 +468,7 @@ Sets the callback function to be invoked when uniform parameters change.
 
 > **get** **receiveShadow**(): `boolean`
 
-Defined in: [src/landscape/grass/core/Grass.ts:523](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L523)
+Defined in: [src/landscape/grass/core/Grass.ts:523](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L523)
 
 Gets or sets whether the grass surface receives shadows.
 
@@ -482,7 +482,7 @@ Whether shadows are received
 
 > **set** **receiveShadow**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:508](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L508)
+Defined in: [src/landscape/grass/core/Grass.ts:508](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L508)
 
 ##### Parameters
 
@@ -504,7 +504,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:508](https://github.com/redcamel/
 
 > <span class="readonly-badge">readonly</span> **get** **renderUnits**(): [`ScatterRenderUnit`](../../Core/namespaces/Scatter/classes/ScatterRenderUnit.md)[]
 
-Defined in: [src/landscape/grass/core/Grass.ts:296](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L296)
+Defined in: [src/landscape/grass/core/Grass.ts:296](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L296)
 
 Returns the array of `ScatterRenderUnit` instances used for grass rendering.
 
@@ -528,7 +528,7 @@ Array of `ScatterRenderUnit`
 
 > **get** **roughness**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:459](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L459)
+Defined in: [src/landscape/grass/core/Grass.ts:459](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L459)
 
 Gets or sets the surface roughness factor (`0.04` to `1.0`).
 
@@ -542,7 +542,7 @@ Roughness factor
 
 > **set** **roughness**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:444](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L444)
+Defined in: [src/landscape/grass/core/Grass.ts:444](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L444)
 
 ##### Parameters
 
@@ -564,7 +564,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:444](https://github.com/redcamel/
 
 > **get** **shadowCullDistance**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:553](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L553)
+Defined in: [src/landscape/grass/core/Grass.ts:553](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L553)
 
 Returns the maximum culling distance at which grass shadows are rendered (auto-derived from `farDistance`).
 
@@ -578,7 +578,7 @@ Shadow culling distance in meters
 
 > **set** **shadowCullDistance**(`_val`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:557](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L557)
+Defined in: [src/landscape/grass/core/Grass.ts:557](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L557)
 
 Gets or sets the shadow pass instance culling distance (`0` or greater).
 
@@ -608,7 +608,7 @@ Shadow pass culling distance
 
 > **get** **shadowFadeStartDistance**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:568](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L568)
+Defined in: [src/landscape/grass/core/Grass.ts:568](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L568)
 
 Returns the distance at which grass shadow fade-out begins (`shadowCullDistance * 0.5`).
 
@@ -622,7 +622,7 @@ Shadow fade start distance in meters
 
 > **set** **shadowFadeStartDistance**(`_val`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:572](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L572)
+Defined in: [src/landscape/grass/core/Grass.ts:572](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L572)
 
 ##### Parameters
 
@@ -644,7 +644,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:572](https://github.com/redcamel/
 
 > **get** **shadowStrength**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:542](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L542)
+Defined in: [src/landscape/grass/core/Grass.ts:542](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L542)
 
 Gets or sets the darkness strength of received shadows (`0.0` to `1.0`).
 
@@ -658,7 +658,7 @@ Shadow strength
 
 > **set** **shadowStrength**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:527](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L527)
+Defined in: [src/landscape/grass/core/Grass.ts:527](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L527)
 
 ##### Parameters
 
@@ -680,7 +680,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:527](https://github.com/redcamel/
 
 > **get** **slotIndex**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:641](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L641)
+Defined in: [src/landscape/grass/core/Grass.ts:641](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L641)
 
 Gets or sets the UBO slot index allocated from `GrassSlotPooler`.
 
@@ -694,7 +694,7 @@ Allocated slot index (`-1` if unallocated)
 
 > **set** **slotIndex**(`val`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:718](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L718)
+Defined in: [src/landscape/grass/core/Grass.ts:718](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L718)
 
 ##### Parameters
 
@@ -716,7 +716,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:718](https://github.com/redcamel/
 
 > **get** **subsurfaceColor**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/landscape/grass/core/Grass.ts:504](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L504)
+Defined in: [src/landscape/grass/core/Grass.ts:504](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L504)
 
 Gets or sets the subsurface scattering RGB color `[r, g, b]`.
 
@@ -730,7 +730,7 @@ Subsurface RGB color tuple `[r, g, b]`
 
 > **set** **subsurfaceColor**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:482](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L482)
+Defined in: [src/landscape/grass/core/Grass.ts:482](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L482)
 
 ##### Parameters
 
@@ -752,7 +752,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:482](https://github.com/redcamel/
 
 > **get** **subsurfaceStrength**(): `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:478](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L478)
+Defined in: [src/landscape/grass/core/Grass.ts:478](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L478)
 
 Gets or sets the subsurface scattering transmission strength (`0.0` to `3.0`).
 
@@ -766,7 +766,7 @@ Subsurface transmission strength
 
 > **set** **subsurfaceStrength**(`v`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:463](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L463)
+Defined in: [src/landscape/grass/core/Grass.ts:463](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L463)
 
 ##### Parameters
 
@@ -790,7 +790,7 @@ Defined in: [src/landscape/grass/core/Grass.ts:463](https://github.com/redcamel/
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:703](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L703)
+Defined in: [src/landscape/grass/core/Grass.ts:703](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L703)
 
 Releases the unified geometry owned by the grass type and associated resources.
 
@@ -810,7 +810,7 @@ Releases the unified geometry owned by the grass type and associated resources.
 
 > **onParameterChanged**(`prop`): `void`
 
-Defined in: [src/landscape/grass/core/Grass.ts:653](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L653)
+Defined in: [src/landscape/grass/core/Grass.ts:653](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L653)
 
 Invoked when a scatter or material property changes, triggering rebaking or UBO update.
 
@@ -843,7 +843,7 @@ Invoked when a scatter or material property changes, triggering rebaking or UBO 
 
 > <span class="readonly-badge">readonly</span> **get** **allocation**(): `TAllocation`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:211](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L211)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:211](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L211)
 
 Returns the segment allocation info (`TAllocation | null`) assigned to this type in the mega buffer.
 
@@ -867,7 +867,7 @@ Segment allocation info (`TAllocation`), or `null` if unallocated
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -891,7 +891,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > **get** **bottomOffset**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:235](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L235)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:235](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L235)
 
 Gets or sets the bottom height offset of instances from the terrain surface.
 
@@ -905,7 +905,7 @@ Bottom height offset
 
 > **set** **bottomOffset**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:259](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L259)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:259](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L259)
 
 ##### Parameters
 
@@ -931,7 +931,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:259](https://github.com/
 
 > **get** **castShadow**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:414](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L414)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:414](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L414)
 
 Gets or sets whether directional light shadow casting is enabled.
 
@@ -945,7 +945,7 @@ Whether shadow casting is enabled
 
 > **set** **castShadow**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:438](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L438)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:438](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L438)
 
 ##### Parameters
 
@@ -971,7 +971,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:438](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -995,7 +995,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > **get** **cullingDistance**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:255](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L255)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:255](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L255)
 
 Gets or sets the main pass instance visibility culling distance (`0` or greater).
 
@@ -1009,7 +1009,7 @@ Main pass visibility culling distance
 
 > **set** **cullingDistance**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:279](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L279)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:279](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L279)
 
 ##### Parameters
 
@@ -1035,7 +1035,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:279](https://github.com/
 
 > **get** **densityMultiplier**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:394](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L394)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:394](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L394)
 
 Gets or sets the density multiplier applied to the base density (`0.0` or greater).
 
@@ -1049,7 +1049,7 @@ Density multiplier
 
 > **set** **densityMultiplier**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:418](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L418)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:418](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L418)
 
 ##### Parameters
 
@@ -1075,7 +1075,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:418](https://github.com/
 
 > **get** **densityPerHectare**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:374](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L374)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:374](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L374)
 
 Gets or sets the base instance density per hectare (10,000㎡) (`0.0` or greater).
 
@@ -1089,7 +1089,7 @@ Base placement density per hectare
 
 > **set** **densityPerHectare**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:398](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L398)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:398](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L398)
 
 ##### Parameters
 
@@ -1115,7 +1115,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:398](https://github.com/
 
 > **get** **densityScaleByWeight**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:354](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L354)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:354](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L354)
 
 Gets or sets whether to scale instance size according to the terrain layer weight.
 
@@ -1129,7 +1129,7 @@ Whether weight-based scaling is enabled
 
 > **set** **densityScaleByWeight**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:378](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L378)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:378](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L378)
 
 ##### Parameters
 
@@ -1155,7 +1155,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:378](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -1179,7 +1179,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > **get** **groundBlendStrength**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:434](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L434)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:434](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L434)
 
 Gets or sets the ground blending strength (`0.0`~`1.0`) with the terrain surface.
 
@@ -1193,7 +1193,7 @@ Ground blending strength (`0.0`~`1.0`)
 
 > **set** **groundBlendStrength**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:461](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L461)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:461](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L461)
 
 ##### Parameters
 
@@ -1219,7 +1219,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:461](https://github.com/
 
 > **get** **height**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:223](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L223)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:223](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L223)
 
 Gets or sets the base height of scatter instances (`0.01` or greater).
 
@@ -1233,7 +1233,7 @@ Instance base height
 
 > **set** **height**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L239)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:239](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L239)
 
 ##### Parameters
 
@@ -1259,7 +1259,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:239](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -1283,7 +1283,7 @@ Per-class unique instance ID
 
 > **get** **maxSlope**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:334](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L334)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:334](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L334)
 
 Gets or sets the maximum terrain slope angle (degrees, `0.0`~`90.0`) allowed for instance placement.
 
@@ -1297,7 +1297,7 @@ Maximum terrain slope angle (in degrees)
 
 > **set** **maxSlope**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:358](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L358)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:358](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L358)
 
 ##### Parameters
 
@@ -1323,7 +1323,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:358](https://github.com/
 
 > **get** **minSlope**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:315](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L315)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:315](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L315)
 
 Gets or sets the minimum terrain slope angle (degrees, `0.0`~`90.0`) allowed for instance placement.
 
@@ -1337,7 +1337,7 @@ Minimum terrain slope angle (in degrees)
 
 > **set** **minSlope**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:338](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L338)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:338](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L338)
 
 ##### Parameters
 
@@ -1363,7 +1363,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:338](https://github.com/
 
 > **get** **name**(): `string`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L166)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:166](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L166)
 
 Returns the unique name of the scatter type. Cannot be changed after creation.
 
@@ -1377,7 +1377,7 @@ Unique name of the scatter type
 
 > **set** **name**(`_value`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L170)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L170)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -1407,7 +1407,7 @@ Object name string
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -1431,7 +1431,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -1455,7 +1455,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > **get** **targetLayer**(): `string` \| `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:295](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L295)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:295](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L295)
 
 Gets or sets the target terrain layer name or index from which to reference placement density weights.
 
@@ -1469,7 +1469,7 @@ Target layer name (`string`), index (`number`), or `undefined`
 
 > **set** **targetLayer**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:319](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L319)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:319](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L319)
 
 ##### Parameters
 
@@ -1495,7 +1495,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:319](https://github.com/
 
 > **get** **typeId**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:182](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L182)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:182](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L182)
 
 Gets or sets the unique numeric ID assigned to the scatter type.
 
@@ -1509,7 +1509,7 @@ Scatter type numeric ID
 
 > **set** **typeId**(`value`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:186](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L186)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:186](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L186)
 
 ##### Parameters
 
@@ -1535,7 +1535,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:186](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -1563,7 +1563,7 @@ UUID string of the object
 
 > **bindAllocation**(`allocation`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:454](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L454)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:454](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L454)
 
 Binds mega buffer segment allocation information to this scatter type.
 
@@ -1589,7 +1589,7 @@ Binds mega buffer segment allocation information to this scatter type.
 
 > **setRawScatterProperties**(`values`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:477](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L477)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:477](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L477)
 
 Batch-sets the internal raw values of scatter properties without triggering the `onParameterChanged` callback.
 

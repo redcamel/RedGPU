@@ -8,7 +8,7 @@
 
 > `const` **VORONOI\_DISTANCE\_TYPE**: `object`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:13](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L13)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:13](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L13)
 
 **`Experimental`**
 
@@ -23,6 +23,6 @@ texture.distanceType = RedGPU.Resource.VORONOI_DISTANCE_TYPE.MANHATTAN;
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-chebyshev"></a> `CHEBYSHEV` | `2` | `2` | 체비셰프 거리 (축별 거리 중 최댓값) | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L28) |
-| <a id="property-euclidean"></a> `EUCLIDEAN` | `0` | `0` | 유클리드 거리 (직선 거리) | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L18) |
-| <a id="property-manhattan"></a> `MANHATTAN` | `1` | `1` | 맨해튼 거리 (축별 거리의 합) | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L23) |
+| <a id="property-chebyshev"></a> `CHEBYSHEV` | `2` | `2` | 체비셰프 거리 (축별 거리 중 최댓값) | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L28) |
+| <a id="property-euclidean"></a> `EUCLIDEAN` | `0` | `0` | 유클리드 거리 (직선 거리) | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:18](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L18) |
+| <a id="property-manhattan"></a> `MANHATTAN` | `1` | `1` | 맨해튼 거리 (축별 거리의 합) | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L23) |

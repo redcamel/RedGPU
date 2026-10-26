@@ -6,7 +6,7 @@
 
 # Interface: DefineVector3Info
 
-Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:10](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector3.ts#L10)
+Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:10](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/vector/defineVector3.ts#L10)
 
 Interface for property definition options passed to the `defineVector3` function.
 
@@ -16,7 +16,7 @@ Interface for property definition options passed to the `defineVector3` function
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector3.ts#L15)
+Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:15](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/vector/defineVector3.ts#L15)
 
 Property key name to define on the target object's prototype
 
@@ -26,6 +26,6 @@ Property key name to define on the target object's prototype
 
 > `optional` **value?**: \[`number`, `number`, `number`\]
 
-Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector3.ts#L20)
+Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:20](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/vector/defineVector3.ts#L20)
 
 Initial 3D vector tuple value of the property (default: `[0, 0, 0]`)

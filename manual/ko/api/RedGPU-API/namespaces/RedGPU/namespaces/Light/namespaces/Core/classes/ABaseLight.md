@@ -6,7 +6,7 @@
 
 # Abstract Class: ABaseLight
 
-Defined in: [src/light/core/ABaseLight.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L16)
+Defined in: [src/light/core/ABaseLight.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L16)
 
 모든 조명(Light)의 공통 속성(`color`, `intensityMultiplier`, `enableDebugger`)을 정의하는 추상 클래스입니다.
 
@@ -27,7 +27,7 @@ Defined in: [src/light/core/ABaseLight.ts:16](https://github.com/redcamel/RedGPU
 
 > **new ABaseLight**(`color`, `intensityMultiplier?`): `ABaseLight`
 
-Defined in: [src/light/core/ABaseLight.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L32)
+Defined in: [src/light/core/ABaseLight.ts:32](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L32)
 
 ABaseLight 인스턴스를 초기화합니다.
 
@@ -50,7 +50,7 @@ ABaseLight 인스턴스를 초기화합니다.
 
 > **get** **color**(): [`ColorRGB`](../../../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L61)
+Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L61)
 
 조명의 색상(`ColorRGB`) 인스턴스를 반환하거나 설정합니다.
 
@@ -64,7 +64,7 @@ Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L65)
+Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L65)
 
 ##### Parameters
 
@@ -84,7 +84,7 @@ Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L45)
+Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L45)
 
 조명 시각적 디버거 활성화 여부를 반환하거나 설정합니다.
 
@@ -98,7 +98,7 @@ Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L49)
+Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L49)
 
 ##### Parameters
 
@@ -118,7 +118,7 @@ Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L80)
+Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L80)
 
 조명 강도 배율(`0` 이상의 실수)을 반환하거나 설정합니다.
 
@@ -132,7 +132,7 @@ Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/light/core/ABaseLight.ts#L84)
 
 ##### Parameters
 

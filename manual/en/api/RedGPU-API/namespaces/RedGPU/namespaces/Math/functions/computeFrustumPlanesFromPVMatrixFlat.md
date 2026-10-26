@@ -8,7 +8,7 @@
 
 > **computeFrustumPlanesFromPVMatrixFlat**(`m`, `out?`): `Float32Array`
 
-Defined in: [src/math/computeFrustumPlanes.ts:251](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/computeFrustumPlanes.ts#L251)
+Defined in: [src/math/computeFrustumPlanes.ts:251](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/computeFrustumPlanes.ts#L251)
 
 Computes 6 frustum planes (Left, Right, Bottom, Top, Near, Far) as a 1D `Float32Array` (length 24) from a combined projection-view matrix (WebGPU `[0, 1]` depth standard).
 

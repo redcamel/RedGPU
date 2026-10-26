@@ -8,7 +8,7 @@
 
 > `const` **srgbToLinearVec3**: `string` = `srgbToLinearVec3_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1748](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L1748)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1748](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L1748)
 
 sRGB 색 공간의 vec3 색상을 Linear 색 공간으로 변환합니다.
 

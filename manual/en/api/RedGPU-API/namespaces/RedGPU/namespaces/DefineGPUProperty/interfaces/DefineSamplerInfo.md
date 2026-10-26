@@ -6,7 +6,7 @@
 
 # Interface: DefineSamplerInfo
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:11](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineSampler.ts#L11)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:11](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/texture/defineSampler.ts#L11)
 
 Interface for property definition options passed to the `defineSampler` function.
 
@@ -16,6 +16,6 @@ Interface for property definition options passed to the `defineSampler` function
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineSampler.ts#L16)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/texture/defineSampler.ts#L16)
 
 Property key name to define on the target object's prototype

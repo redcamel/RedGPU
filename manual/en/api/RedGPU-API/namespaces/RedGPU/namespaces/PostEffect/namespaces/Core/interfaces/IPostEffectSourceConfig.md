@@ -6,7 +6,7 @@
 
 # Interface: IPostEffectSourceConfig
 
-Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L26)
+Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/types.ts#L26)
 
 Interface for post-processing source texture binding configuration.
 
@@ -16,7 +16,7 @@ Interface for post-processing source texture binding configuration.
 
 > `optional` **isSampled?**: `boolean` = `true`
 
-Defined in: [src/postEffect/core/types.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L37)
+Defined in: [src/postEffect/core/types.ts:37](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/types.ts#L37)
 
 Whether to use as a sampleable texture type (`texture_2d<f32>`) with a sampler
 
@@ -26,6 +26,6 @@ Whether to use as a sampleable texture type (`texture_2d<f32>`) with a sampler
 
 > **name**: `string`
 
-Defined in: [src/postEffect/core/types.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L31)
+Defined in: [src/postEffect/core/types.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/types.ts#L31)
 
 Texture binding identifier name in the shader

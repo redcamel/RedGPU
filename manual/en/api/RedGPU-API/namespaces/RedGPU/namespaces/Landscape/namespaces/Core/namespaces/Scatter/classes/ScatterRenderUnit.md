@@ -6,7 +6,7 @@
 
 # Class: ScatterRenderUnit
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L101)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L101)
 
 Submesh/LOD render unit class that serves as a single `drawIndexedIndirect` draw call unit in the scatter system.
 
@@ -24,7 +24,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ScatterRenderUnit**(`init`): `ScatterRenderUnit`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L125)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:125](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L125)
 
 Initializes a `ScatterRenderUnit` instance.
 
@@ -46,7 +46,7 @@ Initializes a `ScatterRenderUnit` instance.
 
 > **get** **baseColorTexture**(): [`BitmapTexture`](../../../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:300](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L300)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:300](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L300)
 
 Gets or sets the base color `BitmapTexture` of the render unit.
 
@@ -60,7 +60,7 @@ Base color `BitmapTexture`, `null`, or `undefined`
 
 > **set** **baseColorTexture**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L304)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L304)
 
 ##### Parameters
 
@@ -80,7 +80,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **firstIndex**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:208](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L208)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:208](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L208)
 
 Returns the starting index offset within the unified index buffer.
 
@@ -98,7 +98,7 @@ Starting index offset
 
 > <span class="readonly-badge">readonly</span> **get** **geometry**(): [`Geometry`](../../../../../../../classes/Geometry.md)
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:172](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L172)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:172](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L172)
 
 Returns the `Geometry` instance of the render unit.
 
@@ -116,7 +116,7 @@ Returns the `Geometry` instance of the render unit.
 
 > <span class="readonly-badge">readonly</span> **get** **indexCount**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:196](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L196)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:196](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L196)
 
 Returns the index count of the render unit.
 
@@ -134,7 +134,7 @@ Index count
 
 > <span class="readonly-badge">readonly</span> **get** **indexFormat**(): `GPUIndexFormat`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:232](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L232)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:232](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L232)
 
 Returns the `GPUIndexFormat` of the index buffer.
 
@@ -152,7 +152,7 @@ Index format (`GPUIndexFormat`)
 
 > **get** **indirectOffsetBytes**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:256](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L256)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:256](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L256)
 
 Gets or sets the byte offset within the indirect draw buffer.
 
@@ -166,7 +166,7 @@ Byte offset within the indirect buffer
 
 > **set** **indirectOffsetBytes**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L260)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L260)
 
 ##### Parameters
 
@@ -186,7 +186,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github
 
 > **get** **instanceBufferOffset**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:272](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L272)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:272](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L272)
 
 Gets or sets the starting instance offset within the culled instance buffer.
 
@@ -200,7 +200,7 @@ Starting instance offset
 
 > **set** **instanceBufferOffset**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L276)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L276)
 
 ##### Parameters
 
@@ -220,7 +220,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **isIndexed**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L220)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:220](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L220)
 
 Returns whether rendering is index-buffer based.
 
@@ -238,7 +238,7 @@ Whether an index buffer is used
 
 > <span class="readonly-badge">readonly</span> **get** **isMasked**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:328](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L328)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:328](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L328)
 
 Returns whether an alpha mask (alpha cutoff) material is used.
 
@@ -256,7 +256,7 @@ Whether alpha masking is used
 
 > <span class="readonly-badge">readonly</span> **get** **lodIndex**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:316](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L316)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:316](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L316)
 
 Returns the LOD level index to which this render unit belongs.
 
@@ -274,7 +274,7 @@ LOD level index
 
 > <span class="readonly-badge">readonly</span> **get** **material**(): `any`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:288](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L288)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:288](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L288)
 
 Returns the material instance associated with the render unit.
 
@@ -292,7 +292,7 @@ Material instance
 
 > <span class="readonly-badge">readonly</span> **get** **strideBytes**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L244)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:244](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L244)
 
 Returns the byte stride per vertex.
 
@@ -310,7 +310,7 @@ Byte stride per vertex
 
 > <span class="readonly-badge">readonly</span> **get** **vertexCount**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L184)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:184](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L184)
 
 Returns the vertex count of the render unit.
 
@@ -326,7 +326,7 @@ Vertex count
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:355](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L355)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:355](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L355)
 
 Destroys the `Geometry` resource referenced by the render unit.
 
@@ -340,7 +340,7 @@ Destroys the `Geometry` resource referenced by the render unit.
 
 > **draw**(`passEncoder`, `indirectGPUBuffer`, `offsetBytes?`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:346](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L346)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:346](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L346)
 
 Records a `drawIndexedIndirect` command onto the provided render pass or render bundle encoder.
 

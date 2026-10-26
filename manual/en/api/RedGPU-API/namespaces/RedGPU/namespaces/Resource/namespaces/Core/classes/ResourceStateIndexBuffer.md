@@ -6,7 +6,7 @@
 
 # Class: ResourceStateIndexBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L14)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L14)
 
 Class that represents the resource management state of `IndexBuffer`.
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ResourceStateIndexBuffer**(`buffer`): `ResourceStateIndexBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L40)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L40)
 
 Creates a ResourceStateIndexBuffer instance.
 
@@ -40,7 +40,7 @@ Creates a ResourceStateIndexBuffer instance.
 
 > **buffer**: [`IndexBuffer`](../../../classes/IndexBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L19)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L19)
 
 Managed index buffer instance
 
@@ -50,7 +50,7 @@ Managed index buffer instance
 
 > **label**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L24)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L24)
 
 Buffer label or name
 
@@ -60,7 +60,7 @@ Buffer label or name
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L29)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:29](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L29)
 
 Unique identifier (UUID)
 
@@ -72,7 +72,7 @@ Unique identifier (UUID)
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L54)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L54)
 
 Gets or sets the resource reference count.
 
@@ -86,7 +86,7 @@ Current reference count
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L58)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L58)
 
 ##### Parameters
 

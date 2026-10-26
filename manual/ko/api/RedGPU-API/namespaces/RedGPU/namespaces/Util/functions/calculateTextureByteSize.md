@@ -8,7 +8,7 @@
 
 > **calculateTextureByteSize**(`texture`): `number`
 
-Defined in: [src/utils/texture/calculateTextureByteSize.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/texture/calculateTextureByteSize.ts#L16)
+Defined in: [src/utils/texture/calculateTextureByteSize.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/utils/texture/calculateTextureByteSize.ts#L16)
 
 `GPUTexture`의 포맷, 해상도, 레이어 수, 샘플 수를 기반으로 총 바이트 크기를 계산합니다.
 

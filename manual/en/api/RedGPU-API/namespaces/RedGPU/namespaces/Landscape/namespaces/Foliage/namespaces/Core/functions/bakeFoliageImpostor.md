@@ -8,7 +8,7 @@
 
 > **bakeFoliageImpostor**(`redGPUContext`, `renderUnits`, `bakeName?`): [`FoliageBakeResult`](../interfaces/FoliageBakeResult.md)
 
-Defined in: [src/landscape/foliage/core/baking/impostor/bakeFoliageImpostor.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/baking/impostor/bakeFoliageImpostor.ts#L217)
+Defined in: [src/landscape/foliage/core/baking/impostor/bakeFoliageImpostor.ts:217](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/baking/impostor/bakeFoliageImpostor.ts#L217)
 
 Renders the specified render units from hemi-octahedral grid viewpoints to bake atlas textures (BaseColor, Normal, ORM) for far-distance impostors.
 

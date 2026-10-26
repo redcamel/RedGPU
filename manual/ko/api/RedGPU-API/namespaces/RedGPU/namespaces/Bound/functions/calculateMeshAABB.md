@@ -8,7 +8,7 @@
 
 > **calculateMeshAABB**(`mesh`, `targetAABB?`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshAABB.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateMeshAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshAABB.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/math/calculateMeshAABB.ts#L24)
 
 메시의 로컬 지오메트리 볼륨에 `modelMatrix`를 적용하여 월드 공간 축 정렬 경계 상자(`AABB`)를 계산합니다.
 

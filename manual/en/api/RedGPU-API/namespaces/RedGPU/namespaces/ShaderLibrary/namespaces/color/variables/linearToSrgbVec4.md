@@ -8,7 +8,7 @@
 
 > `const` **linearToSrgbVec4**: `string` = `linearToSrgbVec4_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1729](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L1729)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1729](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L1729)
 
 Converts vec4 color from Linear color space to sRGB color space. (Preserves Alpha)
 

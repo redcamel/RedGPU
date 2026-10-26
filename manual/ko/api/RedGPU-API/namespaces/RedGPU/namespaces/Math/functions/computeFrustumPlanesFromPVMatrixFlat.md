@@ -8,7 +8,7 @@
 
 > **computeFrustumPlanesFromPVMatrixFlat**(`m`, `out?`): `Float32Array`
 
-Defined in: [src/math/computeFrustumPlanes.ts:251](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/computeFrustumPlanes.ts#L251)
+Defined in: [src/math/computeFrustumPlanes.ts:251](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/computeFrustumPlanes.ts#L251)
 
 투영-뷰 결합 행렬(WebGPU `[0, 1]` 깊이 규격)로부터 6개 프러스텀 평면(Left, Right, Bottom, Top, Near, Far)을 1차원 `Float32Array`(길이 24)로 계산합니다.
 

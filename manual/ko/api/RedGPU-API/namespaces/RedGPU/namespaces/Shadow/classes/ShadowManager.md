@@ -6,7 +6,7 @@
 
 # Class: ShadowManager
 
-Defined in: [src/shadow/ShadowManager.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L24)
+Defined in: [src/shadow/ShadowManager.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/ShadowManager.ts#L24)
 
 씬의 전체적인 그림자 렌더링을 총괄하는 관리자 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/shadow/ShadowManager.ts:24](https://github.com/redcamel/RedGPU/
 
 > **new ShadowManager**(): `ShadowManager`
 
-Defined in: [src/shadow/ShadowManager.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L30)
+Defined in: [src/shadow/ShadowManager.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/ShadowManager.ts#L30)
 
 #### Returns
 
@@ -34,7 +34,7 @@ Defined in: [src/shadow/ShadowManager.ts:30](https://github.com/redcamel/RedGPU/
 
 > <span class="readonly-badge">readonly</span> **get** **directionalShadowManager**(): [`DirectionalShadowManager`](DirectionalShadowManager.md)
 
-Defined in: [src/shadow/ShadowManager.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L41)
+Defined in: [src/shadow/ShadowManager.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/ShadowManager.ts#L41)
 
 직사광(Directional Light) 섀도우 매니저를 반환합니다.
 
@@ -50,7 +50,7 @@ DirectionalShadowManager 인스턴스
 
 > **destroy**(): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L116)
+Defined in: [src/shadow/ShadowManager.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/ShadowManager.ts#L116)
 
 사용 중인 그림자 GPU 리소스를 해제합니다.
 
@@ -64,7 +64,7 @@ Defined in: [src/shadow/ShadowManager.ts:116](https://github.com/redcamel/RedGPU
 
 > **render**(`view`): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L53)
+Defined in: [src/shadow/ShadowManager.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/ShadowManager.ts#L53)
 
 그림자 렌더링을 수행합니다.
 
@@ -84,7 +84,7 @@ Defined in: [src/shadow/ShadowManager.ts:53](https://github.com/redcamel/RedGPU/
 
 > **update**(`redGPUContext`): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:208](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L208)
+Defined in: [src/shadow/ShadowManager.ts:208](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/ShadowManager.ts#L208)
 
 매니저의 상태를 업데이트합니다.
 

@@ -6,7 +6,7 @@
 
 # Abstract Class: AnimState
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L15)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:15](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L15)
 
 애니메이션 상태의 기본이 되는 추상 클래스입니다.
 
@@ -24,7 +24,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:15](https://git
 
 > **new AnimState**(`name`): `AnimState`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L35)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L35)
 
 AnimState 인스턴스를 초기화합니다.
 
@@ -44,7 +44,7 @@ AnimState 인스턴스를 초기화합니다.
 
 > **name**: `string`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L20)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:20](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L20)
 
 애니메이션 상태 이름
 
@@ -54,7 +54,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:20](https://git
 
 > **startTime**: `number` = `0`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L25)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L25)
 
 상태 진입 시작 시간 (ms)
 
@@ -64,7 +64,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:25](https://git
 
 > `abstract` **enter**(`timestamp`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L47)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:47](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L47)
 
 상태에 진입할 때 호출됩니다.
 
@@ -84,7 +84,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:47](https://git
 
 > `abstract` **exit**(): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:66](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L66)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:66](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L66)
 
 상태에서 빠져나갈 때 호출됩니다.
 
@@ -98,7 +98,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:66](https://git
 
 > `abstract` **update**(`deltaTime`, `timestamp`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L60)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:60](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L60)
 
 상태가 활성화된 동안 매 프레임 호출됩니다.
 

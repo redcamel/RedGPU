@@ -8,7 +8,7 @@
 
 > **localToWorld**(`targetMatrix`, `x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/math/coordinates/localToWorld.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/localToWorld.ts#L35)
+Defined in: [src/math/coordinates/localToWorld.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/coordinates/localToWorld.ts#L35)
 
 4x4 변환 행렬(`targetMatrix`)을 사용하여 로컬 좌표(`[x, y, z]`)를 3D 월드 좌표(`[x, y, z]`)로 변환합니다.
 

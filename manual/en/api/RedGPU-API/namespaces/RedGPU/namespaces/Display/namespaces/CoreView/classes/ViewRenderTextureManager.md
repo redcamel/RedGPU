@@ -6,7 +6,7 @@
 
 # Class: ViewRenderTextureManager
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L101)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L101)
 
 Manager class that creates and manages render targets (color, depth, G-Buffer, etc.) for View3D/View2D.
 
@@ -36,7 +36,7 @@ const viewRenderTextureManager = view.viewRenderTextureManager;
 
 > **new ViewRenderTextureManager**(`view`): `ViewRenderTextureManager`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L130)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:130](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L130)
 
 Creates a ViewRenderTextureManager instance.
 
@@ -66,7 +66,7 @@ Creates a ViewRenderTextureManager instance.
 
 > <span class="readonly-badge">readonly</span> **get** **depthTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L179)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:179](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L179)
 
 Returns the depth texture of the current frame.
 
@@ -86,7 +86,7 @@ Current depth texture
 
 > <span class="readonly-badge">readonly</span> **get** **depthTexture0View**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:218](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L218)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:218](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L218)
 
 Returns the view of the first depth texture (`depthTexture0`).
 
@@ -106,7 +106,7 @@ First depth texture view
 
 > <span class="readonly-badge">readonly</span> **get** **depthTexture1View**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:231](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L231)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:231](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L231)
 
 Returns the view of the second depth texture (`depthTexture1`).
 
@@ -126,7 +126,7 @@ Second depth texture view
 
 > <span class="readonly-badge">readonly</span> **get** **depthTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:192](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L192)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:192](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L192)
 
 Returns the depth texture view of the current frame.
 
@@ -146,7 +146,7 @@ Current depth texture view
 
 > <span class="readonly-badge">readonly</span> **get** **gBuffers**(): `Map`\<`string`, `GBufferInfo`\>
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L143)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:143](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L143)
 
 Returns the G-Buffer map (`Map<string, GBufferInfo>`).
 
@@ -166,7 +166,7 @@ G-Buffer information map
 
 > <span class="readonly-badge">readonly</span> **get** **prevDepthTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L205)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:205](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L205)
 
 Returns the depth texture view of the previous frame.
 
@@ -186,7 +186,7 @@ Previous frame depth texture view
 
 > <span class="readonly-badge">readonly</span> **get** **renderPath1DepthResultTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:280](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L280)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:280](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L280)
 
 Returns the render path 1 depth result texture.
 
@@ -206,7 +206,7 @@ Render path 1 depth result texture
 
 > <span class="readonly-badge">readonly</span> **get** **renderPath1DepthResultTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:268](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L268)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:268](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L268)
 
 Returns the render path 1 depth result texture view.
 
@@ -226,7 +226,7 @@ Render path 1 depth result texture view
 
 > <span class="readonly-badge">readonly</span> **get** **renderPath1ResultTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:256](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L256)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:256](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L256)
 
 Returns the render path 1 color result texture.
 
@@ -246,7 +246,7 @@ Render path 1 result texture
 
 > <span class="readonly-badge">readonly</span> **get** **renderPath1ResultTextureDescriptor**(): `GPUTextureDescriptor`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:167](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L167)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:167](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L167)
 
 Returns the texture descriptor of the render path 1 result texture.
 
@@ -266,7 +266,7 @@ Render path 1 result texture descriptor
 
 > <span class="readonly-badge">readonly</span> **get** **renderPath1ResultTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L244)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:244](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L244)
 
 Returns the render path 1 color result texture view.
 
@@ -286,7 +286,7 @@ Render path 1 result texture view
 
 > <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L155)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:155](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L155)
 
 Returns the total video memory usage (in bytes) of the currently managed render textures.
 
@@ -306,7 +306,7 @@ Video memory usage (bytes)
 
 > **copyDepthToRenderPath1**(`encoder`): `void`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:292](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L292)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:292](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L292)
 
 Copies or MSAA-resolves the depth buffer of render path 1 into `renderPath1DepthResultTexture` for reading in path 2.
 
@@ -328,7 +328,7 @@ Copies or MSAA-resolves the depth buffer of render path 1 into `renderPath1Depth
 
 > **destroy**(): `void`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:377](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L377)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:377](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L377)
 
 Releases all managed G-Buffer and depth texture resources and destroys the manager.
 
@@ -344,7 +344,7 @@ Releases all managed G-Buffer and depth texture resources and destroys the manag
 
 > **getGBufferResolveTexture**(`type`): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:336](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L336)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:336](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L336)
 
 Returns the MSAA resolve G-Buffer texture of the specified type.
 
@@ -368,7 +368,7 @@ Resolve target GPU texture
 
 > **getGBufferResolveTextureView**(`type`): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:368](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L368)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:368](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L368)
 
 Returns the MSAA resolve G-Buffer texture view of the specified type.
 
@@ -392,7 +392,7 @@ Resolve target GPU texture view
 
 > **getGBufferTexture**(`type`): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:320](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L320)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:320](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L320)
 
 Returns the G-Buffer texture of the specified type.
 
@@ -416,7 +416,7 @@ G-Buffer GPU texture
 
 > **getGBufferTextureView**(`type`): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:352](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L352)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:352](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L352)
 
 Returns the G-Buffer texture view of the specified type.
 
@@ -445,7 +445,7 @@ G-Buffer GPU texture view
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -469,7 +469,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -493,7 +493,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -517,7 +517,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -541,7 +541,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -555,7 +555,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -581,7 +581,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -605,7 +605,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -629,7 +629,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

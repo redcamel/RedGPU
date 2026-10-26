@@ -8,7 +8,7 @@
 
 > **copyGPUBuffer**(`commandEncoder`, `srcBuffer`, `dstBuffer`): `void`
 
-Defined in: [src/utils/copyGPUBuffer.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/copyGPUBuffer.ts#L27)
+Defined in: [src/utils/copyGPUBuffer.ts:27](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/utils/copyGPUBuffer.ts#L27)
 
 Records a command on the command encoder that copies data from a source `GPUBuffer` to a destination `GPUBuffer`.
 

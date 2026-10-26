@@ -6,7 +6,7 @@
 
 # Class: LandscapeDebuggerManager
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L24)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L24)
 
 Manager class that controls wireframe, LOD coloration, and debug rendering modes for `Landscape`. Automatically created internally when a `Landscape` is instantiated.
 
@@ -28,7 +28,7 @@ debuggerManager.landscapeLodColoration = true;
 
 > **new LandscapeDebuggerManager**(`onDebugPropertyChange?`): `LandscapeDebuggerManager`
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L38)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:38](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L38)
 
 Creates a `LandscapeDebuggerManager` instance.
 
@@ -50,7 +50,7 @@ Creates a `LandscapeDebuggerManager` instance.
 
 > **get** **landscapeDebugMode**(): `number`
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L69)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:69](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L69)
 
 Gets or sets the landscape debug rendering mode. (Refer to `LANDSCAPE_DEBUG_MODE` constants)
 
@@ -64,7 +64,7 @@ Debug mode value
 
 > **set** **landscapeDebugMode**(`value`): `void`
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L73)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:73](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L73)
 
 ##### Parameters
 
@@ -84,7 +84,7 @@ Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:73](https://gith
 
 > **get** **landscapeLodColoration**(): `boolean`
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:88](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L88)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:88](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L88)
 
 Gets or sets whether landscape LOD coloration is enabled.
 
@@ -98,7 +98,7 @@ Whether LOD coloration is enabled
 
 > **set** **landscapeLodColoration**(`value`): `void`
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L92)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L92)
 
 ##### Parameters
 
@@ -118,7 +118,7 @@ Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:92](https://gith
 
 > **get** **landscapeWireframe**(): `boolean`
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L50)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L50)
 
 Gets or sets whether landscape wireframe rendering is enabled.
 
@@ -132,7 +132,7 @@ Whether wireframe is enabled
 
 > **set** **landscapeWireframe**(`value`): `void`
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L54)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L54)
 
 ##### Parameters
 
@@ -150,7 +150,7 @@ Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:54](https://gith
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/debugger/LandscapeDebuggerManager.ts#L103)
+Defined in: [src/landscape/debugger/LandscapeDebuggerManager.ts:103](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/debugger/LandscapeDebuggerManager.ts#L103)
 
 Resets debugger states and releases callback references.
 

@@ -6,7 +6,7 @@
 
 # Class: WindManager
 
-Defined in: [src/wind/WindManager.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L24)
+Defined in: [src/wind/WindManager.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L24)
 
 씬 전역의 바람 방향, 속도, 세기를 관리하는 클래스로, Scene에 의해 내부적으로 자동 생성됩니다.
 
@@ -29,7 +29,7 @@ windManager.strength = 1.5;
 
 > **new WindManager**(`scene`): `WindManager`
 
-Defined in: [src/wind/WindManager.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L41)
+Defined in: [src/wind/WindManager.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L41)
 
 WindManager 인스턴스를 생성합니다. (내부 시스템 전용)
 
@@ -51,7 +51,7 @@ WindManager 인스턴스를 생성합니다. (내부 시스템 전용)
 
 > **get** **directionAngle**(): `number`
 
-Defined in: [src/wind/WindManager.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L70)
+Defined in: [src/wind/WindManager.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L70)
 
 XZ 평면 기준 바람의 수평 진행 방향 각도입니다. (단위: degree, 0 ~ 360, 기본값: 0)
 
@@ -70,7 +70,7 @@ scene.windManager.directionAngle = 45;
 
 > **set** **directionAngle**(`deg`): `void`
 
-Defined in: [src/wind/WindManager.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L74)
+Defined in: [src/wind/WindManager.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L74)
 
 ##### Parameters
 
@@ -90,7 +90,7 @@ Defined in: [src/wind/WindManager.ts:74](https://github.com/redcamel/RedGPU/blob
 
 > <span class="readonly-badge">readonly</span> **get** **directionX**(): `number`
 
-Defined in: [src/wind/WindManager.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L89)
+Defined in: [src/wind/WindManager.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L89)
 
 바람 진행 방향의 정규화된 X 성분 (`cos(directionAngle)`)을 반환합니다.
 
@@ -108,7 +108,7 @@ Defined in: [src/wind/WindManager.ts:89](https://github.com/redcamel/RedGPU/blob
 
 > <span class="readonly-badge">readonly</span> **get** **directionZ**(): `number`
 
-Defined in: [src/wind/WindManager.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L101)
+Defined in: [src/wind/WindManager.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L101)
 
 바람 진행 방향의 정규화된 Z 성분 (`sin(directionAngle)`)을 반환합니다.
 
@@ -126,7 +126,7 @@ Defined in: [src/wind/WindManager.ts:101](https://github.com/redcamel/RedGPU/blo
 
 > **get** **enabled**(): `boolean`
 
-Defined in: [src/wind/WindManager.ts:145](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L145)
+Defined in: [src/wind/WindManager.ts:145](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L145)
 
 바람 효과 활성화 여부입니다. (기본값: true)
 
@@ -140,7 +140,7 @@ Defined in: [src/wind/WindManager.ts:145](https://github.com/redcamel/RedGPU/blo
 
 > **set** **enabled**(`value`): `void`
 
-Defined in: [src/wind/WindManager.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L149)
+Defined in: [src/wind/WindManager.ts:149](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L149)
 
 ##### Parameters
 
@@ -160,7 +160,7 @@ Defined in: [src/wind/WindManager.ts:149](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **scene**(): [`Scene`](../../Display/classes/Scene.md)
 
-Defined in: [src/wind/WindManager.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L53)
+Defined in: [src/wind/WindManager.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L53)
 
 소속 Scene 인스턴스를 반환합니다.
 
@@ -178,7 +178,7 @@ Defined in: [src/wind/WindManager.ts:53](https://github.com/redcamel/RedGPU/blob
 
 > **get** **speed**(): `number`
 
-Defined in: [src/wind/WindManager.ts:113](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L113)
+Defined in: [src/wind/WindManager.ts:113](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L113)
 
 바람 애니메이션의 시간 배율입니다. (기본값: 1.0)
 
@@ -192,7 +192,7 @@ Defined in: [src/wind/WindManager.ts:113](https://github.com/redcamel/RedGPU/blo
 
 > **set** **speed**(`value`): `void`
 
-Defined in: [src/wind/WindManager.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L117)
+Defined in: [src/wind/WindManager.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L117)
 
 ##### Parameters
 
@@ -212,7 +212,7 @@ Defined in: [src/wind/WindManager.ts:117](https://github.com/redcamel/RedGPU/blo
 
 > **get** **strength**(): `number`
 
-Defined in: [src/wind/WindManager.ts:129](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L129)
+Defined in: [src/wind/WindManager.ts:129](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L129)
 
 바람의 기본 세기(풍압)입니다. (기본값: 1.0)
 
@@ -226,7 +226,7 @@ Defined in: [src/wind/WindManager.ts:129](https://github.com/redcamel/RedGPU/blo
 
 > **set** **strength**(`value`): `void`
 
-Defined in: [src/wind/WindManager.ts:133](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/wind/WindManager.ts#L133)
+Defined in: [src/wind/WindManager.ts:133](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/wind/WindManager.ts#L133)
 
 ##### Parameters
 

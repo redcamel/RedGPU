@@ -8,7 +8,7 @@
 
 > `const` **TINT\_BLEND\_MODE**: `object`
 
-Defined in: [src/material/TINT\_BLEND\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L15)
+Defined in: [src/material/TINT\_BLEND\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L15)
 
 Blend mode constants used when compositing material tint colors with base colors.
 
@@ -22,29 +22,29 @@ material.tintBlendMode = RedGPU.Material.TINT_BLEND_MODE.MULTIPLY;
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-color"></a> `COLOR` | `21` | `21` | Color tint blend mode (21) | [src/material/TINT\_BLEND\_MODE.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L125) |
-| <a id="property-color_burn"></a> `COLOR_BURN` | `9` | `9` | Color Burn tint blend mode (9) | [src/material/TINT\_BLEND\_MODE.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L65) |
-| <a id="property-color_dodge"></a> `COLOR_DODGE` | `8` | `8` | Color Dodge tint blend mode (8) | [src/material/TINT\_BLEND\_MODE.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L60) |
-| <a id="property-darken"></a> `DARKEN` | `6` | `6` | Darken tint blend mode (6) | [src/material/TINT\_BLEND\_MODE.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L50) |
-| <a id="property-difference"></a> `DIFFERENCE` | `12` | `12` | Difference tint blend mode (12) | [src/material/TINT\_BLEND\_MODE.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L80) |
-| <a id="property-divide"></a> `DIVIDE` | `14` | `14` | Divide tint blend mode (14) | [src/material/TINT\_BLEND\_MODE.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L90) |
-| <a id="property-exclusion"></a> `EXCLUSION` | `13` | `13` | Exclusion tint blend mode (13) | [src/material/TINT\_BLEND\_MODE.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L85) |
-| <a id="property-hard_light"></a> `HARD_LIGHT` | `10` | `10` | Hard Light tint blend mode (10) | [src/material/TINT\_BLEND\_MODE.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L70) |
-| <a id="property-hue"></a> `HUE` | `19` | `19` | Hue tint blend mode (19) | [src/material/TINT\_BLEND\_MODE.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L115) |
-| <a id="property-lighten"></a> `LIGHTEN` | `2` | `2` | Lighten tint blend mode (2) | [src/material/TINT\_BLEND\_MODE.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L30) |
-| <a id="property-linear_burn"></a> `LINEAR_BURN` | `16` | `16` | Linear Burn tint blend mode (16) | [src/material/TINT\_BLEND\_MODE.ts:100](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L100) |
-| <a id="property-linear_dodge"></a> `LINEAR_DODGE` | `4` | `4` | Linear Dodge tint blend mode (4) | [src/material/TINT\_BLEND\_MODE.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L40) |
-| <a id="property-luminosity"></a> `LUMINOSITY` | `20` | `20` | Luminosity tint blend mode (20) | [src/material/TINT\_BLEND\_MODE.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L120) |
-| <a id="property-multiply"></a> `MULTIPLY` | `1` | `1` | Multiply tint blend mode (1) | [src/material/TINT\_BLEND\_MODE.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L25) |
-| <a id="property-negation"></a> `NEGATION` | `22` | `22` | Negation tint blend mode (22) | [src/material/TINT\_BLEND\_MODE.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L130) |
-| <a id="property-normal"></a> `NORMAL` | `0` | `0` | Normal tint blend mode (0) | [src/material/TINT\_BLEND\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L20) |
-| <a id="property-overlay"></a> `OVERLAY` | `7` | `7` | Overlay tint blend mode (7) | [src/material/TINT\_BLEND\_MODE.ts:55](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L55) |
-| <a id="property-pin_light"></a> `PIN_LIGHT` | `17` | `17` | Pin Light tint blend mode (17) | [src/material/TINT\_BLEND\_MODE.ts:105](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L105) |
-| <a id="property-saturation"></a> `SATURATION` | `18` | `18` | Saturation tint blend mode (18) | [src/material/TINT\_BLEND\_MODE.ts:110](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L110) |
-| <a id="property-screen"></a> `SCREEN` | `3` | `3` | Screen tint blend mode (3) | [src/material/TINT\_BLEND\_MODE.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L35) |
-| <a id="property-soft_light"></a> `SOFT_LIGHT` | `11` | `11` | Soft Light tint blend mode (11) | [src/material/TINT\_BLEND\_MODE.ts:75](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L75) |
-| <a id="property-subtract"></a> `SUBTRACT` | `5` | `5` | Subtract tint blend mode (5) | [src/material/TINT\_BLEND\_MODE.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L45) |
-| <a id="property-vivid_light"></a> `VIVID_LIGHT` | `15` | `15` | Vivid Light tint blend mode (15) | [src/material/TINT\_BLEND\_MODE.ts:95](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/TINT_BLEND_MODE.ts#L95) |
+| <a id="property-color"></a> `COLOR` | `21` | `21` | Color tint blend mode (21) | [src/material/TINT\_BLEND\_MODE.ts:125](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L125) |
+| <a id="property-color_burn"></a> `COLOR_BURN` | `9` | `9` | Color Burn tint blend mode (9) | [src/material/TINT\_BLEND\_MODE.ts:65](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L65) |
+| <a id="property-color_dodge"></a> `COLOR_DODGE` | `8` | `8` | Color Dodge tint blend mode (8) | [src/material/TINT\_BLEND\_MODE.ts:60](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L60) |
+| <a id="property-darken"></a> `DARKEN` | `6` | `6` | Darken tint blend mode (6) | [src/material/TINT\_BLEND\_MODE.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L50) |
+| <a id="property-difference"></a> `DIFFERENCE` | `12` | `12` | Difference tint blend mode (12) | [src/material/TINT\_BLEND\_MODE.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L80) |
+| <a id="property-divide"></a> `DIVIDE` | `14` | `14` | Divide tint blend mode (14) | [src/material/TINT\_BLEND\_MODE.ts:90](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L90) |
+| <a id="property-exclusion"></a> `EXCLUSION` | `13` | `13` | Exclusion tint blend mode (13) | [src/material/TINT\_BLEND\_MODE.ts:85](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L85) |
+| <a id="property-hard_light"></a> `HARD_LIGHT` | `10` | `10` | Hard Light tint blend mode (10) | [src/material/TINT\_BLEND\_MODE.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L70) |
+| <a id="property-hue"></a> `HUE` | `19` | `19` | Hue tint blend mode (19) | [src/material/TINT\_BLEND\_MODE.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L115) |
+| <a id="property-lighten"></a> `LIGHTEN` | `2` | `2` | Lighten tint blend mode (2) | [src/material/TINT\_BLEND\_MODE.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L30) |
+| <a id="property-linear_burn"></a> `LINEAR_BURN` | `16` | `16` | Linear Burn tint blend mode (16) | [src/material/TINT\_BLEND\_MODE.ts:100](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L100) |
+| <a id="property-linear_dodge"></a> `LINEAR_DODGE` | `4` | `4` | Linear Dodge tint blend mode (4) | [src/material/TINT\_BLEND\_MODE.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L40) |
+| <a id="property-luminosity"></a> `LUMINOSITY` | `20` | `20` | Luminosity tint blend mode (20) | [src/material/TINT\_BLEND\_MODE.ts:120](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L120) |
+| <a id="property-multiply"></a> `MULTIPLY` | `1` | `1` | Multiply tint blend mode (1) | [src/material/TINT\_BLEND\_MODE.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L25) |
+| <a id="property-negation"></a> `NEGATION` | `22` | `22` | Negation tint blend mode (22) | [src/material/TINT\_BLEND\_MODE.ts:130](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L130) |
+| <a id="property-normal"></a> `NORMAL` | `0` | `0` | Normal tint blend mode (0) | [src/material/TINT\_BLEND\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L20) |
+| <a id="property-overlay"></a> `OVERLAY` | `7` | `7` | Overlay tint blend mode (7) | [src/material/TINT\_BLEND\_MODE.ts:55](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L55) |
+| <a id="property-pin_light"></a> `PIN_LIGHT` | `17` | `17` | Pin Light tint blend mode (17) | [src/material/TINT\_BLEND\_MODE.ts:105](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L105) |
+| <a id="property-saturation"></a> `SATURATION` | `18` | `18` | Saturation tint blend mode (18) | [src/material/TINT\_BLEND\_MODE.ts:110](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L110) |
+| <a id="property-screen"></a> `SCREEN` | `3` | `3` | Screen tint blend mode (3) | [src/material/TINT\_BLEND\_MODE.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L35) |
+| <a id="property-soft_light"></a> `SOFT_LIGHT` | `11` | `11` | Soft Light tint blend mode (11) | [src/material/TINT\_BLEND\_MODE.ts:75](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L75) |
+| <a id="property-subtract"></a> `SUBTRACT` | `5` | `5` | Subtract tint blend mode (5) | [src/material/TINT\_BLEND\_MODE.ts:45](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L45) |
+| <a id="property-vivid_light"></a> `VIVID_LIGHT` | `15` | `15` | Vivid Light tint blend mode (15) | [src/material/TINT\_BLEND\_MODE.ts:95](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/TINT_BLEND_MODE.ts#L95) |
 
 ## See
 

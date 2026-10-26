@@ -8,7 +8,7 @@
 
 > **getVertexBindGroupLayoutDescriptorFromShaderInfo**(`SHADER_INFO`, `targetGroupIndex`, `overrideEntries?`): `GPUBindGroupLayoutDescriptor`
 
-Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L244)
+Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:244](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L244)
 
 파싱된 셰이더 정보로부터 버텍스 스테이지(GPUShaderStage.VERTEX)용 바인드 그룹 레이아웃 디스크립터를 생성합니다.
 

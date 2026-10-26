@@ -8,7 +8,7 @@
 
 > **bakeFoliageImpostor**(`redGPUContext`, `renderUnits`, `bakeName?`): [`FoliageBakeResult`](../interfaces/FoliageBakeResult.md)
 
-Defined in: [src/landscape/foliage/core/baking/impostor/bakeFoliageImpostor.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/baking/impostor/bakeFoliageImpostor.ts#L217)
+Defined in: [src/landscape/foliage/core/baking/impostor/bakeFoliageImpostor.ts:217](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/baking/impostor/bakeFoliageImpostor.ts#L217)
 
 지정된 렌더 유닛 목록을 반구형 팔면체(Hemi-Octahedral) 격자 시점에서 렌더링하여 원거리 임포스터용 아틀라스 텍스처(BaseColor, Normal, ORM)를 베이킹합니다.
 

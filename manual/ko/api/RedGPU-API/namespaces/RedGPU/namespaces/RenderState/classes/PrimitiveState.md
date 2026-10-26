@@ -6,7 +6,7 @@
 
 # Class: PrimitiveState
 
-Defined in: [src/renderState/PrimitiveState.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L31)
+Defined in: [src/renderState/PrimitiveState.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L31)
 
 객체의 프리미티브(Primitive) 토폴로지, 앞면 방향 및 면 컬링 방식을 제어하는 렌더 상태 클래스입니다.
 
@@ -27,7 +27,7 @@ primitiveState.cullMode = RedGPU.GPU_CULL_MODE.BACK;
 
 > **new PrimitiveState**(`targetObject3D`): `PrimitiveState`
 
-Defined in: [src/renderState/PrimitiveState.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L57)
+Defined in: [src/renderState/PrimitiveState.ts:57](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L57)
 
 PrimitiveState 인스턴스를 생성합니다.
 
@@ -47,7 +47,7 @@ PrimitiveState 인스턴스를 생성합니다.
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/renderState/PrimitiveState.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L36)
+Defined in: [src/renderState/PrimitiveState.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L36)
 
 파이프라인 갱신 필요 여부
 
@@ -57,7 +57,7 @@ Defined in: [src/renderState/PrimitiveState.ts:36](https://github.com/redcamel/R
 
 > **state**: `GPUPrimitiveState`
 
-Defined in: [src/renderState/PrimitiveState.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L41)
+Defined in: [src/renderState/PrimitiveState.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L41)
 
 최종 생성된 `GPUPrimitiveState` 상태 객체
 
@@ -69,7 +69,7 @@ Defined in: [src/renderState/PrimitiveState.ts:41](https://github.com/redcamel/R
 
 > **get** **cullMode**(): `GPUCullMode`
 
-Defined in: [src/renderState/PrimitiveState.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L127)
+Defined in: [src/renderState/PrimitiveState.ts:127](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L127)
 
 면 컬링(Culling) 모드를 반환하거나 설정합니다.
 
@@ -83,7 +83,7 @@ Defined in: [src/renderState/PrimitiveState.ts:127](https://github.com/redcamel/
 
 > **set** **cullMode**(`mode`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L131)
+Defined in: [src/renderState/PrimitiveState.ts:131](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L131)
 
 ##### Parameters
 
@@ -103,7 +103,7 @@ Defined in: [src/renderState/PrimitiveState.ts:131](https://github.com/redcamel/
 
 > **get** **frontFace**(): `GPUFrontFace`
 
-Defined in: [src/renderState/PrimitiveState.ts:108](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L108)
+Defined in: [src/renderState/PrimitiveState.ts:108](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L108)
 
 폴리곤의 앞면(Front Face) 판별 방향을 반환하거나 설정합니다.
 
@@ -117,7 +117,7 @@ Defined in: [src/renderState/PrimitiveState.ts:108](https://github.com/redcamel/
 
 > **set** **frontFace**(`face`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:112](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L112)
+Defined in: [src/renderState/PrimitiveState.ts:112](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L112)
 
 ##### Parameters
 
@@ -137,7 +137,7 @@ Defined in: [src/renderState/PrimitiveState.ts:112](https://github.com/redcamel/
 
 > **get** **stripIndexFormat**(): `GPUIndexFormat`
 
-Defined in: [src/renderState/PrimitiveState.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L89)
+Defined in: [src/renderState/PrimitiveState.ts:89](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L89)
 
 스트립 토폴로지 사용 시 인덱스 포맷을 반환하거나 설정합니다.
 
@@ -151,7 +151,7 @@ Defined in: [src/renderState/PrimitiveState.ts:89](https://github.com/redcamel/R
 
 > **set** **stripIndexFormat**(`format`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L93)
+Defined in: [src/renderState/PrimitiveState.ts:93](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L93)
 
 ##### Parameters
 
@@ -171,7 +171,7 @@ Defined in: [src/renderState/PrimitiveState.ts:93](https://github.com/redcamel/R
 
 > **get** **topology**(): `GPUPrimitiveTopology`
 
-Defined in: [src/renderState/PrimitiveState.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L70)
+Defined in: [src/renderState/PrimitiveState.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L70)
 
 프리미티브 토폴로지를 반환하거나 설정합니다.
 
@@ -185,7 +185,7 @@ Defined in: [src/renderState/PrimitiveState.ts:70](https://github.com/redcamel/R
 
 > **set** **topology**(`value`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L74)
+Defined in: [src/renderState/PrimitiveState.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L74)
 
 ##### Parameters
 
@@ -205,7 +205,7 @@ Defined in: [src/renderState/PrimitiveState.ts:74](https://github.com/redcamel/R
 
 > **get** **unclippedDepth**(): `boolean`
 
-Defined in: [src/renderState/PrimitiveState.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L146)
+Defined in: [src/renderState/PrimitiveState.ts:146](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L146)
 
 깊이 클리핑 비활성화 여부를 반환하거나 설정합니다.
 
@@ -219,7 +219,7 @@ Defined in: [src/renderState/PrimitiveState.ts:146](https://github.com/redcamel/
 
 > **set** **unclippedDepth**(`state`): `void`
 
-Defined in: [src/renderState/PrimitiveState.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/PrimitiveState.ts#L150)
+Defined in: [src/renderState/PrimitiveState.ts:150](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/renderState/PrimitiveState.ts#L150)
 
 ##### Parameters
 

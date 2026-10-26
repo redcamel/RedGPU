@@ -8,7 +8,7 @@
 
 > `const` **getViewDirection**: `string` = `getViewDirection_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:644](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L644)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:644](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L644)
 
 월드 좌표와 카메라 위치를 사용하여 정규화된 시선 방향 벡터(카메라를 향하는 벡터)를 계산합니다.
 

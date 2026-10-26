@@ -6,7 +6,7 @@
 
 # Class: ScatterRenderUnit
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L101)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L101)
 
 스캐터 시스템에서 단일 `drawIndexedIndirect` 드로우콜 단위가 되는 서브메시/LOD 렌더 유닛 클래스입니다.
 
@@ -24,7 +24,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:101](https://github
 
 > **new ScatterRenderUnit**(`init`): `ScatterRenderUnit`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L125)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:125](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L125)
 
 `ScatterRenderUnit` 인스턴스를 초기화합니다.
 
@@ -46,7 +46,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:125](https://github
 
 > **get** **baseColorTexture**(): [`BitmapTexture`](../../../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:300](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L300)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:300](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L300)
 
 렌더 유닛의 베이스 컬러 `BitmapTexture`를 반환하거나 설정합니다.
 
@@ -60,7 +60,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:300](https://github
 
 > **set** **baseColorTexture**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L304)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L304)
 
 ##### Parameters
 
@@ -80,7 +80,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:304](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **firstIndex**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:208](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L208)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:208](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L208)
 
 통합 인덱스 버퍼 내 시작 인덱스 오프셋을 반환합니다.
 
@@ -98,7 +98,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:208](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **geometry**(): [`Geometry`](../../../../../../../classes/Geometry.md)
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:172](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L172)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:172](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L172)
 
 렌더 유닛의 `Geometry` 인스턴스를 반환합니다.
 
@@ -116,7 +116,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:172](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **indexCount**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:196](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L196)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:196](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L196)
 
 렌더 유닛의 인덱스 개수를 반환합니다.
 
@@ -134,7 +134,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:196](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **indexFormat**(): `GPUIndexFormat`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:232](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L232)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:232](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L232)
 
 인덱스 버퍼의 `GPUIndexFormat`을 반환합니다.
 
@@ -152,7 +152,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:232](https://github
 
 > **get** **indirectOffsetBytes**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:256](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L256)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:256](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L256)
 
 인다이렉트 드로우 버퍼 내 바이트 오프셋을 반환하거나 설정합니다.
 
@@ -166,7 +166,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:256](https://github
 
 > **set** **indirectOffsetBytes**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L260)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L260)
 
 ##### Parameters
 
@@ -186,7 +186,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:260](https://github
 
 > **get** **instanceBufferOffset**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:272](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L272)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:272](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L272)
 
 컬링된 인스턴스 버퍼 내 시작 인스턴스 오프셋을 반환하거나 설정합니다.
 
@@ -200,7 +200,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:272](https://github
 
 > **set** **instanceBufferOffset**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L276)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L276)
 
 ##### Parameters
 
@@ -220,7 +220,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:276](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **isIndexed**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L220)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:220](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L220)
 
 인덱스 버퍼 기반 렌더링 여부를 반환합니다.
 
@@ -238,7 +238,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:220](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **isMasked**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:328](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L328)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:328](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L328)
 
 알파 마스크(Alpha Cutoff) 머티리얼 사용 여부를 반환합니다.
 
@@ -256,7 +256,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:328](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **lodIndex**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:316](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L316)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:316](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L316)
 
 이 렌더 유닛이 속한 LOD 레벨 인덱스를 반환합니다.
 
@@ -274,7 +274,7 @@ LOD 레벨 인덱스
 
 > <span class="readonly-badge">readonly</span> **get** **material**(): `any`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:288](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L288)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:288](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L288)
 
 렌더 유닛에 연결된 머티리얼 인스턴스를 반환합니다.
 
@@ -292,7 +292,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:288](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **strideBytes**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L244)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:244](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L244)
 
 정점당 바이트 스트라이드를 반환합니다.
 
@@ -310,7 +310,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:244](https://github
 
 > <span class="readonly-badge">readonly</span> **get** **vertexCount**(): `number`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L184)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:184](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L184)
 
 렌더 유닛의 정점 개수를 반환합니다.
 
@@ -326,7 +326,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:184](https://github
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:355](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L355)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:355](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L355)
 
 렌더 유닛이 참조하는 `Geometry` 리소스를 파기합니다.
 
@@ -340,7 +340,7 @@ Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:355](https://github
 
 > **draw**(`passEncoder`, `indirectGPUBuffer`, `offsetBytes?`): `void`
 
-Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:346](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterRenderUnit.ts#L346)
+Defined in: [src/landscape/core/scatter/ScatterRenderUnit.ts:346](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterRenderUnit.ts#L346)
 
 전달된 렌더 패스 또는 렌더 번들 인코더에 `drawIndexedIndirect` 명령을 기록합니다.
 

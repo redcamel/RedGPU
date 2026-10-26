@@ -8,7 +8,7 @@
 
 > **defineBoolean**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/defineBoolean.ts#L85)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:85](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/defineBoolean.ts#L85)
 
 대상 클래스의 프로토타입에 GPU 유니폼 버퍼와 연동되는 불리언(`boolean`) 프로퍼티를 동적으로 정의합니다.
 

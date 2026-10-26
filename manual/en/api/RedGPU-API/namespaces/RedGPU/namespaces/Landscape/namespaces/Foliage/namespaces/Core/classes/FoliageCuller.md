@@ -6,7 +6,7 @@
 
 # Class: FoliageCuller
 
-Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/culling/FoliageCuller.ts#L23)
+Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/culling/FoliageCuller.ts#L23)
 
 Class that performs frustum culling, HZB occlusion culling, distance-based LOD selection, and shadow cascade culling for foliage instances via GPU compute shaders.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new FoliageCuller**(`redGPUContext`, `megaBuffer?`): `FoliageCuller`
 
-Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/culling/FoliageCuller.ts#L44)
+Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/culling/FoliageCuller.ts#L44)
 
 Creates a `FoliageCuller` instance.
 
@@ -59,7 +59,7 @@ Creates a `FoliageCuller` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **baker**(): [`FoliageInstanceBaker`](FoliageInstanceBaker.md)
 
-Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/culling/FoliageCuller.ts#L59)
+Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:59](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/culling/FoliageCuller.ts#L59)
 
 Returns the foliage instance baker (`FoliageInstanceBaker`) instance.
 
@@ -81,7 +81,7 @@ Returns the foliage instance baker (`FoliageInstanceBaker`) instance.
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/culling/FoliageCuller.ts#L188)
+Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:188](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/culling/FoliageCuller.ts#L188)
 
 Releases the culling pipeline, baker, and internal reference resources.
 
@@ -101,7 +101,7 @@ Releases the culling pipeline, baker, and internal reference resources.
 
 > **dispatchPass**(`computePass`): `void`
 
-Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/culling/FoliageCuller.ts#L130)
+Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:130](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/culling/FoliageCuller.ts#L130)
 
 Records unified foliage culling compute shader dispatch commands into the compute pass encoder.
 
@@ -123,7 +123,7 @@ Records unified foliage culling compute shader dispatch commands into the comput
 
 > **recordResetCommands**(`encoder`): `void`
 
-Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/culling/FoliageCuller.ts#L116)
+Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:116](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/culling/FoliageCuller.ts#L116)
 
 Records commands to reset main and shadow indirect draw buffer counters into the encoder.
 
@@ -145,7 +145,7 @@ Records commands to reset main and shadow indirect draw buffer counters into the
 
 > **update**(`foliageList`, `renderViewStateData`): `void`
 
-Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/culling/FoliageCuller.ts#L74)
+Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:74](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/culling/FoliageCuller.ts#L74)
 
 Updates the unified global culling uniform buffer with the current frame's camera view matrix, FOV, HZB texture, and cascade frustum data.
 
@@ -168,7 +168,7 @@ Updates the unified global culling uniform buffer with the current frame's camer
 
 > **updateAndDispatch**(`foliageList`, `renderViewStateData`): `void`
 
-Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:160](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/culling/FoliageCuller.ts#L160)
+Defined in: [src/landscape/foliage/core/culling/FoliageCuller.ts:160](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/culling/FoliageCuller.ts#L160)
 
 Updates global culling uniforms and registers indirect buffer reset and culling dispatch in the `CommandEncoderManager` pre-process pass.
 
@@ -196,7 +196,7 @@ Updates global culling uniforms and registers indirect buffer reset and culling 
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -220,7 +220,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **bindGroupLayout**(): `GPUBindGroupLayout`
 
-Defined in: [src/landscape/core/scatter/AScatterCuller.ts:52](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterCuller.ts#L52)
+Defined in: [src/landscape/core/scatter/AScatterCuller.ts:52](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterCuller.ts#L52)
 
 Returns the bind group layout of the compute culling shader.
 
@@ -244,7 +244,7 @@ Bind group layout (`GPUBindGroupLayout`), or `null` if not initialized
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -268,7 +268,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **computePipeline**(): `GPUComputePipeline`
 
-Defined in: [src/landscape/core/scatter/AScatterCuller.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterCuller.ts#L40)
+Defined in: [src/landscape/core/scatter/AScatterCuller.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterCuller.ts#L40)
 
 Returns the created WebGPU compute pipeline.
 
@@ -292,7 +292,7 @@ Compute pipeline (`GPUComputePipeline`), or `null` if not initialized
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -316,7 +316,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -340,7 +340,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -354,7 +354,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -380,7 +380,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -404,7 +404,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -428,7 +428,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -456,7 +456,7 @@ UUID string of the object
 
 > **dispatchCompute**(`computePass`, `bindGroup`, `totalInstances`, `workgroupSize?`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterCuller.ts:133](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterCuller.ts#L133)
+Defined in: [src/landscape/core/scatter/AScatterCuller.ts:133](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterCuller.ts#L133)
 
 Dispatches compute culling workgroups based on the total instance count and workgroup size.
 
@@ -485,7 +485,7 @@ Dispatches compute culling workgroups based on the total instance count and work
 
 > **initComputePipeline**(`shaderName`, `shaderSource`, `labelPrefix`, `entryPoint?`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterCuller.ts:82](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterCuller.ts#L82)
+Defined in: [src/landscape/core/scatter/AScatterCuller.ts:82](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterCuller.ts#L82)
 
 Parses the WGSL compute shader source and initializes the bind group layout and compute pipeline.
 

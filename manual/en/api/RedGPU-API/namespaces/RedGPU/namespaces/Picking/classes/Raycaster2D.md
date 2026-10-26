@@ -6,7 +6,7 @@
 
 # Class: Raycaster2D
 
-Defined in: [src/picking/Raycaster2D.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster2D.ts#L23)
+Defined in: [src/picking/Raycaster2D.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster2D.ts#L23)
 
 Class that reverse-tracks NDC coordinates in a `View2D` environment to calculate intersections, local coordinates, and UVs for 2D objects.
 
@@ -28,7 +28,7 @@ const intersects = raycaster.intersectObjects(scene.children);
 
 > **new Raycaster2D**(): `Raycaster2D`
 
-Defined in: [src/picking/Raycaster2D.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster2D.ts#L40)
+Defined in: [src/picking/Raycaster2D.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster2D.ts#L40)
 
 Creates a `Raycaster2D` instance.
 
@@ -42,7 +42,7 @@ Creates a `Raycaster2D` instance.
 
 > <span class="readonly-badge">readonly</span> **ray**: [`Ray`](../../Math/classes/Ray.md)
 
-Defined in: [src/picking/Raycaster2D.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster2D.ts#L28)
+Defined in: [src/picking/Raycaster2D.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster2D.ts#L28)
 
 Internally managed `Ray` object maintained for compatibility with `Raycaster3D`
 
@@ -52,7 +52,7 @@ Internally managed `Ray` object maintained for compatibility with `Raycaster3D`
 
 > **intersectObject**(`mesh`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster2D.ts:96](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster2D.ts#L96)
+Defined in: [src/picking/Raycaster2D.ts:96](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster2D.ts#L96)
 
 Checks for intersection with a single mesh object.
 
@@ -80,7 +80,7 @@ Array of intersection results sorted by distance (`RayIntersectResult[]`)
 
 > **intersectObjects**(`meshes`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster2D.ts:121](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster2D.ts#L121)
+Defined in: [src/picking/Raycaster2D.ts:121](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster2D.ts#L121)
 
 Checks for intersections with multiple mesh objects.
 
@@ -108,7 +108,7 @@ Array of intersection results sorted by distance (`RayIntersectResult[]`)
 
 > **setFromCamera**(`screenX`, `screenY`, `view`): `void`
 
-Defined in: [src/picking/Raycaster2D.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster2D.ts#L63)
+Defined in: [src/picking/Raycaster2D.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/picking/Raycaster2D.ts#L63)
 
 Sets the picking point based on screen coordinates and `View2D` information.
 

@@ -6,7 +6,7 @@
 
 # Interface: CommandPhaseStats
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L12)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:12](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L12)
 
 Interface defining command submission and pass statistics per execution phase.
 
@@ -16,7 +16,7 @@ Interface defining command submission and pass statistics per execution phase.
 
 > **Command Buffers**: `number`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L22)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:22](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L22)
 
 Total number of submitted command buffers
 
@@ -26,7 +26,7 @@ Total number of submitted command buffers
 
 > **Compute Passes**: `object`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:43](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L43)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:43](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L43)
 
 Compute pass execution statistics
 
@@ -48,7 +48,7 @@ List of labels for executed compute passes
 
 > `optional` **Phase?**: [`CommandEncoderType`](../type-aliases/CommandEncoderType.md)
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L17)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:17](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L17)
 
 Execution phase type of the encoder
 
@@ -58,7 +58,7 @@ Execution phase type of the encoder
 
 > **Raw Usages**: `number`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L59)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:59](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L59)
 
 Number of direct encoder usages (`useEncoder` call count)
 
@@ -68,7 +68,7 @@ Number of direct encoder usages (`useEncoder` call count)
 
 > **Render Passes**: `object`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L27)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:27](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/commandEncoderManager/CommandEncoderManager.ts#L27)
 
 Render pass execution statistics
 

@@ -8,7 +8,7 @@
 
 > **PhysicsBodyType** = *typeof* [`PHYSICS_BODY_TYPE`](../variables/PHYSICS_BODY_TYPE.md)\[keyof *typeof* [`PHYSICS_BODY_TYPE`](../variables/PHYSICS_BODY_TYPE.md)\]
 
-Defined in: [src/physics/PhysicsBodyType.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/PhysicsBodyType.ts#L47)
+Defined in: [src/physics/PhysicsBodyType.ts:47](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/physics/PhysicsBodyType.ts#L47)
 
 **`Experimental`**
 

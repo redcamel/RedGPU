@@ -8,7 +8,7 @@
 
 > **mergerNoiseHelperFunctions**(`baseHelperFunctions`, `addHelperFunctions`): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L60)
+Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:60](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L60)
 
 Merges the base WGSL helper function code with additional helper function code using line breaks.
 

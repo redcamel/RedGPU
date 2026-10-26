@@ -8,7 +8,7 @@
 
 > **computeFrustumPlanesFlat**(`projectionMatrix`, `viewMatrix`, `out?`): `Float32Array`
 
-Defined in: [src/math/computeFrustumPlanes.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/computeFrustumPlanes.ts#L104)
+Defined in: [src/math/computeFrustumPlanes.ts:104](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/computeFrustumPlanes.ts#L104)
 
 투영 행렬과 뷰 행렬로부터 정규화된 6개의 뷰 프러스텀 평면을 1차원 `Float32Array`(길이 24)로 계산합니다.
 

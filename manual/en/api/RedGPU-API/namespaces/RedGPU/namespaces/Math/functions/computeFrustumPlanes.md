@@ -8,7 +8,7 @@
 
 > **computeFrustumPlanes**(`projectionMatrix`, `viewMatrix`, `out?`): `number`[][]
 
-Defined in: [src/math/computeFrustumPlanes.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/computeFrustumPlanes.ts#L28)
+Defined in: [src/math/computeFrustumPlanes.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/computeFrustumPlanes.ts#L28)
 
 Multiplies the projection and view matrices to compute an array of 6 normalized view frustum plane equations (`[A, B, C, D]`).
 

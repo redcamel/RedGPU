@@ -6,7 +6,7 @@
 
 # Class: VertexGPURenderInfo
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L16)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:16](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L16)
 
 GPU 버텍스 렌더링 파이프라인 및 리소스 정보를 관리하는 클래스입니다.
 
@@ -20,7 +20,7 @@ GPU 버텍스 렌더링 파이프라인 및 리소스 정보를 관리하는 클
 
 > **new VertexGPURenderInfo**(`vertexShaderModule`, `vertexShaderSourceVariant`, `vertexShaderVariantConditionalBlocks`, `vertexUniformInfo`, `vertexBindGroupLayout`, `vertexUniformBuffer`, `vertexUniformBindGroup`, `pipeline`, `shadowPipeline?`, `pickingPipeline?`): `VertexGPURenderInfo`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:108](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L108)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:108](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L108)
 
 VertexGPURenderInfo 인스턴스를 생성합니다.
 
@@ -49,7 +49,7 @@ VertexGPURenderInfo 인스턴스를 생성합니다.
 
 > **pickingPipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L71)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:71](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L71)
 
 피킹 렌더 파이프라인
 
@@ -59,7 +59,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:71](https://github.com
 
 > **pipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L61)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:61](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L61)
 
 기본 렌더 파이프라인
 
@@ -69,7 +69,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:61](https://github.com
 
 > **shadowPipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:66](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L66)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:66](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L66)
 
 그림자 렌더 파이프라인
 
@@ -79,7 +79,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:66](https://github.com
 
 > **vertexBindGroupLayout**: `GPUBindGroupLayout`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L46)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L46)
 
 버텍스 바인드 그룹 레이아웃
 
@@ -89,7 +89,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:46](https://github.com
 
 > **vertexShaderModule**: `GPUShaderModule`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L21)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L21)
 
 버텍스 셰이더 모듈
 
@@ -99,7 +99,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:21](https://github.com
 
 > **vertexShaderSourceVariant**: [`ShaderVariantGenerator`](../../../../Resource/namespaces/CoreWGSLParser/classes/ShaderVariantGenerator.md)
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L26)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:26](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L26)
 
 버텍스 셰이더 바리안트 생성기
 
@@ -109,7 +109,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:26](https://github.com
 
 > **vertexShaderVariantConditionalBlocks**: `string`[]
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L31)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:31](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L31)
 
 버텍스 셰이더 조건부 블록 목록
 
@@ -119,7 +119,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:31](https://github.com
 
 > **vertexStructInfo**: `any`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L36)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L36)
 
 버텍스 구조체 파싱 정보
 
@@ -129,7 +129,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:36](https://github.com
 
 > **vertexUniformBindGroup**: `GPUBindGroup`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L51)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L51)
 
 버텍스 유니폼 바인드 그룹
 
@@ -139,7 +139,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:51](https://github.com
 
 > **vertexUniformBuffer**: [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md) \| [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L56)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L56)
 
 버텍스 유니폼 또는 스토리지 버퍼
 
@@ -149,6 +149,6 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:56](https://github.com
 
 > **vertexUniformInfo**: `any`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/VertexGPURenderInfo.ts#L41)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/VertexGPURenderInfo.ts#L41)
 
 버텍스 유니폼 정보

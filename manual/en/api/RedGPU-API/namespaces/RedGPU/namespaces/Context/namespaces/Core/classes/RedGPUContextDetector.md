@@ -6,7 +6,7 @@
 
 # Class: RedGPUContextDetector
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L15)
+Defined in: [src/context/core/RedGPUContextDetector.ts:15](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L15)
 
 Class that detects and analyzes GPU adapter/device features and limits, as well as browser, platform, and hardware environments.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new RedGPUContextDetector**(`redGPUContext`): `RedGPUContextDetector`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:43](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L43)
+Defined in: [src/context/core/RedGPUContextDetector.ts:43](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L43)
 
 Creates a RedGPUContextDetector instance.
 
@@ -58,7 +58,7 @@ Creates a RedGPUContextDetector instance.
 
 > <span class="readonly-badge">readonly</span> **get** **activeFeatures**(): `Record`\<`string`, `boolean`\>
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:129](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L129)
+Defined in: [src/context/core/RedGPUContextDetector.ts:129](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L129)
 
 Returns a map (`Record<string, boolean>`) of all known features and whether they are active on the GPU device.
 
@@ -78,7 +78,7 @@ Feature activation map of the GPU device
 
 > <span class="readonly-badge">readonly</span> **get** **activeLimits**(): `GPUSupportedLimits`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:153](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L153)
+Defined in: [src/context/core/RedGPUContextDetector.ts:153](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L153)
 
 Returns the limits (`GPUSupportedLimits`) active on the GPU device.
 
@@ -98,7 +98,7 @@ Active limits of the GPU device
 
 > <span class="readonly-badge">readonly</span> **get** **adapterInfo**(): `GPUAdapterInfo`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:177](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L177)
+Defined in: [src/context/core/RedGPUContextDetector.ts:177](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L177)
 
 Returns the GPU adapter information.
 
@@ -118,7 +118,7 @@ Returns the GPU adapter information.
 
 > <span class="readonly-badge">readonly</span> **get** **deviceMemory**(): `number`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:297](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L297)
+Defined in: [src/context/core/RedGPUContextDetector.ts:297](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L297)
 
 Returns the approximate device memory capacity in GB (default: 4).
 
@@ -138,7 +138,7 @@ Device memory capacity (GB)
 
 > <span class="readonly-badge">readonly</span> **get** **gpuAdapter**(): `GPUAdapter`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:165](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L165)
+Defined in: [src/context/core/RedGPUContextDetector.ts:165](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L165)
 
 Returns the GPU adapter object.
 
@@ -158,7 +158,7 @@ Returns the GPU adapter object.
 
 > <span class="readonly-badge">readonly</span> **get** **hardwareConcurrency**(): `number`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L285)
+Defined in: [src/context/core/RedGPUContextDetector.ts:285](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L285)
 
 Returns the number of logical processor cores (default: 4).
 
@@ -178,7 +178,7 @@ Number of logical processor cores
 
 > <span class="readonly-badge">readonly</span> **get** **isAndroid**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:237](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L237)
+Defined in: [src/context/core/RedGPUContextDetector.ts:237](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L237)
 
 Returns whether the operating system is Android.
 
@@ -198,7 +198,7 @@ Whether it is Android
 
 > <span class="readonly-badge">readonly</span> **get** **isChromium**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:249](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L249)
+Defined in: [src/context/core/RedGPUContextDetector.ts:249](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L249)
 
 Returns whether the browser is Chromium-based.
 
@@ -218,7 +218,7 @@ Whether it is a Chromium-based browser
 
 > <span class="readonly-badge">readonly</span> **get** **isFallbackAdapter**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:189](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L189)
+Defined in: [src/context/core/RedGPUContextDetector.ts:189](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L189)
 
 Returns whether the adapter is a fallback adapter (e.g., software renderer).
 
@@ -238,7 +238,7 @@ Whether it is a fallback adapter
 
 > <span class="readonly-badge">readonly</span> **get** **isFirefox**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:273](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L273)
+Defined in: [src/context/core/RedGPUContextDetector.ts:273](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L273)
 
 Returns whether the browser is Firefox.
 
@@ -258,7 +258,7 @@ Whether it is Firefox
 
 > <span class="readonly-badge">readonly</span> **get** **isIOS**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:225](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L225)
+Defined in: [src/context/core/RedGPUContextDetector.ts:225](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L225)
 
 Returns whether the operating system is iOS.
 
@@ -278,7 +278,7 @@ Whether it is iOS
 
 > <span class="readonly-badge">readonly</span> **get** **isMobile**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:213](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L213)
+Defined in: [src/context/core/RedGPUContextDetector.ts:213](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L213)
 
 Returns whether the current environment is mobile (smartphones, tablets, etc.).
 
@@ -298,7 +298,7 @@ Whether it is a mobile environment
 
 > <span class="readonly-badge">readonly</span> **get** **isSafari**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:261](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L261)
+Defined in: [src/context/core/RedGPUContextDetector.ts:261](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L261)
 
 Returns whether the browser is Safari.
 
@@ -318,7 +318,7 @@ Whether it is Safari
 
 > <span class="readonly-badge">readonly</span> **get** **supportedFeatures**(): `Record`\<`string`, `boolean`\>
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L117)
+Defined in: [src/context/core/RedGPUContextDetector.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L117)
 
 Returns a map (`Record<string, boolean>`) of all known features and whether they are supported by the GPU adapter.
 
@@ -338,7 +338,7 @@ Feature support map of the GPU adapter
 
 > <span class="readonly-badge">readonly</span> **get** **supportedLimits**(): `GPUSupportedLimits`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:141](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L141)
+Defined in: [src/context/core/RedGPUContextDetector.ts:141](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L141)
 
 Returns the limits (`GPUSupportedLimits`) supported by the GPU adapter.
 
@@ -358,7 +358,7 @@ Supported limits of the GPU adapter
 
 > <span class="readonly-badge">readonly</span> **get** **userAgent**(): `string`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:201](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L201)
+Defined in: [src/context/core/RedGPUContextDetector.ts:201](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L201)
 
 Returns the browser's UserAgent string.
 
@@ -380,7 +380,7 @@ UserAgent string
 
 > **destroy**(): `void`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:305](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L305)
+Defined in: [src/context/core/RedGPUContextDetector.ts:305](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L305)
 
 Destroys the RedGPUContextDetector instance and releases internal GPU and environment references.
 
@@ -396,7 +396,7 @@ Destroys the RedGPUContextDetector instance and releases internal GPU and enviro
 
 > **toReport**(): `object`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:325](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L325)
+Defined in: [src/context/core/RedGPUContextDetector.ts:325](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L325)
 
 Returns a comprehensive report object containing detected platform, browser, hardware, and GPU information.
 
@@ -408,28 +408,28 @@ Report object containing platform, browser, hardware, and GPU information
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `browser` | `object` | [src/context/core/RedGPUContextDetector.ts:333](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L333) |
-| `browser.isChromium` | `boolean` | [src/context/core/RedGPUContextDetector.ts:334](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L334) |
-| `browser.isFirefox` | `boolean` | [src/context/core/RedGPUContextDetector.ts:336](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L336) |
-| `browser.isSafari` | `boolean` | [src/context/core/RedGPUContextDetector.ts:335](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L335) |
-| `gpu` | `object` | [src/context/core/RedGPUContextDetector.ts:342](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L342) |
-| `gpu.activeFeatures` | `object` | [src/context/core/RedGPUContextDetector.ts:349](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L349) |
-| `gpu.activeLimits` | `Record`\<`string`, `number`\> | [src/context/core/RedGPUContextDetector.ts:351](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L351) |
-| `gpu.architecture` | `string` | [src/context/core/RedGPUContextDetector.ts:344](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L344) |
-| `gpu.description` | `string` | [src/context/core/RedGPUContextDetector.ts:346](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L346) |
-| `gpu.device` | `string` | [src/context/core/RedGPUContextDetector.ts:345](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L345) |
-| `gpu.isFallback` | `boolean` | [src/context/core/RedGPUContextDetector.ts:347](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L347) |
-| `gpu.supportedFeatures` | `object` | [src/context/core/RedGPUContextDetector.ts:348](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L348) |
-| `gpu.supportedLimits` | `Record`\<`string`, `number`\> | [src/context/core/RedGPUContextDetector.ts:350](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L350) |
-| `gpu.vendor` | `string` | [src/context/core/RedGPUContextDetector.ts:343](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L343) |
-| `hardware` | `object` | [src/context/core/RedGPUContextDetector.ts:338](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L338) |
-| `hardware.deviceMemory` | `number` | [src/context/core/RedGPUContextDetector.ts:340](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L340) |
-| `hardware.hardwareConcurrency` | `number` | [src/context/core/RedGPUContextDetector.ts:339](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L339) |
-| `platform` | `object` | [src/context/core/RedGPUContextDetector.ts:327](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L327) |
-| `platform.isAndroid` | `boolean` | [src/context/core/RedGPUContextDetector.ts:330](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L330) |
-| `platform.isIOS` | `boolean` | [src/context/core/RedGPUContextDetector.ts:329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L329) |
-| `platform.isMobile` | `boolean` | [src/context/core/RedGPUContextDetector.ts:328](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L328) |
-| `platform.userAgent` | `string` | [src/context/core/RedGPUContextDetector.ts:331](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/context/core/RedGPUContextDetector.ts#L331) |
+| `browser` | `object` | [src/context/core/RedGPUContextDetector.ts:333](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L333) |
+| `browser.isChromium` | `boolean` | [src/context/core/RedGPUContextDetector.ts:334](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L334) |
+| `browser.isFirefox` | `boolean` | [src/context/core/RedGPUContextDetector.ts:336](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L336) |
+| `browser.isSafari` | `boolean` | [src/context/core/RedGPUContextDetector.ts:335](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L335) |
+| `gpu` | `object` | [src/context/core/RedGPUContextDetector.ts:342](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L342) |
+| `gpu.activeFeatures` | `object` | [src/context/core/RedGPUContextDetector.ts:349](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L349) |
+| `gpu.activeLimits` | `Record`\<`string`, `number`\> | [src/context/core/RedGPUContextDetector.ts:351](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L351) |
+| `gpu.architecture` | `string` | [src/context/core/RedGPUContextDetector.ts:344](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L344) |
+| `gpu.description` | `string` | [src/context/core/RedGPUContextDetector.ts:346](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L346) |
+| `gpu.device` | `string` | [src/context/core/RedGPUContextDetector.ts:345](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L345) |
+| `gpu.isFallback` | `boolean` | [src/context/core/RedGPUContextDetector.ts:347](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L347) |
+| `gpu.supportedFeatures` | `object` | [src/context/core/RedGPUContextDetector.ts:348](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L348) |
+| `gpu.supportedLimits` | `Record`\<`string`, `number`\> | [src/context/core/RedGPUContextDetector.ts:350](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L350) |
+| `gpu.vendor` | `string` | [src/context/core/RedGPUContextDetector.ts:343](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L343) |
+| `hardware` | `object` | [src/context/core/RedGPUContextDetector.ts:338](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L338) |
+| `hardware.deviceMemory` | `number` | [src/context/core/RedGPUContextDetector.ts:340](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L340) |
+| `hardware.hardwareConcurrency` | `number` | [src/context/core/RedGPUContextDetector.ts:339](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L339) |
+| `platform` | `object` | [src/context/core/RedGPUContextDetector.ts:327](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L327) |
+| `platform.isAndroid` | `boolean` | [src/context/core/RedGPUContextDetector.ts:330](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L330) |
+| `platform.isIOS` | `boolean` | [src/context/core/RedGPUContextDetector.ts:329](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L329) |
+| `platform.isMobile` | `boolean` | [src/context/core/RedGPUContextDetector.ts:328](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L328) |
+| `platform.userAgent` | `string` | [src/context/core/RedGPUContextDetector.ts:331](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/context/core/RedGPUContextDetector.ts#L331) |
 
 ***
 
@@ -444,7 +444,7 @@ Report object containing platform, browser, hardware, and GPU information
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -468,7 +468,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -492,7 +492,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -516,7 +516,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -540,7 +540,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -554,7 +554,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -580,7 +580,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -604,7 +604,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -628,7 +628,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

@@ -8,7 +8,7 @@
 
 > **screenToWorld**(`screenX`, `screenY`, `view`): `number`[]
 
-Defined in: [src/math/coordinates/screenToWorld.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/screenToWorld.ts#L34)
+Defined in: [src/math/coordinates/screenToWorld.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/coordinates/screenToWorld.ts#L34)
 
 화면의 2D 픽셀 좌표(`screenX`, `screenY`)를 뷰(`AView`)의 역 투영-뷰 행렬을 통해 3D 월드 좌표(`[x, y, z]`)로 변환합니다.
 

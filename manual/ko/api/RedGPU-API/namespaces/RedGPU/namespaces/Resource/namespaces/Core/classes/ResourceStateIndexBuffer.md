@@ -6,7 +6,7 @@
 
 # Class: ResourceStateIndexBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L14)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L14)
 
 `IndexBuffer`의 리소스 관리 상태를 나타내는 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **new ResourceStateIndexBuffer**(`buffer`): `ResourceStateIndexBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L40)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L40)
 
 ResourceStateIndexBuffer 인스턴스를 생성합니다.
 
@@ -40,7 +40,7 @@ ResourceStateIndexBuffer 인스턴스를 생성합니다.
 
 > **buffer**: [`IndexBuffer`](../../../classes/IndexBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L19)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L19)
 
 관리 대상 인덱스 버퍼 인스턴스
 
@@ -50,7 +50,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **label**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L24)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L24)
 
 버퍼 라벨 또는 이름
 
@@ -60,7 +60,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L29)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:29](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L29)
 
 고유 식별자(UUID)
 
@@ -72,7 +72,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L54)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L54)
 
 리소스 참조 횟수를 반환하거나 설정합니다.
 
@@ -86,7 +86,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L58)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L58)
 
 ##### Parameters
 

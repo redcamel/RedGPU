@@ -8,7 +8,7 @@
 
 > **calculateGeometryAABB**(`vertexBuffer`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateGeometryAABB.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateGeometryAABB.ts#L21)
+Defined in: [src/bound/math/calculateGeometryAABB.ts:21](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/bound/math/calculateGeometryAABB.ts#L21)
 
 `VertexBuffer`의 정점 위치 데이터를 순회하여 로컬 축 정렬 경계 상자(`AABB`)를 계산합니다.
 

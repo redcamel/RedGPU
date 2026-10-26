@@ -6,7 +6,7 @@
 
 # Class: FoliageSlotPooler
 
-Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L18)
+Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:18](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L18)
 
 Pooler class that manages dynamic uniform slot allocation and data per foliage render unit.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new FoliageSlotPooler**(`redGPUContext`): `FoliageSlotPooler`
 
-Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L27)
+Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:27](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L27)
 
 Creates a `FoliageSlotPooler` instance.
 
@@ -60,7 +60,7 @@ Creates a `FoliageSlotPooler` instance.
 
 > **flushSlotBytes**(`slot`): `void`
 
-Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:207](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L207)
+Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:207](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L207)
 
 Uploads CPU buffer data for the specified slot to the GPU mega uniform buffer.
 
@@ -82,7 +82,7 @@ Uploads CPU buffer data for the specified slot to the GPU mega uniform buffer.
 
 > **updateGroundBlendParams**(`slot`, `strength`, `range`): `void`
 
-Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:186](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L186)
+Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:186](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L186)
 
 Updates ground blend parameters in the CPU buffer for the specified slot.
 
@@ -106,7 +106,7 @@ Updates ground blend parameters in the CPU buffer for the specified slot.
 
 > **updateReceiveShadow**(`slot`, `receiveShadow`): `void`
 
-Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:224](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L224)
+Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:224](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L224)
 
 Updates the shadow receiving flag for the specified slot and immediately uploads it to the GPU buffer.
 
@@ -129,7 +129,7 @@ Updates the shadow receiving flag for the specified slot and immediately uploads
 
 > **updateWindParams**(`slot`, `trunkBendScale`, `leafFlutterScale`, `foliageHeight`): `void`
 
-Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L157)
+Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:157](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L157)
 
 Updates wind-related parameters in the CPU buffer for the specified slot.
 
@@ -154,7 +154,7 @@ Updates wind-related parameters in the CPU buffer for the specified slot.
 
 > **writePBRRenderUnitSlot**(`slot`, `globalSlot`, `receiveShadow`, `isMasked`, `applyGroundBlend`, `groundBlendStrength?`, `groundBlendRange?`, `trunkBendScale?`, `foliageHeight?`, `leafFlutterScale?`): `void`
 
-Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L71)
+Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:71](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L71)
 
 Writes all uniform parameters for a PBR foliage render unit slot and uploads them to the GPU buffer.
 
@@ -185,7 +185,7 @@ Writes all uniform parameters for a PBR foliage render unit slot and uploads the
 
 > **writeShadowRenderUnitSlot**(`slot`, `trunkBendScale?`, `foliageHeight?`, `leafFlutterScale?`): `void`
 
-Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L117)
+Defined in: [src/landscape/foliage/core/buffer/FoliageSlotPooler.ts:117](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/buffer/FoliageSlotPooler.ts#L117)
 
 Writes uniform parameters for a shadow-pass foliage render unit slot and uploads them to the GPU buffer.
 
@@ -213,7 +213,7 @@ Writes uniform parameters for a shadow-pass foliage render unit slot and uploads
 
 > `static` **SLOT\_STRIDE\_FLOATS**: `number` = `64`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L24)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L24)
 
 Number of `Float32` elements per slot (`64`).
 
@@ -229,7 +229,7 @@ Number of `Float32` elements per slot (`64`).
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -253,7 +253,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -277,7 +277,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **cpuBuffer**(): `Float32Array`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L127)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:127](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L127)
 
 Returns the CPU-side `Float32Array` buffer for all slot data.
 
@@ -301,7 +301,7 @@ CPU slot `Float32Array` buffer
 
 > <span class="readonly-badge">readonly</span> **get** **cpuUint32View**(): `Uint32Array`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:139](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L139)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:139](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L139)
 
 Returns the CPU-side `Uint32Array` view for all slot data.
 
@@ -325,7 +325,7 @@ CPU slot `Uint32Array` view
 
 > <span class="readonly-badge">readonly</span> **get** **gpuBuffer**(): `GPUBuffer`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L115)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:115](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L115)
 
 Returns the unified uniform `GPUBuffer` holding all slot data.
 
@@ -349,7 +349,7 @@ Unified uniform `GPUBuffer`, or `null` if destroyed
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -373,7 +373,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -397,7 +397,7 @@ Per-class unique instance ID
 
 > <span class="readonly-badge">readonly</span> **get** **maxSlots**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L91)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:91](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L91)
 
 Returns the maximum number of slots the pool can accommodate.
 
@@ -421,7 +421,7 @@ Maximum slot count
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -435,7 +435,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -461,7 +461,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **paramsSizeBytes**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L103)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:103](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L103)
 
 Returns the actual byte size of uniform parameters within a single slot.
 
@@ -485,7 +485,7 @@ Slot parameter byte size
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -509,7 +509,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -533,7 +533,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -555,7 +555,7 @@ UUID string of the object
 
 > **allocateSlot**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:151](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L151)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:151](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L151)
 
 Allocates and returns an available UBO slot index from the free stack.
 
@@ -577,7 +577,7 @@ Allocated slot index (`0` or greater), or `-1` if slots are exhausted
 
 > **clear**(): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:186](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L186)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:186](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L186)
 
 Clears all slot data and resets all slots to the unallocated state.
 
@@ -597,7 +597,7 @@ Clears all slot data and resets all slots to the unallocated state.
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:203](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L203)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:203](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L203)
 
 Destroys the GPU buffer of the slot pool and resets internal state.
 
@@ -617,7 +617,7 @@ Destroys the GPU buffer of the slot pool and resets internal state.
 
 > **freeSlot**(`slot`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:168](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L168)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:168](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L168)
 
 Zeroes out the data of a used UBO slot and returns it to the free stack.
 
@@ -643,7 +643,7 @@ Zeroes out the data of a used UBO slot and returns it to the free stack.
 
 > **uploadSlotBytes**(`slot`, `byteLength`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:223](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterSlotPooler.ts#L223)
+Defined in: [src/landscape/core/scatter/AScatterSlotPooler.ts:223](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterSlotPooler.ts#L223)
 
 Uploads the CPU buffer data of the specified slot to the corresponding offset in the GPU uniform buffer.
 

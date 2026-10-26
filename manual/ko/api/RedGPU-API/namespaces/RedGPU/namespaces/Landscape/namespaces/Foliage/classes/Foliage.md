@@ -6,7 +6,7 @@
 
 # Class: Foliage
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:319](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L319)
+Defined in: [src/landscape/foliage/core/Foliage.ts:319](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L319)
 
 지형(`Landscape`) 위에 배치되는 단일 식생(나무, 바위, 관목 등) 타입의 LOD, 서브 셀 스트리밍 및 렌더링 속성을 관리하는 클래스입니다.
 
@@ -48,7 +48,7 @@ const pineTree = landscape.foliageManager.addType({
 
 > **new Foliage**(`redGPUContext`, `options`, `megaBuffer?`, `baker?`, `slotPooler?`, `landscape?`): `Foliage`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:396](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L396)
+Defined in: [src/landscape/foliage/core/Foliage.ts:396](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L396)
 
 `Foliage` 인스턴스를 생성합니다.
 
@@ -81,7 +81,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:396](https://github.com/redca
 
 > `optional` **onRepopulateRequired?**: (`type`) => `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:369](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L369)
+Defined in: [src/landscape/foliage/core/Foliage.ts:369](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L369)
 
 배치 파라미터 변경으로 인해 서브 셀 인스턴스 재배치가 필요할 때 호출되는 콜백 함수
 
@@ -103,7 +103,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:369](https://github.com/redca
 
 > `optional` **onUniformDirty?**: (`typeId`) => `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:364](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L364)
+Defined in: [src/landscape/foliage/core/Foliage.ts:364](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L364)
 
 유니폼 파라미터가 변경되어 UBO 갱신이 필요할 때 호출되는 콜백 함수
 
@@ -129,7 +129,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:364](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **activeInstanceCount**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:799](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L799)
+Defined in: [src/landscape/foliage/core/Foliage.ts:799](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L799)
 
 현재 GPU 메가 버퍼에 마운트되어 활성화된 총 인스턴스 수를 반환합니다.
 
@@ -149,7 +149,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:799](https://github.com/redca
 
 > **get** **alignFactor**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:890](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L890)
+Defined in: [src/landscape/foliage/core/Foliage.ts:890](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L890)
 
 지형 법선 정렬 반영 비율(`0.0` ~ `1.0`)을 반환하거나 설정합니다.
 
@@ -163,7 +163,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:890](https://github.com/redca
 
 > **set** **alignFactor**(`val`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:853](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L853)
+Defined in: [src/landscape/foliage/core/Foliage.ts:853](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L853)
 
 ##### Parameters
 
@@ -185,7 +185,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:853](https://github.com/redca
 
 > **get** **alignToNormal**(): `boolean`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:870](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L870)
+Defined in: [src/landscape/foliage/core/Foliage.ts:870](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L870)
 
 지형 표면 법선(Normal) 방향으로 인스턴스를 정렬할지 여부를 반환하거나 설정합니다.
 
@@ -199,7 +199,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:870](https://github.com/redca
 
 > **set** **alignToNormal**(`val`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:836](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L836)
+Defined in: [src/landscape/foliage/core/Foliage.ts:836](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L836)
 
 ##### Parameters
 
@@ -221,7 +221,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:836](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **boundingRadius**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:810](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L810)
+Defined in: [src/landscape/foliage/core/Foliage.ts:810](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L810)
 
 식생 메시의 바운딩 구 반경(미터 단위)을 반환합니다.
 
@@ -241,7 +241,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:810](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **depthPrepassMaskedRenderUnits**(): [`FoliageRenderUnit`](../namespaces/Core/classes/FoliageRenderUnit.md)[]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:744](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L744)
+Defined in: [src/landscape/foliage/core/Foliage.ts:744](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L744)
 
 Depth Prepass에서 렌더링되는 알파 마스크(Masked) `FoliageRenderUnit` 목록을 반환합니다.
 
@@ -261,7 +261,7 @@ Depth Prepass에서 렌더링되는 알파 마스크(Masked) `FoliageRenderUnit`
 
 > <span class="readonly-badge">readonly</span> **get** **depthPrepassOpaqueRenderUnits**(): [`FoliageRenderUnit`](../namespaces/Core/classes/FoliageRenderUnit.md)[]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:733](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L733)
+Defined in: [src/landscape/foliage/core/Foliage.ts:733](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L733)
 
 Depth Prepass에서 렌더링되는 불투명(Opaque) `FoliageRenderUnit` 목록을 반환합니다.
 
@@ -281,7 +281,7 @@ Depth Prepass에서 렌더링되는 불투명(Opaque) `FoliageRenderUnit` 목록
 
 > **get** **groundBlendRange**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:964](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L964)
+Defined in: [src/landscape/foliage/core/Foliage.ts:964](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L964)
 
 지형 하단 색상 블렌딩이 적용되는 높이 범위(미터 단위)를 반환하거나 설정합니다.
 
@@ -295,7 +295,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:964](https://github.com/redca
 
 > **set** **groundBlendRange**(`v`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:874](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L874)
+Defined in: [src/landscape/foliage/core/Foliage.ts:874](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L874)
 
 ##### Parameters
 
@@ -317,7 +317,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:874](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **hasImpostor**(): `boolean`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:901](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L901)
+Defined in: [src/landscape/foliage/core/Foliage.ts:901](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L901)
 
 이 식생 타입에 생성된 옥타헤드럴 임포스터 렌더 유닛이 존재하는지 여부를 반환합니다.
 
@@ -337,7 +337,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:901](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **hasMaskedLOD0**(): `boolean`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:821](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L821)
+Defined in: [src/landscape/foliage/core/Foliage.ts:821](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L821)
 
 LOD 0 단계에 알파 마스크(Masked) 재질이 포함되어 있는지 여부를 반환합니다.
 
@@ -357,7 +357,7 @@ LOD 0 알파 마스크 포함 여부
 
 > <span class="readonly-badge">readonly</span> **get** **landscape**(): [`Landscape`](../../../classes/Landscape.md)
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:711](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L711)
+Defined in: [src/landscape/foliage/core/Foliage.ts:711](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L711)
 
 식생이 배치된 대상 `Landscape` 인스턴스를 반환합니다.
 
@@ -377,7 +377,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:711](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **lastMountedCount**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:986](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L986)
+Defined in: [src/landscape/foliage/core/Foliage.ts:986](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L986)
 
 가장 최근 스트리밍 업데이트에서 새로 마운트된 서브 셀 개수를 반환합니다.
 
@@ -397,7 +397,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:986](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **lastUnmountedCount**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:997](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L997)
+Defined in: [src/landscape/foliage/core/Foliage.ts:997](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L997)
 
 가장 최근 스트리밍 업데이트에서 마운트 해제된 서브 셀 개수를 반환합니다.
 
@@ -417,7 +417,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:997](https://github.com/redca
 
 > **get** **leafFlutterScale**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:832](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L832)
+Defined in: [src/landscape/foliage/core/Foliage.ts:832](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L832)
 
 바람에 의한 잎사귀 떨림 강도 배율을 반환하거나 설정합니다.
 
@@ -431,7 +431,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:832](https://github.com/redca
 
 > **set** **leafFlutterScale**(`val`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:844](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L844)
+Defined in: [src/landscape/foliage/core/Foliage.ts:844](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L844)
 
 ##### Parameters
 
@@ -453,7 +453,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:844](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **lod0RenderUnits**(): [`FoliageRenderUnit`](../namespaces/Core/classes/FoliageRenderUnit.md)[]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:766](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L766)
+Defined in: [src/landscape/foliage/core/Foliage.ts:766](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L766)
 
 LOD 0 단계에 해당하는 `FoliageRenderUnit` 목록을 반환합니다.
 
@@ -473,7 +473,7 @@ LOD 0 렌더 유닛 배열
 
 > <span class="readonly-badge">readonly</span> **get** **lodInfoList**(): [`FoliageLODInfo`](../namespaces/Core/interfaces/FoliageLODInfo.md)[]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:788](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L788)
+Defined in: [src/landscape/foliage/core/Foliage.ts:788](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L788)
 
 구성된 각 LOD 단계의 메타데이터(`FoliageLODInfo`) 목록을 반환합니다.
 
@@ -493,7 +493,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:788](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **mainRenderUnits**(): [`FoliageRenderUnit`](../namespaces/Core/classes/FoliageRenderUnit.md)[]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:755](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L755)
+Defined in: [src/landscape/foliage/core/Foliage.ts:755](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L755)
 
 메인 컬러 패스에서 렌더링되는 `FoliageRenderUnit` 목록을 반환합니다.
 
@@ -513,7 +513,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:755](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **maxInstances**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:624](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L624)
+Defined in: [src/landscape/foliage/core/Foliage.ts:624](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L624)
 
 이 식생 타입에 할당된 최대 인스턴스 수용량을 반환합니다.
 
@@ -533,7 +533,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:624](https://github.com/redca
 
 > **get** **maxScale**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:678](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L678)
+Defined in: [src/landscape/foliage/core/Foliage.ts:678](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L678)
 
 인스턴스 랜덤 스케일의 최댓값 `[x, y, z]`를 반환하거나 설정합니다.
 
@@ -547,7 +547,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:678](https://github.com/redca
 
 > **set** **maxScale**(`v`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:655](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L655)
+Defined in: [src/landscape/foliage/core/Foliage.ts:655](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L655)
 
 ##### Parameters
 
@@ -569,7 +569,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:655](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **megaBuffer**(): [`FoliageMegaBuffer`](../namespaces/Core/classes/FoliageMegaBuffer.md)
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:700](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L700)
+Defined in: [src/landscape/foliage/core/Foliage.ts:700](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L700)
 
 연결된 `FoliageMegaBuffer` 인스턴스를 반환합니다.
 
@@ -589,7 +589,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:700](https://github.com/redca
 
 > **get** **minScale**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:651](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L651)
+Defined in: [src/landscape/foliage/core/Foliage.ts:651](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L651)
 
 인스턴스 랜덤 스케일의 최솟값 `[x, y, z]`를 반환하거나 설정합니다.
 
@@ -603,7 +603,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:651](https://github.com/redca
 
 > **set** **minScale**(`v`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:628](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L628)
+Defined in: [src/landscape/foliage/core/Foliage.ts:628](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L628)
 
 ##### Parameters
 
@@ -625,7 +625,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:628](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **mountedSubCellCount**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:975](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L975)
+Defined in: [src/landscape/foliage/core/Foliage.ts:975](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L975)
 
 현재 마운트되어 있는 서브 셀의 개수를 반환합니다.
 
@@ -645,7 +645,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:975](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **nameHash**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:613](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L613)
+Defined in: [src/landscape/foliage/core/Foliage.ts:613](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L613)
 
 식생 타입 이름으로부터 계산된 해시 값을 반환합니다.
 
@@ -665,7 +665,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:613](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **randomRotationY**(): `boolean`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:689](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L689)
+Defined in: [src/landscape/foliage/core/Foliage.ts:689](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L689)
 
 Y축 기준 랜덤 회전 적용 여부를 반환합니다.
 
@@ -685,7 +685,7 @@ Y축 랜덤 회전 여부
 
 > **get** **receiveShadow**(): `boolean`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:933](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L933)
+Defined in: [src/landscape/foliage/core/Foliage.ts:933](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L933)
 
 식생 표면의 그림자 수신 여부를 반환하거나 설정합니다.
 
@@ -699,7 +699,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:933](https://github.com/redca
 
 > **set** **receiveShadow**(`value`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:937](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L937)
+Defined in: [src/landscape/foliage/core/Foliage.ts:937](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L937)
 
 ##### Parameters
 
@@ -721,7 +721,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:937](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **renderUnits**(): [`FoliageRenderUnit`](../namespaces/Core/classes/FoliageRenderUnit.md)[]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:722](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L722)
+Defined in: [src/landscape/foliage/core/Foliage.ts:722](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L722)
 
 모든 LOD 단계의 `FoliageRenderUnit` 목록을 반환합니다.
 
@@ -745,7 +745,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:722](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **shadowMergedRenderUnits**(): [`FoliageRenderUnit`](../namespaces/Core/classes/FoliageRenderUnit.md)[]
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:777](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L777)
+Defined in: [src/landscape/foliage/core/Foliage.ts:777](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L777)
 
 그림자 패스 렌더링을 위해 병합된 `FoliageRenderUnit` 목록을 반환합니다.
 
@@ -765,7 +765,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:777](https://github.com/redca
 
 > <span class="readonly-badge">readonly</span> **get** **streamingRadius**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:953](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L953)
+Defined in: [src/landscape/foliage/core/Foliage.ts:953](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L953)
 
 서브 셀 스트리밍이 수행되는 유효 반경(미터 단위)을 반환합니다.
 
@@ -785,7 +785,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:953](https://github.com/redca
 
 > **get** **trunkBendScale**(): `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:593](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L593)
+Defined in: [src/landscape/foliage/core/Foliage.ts:593](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L593)
 
 바람에 의한 줄기/기둥 흔들림 강도 배율을 반환하거나 설정합니다.
 
@@ -799,7 +799,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:593](https://github.com/redca
 
 > **set** **trunkBendScale**(`val`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:597](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L597)
+Defined in: [src/landscape/foliage/core/Foliage.ts:597](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L597)
 
 ##### Parameters
 
@@ -821,7 +821,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:597](https://github.com/redca
 
 > **get** **useImpostor**(): `boolean`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:912](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L912)
+Defined in: [src/landscape/foliage/core/Foliage.ts:912](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L912)
 
 원거리 옥타헤드럴 임포스터(Octahedral Impostor) LOD 사용 여부를 반환하거나 설정합니다.
 
@@ -835,7 +835,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:912](https://github.com/redca
 
 > **set** **useImpostor**(`value`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:916](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L916)
+Defined in: [src/landscape/foliage/core/Foliage.ts:916](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L916)
 
 ##### Parameters
 
@@ -859,7 +859,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:916](https://github.com/redca
 
 > **clearSubCellCache**(): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:1061](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L1061)
+Defined in: [src/landscape/foliage/core/Foliage.ts:1061](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L1061)
 
 마운트된 모든 서브 셀의 상태를 초기화하고 서브 셀 캐시를 비웁니다.
 
@@ -875,7 +875,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:1061](https://github.com/redc
 
 > **destroy**(): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:1005](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L1005)
+Defined in: [src/landscape/foliage/core/Foliage.ts:1005](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L1005)
 
 식생 타입의 모든 렌더 유닛, 서브 셀 캐시 및 관련 리소스를 해제합니다.
 
@@ -895,7 +895,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:1005](https://github.com/redc
 
 > **flushAllRenderUnitUBOs**(): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:1043](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L1043)
+Defined in: [src/landscape/foliage/core/Foliage.ts:1043](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L1043)
 
 타입 파라미터를 동기화하고 모든 렌더 유닛 및 그림자 렌더 유닛의 슬롯 UBO를 GPU에 플러시합니다.
 
@@ -911,7 +911,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:1043](https://github.com/redc
 
 > **onParameterChanged**(`prop`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:1108](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L1108)
+Defined in: [src/landscape/foliage/core/Foliage.ts:1108](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L1108)
 
 스캐터 속성 값이 변경되었을 때 호출되어 캐시 초기화, 리베이크 또는 UBO 갱신을 트리거합니다.
 
@@ -937,7 +937,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:1108](https://github.com/redc
 
 > **rebake**(): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:1339](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L1339)
+Defined in: [src/landscape/foliage/core/Foliage.ts:1339](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L1339)
 
 현재 마운트된 모든 서브 셀의 인스턴스 변환 데이터를 GPU 메가 버퍼에 다시 베이킹합니다.
 
@@ -953,7 +953,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:1339](https://github.com/redc
 
 > **setLODDistance**(`lodIndex`, `distance`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:1088](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L1088)
+Defined in: [src/landscape/foliage/core/Foliage.ts:1088](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L1088)
 
 특정 LOD 단계의 전환 거리를 변경합니다.
 
@@ -976,7 +976,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:1088](https://github.com/redc
 
 > **updateStreaming**(`camX`, `camZ`, `mountBudget?`, `unmountBudget?`): `void`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:1208](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L1208)
+Defined in: [src/landscape/foliage/core/Foliage.ts:1208](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L1208)
 
 카메라 위치를 기준으로 스트리밍 반경 내외의 서브 셀을 예산(Budget) 범위 안에서 마운트하거나 언마운트합니다.
 
@@ -1006,7 +1006,7 @@ Defined in: [src/landscape/foliage/core/Foliage.ts:1208](https://github.com/redc
 
 > <span class="readonly-badge">readonly</span> **get** **allocation**(): `TAllocation`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:211](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L211)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:211](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L211)
 
 메가 버퍼에서 이 타입에 할당된 세그먼트 정보(`TAllocation | null`)를 반환합니다.
 
@@ -1030,7 +1030,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:211](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
@@ -1054,7 +1054,7 @@ Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blo
 
 > **get** **bottomOffset**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:235](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L235)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:235](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L235)
 
 지형 표면으로부터의 인스턴스 하단 높이 오프셋을 반환하거나 설정합니다.
 
@@ -1068,7 +1068,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:235](https://github.com/
 
 > **set** **bottomOffset**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:259](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L259)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:259](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L259)
 
 ##### Parameters
 
@@ -1094,7 +1094,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:259](https://github.com/
 
 > **get** **castShadow**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:414](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L414)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:414](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L414)
 
 디렉셔널 라이트 그림자 투사 여부를 반환하거나 설정합니다.
 
@@ -1108,7 +1108,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:414](https://github.com/
 
 > **set** **castShadow**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:438](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L438)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:438](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L438)
 
 ##### Parameters
 
@@ -1134,7 +1134,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:438](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
@@ -1158,7 +1158,7 @@ WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스�
 
 > **get** **cullingDistance**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:255](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L255)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:255](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L255)
 
 메인 패스 인스턴스 가시 컬링 거리를 반환하거나 설정합니다 (`0` 이상).
 
@@ -1172,7 +1172,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:255](https://github.com/
 
 > **set** **cullingDistance**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:279](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L279)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:279](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L279)
 
 ##### Parameters
 
@@ -1198,7 +1198,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:279](https://github.com/
 
 > **get** **densityMultiplier**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:394](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L394)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:394](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L394)
 
 기준 밀도에 곱해지는 밀도 배율을 반환하거나 설정합니다 (`0.0` 이상).
 
@@ -1212,7 +1212,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:394](https://github.com/
 
 > **set** **densityMultiplier**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:418](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L418)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:418](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L418)
 
 ##### Parameters
 
@@ -1238,7 +1238,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:418](https://github.com/
 
 > **get** **densityPerHectare**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:374](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L374)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:374](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L374)
 
 헥타르(10,000㎡)당 기준 인스턴스 밀도를 반환하거나 설정합니다 (`0.0` 이상).
 
@@ -1252,7 +1252,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:374](https://github.com/
 
 > **set** **densityPerHectare**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:398](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L398)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:398](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L398)
 
 ##### Parameters
 
@@ -1278,7 +1278,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:398](https://github.com/
 
 > **get** **densityScaleByWeight**(): `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:354](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L354)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:354](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L354)
 
 지형 레이어 가중치에 따라 인스턴스 스케일을 조절할지 여부를 반환하거나 설정합니다.
 
@@ -1292,7 +1292,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:354](https://github.com/
 
 > **set** **densityScaleByWeight**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:378](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L378)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:378](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L378)
 
 ##### Parameters
 
@@ -1318,7 +1318,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:378](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
@@ -1342,7 +1342,7 @@ Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blo
 
 > **get** **groundBlendStrength**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:434](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L434)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:434](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L434)
 
 지형 표면과의 하단 블렌딩 강도(`0.0`~`1.0`)를 반환하거나 설정합니다.
 
@@ -1356,7 +1356,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:434](https://github.com/
 
 > **set** **groundBlendStrength**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:461](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L461)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:461](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L461)
 
 ##### Parameters
 
@@ -1382,7 +1382,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:461](https://github.com/
 
 > **get** **height**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:223](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L223)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:223](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L223)
 
 스캐터 인스턴스의 기준 높이를 반환하거나 설정합니다 (`0.01` 이상).
 
@@ -1396,7 +1396,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:223](https://github.com/
 
 > **set** **height**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L239)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:239](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L239)
 
 ##### Parameters
 
@@ -1422,7 +1422,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:239](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
 
@@ -1446,7 +1446,7 @@ Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **maxSlope**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:334](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L334)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:334](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L334)
 
 인스턴스 배치가 허용되는 최대 지형 경사각(도, `0.0`~`90.0`)을 반환하거나 설정합니다.
 
@@ -1460,7 +1460,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:334](https://github.com/
 
 > **set** **maxSlope**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:358](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L358)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:358](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L358)
 
 ##### Parameters
 
@@ -1486,7 +1486,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:358](https://github.com/
 
 > **get** **minSlope**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:315](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L315)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:315](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L315)
 
 인스턴스 배치가 허용되는 최소 지형 경사각(도, `0.0`~`90.0`)을 반환하거나 설정합니다.
 
@@ -1500,7 +1500,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:315](https://github.com/
 
 > **set** **minSlope**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:338](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L338)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:338](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L338)
 
 ##### Parameters
 
@@ -1526,7 +1526,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:338](https://github.com/
 
 > **get** **name**(): `string`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L166)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:166](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L166)
 
 스캐터 타입의 고유 이름을 반환합니다. 생성 이후에는 변경할 수 없습니다.
 
@@ -1540,7 +1540,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:166](https://github.com/
 
 > **set** **name**(`_value`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L170)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:170](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L170)
 
 객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
@@ -1570,7 +1570,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:170](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
@@ -1594,7 +1594,7 @@ Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
@@ -1618,7 +1618,7 @@ Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blo
 
 > **get** **shadowCullDistance**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:275](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L275)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:275](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L275)
 
 그림자 패스 인스턴스 컬링 거리를 반환하거나 설정합니다 (`0` 이상).
 
@@ -1632,7 +1632,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:275](https://github.com/
 
 > **set** **shadowCullDistance**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:299](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L299)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:299](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L299)
 
 ##### Parameters
 
@@ -1658,7 +1658,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:299](https://github.com/
 
 > **get** **targetLayer**(): `string` \| `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:295](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L295)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:295](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L295)
 
 배치 밀도 가중치를 참조할 대상 지형 레이어 이름 또는 인덱스를 반환하거나 설정합니다.
 
@@ -1672,7 +1672,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:295](https://github.com/
 
 > **set** **targetLayer**(`val`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:319](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L319)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:319](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L319)
 
 ##### Parameters
 
@@ -1698,7 +1698,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:319](https://github.com/
 
 > **get** **typeId**(): `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:182](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L182)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:182](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L182)
 
 스캐터 타입에 할당된 고유 숫자 ID를 반환하거나 설정합니다.
 
@@ -1712,7 +1712,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:182](https://github.com/
 
 > **set** **typeId**(`value`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:186](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L186)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:186](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L186)
 
 ##### Parameters
 
@@ -1738,7 +1738,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:186](https://github.com/
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -1766,7 +1766,7 @@ Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/
 
 > **bindAllocation**(`allocation`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:454](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L454)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:454](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L454)
 
 메가 버퍼 세그먼트 할당 정보를 이 스캐터 타입에 바인딩합니다.
 
@@ -1792,7 +1792,7 @@ Defined in: [src/landscape/core/scatter/AScatterType.ts:454](https://github.com/
 
 > **setRawScatterProperties**(`values`): `void`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:477](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L477)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:477](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L477)
 
 `onParameterChanged` 콜백을 트리거하지 않고 스캐터 속성들의 내부 원시 값을 일괄 설정합니다.
 

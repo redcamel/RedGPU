@@ -8,7 +8,7 @@
 
 > **assembleScatterRenderUnits**(`redGPUContext`, `roots`, `options?`): [`ScatterAssemblyResult`](../interfaces/ScatterAssemblyResult.md)
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:314](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L314)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:314](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L314)
 
 Traverses one or more `Mesh` hierarchies to merge vertex and index buffers by identical material, producing a list of `ScatterRenderUnit` instances and bounding metrics optimized for scatter instanced rendering.
 

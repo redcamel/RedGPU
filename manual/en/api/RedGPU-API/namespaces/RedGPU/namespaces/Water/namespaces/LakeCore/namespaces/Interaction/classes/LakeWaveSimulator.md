@@ -6,7 +6,7 @@
 
 # Class: LakeWaveSimulator
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L19)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L19)
 
 Class that simulates lake surface wave propagation and generates a ripple normal texture.
 
@@ -30,7 +30,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new LakeWaveSimulator**(`redGPUContext`, `textureSize?`): `LakeWaveSimulator`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L80)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L80)
 
 Creates a `LakeWaveSimulator` instance.
 
@@ -59,7 +59,7 @@ Creates a `LakeWaveSimulator` instance.
 
 > **damping**: `number` = `0.012`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L46)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L46)
 
 Wave energy damping factor per frame. (Default: `0.012`)
 
@@ -71,7 +71,7 @@ Wave energy damping factor per frame. (Default: `0.012`)
 
 > **normalStrength**: `number` = `1.0`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L51)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:51](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L51)
 
 Strength of the generated ripple normal. (Default: `1.0`)
 
@@ -83,7 +83,7 @@ Strength of the generated ripple normal. (Default: `1.0`)
 
 > **rippleNormalTexture**: `GPUTexture`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L30)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L30)
 
 `GPUTexture` storing the simulated ripple normals.
 
@@ -95,7 +95,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:30](https://git
 
 > **rippleNormalTextureView**: `GPUTextureView`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L35)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L35)
 
 `GPUTextureView` of `rippleNormalTexture`.
 
@@ -107,7 +107,7 @@ Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:35](https://git
 
 > **textureSize**: `number` = `512`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L24)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L24)
 
 Width and height resolution of the wave simulation texture in pixels. (Default: `512`)
 
@@ -119,7 +119,7 @@ Width and height resolution of the wave simulation texture in pixels. (Default: 
 
 > **waveSpeed**: `number` = `0.32`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L41)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:41](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L41)
 
 Wave propagation speed. (Default: `0.32`)
 
@@ -137,7 +137,7 @@ Wave propagation speed. (Default: `0.32`)
 
 > **clear**(`commandEncoder`): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:175](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L175)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:175](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L175)
 
 Clears the wave buffers and ripple normal texture to zero.
 
@@ -159,7 +159,7 @@ Clears the wave buffers and ripple normal texture to zero.
 
 > **destroy**(): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:185](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L185)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:185](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L185)
 
 Releases all allocated GPU resources.
 
@@ -175,7 +175,7 @@ Releases all allocated GPU resources.
 
 > **simulate**(`commandEncoder`, `shiftX?`, `shiftZ?`): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L140)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:140](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L140)
 
 Executes the wave simulation compute pass.
 
@@ -199,7 +199,7 @@ Executes the wave simulation compute pass.
 
 > **updateCaptureBinding**(`captureTextureView`): `void`
 
-Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:97](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L97)
+Defined in: [src/water/lakeCore/interaction/LakeWaveSimulator.ts:97](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/water/lakeCore/interaction/LakeWaveSimulator.ts#L97)
 
 Binds the penetration depth texture view from the capture pass to the bind groups.
 
@@ -226,7 +226,7 @@ Binds the penetration depth texture view from the capture pass to the bind group
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -250,7 +250,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -274,7 +274,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -298,7 +298,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -322,7 +322,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -336,7 +336,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -362,7 +362,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -386,7 +386,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -410,7 +410,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

@@ -6,7 +6,7 @@
 
 # Class: ResourceStateCubeTexture
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L15)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:15](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L15)
 
 Class representing the resource management state of cube textures (`CubeTexture`, `DirectCubeTexture`).
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ResourceStateCubeTexture**(`cubeTexture`): `ResourceStateCubeTexture`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L50)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:50](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L50)
 
 Creates a ResourceStateCubeTexture instance.
 
@@ -40,7 +40,7 @@ Creates a ResourceStateCubeTexture instance.
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L30)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L30)
 
 Resource cache key
 
@@ -50,7 +50,7 @@ Resource cache key
 
 > **srcList**: `string`[]
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L25)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:25](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L25)
 
 Array of source paths for the 6 cubemap faces
 
@@ -60,7 +60,7 @@ Array of source paths for the 6 cubemap faces
 
 > **texture**: [`CubeTexture`](../../../classes/CubeTexture.md) \| [`DirectCubeTexture`](../../../classes/DirectCubeTexture.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L20)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:20](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L20)
 
 Managed cube texture instance
 
@@ -70,7 +70,7 @@ Managed cube texture instance
 
 > **useNum**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L35)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:35](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L35)
 
 Resource reference count
 
@@ -80,6 +80,6 @@ Resource reference count
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L40)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L40)
 
 Unique identifier (UUID)

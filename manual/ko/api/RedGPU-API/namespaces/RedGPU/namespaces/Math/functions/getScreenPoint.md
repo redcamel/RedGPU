@@ -8,7 +8,7 @@
 
 > **getScreenPoint**(`view`, `targetMatrix`): \[`number`, `number`\]
 
-Defined in: [src/math/coordinates/getScreenPoint.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/getScreenPoint.ts#L30)
+Defined in: [src/math/coordinates/getScreenPoint.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/math/coordinates/getScreenPoint.ts#L30)
 
 대상의 4x4 월드 모델 행렬과 `View3D`의 카메라·투영 행렬을 사용하여 CSS 픽셀 단위의 2D 화면 좌표(`[x, y]`)를 계산합니다.
 

@@ -8,7 +8,7 @@
 
 > **createMeshVertexUniformBuffers**(`mesh`, `skin?`): `void`
 
-Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L22)
+Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:22](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L22)
 
 메시의 버텍스 유니폼 버퍼와 바인드 그룹 레이아웃을 생성합니다.
 

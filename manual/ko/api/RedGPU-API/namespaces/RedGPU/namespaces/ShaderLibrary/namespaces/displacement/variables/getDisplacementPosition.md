@@ -8,7 +8,7 @@
 
 > `const` **getDisplacementPosition**: `string` = `getDisplacementPosition_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2824](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2824)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2824](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L2824)
 
 디스플레이스먼트 텍스처를 바이큐빅 필터링으로 샘플링하여 변형된 정점 위치를 계산합니다.
 

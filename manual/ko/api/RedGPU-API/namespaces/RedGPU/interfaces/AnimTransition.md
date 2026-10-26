@@ -6,7 +6,7 @@
 
 # Interface: AnimTransition
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:138](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L138)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:138](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L138)
 
 애니메이션 상태 전이 규칙 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:138](https://gi
 
 > **conditions**: () => `boolean`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:158](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L158)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:158](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L158)
 
 전이 시작 조건 판별 함수
 
@@ -30,7 +30,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:158](https://gi
 
 > **duration**: `number`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:153](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L153)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:153](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L153)
 
 크로스페이드 시간 (초 단위)
 
@@ -40,7 +40,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:153](https://gi
 
 > **fromState**: `string`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L143)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:143](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L143)
 
 전이 출발 상태 이름
 
@@ -50,6 +50,6 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:143](https://gi
 
 > **toState**: `string`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:148](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L148)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:148](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/loader/gltf/animationLooper/AnimStateMachine.ts#L148)
 
 전이 도착 상태 이름

@@ -6,7 +6,7 @@
 
 # Class: FoliagePipelineRegistry
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L34)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:34](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L34)
 
 Registry class that creates and caches instanced `GPURenderPipeline` objects for foliage main, depth prepass, and shadow passes.
 
@@ -28,7 +28,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new FoliagePipelineRegistry**(`redGPUContext`): `FoliagePipelineRegistry`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L48)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L48)
 
 Creates a `FoliagePipelineRegistry` instance.
 
@@ -60,7 +60,7 @@ Creates a `FoliagePipelineRegistry` instance.
 
 > **clearCache**(): `void`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:460](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L460)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:460](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L460)
 
 Clears all cached render pipelines.
 
@@ -76,7 +76,7 @@ Clears all cached render pipelines.
 
 > **getOrCreatePipeline**(`material`, `sampleCount`, `msaaID`, `strideBytes?`, `cullMode?`, `depthPassMode?`, `renderUnitBindGroupLayout?`, `isMasked?`): `GPURenderPipeline`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:111](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L111)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:111](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L111)
 
 Retrieves or creates a foliage render pipeline for the main pass or depth prepass.
 
@@ -107,7 +107,7 @@ Created or cached `GPURenderPipeline` instance (`null` if invalid)
 
 > **getOrCreateShadowMaskedPipeline**(`material`, `strideBytes?`, `cullMode?`, `renderUnitBindGroupLayout?`): `GPURenderPipeline`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:379](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L379)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:379](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L379)
 
 Retrieves or creates a shadow pass render pipeline for alpha-masked (cutoff) foliage or impostors.
 
@@ -134,7 +134,7 @@ Created or cached `GPURenderPipeline` instance (`null` if material is absent)
 
 > **getOrCreateShadowMergedPipeline**(`strideBytes?`, `cullMode?`, `renderUnitBindGroupLayout?`): `GPURenderPipeline`
 
-Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:299](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L299)
+Defined in: [src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts:299](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/pipeline/FoliagePipelineRegistry.ts#L299)
 
 Retrieves or creates a shadow pass render pipeline dedicated to opaque merged geometry.
 
@@ -165,7 +165,7 @@ Created or cached shadow render pipeline (`GPURenderPipeline`)
 
 > <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L80)
 
 Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
@@ -189,7 +189,7 @@ Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 > <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L92)
 
 Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
@@ -213,7 +213,7 @@ Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 > <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L56)
 
 Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
@@ -237,7 +237,7 @@ Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 > <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L36)
 
 Returns the unique sequential instance ID assigned per class.
 
@@ -261,7 +261,7 @@ Per-class unique instance ID
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L63)
 
 Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
@@ -275,7 +275,7 @@ Object name string
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
@@ -301,7 +301,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L44)
 
 Returns the bound `RedGPUContext` instance.
 
@@ -325,7 +325,7 @@ Returns the bound `RedGPUContext` instance.
 
 > <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/RedGPUObject.ts#L68)
 
 Returns the `ResourceManager` instance managing global GPU resources.
 
@@ -349,7 +349,7 @@ Returns the `ResourceManager` instance managing global GPU resources.
 
 > <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 

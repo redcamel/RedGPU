@@ -8,6 +8,6 @@
 
 > `const` **PBR\_STRIDE\_BYTES**: `number`
 
-Defined in: [src/landscape/core/scatter/ScatterVertexFormats.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/ScatterVertexFormats.ts#L36)
+Defined in: [src/landscape/core/scatter/ScatterVertexFormats.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/ScatterVertexFormats.ts#L36)
 
 Byte stride per vertex (`72`) for the PBR interleaved vertex format.

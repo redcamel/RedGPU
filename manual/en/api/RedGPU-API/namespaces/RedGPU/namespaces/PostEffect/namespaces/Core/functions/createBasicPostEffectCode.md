@@ -8,7 +8,7 @@
 
 > **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct?`, `sourceTextureConfigs?`, `earlyExit?`): `object`
 
-Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/createBasicPostEffectCode.ts#L90)
+Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:90](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/createBasicPostEffectCode.ts#L90)
 
 Generates MSAA and Non-MSAA WGSL compute shader codes for a single-pass post-processing effect.
 
@@ -32,5 +32,5 @@ WGSL code object for MSAA and Non-MSAA (`{ msaa: string, nonMsaa: string }`)
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:98](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/createBasicPostEffectCode.ts#L98) |
-| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:99](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/createBasicPostEffectCode.ts#L99) |
+| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:98](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/createBasicPostEffectCode.ts#L98) |
+| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:99](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/postEffect/core/createBasicPostEffectCode.ts#L99) |

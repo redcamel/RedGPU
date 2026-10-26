@@ -6,7 +6,7 @@
 
 # Class: DirectionalShadowManager
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L46)
+Defined in: [src/shadow/DirectionalShadowManager.ts:46](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L46)
 
 Class that manages CSM (Cascaded Shadow Maps) depth texture arrays and related settings for directional lights.
 
@@ -38,7 +38,7 @@ const directionalShadowManager = view.directionalShadowManager;
 
 > **get** **bias**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:175](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L175)
+Defined in: [src/shadow/DirectionalShadowManager.ts:175](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L175)
 
 Returns the shadow bias value.
 
@@ -52,7 +52,7 @@ Bias value
 
 > **set** **bias**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:162](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L162)
+Defined in: [src/shadow/DirectionalShadowManager.ts:162](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L162)
 
 Sets the shadow bias value. (0.0 to 1.0)
 
@@ -74,7 +74,7 @@ Sets the shadow bias value. (0.0 to 1.0)
 
 > <span class="readonly-badge">readonly</span> **get** **cascadeBoundingSpheres**(): `Float32Array`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:78](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L78)
+Defined in: [src/shadow/DirectionalShadowManager.ts:78](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L78)
 
 Returns the world-space bounding sphere info [center.x, center.y, center.z, radius] * 4 (length 16 Float32Array) for each cascade.
 
@@ -90,7 +90,7 @@ Returns the world-space bounding sphere info [center.x, center.y, center.z, radi
 
 > **get** **cascadeCount**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:212](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L212)
+Defined in: [src/shadow/DirectionalShadowManager.ts:212](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L212)
 
 Returns the number of cascade splits for CSM (Cascaded Shadow Maps) (1 to 4, default: 3).
 
@@ -104,7 +104,7 @@ Cascade count
 
 > **set** **cascadeCount**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:245](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L245)
+Defined in: [src/shadow/DirectionalShadowManager.ts:245](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L245)
 
 Sets the number of cascade splits for CSM (Cascaded Shadow Maps) (1 to 4).
 
@@ -126,7 +126,7 @@ Sets the number of cascade splits for CSM (Cascaded Shadow Maps) (1 to 4).
 
 > <span class="readonly-badge">readonly</span> **get** **cascadeLightDistances**(): `Float32Array`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L86)
+Defined in: [src/shadow/DirectionalShadowManager.ts:86](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L86)
 
 Returns the array of orthographic light distances (length 4 Float32Array) along the inverse light direction (-lightDir) from each cascade center.
 
@@ -142,7 +142,7 @@ Returns the array of orthographic light distances (length 4 Float32Array) along 
 
 > <span class="readonly-badge">readonly</span> **get** **cascadeProjectionViewMatrices**(): [`mat4`](../../Math/type-aliases/mat4.md)[]
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:270](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L270)
+Defined in: [src/shadow/DirectionalShadowManager.ts:270](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L270)
 
 Returns the array of projection-view matrices for each cascade (length 4).
 
@@ -160,7 +160,7 @@ Array of projection-view matrices
 
 > <span class="readonly-badge">readonly</span> **get** **cascadeSplitDepths**(): `Float32Array`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:258](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L258)
+Defined in: [src/shadow/DirectionalShadowManager.ts:258](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L258)
 
 Returns the array of split depths for each cascade (length 4).
 
@@ -178,7 +178,7 @@ Split depth Float32Array
 
 > <span class="readonly-badge">readonly</span> **get** **casterBoundingCenter**(): `Float32Array`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:94](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L94)
+Defined in: [src/shadow/DirectionalShadowManager.ts:94](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L94)
 
 Returns the center coordinates (vec3) of the casters' effective shadow volume.
 
@@ -194,7 +194,7 @@ Returns the center coordinates (vec3) of the casters' effective shadow volume.
 
 > <span class="readonly-badge">readonly</span> **get** **casterBoundingRadiusSq**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L102)
+Defined in: [src/shadow/DirectionalShadowManager.ts:102](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L102)
 
 Returns the squared radius of the casters' effective shadow volume (0.0: no casters, <0.0: global casters bypass, >0.0: valid squared radius).
 
@@ -210,7 +210,7 @@ Returns the squared radius of the casters' effective shadow volume (0.0: no cast
 
 > <span class="readonly-badge">readonly</span> **get** **castingList**(): ([`Mesh`](../../Display/classes/Mesh.md) \| [`InstancingMesh`](../../Display/classes/InstancingMesh.md))[]
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:126](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L126)
+Defined in: [src/shadow/DirectionalShadowManager.ts:126](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L126)
 
 Returns the list of objects that will cast shadows.
 
@@ -228,7 +228,7 @@ Array of shadow casting objects
 
 > **get** **maxShadowDistance**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L220)
+Defined in: [src/shadow/DirectionalShadowManager.ts:220](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L220)
 
 Returns the maximum shadow distance (Unreal Engine standard default: 200m).
 
@@ -240,7 +240,7 @@ Returns the maximum shadow distance (Unreal Engine standard default: 200m).
 
 > **set** **maxShadowDistance**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:232](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L232)
+Defined in: [src/shadow/DirectionalShadowManager.ts:232](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L232)
 
 Sets the maximum shadow distance (default: 200m).
 
@@ -262,7 +262,7 @@ Sets the maximum shadow distance (default: 200m).
 
 > **get** **shadowDepthTextureSize**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:282](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L282)
+Defined in: [src/shadow/DirectionalShadowManager.ts:282](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L282)
 
 Returns the size (resolution, default: 2048) of the shadow depth texture.
 
@@ -276,7 +276,7 @@ Resolution value
 
 > **set** **shadowDepthTextureSize**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:294](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L294)
+Defined in: [src/shadow/DirectionalShadowManager.ts:294](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L294)
 
 Sets the size (resolution, default: 2048) of the shadow depth texture. (Integer)
 
@@ -298,7 +298,7 @@ Sets the size (resolution, default: 2048) of the shadow depth texture. (Integer)
 
 > <span class="readonly-badge">readonly</span> **get** **shadowDepthTextureView**(): `GPUTextureView`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:138](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L138)
+Defined in: [src/shadow/DirectionalShadowManager.ts:138](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L138)
 
 Returns the shadow depth texture view in 2D Texture Array dimension. (For main rendering shader binding)
 
@@ -316,7 +316,7 @@ Returns the shadow depth texture view in 2D Texture Array dimension. (For main r
 
 > <span class="readonly-badge">readonly</span> **get** **shadowDepthTextureViewEmpty**(): `GPUTextureView`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L150)
+Defined in: [src/shadow/DirectionalShadowManager.ts:150](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L150)
 
 Returns an empty (1x1x4) 2D Array depth texture view for non-shadow states.
 
@@ -334,7 +334,7 @@ Empty depth GPUTextureView
 
 > **get** **strength**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:200](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L200)
+Defined in: [src/shadow/DirectionalShadowManager.ts:200](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L200)
 
 Returns the shadow strength value.
 
@@ -348,7 +348,7 @@ Strength value (0.0 to 1.0)
 
 > **set** **strength**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L187)
+Defined in: [src/shadow/DirectionalShadowManager.ts:187](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L187)
 
 Sets the shadow strength value. (0.0 to 1.0)
 
@@ -370,7 +370,7 @@ Sets the shadow strength value. (0.0 to 1.0)
 
 > <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:114](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L114)
+Defined in: [src/shadow/DirectionalShadowManager.ts:114](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L114)
 
 Returns the video memory size (Bytes) used by the current shadow map.
 
@@ -386,7 +386,7 @@ Video memory usage in bytes
 
 > **calculateCSMMatrices**(`view`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:331](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L331)
+Defined in: [src/shadow/DirectionalShadowManager.ts:331](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L331)
 
 In-place calculates jitter-free high-precision CSM matrices and split depths directly into member buffers
      using the Auto-CSM physical texel density inversion model and symmetric bounding sphere algorithm.
@@ -407,7 +407,7 @@ In-place calculates jitter-free high-precision CSM matrices and split depths dir
 
 > **destroy**(): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:483](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L483)
+Defined in: [src/shadow/DirectionalShadowManager.ts:483](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L483)
 
 Releases GPU resources in use.
 
@@ -421,7 +421,7 @@ Releases GPU resources in use.
 
 > **getCascadeLayerView**(`index`): `GPUTextureView`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:310](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L310)
+Defined in: [src/shadow/DirectionalShadowManager.ts:310](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L310)
 
 Returns a single 2D depth texture view for a specific cascade layer.
 
@@ -443,7 +443,7 @@ Returns a single 2D depth texture view for a specific cascade layer.
 
 > **resetCastingList**(): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:318](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L318)
+Defined in: [src/shadow/DirectionalShadowManager.ts:318](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L318)
 
 Resets the list of shadow casting objects.
 
@@ -457,7 +457,7 @@ Resets the list of shadow casting objects.
 
 > **update**(`redGPUContext`): `boolean`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:508](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/DirectionalShadowManager.ts#L508)
+Defined in: [src/shadow/DirectionalShadowManager.ts:508](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/shadow/DirectionalShadowManager.ts#L508)
 
 Updates internal state. (Mainly checks for resolution changes)
 

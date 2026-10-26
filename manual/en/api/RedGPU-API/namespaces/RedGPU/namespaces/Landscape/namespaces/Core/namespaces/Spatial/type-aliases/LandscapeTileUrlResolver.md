@@ -8,7 +8,7 @@
 
 > **LandscapeTileUrlResolver** = (`row`, `col`, `comp?`) => `string`
 
-Defined in: [src/landscape/core/spatial/LandscapeTileStreamer.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/spatial/LandscapeTileStreamer.ts#L38)
+Defined in: [src/landscape/core/spatial/LandscapeTileStreamer.ts:38](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/spatial/LandscapeTileStreamer.ts#L38)
 
 Resolver function type that returns the URL of a terrain heightmap tile image based on row and column indices.
 

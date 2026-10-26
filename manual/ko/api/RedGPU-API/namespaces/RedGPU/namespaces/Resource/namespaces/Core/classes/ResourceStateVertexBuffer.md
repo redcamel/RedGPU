@@ -6,7 +6,7 @@
 
 # Class: ResourceStateVertexBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L14)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L14)
 
 `VertexBuffer`의 리소스 관리 상태를 나타내는 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **new ResourceStateVertexBuffer**(`buffer`): `ResourceStateVertexBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L40)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:40](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L40)
 
 ResourceStateVertexBuffer 인스턴스를 생성합니다.
 
@@ -40,7 +40,7 @@ ResourceStateVertexBuffer 인스턴스를 생성합니다.
 
 > **buffer**: [`VertexBuffer`](../../../classes/VertexBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L19)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L19)
 
 관리 대상 정점 버퍼 인스턴스
 
@@ -50,7 +50,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **label**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L24)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L24)
 
 버퍼 라벨 또는 이름
 
@@ -60,7 +60,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L29)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:29](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L29)
 
 고유 식별자(UUID)
 
@@ -72,7 +72,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L54)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L54)
 
 리소스 참조 횟수를 반환하거나 설정합니다.
 
@@ -86,7 +86,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L58)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L58)
 
 ##### Parameters
 

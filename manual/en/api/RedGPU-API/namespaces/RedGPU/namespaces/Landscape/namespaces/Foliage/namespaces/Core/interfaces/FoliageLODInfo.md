@@ -6,7 +6,7 @@
 
 # Interface: FoliageLODInfo
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:185](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L185)
+Defined in: [src/landscape/foliage/core/Foliage.ts:185](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L185)
 
 LOD metadata interface used for GPU culling and rendering after assembly.
 
@@ -16,7 +16,7 @@ LOD metadata interface used for GPU culling and rendering after assembly.
 
 > **lodDistance**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:195](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L195)
+Defined in: [src/landscape/foliage/core/Foliage.ts:195](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L195)
 
 Transition distance for this LOD level (in meters)
 
@@ -26,7 +26,7 @@ Transition distance for this LOD level (in meters)
 
 > **lodIndex**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:190](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L190)
+Defined in: [src/landscape/foliage/core/Foliage.ts:190](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L190)
 
 LOD level index
 
@@ -36,7 +36,7 @@ LOD level index
 
 > **renderUnitCount**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L205)
+Defined in: [src/landscape/foliage/core/Foliage.ts:205](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L205)
 
 Number of render units belonging to this LOD level
 
@@ -46,6 +46,6 @@ Number of render units belonging to this LOD level
 
 > **renderUnitOffset**: `number`
 
-Defined in: [src/landscape/foliage/core/Foliage.ts:200](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/foliage/core/Foliage.ts#L200)
+Defined in: [src/landscape/foliage/core/Foliage.ts:200](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/foliage/core/Foliage.ts#L200)
 
 Starting offset within the render unit array

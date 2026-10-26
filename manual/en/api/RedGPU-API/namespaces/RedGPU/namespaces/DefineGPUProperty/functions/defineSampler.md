@@ -8,7 +8,7 @@
 
 > **defineSampler**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineSampler.ts#L64)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:64](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/texture/defineSampler.ts#L64)
 
 Defines texture sampler properties on the target's prototype that synchronize with GPU bind groups.
 

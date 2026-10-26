@@ -8,7 +8,7 @@
 
 > **definePositiveNumber**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/number/definePositiveNumber.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/definePositiveNumber.ts#L101)
+Defined in: [src/defineProperty/funcs/number/definePositiveNumber.ts:101](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/defineProperty/funcs/number/definePositiveNumber.ts#L101)
 
 Defines positive numeric properties on the target's prototype that synchronize with GPU uniform buffers.
 

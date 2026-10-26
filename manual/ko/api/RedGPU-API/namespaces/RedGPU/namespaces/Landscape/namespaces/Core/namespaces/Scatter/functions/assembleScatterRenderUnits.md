@@ -8,7 +8,7 @@
 
 > **assembleScatterRenderUnits**(`redGPUContext`, `roots`, `options?`): [`ScatterAssemblyResult`](../interfaces/ScatterAssemblyResult.md)
 
-Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:314](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L314)
+Defined in: [src/landscape/core/scatter/assembleScatterRenderUnits.ts:314](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/assembleScatterRenderUnits.ts#L314)
 
 하나 이상의 `Mesh` 계층 구조를 순회하여 동일 머티리얼 단위로 정점/인덱스 버퍼를 병합하고, 스캐터 인스턴싱 렌더링에 최적화된 `ScatterRenderUnit` 목록과 바운딩 정보를 생성합니다.
 

@@ -8,7 +8,7 @@
 
 > **createPrimitiveGeometry**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/createPrimitiveGeometry.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/createPrimitiveGeometry.ts#L38)
+Defined in: [src/primitive/core/createPrimitiveGeometry.ts:38](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/primitive/core/createPrimitiveGeometry.ts#L38)
 
 인터리브 정점 데이터와 인덱스 배열로부터 기본 도형 `Geometry` 인스턴스를 생성합니다.
 

@@ -8,7 +8,7 @@
 
 > `const` **getTBN**: `string` = `getTBN_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:834](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L834)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:834](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/systemCodeManager/ShaderLibrary.ts#L834)
 
 법선(Normal)과 임의의 탄젠트(Tangent) 벡터를 사용하여 완전한 직교 기저(Orthonormal Basis)인 TBN 행렬을 구축합니다.
 

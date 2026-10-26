@@ -6,7 +6,7 @@
 
 # Interface: GrassOptions
 
-Defined in: [src/landscape/grass/core/Grass.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L18)
+Defined in: [src/landscape/grass/core/Grass.ts:18](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L18)
 
 Configuration options interface for creating and initializing a `Grass` type.
 
@@ -24,7 +24,7 @@ Configuration options interface for creating and initializing a `Grass` type.
 
 > `optional` **alphaCutoff?**: `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:43](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L43)
+Defined in: [src/landscape/grass/core/Grass.ts:43](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L43)
 
 Alpha cutoff threshold (`0.01` to `1.0`, default: `0.2`)
 
@@ -36,7 +36,7 @@ Alpha cutoff threshold (`0.01` to `1.0`, default: `0.2`)
 
 > `optional` **baseColorTexture?**: `string` \| [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/landscape/grass/core/Grass.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L28)
+Defined in: [src/landscape/grass/core/Grass.ts:28](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L28)
 
 Grass base color texture URL string or `BitmapTexture` instance
 
@@ -48,7 +48,7 @@ Grass base color texture URL string or `BitmapTexture` instance
 
 > `optional` **exposureBoost?**: `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L63)
+Defined in: [src/landscape/grass/core/Grass.ts:63](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L63)
 
 Brightness exposure boost multiplier (default: `1.0`)
 
@@ -60,7 +60,7 @@ Brightness exposure boost multiplier (default: `1.0`)
 
 > `optional` **maxInstances?**: `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L83)
+Defined in: [src/landscape/grass/core/Grass.ts:83](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L83)
 
 Maximum instance capacity to allocate
 
@@ -72,7 +72,7 @@ Maximum instance capacity to allocate
 
 > `optional` **maxScale?**: \[`number`, `number`\] \| \[`number`, `number`, `number`\]
 
-Defined in: [src/landscape/grass/core/Grass.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L38)
+Defined in: [src/landscape/grass/core/Grass.ts:38](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L38)
 
 Maximum random instance scale `[width, height]` or `[x, y, z]` (default: `[1.3, 1.4]`)
 
@@ -84,7 +84,7 @@ Maximum random instance scale `[width, height]` or `[x, y, z]` (default: `[1.3, 
 
 > **mesh**: [`Mesh`](../../../../Display/classes/Mesh.md)
 
-Defined in: [src/landscape/grass/core/Grass.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L23)
+Defined in: [src/landscape/grass/core/Grass.ts:23](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L23)
 
 Source `Mesh` instance from which grass blade geometry and material are extracted
 
@@ -96,7 +96,7 @@ Source `Mesh` instance from which grass blade geometry and material are extracte
 
 > `optional` **minScale?**: \[`number`, `number`\] \| \[`number`, `number`, `number`\]
 
-Defined in: [src/landscape/grass/core/Grass.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L33)
+Defined in: [src/landscape/grass/core/Grass.ts:33](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L33)
 
 Minimum random instance scale `[width, height]` or `[x, y, z]` (default: `[0.7, 0.7]`)
 
@@ -108,7 +108,7 @@ Minimum random instance scale `[width, height]` or `[x, y, z]` (default: `[0.7, 
 
 > `optional` **minY?**: `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L68)
+Defined in: [src/landscape/grass/core/Grass.ts:68](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L68)
 
 Mesh local bounding minimum Y offset (automatically calculated from mesh geometry if omitted)
 
@@ -120,7 +120,7 @@ Mesh local bounding minimum Y offset (automatically calculated from mesh geometr
 
 > `optional` **receiveShadow?**: `boolean`
 
-Defined in: [src/landscape/grass/core/Grass.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L73)
+Defined in: [src/landscape/grass/core/Grass.ts:73](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L73)
 
 Whether the grass surface receives shadows (default: `true`)
 
@@ -132,7 +132,7 @@ Whether the grass surface receives shadows (default: `true`)
 
 > `optional` **roughness?**: `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L48)
+Defined in: [src/landscape/grass/core/Grass.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L48)
 
 Surface roughness factor (`0.04` to `1.0`, default: `0.55`)
 
@@ -144,7 +144,7 @@ Surface roughness factor (`0.04` to `1.0`, default: `0.55`)
 
 > `optional` **shadowStrength?**: `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:78](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L78)
+Defined in: [src/landscape/grass/core/Grass.ts:78](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L78)
 
 Darkness strength of received shadows (`0.0` to `1.0`, default: `1.0`)
 
@@ -156,7 +156,7 @@ Darkness strength of received shadows (`0.0` to `1.0`, default: `1.0`)
 
 > `optional` **subsurfaceColor?**: \[`number`, `number`, `number`\]
 
-Defined in: [src/landscape/grass/core/Grass.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L58)
+Defined in: [src/landscape/grass/core/Grass.ts:58](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L58)
 
 Subsurface scattering RGB color `[r, g, b]` (`0.0` to `1.0`, default: `[0.35, 0.65, 0.15]`)
 
@@ -168,7 +168,7 @@ Subsurface scattering RGB color `[r, g, b]` (`0.0` to `1.0`, default: `[0.35, 0.
 
 > `optional` **subsurfaceStrength?**: `number`
 
-Defined in: [src/landscape/grass/core/Grass.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/core/Grass.ts#L53)
+Defined in: [src/landscape/grass/core/Grass.ts:53](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/grass/core/Grass.ts#L53)
 
 Subsurface scattering transmission strength (`0.0` to `3.0`, default: `0.25`)
 
@@ -185,7 +185,7 @@ Subsurface scattering transmission strength (`0.0` to `3.0`, default: `0.25`)
 
 > `optional` **bottomOffset?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L36)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:36](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L36)
 
 Bottom height offset of the instance relative to the terrain surface (default: `0.0`)
 
@@ -201,7 +201,7 @@ Bottom height offset of the instance relative to the terrain surface (default: `
 
 > `optional` **castShadow?**: `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L48)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:48](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L48)
 
 Whether directional light shadow casting is enabled (default: `true`)
 
@@ -217,7 +217,7 @@ Whether directional light shadow casting is enabled (default: `true`)
 
 > `optional` **cullingDistance?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L24)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:24](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L24)
 
 Maximum visibility distance from the camera at which instances are culled (default: `200.0`)
 
@@ -233,7 +233,7 @@ Maximum visibility distance from the camera at which instances are culled (defau
 
 > `optional` **densityMultiplier?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L84)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:84](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L84)
 
 Density multiplier applied to the base density (default: `1.0`)
 
@@ -249,7 +249,7 @@ Density multiplier applied to the base density (default: `1.0`)
 
 > `optional` **densityPerHectare?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:78](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L78)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:78](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L78)
 
 Base placement density per hectare (10,000㎡) (default: `1000.0`)
 
@@ -265,7 +265,7 @@ Base placement density per hectare (10,000㎡) (default: `1000.0`)
 
 > `optional` **densityScaleByWeight?**: `boolean`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:72](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L72)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:72](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L72)
 
 Whether to scale instance size proportionally to the layer weight (default: `true`)
 
@@ -281,7 +281,7 @@ Whether to scale instance size proportionally to the layer weight (default: `tru
 
 > `optional` **groundBlendStrength?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L90)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:90](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L90)
 
 Ground blending strength with terrain surface color and normal (`0.0`~`1.0`, default: `1.0`)
 
@@ -297,7 +297,7 @@ Ground blending strength with terrain surface color and normal (`0.0`~`1.0`, def
 
 > `optional` **height?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:42](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L42)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:42](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L42)
 
 Base height of the instance (default: `1.0`)
 
@@ -313,7 +313,7 @@ Base height of the instance (default: `1.0`)
 
 > `optional` **maxSlope?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:66](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L66)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:66](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L66)
 
 Maximum terrain slope angle at which instances can be placed (in degrees, default: `45.0`)
 
@@ -329,7 +329,7 @@ Maximum terrain slope angle at which instances can be placed (in degrees, defaul
 
 > `optional` **minSlope?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L60)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:60](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L60)
 
 Minimum terrain slope angle at which instances can be placed (in degrees, default: `0.0`)
 
@@ -345,7 +345,7 @@ Minimum terrain slope angle at which instances can be placed (in degrees, defaul
 
 > **name**: `string`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L18)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:18](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L18)
 
 Unique identifier name of the scatter type
 
@@ -361,7 +361,7 @@ Unique identifier name of the scatter type
 
 > `optional` **shadowCullDistance?**: `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L30)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:30](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L30)
 
 Maximum distance at which instances are culled in the shadow pass (default: `50.0`)
 
@@ -377,7 +377,7 @@ Maximum distance at which instances are culled in the shadow pass (default: `50.
 
 > `optional` **targetLayer?**: `string` \| `number`
 
-Defined in: [src/landscape/core/scatter/AScatterType.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterType.ts#L54)
+Defined in: [src/landscape/core/scatter/AScatterType.ts:54](https://github.com/redcamel/RedGPU/blob/26caeb42c00946af874ef1905798dd18e81e18de/src/landscape/core/scatter/AScatterType.ts#L54)
 
 Name or index of the target terrain layer from which to reference placement density
 
