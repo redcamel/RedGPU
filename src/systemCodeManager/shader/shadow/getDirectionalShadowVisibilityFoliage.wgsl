@@ -31,9 +31,32 @@ fn sampleShadowIsotropic6Foliage(
 }
 
 /**
- * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수 (6 / 1 / 1 / 1)]
- * - Cascade 0 (초근경): 비회전 6-Tap 등방성 원형 디스크로 기존 9-Tap Tent 대비 텍스처 대역폭 33% 절감 및 나눗셈(fdiv) 100% 제거
- * - Cascade 1+ (중원경): 초고속 1-Tap 하드웨어 Bilinear PCF로 대규모 숲 오버드로우 대역폭 절감
+ * 🌟 [식생(Foliage) 중경(Cascade 1) 전용 4-Tap Rotated-Grid PCF]
+ * - 바람(Wind)에 의해 흔들리는 잎사귀가 그림자 맵 텍셀 경계를 지날 때 1-Tap 이진 점프(깜빡임)가 발생하지 않도록
+ *   1.0 텍셀 이내 비대칭 회전 격자(실효 16텍셀 연속 Bilinear 중첩)로 부드럽게 필터링합니다.
+ */
+fn sampleShadowRotated4Foliage(
+    directionalShadowMap: texture_depth_2d_array,
+    directionalShadowMapSampler: sampler_comparison,
+    tUV: vec2<f32>,
+    cascadeIndex: u32,
+    compareDepth: f32,
+    oneOverTextureSize: f32
+) -> f32 {
+    let s = oneOverTextureSize;
+    var sum: f32 = 0.0;
+    sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.35,  0.75) * s, cascadeIndex, compareDepth);
+    sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.75,  0.35) * s, cascadeIndex, compareDepth);
+    sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.35, -0.75) * s, cascadeIndex, compareDepth);
+    sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.75, -0.35) * s, cascadeIndex, compareDepth);
+    return sum * 0.25;
+}
+
+/**
+ * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수 (6 / 4 / 1 / 1)]
+ * - Cascade 0 (초근경): 비회전 6-Tap 등방성 원형 디스크
+ * - Cascade 1 (중경): 4-Tap Rotated-Grid PCF로 풍하중 애니메이션 시 텍셀 경계 깜빡임 방지
+ * - Cascade 2+ (원경): 초고속 1-Tap 하드웨어 Bilinear PCF로 대규모 숲 오버드로우 대역폭 절감
  * - Caster Bounding Volume 0-Tap 가드 및 캐스케이드 전환 크로스페이드 적용
  *
  * @param directionalShadowMap 방향성 광원용 2D 뎁스 텍스처 어레이
@@ -90,10 +113,10 @@ fn getDirectionalShadowVisibilityFoliage(
     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
-    // 4. 하드웨어 Slope-Scaled Depth Bias와 결합된 정밀 서브텍셀 리시버 바이어스
+    // 4. 풍하중 잎사귀 떨림(Leaf Flutter) 및 수관 LOD 편차를 고려한 식생 전용 서브텍셀 리시버 바이어스
     let slopeBias = saturate(1.0 - nDotL);
     let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
-    let rawNormalBiasScale = 0.20 + slopeBias * 0.55;
+    let rawNormalBiasScale = 0.35 + slopeBias * 0.75;
     let normalBiasScale = rawNormalBiasScale * cascadeAtten;
     let rawBaseBiasFactor = bias * (1.0 + slopeBias * 1.5);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
@@ -114,17 +137,26 @@ fn getDirectionalShadowVisibilityFoliage(
     let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
     let driftBias = maxCoord * 0.00000025;
     let shadowDepth = saturate(shadowCoord.z);
-    let cascadeBias = rawBaseBiasFactor * cascadeAtten + driftBias;
+    let cascadeBias = max(rawBaseBiasFactor, 0.00035) * cascadeAtten + driftBias;
 
     var finalVis: f32 = 1.0;
 
-    // 5. 적응형 샘플링: 초근경(Cascade 0)은 비회전 6-Tap 등방성 원형 디스크, 중원경(Cascade 1+)은 1-Tap 하드웨어 Bilinear PCF
+    // 5. 적응형 샘플링: Cascade 0은 6-Tap 원형 디스크, Cascade 1은 4-Tap Rotated-Grid PCF, Cascade 2+는 1-Tap Bilinear PCF
     if (cascadeIndex == 0u) {
         finalVis = sampleShadowIsotropic6Foliage(
             directionalShadowMap,
             directionalShadowMapSampler,
             tUV,
             0u,
+            shadowDepth - cascadeBias,
+            oneOverTextureSize
+        );
+    } else if (cascadeIndex == 1u) {
+        finalVis = sampleShadowRotated4Foliage(
+            directionalShadowMap,
+            directionalShadowMapSampler,
+            tUV,
+            1u,
             shadowDepth - cascadeBias,
             oneOverTextureSize
         );
@@ -160,15 +192,27 @@ fn getDirectionalShadowVisibilityFoliage(
             let nextOutOfBounds = nextTUV.x < 0.0 || nextTUV.x > 1.0 || nextTUV.y < 0.0 || nextTUV.y > 1.0 || nextShadowCoord.z < 0.0 || nextShadowCoord.z > 1.0;
             if (!nextOutOfBounds) {
                 let nextShadowDepth = saturate(nextShadowCoord.z);
-                let nextCascadeBias = rawBaseBiasFactor * nextAtten + driftBias;
+                let nextCascadeBias = max(rawBaseBiasFactor, 0.00035) * nextAtten + driftBias;
 
-                let nextVis = textureSampleCompareLevel(
-                    directionalShadowMap,
-                    directionalShadowMapSampler,
-                    nextTUV,
-                    nextIndex,
-                    nextShadowDepth - nextCascadeBias
-                );
+                var nextVis: f32;
+                if (nextIndex == 1u) {
+                    nextVis = sampleShadowRotated4Foliage(
+                        directionalShadowMap,
+                        directionalShadowMapSampler,
+                        nextTUV,
+                        1u,
+                        nextShadowDepth - nextCascadeBias,
+                        oneOverTextureSize
+                    );
+                } else {
+                    nextVis = textureSampleCompareLevel(
+                        directionalShadowMap,
+                        directionalShadowMapSampler,
+                        nextTUV,
+                        nextIndex,
+                        nextShadowDepth - nextCascadeBias
+                    );
+                }
 
                 let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
                 finalVis = mix(finalVis, nextVis, blendFactor);

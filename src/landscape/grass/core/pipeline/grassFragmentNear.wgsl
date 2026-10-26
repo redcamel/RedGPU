@@ -73,25 +73,29 @@ fn main(input: VertexOutput) -> OutputFragment {
             if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) {
                 cascadeIndex = 2u;
             }
+            if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) {
+                cascadeIndex = 3u;
+            }
             let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
 
             let slopeBias = saturate(1.0 - firstNDotL);
+            let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
             let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
-            let normalOffset = N * ((0.35 + slopeBias * 0.65) * worldTexelSize);
+            let normalOffset = N * ((0.20 + slopeBias * 0.55) * cascadeAtten * worldTexelSize);
             let shadowCoord = getShadowCoord(input.worldPos + normalOffset, lightVP);
 
             let tUV = shadowCoord.xy;
             if (all(tUV >= vec2<f32>(0.0)) && all(tUV <= vec2<f32>(1.0)) && shadowCoord.z >= 0.0 && shadowCoord.z <= 1.0) {
                 let absPos = abs(input.worldPos);
                 let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
-                let driftBias = max(maxCoord * 0.00000035, 0.0001);
-                let cascadeBias = shadowInfo.directionalShadowBias * (1.0 + f32(cascadeIndex) * 0.5) + 0.0002 + driftBias;
+                let driftBias = maxCoord * 0.00000025;
+                let cascadeBias = shadowInfo.directionalShadowBias * (1.0 + slopeBias * 1.5) * cascadeAtten + driftBias;
                 let rawVisibility = textureSampleCompareLevel(
                     directionalShadowMap,
                     directionalShadowMapSampler,
                     tUV,
                     cascadeIndex,
-                    saturate(shadowCoord.z - cascadeBias)
+                    saturate(shadowCoord.z) - cascadeBias
                 );
                 let horizonFade = saturate(firstNDotL * 6.25 + 0.5);
                 shadowFactor = 1.0 - effectiveShadowWeight * (1.0 - rawVisibility * horizonFade);

@@ -562,6 +562,9 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
                 format: 'depth32float',
                 depthWriteEnabled: true,
                 depthCompare: 'less-equal',
+                depthBias: 1,
+                depthBiasSlopeScale: 1.25,
+                depthBiasClamp: 0.005,
             },
             multisample: {
                 count: 1

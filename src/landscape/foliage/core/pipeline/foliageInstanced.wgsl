@@ -107,6 +107,58 @@ fn calculateFoliageWindDisplacement(
     return trunkDisplacement + leafDisplacement;
 }
 
+/**
+ * 🌟 [그림자 패스 전용 저주파 풍하중 변위 함수]
+ * - 1x 포인트 샘플링되는 그림자 맵에서 알파 컷오프 잎사귀와 병합 LOD 삼각형이 고주파(3.5x) `leafFlutter`로 인해
+ *   매 프레임 텍셀 중심을 넘나들며 깜빡이는 현상(Shadow Texel Shimmering)을 원천 차단합니다.
+ * - 부드럽고 일관된 저주파 줄기/수관 흔들림(`trunkDisplacement`)만 반영하고 원거리 캐스케이드에서 점진 감쇄합니다.
+ */
+fn calculateFoliageShadowWindDisplacement(
+    localPos: vec3<f32>,
+    vertexColor: vec4<f32>,
+    instancePos: vec3<f32>,
+    time: f32
+) -> vec3<f32> {
+    if (systemUniforms.wind.enabled == 0u || systemUniforms.wind.strength <= 0.0001 || renderUnitUniforms.trunkBendScale <= 0.0001) {
+        return vec3<f32>(0.0);
+    }
+
+    let diff = systemUniforms.camera.cameraPosition - instancePos;
+    let distSq = dot(diff, diff);
+    if (distSq > 19600.0) {
+        return vec3<f32>(0.0);
+    }
+    let viewDist = sqrt(distSq);
+
+    let foliageH = max(2.0, renderUnitUniforms.foliageHeight);
+    let heightNorm = saturate(localPos.y / foliageH);
+
+    let groundAnchor = smoothstep(0.08, 0.8, heightNorm);
+    let cubicBend = groundAnchor * groundAnchor * groundAnchor;
+
+    let hasValidMask = (vertexColor.r > 0.001 && vertexColor.r < 0.999) ||
+                       (vertexColor.b > 0.001 && vertexColor.b < 0.999);
+
+    let trunkMask = select(
+        cubicBend,
+        vertexColor.r * groundAnchor,
+        hasValidMask
+    );
+
+    let windDir = systemUniforms.wind.direction.xz;
+    let windSpeed = systemUniforms.wind.speed;
+
+    let treeBaseXZ = instancePos.xz;
+    let spatialPhase = (treeBaseXZ.x * windDir.x + treeBaseXZ.y * windDir.y) * WIND_SPATIAL_SCALE;
+    let mainWave = sin(time * windSpeed + spatialPhase);
+    let gustWave = sin(time * (windSpeed * 1.5) + spatialPhase * 1.8) * 0.25;
+    let combinedWave = mainWave + gustWave;
+
+    let shadowDistFade = saturate(1.0 - (viewDist - 60.0) * 0.0125);
+    return vec3<f32>(windDir.x, 0.0, windDir.y) *
+           (combinedWave * trunkMask * (systemUniforms.wind.strength * 0.45) * renderUnitUniforms.trunkBendScale * shadowDistFade);
+}
+
 struct FoliageInstanceData {
     instancePos: vec3<f32>,
     instanceScale: vec3<f32>,
@@ -139,6 +191,22 @@ fn calculateFoliageOpaqueWorldPosition(
 ) -> vec3<f32> {
     let instData = unpackAndTransformFoliage(position, instancePos_scaleY, instanceRotQuat, instanceScaleXZ);
     let windDisp = calculateFoliageWindDisplacement(
+        position,
+        vec4<f32>(1.0),
+        instData.instancePos,
+        systemUniforms.time.time
+    );
+    return instData.xform.worldPos + windDisp;
+}
+
+fn calculateFoliageShadowOpaqueWorldPosition(
+    position: vec3<f32>,
+    instancePos_scaleY: vec4<f32>,
+    instanceRotQuat: vec4<f32>,
+    instanceScaleXZ: vec2<f32>
+) -> vec3<f32> {
+    let instData = unpackAndTransformFoliage(position, instancePos_scaleY, instanceRotQuat, instanceScaleXZ);
+    let windDisp = calculateFoliageShadowWindDisplacement(
         position,
         vec4<f32>(1.0),
         instData.instancePos,
@@ -199,6 +267,7 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
     let instanceRotQuat = input.instanceRotQuat;
     let hierarchyPos = input.position;
     var worldPos = instData.xform.worldPos;
+    var prevWorldPos = worldPos;
     let safeScale = instData.xform.safeScale;
     var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
 
@@ -220,6 +289,7 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
 
         let impostorOffset = billboardRight * (hierarchyPos.x * safeScale.x) + billboardUp * (hierarchyPos.y * safeScale.y);
         worldPos = treeCenter + impostorOffset;
+        prevWorldPos = worldPos;
         worldNormal = vec3<f32>(-billboardRight.z, 0.0, billboardRight.x);
 
         let invQuat = vec4<f32>(-instanceRotQuat.xyz, instanceRotQuat.w);
@@ -241,7 +311,11 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
         let tanW = select(1.0, input.vertexTangent.w, input.vertexTangent.w != 0.0);
         output.vertexTangent = vec4<f32>(worldTangent, tanW);
 
-        let windDisp = calculateFoliageWindDisplacement(hierarchyPos, input.vertexColor_0, instancePos, systemUniforms.time.time);
+        let curTime = systemUniforms.time.time;
+        let prevTime = curTime - clamp(systemUniforms.time.deltaTime, 0.0, 0.1);
+        let windDisp = calculateFoliageWindDisplacement(hierarchyPos, input.vertexColor_0, instancePos, curTime);
+        let prevWindDisp = calculateFoliageWindDisplacement(hierarchyPos, input.vertexColor_0, instancePos, prevTime);
+        prevWorldPos = worldPos + prevWindDisp;
         worldPos += windDisp;
     }
 
@@ -254,7 +328,7 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
     output.uv = input.uv;
     output.uv1 = input.uv1;
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
-    output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(prevWorldPos, 1.0);
 
     output.instanceRotQuat = instanceRotQuat;
     output.vertexColor_0 = input.vertexColor_0;
@@ -292,7 +366,7 @@ struct FoliageShadowOpaqueOutput {
 @vertex
 fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShadowOpaqueOutput {
     var output : FoliageShadowOpaqueOutput;
-    let worldPos = calculateFoliageOpaqueWorldPosition(
+    let worldPos = calculateFoliageShadowOpaqueWorldPosition(
         input.position,
         input.instancePos_scaleY,
         input.instanceRotQuat,
@@ -356,7 +430,7 @@ fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutpu
         let safeSubUV = clamp(input.uv, vec2<f32>(0.00390625), vec2<f32>(1.0 - 0.00390625));
         outUV = (grid + safeSubUV) * 0.125;
     } else {
-        let windDisp = calculateFoliageWindDisplacement(
+        let windDisp = calculateFoliageShadowWindDisplacement(
             input.position,
             input.vertexColor_0,
             instData.instancePos,
@@ -381,7 +455,7 @@ fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
     let ddyUV = dpdy(input.uv);
     let alpha = textureSample(shadowBaseColorTexture, shadowBaseColorTextureSampler, input.uv).a;
 
-    ditherFadeDiscard(input.position.xy, input.shadowFade, systemUniforms.time.frameIndex);
+    ditherFadeDiscard(input.position.xy, input.shadowFade, 0u);
 
     let globalFragmentData = globalFragmentSSBO_PBR[input.globalFragmentSlotIndex];
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
