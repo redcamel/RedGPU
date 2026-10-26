@@ -5,7 +5,7 @@ order: 13
 
 # Water System
 
-<img src="/RedGPU/manual/water/lake.jpg" alt="Water" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
+<img src="/water/lake.jpg" alt="Water" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
 
 RedGPU provides a physically based water (`Water`) system that integrates seamlessly with terrain (`Landscape`) and
 standard 3D scenes.
