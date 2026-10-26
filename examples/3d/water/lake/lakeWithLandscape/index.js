@@ -239,8 +239,8 @@ RedGPU.init(
             'https://threejs.org/examples/models/gltf/Soldier.glb',
             (loader) => {
                 characterMesh = loader.resultMesh;
-                characterMesh.x = 0;
-                characterMesh.z = 32;
+                characterMesh.x = 5;
+                characterMesh.z = 30;
                 characterMesh.y = landscape.getHeightAt(characterMesh.x, characterMesh.z);
 
                 characterMesh.setCastShadowRecursively(true);
