@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986902850";
-import * as RedGPU from "../../../../dist/index.js?t=1792986902850";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
 /**
  * [KO] Vertex Color Test 예제
  * [EN] Vertex Color Test example

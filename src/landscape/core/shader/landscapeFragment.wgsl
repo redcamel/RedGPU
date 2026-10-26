@@ -48,9 +48,7 @@ struct NearDetailLayerResult {
 @group(1) @binding(2) var heightMapTexture: texture_2d<f32>;
 @group(1) @binding(3) var vntNormalTexture: texture_2d<f32>;
 @group(1) @binding(4) var<uniform> landscapeInstanceUniforms: LandscapeUniforms;
-@group(1) @binding(5) var vbtBaseColorAtlasTexture: texture_2d<f32>;
-@group(1) @binding(6) var vbtNormalAtlasTexture: texture_2d<f32>;
-@group(1) @binding(7) var vbtORMAtlasTexture: texture_2d<f32>;
+@group(1) @binding(5) var vbtAtlasArrayTexture: texture_2d_array<f32>;
 
 @group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
@@ -586,9 +584,9 @@ fn main(inputData: InputData) -> OutputFragment {
 
     if (hasAnyEnabledLayer) {
         if (!isDetailActive) {
-            let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-            let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-            let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+            let vbtBaseColor = textureSampleGrad(vbtAtlasArrayTexture, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
+            let vbtNormalRaw = textureSampleGrad(vbtAtlasArrayTexture, baseColorTextureSampler, globalUV, 1, ddxGlobalUV, ddyGlobalUV).rgb;
+            let vbtORM = textureSampleGrad(vbtAtlasArrayTexture, baseColorTextureSampler, globalUV, 2, ddxGlobalUV, ddyGlobalUV);
 
             let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
             let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
@@ -616,9 +614,9 @@ fn main(inputData: InputData) -> OutputFragment {
                 ambientOcclusion = nearDetail.ao;
             }
         } else {
-            let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-            let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-            let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+            let vbtBaseColor = textureSampleGrad(vbtAtlasArrayTexture, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
+            let vbtNormalRaw = textureSampleGrad(vbtAtlasArrayTexture, baseColorTextureSampler, globalUV, 1, ddxGlobalUV, ddyGlobalUV).rgb;
+            let vbtORM = textureSampleGrad(vbtAtlasArrayTexture, baseColorTextureSampler, globalUV, 2, ddxGlobalUV, ddyGlobalUV);
 
             let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
             let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;

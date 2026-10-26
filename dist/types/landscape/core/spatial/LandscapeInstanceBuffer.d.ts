@@ -219,8 +219,8 @@ declare class LandscapeInstanceBuffer extends RedGPUObject {
         getLODRange(lod: number): any;
     }, lodMaxLevel: number, isWireframe: boolean): void;
     /**
-     * [KO] VHT, VNT 및 VBT 아틀라스 텍스처 뷰를 바인딩하여 인스턴스 스토리지 바인드 그룹을 갱신합니다.
-     * [EN] Updates the instance storage bind group by binding VHT, VNT, and VBT atlas texture views.
+     * [KO] VHT, VNT 및 VBT 3-레이어 아틀라스 텍스처 뷰를 바인딩하여 인스턴스 스토리지 바인드 그룹을 갱신합니다.
+     * [EN] Updates the instance storage bind group by binding VHT, VNT, and VBT 3-layer atlas texture views.
      *
      * @param vhtTextureView -
      * [KO] 가상 하이트맵 아틀라스(VHT) 텍스처 뷰
@@ -228,17 +228,11 @@ declare class LandscapeInstanceBuffer extends RedGPUObject {
      * @param vntTextureView -
      * [KO] 가상 노멀맵 아틀라스(VNT) 텍스처 뷰 (선택)
      * [EN] Virtual Normalmap Texture (VNT) atlas view (optional)
-     * @param vbtBaseColorView -
-     * [KO] 가상 블렌드 BaseColor 아틀라스(VBT) 텍스처 뷰 (선택)
-     * [EN] Virtual Blend Texture (VBT) BaseColor atlas view (optional)
-     * @param vbtNormalView -
-     * [KO] 가상 블렌드 Normal 아틀라스(VBT) 텍스처 뷰 (선택)
-     * [EN] Virtual Blend Texture (VBT) Normal atlas view (optional)
-     * @param vbtORMView -
-     * [KO] 가상 블렌드 ORM 아틀라스(VBT) 텍스처 뷰 (선택)
-     * [EN] Virtual Blend Texture (VBT) ORM atlas view (optional)
+     * @param vbtAtlasArrayView -
+     * [KO] 가상 블렌드 3-레이어(BaseColor, Normal, ORM) 아틀라스(VBT) `2d-array` 텍스처 뷰 (선택)
+     * [EN] Virtual Blend Texture (VBT) 3-layer (BaseColor, Normal, ORM) `2d-array` atlas texture view (optional)
      */
-    updateBindGroup(vhtTextureView: GPUTextureView, vntTextureView?: GPUTextureView, vbtBaseColorView?: GPUTextureView, vbtNormalView?: GPUTextureView, vbtORMView?: GPUTextureView): void;
+    updateBindGroup(vhtTextureView: GPUTextureView, vntTextureView?: GPUTextureView, vbtAtlasArrayView?: GPUTextureView): void;
     /**
      * [KO] 할당된 모든 GPU 버퍼(`allTilesBuffer`, `visibleTilesBuffer`, `indirectDrawBuffer`, `landscapeUniformBuffer`)를 파괴합니다.
      * [EN] Destroys all allocated GPU buffers (`allTilesBuffer`, `visibleTilesBuffer`, `indirectDrawBuffer`, `landscapeUniformBuffer`).

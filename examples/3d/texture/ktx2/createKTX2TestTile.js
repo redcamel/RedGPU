@@ -1,4 +1,4 @@
-import * as RedGPU from '../../../../dist/index.js?t=1792986902850';
+import * as RedGPU from '../../../../dist/index.js?t=1792993380695';
 
 /**
  * [KO] 현재 GPU 디바이스 지원 압축 포맷 피처 및 트랜스코드 타겟 현황을 표시합니다.
