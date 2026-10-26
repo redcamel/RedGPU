@@ -25,7 +25,7 @@ const landscapeGraph = `
 
 # 대규모 지형 및 생태계 (Landscape & Ecosystem)
 
-<img src="/RedGPU/manual/landscape/landscape.jpg" alt="Landscape" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
+<img src="/landscape/landscape.jpg" alt="Landscape" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
 
 RedGPU는 수십 제곱킬로미터 규모의 오픈월드 환경을 60 FPS로 렌더링하기 위해 GPU 기반의 **지형**(`Landscape`) 및 **생태계**(`GrassManager`, `FoliageManager`)
 시스템을 제공합니다.
