@@ -1,11 +1,8 @@
 /**
- * [KO] 주어진 값이 숫자(Number) 타입인지 검증합니다.
- * [EN] Validates if the given value is a number type.
+ * [KO] 값이 NaN이 아닌 number 타입인지 검증하며, 실패 시 예외를 발생시킵니다.
+ * [EN] Validates that the value is a non-NaN number and throws an exception on failure.
  *
- * [KO] 값이 number 타입이 아니면 예외를 발생시킵니다.
- * [EN] Throws an exception if the value is not a number type.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * RedGPU.RuntimeChecker.validateNumber(123);
  * ```
@@ -14,11 +11,11 @@
  * [KO] 검증할 값
  * [EN] Value to validate
  * @returns
- * [KO] 값이 숫자이면 true
- * [EN] True if the value is a number
+ * [KO] 유효한 숫자이면 true
+ * [EN] True if the value is a valid number
  * @throws
- * [KO] 값이 숫자가 아닐 경우 Error 발생
- * [EN] Throws Error if the value is not a number
+ * [KO] number 타입이 아니거나 NaN인 경우 Error 발생
+ * [EN] Throws Error if the value is not a number or is NaN
  * @category Validation
  */
 declare const validateNumber: (value: number) => boolean;

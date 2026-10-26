@@ -1,9 +1,7 @@
 /**
- * [KO] RedGPU는 WebGPU 기반의 차세대 3D 그래픽 엔진입니다.
- * [EN] RedGPU is a next-generation 3D graphics engine based on WebGPU.
+ * [KO] RedGPU 엔진의 핵심 모듈과 하위 네임스페이스를 제공하는 최상위 진입점입니다.
+ * [EN] Top-level entry point providing core modules and sub-namespaces of the RedGPU engine.
  *
- * [KO] 고성능 렌더링 파이프라인, 유연한 카메라 시스템, 다양한 조명 및 재질, 후처리 효과 등을 제공하여 웹 환경에서 강력한 그래픽 애플리케이션을 구축할 수 있도록 돕습니다.
- * [EN] It provides a high-performance rendering pipeline, flexible camera system, various lights and materials, and post-processing effects to help build powerful graphics applications in the web environment.
  * @packageDocumentation
  */
 import init from "./init";
@@ -42,4 +40,7 @@ export * as DefineGPUProperty from "./defineProperty"
 export * as Antialiasing from "./antialiasing"
 export * as Physics from "./physics"
 export * from "./loader/gltf/animationLooper/AnimStateMachine";
+export * as Landscape from "./landscape";
+export * as Water from "./water";
+export * as Wind from "./wind";
 

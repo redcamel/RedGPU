@@ -1,6 +1,6 @@
 /**
- * [KO] 그림자 렌더링과 관련된 관리자 및 유틸리티를 제공합니다.
- * [EN] Provides managers and utilities related to shadow rendering.
+ * [KO] 방향성 광원 그림자 매니저와 씬 단위 그림자 매니저를 제공합니다.
+ * [EN] Provides the directional light shadow manager and the scene-level shadow manager.
  * @packageDocumentation
  */
 import DirectionalShadowManager from "./DirectionalShadowManager";

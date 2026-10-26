@@ -6,6 +6,30 @@ import {GLTF, GlTfId, MaterialNormalTextureInfo, MaterialOcclusionTextureInfo, T
 import GLTFLoader from "../../GLTFLoader";
 import parse_KHR_texture_transform from "./extensions/parse_KHR_texture_transform";
 
+/**
+ * [KO] GLTF 재질의 텍스처 정보 및 샘플러 옵션을 파싱하여 로더의 텍스처 로드 목록에 등록합니다.
+ * [EN] Parses texture information and sampler options of a GLTF material and registers them in the loader's texture load list.
+ *
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param tMaterial -
+ * [KO] 텍스처가 적용될 대상 `PBRMaterial` 인스턴스
+ * [EN] Target `PBRMaterial` instance to which the texture will be applied
+ * @param textureInfo -
+ * [KO] 파싱할 GLTF 텍스처 정보 객체
+ * [EN] GLTF texture info object to parse
+ * @param targetTextureKey -
+ * [KO] 대상 재질의 텍스처 프로퍼티 키 이름
+ * [EN] Texture property key name on the target material
+ * @param format -
+ * [KO] 적용할 텍스처 포맷 문자열
+ * [EN] Optional texture format string to apply
+ * @param useMipmap -
+ * [KO] 밉맵 사용 여부 (기본값: `true`)
+ * [EN] Whether to use mipmaps (default: `true`)
+ * @category Loader
+ */
 const parseMaterialTexture = (
     gltfLoader: GLTFLoader,
     tMaterial: PBRMaterial,
@@ -51,6 +75,23 @@ const parseMaterialTexture = (
     }
 }
 export default parseMaterialTexture
+/**
+ * [KO] GLTF 이미지 소스 ID로부터 실제 로드할 URI와 캐시 키를 추출합니다.
+ * [EN] Extracts the actual load URI and cache key from a GLTF image source ID.
+ *
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param scenesData -
+ * [KO] GLTF 데이터 객체
+ * [EN] GLTF data object
+ * @param sourceGlTfId -
+ * [KO] 대상 이미지 소스의 GLTF ID
+ * [EN] GLTF ID of the target image source
+ * @returns
+ * [KO] 파싱된 URI(`parsedURI`)와 캐시 키(`cacheKey`)를 담은 객체 또는 `null`
+ * [EN] Object containing the parsed URI (`parsedURI`) and cache key (`cacheKey`), or `null`
+ */
 const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId: GlTfId) {
     if (!scenesData.images[sourceGlTfId]) {
         console.log('없어', scenesData.images, sourceGlTfId)
@@ -69,6 +110,23 @@ const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId:
         cacheKey
     }
 };
+/**
+ * [KO] GLTF 샘플러 ID로부터 WebGPU 샘플러 디스크립터(`GPUSamplerDescriptor`)를 생성합니다.
+ * [EN] Creates a WebGPU sampler descriptor (`GPUSamplerDescriptor`) from a GLTF sampler ID.
+ *
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param scenesData -
+ * [KO] GLTF 데이터 객체
+ * [EN] GLTF data object
+ * @param samplerGlTfId -
+ * [KO] 대상 샘플러의 GLTF ID
+ * [EN] GLTF ID of the target sampler
+ * @returns
+ * [KO] 변환된 `GPUSamplerDescriptor` 객체
+ * [EN] Converted `GPUSamplerDescriptor` object
+ */
 const getSamplerInfo = function (gltfLoader: GLTFLoader, scenesData: GLTF, samplerGlTfId: GlTfId): GPUSamplerDescriptor {
     const result: GPUSamplerDescriptor = {
         magFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,

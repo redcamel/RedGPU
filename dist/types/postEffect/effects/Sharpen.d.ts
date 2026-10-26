@@ -3,22 +3,18 @@ import View3D from "../../display/view/View3D";
 import AMultiPassPostEffect from "../core/AMultiPassPostEffect";
 import { IPostEffectResult } from "../core/types";
 /**
- * [KO] 샤픈(Sharpen) 후처리 이펙트입니다.
- * [EN] Sharpen post-processing effect.
+ * [KO] 컨볼루션 커널을 사용하여 인접 픽셀 간 대비를 높이고 경계를 선명하게 강조하는 샤픈(Sharpen) 후처리 이펙트입니다.
+ * [EN] Sharpen post-processing effect that enhances edges and details by increasing contrast between adjacent pixels using a convolution kernel.
  *
- * [KO] 컨볼루션 커널(Convolution Kernel)을 사용하여 이미지의 인접 픽셀 간 대비를 높임으로써 경계와 디테일을 선명하게 강조합니다.
- * [EN] Enhances edges and details by increasing the contrast between adjacent pixels using a convolution kernel.
- *
- * [KO] 이 효과는 LDR 공간에서 동작할 때 가장 선명하고 깨끗한 결과를 제공합니다.
- * [EN] This effect provides the sharpest and cleanest results when operating in LDR space.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Sharpen(redGPUContext);
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/sharpen/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/sharpen/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Sharpen example](/RedGPU/examples/postEffect/sharpen/)
  * @category PostEffect
  */
 declare class Sharpen extends AMultiPassPostEffect {
@@ -27,18 +23,35 @@ declare class Sharpen extends AMultiPassPostEffect {
      * [KO] Sharpen 인스턴스를 생성합니다.
      * [EN] Creates a Sharpen instance.
      *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Sharpen(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
     /**
-     * [KO] 샤픈 효과를 렌더링합니다.
-     * [EN] Renders the sharpen effect.
+     * [KO] 샤픈 후처리 효과를 렌더링합니다.
+     * [EN] Renders the sharpen post-processing effect.
      *
-     * @param view - [KO] View3D 인스턴스 [EN] View3D instance
-     * @param width - [KO] 너비 [EN] Width
-     * @param height - [KO] 높이 [EN] Height
-     * @param sourceTextureInfo - [KO] 소스 텍스처 정보 [EN] Source texture info
-     * @returns [KO] 샤픈 처리된 텍스처 결과 [EN] Sharpened texture result
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 샤픈 처리된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Sharpened output texture information (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }

@@ -9,9 +9,22 @@ import equirectangularToCubeShaderCode from "./equirectangularToCubeShaderCode.w
 import RedGPUObject from "../../../../../base/RedGPUObject";
 
 /**
- * [KO] Equirectangular(2D) 텍스처를 CubeMap으로 변환하는 클래스입니다.
- * [EN] Class that converts an Equirectangular (2D) texture to a CubeMap.
+ * [KO] 2D Equirectangular(등장방형도법) 텍스처를 큐브맵으로 변환하는 클래스입니다.
+ * [EN] Class that converts a 2D Equirectangular texture into a cubemap.
  *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
+ * const equirectangularToCubeGenerator = redGPUContext.resourceManager.equirectangularToCubeGenerator;
+ * ```
+ *
+ * @see [IBL test example](/RedGPU/examples/3d/skybox/ibl/iblTest/)
  * @category IBL
  */
 class EquirectangularToCubeGenerator extends RedGPUObject {
@@ -41,10 +54,12 @@ class EquirectangularToCubeGenerator extends RedGPUObject {
 
     /**
      * [KO] 2D Equirectangular 텍스처를 큐브맵으로 변환하여 반환합니다.
-     * [EN] Converts a 2D Equirectangular texture to a cubemap and returns it.
+     * [EN] Converts a 2D Equirectangular texture into a cubemap and returns it.
      *
      * ### Example
      * ```typescript
+     * // [KO] 2D HDR 텍스처를 큐브맵으로 변환
+     * // [EN] Convert 2D HDR texture to cubemap
      * const cubeMap = await redGPUContext.resourceManager.equirectangularToCubeGenerator.generate(hdrTexture, 1024);
      * ```
      *
@@ -55,15 +70,14 @@ class EquirectangularToCubeGenerator extends RedGPUObject {
      * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
      * [EN] Size of one side of the generated cubemap (default: 512)
      * @returns
-     * [KO] 생성된 DirectCubeTexture
-     * [EN] Generated DirectCubeTexture
+     * [KO] 생성된 `Promise<DirectCubeTexture>`
+     * [EN] Generated `Promise<DirectCubeTexture>`
      */
     async generate(sourceTexture: GPUTexture, size: number = 512): Promise<DirectCubeTexture> {
         const {gpuDevice, resourceManager, commandEncoderManager, redGPUContext} = this;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
 
-        // 1. 결과용 큐브 텍스처 생성 (밉맵 포함)
         const textureDesc: GPUTextureDescriptor = {
             size: [size, size, 6],
             format: format,
@@ -74,7 +88,6 @@ class EquirectangularToCubeGenerator extends RedGPUObject {
         };
         const cubeGPUTexture = resourceManager.createManagedTexture(textureDesc);
 
-        // 2. 파이프라인 생성
         if (!this.#shaderModule) {
             this.#shaderModule = resourceManager.createGPUShaderModule(
                 'EQUIRECTANGULAR_TO_CUBE_GENERATOR_SHADER_MODULE',
@@ -93,7 +106,6 @@ class EquirectangularToCubeGenerator extends RedGPUObject {
             });
         }
 
-        // 3. 6개 면 연산
         const faceMatrices = this.#getCubeMapFaceMatrices();
 
         if (!this.#uniformBuffer) {
@@ -132,7 +144,6 @@ class EquirectangularToCubeGenerator extends RedGPUObject {
             computePass.dispatchWorkgroups(Math.ceil(size / 8), Math.ceil(size / 8), 6);
         });
 
-        // 밉맵 생성 (컴퓨트 쉐이더로 첫 레벨 작성 후 밉맵 생성)
         resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc, true);
 
         return new DirectCubeTexture(redGPUContext, `CubeMap_From_Equirect_${createUUID()}`, cubeGPUTexture);
@@ -149,6 +160,10 @@ class EquirectangularToCubeGenerator extends RedGPUObject {
         ];
     }
 
+    /**
+     * [KO] 내부 GPU 버퍼 및 파이프라인 리소스를 해제합니다.
+     * [EN] Releases internal GPU buffer and pipeline resources.
+     */
     destroy() {
         if (this.#uniformBuffer) {
             try {

@@ -3,12 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RedGPU - Javascript WebGPU Library</title>
+    <title>RedGPU - WebGPU 3D Engine for JavaScript &amp; TypeScript</title>
+    <meta content="RedGPU is a high-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for building next-generation web graphics applications."
+          name="description">
+    <meta content="RedGPU, WebGPU, 3D Engine, Graphics, JavaScript, TypeScript, WebGL, Computer Graphics"
+          name="keywords">
     <link rel="icon" type="image/svg+xml" href="manual/public/logo-dark.svg">
     <link href="https://redcamel.github.io/RedGPU/" rel="canonical">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+    <!-- Open Graph / Facebook -->
+    <meta content="website" property="og:type">
+    <meta content="https://redcamel.github.io/RedGPU/" property="og:url">
+    <meta content="RedGPU - WebGPU 3D Engine for JavaScript &amp; TypeScript" property="og:title">
+    <meta content="RedGPU is a high-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for building next-generation web graphics applications."
+          property="og:description">
+    <meta content="https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e"
+          property="og:image">
+
+    <!-- Twitter -->
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="https://redcamel.github.io/RedGPU/" name="twitter:url">
+    <meta content="RedGPU - WebGPU 3D Engine for JavaScript &amp; TypeScript" name="twitter:title">
+    <meta content="RedGPU is a high-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for building next-generation web graphics applications."
+          name="twitter:description">
+    <meta content="https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e"
+          name="twitter:image">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "@id": "https://redcamel.github.io/RedGPU/#website",
+                "url": "https://redcamel.github.io/RedGPU/",
+                "name": "RedGPU",
+                "description": "RedGPU is a high-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for building next-generation web graphics applications.",
+                "inLanguage": "en",
+                "publisher": {
+                    "@id": "https://redcamel.github.io/RedGPU/#author"
+                }
+            },
+            {
+                "@type": "Person",
+                "@id": "https://redcamel.github.io/RedGPU/#author",
+                "name": "redcamel",
+                "url": "https://github.com/redcamel",
+                "sameAs": [
+                    "https://github.com/redcamel",
+                    "https://twitter.com/redcamel15"
+                ]
+            },
+            {
+                "@type": "SoftwareSourceCode",
+                "@id": "https://redcamel.github.io/RedGPU/#software",
+                "name": "RedGPU",
+                "alternateName": "redgpu",
+                "description": "High-performance JavaScript & TypeScript WebGPU 3D/2D graphics library for next-generation web graphics.",
+                "url": "https://redcamel.github.io/RedGPU/",
+                "codeRepository": "https://github.com/redcamel/RedGPU",
+                "programmingLanguage": [
+                    "TypeScript",
+                    "JavaScript",
+                    "WGSL"
+                ],
+                "runtimePlatform": "Web browser with WebGPU support",
+                "license": "https://opensource.org/licenses/MIT",
+                "keywords": "WebGPU, 3D Engine, JavaScript, TypeScript, WGSL, glTF, PBR, Computer Graphics",
+                "image": "https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e",
+                "copyrightYear": 2019,
+                "author": {
+                    "@id": "https://redcamel.github.io/RedGPU/#author"
+                },
+                "isPartOf": {
+                    "@id": "https://redcamel.github.io/RedGPU/#website"
+                }
+            }
+        ]
+    }</script>
+
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -34,17 +108,8 @@
             radial-gradient(circle at 75% 75%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
             radial-gradient(circle at 50% 50%, rgba(255, 100, 0, 0.05) 0%, transparent 50%);
             z-index: -1;
-            animation: backgroundMove 15s ease-in-out infinite;
         }
 
-        @keyframes backgroundMove {
-            0%, 100% {
-                transform: scale(1) rotate(0deg);
-            }
-            50% {
-                transform: scale(4.1) rotate(180deg);
-            }
-        }
 
         .hero {
             padding: 4rem 2rem;
@@ -83,6 +148,15 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .hero-title-sub {
+            display: block;
+            margin-top: 0.75rem;
+            font-size: clamp(1.1rem, 2.4vw, 1.75rem);
+            font-weight: 600;
+            line-height: 1.3;
+            letter-spacing: 0;
+        }
+
         .hero-subtitle {
             font-size: clamp(1.1rem, 2vw, 1.4rem);
             color: rgba(255, 255, 255, 0.8);
@@ -91,12 +165,33 @@
             line-height: 1.6;
         }
 
+        .hero-version {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.25rem 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .hero-version[hidden] {
+            display: none;
+        }
+
+
+
         .hero-buttons {
             display: flex;
             gap: 1.5rem;
         }
 
-        .iframes {
+        .hero-canvas {
             position: absolute;
             bottom: 0;
             right: 0;
@@ -108,10 +203,10 @@
             opacity: 1
         }
 
-        iframe {
+        .hero-canvas canvas {
+            display: block;
             width: 100%;
             height: 100%;
-            border: none;
         }
 
         @media (max-width: 1100px) {
@@ -125,7 +220,7 @@
                 max-width: 550px;
             }
 
-            .iframes {
+            .hero-canvas {
                 width: 350px;
                 height: 400px;
             }
@@ -146,7 +241,7 @@
                 max-width: 420px;
             }
 
-            .iframes {
+            .hero-canvas {
                 transform: translate(20px, 0);
                 height: 280px;
                 bottom: 220px
@@ -175,7 +270,7 @@
                 justify-content: center;
             }
 
-            .iframes {
+            .hero-canvas {
                 opacity:0
             }
         }
@@ -237,9 +332,6 @@
         .section {
             margin-bottom: 0;
             padding: 6rem 0;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.8s ease-out forwards;
             position: relative;
         }
 
@@ -283,27 +375,11 @@
             padding: 3rem 2rem 6rem;
         }
 
-        .section:nth-child(2) {
-            animation-delay: 0.2s;
-        }
 
-        .section:nth-child(3) {
-            animation-delay: 0.4s;
-        }
 
-        .section:nth-child(4) {
-            animation-delay: 0.6s;
-        }
 
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
 
         .section-title {
-            font-family: 'Inter', sans-serif;
             font-size: clamp(1.5rem, 3vw, 2.25rem);
             font-weight: 700;
             margin-bottom: 2rem;
@@ -316,7 +392,7 @@
 
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(calc(50% - 1rem), 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
@@ -446,7 +522,12 @@
         .video-card video {
             width: 100%;
             height: auto;
+            aspect-ratio: 16 / 9;
             display: block;
+        }
+
+        .video-card + .video-card {
+            margin-top: 2rem;
         }
 
 
@@ -651,31 +732,73 @@
 
     </style>
     <script type="module">
-        window.onload = () => {
-            const iframes = document.querySelector('.iframes');
-            const t0 = document.createElement('iframe');
-            t0.src = './examples/assets/indexSample.html';
-            iframes.appendChild(t0);
+        window.addEventListener('load', async () => {
+            // Skip WebGPU init and resource downloads on <= 640px where the hero canvas is hidden
+            if (window.matchMedia('(max-width: 640px)').matches) return;
+            const canvas = document.getElementById('heroCanvas');
+            const RedGPU = await import('./dist/index.js');
+            RedGPU.init(
+                canvas,
+                (redGPUContext) => {
+                    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+                    controller.speedDistance = 0.1;
+                    controller.tilt = 0;
+                    // Lock distance to prevent zooming
+                    controller.distance =
+                        controller.minDistance =
+                            controller.maxDistance = 0.9;
 
-        };
+                    const scene = new RedGPU.Display.Scene();
+                    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+                    redGPUContext.backgroundColor.a = 0;
+                    redGPUContext.addView(view);
+
+                    const modelURL = redGPUContext.detector.isMobile ?
+                        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoomBox/glTF-Binary/BoomBox.glb' :
+                        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/FlightHelmet/glTF/FlightHelmet.gltf';
+                    new RedGPU.GLTFLoader(redGPUContext, modelURL, (result) => {
+                        const mesh = result.resultMesh;
+                        mesh.y = -0.3;
+                        scene.addChild(mesh);
+                    });
+
+                    view.ibl = new RedGPU.Resource.IBL(redGPUContext, './examples/assets/hdr/Cannon_Exterior.hdr');
+
+                    const renderer = new RedGPU.Renderer();
+                    renderer.start(redGPUContext, () => {
+                        if (scene.numChildren) {
+                            scene.getChildAt(0).rotationY += 0.1;
+                        }
+                    });
+                },
+                (failReason) => {
+                }
+            );
+        });
     </script>
 </head>
 <body>
 
+<main>
 <section class="hero">
-    <div class="iframes"></div>
+    <div aria-hidden="true" class="hero-canvas">
+        <canvas id="heroCanvas"></canvas>
+    </div>
     <div class="hero-container">
         <div class="hero-content-left">
-            <h1 class="hero-title">RedGPU</h1>
+            <a class="hero-version" hidden href="https://github.com/redcamel/RedGPU/releases" id="heroVersion"><span
+                    class="hero-version-number"></span></a>
+            <h1 class="hero-title">RedGPU<span
+                    class="hero-title-sub">WebGPU 3D Engine for JavaScript &amp; TypeScript</span></h1>
             <p class="hero-subtitle">A powerful JavaScript WebGPU library for creating stunning 2D/3D graphics and
                 high-performance web applications. Experience the next generation of web graphics today.</p>
 
             <div class="hero-buttons">
                 <a href="/RedGPU/examples/" class="cta-button">
-                    <img src="manual/public/icon-showcase-dark.svg" alt="Examples" > Explore Examples
+                    <img alt="" src="manual/public/icon-showcase-dark.svg"> Explore Examples
                 </a>
                 <a href="https://github.com/redcamel/RedGPU" class="cta-button cta-button-secondary">
-                    <img src="manual/public/readme-dark.svg" alt="GitHub"> View on GitHub
+                    <img alt="" src="manual/public/readme-dark.svg"> View on GitHub
                 </a>
             </div>
         </div>
@@ -688,7 +811,7 @@
         <div class="feature-grid">
             <a href="/RedGPU/examples/" class="feature-card">
                 <div class="feature-icon">
-                    <img src="manual/public/icon-showcase-dark.svg" alt="Examples">
+                    <img alt="" src="manual/public/icon-showcase-dark.svg">
                 </div>
                 <h3 class="feature-title">Examples</h3>
                 <p class="feature-description">Explore a wide variety of interactive examples showcasing the power of
@@ -698,9 +821,9 @@
                 </span>
             </a>
 
-            <a href="/RedGPU/manual/" class="feature-card">
+            <a class="feature-card" data-href-ko="/RedGPU/manual/ko/" href="/RedGPU/manual/">
                 <div class="feature-icon">
-                    <img src="manual/public/readme-dark.svg" alt="Documentation">
+                    <img alt="" src="manual/public/readme-dark.svg">
                 </div>
                 <h3 class="feature-title">Documentation</h3>
                 <p class="feature-description">Learn how to build powerful WebGPU applications with our step-by-step
@@ -710,9 +833,10 @@
                 </span>
             </a>
 
-            <a href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html" class="feature-card">
+            <a class="feature-card"
+               data-href-ko="/RedGPU/manual/ko/api/RedGPU-API/namespaces/RedGPU/README.html" href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html">
                 <div class="feature-icon">
-                    <img src="manual/public/icon-api-dark.svg" alt="API">
+                    <img alt="" src="manual/public/icon-api-dark.svg">
                 </div>
                 <h3 class="feature-title">API Reference</h3>
                 <p class="feature-description">Deep dive into the complete API specification. Find detailed information
@@ -721,32 +845,27 @@
                     Browse API →
                 </span>
             </a>
-
-            <a href="https://github.com/redcamel/RedGPU" class="feature-card">
-                <div class="feature-icon">
-                    <img src="manual/public/icon-performance-dark.svg" alt="Performance">
-                </div>
-                <h3 class="feature-title">High Performance</h3>
-                <p class="feature-description">Built for speed and efficiency, leveraging the power of WebGPU for
-                    next-generation web graphics.</p>
-                <span class="feature-link">
-                    View on GitHub →
-                </span>
-            </a>
         </div>
     </section>
 
     <section class="section">
         <h2 class="section-title">Visual Showcase</h2>
         <div class="video-card">
-            <video autoplay loop muted playsinline controls>
-                <source src="https://github.com/user-attachments/assets/3115b699-9b3e-45f2-9e3b-682db04bcc03" type="video/mp4">
+            <video class="lazy-video" controls loop muted playsinline preload="none">
+                <source src="https://github.com/user-attachments/assets/e46b2e21-3173-43fb-948f-a68f6fcfb424"
+                        type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
-        <br/>
         <div class="video-card">
-            <video autoplay loop muted playsinline controls>
+            <video class="lazy-video" controls loop muted playsinline preload="none">
+                <source src="https://github.com/user-attachments/assets/3115b699-9b3e-45f2-9e3b-682db04bcc03"
+                        type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="video-card">
+            <video class="lazy-video" controls loop muted playsinline preload="none">
                 <source src="https://github.com/user-attachments/assets/2bb100e7-fb48-43c8-8144-963cec280de9" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
@@ -754,6 +873,7 @@
     </section>
 
 </div>
+</main>
 
 <footer class="footer">
     <div class="footer-content">
@@ -762,13 +882,13 @@
             <p>A powerful JavaScript WebGPU library for creating stunning 2D/3D graphics and high-performance web
                 applications. Built for the next generation of web graphics.</p>
             <div class="footer-social">
-                <a href="https://github.com/redcamel/RedGPU" title="GitHub">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                <a aria-label="GitHub" href="https://github.com/redcamel/RedGPU" title="GitHub">
+                    <svg aria-hidden="true" fill="#fff" focusable="false" height="20" viewBox="0 0 24 24" width="20">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
                 </a>
-                <a href="https://twitter.com/redcamel15" title="Twitter">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                <a aria-label="Twitter" href="https://twitter.com/redcamel15" title="Twitter">
+                    <svg aria-hidden="true" fill="#fff" focusable="false" height="20" viewBox="0 0 24 24" width="20">
                         <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
                     </svg>
                 </a>
@@ -777,23 +897,24 @@
 
         <div class="footer-section">
             <h3>Resources</h3>
-            <div class="footer-links">
+            <nav aria-label="Resources" class="footer-links">
                 <a href="/RedGPU/examples/">
-                    <img src="manual/public/icon-showcase-dark.svg" class="link-icon" alt="Examples"> Examples
+                    <img alt="" class="link-icon" src="manual/public/icon-showcase-dark.svg"> Examples
                 </a>
-                <a href="/RedGPU/manual/">
-                    <img src="manual/public/readme-dark.svg" class="link-icon" alt="Documentation"> Documentation
+                <a data-href-ko="/RedGPU/manual/ko/" href="/RedGPU/manual/">
+                    <img alt="" class="link-icon" src="manual/public/readme-dark.svg"> Documentation
                 </a>
-                <a href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html">
-                    <img src="manual/public/icon-api-dark.svg" class="link-icon" alt="API"> API Reference
+                <a data-href-ko="/RedGPU/manual/ko/api/RedGPU-API/namespaces/RedGPU/README.html"
+                   href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html">
+                    <img alt="" class="link-icon" src="manual/public/icon-api-dark.svg"> API Reference
                 </a>
                 <a href="https://github.com/redcamel/RedGPU/releases">
-                    <img src="manual/public/readme-dark.svg" class="link-icon" alt="Releases"> Releases
+                    <img alt="" class="link-icon" src="manual/public/readme-dark.svg"> Releases
                 </a>
                 <a href="https://github.com/redcamel/RedGPU/issues">
                     🐛 Issues
                 </a>
-            </div>
+            </nav>
         </div>
 
         <div class="footer-section">
@@ -807,8 +928,8 @@
                     <img src="https://img.shields.io/github/release-date/redcamel/RedGPU?style=for-the-badge&logo=github&label=Release%20Date"
                          alt="Release Date">
                 </a>
-                <a href="LICENSE.md">
-                    <img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"
+                <a href="https://github.com/redcamel/RedGPU/blob/master/LICENCE.md">
+                    <img src="https://img.shields.io/github/license/redcamel/RedGPU?colorB=ff0000"
                          alt="License">
                 </a>
                 <img src="https://img.shields.io/github/last-commit/redcamel/RedGPU" alt="Last Commit">
@@ -823,5 +944,67 @@
         </p>
     </div>
 </footer>
+<script>
+    // Route manual / API links to the Korean docs when the browser locale is Korean
+    if ((navigator.language || '').toLowerCase().startsWith('ko')) {
+        document.querySelectorAll('a[data-href-ko]').forEach((link) => {
+            link.href = link.dataset.hrefKo;
+        });
+    }
+</script>
+<script>
+    // Show the current version (package.json SSOT) near the hero title; stays hidden on failure
+    fetch('./package.json')
+        .then((response) => (response.ok ? response.json() : null))
+        .then((pkg) => {
+            const version = pkg && pkg.version;
+            if (!version) return;
+            const badge = document.getElementById('heroVersion');
+            badge.querySelector('.hero-version-number').textContent = 'v' + version;
+            badge.hidden = false;
+        })
+        .catch(() => {
+        });
+</script>
+<script>
+    // Lazy autoplay: videos stay preload="none" and only load/play while visible; paused off-screen.
+    // A manual pause by the user is respected until the user plays the video again.
+    (() => {
+        const videos = document.querySelectorAll('video.lazy-video');
+        if (!('IntersectionObserver' in window)) {
+            videos.forEach((video) => video.play().catch(() => {
+            }));
+            return;
+        }
+        const visible = new WeakSet();
+        const userPaused = new WeakSet();
+        const onPause = (event) => {
+            if (visible.has(event.target)) userPaused.add(event.target);
+        };
+        const onPlay = (event) => {
+            userPaused.delete(event.target);
+        };
+        const ignorePlayError = () => {
+        };
+        const observer = new IntersectionObserver((entries) => {
+            for (let i = 0; i < entries.length; i++) {
+                const entry = entries[i];
+                const video = entry.target;
+                if (entry.isIntersecting) {
+                    visible.add(video);
+                    if (video.paused && !userPaused.has(video)) video.play().catch(ignorePlayError);
+                } else {
+                    visible.delete(video);
+                    if (!video.paused) video.pause();
+                }
+            }
+        }, {threshold: 0.25});
+        videos.forEach((video) => {
+            video.addEventListener('pause', onPause);
+            video.addEventListener('play', onPlay);
+            observer.observe(video);
+        });
+    })();
+</script>
 </body>
 </html>

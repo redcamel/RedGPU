@@ -1,44 +1,44 @@
 /**
- * [KO] SSAO(Screen Space Ambient Occlusion) 계산을 위한 컴퓨팅 셰이더입니다.
- * [EN] Compute shader for SSAO (Screen Space Ambient Occlusion) calculation.
+ * [KO] SSAO(Screen Space Ambient Occlusion) 계산을 위한 컴퓨팅 셰이더입니다. (Half-Res 최적화)
+ * [EN] Compute shader for SSAO (Screen Space Ambient Occlusion) calculation. (Half-Res Optimized)
  */
 {
-    // [KO] 1. 초기화 및 입력 데이터 추출
-    // [EN] 1. Initialization and input data extraction
+    // [KO] 1. 초기화 및 입력 데이터 추출 (Half-Res 그리드)
+    // [EN] 1. Initialization and input data extraction (Half-Res Grid)
     let screenCoord = vec2<i32>(global_id.xy);
-    let texSize     = vec2<i32>(textureDimensions(sourceTexture));
+    let texSize     = vec2<i32>(postEffectOutputDimensions);
 
     // 화면 경계 검사
     if (screenCoord.x >= texSize.x || screenCoord.y >= texSize.y) { return; }
 
-    let originalColor = textureLoad(sourceTexture, screenCoord, 0);
-    let depth         = textureLoad(depthTexture, screenCoord, 0);
+    let uv = (vec2<f32>(screenCoord) + 0.5) / vec2<f32>(texSize);
+    let fullDepthDims = vec2<f32>(textureDimensions(depthTexture));
+    let fullCoord = clamp(vec2<i32>(uv * fullDepthDims), vec2<i32>(0), vec2<i32>(fullDepthDims) - vec2<i32>(1));
 
-    // 배경(깊이 없음) 처리: 블러 사용 여부에 따라 기본값 반환
-    var failColor = vec4<f32>(select(originalColor.rgb, vec3<f32>(1.0), uniforms.useBlur == 1u), originalColor.a);
+    let depth = textureLoad(depthTexture, fullCoord, 0);
+
+    // 배경(깊이 없음) 처리: 차폐 없음(1.0) 반환
     if (depth < 0.001) {
-        textureStore(outputTexture, screenCoord, failColor);
+        textureStore(outputTexture, screenCoord, vec4<f32>(1.0, 1.0, 1.0, 1.0));
         return;
     }
 
-    let normalData = textureLoad(gBufferNormalTexture, screenCoord, 0);
+    let normalData = textureLoad(gBufferNormalTexture, fullCoord, 0);
 
     // 유효하지 않은 노말 데이터 처리
     if (length(normalData.rgb) < 0.001) {
-        textureStore(outputTexture, screenCoord, failColor);
+        textureStore(outputTexture, screenCoord, vec4<f32>(1.0, 1.0, 1.0, 1.0));
         return;
     }
 
     // [KO] 2. 뷰 공간(View Space) 데이터 복원
     // [EN] 2. Restore View Space data
-    let viewPos      = getViewPositionFromDepth((vec2<f32>(screenCoord) + 0.5) / vec2<f32>(texSize), depth, systemUniforms.projection.inverseProjectionMatrix);
+    let viewPos      = getViewPositionFromDepth(uv, depth, systemUniforms.projection.inverseProjectionMatrix);
     let viewNormal   = getViewNormalFromGNormalBuffer(normalData.rgb, systemUniforms.camera.viewMatrix);
     let distToCamera = -viewPos.z;
 
     // [KO] 3. 거리 기반 적응형 반경(Adaptive Radius) 계산
     // [EN] 3. Calculate distance-based Adaptive Radius
-    // [KO] 카메라와의 거리에 비례하여 샘플링 반경을 키워 원근감을 보정합니다.
-    // [EN] Scale the sampling radius proportional to the distance from the camera to correct perspective.
     let depthScale = distToCamera * 0.1;
     let adaptiveRadius = uniforms.radius * (1.0 + depthScale);
 
@@ -76,7 +76,7 @@
         }
 
         // 해당 샘플 위치의 실제 깊이 값 복원
-        let sampleCoord = vec2<i32>(sampleUV * vec2<f32>(texSize));
+        let sampleCoord = clamp(vec2<i32>(sampleUV * fullDepthDims), vec2<i32>(0), vec2<i32>(fullDepthDims) - vec2<i32>(1));
         let realDepth   = textureLoad(depthTexture, sampleCoord, 0);
 
         if (realDepth < 0.001) { continue; }
@@ -120,12 +120,7 @@
     var finalAO = saturate(1.0 - (ao * distanceFade));
     finalAO = pow(finalAO, uniforms.contrast);
 
-    // [KO] 8. 최종 색상 합성 및 결과 출력
-    // [EN] 8. Final color synthesis and result output
-    let finalColor = vec4<f32>(
-        select(originalColor.rgb * vec3<f32>(finalAO), vec3<f32>(finalAO), uniforms.useBlur == 1u),
-        originalColor.a
-    );
-
-    textureStore(outputTexture, screenCoord, finalColor);
+    // [KO] 8. 순수 AO 값 버퍼 출력 (1.0: 차폐 없음, 0.0: 완전 차폐)
+    // [EN] 8. Pure AO value buffer output (1.0: no occlusion, 0.0: fully occluded)
+    textureStore(outputTexture, screenCoord, vec4<f32>(finalAO, finalAO, finalAO, 1.0));
 }

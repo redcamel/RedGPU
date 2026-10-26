@@ -4,27 +4,30 @@ import updateTargetUniform from "../../core/updateTargetUniform";
 import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 
 /**
- * `definePositiveNumber` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ * [KO] `definePositiveNumber` 함수에 전달할 속성 정의 옵션 인터페이스입니다.
+ * [EN] Interface for property definition options passed to the `definePositiveNumber` function.
+ *
+ * @category DefineProperty
  */
 export interface DefinePositiveNumberInfo {
     /**
-     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
-     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     * [KO] 대상 객체 프로토타입에 정의할 속성 키 이름
+     * [EN] Property key name to define on the target object's prototype
      */
     key: string;
     /**
-     * [KO] 속성의 초기 양수값.
-     * [EN] Initial positive numeric value of the property.
+     * [KO] 속성의 초기 양수 값
+     * [EN] Initial positive numeric value of the property
      */
     value: number;
     /**
-     * [KO] 허용할 최소값 (옵션, 기본값 0). 설정 범위 미만의 값이 setter에 할당되면 경고를 내고 이 값으로 고정됩니다.
-     * [EN] Optional minimum allowed value (defaults to 0). Assigning a value below this limit will log a warning and clamp it.
+     * [KO] 허용할 최소값 (선택, 기본값: 0). 범위 미만의 값이 할당되면 경고를 출력하고 이 값으로 클램핑됩니다.
+     * [EN] Optional minimum allowed value (default: 0). Values below this limit log a warning and are clamped.
      */
     min?: number;
     /**
-     * [KO] 허용할 최대값 (옵션). 설정 범위 초과의 값이 setter에 할당되면 경고를 내고 이 값으로 고정됩니다.
-     * [EN] Optional maximum allowed value. Assigning a value above this limit will log a warning and clamp it.
+     * [KO] 허용할 최대값 (선택). 범위 초과의 값이 할당되면 경고를 출력하고 이 값으로 클램핑됩니다.
+     * [EN] Optional maximum allowed value. Values above this limit log a warning and are clamped.
      */
     max?: number;
 }
@@ -67,33 +70,33 @@ function definePositiveNumberRange_func(
 }
 
 /**
- * 지정된 클래스의 프로토타입에 GPU와 연동되는 양수(Positive Number) 범위 속성을 정의합니다.
+ * [KO] 지정된 대상의 프로토타입에 GPU 유니폼 버퍼와 연동되는 양수(Positive Number) 범위 속성을 정의합니다.
+ * [EN] Defines positive numeric properties on the target's prototype that synchronize with GPU uniform buffers.
  *
- * @remarks
- * **[KO]**
- * - 값 설정 시 {@link validatePositiveNumberRange}를 통해 0 이상의 양수인지 검사합니다.
- * - 최소값 `min`은 0 이상이어야 하며 기본값은 0입니다. `max`가 제공된 경우 최대값을 넘지 못하도록 클램핑(Clamping)합니다.
- * - 범위 외의 값이 할당되면 `console.warn` 경고를 출력한 후 최소/최대값 한계치로 조정하여 저장하고 GPU 버퍼에 반영합니다.
+ * [KO] 값 할당 시 0 이상의 양수 여부를 검사하며, `min`(기본값: 0) 및 `max` 범위를 벗어나면 경고 출력 후 경계값으로 클램핑하여 유니폼 버퍼를 갱신합니다.
+ * [EN] Validates that the assigned value is a non-negative number (`>= 0`), clamping out-of-bounds values to `min` (default: 0) or `max` with a warning before updating the uniform buffer.
  *
- * **[EN]**
- * - Validates that the input is a positive number (>= 0) via {@link validatePositiveNumberRange}.
- * - The minimum value `min` defaults to 0. Clamps the value if it exceeds `max` (if provided).
- * - Values outside the range print a `console.warn` and are clamped before writing to the GPU buffer.
- *
- * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link DefinePositiveNumberInfo} 설정 또는 그 배열 [EN] A single {@link DefinePositiveNumberInfo} configuration or an array of configurations
- *
- * @example
+ * ### Example
  * ```typescript
- * // 단일 설정
+ * // [KO] 단일 양수 속성 정의
+ * // [EN] Define a single positive numeric property
  * RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, { key: 'shininess', value: 30, min: 0, max: 100 });
  *
- * // 여러 속성 일괄 정의
+ * // [KO] 다중 양수 속성 일괄 정의
+ * // [EN] Define multiple positive numeric properties at once
  * RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, [
  *   { key: 'fogDensity', value: 0.01, min: 0 },
  *   { key: 'roughness', value: 0.5, min: 0, max: 1 }
  * ]);
  * ```
+ *
+ * @param target -
+ * [KO] 속성을 정의할 대상 클래스 또는 프로토타입
+ * [EN] Target class or prototype to define properties on
+ * @param defineInfo -
+ * [KO] 단일 `DefinePositiveNumberInfo` 설정 또는 설정 배열
+ * [EN] Single `DefinePositiveNumberInfo` configuration or an array of configurations
+ * @category DefineProperty
  */
 const definePositiveNumber = (target: any, defineInfo: DefinePositiveNumberInfo | DefinePositiveNumberInfo[]) => applyProperties(target, defineInfo, definePositiveNumberRange_func);
 

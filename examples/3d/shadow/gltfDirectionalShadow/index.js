@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
  * [KO] GLTF Directional Light 그림자 예제
@@ -17,11 +17,12 @@ RedGPU.init(
     (redGPUContext) => {
         // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 15;
+        controller.distance = 20;
         controller.speedDistance = 0.3;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
         redGPUContext.addView(view);
 
         // 2. 조명 설정
@@ -32,8 +33,8 @@ RedGPU.init(
 
         // 3. 바닥 및 GLTF 모델 로드
         addGround(redGPUContext, scene);
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -1, 1);
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 1, 0);
+        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -3, 3, 3);
+        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 3, 0, 3);
 
         // 4. 애니메이션 렌더 루프 및 시작
         const renderer = new RedGPU.Renderer();
@@ -47,7 +48,7 @@ RedGPU.init(
             }
         });
 
-        // 5. 테스트 GUI 설정
+        // 6. 테스트 GUI 설정
         renderTestPane(redGPUContext, scene);
     },
     (failReason) => {
@@ -62,12 +63,13 @@ RedGPU.init(
  * [KO] GLTF 모델을 로드하고 그림자 설정을 적용합니다.
  * [EN] Loads a GLTF model and applies shadow settings.
  */
-const loadGLTF = (redGPUContext, scene, url, xPosition, yPosition) => {
+const loadGLTF = (redGPUContext, scene, url, xPosition, yPosition, scale = 1) => {
     new RedGPU.GLTFLoader(
         redGPUContext,
         url,
         (v) => {
             const mesh = v['resultMesh'];
+            mesh.setScale(scale);
             mesh.x = xPosition;
             mesh.y = yPosition;
 
@@ -103,31 +105,8 @@ const addGround = (redGPUContext, scene) => {
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
+        directionalShadow: true,
         ibl: true,
         skybox: true,
-        gui: (pane) => {
-            const {shadowManager} = scene;
-            const {directionalShadowManager} = shadowManager;
-
-            const folder = pane.addFolder({title: 'Directional Shadow', expanded: true});
-            folder.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
-                min: 128,
-                max: 4096,
-                step: 1,
-                label: 'Texture Size'
-            });
-            folder.addBinding(directionalShadowManager, 'strength', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.01,
-                label: 'Shadow Strength'
-            });
-            folder.addBinding(directionalShadowManager, 'filterScale', {
-                min: 0.0,
-                max: 15.0,
-                step: 0.1,
-                label: 'Filter Scale'
-            });
-        }
     });
 };

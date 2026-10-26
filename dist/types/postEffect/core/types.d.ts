@@ -1,26 +1,37 @@
 /**
- * [KO] 단일 패스 후처리 이펙트 결과 인터페이스입니다.
- * [EN] Result interface for a single-pass post-processing effect.
+ * [KO] 후처리 이펙트 렌더링 결과 텍스처 정보 인터페이스입니다.
+ * [EN] Interface representing the output texture information of a post-processing effect.
+ *
+ * @category PostEffect
  */
 export interface IPostEffectResult {
     /**
-     * [KO] 결과 텍스처
-     * [EN] Result texture
+     * [KO] 결과 `GPUTexture` 인스턴스
+     * [EN] Result `GPUTexture` instance
      */
     texture: GPUTexture;
     /**
-     * [KO] 결과 텍스처 뷰
-     * [EN] Result texture view
+     * [KO] 결과 `GPUTextureView` 인스턴스
+     * [EN] Result `GPUTextureView` instance
      */
     textureView: GPUTextureView;
 }
 /**
- * [KO] 후처리 소스 텍스처 설정 인터페이스
- * [EN] Post-effect source texture configuration interface
+ * [KO] 후처리 소스 텍스처 바인딩 설정 인터페이스입니다.
+ * [EN] Interface for post-processing source texture binding configuration.
+ *
+ * @category PostEffect
  */
 export interface IPostEffectSourceConfig {
-    /** [KO] 텍스처 이름 [EN] Texture name */
+    /**
+     * [KO] 셰이더 내 텍스처 바인딩 식별자 이름
+     * [EN] Texture binding identifier name in the shader
+     */
     name: string;
-    /** [KO] 샘플링 가능한 타입(texture_2d)으로 사용할지 여부 [EN] Whether to use as a sampleable type (texture_2d) */
+    /**
+     * [KO] 샘플러와 함께 사용하는 샘플링 가능 타입(`texture_2d<f32>`) 여부
+     * [EN] Whether to use as a sampleable texture type (`texture_2d<f32>`) with a sampler
+     * @defaultValue true
+     */
     isSampled?: boolean;
 }

@@ -4,7 +4,7 @@
       <div class="footer-title">RedGPU API</div>
       <div class="footer-links">
         <a href="https://github.com/redcamel/RedGPU/releases" target="_blank">Latest Release</a>
-        <a href="https://redcamel.github.io/RedGPU/examples/" target="_blank">Examples</a>
+        <a href="/RedGPU/examples/" target="_blank">Examples</a>
         <a href="https://github.com/redcamel/RedGPU/issues" target="_blank">Report Issue</a>
         <a href="https://github.com/redcamel/RedGPU" target="_blank">GitHub</a>
       </div>

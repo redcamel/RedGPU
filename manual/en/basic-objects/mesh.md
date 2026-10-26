@@ -18,13 +18,14 @@ const meshGraph = `
 
 # Mesh
 
-**Mesh** is the most basic object unit visually represented in RedGPU's 3D space. **Geometry**, which acts as the skeleton, and **Material**, which acts as the skin, are combined to form a complete object.
+`Mesh` is the most basic object unit visually represented in RedGPU's 3D space. `Geometry`, which acts as the skeleton,
+and **Material**, which acts as the skin, are combined to form a complete object.
 
 ## 1. Components of a Mesh
 
-A **Mesh** cannot exist independently and must combine the following two elements:
+A `Mesh` cannot exist independently and must combine the following two elements:
 
-- **Geometry**: The physical **shape** of the object consisting of points, lines, and faces.
+- **`Geometry`**: The physical **shape** of the object consisting of points, lines, and faces.
 - **Material**: Determines the **surface** properties of the object, such as color, texture, and reflection.
 
 <ClientOnly>
@@ -33,31 +34,35 @@ A **Mesh** cannot exist independently and must combine the following two element
 
 ## 2. Geometry & Primitive
 
-**Geometry** is a collection of numerous **Vertex** data points in 3D space.
+**Geometry** (`Geometry`) is a collection of numerous **Vertex** data points in 3D space.
 
-RedGPU provides basic shapes called **Primitives** to allow for quick **space configuration or visualization testing** before loading external model files. Using these allows you to design 3D structures immediately without complex data calculations.
+RedGPU provides basic shapes called **Primitives** to allow for quick **space configuration or visualization testing**
+before loading external model files. Using these allows you to design 3D structures immediately without complex data
+calculations.
 
-| Type                      | Description                                            |
-|:--------------------------|:-------------------------------------------------------|
-| **Box** / **RoundedBox**  | Hexahedral box shape or box shape with rounded corners |
-| **Sphere** / **Capsule**  | Smooth spherical shape or capsule pill shape           |
-| **Cone** / **Cylinder**   | Cone or cylindrical shape                              |
-| **Plane** / **Ground**    | 2D rectangular plane or grid ground shape              |
-| **Circle** / **Ring**     | Filled circular plane or hollow ring plane shape       |
-| **Torus** / **TorusKnot** | Donut-like ring or complexly twisted knot shape        |
+| Type                          | Description                                            |
+|:------------------------------|:-------------------------------------------------------|
+| **`Box`** / **`RoundedBox`**  | Hexahedral box shape or box shape with rounded corners |
+| **`Sphere`** / **`Capsule`**  | Smooth spherical shape or capsule pill shape           |
+| **`Cone`** / **`Cylinder`**   | Cone or cylindrical shape                              |
+| **`Plane`** / **`Ground`**    | 2D rectangular plane or grid ground shape              |
+| **`Circle`** / **`Ring`**     | Filled circular plane or hollow ring plane shape       |
+| **`Torus`** / **`TorusKnot`** | Donut-like ring or complexly twisted knot shape        |
 
 ## 3. Defining the Surface: Material
 
-**Material** is a property that determines how an object's surface looks. It can define not only simple colors but also textures, reflectance, transparency, and more.
+**Material** is a property that determines how an object's surface looks. It can define not only simple colors but also
+textures, reflectance, transparency, and more.
 
-| Type | Features | Main Usage |
-| :--- | :--- | :--- |
-| **ColorMaterial** | Outputs only solid color and transparency (ignores lighting) | Quick visualization, prototyping, debugging |
-| **BitmapMaterial** | Outputs an image (**Texture**) on the object surface | Backgrounds, simple image objects, 2D sprites |
-| **PhongMaterial** | Expresses light, shadow, and highlights | Realistic 3D objects, emphasizing three-dimensionality |
-| **PBRMaterial** | Supports Physically Based Rendering (**PBR**) | High-quality photorealistic rendering, metal/roughness expression |
+| Type                 | Features                                                     | Main Usage                                                        |
+|:---------------------|:-------------------------------------------------------------|:------------------------------------------------------------------|
+| **`ColorMaterial`**  | Outputs only solid color and transparency (ignores lighting) | Quick visualization, prototyping, debugging                       |
+| **`BitmapMaterial`** | Outputs an image (`BitmapTexture`) on the object surface     | Backgrounds, simple image objects, 2D sprites                     |
+| **`PhongMaterial`**  | Expresses light, shadow, and highlights                      | Realistic 3D objects, emphasizing three-dimensionality            |
+| **`PBRMaterial`**    | Supports Physically Based Rendering (**PBR**)                | High-quality photorealistic rendering, metal/roughness expression |
 
-The most basic **ColorMaterial** quickly renders only color values (RGB) and transparency (Alpha) without lighting calculations.
+The most basic `ColorMaterial` quickly renders only color values (RGB) and transparency (Alpha) without lighting
+calculations.
 
 ```javascript
 // 1. Opaque red material
@@ -69,19 +74,21 @@ blueAlphaMat.alpha = 0.5;
 ```
 
 ::: info [Various Materials]
-Use **BitmapMaterial** to apply images, **PhongMaterial** to express light and shadow, and so on. These are covered in detail in the following chapters.
+Use `BitmapMaterial` to apply images, `PhongMaterial` to express light and shadow, and so on. These are covered in
+detail in the following chapters.
 :::
 
 ## 4. Controlling the Mesh (Transformation)
 
-The created **Mesh** object has properties that can be freely transformed within 3D space.
+The created `Mesh` object has properties that can be freely transformed within 3D space.
 
 - **Position** (`x`, `y`, `z`): Specifies the position in space.
 - **Rotation** (`rotationX`, `rotationY`, `rotationZ`): Adjusts the rotation value of the object. (Unit: Degree)
 - **Scale** (`scaleX`, `scaleY`, `scaleZ`): Adjusts the size of the object by a multiplier.
 
 ::: tip [Pivot Guide]
-All movement, rotation, and scaling operations are based on the object's **Pivot** point. For primitives, the geometric center of each shape becomes the reference point.
+All movement, rotation, and scaling operations are based on the object's **Pivot** point. For primitives, the geometric
+center of each shape becomes the reference point.
 :::
 
 ```javascript
@@ -211,12 +218,16 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
 
-- **Mesh** is the basic unit of a 3D object, combining **Geometry** and **Material**.
-- **Primitive** refers to standard shape data for visualization testing and structural design.
-- **ColorMaterial** is lightweight and suitable for checking colors without lighting.
-- All transformations are based on the object's **Pivot** point.
+## Related Examples
+
+- [Basic Mesh](/RedGPU/examples/3d/mesh/basicMesh/)
+- [Built-in Primitives](/RedGPU/examples/3d/primitive/primitives/)
+- [Pivot Configuration](/RedGPU/examples/3d/mesh/pivot/)
+- [LookAt](/RedGPU/examples/3d/mesh/lookAt/)
+- [Mesh BoundBox Visualization](/RedGPU/examples/3d/mesh/boundBox/meshBoundBox/)
+
+---
 
 ## Next Steps
 

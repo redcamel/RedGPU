@@ -5,59 +5,66 @@ order: 4
 
 # 빌트인 이펙트
 
-빌트인 이펙트는 성능 최적화와 깊이 버퍼(Depth Buffer) 활용을 위해 시스템 내부에서 자동으로 관리되는 고성능 후처리 효과입니다.
+빌트인 이펙트 (Built-in Effects)는 3D 씬의 G-Buffer (깊이·노말 버퍼)를 활용하여 톤 매핑 이전의 HDR 단계에서 실행되는 내장 공간 광원 효과입니다. 일반 이펙트처럼 인스턴스를 직접
+생성하여 `addEffect()`로 등록하는 대신, `view.postEffectManager`의 불리언 속성 (`useSSAO`, `useSSR`)으로 즉시 활성화하고 내장 인스턴스 (`ssao`, `ssr`)를
+통해 세부 옵션을 조절합니다.
 
-## 1. 특징 및 사용 방법
+---
 
-일반 이펙트와 달리 사용자가 직접 인스턴스를 생성하거나 `addEffect()` 로 추가하지 않습니다. `PostEffectManager` 의 속성 값을 변경하는 것만으로 즉시 제어할 수 있습니다.
+## 1. SSAO (화면 공간 주변광 차폐)
 
-- **접근 경로**: `view.postEffectManager`
-- **활성화 방식**: `useSSAO`, `useSSR` 등의 불리언(Boolean) 속성 사용
+`SSAO`(Screen Space Ambient Occlusion)는 깊이 (Depth)와 법선 (Normal) 버퍼를 기반으로 물체 사이의 구석진 부분이나 맞닿은 경계면에 자연스러운 차폐 음영을 생성하여 입체감을
+높입니다.
 
-## 2. SSAO
-
-객체 사이의 구석진 부분이나 겹치는 영역에 미세한 그림자를 생성하여 입체감을 극대화합니다.
-
-### 활성화 및 설정
 ```javascript
 // 1. SSAO 활성화
 view.postEffectManager.useSSAO = true;
 
-// 2. 세부 설정 (필요 시)
+// 2. 세부 옵션 조절
 const ssao = view.postEffectManager.ssao;
-ssao.radius = 0.5;      // 그림자 반경
-ssao.intensity = 1.0;   // 그림자 강도
-ssao.useBlur = true;    // 그림자 노이즈 제거를 위한 블러 사용 여부
+ssao.radius = 0.25;     // 차폐 샘플링 반경 (기본값: 0.25)
+ssao.intensity = 1.0;   // 음영 강도 (기본값: 1.0)
+ssao.contrast = 1.5;    // 음영 대비 (기본값: 1.5)
+ssao.useBlur = true;    // 노이즈 제거용 가우시안 블러 사용 여부 (기본값: true)
 ```
 
-## 3. SSR
+<iframe src="/RedGPU/examples/postEffect/ssao/" style="width:100%; height:500px;"></iframe>
 
-화면상의 정보를 활용하여 실시간 반사를 구현합니다. 바닥이나 벽면에 주변 환경이 비치는 효과를 낼 때 효과적입니다.
+---
 
-::: warning [실험적 기능]
-현재 SSR은 실험적인 단계의 기능입니다. 사용 환경에 따라 노이즈나 시각적 한계가 발생할 수 있으므로, 결과물을 확인하며 신중하게 적용하시기 바랍니다.
-:::
+## 2. SSR (화면 공간 반사)
 
-### 활성화 및 설정
+`SSR`(Screen Space Reflection)은 화면 공간의 깊이 및 법선 정보를 따라 레이 마칭 (Ray Marching)을 수행하여 바닥이나 금속·유리 표면에 주변 물체가 실시간으로 비치는 반사 효과를
+구현합니다.
+
+- **적용 방법**: `view.postEffectManager.useSSR = true`를 활성화하고, 반사를 표현할 객체의 머티리얼 (`PhongMaterial`, `PBRMaterial` 등)에서
+  `material.useSSR = true`를 함께 설정합니다.
+
 ```javascript
-// 1. SSR 활성화
+// 1. 뷰의 SSR 후처리 활성화
 view.postEffectManager.useSSR = true;
 
-// 2. 세부 설정 (필요 시)
+// 2. 반사를 적용할 재질에 useSSR 활성화
+material.useSSR = true;
+
+// 3. 세부 옵션 조절
 const ssr = view.postEffectManager.ssr;
-ssr.reflectionIntensity = 1.0; // 반사 강도
-ssr.maxDistance = 15.0;        // 최대 반사 추적 거리
-ssr.maxSteps = 64;             // 반사 계산 정밀도 (스텝 수)
+ssr.reflectionIntensity = 1.0; // 반사 강도 (기본값: 1.0)
+ssr.maxDistance = 15.0;        // 최대 반사 추적 거리 (기본값: 15.0)
+ssr.maxSteps = 64;             // 레이 마칭 스텝 수 (기본값: 64)
 ```
 
-## 핵심 요약
+<iframe src="/RedGPU/examples/postEffect/ssr/" style="width:100%; height:500px;"></iframe>
 
-- 빌트인 이펙트는 **속성 설정** 만으로 활성화되는 고정 단계 효과입니다.
+---
 
-- 시스템 내부에서 깊이 정보를 공유하므로 직접 구현하는 것보다 성능 면에서 유리합니다.
+## 관련 예제
 
-- `useSSAO`, `useSSR` 속성을 통해 개별적으로 제어할 수 있습니다.
+- [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/ssao/)
+- [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/ssr/)
+
+---
 
 ## 다음 학습 추천
 
-- **[LOD](../lod/index.md)**
+- **[안티앨리어싱](../antialiasing/index.md)**

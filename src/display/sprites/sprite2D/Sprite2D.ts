@@ -5,15 +5,14 @@ import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/va
 import {mixInMesh2D} from "../../mesh/core";
 import Mesh from "../../mesh/Mesh";
 
-/** 2D 메시 기능이 믹스인된 베이스 클래스 */
 const BaseSprite2D = mixInMesh2D(Mesh);
 
 /**
- * [KO] 2D 스프라이트 렌더링을 위한 클래스입니다.
- * [EN] Class for 2D sprite rendering.
+ * [KO] 평면 지오메트리 기반의 2D 스프라이트 객체 클래스입니다.
+ * [EN] 2D sprite object class based on plane geometry.
  *
- * [KO] Sprite2D는 2D 게임이나 UI 요소를 렌더링하기 위한 클래스입니다. 평면 지오메트리를 기반으로 하며, 너비와 높이를 동적으로 조절할 수 있습니다.
- * [EN] Sprite2D is a class for rendering 2D game or UI elements. Based on plane geometry, its width and height can be adjusted dynamically.
+ * [KO] 픽셀 단위로 너비(`width`)와 높이(`height`)를 제어하며 2D 씬 및 UI 요소 렌더링에 사용됩니다.
+ * [EN] Controls `width` and `height` in pixels and is used for rendering 2D scenes and UI elements.
  *
  * ### Example
  * ```typescript
@@ -22,39 +21,33 @@ const BaseSprite2D = mixInMesh2D(Mesh);
  * scene.addChild(sprite);
  * ```
  *
- * <iframe src="/RedGPU/examples/2d/sprite2D/basic/"></iframe>
+ * <iframe src="/RedGPU/examples/2d/sprite2D/basic/" style="width:100%; height:500px;"></iframe>
  *
- * [KO] 아래는 Sprite2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of Sprite2D.
  * @see [Sprite2D Basic example](/RedGPU/examples/2d/sprite2D/basic/)
  * @see [Sprite2D Hierarchy example](/RedGPU/examples/2d/sprite2D/hierarchy/)
  * @see [Sprite2D Pivot example](/RedGPU/examples/2d/sprite2D/pivot/)
  * @see [Sprite2D Child Methods example](/RedGPU/examples/2d/sprite2D/childMethod/)
  * @see [Sprite2D MouseEvent example](/RedGPU/examples/2d/interaction/mouseEvent/sprite2D/)
- *
  * @category Sprite
  */
 class Sprite2D extends BaseSprite2D {
-    /**
-     * [KO] 스프라이트의 너비 (픽셀 단위)
-     * [EN] Width of the sprite (in pixels)
-     */
     #width: number = 1
-    /**
-     * [KO] 스프라이트의 높이 (픽셀 단위)
-     * [EN] Height of the sprite (in pixels)
-     */
     #height: number = 1
 
     /**
-     * [KO] 새로운 Sprite2D 인스턴스를 생성합니다.
-     * [EN] Creates a new Sprite2D instance.
+     * [KO] Sprite2D 인스턴스를 생성합니다.
+     * [EN] Creates a Sprite2D instance.
+     *
+     * ### Example
+     * ```typescript
+     * const sprite = new RedGPU.Display.Sprite2D(redGPUContext, material);
+     * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 렌더링 컨텍스트
-     * [EN] RedGPU rendering context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param material -
-     * [KO] 스프라이트에 적용할 머티리얼 (선택적)
+     * [KO] 스프라이트에 적용할 머티리얼 (선택)
      * [EN] Material to apply to the sprite (optional)
      */
     constructor(redGPUContext: RedGPUContext, material?) {
@@ -63,23 +56,20 @@ class Sprite2D extends BaseSprite2D {
     }
 
     /**
-     * [KO] 스프라이트의 너비를 반환합니다. (픽셀 단위)
-     * [EN] Returns the width of the sprite (in pixels).
+     * [KO] 스프라이트의 너비(픽셀 단위, 양수)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the width of the sprite (in pixels, positive number).
+     *
+     * @returns
+     * [KO] 스프라이트 너비 (단위: px)
+     * [EN] Sprite width (unit: px)
+     * @throws
+     * [KO] 설정 값이 0 미만일 경우 에러가 발생합니다.
+     * [EN] Throws an error if the assigned value is less than 0.
      */
     get width(): number {
         return this.#width;
     }
 
-    /**
-     * [KO] 스프라이트의 너비를 설정합니다. (픽셀 단위)
-     * [EN] Sets the width of the sprite (in pixels).
-     * @param value -
-     * [KO] 설정할 너비 값 (양수)
-     * [EN] Width value to set (positive)
-     * @throws
-     * [KO] 값이 양수가 아닌 경우 에러가 발생합니다.
-     * [EN] Throws an error if the value is not positive.
-     */
     set width(value: number) {
         validatePositiveNumberRange(value)
         this.#width = value;
@@ -87,23 +77,20 @@ class Sprite2D extends BaseSprite2D {
     }
 
     /**
-     * [KO] 스프라이트의 높이를 반환합니다. (픽셀 단위)
-     * [EN] Returns the height of the sprite (in pixels).
+     * [KO] 스프라이트의 높이(픽셀 단위, 양수)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the height of the sprite (in pixels, positive number).
+     *
+     * @returns
+     * [KO] 스프라이트 높이 (단위: px)
+     * [EN] Sprite height (unit: px)
+     * @throws
+     * [KO] 설정 값이 0 미만일 경우 에러가 발생합니다.
+     * [EN] Throws an error if the assigned value is less than 0.
      */
     get height(): number {
         return this.#height;
     }
 
-    /**
-     * [KO] 스프라이트의 높이를 설정합니다. (픽셀 단위)
-     * [EN] Sets the height of the sprite (in pixels).
-     * @param value -
-     * [KO] 설정할 높이 값 (양수)
-     * [EN] Height value to set (positive)
-     * @throws
-     * [KO] 값이 양수가 아닌 경우 에러가 발생합니다.
-     * [EN] Throws an error if the value is not positive.
-     */
     set height(value: number) {
         validatePositiveNumberRange(value)
         this.#height = value;
@@ -111,15 +98,20 @@ class Sprite2D extends BaseSprite2D {
     }
 
     /**
-     * [KO] 스프라이트의 크기를 일괄 설정합니다.
-     * [EN] Sets the size of the sprite.
+     * [KO] 스프라이트의 너비와 높이를 일괄 설정합니다.
+     * [EN] Sets the width and height of the sprite at once.
+     *
+     * ### Example
+     * ```typescript
+     * sprite.setSize(200, 100);
+     * ```
      *
      * @param width -
-     * [KO] 설정할 너비 값
-     * [EN] Width value to set
+     * [KO] 설정할 너비 값 (단위: px)
+     * [EN] Width value to set (unit: px)
      * @param height -
-     * [KO] 설정할 높이 값 (선택적, 생략 시 너비와 같은 값 사용)
-     * [EN] Height value to set (optional, uses the same value as width if omitted)
+     * [KO] 설정할 높이 값 (단위: px, 생략 시 `width`와 동일한 값 적용)
+     * [EN] Height value to set (unit: px, uses `width` if omitted)
      */
     setSize(width: number, height?: number) {
         this.width = width;

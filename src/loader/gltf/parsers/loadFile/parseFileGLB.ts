@@ -1,4 +1,4 @@
-import {keepLog} from "../../../../utils";
+import keepLog from "../../../../utils/keepLog";
 import getAbsoluteURL from "../../../../utils/file/getAbsoluteURL";
 import getArrayBufferFromSrc from "../../core/getArrayBufferFromSrc";
 import {GLTF} from "../../GLTF";
@@ -6,32 +6,37 @@ import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
 import parseGLTF from "../parseGLTF";
 
 /**
- * Length of the header for the binpacker data format.
- * @type {number}
+ * [KO] GLB 바이너리 헤더의 바이트 길이입니다.
+ * [EN] Byte length of the GLB binary header.
  */
 const BINPACKER_HEADER_LENGTH = 12;
 /**
- * The chunk type for JSON data in the binpacker.
- *
- * @constant {number}
- * @name BINPACKER_CHUNK_TYPE_JSON
- * @description This constant represents the chunk type for JSON data in the binpacker.
- *              It has a hexadecimal value of 0x4e4f534a.
+ * [KO] GLB 포맷의 JSON 청크 타입 상수입니다.
+ * [EN] JSON chunk type constant in GLB format.
  */
 const BINPACKER_CHUNK_TYPE_JSON = 0x4e4f534a;
 /**
- * The chunk type constant for binary chunks in BINPACKER.
- *
- * @constant {number}
+ * [KO] GLB 포맷의 바이너리(BIN) 청크 타입 상수입니다.
+ * [EN] Binary (BIN) chunk type constant in GLB format.
  */
 const BINPACKER_CHUNK_TYPE_BINARY = 0x004e4942;
 /**
- * Parses a GLB file using the provided GLTFLoader and invokes the callback with the parsed data.
+ * [KO] GLB 파일을 로드 및 파싱하고 완료 시 콜백 함수를 호출합니다.
+ * [EN] Loads and parses a GLB file and invokes the callback function upon completion.
  *
- * @param {GLTFLoader} gltfLoader - The GLTFLoader used to load the GLB file.
- * @param {function} callBack - The callback function to be invoked with the parsed GLTF data.
- *
- * @returns {Promise<void>} - A promise that resolves when the GLB file has been parsed.
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param callBack -
+ * [KO] 파싱 완료 후 호출될 콜백 함수
+ * [EN] Callback function invoked after parsing is complete
+ * @param onProgress -
+ * [KO] 로딩 진행 상태를 전달받는 콜백 함수
+ * [EN] Optional callback function receiving loading progress information
+ * @returns
+ * [KO] 파싱이 완료되면 해결되는 `Promise<void>`
+ * [EN] `Promise<void>` that resolves when parsing is complete
+ * @category Loader
  */
 const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
     console.log('GLB Model parsing has start.');
@@ -71,7 +76,7 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
             (buffer) => {
                 cache.set(loadFilePath, buffer);
                 keepLog('GLB Model parsing set cache', loadFilePath);
-                pending.delete(loadFilePath); // 진행중 목록에서 제거
+                pending.delete(loadFilePath);
                 resolve(buffer);
             },
             (error) => {
@@ -94,6 +99,23 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
         console.log(error);
     }
 }
+/**
+ * [KO] GLB ArrayBuffer에서 JSON 데이터와 바이너리 청크를 추출하여 GLTF 파싱을 수행합니다.
+ * [EN] Extracts JSON data and binary chunks from a GLB ArrayBuffer and performs GLTF parsing.
+ *
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param buffer -
+ * [KO] GLB 파일의 `ArrayBuffer` 데이터
+ * [EN] `ArrayBuffer` data of the GLB file
+ * @param callBack -
+ * [KO] 파싱 완료 후 호출될 콜백 함수
+ * [EN] Callback function invoked after parsing is complete
+ * @param onProgress -
+ * [KO] 로딩 진행 상태를 전달받는 콜백 함수
+ * [EN] Callback function receiving loading progress information
+ */
 const parseArrayBuffer = async (gltfLoader: GLTFLoader, buffer: ArrayBuffer, callBack, onProgress) => {
     const {content, binaryChunk} = parseBuffer(buffer);
     if (content === null) {
@@ -106,12 +128,15 @@ const parseArrayBuffer = async (gltfLoader: GLTFLoader, buffer: ArrayBuffer, cal
     parseGLTF(gltfLoader, gltfData, callBack, onProgress)
 }
 /**
- * Parses the given buffer and extracts content and binary chunks.
+ * [KO] GLB 버퍼를 분석하여 JSON 문자열과 바이너리 청크를 추출합니다.
+ * [EN] Parses the GLB buffer to extract the JSON string and binary chunk.
  *
- * @param {ArrayBuffer} buffer - The buffer to parse.
- * @returns {Object} - An object containing the parsed content and binary chunk.
- * - content: The parsed content as a string.
- * - binaryChunk: The extracted binary chunk.
+ * @param buffer -
+ * [KO] 파싱할 `ArrayBuffer`
+ * [EN] `ArrayBuffer` to parse
+ * @returns
+ * [KO] 파싱된 JSON 문자열(`content`)과 바이너리 청크(`binaryChunk`)를 담은 객체
+ * [EN] Object containing the parsed JSON string (`content`) and binary chunk (`binaryChunk`)
  */
 const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any } => {
     let content = null;
@@ -144,8 +169,18 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
     return {content, binaryChunk: body};
 }
 /**
- * GLTF 이미지 데이터를 처리하고 Object URL을 생성하는 함수
- * 동일한 이미지 버퍼에 대해 동일한 Object URL을 재사용
+ * [KO] GLTF 이미지 데이터를 처리하여 Object URL을 생성하고 동일한 버퍼에 대해 재사용합니다.
+ * [EN] Processes GLTF image data to create Object URLs and reuses them for identical buffers.
+ *
+ * @param gltfData -
+ * [KO] GLTF 데이터 객체
+ * [EN] GLTF data object
+ * @param binaryChunk -
+ * [KO] 추출된 바이너리 청크 데이터
+ * [EN] Extracted binary chunk data
+ * @returns
+ * [KO] 버퍼 키와 생성된 Object URL의 매핑(`Map<string, string>`)
+ * [EN] Mapping of buffer keys to created Object URLs (`Map<string, string>`)
  */
 const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
     const {images, bufferViews} = gltfData;
@@ -175,10 +210,15 @@ const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
 };
 export default parseFileGLB
 /**
- * Convert a Uint8Array to a string.
+ * [KO] `Uint8Array` 데이터를 문자열로 변환합니다.
+ * [EN] Converts `Uint8Array` data to a string.
  *
- * @param {Uint8Array} array - The Uint8Array to convert.
- * @returns {string} - The converted string.
+ * @param array -
+ * [KO] 변환할 `Uint8Array` 객체
+ * [EN] `Uint8Array` object to convert
+ * @returns
+ * [KO] 변환된 문자열
+ * [EN] Converted string
  */
 const convertUint8ArrayToString = (array: Uint8Array): string => {
     let str = '';

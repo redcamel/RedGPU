@@ -1,121 +1,116 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
  * [KO] Max Anisotropy 예제
  * [EN] Max Anisotropy example
  *
- * [KO] 이방성 필터링(Anisotropic Filtering)의 효과를 시연합니다.
- * [KO] 멀리 있는 텍스처가 예각에서 뭉개지는 현상을 방지하여 선명도를 유지하는 과정을 확인합니다.
- * [EN] Demonstrates the effect of Anisotropic Filtering.
- * [EN] Observe how it maintains clarity by preventing texture blurring at sharp angles in the distance.
+ * [KO] 이방성 필터링(Anisotropic Filtering)을 통해 예각으로 멀어지는 바닥 텍스처의 선명도를 비교 시연합니다.
+ * [EN] Compares and demonstrates how Anisotropic Filtering maintains floor texture clarity at oblique viewing angles into the distance.
  */
 
-const canvas = document.createElement("canvas");
+const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. [KO] 카메라 컨트롤러 설정 (도로를 길게 내다보는 각도)
-        // [EN] Setup Camera Controller (Angle looking down the long roads)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 40;
-        controller.tilt = -10;
-        controller.pan = 0;
-        controller.centerY = 2;
+        controller.distance = 14;
+        controller.tilt = -8;
+        controller.speedDistance = 0.3;
 
-        // 2. [KO] 씬 구성
-        // [EN] Configure Scene
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // 3. [KO] 조명 설정
-        // [EN] Setup Lighting
-        const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.intensity = 1.5;
-        scene.lightManager.addDirectionalLight(directionalLight);
+        const {texture, lanes} = createComparisonLanes(redGPUContext, scene);
 
-        // 4. [KO] 이방성 필터링 비교용 도로 생성 (Ground 프리미티브 사용)
-        // [EN] Create Comparison Lanes (Using Ground primitive)
-        createComparisonLanes(redGPUContext, scene);
-
-        // 5. [KO] 렌더러 생성 및 루프 시작
-        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        // 6. [KO] 테스트용 GUI 렌더링
-        // [EN] Render Test GUI
-        renderTestPane(redGPUContext);
+        renderTestPane(redGPUContext, texture, lanes);
     },
     (failReason) => {
-        console.error("Initialization failed:", failReason);
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
 /**
- * [KO] 서로 다른 maxAnisotropy 값이 적용된 긴 도로(Ground)들을 생성합니다.
- * [EN] Creates long roads (Ground) with different maxAnisotropy values applied.
+ * [KO] 서로 다른 maxAnisotropy 값이 적용된 비교 차선(Ground)들을 생성합니다.
+ * [EN] Creates comparison lanes (Ground) with different maxAnisotropy values applied.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {{texture: RedGPU.Resource.BitmapTexture, lanes: Array<{sampler: RedGPU.Resource.Sampler, label: RedGPU.Display.TextField3D}>}}
  */
-function createComparisonLanes(redGPUContext, scene) {
-    const anisotropyValues = [1, 8, 16];
-    const laneWidth = 10;
+const createComparisonLanes = (redGPUContext, scene) => {
+    const anisotropyValues = [1, 4, 16];
+    const laneWidth = 8;
     const laneLength = 2000;
-    const gap = 2;
+    const gap = 0.8;
     const totalWidth = (laneWidth + gap) * anisotropyValues.length - gap;
 
-    // [KO] 텍스처 리소스 로드
-    // [EN] Load texture resource
-    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/maxAnisotropy/maxAnisotropy.jpg");
-    
-    // [KO] Ground 지오메트리 생성 (이미 XZ 평면에 누워 있음)
-    // [EN] Create Ground geometry (already lying on the XZ plane)
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/maxAnisotropy/maxAnisotropy.jpg');
     const geometry = new RedGPU.Primitive.Ground(redGPUContext, laneWidth, laneLength, 1, 100);
+    const lanes = [];
 
     anisotropyValues.forEach((value, index) => {
         const x = (index * (laneWidth + gap)) - (totalWidth / 2) + (laneWidth / 2);
 
-        // [KO] 각 도로별 고유한 샘플러 설정
-        // [EN] Set a unique sampler for each road
-        const sampler = new RedGPU.Resource.Sampler(redGPUContext);
-        sampler.minFilter = RedGPU.GPU_FILTER_MODE.LINEAR;
-        sampler.magFilter = RedGPU.GPU_FILTER_MODE.LINEAR;
-        sampler.mipmapFilter = RedGPU.GPU_FILTER_MODE.LINEAR;
-        sampler.addressModeU = RedGPU.GPU_ADDRESS_MODE.REPEAT;
-        sampler.addressModeV = RedGPU.GPU_ADDRESS_MODE.REPEAT;
-        sampler.maxAnisotropy = value;
-
+        // [KO] 각 차선별 샘플러 주소 모드 및 maxAnisotropy 설정
+        // [EN] Configure sampler address mode and maxAnisotropy for each lane
         const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
-        material.diffuseTextureSampler = sampler;
-        
-        // [KO] 텍스처 타일링 설정
-        // [EN] Set texture tiling
         material.textureScale = [1, laneLength / laneWidth];
+        material.diffuseTextureSampler.addressModeU = RedGPU.GPU_ADDRESS_MODE.REPEAT;
+        material.diffuseTextureSampler.addressModeV = RedGPU.GPU_ADDRESS_MODE.REPEAT;
+        material.diffuseTextureSampler.maxAnisotropy = value;
 
         const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-        // [KO] Ground는 별도의 회전 없이도 바닥에 놓입니다. Z축 방향으로 길게 뻗도록 위치 조절
-        // [EN] Ground lies on the floor without additional rotation. Adjust position to extend along Z-axis
-        mesh.setPosition(x, 0, -laneLength / 2 + 25);
+        mesh.setPosition(x, 0, -laneLength / 2 + 12);
         scene.addChild(mesh);
 
-        // [KO] 각 도로 입구에 값 표시 라벨 생성
-        // [EN] Create value labels at the entrance of each road
         const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.text = `MaxAnisotropy: ${value}`;
-        label.fontSize = 24;
-        label.worldSize = 1.2;
-        label.setPosition(x, 1, 5);
+        label.text = `maxAnisotropy: ${value}`;
+        label.fontSize = 28;
+        label.worldSize = 0.9;
+        label.setPosition(x, 1.2, 0);
         label.useBillboard = true;
         scene.addChild(label);
+
+        lanes.push({sampler: material.diffuseTextureSampler, label});
     });
-}
+
+    return {texture, lanes};
+};
 
 /**
- * [KO] 테스트용 GUI를 구성합니다.
- * [EN] Configures GUI for testing.
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Resource.BitmapTexture} texture
+ * @param {Array<{sampler: RedGPU.Resource.Sampler, label: RedGPU.Display.TextField3D}>} lanes
  */
-const renderTestPane = (redGPUContext) => {
-    new RedGPUExampleHelper(redGPUContext);
+const renderTestPane = (redGPUContext, texture, lanes) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const textureFolder = pane.addFolder({title: 'Texture', expanded: true});
+            textureFolder.addBinding(texture, 'useMipmap');
+
+            const laneTitles = ['Left Lane', 'Center Lane', 'Right Lane'];
+            lanes.forEach(({sampler, label}, index) => {
+                const folder = pane.addFolder({title: laneTitles[index], expanded: true});
+                folder.addBinding(sampler, 'maxAnisotropy', {
+                    min: 1,
+                    max: 16,
+                    step: 1
+                }).on('change', (evt) => {
+                    label.text = `maxAnisotropy: ${evt.value}`;
+                });
+            });
+        }
+    });
 };

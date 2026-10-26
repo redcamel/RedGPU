@@ -6,6 +6,7 @@ import parse_KHR_materials_anisotropy from "./extensions/parse_KHR_materials_ani
 import parse_KHR_materials_clearcoat from "./extensions/parse_KHR_materials_clearcoat";
 import parse_KHR_materials_diffuse_transmission from "./extensions/parse_KHR_materials_diffuse_transmission";
 import parse_KHR_materials_iridescence from "./extensions/parse_KHR_materials_iridescence";
+import parse_KHR_materials_pbrSpecularGlossiness from "./extensions/parse_KHR_materials_pbrSpecularGlossiness";
 import parse_KHR_materials_sheen from "./extensions/parse_KHR_materials_sheen";
 import parse_KHR_materials_specular from "./extensions/parse_KHR_materials_specular";
 import parse_KHR_materials_transmission from "./extensions/parse_KHR_materials_transmission";
@@ -13,11 +14,22 @@ import parse_KHR_materials_volume from "./extensions/parse_KHR_materials_volume"
 import parseMaterialTexture from "./parseMaterialTexture";
 
 /**
- * Parse Material Info from GLTF
- * @param {GLTFLoader} gltfLoader - The GLTF Loader
- * @param {GLTF} gltfData - The GLTF data
- * @param {MeshPrimitive} meshPrimitive - The Mesh Primitive
- * @returns {PBRMaterial} - The parsed PBR Material
+ * [KO] GLTF 메쉬 프리미티브의 재질(Material) 정보 및 확장(Extensions)을 파싱하여 PBRMaterial 인스턴스를 생성합니다.
+ * [EN] Parses material information and extensions of a GLTF mesh primitive to create a PBRMaterial instance.
+ *
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param gltfData -
+ * [KO] GLTF 데이터 객체
+ * [EN] GLTF data object
+ * @param meshPrimitive -
+ * [KO] 대상 GLTF 메쉬 프리미티브
+ * [EN] Target GLTF mesh primitive
+ * @returns
+ * [KO] 파싱된 `PBRMaterial` 인스턴스
+ * [EN] Parsed `PBRMaterial` instance
+ * @category Loader
  */
 const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrimitive: MeshPrimitive) => {
     const {redGPUContext} = gltfLoader
@@ -29,7 +41,6 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
         currentMaterial = new PBRMaterial(redGPUContext);
         const materialGlTfId = meshPrimitive.material;
         const materialInfo = gltfData.materials[materialGlTfId];
-        // console.log('tMaterialInfo', materialInfo)
         doubleSided = !!materialInfo.doubleSided;
         alphaMode = materialInfo.alphaMode ?? alphaMode;
         alphaCutoff = materialInfo.alphaCutoff ?? alphaCutoff;
@@ -119,8 +130,12 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
                 KHR_materials_specular,
                 KHR_materials_dispersion,
                 KHR_materials_anisotropy,
-                KHR_materials_iridescence
+                KHR_materials_iridescence,
+                KHR_materials_pbrSpecularGlossiness
             } = extensions
+            if (KHR_materials_pbrSpecularGlossiness) {
+                parse_KHR_materials_pbrSpecularGlossiness(currentMaterial, KHR_materials_pbrSpecularGlossiness, gltfLoader)
+            }
             if (KHR_materials_iridescence) {
                 parse_KHR_materials_iridescence(currentMaterial, KHR_materials_iridescence, gltfLoader)
             }
@@ -168,9 +183,7 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
             }
         }
     } else {
-        // let tColor = [1, 1, 1, 1];
         currentMaterial = new PBRMaterial(redGPUContext);
-        // tMaterial.baseColorFactor = tColor;
     }
     if (Object.hasOwn(meshPrimitive.attributes, 'COLOR_0')) {
         currentMaterial.useVertexColor = true
@@ -185,7 +198,6 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
             blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA
             blendAlphaState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA
             blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA
-            // blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE
             currentMaterial.transparent = true
             break;
         case 'MASK' :

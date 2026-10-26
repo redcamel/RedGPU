@@ -1,13 +1,10 @@
 import Group3D from "./Group3D";
 
 /**
- * [KO] 2D 공간 내에서 자식 객체들을 계층적으로 구성하고 그룹 제어하기 위한 컨테이너 클래스입니다.
- * [EN] Container class for hierarchically organizing and group-controlling child objects in 2D space.
+ * [KO] 2D 공간에서 자식 객체들을 계층적으로 그룹화하고 일괄 변환(위치, 회전, 스케일)을 적용하는 컨테이너 클래스입니다.
+ * [EN] Container class that hierarchically groups child objects and applies collective transformations (position, rotation, scale) in 2D space.
  *
- * [KO] 자체적인 geometry나 material 없이 오직 트랜스폼(위치, 회전, 스케일) 정보와 자식 계층만을 관리합니다. 씬 내에서 논리적인 그룹을 지정하고 자식 노드들에게 2D 변환을 일괄 적용할 때 사용됩니다.
- * [EN] Manages only transform (position, rotation, scale) details and child hierarchy without its own geometry or material. Used to designate logical groups in a scene and apply 2D transformations to child nodes collectively.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const group = new RedGPU.Display.Group2D();
  * group.addChild(sprite1);
@@ -15,22 +12,26 @@ import Group3D from "./Group3D";
  * scene.addChild(group);
  * ```
  *
- * <iframe src="/RedGPU/examples/2d/group2D/basic/" ></iframe>
+ * <iframe src="/RedGPU/examples/2d/group2D/basic/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Group2D basic example](/RedGPU/examples/2d/group2D/basic/)
  * @category Group
  */
 class Group2D extends Group3D {
-    /**
-     * [KO] 그룹의 2D 회전 값 (라디안 단위)
-     * [EN] Rotation value of the group (in radians)
-     */
     #rotation: number = 0;
 
     /**
-     * [KO] Group2D 인스턴스를 생성합니다.
-     * [EN] Creates an instance of Group2D.
+     * [KO] `Group2D` 인스턴스를 생성합니다.
+     * [EN] Creates a `Group2D` instance.
+     *
+     * ### Example
+     * ```typescript
+     * const group = new RedGPU.Display.Group2D('myGroup2D');
+     * ```
+     *
      * @param name -
-     * [KO] 그룹의 식별 이름 (선택)
-     * [EN] Identification name of the group (optional)
+     * [KO] 그룹 식별 이름 (선택)
+     * [EN] Group identification name (optional)
      */
     constructor(name?: string) {
         super();
@@ -38,8 +39,12 @@ class Group2D extends Group3D {
     }
 
     /**
-     * [KO] 그룹의 회전 값(라디안)을 반환하거나 설정합니다. 설정 시 내부적으로 Z축 회전에 연동됩니다.
-     * [EN] Returns or sets the rotation value of the group in radians. Setting this internally maps to the Z-axis rotation.
+     * [KO] 그룹의 2D 회전각(단위: Degree)을 가져오거나 설정합니다. 설정 시 내부적으로 Z축 회전(`rotationZ`)에 연동됩니다.
+     * [EN] Gets or sets the 2D rotation angle (unit: Degree) of the group. Setting this internally maps to the Z-axis rotation (`rotationZ`).
+     *
+     * @returns
+     * [KO] 2D 회전각 (Degree)
+     * [EN] 2D rotation angle (Degree)
      */
     // @ts-ignore
     get rotation(): number {
@@ -53,14 +58,20 @@ class Group2D extends Group3D {
     }
 
     /**
-     * [KO] 그룹의 2D 스케일을 일괄적으로 설정합니다. Y값을 생략하면 X값과 동일하게 통일되어 적용됩니다.
-     * [EN] Sets the 2D scale of the group. If Y is omitted, it defaults to the value of X (globalStruct scaling).
+     * [KO] 그룹의 2D 스케일을 설정합니다. `y`를 생략하면 `x`와 동일한 값으로 설정됩니다.
+     * [EN] Sets the 2D scale of the group. If `y` is omitted, it is set to the same value as `x`.
+     *
+     * ### Example
+     * ```typescript
+     * group.setScale(2, 2);
+     * ```
+     *
      * @param x -
      * [KO] X축 스케일 배율
      * [EN] Scale factor along the X-axis
      * @param y -
-     * [KO] Y축 스케일 배율 (선택, 기본값: x)
-     * [EN] Scale factor along the Y-axis (optional, default: x)
+     * [KO] Y축 스케일 배율 (선택, 기본값: `x`)
+     * [EN] Scale factor along the Y-axis (optional, default: `x`)
      */
     setScale(x: number, y?: number) {
         y = y ?? x;
@@ -69,14 +80,20 @@ class Group2D extends Group3D {
     }
 
     /**
-     * [KO] 그룹의 2D 위치(X, Y 좌표)를 설정합니다. Y값을 생략하면 X값과 동일하게 대입됩니다.
-     * [EN] Sets the 2D position (X and Y coordinates) of the group. If Y is omitted, it defaults to the value of X.
+     * [KO] 그룹의 2D 위치를 설정합니다. `y`를 생략하면 `x`와 동일한 값으로 설정됩니다.
+     * [EN] Sets the 2D position of the group. If `y` is omitted, it is set to the same value as `x`.
+     *
+     * ### Example
+     * ```typescript
+     * group.setPosition(100, 200);
+     * ```
+     *
      * @param x -
-     * [KO] X축 좌표값
-     * [EN] X coordinate of the position
+     * [KO] X축 좌표
+     * [EN] X-axis coordinate
      * @param y -
-     * [KO] Y축 좌표값 (선택, 기본값: x)
-     * [EN] Y coordinate of the position (optional, default: x)
+     * [KO] Y축 좌표 (선택, 기본값: `x`)
+     * [EN] Y-axis coordinate (optional, default: `x`)
      */
     setPosition(x: number, y?: number) {
         y = y ?? x;
@@ -85,21 +102,23 @@ class Group2D extends Group3D {
     }
 
     /**
-     * [KO] 그룹의 2D 회전 값을 라디안(Radian) 단위로 설정합니다.
-     * [EN] Sets the 2D rotation of the group in radians.
+     * [KO] 그룹의 2D 회전각(단위: Degree)을 설정합니다.
+     * [EN] Sets the 2D rotation angle (unit: Degree) of the group.
+     *
+     * ### Example
+     * ```typescript
+     * group.setRotation(45);
+     * ```
+     *
      * @param value -
-     * [KO] 회전각 (라디안 단위)
-     * [EN] Rotation angle in radians
+     * [KO] 회전각 (단위: Degree)
+     * [EN] Rotation angle (unit: Degree)
      */
     setRotation(value: number) {
         this.rotation = value;
     }
 }
 
-/**
- * 이 객체가 2D Mesh 타입의 그룹임을 나타내는 플래그입니다.\
- * geometry/vertex 데이터 없이 transform과 자식만을 가지는 구조임을 구분하기 위해 사용됩니다.
- */
 Object.defineProperty(Group2D.prototype, 'is2DMeshType', {
     value: true,
     writable: false

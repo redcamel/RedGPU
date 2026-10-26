@@ -46,8 +46,18 @@
     margin: 1.5rem 0;
 }
 
-.vp-doc th, .vp-doc td {
-    word-break: break-word;
+.vp-doc th {
+    white-space: nowrap;
+}
+
+.vp-doc td {
+    word-break: keep-all;
+}
+
+.vp-doc th:first-child,
+.vp-doc td:first-child,
+.vp-doc td code {
+    white-space: nowrap;
 }
 
 @media (min-width: 1280px) {
@@ -351,4 +361,281 @@
     }
 }
 
+/* ============================================================
+   9. 사이드바 API 뱃지 스타일 (본문 API 카드와 100% 일치)
+   ============================================================ */
+.VPSidebarItem .item {
+    min-width: 0 !important;
+}
 
+.VPSidebarItem .link {
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+/* 사이드바 level-0 폴더/네임스페이스 하위 아이템에도 level-1과 동일한 들여쓰기 및 가이드선 부여 */
+.VPSidebarItem.level-0 .items {
+    border-left: 1px solid var(--vp-c-divider);
+    padding-left: 16px;
+}
+
+/* 사이드바 아이템 줄바꿈 방지 및 말줄임표(...) 처리 + 수직 중앙 완벽 일치 */
+.VPSidebarItem .text {
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+    line-height: 1.5 !important;
+}
+
+.VPSidebarItem .api-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    margin-right: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 4px;
+    color: #ffffff !important;
+    line-height: 1;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.VPSidebarItem .api-badge.badge-folder {
+    background-color: transparent !important;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.VPSidebarItem .api-badge.badge-n {
+    background-color: #ef4444;
+}
+
+.VPSidebarItem .api-badge.badge-c {
+    background-color: #47a047;
+}
+
+.VPSidebarItem .api-badge.badge-i {
+    background-color: #2b7489;
+}
+
+.VPSidebarItem .api-badge.badge-f {
+    background-color: #06b6d4;
+}
+
+.VPSidebarItem .api-badge.badge-v {
+    background-color: #d88e00;
+}
+
+.VPSidebarItem .api-badge.badge-t {
+    background-color: #d88e00;
+}
+
+.VPSidebarItem .api-badge.badge-e {
+    background-color: #7d4099;
+}
+
+/* ============================================================
+   우측 목차(Outline) 접기/펼치기(Collapsible Tree) 스타일
+   ============================================================ */
+
+/* 목차 헤더 영역 및 '모두 접기/펼치기' 버튼 */
+.VPDocAsideOutline .content {
+    position: relative;
+}
+
+.VPDocAsideOutline .outline-toggle-all-btn {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 0 7px;
+    border-radius: 4px;
+    border: 1px solid var(--vp-c-divider);
+    background-color: var(--vp-c-bg-soft);
+    color: var(--vp-c-text-2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.VPDocAsideOutline .outline-toggle-all-btn:hover {
+    color: var(--vp-c-brand-1);
+    border-color: var(--vp-c-brand-1);
+    background-color: var(--vp-c-default-soft);
+}
+
+/* 하위 목록(ul)을 가진 상위 목차 li */
+.VPDocAsideOutline .VPDocOutlineItem li.has-nested {
+    position: relative;
+}
+
+/* 상위 카테고리 링크: 가로 전체 클릭 인터랙션 및 폴더명 강조 (더 진하고 두껍게) */
+.VPDocAsideOutline .VPDocOutlineItem li.has-nested > .outline-link {
+    padding-right: 44px !important;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 4px;
+    font-weight: 600 !important;
+    color: var(--vp-c-text-1) !important;
+    letter-spacing: -0.01em;
+    transition: color 0.2s ease;
+}
+
+.VPDocAsideOutline .VPDocOutlineItem li.has-nested > .outline-link:hover {
+    color: var(--vp-c-brand-1) !important;
+}
+
+/* 상위 카테고리 행에 마우스 호버 시 화살표 아이콘도 함께 반응 */
+.VPDocAsideOutline .VPDocOutlineItem li.has-nested:hover > .outline-toggle-btn {
+    color: var(--vp-c-text-1);
+}
+
+/* 개별 접기/펼치기 캐럿 버튼 */
+.VPDocAsideOutline .outline-toggle-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 40px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--vp-c-text-3);
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s, background-color 0.2s;
+    z-index: 2;
+}
+
+.VPDocAsideOutline .outline-toggle-btn:hover {
+    color: var(--vp-c-brand-1);
+    background-color: var(--vp-c-default-soft);
+}
+
+.VPDocAsideOutline .outline-toggle-btn svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+    transform: rotate(0deg); /* 펼침 상태: 아래(v) */
+    pointer-events: none; /* 클릭 이벤트가 버튼으로 확실히 전파되도록 설정 */
+}
+
+/* 접힌 상태 (Collapsed) */
+.VPDocAsideOutline .VPDocOutlineItem li.is-collapsed > ul {
+    display: none !important;
+}
+
+.VPDocAsideOutline .VPDocOutlineItem li.is-collapsed > .outline-toggle-btn svg {
+    transform: rotate(-90deg); /* 접힘 상태: 오른쪽(>) */
+}
+
+/* ============================================================
+   우측 목차 Accessor 배지 (동일 규격 고정 크기)
+   ============================================================ */
+
+/* 목차 하위 링크 flex 정렬 보장 */
+.VPDocAsideOutline .VPDocOutlineItem li:not(.has-nested) > .outline-link {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0px;
+}
+
+.VPDocAsideOutline .accessor-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; /* 셋 다 정확히 동일한 고정 너비 */
+    height: 16px; /* 셋 다 정확히 동일한 고정 높이 */
+    font-size: 9px;
+    font-weight: 750;
+    line-height: 1;
+    border-radius: 4px;
+    margin-right: 6px; /* 속성명과의 간격 */
+    padding: 0;
+    flex-shrink: 0;
+    letter-spacing: -0.3px;
+    font-family: var(--vp-font-family-mono, monospace);
+    user-select: none;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+/* g/s : Getter & Setter 둘 다 있음 */
+.VPDocAsideOutline .accessor-badge.badge-gs {
+    background-color: rgba(99, 102, 241, 0.12);
+    color: #4f46e5;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.dark .VPDocAsideOutline .accessor-badge.badge-gs {
+    background-color: rgba(129, 140, 248, 0.18);
+    color: #a5b4fc;
+    border-color: rgba(129, 140, 248, 0.35);
+}
+
+/* get : Getter만 있음 (읽기 전용) */
+.VPDocAsideOutline .accessor-badge.badge-get {
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.dark .VPDocAsideOutline .accessor-badge.badge-get {
+    background-color: rgba(52, 211, 153, 0.18);
+    color: #6ee7b7;
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+/* set : Setter만 있음 (쓰기 전용) */
+.VPDocAsideOutline .accessor-badge.badge-set {
+    background-color: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.dark .VPDocAsideOutline .accessor-badge.badge-set {
+    background-color: rgba(251, 191, 36, 0.18);
+    color: #fde047;
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+/* ============================================================
+   본문 API 시그니처 readonly 배지 스타일
+   ============================================================ */
+.vp-doc .readonly-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 7px;
+    margin-right: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    border-radius: 4px;
+    font-family: var(--vp-font-family-mono, monospace);
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    vertical-align: middle;
+    transform: translateY(-1px);
+    user-select: none;
+}
+
+.dark .vp-doc .readonly-badge {
+    background-color: rgba(52, 211, 153, 0.18);
+    color: #6ee7b7;
+    border-color: rgba(52, 211, 153, 0.35);
+}

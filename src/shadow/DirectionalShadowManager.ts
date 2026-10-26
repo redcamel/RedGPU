@@ -1,34 +1,107 @@
 import RedGPUContext from "../context/RedGPUContext";
 import InstancingMesh from "../display/instancingMesh/InstancingMesh";
 import Mesh from "../display/mesh/Mesh";
+import PerspectiveCamera from "../camera/camera/PerspectiveCamera";
+import View3D from "../display/view/View3D";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
-import {keepLog} from "../utils";
+import keepLog from "../utils/keepLog";
+import {mat4, vec3} from "gl-matrix";
+
+const g_invVM = mat4.create();
+const g_lightDir = vec3.create();
+const g_lightPos = vec3.create();
+const g_frustumCenter = vec3.create();
+const g_snappedCenter = vec3.create();
+const g_localCenter = vec3.create();
+const g_up = vec3.create();
+const g_p = vec3.create();
+const g_zero = vec3.fromValues(0, 0, 0);
+
+const g_lightRotMat = mat4.create();
+const g_invLightRotMat = mat4.create();
+const g_tempLightP = mat4.create();
+const g_tempLightV = mat4.create();
+const g_cascadeSplits = new Float32Array(5);
 
 /**
- * [KO] 직사광(Directional Light)의 그림자 뎁스 텍스처와 관련 설정을 관리하는 클래스입니다.
- * [EN] Class that manages shadow depth textures and related settings for directional lights.
+ * [KO] 직사광(Directional Light)의 CSM (Cascaded Shadow Maps) 뎁스 텍스처 배열과 관련 설정을 총괄 관리하는 클래스입니다.
+ * [EN] Class that manages CSM (Cascaded Shadow Maps) depth texture arrays and related settings for directional lights.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * ### Example
+ * ```typescript
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
+ * const directionalShadowManager = view.directionalShadowManager;
+ * ```
+ *
  * @category Shadow
  */
 class DirectionalShadowManager {
-    #shadowDepthTextureSize: number = 4096
-    #bias: number = 0.00017
-    #strength: number = 0.7
-    #filterScale: number = 2.0
-    #shadowDepthTexture: GPUTexture
-    #shadowDepthTextureView: GPUTextureView
-    #shadowDepthTextureEmpty: GPUTexture
-    #shadowDepthTextureViewEmpty: GPUTextureView
-    #redGPUContext: RedGPUContext
-    #castingList: (Mesh | InstancingMesh)[] = []
-    #videoMemorySize: number = 0
+    #shadowDepthTextureSize: number = 2048;
+    #bias: number = 0.00015;
+    #strength: number = 0.9;
+    #maxShadowDistance: number = 200;
+    #cascadeCount: number = 4;
+
+    #shadowDepthTexture: GPUTexture;
+    #shadowDepthTextureView: GPUTextureView;
+    #cascadeLayerViews: GPUTextureView[] = [];
+    #shadowDepthTextureEmpty: GPUTexture;
+    #shadowDepthTextureViewEmpty: GPUTextureView;
+
+    #redGPUContext: RedGPUContext;
+    #castingList: (Mesh | InstancingMesh)[] = [];
+    #videoMemorySize: number = 0;
+
+    #cascadeSplitDepths: Float32Array = new Float32Array(4);
+    #cascadeBoundingSpheres: Float32Array = new Float32Array(16);
+    #cascadeLightDistances: Float32Array = new Float32Array(4);
+    #cascadeProjectionViewMatrices: mat4[] = [mat4.create(), mat4.create(), mat4.create(), mat4.create()];
+
+    #casterAabbCenter: Float32Array = new Float32Array(3);
+    #casterAabbRadius: number = -1;
+    #casterBoundingCenter: Float32Array = new Float32Array(3);
+    #casterBoundingRadiusSq: number = -1;
+    #hasCastingListCycleStarted: boolean = false;
+
+    /**
+     * [KO] 각 캐스케이드의 월드 공간 외접구 정보 [center.x, center.y, center.z, radius] * 4 (길이 16 Float32Array)를 반환합니다.
+     * [EN] Returns the world-space bounding sphere info [center.x, center.y, center.z, radius] * 4 (length 16 Float32Array) for each cascade.
+     */
+    get cascadeBoundingSpheres(): Float32Array {
+        return this.#cascadeBoundingSpheres;
+    }
+
+    /**
+     * [KO] 각 캐스케이드 중심으로부터 광원 역방향(-lightDir)으로 설정된 실제 직교 광원 거리 배열(길이 4 Float32Array)을 반환합니다.
+     * [EN] Returns the array of orthographic light distances (length 4 Float32Array) along the inverse light direction (-lightDir) from each cascade center.
+     */
+    get cascadeLightDistances(): Float32Array {
+        return this.#cascadeLightDistances;
+    }
+
+    /**
+     * [KO] 캐스터들의 그림자 유효 영역 중심 좌표(vec3)를 반환합니다.
+     * [EN] Returns the center coordinates (vec3) of the casters' effective shadow volume.
+     */
+    get casterBoundingCenter(): Float32Array {
+        return this.#casterBoundingCenter;
+    }
+
+    /**
+     * [KO] 캐스터들의 그림자 유효 영역 반경 제곱값을 반환합니다. (0.0: 캐스터 없음, <0.0: 전역 캐스터 존재로 가드 우회, >0.0: 유효 반경 제곱)
+     * [EN] Returns the squared radius of the casters' effective shadow volume (0.0: no casters, <0.0: global casters bypass, >0.0: valid squared radius).
+     */
+    get casterBoundingRadiusSq(): number {
+        return this.#casterBoundingRadiusSq;
+    }
 
     /**
      * [KO] 현재 섀도우 맵이 사용하는 비디오 메모리 크기(Bytes)를 반환합니다.
@@ -55,20 +128,20 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 섀도우 뎁스 텍스처 뷰를 반환합니다.
-     * [EN] Returns the shadow depth texture view.
+     * [KO] 전체 2D Texture Array 형태의 섀도우 뎁스 텍스처 뷰를 반환합니다. (메인 렌더링 셰이더 바인딩용)
+     * [EN] Returns the shadow depth texture view in 2D Texture Array dimension. (For main rendering shader binding)
      *
      * @returns
-     * [KO] 섀도우 뎁스 GPUTextureView
-     * [EN] Shadow depth GPUTextureView
+     * [KO] 2D Array 섀도우 뎁스 GPUTextureView
+     * [EN] 2D Array Shadow depth GPUTextureView
      */
     get shadowDepthTextureView(): GPUTextureView {
         return this.#shadowDepthTextureView;
     }
 
     /**
-     * [KO] 그림자가 없는 상태를 위한 빈(1x1) 뎁스 텍스처 뷰를 반환합니다.
-     * [EN] Returns an empty (1x1) depth texture view for non-shadow states.
+     * [KO] 그림자가 없는 상태를 위한 빈(1x1x4) 2D Array 뎁스 텍스처 뷰를 반환합니다.
+     * [EN] Returns an empty (1x1x4) 2D Array depth texture view for non-shadow states.
      *
      * @returns
      * [KO] 빈 뎁스 GPUTextureView
@@ -76,6 +149,19 @@ class DirectionalShadowManager {
      */
     get shadowDepthTextureViewEmpty(): GPUTextureView {
         return this.#shadowDepthTextureViewEmpty;
+    }
+
+    /**
+     * [KO] 그림자 바이어스(Bias) 값을 설정합니다. (0.0 ~ 1.0)
+     * [EN] Sets the shadow bias value. (0.0 to 1.0)
+     *
+     * @param value -
+     * [KO] 바이어스 값
+     * [EN] Bias value
+     */
+    set bias(value: number) {
+        validatePositiveNumberRange(value, 0, 1);
+        this.#bias = value;
     }
 
     /**
@@ -91,16 +177,16 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 그림자 바이어스(Bias) 값을 설정합니다. (0.0 ~ 1.0)
-     * [EN] Sets the shadow bias value. (0.0 to 1.0)
+     * [KO] 그림자의 세기(Strength) 값을 설정합니다. (0.0 ~ 1.0)
+     * [EN] Sets the shadow strength value. (0.0 to 1.0)
      *
      * @param value -
-     * [KO] 바이어스 값
-     * [EN] Bias value
+     * [KO] 세기 값
+     * [EN] Strength value
      */
-    set bias(value: number) {
-        validatePositiveNumberRange(value, 0, 1)
-        this.#bias = value;
+    set strength(value: number) {
+        validatePositiveNumberRange(value, 0, 1);
+        this.#strength = value;
     }
 
     /**
@@ -116,47 +202,78 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 그림자의 세기(Strength) 값을 설정합니다. (0.0 ~ 1.0)
-     * [EN] Sets the shadow strength value. (0.0 to 1.0)
-     *
-     * @param value -
-     * [KO] 세기 값
-     * [EN] Strength value
-     */
-    set strength(value: number) {
-        validatePositiveNumberRange(value, 0, 1)
-        this.#strength = value;
-    }
-
-    /**
-     * [KO] 그림자 필터 번짐 반경(Filter Scale) 값을 반환합니다.
-     * [EN] Returns the shadow filter scale value.
+     * [KO] CSM(Cascaded Shadow Maps)의 캐스케이드 분할 수(1 ~ 4, 기본값: 3)를 반환합니다.
+     * [EN] Returns the number of cascade splits for CSM (Cascaded Shadow Maps) (1 to 4, default: 3).
      *
      * @returns
-     * [KO] 필터 스케일 값 (기본값: 4.0)
-     * [EN] Filter scale value (default: 4.0)
+     * [KO] 캐스케이드 개수
+     * [EN] Cascade count
      */
-    get filterScale(): number {
-        return this.#filterScale;
+    get cascadeCount(): number {
+        return this.#cascadeCount;
     }
 
     /**
-     * [KO] 그림자 필터 번짐 반경(Filter Scale) 값을 설정합니다. (0.0 이상)
-     * [EN] Sets the shadow filter scale value. (0.0 or greater)
+     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(언리얼 엔진 표준 기본값: 200m)를 반환합니다.
+     * [EN] Returns the maximum shadow distance (Unreal Engine standard default: 200m).
+     */
+    get maxShadowDistance(): number {
+        return this.#maxShadowDistance;
+    }
+
+    /**
+     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(기본값: 200m)를 설정합니다.
+     * [EN] Sets the maximum shadow distance (default: 200m).
      *
      * @param value -
-     * [KO] 필터 스케일 값
-     * [EN] Filter scale value
+     * [KO] 최대 그림자 가시거리 (m)
+     * [EN] Maximum shadow distance in meters
      */
-    set filterScale(value: number) {
-        validatePositiveNumberRange(value, 0)
-        this.#filterScale = value;
+    set maxShadowDistance(value: number) {
+        validatePositiveNumberRange(value, 1);
+        this.#maxShadowDistance = value;
     }
 
+    /**
+     * [KO] CSM(Cascaded Shadow Maps)의 캐스케이드 분할 수(1 ~ 4)를 설정합니다.
+     * [EN] Sets the number of cascade splits for CSM (Cascaded Shadow Maps) (1 to 4).
+     *
+     * @param value -
+     * [KO] 캐스케이드 개수 (1 ~ 4)
+     * [EN] Cascade count (1 to 4)
+     */
+    set cascadeCount(value: number) {
+        validateUintRange(value, 1, 4);
+        this.#cascadeCount = value;
+    }
 
     /**
-     * [KO] 섀도우 뎁스 텍스처의 크기(해상도)를 반환합니다.
-     * [EN] Returns the size (resolution) of the shadow depth texture.
+     * [KO] 각 캐스케이드의 분할 깊이(Split Depth) 배열(길이 4)을 반환합니다.
+     * [EN] Returns the array of split depths for each cascade (length 4).
+     *
+     * @returns
+     * [KO] 분할 깊이 Float32Array
+     * [EN] Split depth Float32Array
+     */
+    get cascadeSplitDepths(): Float32Array {
+        return this.#cascadeSplitDepths;
+    }
+
+    /**
+     * [KO] 각 캐스케이드의 투영-뷰(Projection-View) 행렬 배열(길이 4)을 반환합니다.
+     * [EN] Returns the array of projection-view matrices for each cascade (length 4).
+     *
+     * @returns
+     * [KO] 투영-뷰 행렬 배열
+     * [EN] Array of projection-view matrices
+     */
+    get cascadeProjectionViewMatrices(): mat4[] {
+        return this.#cascadeProjectionViewMatrices;
+    }
+
+    /**
+     * [KO] 섀도우 뎁스 텍스처의 크기(해상도, 기본값: 2048)를 반환합니다.
+     * [EN] Returns the size (resolution, default: 2048) of the shadow depth texture.
      *
      * @returns
      * [KO] 해상도 값
@@ -167,24 +284,31 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 섀도우 뎁스 텍스처의 크기(해상도)를 설정합니다. (정수)
-     * [EN] Sets the size (resolution) of the shadow depth texture. (Integer)
+     * [KO] 섀도우 뎁스 텍스처의 크기(해상도, 기본값: 2048)를 설정합니다. (정수)
+     * [EN] Sets the size (resolution, default: 2048) of the shadow depth texture. (Integer)
      *
      * @param value -
-     * [KO] 해상도 값
-     * [EN] Resolution value
+     * [KO] 해상도 값 (기본값: 2048)
+     * [EN] Resolution value (default: 2048)
      */
     set shadowDepthTextureSize(value: number) {
-        validateUintRange(value, 1)
+        validateUintRange(value, 1);
         this.#shadowDepthTextureSize = value;
     }
 
     /**
-     * [KO] 매니저를 리셋하고 리소스를 파기합니다.
-     * [EN] Resets the manager and destroys resources.
+     * [KO] 특정 캐스케이드 레이어의 단일 2D 뎁스 텍스처 뷰를 반환합니다.
+     * [EN] Returns a single 2D depth texture view for a specific cascade layer.
+     *
+     * @param index -
+     * [KO] 캐스케이드 인덱스 (0 ~ 3)
+     * [EN] Cascade index (0 to 3)
+     * @returns
+     * [KO] 해당 레이어의 2D GPUTextureView
+     * [EN] 2D GPUTextureView of the layer
      */
-    reset() {
-        this.destroy()
+    getCascadeLayerView(index: number): GPUTextureView {
+        return this.#cascadeLayerViews[index] || this.#shadowDepthTextureViewEmpty;
     }
 
     /**
@@ -192,7 +316,185 @@ class DirectionalShadowManager {
      * [EN] Resets the list of shadow casting objects.
      */
     resetCastingList() {
-        this.#castingList.length = 0
+        this.#castingList.length = 0;
+        this.#hasCastingListCycleStarted = true;
+    }
+
+    /**
+     * [KO] Auto-CSM 물리 기반 텍셀 밀도 역산 모델 및 절두체 8정점 완전 포섭 대칭 외접구(Symmetric Bounding Sphere)
+     *      알고리즘을 적용하여 CSM 행렬과 분할 깊이를 직접(In-Place) 계산합니다.
+     * [EN] In-place calculates jitter-free high-precision CSM matrices and split depths directly into member buffers
+     *      using the Auto-CSM physical texel density inversion model and symmetric bounding sphere algorithm.
+     *
+     * @param view - 대상 View3D
+     */
+    calculateCSMMatrices(view: View3D): void {
+        const rawCamera = view.rawCamera;
+        const lightManager = view.scene?.lightManager;
+        const directionalLights = lightManager?.directionalLights;
+
+        const cascadeCount = Math.min(4, Math.max(1, this.#cascadeCount || 3));
+        const maxDist = this.#maxShadowDistance ?? 200.0;
+        const textureSize = this.#shadowDepthTextureSize || 2048;
+
+        const splitDepths = this.#cascadeSplitDepths;
+        const cascadePV = this.#cascadeProjectionViewMatrices;
+
+        if (!directionalLights?.length || !(rawCamera instanceof PerspectiveCamera)) {
+            splitDepths.fill(1000.0);
+            this.#casterBoundingRadiusSq = 0.0;
+            return;
+        }
+
+        const camViewMatrix = rawCamera.viewMatrix;
+        if (!mat4.invert(g_invVM, camViewMatrix)) {
+            splitDepths.fill(1000.0);
+            this.#casterBoundingRadiusSq = 0.0;
+            return;
+        }
+
+        const shadowFar = Math.min(rawCamera.farClipping, maxDist);
+        const near = rawCamera.nearClipping;
+        const fov = (Math.PI / 180) * rawCamera.fieldOfView;
+        const aspect = view.aspect;
+
+        const light = directionalLights[0];
+        vec3.set(g_lightDir, light.direction[0], light.direction[1], light.direction[2]);
+        vec3.normalize(g_lightDir, g_lightDir);
+
+        this.#updateCasterBoundingVolume(view, g_lightDir);
+
+        vec3.set(g_up, 0, 1, 0);
+        if (Math.abs(vec3.dot(g_lightDir, g_up)) > 0.99) {
+            vec3.set(g_up, 0, 0, 1);
+        }
+
+        mat4.lookAt(g_lightRotMat, g_zero, g_lightDir, g_up);
+        mat4.invert(g_invLightRotMat, g_lightRotMat);
+
+        g_cascadeSplits[0] = near;
+
+        const tanHalfFov = Math.tan(fov * 0.5);
+        const k = tanHalfFov * Math.sqrt(1.0 + aspect * aspect);
+        const kSq = k * k;
+        const cosTheta = 1.0 / Math.sqrt(1.0 + kSq);
+        const sinTheta = k * cosTheta;
+
+        if (cascadeCount === 1) {
+            g_cascadeSplits[1] = shadowFar;
+            splitDepths[0] = shadowFar;
+            for (let i = 1; i < 4; i++) {
+                splitDepths[i] = shadowFar * 2.0;
+            }
+        } else {
+            const lambda = 0.75;
+            const effectiveNear = Math.min(Math.max(near, 1.0), shadowFar * 0.25);
+            const ratio = shadowFar / effectiveNear;
+            const range = shadowFar - near;
+
+            for (let i = 1; i <= cascadeCount; i++) {
+                const p = i / cascadeCount;
+                const logSplit = effectiveNear * Math.pow(ratio, p);
+                const uniformSplit = near + range * p;
+                const dist = (i === cascadeCount) ? shadowFar : (lambda * logSplit + (1.0 - lambda) * uniformSplit);
+                g_cascadeSplits[i] = dist;
+                splitDepths[i - 1] = dist;
+            }
+
+            for (let i = cascadeCount; i < 4; i++) {
+                splitDepths[i] = shadowFar * 2.0;
+            }
+        }
+
+        for (let c = 0; c < cascadeCount; c++) {
+            const subNear = g_cascadeSplits[c];
+            const subFar = g_cascadeSplits[c + 1];
+            const prevSpan = c > 0 ? (subNear - g_cascadeSplits[c - 1]) : 0.0;
+            const effNear = Math.max(near, subNear - prevSpan * 0.20);
+
+            const farCornerZ = subFar * cosTheta;
+            const farDiag = subFar * sinTheta;
+            const cz = Math.min((effNear + subFar) * 0.5 / cosTheta, farCornerZ);
+            const farDz = farCornerZ - cz;
+            let sphereRadius = Math.sqrt(farDz * farDz + farDiag * farDiag);
+
+            const rawWorldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
+            sphereRadius += rawWorldUnitsPerTexel * 2.0;
+            sphereRadius = Math.ceil(sphereRadius / rawWorldUnitsPerTexel) * rawWorldUnitsPerTexel;
+
+            vec3.set(g_localCenter, 0, 0, -cz);
+            vec3.transformMat4(g_frustumCenter, g_localCenter, g_invVM);
+
+            const worldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
+            vec3.transformMat4(g_p, g_frustumCenter, g_lightRotMat);
+            g_p[0] = Math.floor(g_p[0] / worldUnitsPerTexel) * worldUnitsPerTexel;
+            g_p[1] = Math.floor(g_p[1] / worldUnitsPerTexel) * worldUnitsPerTexel;
+            vec3.transformMat4(g_snappedCenter, g_p, g_invLightRotMat);
+
+            let lightDistance: number;
+            if (this.#casterAabbRadius > 0) {
+                const cdx = this.#casterAabbCenter[0] - g_snappedCenter[0];
+                const cdy = this.#casterAabbCenter[1] - g_snappedCenter[1];
+                const cdz = this.#casterAabbCenter[2] - g_snappedCenter[2];
+                const upstreamCasterDist = -(cdx * g_lightDir[0] + cdy * g_lightDir[1] + cdz * g_lightDir[2]) + this.#casterAabbRadius;
+                lightDistance = Math.max(sphereRadius, upstreamCasterDist);
+            } else {
+                lightDistance = Math.max(sphereRadius, shadowFar);
+            }
+            this.#cascadeLightDistances[c] = lightDistance;
+            vec3.scaleAndAdd(g_lightPos, g_snappedCenter, g_lightDir, -lightDistance);
+
+            mat4.lookAt(g_tempLightV, g_lightPos, g_snappedCenter, g_up);
+
+            const left = -sphereRadius;
+            const right = sphereRadius;
+            const bottom = -sphereRadius;
+            const top = sphereRadius;
+            const nearPlane = 0.1;
+            const farPlane = lightDistance + sphereRadius;
+
+            mat4.orthoZO(g_tempLightP, left, right, bottom, top, nearPlane, farPlane);
+
+            mat4.multiply(cascadePV[c], g_tempLightP, g_tempLightV);
+
+            const sphereIdx = c * 4;
+            this.#cascadeBoundingSpheres[sphereIdx] = g_snappedCenter[0];
+            this.#cascadeBoundingSpheres[sphereIdx + 1] = g_snappedCenter[1];
+            this.#cascadeBoundingSpheres[sphereIdx + 2] = g_snappedCenter[2];
+            this.#cascadeBoundingSpheres[sphereIdx + 3] = sphereRadius;
+        }
+
+        for (let c = cascadeCount; c < 4; c++) {
+            mat4.copy(cascadePV[c], cascadePV[cascadeCount - 1]);
+            this.#cascadeLightDistances[c] = this.#cascadeLightDistances[cascadeCount - 1];
+            const srcIdx = (cascadeCount - 1) * 4;
+            const dstIdx = c * 4;
+            this.#cascadeBoundingSpheres[dstIdx] = this.#cascadeBoundingSpheres[srcIdx];
+            this.#cascadeBoundingSpheres[dstIdx + 1] = this.#cascadeBoundingSpheres[srcIdx + 1];
+            this.#cascadeBoundingSpheres[dstIdx + 2] = this.#cascadeBoundingSpheres[srcIdx + 2];
+            this.#cascadeBoundingSpheres[dstIdx + 3] = this.#cascadeBoundingSpheres[srcIdx + 3];
+        }
+    }
+
+    /**
+     * [KO] 사용 중인 GPU 리소스를 해제합니다.
+     * [EN] Releases GPU resources in use.
+     */
+    destroy() {
+        const {commandEncoderManager} = this.#redGPUContext || {};
+        if (this.#shadowDepthTexture) {
+            commandEncoderManager?.addDeferredDestroy(this.#shadowDepthTexture);
+            this.#shadowDepthTexture = null;
+            this.#shadowDepthTextureView = null;
+            this.#cascadeLayerViews = [];
+        }
+        if (this.#shadowDepthTextureEmpty) {
+            commandEncoderManager?.addDeferredDestroy(this.#shadowDepthTextureEmpty);
+            this.#shadowDepthTextureEmpty = null;
+            this.#shadowDepthTextureViewEmpty = null;
+        }
+        this.#hasCastingListCycleStarted = false;
+        keepLog('🧹 DirectionalShadowManager destroy 완료');
     }
 
     /**
@@ -203,70 +505,159 @@ class DirectionalShadowManager {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      */
-    update(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext
-        this.#checkDepthTexture()
+    update(redGPUContext: RedGPUContext): boolean {
+        this.#redGPUContext = redGPUContext;
+        return this.#checkDepthTexture();
     }
 
-    /**
-     * [KO] 사용 중인 GPU 리소스를 해제합니다.
-     * [EN] Releases GPU resources in use.
-     */
-    destroy() {
-        const {commandEncoderManager} = this.#redGPUContext
-        if (this.#shadowDepthTexture) {
-            commandEncoderManager.addDeferredDestroy(this.#shadowDepthTexture)
-            this.#shadowDepthTexture = null
-            this.#shadowDepthTextureView = null
+    #updateCasterBoundingVolume(view: View3D, lightDir: vec3): void {
+        const landscape = view.scene?.landscape;
+        if (landscape) {
+            const foliageManager = landscape.foliageManager;
+            if (foliageManager?.enabled) {
+                const types = foliageManager.types;
+                const len = types.length;
+                for (let i = 0; i < len; i++) {
+                    if (types[i].castShadow) {
+                        this.#casterAabbRadius = -1.0;
+                        this.#casterBoundingRadiusSq = -1.0;
+                        return;
+                    }
+                }
+            }
+            const grassManager = landscape.grassManager;
+            if (grassManager?.enabled) {
+                const types = grassManager.types;
+                const len = types.length;
+                for (let i = 0; i < len; i++) {
+                    if (types[i].castShadow) {
+                        this.#casterAabbRadius = -1.0;
+                        this.#casterBoundingRadiusSq = -1.0;
+                        return;
+                    }
+                }
+            }
         }
-        if (this.#shadowDepthTextureEmpty) {
-            commandEncoderManager.addDeferredDestroy(this.#shadowDepthTextureEmpty)
-            this.#shadowDepthTextureEmpty = null
-            this.#shadowDepthTextureViewEmpty = null
+
+        const castingList = this.#castingList;
+        const count = castingList.length;
+        if (count === 0) {
+            this.#casterAabbRadius = 0.0;
+            this.#casterBoundingRadiusSq = this.#hasCastingListCycleStarted ? 0.0 : -1.0;
+            return;
         }
-        keepLog('🧹 DirectionalShadowManager destroy 완료')
+
+        let minX = Infinity;
+        let minY = Infinity;
+        let minZ = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        let maxZ = -Infinity;
+
+        for (let i = 0; i < count; i++) {
+            const aabb = castingList[i].boundingAABB;
+            if (aabb.minX < minX) minX = aabb.minX;
+            if (aabb.maxX > maxX) maxX = aabb.maxX;
+            if (aabb.minY < minY) minY = aabb.minY;
+            if (aabb.maxY > maxY) maxY = aabb.maxY;
+            if (aabb.minZ < minZ) minZ = aabb.minZ;
+            if (aabb.maxZ > maxZ) maxZ = aabb.maxZ;
+        }
+
+        const cx = (minX + maxX) * 0.5;
+        const cy = (minY + maxY) * 0.5;
+        const cz = (minZ + maxZ) * 0.5;
+
+        const dx = (maxX - minX) * 0.5;
+        const dy = (maxY - minY) * 0.5;
+        const dz = (maxZ - minZ) * 0.5;
+        const casterRadius = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        this.#casterAabbCenter[0] = cx;
+        this.#casterAabbCenter[1] = cy;
+        this.#casterAabbCenter[2] = cz;
+        this.#casterAabbRadius = casterRadius;
+
+        const shadowDirX = lightDir[0];
+        const shadowDirZ = lightDir[2];
+        const horizLen = Math.sqrt(shadowDirX * shadowDirX + shadowDirZ * shadowDirZ);
+
+        const clampedLy = Math.max(Math.abs(lightDir[1]), 0.15);
+        const maxDist = this.#maxShadowDistance ?? 200.0;
+        const shadowExtension = Math.min((2.0 * casterRadius) / clampedLy, maxDist);
+
+        let normShadowDirX = 0;
+        let normShadowDirZ = 0;
+        if (horizLen > 0.0001) {
+            const invLen = 1.0 / horizLen;
+            normShadowDirX = shadowDirX * invLen;
+            normShadowDirZ = shadowDirZ * invLen;
+        }
+
+        const halfExt = shadowExtension * 0.5;
+        this.#casterBoundingCenter[0] = cx + normShadowDirX * halfExt;
+        this.#casterBoundingCenter[1] = cy;
+        this.#casterBoundingCenter[2] = cz + normShadowDirZ * halfExt;
+
+        const shadowRadius = casterRadius + halfExt + 15.0;
+        this.#casterBoundingRadiusSq = shadowRadius * shadowRadius;
     }
 
-    /** 비디오 메모리 계산 */
     #calcVideoMemory() {
-        const texture = this.#shadowDepthTexture
+        const texture = this.#shadowDepthTexture;
         if (!texture) return 0;
-        this.#videoMemorySize = calculateTextureByteSize(texture)
+        this.#videoMemorySize = calculateTextureByteSize(texture);
     }
 
-    /** 뎁스 텍스처 변경 여부 확인 및 재생성 */
-    #checkDepthTexture() {
+    #checkDepthTexture(): boolean {
         if (this.#shadowDepthTexture?.width !== this.#shadowDepthTextureSize) {
-            this.destroy()
-            this.#createDepthTexture()
-            this.#calcVideoMemory()
+            this.destroy();
+            this.#createDepthTexture();
+            this.#calcVideoMemory();
+            return true;
         }
+        return false;
     }
 
-    /** 빈 뎁스 텍스처(1x1) 생성 */
     #createEmptyDepthTexture(gpuDevice: GPUDevice) {
         this.#shadowDepthTextureEmpty = gpuDevice.createTexture({
-            size: [1, 1, 1],
+            size: [1, 1, 4],
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
             format: 'depth32float',
-            label: `DirectionalShadowManager_EmptyDepthTexture_1x1_${Date.now()}`,
-        })
-        this.#shadowDepthTextureViewEmpty = this.#shadowDepthTextureEmpty.createView({label: this.#shadowDepthTextureEmpty.label})
+            label: `DirectionalShadowManager_EmptyDepthTexture_1x1x4_${Date.now()}`,
+        });
+        this.#shadowDepthTextureViewEmpty = this.#shadowDepthTextureEmpty.createView({
+            dimension: '2d-array',
+            label: this.#shadowDepthTextureEmpty.label
+        });
     }
 
-    /** 실제 섀도우 뎁스 텍스처 생성 */
     #createDepthTexture() {
-        const {gpuDevice, resourceManager} = this.#redGPUContext
+        const {gpuDevice, resourceManager} = this.#redGPUContext;
         this.#shadowDepthTexture = resourceManager.createManagedTexture({
-            size: [this.#shadowDepthTextureSize, this.#shadowDepthTextureSize, 1],
+            size: [this.#shadowDepthTextureSize, this.#shadowDepthTextureSize, 4],
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
             format: 'depth32float',
-            label: `DirectionalShadowManager_shadowDepthTextureSize_${this.#shadowDepthTextureSize}x${this.#shadowDepthTextureSize}_${Date.now()}`,
+            label: `DirectionalShadowManager_CSM_Array_${this.#shadowDepthTextureSize}x${this.#shadowDepthTextureSize}_4Layers_${Date.now()}`,
         });
-        this.#shadowDepthTextureView = this.#shadowDepthTexture.createView({label: this.#shadowDepthTexture.label})
-        if (!this.#shadowDepthTextureViewEmpty) this.#createEmptyDepthTexture(gpuDevice)
+        this.#shadowDepthTextureView = this.#shadowDepthTexture.createView({
+            dimension: '2d-array',
+            label: `${this.#shadowDepthTexture.label}_ArrayView`
+        });
+
+        this.#cascadeLayerViews.length = 0;
+        for (let layerIndex = 0; layerIndex < 4; layerIndex++) {
+            this.#cascadeLayerViews[layerIndex] = this.#shadowDepthTexture.createView({
+                label: `${this.#shadowDepthTexture.label}_Layer_${layerIndex}`,
+                dimension: '2d',
+                baseArrayLayer: layerIndex,
+                arrayLayerCount: 1
+            });
+        }
+
+        if (!this.#shadowDepthTextureViewEmpty) this.#createEmptyDepthTexture(gpuDevice);
     }
 }
 
-Object.freeze(DirectionalShadowManager)
-export default DirectionalShadowManager
+Object.freeze(DirectionalShadowManager);
+export default DirectionalShadowManager;

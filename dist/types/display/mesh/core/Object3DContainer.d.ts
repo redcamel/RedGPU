@@ -2,15 +2,15 @@ import { mat4 } from "gl-matrix";
 import Mesh from "../Mesh";
 import BaseObject from "../../../base/BaseObject";
 /**
- * [KO] Mesh 객체들을 담는 시각적 컨테이너 클래스입니다.
- * [EN] Visual container class for Mesh objects.
+ * [KO] 3D 객체들을 계층적으로 관리하는 컨테이너 클래스입니다.
+ * [EN] Container class that hierarchically manages 3D objects.
  *
- * [KO] Scene의 기반이 되는 구조로, View에서 렌더링할 수 있는 3D 객체들을 계층적으로 관리합니다. 자식 객체의 추가, 제거, 위치 변경, 교환 등의 기능을 제공합니다.
- * [EN] As a foundational structure for Scene, it hierarchically manages 3D objects that can be rendered in a View. It provides functions such as adding, removing, reordering, and swapping child objects.
+ * [KO] 자식 객체의 추가, 제거, 인덱스 변경 및 정렬 기능을 제공합니다.
+ * [EN] Provides functions for adding, removing, reindexing, and sorting child objects.
  *
  * ::: warning
- * [KO] 이 클래스는 시스템 내부적으로 사용되는 컨테이너 클래스입니다.<br/>일반적인 사용자는 직접 인스턴스를 생성할 필요가 없습니다.
- * [EN] This class is a container class used internally by the system.<br/>General users do not need to create instances directly.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Core
@@ -18,89 +18,172 @@ import BaseObject from "../../../base/BaseObject";
 declare class Object3DContainer extends BaseObject {
     #private;
     /**
-     * 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
+     * [KO] 객체의 월드 변환을 나타내는 모델 행렬입니다.
+     * [EN] Model matrix representing the world transformation of the object.
      */
     modelMatrix: mat4;
     /**
-     * Object3DContainer 생성자입니다.
+     * [KO] Object3DContainer 인스턴스를 생성합니다.
+     * [EN] Creates an Object3DContainer instance.
      */
     constructor();
     /**
-     * 현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
-     * @returns {Mesh[]} 자식 객체 배열
+     * [KO] 자식 객체 배열을 반환합니다.
+     * [EN] Returns the array of child objects.
+     *
+     * @returns
+     * [KO] 자식 Mesh 배열 (`Mesh[]`)
+     * [EN] Array of child Meshes (`Mesh[]`)
      */
     get children(): Mesh[];
     /**
-     * 자식 객체의 개수를 반환합니다.
-     * @returns {number} 자식 수
+     * [KO] 등록된 자식 객체의 개수를 반환합니다.
+     * [EN] Returns the number of registered child objects.
+     *
+     * @returns
+     * [KO] 자식 객체 개수
+     * [EN] Number of child objects
      */
     get numChildren(): number;
     /**
-     * 특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
-     * @param {Mesh} child - 확인할 자식 객체
-     * @returns {boolean} 포함 여부
+     * [KO] 지정한 객체가 현재 컨테이너의 자식인지 확인합니다.
+     * [EN] Checks whether the specified object is a child of this container.
+     *
+     * @param child -
+     * [KO] 확인할 자식 객체
+     * [EN] Child object to check
+     * @returns
+     * [KO] 포함 여부
+     * [EN] Whether the child is contained
      */
     contains(child: Mesh): boolean;
     /**
-     * 자식 Mesh를 컨테이너에 추가합니다.
-     * @param {Mesh} child - 추가할 자식 객체
-     * @returns {Mesh} 추가된 객체 또는 실패 시 null
+     * [KO] 자식 객체를 컨테이너 끝에 추가합니다.
+     * [EN] Appends a child object to the end of the container.
+     *
+     * @param child -
+     * [KO] 추가할 자식 객체
+     * [EN] Child object to add
+     * @returns
+     * [KO] 추가된 자식 객체 (실패 시 `null`)
+     * [EN] Added child object (`null` on failure)
      */
     addChild(child: Mesh): Mesh;
     /**
-     * 자식 Mesh를 특정 인덱스에 추가합니다.
-     * @param {Mesh} child - 추가할 자식 객체
-     * @param {number} index - 삽입 위치
-     * @returns {this} 현재 컨테이너
+     * [KO] 지정한 인덱스 위치에 자식 객체를 추가합니다.
+     * [EN] Inserts a child object at the specified index position.
+     *
+     * @param child -
+     * [KO] 추가할 자식 객체
+     * [EN] Child object to add
+     * @param index -
+     * [KO] 삽입할 인덱스 위치
+     * [EN] Index position to insert at
+     * @returns
+     * [KO] 현재 컨테이너 인스턴스
+     * [EN] Current container instance
      */
     addChildAt(child: Mesh, index: number): this;
     /**
-     * 지정된 인덱스의 자식 Mesh를 반환합니다.
-     * @param {number} index - 조회할 위치
-     * @returns {Mesh} 해당 위치의 자식 객체 또는 undefined
+     * [KO] 지정한 인덱스에 위치한 자식 객체를 반환합니다.
+     * [EN] Returns the child object at the specified index.
+     *
+     * @param index -
+     * [KO] 조회할 인덱스 위치
+     * [EN] Index position to retrieve
+     * @returns
+     * [KO] 해당 위치의 자식 객체 (범위 초과 시 `undefined`)
+     * [EN] Child object at the index (`undefined` if out of bounds)
      */
     getChildAt(index: number): Mesh;
     /**
-     * 특정 자식 객체의 인덱스를 반환합니다.
-     * @param {Mesh} child - 조회할 자식 객체
-     * @returns {number} 인덱스 또는 -1
+     * [KO] 지정한 자식 객체의 인덱스를 반환합니다.
+     * [EN] Returns the index of the specified child object.
+     *
+     * @param child -
+     * [KO] 인덱스를 조회할 자식 객체
+     * [EN] Child object to find the index of
+     * @returns
+     * [KO] 자식 객체의 인덱스 (존재하지 않으면 `-1`)
+     * [EN] Index of the child object (`-1` if not found)
      */
     getChildIndex(child: Mesh): number;
     /**
-     * 자식 객체의 위치를 변경합니다.
-     * @param {Mesh} child - 대상 자식 객체
-     * @param {number} index - 새 인덱스
+     * [KO] 자식 객체의 인덱스 위치를 변경합니다.
+     * [EN] Changes the index position of a child object.
+     *
+     * @param child -
+     * [KO] 위치를 변경할 자식 객체
+     * [EN] Child object to reposition
+     * @param index -
+     * [KO] 새로 지정할 인덱스
+     * [EN] New index to assign
      */
     setChildIndex(child: Mesh, index: number): void;
     /**
-     * 두 자식 객체의 위치를 서로 바꿉니다.
-     * @param {Mesh} child1 - 첫 번째 객체
-     * @param {Mesh} child2 - 두 번째 객체
+     * [KO] 두 자식 객체의 배열 내 순서(인덱스)를 서로 맞바꿉니다.
+     * [EN] Swaps the order (indices) of two child objects within the container.
+     *
+     * @param child1 -
+     * [KO] 첫 번째 자식 객체
+     * [EN] First child object
+     * @param child2 -
+     * [KO] 두 번째 자식 객체
+     * [EN] Second child object
      */
     swapChildren(child1: Mesh, child2: Mesh): void;
     /**
-     * 두 인덱스의 자식 객체 위치를 서로 바꿉니다.
-     * @param {number} index1 - 첫 번째 인덱스
-     * @param {number} index2 - 두 번째 인덱스
+     * [KO] 지정된 두 인덱스에 있는 자식 객체들의 위치를 서로 맞바꿉니다.
+     * [EN] Swaps the child objects at the two specified indices.
+     *
+     * @param index1 -
+     * [KO] 첫 번째 인덱스
+     * [EN] First index
+     * @param index2 -
+     * [KO] 두 번째 인덱스
+     * [EN] Second index
      */
     swapChildrenAt(index1: number, index2: number): void;
     /**
-     * 특정 자식 객체를 제거합니다.
-     * @param {Mesh} child - 제거할 자식 객체
-     * @returns {Mesh} 제거된 객체
+     * [KO] 지정한 자식 객체를 컨테이너에서 제거합니다.
+     * [EN] Removes the specified child object from the container.
+     *
+     * @param child -
+     * [KO] 제거할 자식 객체
+     * [EN] Child object to remove
+     * @returns
+     * [KO] 제거된 자식 객체
+     * [EN] Removed child object
      */
     removeChild(child: Mesh): Mesh;
     /**
-     * 지정된 인덱스의 자식 객체를 제거합니다.
-     * @param {number} index - 제거할 위치
-     * @returns {Mesh} 제거된 객체
+     * [KO] 지정한 인덱스의 자식 객체를 컨테이너에서 제거합니다.
+     * [EN] Removes the child object at the specified index from the container.
+     *
+     * @param index -
+     * [KO] 제거할 자식 객체의 인덱스
+     * [EN] Index of the child object to remove
+     * @returns
+     * [KO] 제거된 자식 객체
+     * [EN] Removed child object
+     * @throws
+     * [KO] 해당 인덱스에 자식 객체가 존재하지 않을 경우 Error 발생
+     * [EN] Throws Error if no child exists at the provided index
      */
     removeChildAt(index: number): Mesh;
     /**
-     * 모든 자식 객체를 제거합니다.
-     * @returns {this} 현재 컨테이너
+     * [KO] 컨테이너의 모든 자식 객체를 제거합니다.
+     * [EN] Removes all child objects from the container.
+     *
+     * @returns
+     * [KO] 현재 컨테이너 인스턴스
+     * [EN] Current container instance
      */
     removeAllChildren(): this;
+    /**
+     * [KO] 컨테이너 내 모든 자식 객체를 파괴하고 컨테이너에서 제거합니다.
+     * [EN] Destroys all child objects in the container and removes them.
+     */
     destroy(): void;
 }
 export default Object3DContainer;

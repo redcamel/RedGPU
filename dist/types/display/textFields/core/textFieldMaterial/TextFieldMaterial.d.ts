@@ -3,13 +3,15 @@ import ABitmapBaseMaterial from "../../../../material/core/ABitmapBaseMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 /**
- * [KO] 텍스트 필드 머티리얼 인터페이스
- * [EN] Text field material interface
+ * [KO] 텍스트 필드 머티리얼의 텍스처 및 샘플러 속성을 정의하는 인터페이스입니다.
+ * [EN] Interface defining texture and sampler properties for a text field material.
+ *
+ * @category Material
  */
 interface TextFieldMaterial {
     /**
-     * [KO] 디퓨즈 텍스처 (텍스트 필드 비트맵 텍스처)
-     * [EN] Diffuse texture (text field bitmap texture)
+     * [KO] 텍스트 비트맵 디퓨즈 텍스처
+     * [EN] Text bitmap diffuse texture
      */
     diffuseTexture: BitmapTexture;
     /**
@@ -19,15 +21,12 @@ interface TextFieldMaterial {
     diffuseTextureSampler: Sampler;
 }
 /**
- * [KO] 텍스트 필드 렌더링에 사용되는 머티리얼 클래스입니다.
- * [EN] Material class used for rendering text fields.
- *
- * [KO] `ABitmapBaseMaterial`을 확장하며, 텍스처와 샘플러를 기반으로 GPU 렌더링 정보를 초기화합니다.
- * [EN] Extends `ABitmapBaseMaterial` and initializes GPU rendering info based on a texture and a sampler.
+ * [KO] 텍스트 필드 내부에서 비트맵 텍스처 렌더링을 위해 자동으로 생성되는 전용 머티리얼 클래스입니다.
+ * [EN] Dedicated material class automatically created inside a text field for bitmap texture rendering.
  *
  * ::: warning
- * [KO] 시스템 전용 클래스입니다. 일반 사용자가 직접 인스턴스를 생성하여 활용하는 것은 권장되지 않습니다.
- * [EN] System-only class. It is not recommended for general users to instantiate and use it directly.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Material
@@ -35,17 +34,17 @@ interface TextFieldMaterial {
 declare class TextFieldMaterial extends ABitmapBaseMaterial {
     /**
      * [KO] TextFieldMaterial 인스턴스를 생성합니다.
-     * [EN] Creates a new TextFieldMaterial instance.
+     * [EN] Creates a TextFieldMaterial instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 렌더링 컨텍스트
-     * [EN] RedGPU rendering context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param diffuseTexture -
-     * [KO] 텍스트 필드에 사용할 비트맵 텍스처 (선택 사항)
-     * [EN] Bitmap texture to use for the text field (optional)
+     * [KO] 텍스트 필드에 적용할 비트맵 텍스처 (선택)
+     * [EN] Bitmap texture to apply to the text field (optional)
      * @param name -
-     * [KO] 머티리얼의 이름 (선택 사항)
-     * [EN] Name of the material (optional)
+     * [KO] 머티리얼 이름 (선택)
+     * [EN] Material name (optional)
      */
     constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string);
 }

@@ -1,30 +1,27 @@
 /**
- * [KO] 주어진 값이 지정된 범위 내의 숫자인지 검증합니다.
- * [EN] Validates if the given value is a number within the specified range.
+ * [KO] 값이 [minRange, maxRange] 범위 내의 숫자인지 검증하며, 실패 시 예외를 발생시킵니다.
+ * [EN] Validates that the value is a number within [minRange, maxRange] and throws an exception on failure.
  *
- * [KO] 값이 지정된 최소/최대값 범위를 벗어나거나 숫자가 아니면 예외를 발생시킵니다.
- * [EN] Throws an exception if the value is out of range or not a number.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * RedGPU.RuntimeChecker.validateNumberRange(50, 0, 100);
  * ```
  *
  * @param value -
  * [KO] 검증할 숫자 값
- * [EN] Value to validate
+ * [EN] Numeric value to validate
  * @param minRange -
- * [KO] 허용되는 최소값 (기본값: -Number.MAX_VALUE)
+ * [KO] 허용 최소값 (기본값: -Number.MAX_VALUE)
  * [EN] Minimum allowed value (default: -Number.MAX_VALUE)
  * @param maxRange -
- * [KO] 허용되는 최대값 (기본값: Number.MAX_VALUE)
+ * [KO] 허용 최대값 (기본값: Number.MAX_VALUE)
  * [EN] Maximum allowed value (default: Number.MAX_VALUE)
  * @returns
  * [KO] 범위 내의 숫자이면 true
- * [EN] True if the value is a number within range
+ * [EN] True if the value is within range
  * @throws
- * [KO] 입력값이 숫자가 아니거나 범위를 벗어날 경우 Error 발생
- * [EN] Throws Error if inputs are not numbers or the value is out of range
+ * [KO] 인자가 숫자가 아니거나 NaN, 또는 값이 범위를 벗어난 경우 Error 발생
+ * [EN] Throws Error if any argument is not a number or NaN, or the value is out of range
  * @category Validation
  */
 declare const validateNumberRange: (value: number, minRange?: number, maxRange?: number) => boolean;

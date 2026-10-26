@@ -44,7 +44,8 @@ const flowGraph = `
 
 # 시작하기
 
-RedGPU는 차세대 웹 그래픽 표준인 **WebGPU** 를 기반으로 설계된 고성능 3D 엔진입니다. 강력한 **컴퓨트 셰이더**(Compute Shader) 활용과 낮은 오버헤드를 통해 웹 환경에서 네이티브 수준의 몰입형 그래픽 경험을 제공합니다.
+RedGPU는 차세대 웹 그래픽 표준인 **WebGPU** 를 기반으로 설계된 고성능 3D 엔진입니다. 강력한 **컴퓨트 셰이더**(Compute Shader) 활용과 낮은 오버헤드를 통해 웹 환경에서 네이티브
+수준의 몰입형 그래픽 경험을 제공합니다.
 
 이 가이드는 RedGPU를 사용하여 첫 번째 3D 애플리케이션을 구축하는 과정을 단계별로 안내합니다.
 
@@ -58,7 +59,7 @@ WebGPU는 최신 기술이므로 시작하기 전에 아래 실행 환경을 확
 
 ## 2. 엔진 도입
 
-RedGPU는 별도의 복잡한 설치 과정 없이, ES Module(ESM)을 통해 즉시 프로젝트에 통합할 수 있습니다.
+RedGPU는 별도의 복잡한 설치 과정 없이, ES Module (ESM)을 통해 즉시 프로젝트에 통합할 수 있습니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -163,9 +164,9 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const scene = new RedGPU.Display.Scene();
-const camera = new RedGPU.Camera.PerspectiveCamera();
+const camera = new RedGPU.Camera.PerspectiveCamera ();
         camera.z = -5;
-camera.lookAt(0,0,0)
+camera.lookAt (0,0,0)
 
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
         const material = new RedGPU.Material.ColorMaterial(redGPUContext, "#00CC99");
@@ -204,16 +205,25 @@ RedGPU의 주요 클래스 관계와 애플리케이션 생명 주기를 도식�
 
 ### 주요 구성 요소
 
-| 클래스 | 역할 정의 |
-| :--- | :--- |
-| **`RedGPU.init`** | WebGPU 디바이스 권한을 요청하고 엔진의 핵심 컨텍스트를 생성합니다. |
-| **`RedGPU.Renderer`** | 등록된 뷰들을 GPU 하드웨어에 그리는 렌더링 루프를 관리합니다. |
-| **`RedGPU.Display.Scene`** | 메시, 조명 등 3D 객체들이 배치되는 가상 공간의 루트 컨테이너입니다. |
+| 클래스                      | 역할 정의                                                            |
+|:----------------------------|:---------------------------------------------------------------------|
+| **`RedGPU.init`**           | WebGPU 디바이스 권한을 요청하고 엔진의 핵심 컨텍스트를 생성합니다.   |
+| **`RedGPU.Renderer`**       | 등록된 뷰들을 GPU 하드웨어에 그리는 렌더링 루프를 관리합니다.        |
+| **`RedGPU.Display.Scene`**  | 메시, 조명 등 3D 객체들이 배치되는 가상 공간의 루트 컨테이너입니다.  |
 | **`RedGPU.Display.View3D`** | 특정 씬을 어떤 시점(Camera)에서 화면에 출력할지 결정하는 단위입니다. |
 
 <ClientOnly>
   <MermaidResponsive :definition="systemGraph" />
 </ClientOnly>
+
+---
+
+## 관련 예제
+
+- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
+- [Hello World 2D](/RedGPU/examples/2d/helloWorld2D/)
+
+---
 
 ## 다음 학습 추천
 
@@ -224,5 +234,5 @@ RedGPU의 주요 클래스 관계와 애플리케이션 생명 주기를 도식�
 - **[메시](../basic-objects/mesh.md)** : 지오메트리와 머티리얼을 결합하여 물체를 만들고 제어하는 방법.
 - **[조명과 그림자](../lighting-and-shadow/phong-material.md)** : 빛에 반응하는 사실적인 질감과 그림자 표현.
 - **[환경 설정](../environment/skybox.md)** : 스카이박스 및 IBL 설정 방법.
-- **[확장 객체](../assets/model-loading/index.md)** : 외부 3D 모델 및 스프라이트 사용 방법.
+- **[확장 객체](../extended-objects/model-loading/index.md)** : 외부 3D 모델 및 스프라이트 사용 방법.
 

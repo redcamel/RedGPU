@@ -1,7 +1,7 @@
-import { Function } from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
+import DrawBufferManager, { DrawCommandSlot } from "../../renderer/core/DrawBufferManager";
 import AABB from "../../bound/AABB";
 import OBB from "../../bound/OBB";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
@@ -10,9 +10,25 @@ import LODManager from "./core/LODManager";
 import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
 interface Mesh {
+    /**
+     * [KO] 그림자 수신 여부
+     * [EN] Whether to receive shadows
+     */
     receiveShadow: boolean;
+    /**
+     * [KO] TAA 지터(Jitter) 비활성화 여부
+     * [EN] Whether to disable TAA jitter
+     */
     disableJitter: boolean;
+    /**
+     * [KO] 변위 텍스처(Displacement Texture) 사용 여부
+     * [EN] Whether to use displacement texture
+     */
     useDisplacementTexture: boolean;
+    /**
+     * [KO] Mesh 인스턴스 여부 판별 식별자
+     * [EN] Identifier to determine if it is a Mesh instance
+     */
     isInstanceofMesh: boolean;
 }
 /**
@@ -25,17 +41,14 @@ interface Mesh {
  * [KO] 위치, 회전, 스케일, 피벗, 계층 구조, 그림자, 디버깅, 이벤트 등 다양한 기능을 지원합니다.
  * [EN] Supports various functions such as position, rotation, scale, pivot, hierarchy, shadow, debugging, and events.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
  * scene.addChild(mesh);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/" style="width:100%; height:500px;"></iframe>
  *
- * @see
- * [KO] 아래는 Mesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of Mesh.
  * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
  * @see [Mesh Child Methods example](/RedGPU/examples/3d/mesh/childMethod/)
@@ -68,6 +81,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
      * [EN] Creates an instance of Mesh.
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
@@ -85,335 +99,355 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 글로벌 버퍼 슬롯 인덱스를 반환합니다.
      * [EN] Returns the global buffer slot index.
+     *
+     * @returns
+     * [KO] 글로벌 버텍스 슬롯 인덱스
+     * [EN] Global vertex slot index
      */
     get globalVertexSlotIndex(): number;
     /**
+     * [KO] 드로우 커맨드 슬롯을 반환합니다.
+     * [EN] Returns the draw command slot.
+     *
+     * @returns
+     * [KO] DrawCommandSlot 인스턴스 또는 `null`
+     * [EN] DrawCommandSlot instance or `null`
+     */
+    get drawCommandSlot(): DrawCommandSlot | null;
+    /**
+     * [KO] 드로우 버퍼 매니저를 반환합니다.
+     * [EN] Returns the draw buffer manager.
+     *
+     * @returns
+     * [KO] DrawBufferManager 인스턴스 또는 `null`
+     * [EN] DrawBufferManager instance or `null`
+     */
+    get drawBufferManager(): DrawBufferManager | null;
+    /**
      * [KO] LOD(Level of Detail) 매니저를 반환합니다.
      * [EN] Returns the LOD (Level of Detail) manager.
+     *
      * @returns
      * [KO] LODManager 인스턴스
      * [EN] LODManager instance
      */
     get LODManager(): LODManager;
     /**
-     * [KO] 디버거 활성화 여부를 반환합니다.
-     * [EN] Returns whether the debugger is enabled.
+     * [KO] 디버거 활성화 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether the debugger is enabled.
+     *
+     * @returns
+     * [KO] 디버거 활성화 여부
+     * [EN] Whether the debugger is enabled
      */
     get enableDebugger(): boolean;
-    /**
-     * [KO] 디버거 활성화 여부를 설정합니다.
-     * [EN] Sets whether the debugger is enabled.
-     * @param value -
-     * [KO] 활성화 여부
-     * [EN] Whether to enable
-     */
     set enableDebugger(value: boolean);
     /**
      * [KO] 디버그 메시 객체를 반환합니다.
      * [EN] Returns the debug mesh object.
+     *
+     * @returns
+     * [KO] DrawDebuggerMesh 인스턴스
+     * [EN] DrawDebuggerMesh instance
      */
     get drawDebugger(): DrawDebuggerMesh;
     _material: any;
     /**
-     * [KO] 머티리얼을 반환합니다.
-     * [EN] Returns the material.
+     * [KO] 머티리얼을 가져오거나 설정합니다.
+     * [EN] Gets or sets the material.
+     *
+     * @returns
+     * [KO] 설정된 머티리얼 인스턴스
+     * [EN] Configured material instance
      */
     get material(): any;
-    /**
-     * [KO] 머티리얼을 설정합니다.
-     * [EN] Sets the material.
-     * @param value -
-     * [KO] 설정할 머티리얼
-     * [EN] Material to set
-     */
     set material(value: any);
     _geometry: Geometry | Primitive;
     /**
-     * [KO] 지오메트리를 반환합니다.
-     * [EN] Returns the geometry.
+     * [KO] 지오메트리를 가져오거나 설정합니다.
+     * [EN] Gets or sets the geometry.
+     *
+     * @returns
+     * [KO] Geometry 또는 Primitive 인스턴스
+     * [EN] Geometry or Primitive instance
      */
     get geometry(): Geometry | Primitive;
-    /**
-     * [KO] 지오메트리를 설정합니다.
-     * [EN] Sets the geometry.
-     * @param value -
-     * [KO] 설정할 지오메트리
-     * [EN] Geometry to set
-     */
     set geometry(value: Geometry | Primitive);
     /**
-     * [KO] 메시의 투명도를 반환합니다. (0~1)
-     * [EN] Returns the opacity of the mesh. (0~1)
+     * [KO] 메시의 투명도를 가져오거나 설정합니다 (0~1).
+     * [EN] Gets or sets the opacity of the mesh (0~1).
+     *
+     * @returns
+     * [KO] 투명도 값 (0~1)
+     * [EN] Opacity value (0~1)
      */
     get opacity(): number;
-    /**
-     * [KO] 메시의 투명도를 설정합니다. (0~1)
-     * [EN] Sets the opacity of the mesh. (0~1)
-     * @param value -
-     * [KO] 투명도 값
-     * [EN] Opacity value
-     */
     set opacity(value: number);
     /**
-     * [KO] 프러스텀 컬링 무시 여부를 반환합니다.
-     * [EN] Returns whether to ignore frustum culling.
+     * [KO] 프러스텀 컬링 무시 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether to ignore frustum culling.
+     *
+     * @returns
+     * [KO] 프러스텀 컬링 무시 여부
+     * [EN] Whether frustum culling is ignored
      */
     get ignoreFrustumCulling(): boolean;
-    /**
-     * [KO] 프러스텀 컬링 무시 여부를 설정합니다.
-     * [EN] Sets whether to ignore frustum culling.
-     * @param value -
-     * [KO] 무시 여부
-     * [EN] Whether to ignore
-     */
     set ignoreFrustumCulling(value: boolean);
     /**
-     * [KO] 투영 면적 Culling 사용 여부를 반환합니다.
-     * [EN] Returns whether to use screen space size culling.
+     * [KO] 투영 면적 컬링(Screen Space Size Culling) 사용 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether to use screen space size culling.
+     *
+     * @returns
+     * [KO] 투영 면적 컬링 사용 여부
+     * [EN] Whether screen space size culling is used
      */
     get useScreenSpaceSizeCulling(): boolean;
-    /**
-     * [KO] 투영 면적 Culling 사용 여부를 설정합니다.
-     * [EN] Sets whether to use screen space size culling.
-     * @param value - [KO] 사용 여부 [EN] Whether to use
-     */
     set useScreenSpaceSizeCulling(value: boolean);
     /**
-     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 반환합니다.
-     * [EN] Returns the minimum size ratio threshold for screen space size culling.
+     * [KO] 투영 면적 컬링의 화면상 크기 비율 임계값을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum size ratio threshold for screen space size culling.
+     *
+     * @returns
+     * [KO] 화면상 크기 비율 임계값
+     * [EN] Screen space size ratio threshold
      */
     get minScreenSpaceSize(): number;
-    /**
-     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 설정합니다.
-     * [EN] Sets the minimum size ratio threshold for screen space size culling.
-     * @param value - [KO] 크기 비율 임계값 [EN] Size ratio threshold
-     */
     set minScreenSpaceSize(value: number);
     /**
      * [KO] 피킹 ID를 반환합니다.
      * [EN] Returns the picking ID.
+     *
+     * @returns
+     * [KO] 피킹 식별자 값
+     * [EN] Picking identifier value
      */
     get pickingId(): number;
     /**
-     * [KO] 등록된 이벤트들을 반환합니다.
-     * [EN] Returns the registered events.
+     * [KO] 등록된 이벤트 맵 객체를 반환합니다.
+     * [EN] Returns the registered event map object.
+     *
+     * @returns
+     * [KO] 등록된 이벤트 객체
+     * [EN] Registered events object
      */
     get events(): any;
     /**
-     * [KO] 버텍스 상태 버퍼 레이아웃을 반환합니다.
-     * [EN] Returns the vertex state buffer layouts.
+     * [KO] 버텍스 상태 버퍼 레이아웃 배열을 반환합니다.
+     * [EN] Returns the array of vertex state buffer layouts.
+     *
+     * @returns
+     * [KO] GPUVertexBufferLayout 배열
+     * [EN] Array of GPUVertexBufferLayout
      */
     get vertexStateBuffers(): GPUVertexBufferLayout[];
     /**
-     * [KO] 설정된 부모 객체를 반환합니다.
-     * [EN] Returns the set parent object.
+     * [KO] 설정된 부모 컨테이너 객체를 가져오거나 설정합니다.
+     * [EN] Gets or sets the parent container object.
+     *
+     * @returns
+     * [KO] 부모 Object3DContainer 인스턴스
+     * [EN] Parent Object3DContainer instance
      */
     get parent(): Object3DContainer;
-    /**
-     * [KO] 부모 객체를 설정합니다.
-     * [EN] Sets the parent object.
-     * @param value -
-     * [KO] 부모 컨테이너
-     * [EN] Parent container
-     */
     set parent(value: Object3DContainer);
     /**
-     * [KO] 피벗 X 좌표를 반환합니다.
-     * [EN] Returns the pivot X coordinate.
+     * [KO] 물(Lake)과의 실시간 파동 인터랙션 활성화 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether real-time wave interaction with water (Lake) is enabled.
+     *
+     * @returns
+     * [KO] 물 파동 인터랙션 활성화 여부
+     * [EN] Whether water wave interaction is enabled
+     */
+    get enableWaterInteraction(): boolean;
+    set enableWaterInteraction(value: boolean);
+    /**
+     * [KO] 물 파동 생성 강도 배율을 가져오거나 설정합니다 (기본값: 1.0).
+     * [EN] Gets or sets the wave generation strength multiplier (default: 1.0).
+     *
+     * @returns
+     * [KO] 물 파동 생성 강도 배율
+     * [EN] Water wave generation strength multiplier
+     */
+    get waterWaveStrength(): number;
+    set waterWaveStrength(value: number);
+    /**
+     * [KO] 피벗 X 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the pivot X coordinate.
+     *
+     * @returns
+     * [KO] 피벗 X 좌표
+     * [EN] Pivot X coordinate
      */
     get pivotX(): number;
-    /**
-     * [KO] 피벗 X 좌표를 설정합니다.
-     * [EN] Sets the pivot X coordinate.
-     * @param value -
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     set pivotX(value: number);
     /**
-     * [KO] 피벗 Y 좌표를 반환합니다.
-     * [EN] Returns the pivot Y coordinate.
+     * [KO] 피벗 Y 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the pivot Y coordinate.
+     *
+     * @returns
+     * [KO] 피벗 Y 좌표
+     * [EN] Pivot Y coordinate
      */
     get pivotY(): number;
-    /**
-     * [KO] 피벗 Y 좌표를 설정합니다.
-     * [EN] Sets the pivot Y coordinate.
-     * @param value -
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     set pivotY(value: number);
     /**
-     * [KO] 피벗 Z 좌표를 반환합니다.
-     * [EN] Returns the pivot Z coordinate.
+     * [KO] 피벗 Z 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the pivot Z coordinate.
+     *
+     * @returns
+     * [KO] 피벗 Z 좌표
+     * [EN] Pivot Z coordinate
      */
     get pivotZ(): number;
-    /**
-     * [KO] 피벗 Z 좌표를 설정합니다.
-     * [EN] Sets the pivot Z coordinate.
-     * @param value -
-     * [KO] Z 좌표
-     * [EN] Z coordinate
-     */
     set pivotZ(value: number);
     /**
-     * [KO] X 위치 좌표를 반환합니다.
-     * [EN] Returns the X position coordinate.
+     * [KO] X 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the X position coordinate.
+     *
+     * @returns
+     * [KO] X 위치 좌표
+     * [EN] X position coordinate
      */
     get x(): number;
-    /**
-     * [KO] X 위치 좌표를 설정합니다.
-     * [EN] Sets the X position coordinate.
-     * @param value -
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     set x(value: number);
     /**
-     * [KO] Y 위치 좌표를 반환합니다.
-     * [EN] Returns the Y position coordinate.
+     * [KO] Y 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Y position coordinate.
+     *
+     * @returns
+     * [KO] Y 위치 좌표
+     * [EN] Y position coordinate
      */
     get y(): number;
-    /**
-     * [KO] Y 위치 좌표를 설정합니다.
-     * [EN] Sets the Y position coordinate.
-     * @param value -
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     set y(value: number);
     /**
-     * [KO] Z 위치 좌표를 반환합니다.
-     * [EN] Returns the Z position coordinate.
+     * [KO] Z 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Z position coordinate.
+     *
+     * @returns
+     * [KO] Z 위치 좌표
+     * [EN] Z position coordinate
      */
     get z(): number;
-    /**
-     * [KO] Z 위치 좌표를 설정합니다.
-     * [EN] Sets the Z position coordinate.
-     * @param value -
-     * [KO] Z 좌표
-     * [EN] Z coordinate
-     */
     set z(value: number);
     /**
      * [KO] 현재 위치를 반환합니다. [x, y, z]
      * [EN] Returns the current position. [x, y, z]
+     *
      * @returns
      * [KO] 위치 배열
      * [EN] Position array
      */
     get position(): Float32Array;
     /**
-     * [KO] X축 스케일을 반환합니다.
-     * [EN] Returns the X-axis scale.
+     * [KO] X축 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the X-axis scale.
+     *
+     * @returns
+     * [KO] X축 스케일 값
+     * [EN] X-axis scale value
      */
     get scaleX(): number;
-    /**
-     * [KO] X축 스케일을 설정합니다.
-     * [EN] Sets the X-axis scale.
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
     set scaleX(value: number);
     /**
-     * [KO] Y축 스케일을 반환합니다.
-     * [EN] Returns the Y-axis scale.
+     * [KO] Y축 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the Y-axis scale.
+     *
+     * @returns
+     * [KO] Y축 스케일 값
+     * [EN] Y-axis scale value
      */
     get scaleY(): number;
-    /**
-     * [KO] Y축 스케일을 설정합니다.
-     * [EN] Sets the Y-axis scale.
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
     set scaleY(value: number);
     /**
-     * [KO] Z축 스케일을 반환합니다.
-     * [EN] Returns the Z-axis scale.
+     * [KO] Z축 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the Z-axis scale.
+     *
+     * @returns
+     * [KO] Z축 스케일 값
+     * [EN] Z-axis scale value
      */
     get scaleZ(): number;
-    /**
-     * [KO] Z축 스케일을 설정합니다.
-     * [EN] Sets the Z-axis scale.
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
     set scaleZ(value: number);
     /**
      * [KO] 현재 스케일을 반환합니다. [x, y, z]
      * [EN] Returns the current scale. [x, y, z]
+     *
+     * @returns
+     * [KO] 스케일 배열
+     * [EN] Scale array
      */
     get scale(): Float32Array;
     /**
-     * [KO] X축 회전값을 반환합니다. (도)
-     * [EN] Returns the X-axis rotation value. (degrees)
+     * [KO] X축 회전값을 가져오거나 설정합니다 (도).
+     * [EN] Gets or sets the X-axis rotation value (degrees).
+     *
+     * @returns
+     * [KO] X축 회전값 (도)
+     * [EN] X-axis rotation value (degrees)
      */
     get rotationX(): number;
-    /**
-     * [KO] X축 회전값을 설정합니다. (도)
-     * [EN] Sets the X-axis rotation value. (degrees)
-     * @param value -
-     * [KO] 회전값
-     * [EN] Rotation value
-     */
     set rotationX(value: number);
     /**
-     * [KO] Y축 회전값을 반환합니다. (도)
-     * [EN] Returns the Y-axis rotation value. (degrees)
+     * [KO] Y축 회전값을 가져오거나 설정합니다 (도).
+     * [EN] Gets or sets the Y-axis rotation value (degrees).
+     *
+     * @returns
+     * [KO] Y축 회전값 (도)
+     * [EN] Y-axis rotation value (degrees)
      */
     get rotationY(): number;
-    /**
-     * [KO] Y축 회전값을 설정합니다. (도)
-     * [EN] Sets the Y-axis rotation value. (degrees)
-     * @param value -
-     * [KO] 회전값
-     * [EN] Rotation value
-     */
     set rotationY(value: number);
     /**
-     * [KO] Z축 회전값을 반환합니다. (도)
-     * [EN] Returns the Z-axis rotation value. (degrees)
+     * [KO] Z축 회전값을 가져오거나 설정합니다 (도).
+     * [EN] Gets or sets the Z-axis rotation value (degrees).
+     *
+     * @returns
+     * [KO] Z축 회전값 (도)
+     * [EN] Z-axis rotation value (degrees)
      */
     get rotationZ(): number;
-    /**
-     * [KO] Z축 회전값을 설정합니다. (도)
-     * [EN] Sets the Z-axis rotation value. (degrees)
-     * @param value -
-     * [KO] 회전값
-     * [EN] Rotation value
-     */
     set rotationZ(value: number);
     /**
      * [KO] 현재 회전값을 반환합니다. [x, y, z] (도)
      * [EN] Returns the current rotation values. [x, y, z] (degrees)
+     *
+     * @returns
+     * [KO] 회전값 배열 (도)
+     * [EN] Rotation values array (degrees)
      */
     get rotation(): Float32Array;
     /**
      * [KO] OBB(Oriented Bounding Box) 정보를 반환합니다.
      * [EN] Returns the OBB (Oriented Bounding Box) information.
+     *
+     * @returns
+     * [KO] 계산된 OBB 인스턴스
+     * [EN] Calculated OBB instance
      */
     get boundingOBB(): OBB;
     /**
-     * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
-     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information.
+     * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다. (Zero-GC 인플레이스 재사용)
+     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information. (Zero-GC in-place reuse)
+     *
+     * @returns
+     * [KO] 계산된 AABB 인스턴스
+     * [EN] Calculated AABB instance
      */
     get boundingAABB(): AABB;
     /**
      * [KO] 자식 객체들을 포함한 통합 AABB 정보를 반환합니다.
      * [EN] Returns the combined AABB information including child objects.
+     *
+     * @returns
+     * [KO] 통합된 AABB 인스턴스
+     * [EN] Combined AABB instance
      */
     get combinedBoundingAABB(): AABB;
     /**
-     * [KO] 리소스를 해제합니다.
-     * [EN] Disposes of the resources.
-     */
-    dispose(): void;
-    /**
      * [KO] 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
      * [EN] Sets the debugger visibility for all objects in the hierarchy.
+     *
      * @param enableDebugger -
      * [KO] 활성화 여부 (기본값: false)
      * [EN] Whether to enable (default: false)
@@ -422,6 +456,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 하위 계층의 모든 객체에 그림자 캐스팅 여부를 설정합니다.
      * [EN] Sets shadow casting for all objects in the hierarchy.
+     *
      * @param value -
      * [KO] 캐스팅 여부 (기본값: false)
      * [EN] Whether to cast (default: false)
@@ -430,6 +465,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 하위 계층의 모든 객체에 그림자 수신 여부를 설정합니다.
      * [EN] Sets shadow receiving for all objects in the hierarchy.
+     *
      * @param value -
      * [KO] 수신 여부 (기본값: false)
      * [EN] Whether to receive (default: false)
@@ -438,6 +474,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 하위 계층의 모든 객체에 프러스텀 컬링 무시 여부를 설정합니다.
      * [EN] Sets whether to ignore frustum culling for all objects in the hierarchy.
+     *
      * @param value -
      * [KO] 무시 여부 (기본값: false)
      * [EN] Whether to ignore (default: false)
@@ -446,6 +483,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 부모 계층을 고려한 통합 투명도를 계산하여 반환합니다.
      * [EN] Calculates and returns the combined opacity considering the parent hierarchy.
+     *
      * @returns
      * [KO] 통합 투명도 값
      * [EN] Combined opacity value
@@ -454,6 +492,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 이벤트 리스너를 추가합니다.
      * [EN] Adds an event listener.
+     *
      * @param eventName -
      * [KO] 이벤트 이름
      * [EN] Event name
@@ -465,6 +504,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 메시가 특정 좌표를 바라보도록 회전시킵니다.
      * [EN] Rotates the mesh to look at a specific coordinate.
+     *
      * @param targetX -
      * [KO] 대상 X 좌표 또는 [x, y, z] 배열
      * [EN] Target X coordinate or [x, y, z] array
@@ -479,6 +519,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 스케일을 설정합니다.
      * [EN] Sets the scale.
+     *
      * @param x -
      * [KO] X축 스케일
      * [EN] X-axis scale
@@ -493,6 +534,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 위치를 설정합니다.
      * [EN] Sets the position.
+     *
      * @param x -
      * [KO] X 좌표
      * [EN] X coordinate
@@ -507,6 +549,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 회전값을 설정합니다. (도)
      * [EN] Sets the rotation values. (degrees)
+     *
      * @param rotationX -
      * [KO] X축 회전
      * [EN] X-axis rotation
@@ -521,6 +564,7 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 메시를 복제합니다.
      * [EN] Clones the mesh.
+     *
      * @experimental
      * @returns
      * [KO] 복제된 Mesh 인스턴스
@@ -530,12 +574,37 @@ declare class Mesh extends MeshBase {
     /**
      * [KO] 메시를 렌더링합니다.
      * [EN] Renders the mesh.
+     *
      * @param renderViewStateData -
      * [KO] 렌더 상태 데이터
      * [EN] Render view state data
      */
     render(renderViewStateData: RenderViewStateData): void;
+    /**
+     * [KO] 메시의 GPU 렌더링 정보(VertexGPURenderInfo)를 초기화하고 파이프라인을 갱신합니다.
+     * [EN] Initializes the mesh's GPU render info (VertexGPURenderInfo) and updates the pipeline.
+     */
     initGPURenderInfos(): void;
+    /**
+     * [KO] 기본 메시 버텍스 셰이더 모듈과 유니폼 바인드 그룹을 생성하고 반환합니다.
+     * [EN] Creates and returns the basic mesh vertex shader module and uniform bind group.
+     *
+     * @param VERTEX_SHADER_MODULE_NAME -
+     * [KO] 버텍스 셰이더 모듈 이름
+     * [EN] Vertex shader module name
+     * @param SHADER_INFO -
+     * [KO] 파싱된 WGSL 셰이더 정보
+     * [EN] Parsed WGSL shader info
+     * @param UNIFORM_STRUCT_BASIC -
+     * [KO] 버텍스 유니폼 구조체 정보
+     * [EN] Vertex uniform struct info
+     * @param vertexModuleSource -
+     * [KO] 버텍스 셰이더 WGSL 소스 코드
+     * [EN] Vertex shader WGSL source code
+     * @returns
+     * [KO] 생성된 GPUShaderModule 인스턴스
+     * [EN] Created GPUShaderModule instance
+     */
     createMeshVertexShaderModuleBASIC: (VERTEX_SHADER_MODULE_NAME: any, SHADER_INFO: any, UNIFORM_STRUCT_BASIC: any, vertexModuleSource: any) => GPUShaderModule;
     /**
      * [KO] Mesh 인스턴스를 파기하고 할당된 드로우 커맨드 슬롯, 전역 버퍼 슬롯 및 리소스를 즉시 해제합니다.

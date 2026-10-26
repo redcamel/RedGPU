@@ -1,11 +1,17 @@
 import { GLTF } from "../GLTF";
 /**
- * Parses the asset version from the given GLTF data.
- * Throws an error if the asset version is invalid or lower than the required version.
+ * [KO] GLTF 데이터의 `asset.version`을 파싱하고 2.0 이상인지 검증합니다.
+ * [EN] Parses `asset.version` of the GLTF data and validates that it is 2.0 or higher.
  *
- * @param {GLTF} gltfData - The GLTF data to parse.
- * @returns {number} - The parsed asset version.
- * @throws {Error} - If the asset version is invalid or lower than the required version.
+ * @param gltfData -
+ * [KO] 파싱할 GLTF 데이터
+ * [EN] GLTF data to parse
+ * @returns
+ * [KO] 숫자로 변환된 에셋 버전
+ * [EN] Asset version converted to a number
+ * @throws
+ * [KO] asset 또는 version이 없거나, 숫자가 아니거나, 2.0 미만인 경우
+ * [EN] If asset or version is missing, non-numeric, or lower than 2.0
  */
 declare const parseAssetVersion: (gltfData: GLTF) => number;
 export default parseAssetVersion;

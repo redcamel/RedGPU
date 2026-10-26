@@ -5,12 +5,21 @@ import createMeshVertexShaderModule from "../shader/createMeshVertexShaderModule
 import createBasePipeline from "./createBasePipeline";
 
 /**
- * Updates the dirty state of a mesh's pipeline and related data.
+ * [KO] 메시의 변경된 파이프라인 상태와 버텍스 셰이더 모듈을 갱신합니다.
+ * [EN] Updates the dirty pipeline state and vertex shader module of a mesh.
  *
- * @param {Mesh} mesh - The mesh to update.
- * @param {RenderViewStateData} renderViewStateData - The render state data used for debugging.
+ * ::: warning
+ * [KO] 이 함수는 시스템에 의해 내부적으로 호출됩니다.<br/>직접 호출하지 마십시오.
+ * [EN] This function is called internally by the system.<br/>Do not call it directly.
+ * :::
  *
-
+ * @param mesh -
+ * [KO] 파이프라인을 갱신할 대상 Mesh 인스턴스
+ * [EN] Target Mesh instance to update the pipeline for
+ * @param renderViewStateData -
+ * [KO] 현재 렌더링 뷰 상태 데이터 (선택)
+ * [EN] Current render view state data (optional)
+ * @category Core
  */
 const updateMeshDirtyPipeline = (
     mesh: Mesh,
@@ -22,7 +31,8 @@ const updateMeshDirtyPipeline = (
     mesh.dirtyTransform = true
     if (material.dirtyPipeline) material._updateFragmentState()
     const vertexShader = createMeshVertexShaderModule(mesh)
-    const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
+    // @ts-ignore
+    const vertexBindGroupLayout: GPUBindGroupLayout = mesh.customVertexBindGroupLayout || resourceManager.getGPUBindGroupLayout(
         gpuRenderInfo.vertexStructInfo.uniforms.vertexUniforms ? ResourceManager.PRESET_VERTEX_GPUBindGroupLayout :
             mesh.animationInfo.skinInfo ? ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN : ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout
     )
@@ -35,18 +45,15 @@ const updateMeshDirtyPipeline = (
     if (vertexUniformInfo) {
         const {members} = vertexUniformInfo
         for (const k in members) {
-            if (k !== 'pickingId' && k !== 'pixelSize') mesh[k] = mesh[k]
+            if (k !== 'pickingId' && k !== 'pixelSize' && k !== 'renderRatioX' && k !== 'renderRatioY' && k in mesh) mesh[k] = mesh[k]
         }
     }
 
-    // if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
-    // mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
     mesh.redGPUContext.globalVertexSSBO.updateUintData(
         mesh.globalVertexSlotIndex,
         new Uint32Array([mesh.pickingId]),
         resourceManager.GLOBAL_VERTEX_STRUCT.members.pickingId.uniformOffset / 4
     )
-    // }
     material.dirtyPipeline = false
     mesh.dirtyPipeline = false
     if (renderViewStateData) renderViewStateData.renderResults.numDirtyPipelines++

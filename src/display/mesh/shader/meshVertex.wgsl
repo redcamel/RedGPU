@@ -1,5 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include shadow.getShadowCoord;
 #redgpu_include entryPoint.mesh.entryPointShadowVertex;
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
 #redgpu_include displacement.getDisplacementPosition;
@@ -21,15 +20,6 @@ fn main(inputData: InputData) -> VertexOutput {
     // System uniforms
     let su_projection = systemUniforms.projection;
     let su_projectionViewMatrix = su_projection.projectionViewMatrix;
-    #redgpu_if disableJitter
-    {
-        let su_projectionMatrix = su_projection.noneJitterProjectionViewMatrix;
-    }
-    #redgpu_else
-    {
-        let su_projectionMatrix = su_projection.projectionMatrix;
-    }
-    #redgpu_endIf
 
     let su_cameraPosition = systemUniforms.camera.cameraPosition;
 
@@ -87,8 +77,10 @@ fn main(inputData: InputData) -> VertexOutput {
     let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
     let normalPosition = vec4<f32>(worldNormal, 0.0);
 
-    // Basic output assignments
-    output.position = su_projectionViewMatrix * position;
+    // Basic output assignments (카메라 상대적 고정밀 투영 변환)
+    let relPos = position.xyz - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    output.position = su_projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = transformedUV;
@@ -100,16 +92,11 @@ fn main(inputData: InputData) -> VertexOutput {
     output.combinedOpacity = gu_combinedOpacity;
 
     // Shadow calculation
-    #redgpu_if receiveShadow
-    {
-        output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
-        output.receiveShadow = globalVertexData.receiveShadow;
-    }
-    #redgpu_endIf
+    output.receiveShadow = globalVertexData.receiveShadow;
 
     // Motion vector calculation
     {
-      output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
+      output.currentClipPos = su_projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
       output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
     }
 

@@ -11,69 +11,76 @@ import defineCubeTexture from "../../../../defineProperty/funcs/texture/defineCu
 import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../../../defineProperty/funcs/texture/defineSampler";
 
+/**
+ * [KO] `SkyBox`의 큐브맵 배경 및 전환 효과 파라미터를 정의하는 인터페이스입니다.
+ * [EN] Interface defining cubemap background and transition effect parameters for `SkyBox`.
+ *
+ * @category SkyBox
+ */
 interface SkyBoxMaterial {
     /**
-     * [KO] 스카이박스 렌더링에 적용할 현재 큐브 텍스처
-     * [EN] Current cube texture to apply for skybox rendering
+     * [KO] 스카이박스 렌더링에 적용할 기본 큐브 텍스처
+     * [EN] Base cube texture applied to skybox rendering
      */
     texture0: CubeTexture | DirectCubeTexture;
     /**
-     * [KO] 부드러운 전환 효과 진행 시 대상이 되는 목표 큐브 텍스처
-     * [EN] Target cube texture when performing a smooth transition effect
+     * [KO] 전환 효과 진행 시 목표가 되는 대상 큐브 텍스처
+     * [EN] Target cube texture during a transition effect
      */
     transitionTexture: CubeTexture | DirectCubeTexture;
     /**
-     * [KO] 전환 애니메이션에 적용할 지형/노이즈 마스크 텍스처
-     * [EN] Terrain/noise mask texture to apply to the transition animation
+     * [KO] 전환 애니메이션에 적용할 노이즈 또는 비트맵 마스크 텍스처
+     * [EN] Noise or bitmap mask texture applied to the transition animation
      */
     transitionMask: ANoiseTexture | BitmapTexture;
     /**
-     * [KO] 스카이박스 텍스처 샘플링 필터링 설정을 제어하는 Sampler 인스턴스
-     * [EN] Sampler instance controlling the skybox texture sampling and filtering configuration
+     * [KO] 스카이박스 텍스처 샘플러 인스턴스
+     * [EN] Skybox texture sampler instance
      */
     sampler0: Sampler;
     /**
-     * [KO] 스카이박스 이미지의 블러 가우시안 필터 강도 (0.0 ~ 1.0)
-     * [EN] Gaussian blur strength of the skybox image (0.0 to 1.0)
+     * [KO] 배경 텍스처의 블러 강도 (0.0 ~ 1.0)
+     * [EN] Blur strength of the background texture (0.0 to 1.0)
      */
     blur: number;
     /**
-     * [KO] 아티스트 시각 제어용 최종 라이팅 밝기 강도 배율
-     * [EN] Final lighting brightness intensity multiplier for artistic control
+     * [KO] 시각적 라이팅 밝기 강도 배율
+     * [EN] Visual lighting brightness intensity multiplier
      */
     intensityMultiplier: number;
     /**
-     * [KO] 물리 기반 광학 시뮬레이션용 휘도값 (Nit, 기본값: 10000 Nit)
-     * [EN] Luminance value for physical optics simulation (Nit, default: 10000 Nit)
+     * [KO] 물리 기반 광학 시뮬레이션용 휘도 값 (단위: Nit, 기본값: 10000)
+     * [EN] Luminance value for physical optics simulation (unit: Nit, default: 10000)
      */
     luminance: number;
     /**
-     * [KO] 분석 완료된 HDR 텍스처의 평균 휘도
-     * [EN] The analyzed average luminance of the HDR texture
-     */
-    averageLuminance: number;
-    /**
-     * [KO] 스카이박스의 불투명도 수치 (0.0 ~ 1.0)
-     * [EN] Opacity value of the skybox (0.0 to 1.0)
+     * [KO] 스카이박스의 불투명도 (0.0 ~ 1.0)
+     * [EN] Opacity of the skybox (0.0 to 1.0)
      */
     opacity: number;
     /**
-     * [KO] 두 텍스처 간의 보간 전환 진행률 (0.0 ~ 1.0)
-     * [EN] Interpolated transition progress between the two textures (0.0 to 1.0)
+     * [KO] 두 큐브 텍스처 간의 전환 진행률 (0.0 ~ 1.0)
+     * [EN] Transition progress between the two cube textures (0.0 to 1.0)
      */
     transitionProgress: number;
 }
 
 /**
- * [KO] SkyBox 렌더링에 특화된 전용 셰이더 및 바인딩 처리를 제공하는 머티리얼 클래스입니다.
- * [EN] Material class that provides specialized shaders and binding configurations tailored for SkyBox rendering.
+ * [KO] `SkyBox` 내부에서 자동 생성되어 사용되는 전용 머티리얼 클래스입니다.
+ * [EN] Dedicated material class automatically created and used internally by `SkyBox`.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
  * @category SkyBox
  */
 class SkyBoxMaterial extends ABitmapBaseMaterial {
     /**
      * [KO] SkyBoxMaterial 인스턴스를 생성합니다.
-     * [EN] Creates an instance of SkyBoxMaterial.
+     * [EN] Creates a SkyBoxMaterial instance.
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance

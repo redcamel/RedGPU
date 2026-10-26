@@ -7,40 +7,25 @@ import AABB from "../bound/AABB";
 import calculateGeometryAABB from "../bound/math/calculateGeometryAABB";
 
 /**
- * [KO] 정점 버퍼(VertexBuffer)와 인덱스 버퍼(IndexBuffer)를 관리하며, GPU 렌더링에 필요한 정보를 제공하는 클래스입니다.
- * [EN] A class that manages vertex buffers (VertexBuffer) and index buffers (IndexBuffer) and provides information required for GPU rendering.
+ * [KO] 정점 버퍼(`VertexBuffer`)와 인덱스 버퍼(`IndexBuffer`)를 결합하여 GPU 렌더링 레이아웃 및 AABB 경계 상자 정보를 관리하는 지오메트리 클래스입니다.
+ * [EN] Geometry class that combines a vertex buffer (`VertexBuffer`) and an index buffer (`IndexBuffer`) to manage GPU rendering layout and AABB bounding box information.
  *
- * [KO] 정점 데이터와 인덱스 데이터를 결합하여 하나의 지오메트리 단위를 형성하며, GPU 파이프라인에 필요한 레이아웃 정보와 객체의 AABB(경계 상자) 정보를 캡슐화합니다.
- * [EN] Forms a single geometry unit by combining vertex and index data, encapsulating layout information required for the GPU pipeline and AABB (Bounding Box) information of the object.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const geometry = new RedGPU.Geometry(redGPUContext, vertexBuffer, indexBuffer);
  * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
  * ```
- * @extends ResourceBase
+ *
  * @category Geometry
  */
 class Geometry extends ResourceBase {
     /**
-     * [KO] GPU 파이프라인에 필요한 레이아웃 정보
-     * [EN] Layout information required for GPU pipeline
+     * [KO] GPU 파이프라인 구성에 필요한 정점 버퍼 레이아웃 정보
+     * [EN] Vertex buffer layout information required for GPU pipeline configuration
      */
     gpuRenderInfo: GeometryGPURenderInfo
-    /**
-     * [KO] 정점 버퍼
-     * [EN] Vertex buffer
-     */
     #vertexBuffer: VertexBuffer
-    /**
-     * [KO] 인덱스 버퍼
-     * [EN] Index buffer
-     */
     #indexBuffer: IndexBuffer
-    /**
-     * [KO] AABB(경계 상자) 정보
-     * [EN] AABB (Axis-Aligned Bounding Box) information
-     */
     #volume: AABB;
 
     /**
@@ -75,6 +60,10 @@ class Geometry extends ResourceBase {
     /**
      * [KO] 정점 버퍼를 반환합니다.
      * [EN] Returns the vertex buffer.
+     *
+     * @returns
+     * [KO] 정점 버퍼 인스턴스
+     * [EN] VertexBuffer instance
      */
     get vertexBuffer(): VertexBuffer {
         return this.#vertexBuffer;
@@ -83,18 +72,22 @@ class Geometry extends ResourceBase {
     /**
      * [KO] 인덱스 버퍼를 반환합니다.
      * [EN] Returns the index buffer.
+     *
+     * @returns
+     * [KO] 인덱스 버퍼 인스턴스
+     * [EN] IndexBuffer instance
      */
     get indexBuffer(): IndexBuffer {
         return this.#indexBuffer;
     }
 
     /**
-     * [KO] 정점 버퍼 기준 AABB(경계 상자) 정보를 반환합니다. 최초 접근 시 계산 후 캐싱됩니다.
-     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information based on the vertex buffer. It is calculated and cached on the first access.
+     * [KO] 정점 버퍼 기준 AABB(축 정렬 경계 상자) 정보를 반환합니다. 최초 접근 시 계산 후 캐싱됩니다.
+     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information based on the vertex buffer. Calculated and cached upon first access.
      *
      * @returns
-     * [KO] AABB 정보
-     * [EN] AABB information
+     * [KO] 계산된 AABB 인스턴스
+     * [EN] Calculated AABB instance
      */
     get volume(): AABB {
         if (!this.#volume) {
@@ -104,8 +97,8 @@ class Geometry extends ResourceBase {
     }
 
     /**
-     * [KO] Geometry 인스턴스를 파기하고 할당된 Vertex/Index 물리 GPU 버퍼를 해제합니다.
-     * [EN] Destroys the Geometry instance and releases the allocated Vertex/Index physical GPU buffers.
+     * [KO] Geometry 인스턴스를 파기하고 할당된 정점 및 인덱스 GPU 버퍼를 해제합니다.
+     * [EN] Destroys the Geometry instance and releases the allocated vertex and index GPU buffers.
      */
     destroy() {
         if (this.#vertexBuffer) {
@@ -121,11 +114,6 @@ class Geometry extends ResourceBase {
         console.log("🧹 Geometry destroy 완료");
     }
 
-    /**
-     * 정점 버퍼를 갱신하고, AABB 캐시를 초기화합니다.
-     * @param vertexBuffer 새 정점 버퍼
-     * @private
-     */
     #updateVertexBuffer(vertexBuffer: VertexBuffer) {
         const prevBuffer = this.#vertexBuffer
         this.#vertexBuffer = vertexBuffer
@@ -134,11 +122,6 @@ class Geometry extends ResourceBase {
         this.#volume = null
     }
 
-    /**
-     * 인덱스 버퍼를 갱신합니다.
-     * @param indexBuffer 새 인덱스 버퍼
-     * @private
-     */
     #updateIndexBuffer(indexBuffer: IndexBuffer) {
         const prevBuffer = this.#indexBuffer
         this.#indexBuffer = indexBuffer
@@ -146,18 +129,10 @@ class Geometry extends ResourceBase {
         if (indexBuffer) indexBuffer.__addDirtyPipelineListener(this.#updateIndexBufferState);
     }
 
-    /**
-     * 정점 버퍼 변경 시 호출되는 내부 상태 갱신 함수
-     * @private
-     */
     #updateVertexBufferState() {
         this?.notifyUpdate();
     }
 
-    /**
-     * 인덱스 버퍼 변경 시 호출되는 내부 상태 갱신 함수
-     * @private
-     */
     #updateIndexBufferState() {
         this?.notifyUpdate();
     }

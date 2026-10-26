@@ -5,12 +5,14 @@ order: 2
 
 # Mesh LOD
 
-This section covers how to apply LOD to general **Mesh** objects.
-LOD for a `Mesh` works by calculating the distance from the camera on the CPU every frame and swapping to the **Geometry** that meets the specified distance condition.
+This section covers how to apply LOD to general `Mesh` objects.
+LOD for a `Mesh` works by calculating the distance from the camera on the CPU every frame and swapping to the `Geometry`
+that meets the specified distance condition.
 
 ## 1. How it Works
 
-The `LODManager` within the `Mesh` iterates through the registered LOD levels and finds the level with the largest distance value that is less than or equal to the current camera distance.
+The `LODManager` within the `Mesh` iterates through the registered LOD levels and finds the level with the largest
+distance value that is less than or equal to the current camera distance.
 When a suitable level is found, the rendering target is swapped to the geometry registered at that level.
 
 ## 2. Usage
@@ -63,7 +65,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
 
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.5;
+    ambientLight.intensity = 0.5;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Setup Material and Texture
@@ -126,3 +128,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 </pre>
 </CodePen>
 </ClientOnly>
+
+---
+
+## Related Examples
+
+- [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
+- [Mesh CPU LOD (Per-Level Material)](/RedGPU/examples/3d/lod/MeshCPULOD_material/)
+- [Distance Culling](/RedGPU/examples/3d/frustumCulling/distanceCulling/)

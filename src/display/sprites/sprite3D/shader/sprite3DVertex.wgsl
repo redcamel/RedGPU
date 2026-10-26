@@ -8,8 +8,8 @@ struct Sprite3DVertexUniforms {
     useBillboard: u32,
     usePixelSize: u32,
     pixelSize: f32,
-    _renderRatioX: f32,
-    _renderRatioY: f32,
+    renderRatioX: f32,
+    renderRatioY: f32,
 };
 
 @group(1) @binding(0) var<uniform> vertexUniforms: Sprite3DVertexUniforms;
@@ -34,7 +34,6 @@ struct VertexOutput {
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowCoord: vec3<f32>,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
@@ -54,8 +53,8 @@ fn main(inputData: InputData) -> VertexOutput {
         vertexUniforms.useBillboard,
         vertexUniforms.usePixelSize,
         vertexUniforms.pixelSize,
-        vertexUniforms._renderRatioX,
-        vertexUniforms._renderRatioY
+        vertexUniforms.renderRatioX,
+        vertexUniforms.renderRatioY
     );
 
     output.position = billboardResult.position;
@@ -67,4 +66,3 @@ fn main(inputData: InputData) -> VertexOutput {
 
     return output;
 }
-

@@ -1,23 +1,20 @@
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import AABB from "../AABB";
 /**
- * [KO] VertexBuffer 정보를 기반으로 AABB를 계산합니다.
- * [EN] Calculates AABB based on VertexBuffer information.
+ * [KO] `VertexBuffer`의 정점 위치 데이터를 순회하여 로컬 축 정렬 경계 상자(`AABB`)를 계산합니다.
+ * [EN] Calculates a local Axis-Aligned Bounding Box (`AABB`) by iterating over the vertex position data of a `VertexBuffer`.
  *
- * [KO] 버텍스 버퍼의 각 정점 위치를 순회하며 최소/최대값을 찾아 AABB를 생성합니다.
- * [EN] Iterates through vertex positions to find min/max values and create an AABB.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const geometryAABB = RedGPU.Bound.calculateGeometryAABB(vertexBuffer);
  * ```
  *
  * @param vertexBuffer -
- * [KO] AABB를 계산할 버텍스 버퍼 객체
- * [EN] Vertex buffer object to calculate AABB from
+ * [KO] `AABB`를 계산할 대상 `VertexBuffer` 인스턴스
+ * [EN] Target `VertexBuffer` instance to calculate the `AABB` from
  * @returns
- * [KO] 계산된 AABB 인스턴스
- * [EN] Calculated AABB instance
+ * [KO] 계산된 로컬 `AABB` 인스턴스
+ * [EN] Calculated local `AABB` instance
  * @category Bound
  */
 declare const calculateGeometryAABB: (vertexBuffer: VertexBuffer) => AABB;

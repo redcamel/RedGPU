@@ -1,9 +1,17 @@
 /**
- * [KO] 개별 벡터 속성에 대한 속성 기술자(Property Descriptor)를 생성하는 기본 함수입니다.
- * [EN] Base function that creates a property descriptor for an individual vector property.
+ * [KO] 벡터 프로퍼티를 위한 `PropertyDescriptor`를 생성합니다.
+ * [EN] Creates a `PropertyDescriptor` for a vector property.
  *
- * @param propertyKey - [KO] 속성 키 이름 [EN] Property key name
- * @param initValue - [KO] 초기값 [EN] Initial value
+ * @param propertyKey -
+ * [KO] 프로퍼티 키 이름
+ * [EN] Property key name
+ * @param initValue -
+ * [KO] 초기 벡터 배열 값
+ * [EN] Initial vector array value
+ * @returns
+ * [KO] 생성된 프로퍼티 디스크립터 객체
+ * [EN] Created property descriptor object
+ * @category DefineProperty
  */
 declare function defineVector(propertyKey: string, initValue: number[]): {
     configurable?: boolean;

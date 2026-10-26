@@ -10,7 +10,7 @@ redUnit.testGroup(
             constructor(ctx, info) { super(ctx, info); }
         }
 
-        const setup = (callback) => {
+        const setup = (run, callback) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -19,13 +19,13 @@ redUnit.testGroup(
                     redGPUContext.destroy();
                 } catch (e) {
                     redGPUContext.destroy();
-                    throw e;
+                    run(false, e);
                 }
-            }, (error) => { throw error; });
+            }, (error) => run(false, error));
         };
 
         runner.defineTest('Success Test: Initial state and Getters', (run) => {
-            setup((ctx, controller) => {
+            setup(run, (ctx, controller) => {
                 const checkCamera = controller.camera instanceof RedGPU.Camera.PerspectiveCamera;
                 const checkCoords = controller.x === 0 && controller.y === 0 && controller.z === 0;
                 const checkHover = controller.hoveredView === null;
@@ -35,14 +35,14 @@ redUnit.testGroup(
         }, true);
 
         runner.defineTest('Success Test: coordinate passthrough', (run) => {
-            setup((ctx, controller) => {
+            setup(run, (ctx, controller) => {
                 controller.camera.setPosition(10, 20, 30);
                 run(controller.x === 10 && controller.y === 20 && controller.z === 30);
             });
         }, true);
 
         runner.defineTest('Success Test: keyboardActiveView Setter/Getter', (run) => {
-            setup((ctx, controller) => {
+            setup(run, (ctx, controller) => {
                 // Mock View
                 const view = { name: 'mockView' };
                 controller.keyboardActiveView = view;
@@ -57,14 +57,14 @@ redUnit.testGroup(
         }, true);
 
         runner.defineTest('Success Test: keyboardProcessedThisFrame property', (run) => {
-            setup((ctx, controller) => {
+            setup(run, (ctx, controller) => {
                 controller.keyboardProcessedThisFrame = true;
                 run(controller.keyboardProcessedThisFrame);
             });
         }, true);
 
         runner.defineTest('Success Test: destroy method access', (run) => {
-            setup((ctx, controller) => {
+            setup(run, (ctx, controller) => {
                 try {
                     controller.destroy();
                     run(true);

@@ -62,8 +62,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const light = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(light);
 
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.5;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. 재질 및 텍스처 설정
@@ -126,3 +125,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 </pre>
 </CodePen>
 </ClientOnly>
+
+---
+
+## 관련 예제
+
+- [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
+- [Mesh CPU LOD (레벨별 재질 변경)](/RedGPU/examples/3d/lod/MeshCPULOD_material/)
+- [거리 컬링 (Distance Culling)](/RedGPU/examples/3d/frustumCulling/distanceCulling/)

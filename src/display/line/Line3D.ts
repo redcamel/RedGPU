@@ -23,16 +23,13 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_3D'
 
 
 /**
- * [KO] 3D 공간에서 선(라인)을 표현하는 클래스입니다.
- * [EN] Class representing a line in 3D space.
+ * [KO] 3D 공간에서 점들을 연결하여 직선 또는 곡선(Bezier, Catmull-Rom)을 렌더링하는 클래스입니다.
+ * [EN] Class that renders straight lines or curves (Bezier, Catmull-Rom) by connecting points in 3D space.
  *
- * [KO] 3D 공간상에서 여러 점을 연결하여 선을 그릴 수 있으며, 직선뿐만 아니라 베지어(Bezier), 캣멀-롬(Catmull-Rom) 곡선 타입을 지원합니다.
- * [EN] You can draw lines by connecting multiple points in 3D space, supporting not only straight lines but also Bezier and Catmull-Rom curve types.
+ * [KO] `geometry`와 `material`은 인스턴스 생성 시 내부적으로 자동 할당되며 임의로 변경할 수 없습니다.
+ * [EN] `geometry` and `material` are automatically assigned internally upon instantiation and cannot be changed.
  *
- * [KO] geometry와 material은 생성 시 자동으로 할당되며, 이후 변경이 불가능합니다.
- * [EN] Geometry and material are automatically assigned during creation and cannot be changed thereafter.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const line = new RedGPU.Display.Line3D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR);
  * line.addPoint(0, 0, 0);
@@ -40,70 +37,45 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_3D'
  * scene.addChild(line);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/line3D/linear/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/line3D/linear/" style="width:100%; height:500px;"></iframe>
  *
- * [KO] 아래는 Line3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of Line3D.
+ * @see [Line3D Linear Type example](/RedGPU/examples/3d/line3D/linear/)
  * @see [Line3D Bezier Type example](/RedGPU/examples/3d/line3D/bezier/)
  * @see [Line3D CatmullRom Type example](/RedGPU/examples/3d/line3D/catmullRom/)
- *
- * @experimental
  * @category Line
  */
 class Line3D extends Mesh {
     /**
-     * [KO] 기본 색상
-     * [EN] Base color
+     * [KO] 기본 선 색상 (HEX 문자열)
+     * [EN] Base line color (HEX string)
      */
     baseColor
-    /**
-     * [KO] 라인 타입 (LINE_TYPE)
-     * [EN] Line type (LINE_TYPE)
-     */
     #type: LINE_TYPE
-    /**
-     * [KO] Catmull-Rom 곡선의 텐션 값
-     * [EN] Tension value for Catmull-Rom curves
-     */
     #tension: number = 1
-    /**
-     * [KO] 곡선 샘플링 허용 오차
-     * [EN] Tolerance for curve sampling
-     */
     #tolerance: number = 0.01
-    /**
-     * [KO] 곡선 단순화 허용 거리
-     * [EN] Distance threshold for curve simplification
-     */
     #distance: number = 0.01
-    /**
-     * [KO] 버텍스 interleave 데이터 배열
-     * [EN] Vertex interleaved data array
-     */
     #interleaveData: number[] = []
-    /**
-     * [KO] 원본 점(LinePointWithInOut) 배열
-     * [EN] Array of original points (LinePointWithInOut)
-     */
     #originalPoints: LinePointWithInOut[] = []
-    /**
-     * [KO] 곡선 타입별 직렬화된 점(LinePoint) 배열
-     * [EN] Array of serialized points (LinePoint) by curve type
-     */
     #serializedLinePoints: LinePoint[]
 
     /**
-     * [KO] Line3D 인스턴스를 생성합니다.
-     * [EN] Creates an instance of Line3D.
+     * [KO] `Line3D` 인스턴스를 생성합니다.
+     * [EN] Creates a `Line3D` instance.
+     *
+     * ### Example
+     * ```typescript
+     * const line = new RedGPU.Display.Line3D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, '#ffffff');
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param type -
-     * [KO] 라인 타입 (기본값: LINE_TYPE.LINEAR)
-     * [EN] Line type (default: LINE_TYPE.LINEAR)
+     * [KO] 라인 보간 타입 (기본값: `LINE_TYPE.LINEAR`)
+     * [EN] Line interpolation type (default: `LINE_TYPE.LINEAR`)
      * @param baseColor -
-     * [KO] 기본 색상 (기본값: #fff)
-     * [EN] Base color (default: #fff)
+     * [KO] 기본 선 색상 (HEX 문자열, 기본값: `'#fff'`)
+     * [EN] Base line color (HEX string, default: `'#fff'`)
      */
     constructor(redGPUContext: RedGPUContext, type: LINE_TYPE = LINE_TYPE.LINEAR, baseColor: string = '#fff') {
         super(redGPUContext);
@@ -127,14 +99,24 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 원본 점(LinePointWithInOut) 배열을 반환합니다.
+     * [KO] 입·출력 탄젠트 제어점을 포함한 원본 정점(`LinePointWithInOut`) 배열을 반환합니다.
+     * [EN] Returns the array of original points (`LinePointWithInOut`) including in/out tangent control points.
+     *
+     * @returns
+     * [KO] `LinePointWithInOut` 배열
+     * [EN] Array of `LinePointWithInOut`
      */
     get originalPoints(): LinePointWithInOut[] {
         return this.#originalPoints;
     }
 
     /**
-     * 라인 타입을 반환/설정합니다.
+     * [KO] 라인의 곡선 보간 타입(`LINE_TYPE`)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the curve interpolation type (`LINE_TYPE`) of the line.
+     *
+     * @returns
+     * [KO] 현재 설정된 `LINE_TYPE` 값
+     * [EN] Currently set `LINE_TYPE` value
      */
     get type(): LINE_TYPE {
         return this.#type;
@@ -146,14 +128,24 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 버텍스 interleave 데이터 배열을 반환합니다.
+     * [KO] 정점 위치와 색상 정보가 인터리브(Interleaved) 형태로 직렬화된 숫자 배열을 반환합니다.
+     * [EN] Returns the number array of vertex positions and colors serialized in interleaved format.
+     *
+     * @returns
+     * [KO] 인터리브 정점 데이터 배열 (`number[]`)
+     * [EN] Interleaved vertex data array (`number[]`)
      */
     get interleaveData(): number[] {
         return this.#interleaveData;
     }
 
     /**
-     * Catmull-Rom 곡선의 텐션 값을 반환/설정합니다.
+     * [KO] `LINE_TYPE.CATMULL_ROM` 곡선의 장력(Tension) 값을 반환하거나 설정합니다. (기본값: `1`, 양수 범위)
+     * [EN] Returns or sets the tension value for `LINE_TYPE.CATMULL_ROM` curves. (default: `1`, positive number)
+     *
+     * @returns
+     * [KO] Catmull-Rom 곡선 장력 값
+     * [EN] Catmull-Rom curve tension value
      */
     get tension(): number {
         return this.#tension;
@@ -166,7 +158,12 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 곡선 샘플링 허용 오차를 반환/설정합니다.
+     * [KO] 베지어 곡선 분할 샘플링 시 평탄도 허용 오차(Tolerance)를 반환하거나 설정합니다. (기본값: `0.01`, 양수 범위)
+     * [EN] Returns or sets the flatness tolerance for Bezier curve subdivision sampling. (default: `0.01`, positive number)
+     *
+     * @returns
+     * [KO] 곡선 샘플링 허용 오차
+     * [EN] Curve sampling tolerance
      */
     get tolerance(): number {
         return this.#tolerance;
@@ -179,7 +176,12 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 곡선 단순화 허용 거리를 반환/설정합니다.
+     * [KO] 곡선 정점 단순화(Simplification) 시 허용 거리 임계값을 반환하거나 설정합니다. (기본값: `0.01`, 양수 범위)
+     * [EN] Returns or sets the distance threshold for curve point simplification. (default: `0.01`, positive number)
+     *
+     * @returns
+     * [KO] 곡선 단순화 거리 임계값
+     * [EN] Curve simplification distance threshold
      */
     get distance(): number {
         return this.#distance;
@@ -192,43 +194,56 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 현재 라인의 점 개수를 반환합니다.
+     * [KO] 현재 라인에 등록된 원본 정점 개수를 반환합니다.
+     * [EN] Returns the number of original points registered in the line.
+     *
+     * @returns
+     * [KO] 원본 정점 개수
+     * [EN] Number of original points
      */
     get numPoints(): number {
         return this.#originalPoints.length
     }
 
     /**
-     * geometry를 반환합니다. (생성 시 자동 할당, 변경 불가)
+     * [KO] 라인에 자동 할당된 지오메트리를 반환합니다. 외부에서 변경할 수 없습니다.
+     * [EN] Returns the geometry automatically assigned to the line. Cannot be modified externally.
+     *
+     * @returns
+     * [KO] 라인 지오메트리 객체
+     * [EN] Line geometry object
      */
     get geometry(): Geometry | Primitive {
         return this._geometry;
     }
 
-    /**
-     * geometry를 변경할 수 없습니다.
-     */
     set geometry(value: Geometry | Primitive) {
         consoleAndThrowError('Line3D can not change geometry')
     }
 
     /**
-     * material을 반환합니다. (생성 시 자동 할당, 변경 불가)
+     * [KO] 라인에 자동 할당된 전용 재질(`LineMaterial`)을 반환합니다. 외부에서 변경할 수 없습니다.
+     * [EN] Returns the dedicated material (`LineMaterial`) automatically assigned to the line. Cannot be modified externally.
+     *
+     * @returns
+     * [KO] 라인 재질 객체
+     * [EN] Line material object
      */
     get material() {
         return this._material
     }
 
-    /**
-     * material을 변경할 수 없습니다.
-     */
     set material(value) {
         consoleAndThrowError('Line3D can not change material')
     }
 
     /**
-     * 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [KO] `Line3D` 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [EN] Creates a custom vertex shader module dedicated to `Line3D`.
      *
+     * @returns
+     * [KO] 생성된 `GPUShaderModule` 인스턴스
+     * [EN] Created `GPUShaderModule` instance
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('LINE3D_VERTEX', vertexModuleSource);
@@ -237,18 +252,47 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 3D 공간상에 점을 추가합니다.
-     * @param x X 좌표
-     * @param y Y 좌표
-     * @param z Z 좌표
-     * @param color 점 색상 (기본값: baseColor)
-     * @param colorAlpha 알파값 (기본값: 1)
-     * @param inX in tangent X (기본값: 0)
-     * @param inY in tangent Y (기본값: 0)
-     * @param inZ in tangent Z (기본값: 0)
-     * @param outX out tangent X (기본값: 0)
-     * @param outY out tangent Y (기본값: 0)
-     * @param outZ out tangent Z (기본값: 0)
+     * [KO] 3D 공간 경로의 끝에 새로운 정점(Point)을 추가합니다.
+     * [EN] Appends a new point to the end of the 3D space path.
+     *
+     * ### Example
+     * ```typescript
+     * line.addPoint(10, 20, 30, '#ff0000', 1.0);
+     * ```
+     *
+     * @param x -
+     * [KO] X 좌표 (기본값: `0`)
+     * [EN] X coordinate (default: `0`)
+     * @param y -
+     * [KO] Y 좌표 (기본값: `0`)
+     * [EN] Y coordinate (default: `0`)
+     * @param z -
+     * [KO] Z 좌표 (기본값: `0`)
+     * [EN] Z coordinate (default: `0`)
+     * @param color -
+     * [KO] 정점 색상 HEX 문자열 (기본값: `this.baseColor`)
+     * [EN] Point color HEX string (default: `this.baseColor`)
+     * @param colorAlpha -
+     * [KO] 색상 불투명도 (`0` ~ `1`, 기본값: `1`)
+     * [EN] Color opacity (`0` to `1`, default: `1`)
+     * @param inX -
+     * [KO] 진입 제어점(In Tangent) X 좌표 (기본값: `0`)
+     * [EN] In-tangent control point X coordinate (default: `0`)
+     * @param inY -
+     * [KO] 진입 제어점(In Tangent) Y 좌표 (기본값: `0`)
+     * [EN] In-tangent control point Y coordinate (default: `0`)
+     * @param inZ -
+     * [KO] 진입 제어점(In Tangent) Z 좌표 (기본값: `0`)
+     * [EN] In-tangent control point Z coordinate (default: `0`)
+     * @param outX -
+     * [KO] 진출 제어점(Out Tangent) X 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point X coordinate (default: `0`)
+     * @param outY -
+     * [KO] 진출 제어점(Out Tangent) Y 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point Y coordinate (default: `0`)
+     * @param outZ -
+     * [KO] 진출 제어점(Out Tangent) Z 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point Z coordinate (default: `0`)
      */
     addPoint(
         x = 0, y = 0, z = 0,
@@ -269,19 +313,50 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 3D 공간상에 지정한 위치에 점을 추가합니다.
-     * @param index 추가할 위치 인덱스
-     * @param x X 좌표
-     * @param y Y 좌표
-     * @param z Z 좌표
-     * @param color 점 색상 (기본값: baseColor)
-     * @param colorAlpha 알파값 (기본값: 1)
-     * @param inX in tangent X (기본값: 0)
-     * @param inY in tangent Y (기본값: 0)
-     * @param inZ in tangent Z (기본값: 0)
-     * @param outX out tangent X (기본값: 0)
-     * @param outY out tangent Y (기본값: 0)
-     * @param outZ out tangent Z (기본값: 0)
+     * [KO] 3D 공간 경로의 지정된 인덱스에 정점(Point)을 삽입합니다.
+     * [EN] Inserts a point at the specified index in the 3D space path.
+     *
+     * ### Example
+     * ```typescript
+     * line.addPointAt(1, 5, 5, 5, '#00ff00', 1.0);
+     * ```
+     *
+     * @param index -
+     * [KO] 정점을 삽입할 인덱스
+     * [EN] Index at which to insert the point
+     * @param x -
+     * [KO] X 좌표 (기본값: `0`)
+     * [EN] X coordinate (default: `0`)
+     * @param y -
+     * [KO] Y 좌표 (기본값: `0`)
+     * [EN] Y coordinate (default: `0`)
+     * @param z -
+     * [KO] Z 좌표 (기본값: `0`)
+     * [EN] Z coordinate (default: `0`)
+     * @param color -
+     * [KO] 정점 색상 HEX 문자열 (기본값: `this.baseColor`)
+     * [EN] Point color HEX string (default: `this.baseColor`)
+     * @param colorAlpha -
+     * [KO] 색상 불투명도 (`0` ~ `1`, 기본값: `1`)
+     * [EN] Color opacity (`0` to `1`, default: `1`)
+     * @param inX -
+     * [KO] 진입 제어점(In Tangent) X 좌표 (기본값: `0`)
+     * [EN] In-tangent control point X coordinate (default: `0`)
+     * @param inY -
+     * [KO] 진입 제어점(In Tangent) Y 좌표 (기본값: `0`)
+     * [EN] In-tangent control point Y coordinate (default: `0`)
+     * @param inZ -
+     * [KO] 진입 제어점(In Tangent) Z 좌표 (기본값: `0`)
+     * [EN] In-tangent control point Z coordinate (default: `0`)
+     * @param outX -
+     * [KO] 진출 제어점(Out Tangent) X 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point X coordinate (default: `0`)
+     * @param outY -
+     * [KO] 진출 제어점(Out Tangent) Y 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point Y coordinate (default: `0`)
+     * @param outZ -
+     * [KO] 진출 제어점(Out Tangent) Z 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point Z coordinate (default: `0`)
      */
     addPointAt(
         index: number,
@@ -297,8 +372,17 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 지정한 위치의 점을 삭제합니다.
-     * @param index 삭제할 위치 인덱스
+     * [KO] 지정된 인덱스의 정점(Point)을 제거합니다.
+     * [EN] Removes the point at the specified index.
+     *
+     * ### Example
+     * ```typescript
+     * line.removePointAt(0);
+     * ```
+     *
+     * @param index -
+     * [KO] 제거할 정점의 인덱스 (양의 정수)
+     * [EN] Index of the point to remove (unsigned integer)
      */
     removePointAt(index: number) {
         validateUintRange(index)
@@ -308,18 +392,21 @@ class Line3D extends Mesh {
     }
 
     /**
-     * 모든 점을 삭제합니다.
+     * [KO] 라인에 등록된 모든 정점(Point)을 제거합니다.
+     * [EN] Removes all points registered in the line.
+     *
+     * ### Example
+     * ```typescript
+     * line.removeAllPoint();
+     * ```
      */
     removeAllPoint() {
         this.#originalPoints.length = 0;
         this.#parsePointsByType()
     };
 
-    //TODO 포인트 추가 삭제메서드 점검
     #update() {
         if (this._geometry) {
-            //TODO Destroy추가
-            // this._geometry.vertexBuffer.destroy()
         }
         if (this.#originalPoints.length) {
             const {redGPUContext} = this
@@ -337,7 +424,6 @@ class Line3D extends Mesh {
                 ),
             );
         } else {
-            // this._geometry = null;
         }
         this.dirtyPipeline = true
     }
@@ -347,7 +433,6 @@ class Line3D extends Mesh {
         const tension = this.#tension
         const tolerance = this.#tolerance
         const distance = this.#distance
-        // 타입별로 파서 분기
         this.#interleaveData.length = 0;
         let newPointList;
         let i, len;

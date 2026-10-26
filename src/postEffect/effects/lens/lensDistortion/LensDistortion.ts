@@ -7,33 +7,41 @@ import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 
 
 interface LensDistortion {
-    /** [KO] 왜곡 강도. 양수일 때 배럴 왜곡(볼록), 음수일 때 핀쿠션 왜곡(오목)이 발생합니다. [EN] Distortion strength. Positive for barrel distortion (convex), negative for pincushion distortion (concave). */
+    /**
+     * [KO] 왜곡 강도 (양수: 배럴 왜곡, 음수: 핀쿠션 왜곡)
+     * [EN] Distortion strength (positive: barrel distortion, negative: pincushion distortion)
+     * @defaultValue 0.1
+     */
     distortion: number
-    /** [KO] 왜곡의 중심점 X 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Distortion center X offset (in pixels, 0 is screen center). */
+    /**
+     * [KO] 왜곡 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Distortion center X offset (unit: pixels, 0 = screen center)
+     * @defaultValue 0
+     */
     centerX: number
-    /** [KO] 왜곡의 중심점 Y 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Distortion center Y offset (in pixels, 0 is screen center). */
+    /**
+     * [KO] 왜곡 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Distortion center Y offset (unit: pixels, 0 = screen center)
+     * @defaultValue 0
+     */
     centerY: number
 }
 
 /**
- * [KO] 렌즈 왜곡(Lens Distortion) 후처리 이펙트입니다.
- * [EN] Lens Distortion post-processing effect.
+ * [KO] 화면 중심점을 기준으로 배럴(볼록) 또는 핀쿠션(오목) 기하학적 렌즈 왜곡을 시뮬레이션하는 후처리 이펙트입니다.
+ * [EN] Post-processing effect that simulates geometric barrel (convex) or pincushion (concave) lens distortion relative to a center point.
  *
- * [KO] 광각 렌즈나 어안 렌즈에서 발생하는 기하학적 왜곡을 시뮬레이션합니다. 화면의 특정 지점(0,0은 정중앙)을 기준으로 이미지를 볼록하게 하거나 오목하게 변형시킵니다.
- * [EN] Simulates geometric distortion found in wide-angle or fisheye lenses. It warps the image to be convex or concave relative to a specific point (0,0 is exact center).
- *
- * [KO] 하드웨어 선형 샘플러를 사용하여 왜곡된 이미지의 계단 현상을 제거하고 매끄러운 화질을 유지합니다.
- * [EN] Uses a hardware linear sampler to eliminate aliasing in the warped image and maintain smooth image quality.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
- * effect.distortion = 0.2;  // 배럴 왜곡 적용
- * effect.centerX = 100;     // 중심을 오른쪽으로 100픽셀 이동
+ * effect.distortion = 0.2;
+ * effect.centerX = 100;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [LensDistortion example](/RedGPU/examples/postEffect/lens/lensDistortion/)
  * @category Lens
  */
 class LensDistortion extends ASinglePassPostEffect {
@@ -41,13 +49,17 @@ class LensDistortion extends ASinglePassPostEffect {
      * [KO] LensDistortion 인스턴스를 생성합니다.
      * [EN] Creates a LensDistortion instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.isLdr = true;
+        super(redGPUContext, {isLdr: true});
         this.init(
             redGPUContext,
             'POST_EFFECT_LENS_DISTORTION',

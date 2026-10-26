@@ -1,21 +1,18 @@
 /**
- * [KO] 렌더 패스 종료 시 어태치먼트의 내용을 저장하는 방식을 정의하는 상수군입니다.
- * [EN] Constants defining how to store attachment contents at the end of a render pass.
- *
- * [KO] 렌더링 결과물을 메모리에 저장할지 혹은 버릴지 결정합니다.
- * [EN] Determines whether to store the rendering results in memory or discard them.
+ * [KO] 렌더 패스(Render Pass) 종료 시 컬러 또는 깊이/스텐실 어태치먼트의 렌더링 결과를 메모리에 보존할지 결정하는 저장 연산 상수입니다.
+ * [EN] Store operation constants determining whether to preserve the rendered results of color or depth/stencil attachments in memory at the end of a render pass.
  *
  * @category Constants
  */
 const GPU_STORE_OP = {
     /**
-     * [KO] 렌더링된 결과물을 어태치먼트에 저장합니다.
-     * [EN] Stores the rendered results in the attachment.
+     * [KO] 렌더 패스에서 그려진 결과물을 어태치먼트 메모리에 저장합니다.
+     * [EN] Stores the rendered results of the render pass into the attachment memory.
      */
     STORE: 'store',
     /**
-     * [KO] 렌더링된 결과물을 저장하지 않고 버립니다.
-     * [EN] Discards the rendered results without storing them.
+     * [KO] 렌더 패스의 결과물을 메모리에 저장하지 않고 폐기하여 대역폭을 절약합니다.
+     * [EN] Discards the rendered results without storing them to memory, conserving memory bandwidth.
      */
     DISCARD: 'discard',
 } as const;

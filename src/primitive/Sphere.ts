@@ -3,18 +3,17 @@ import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
 
 /**
- * [KO] Sphere(구) 기본 도형 클래스입니다.
- * [EN] Sphere primitive geometry class.
- *
- * [KO] 반지름, 세그먼트 등을 기반으로 3D 구 형태의 데이터를 생성하여 관리합니다.
- * [EN] Generates and manages 3D spherical data based on radius, segments, etc.
+ * [KO] 반지름과 수평·수직 세그먼트 분할 수를 기반으로 3D 구 형태의 정점 및 인덱스 데이터를 생성하는 기본 도형 클래스입니다.
+ * [EN] Primitive geometry class that generates vertex and index data for a 3D sphere based on radius and horizontal/vertical segment counts.
  *
  * ### Example
  * ```typescript
- * // 반지름 1, 32x16 세그먼트 구 생성
- * const sphere = new RedGPU.Sphere(redGPUContext, 1, 32, 16);
+ * const sphere = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 16);
  * ```
  * <iframe src="/RedGPU/examples/3d/primitive/sphere/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Sphere example](/RedGPU/examples/3d/primitive/sphere/)
+ * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)
  * @category Primitive
  */
 class Sphere extends Primitive {
@@ -24,17 +23,33 @@ class Sphere extends Primitive {
      *
      * ### Example
      * ```typescript
-     * const sphere = new RedGPU.Sphere(redGPUContext, 1, 32, 16);
+     * const sphere = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 16);
      * ```
      *
-     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param radius - [KO] 구 반지름 (기본값 1) [EN] Sphere radius (default 1)
-     * @param widthSegments - [KO] 가로 세그먼트 수 (기본값 16, 최소 3) [EN] Width segments (default 16, min 3)
-     * @param heightSegments - [KO] 세로 세그먼트 수 (기본값 16, 최소 2) [EN] Height segments (default 16, min 2)
-     * @param phiStart - [KO] 수평 시작 각도 (라디안, 기본값 0) [EN] Horizontal start angle (radians, default 0)
-     * @param phiLength - [KO] 수평 각도 길이 (라디안, 기본값 2*PI) [EN] Horizontal angle length (radians, default 2*PI)
-     * @param thetaStart - [KO] 수직 시작 각도 (라디안, 기본값 0) [EN] Vertical start angle (radians, default 0)
-     * @param thetaLength - [KO] 수직 각도 길이 (라디안, 기본값 PI) [EN] Vertical angle length (radians, default PI)
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param radius -
+     * [KO] 구 반지름 (기본값: 1)
+     * [EN] Sphere radius (default: 1)
+     * @param widthSegments -
+     * [KO] 수평(경도) 방향 분할 수 (기본값: 16, 최소값: 3)
+     * [EN] Number of horizontal (longitude) segments (default: 16, minimum: 3)
+     * @param heightSegments -
+     * [KO] 수직(위도) 방향 분할 수 (기본값: 16, 최소값: 2)
+     * [EN] Number of vertical (latitude) segments (default: 16, minimum: 2)
+     * @param phiStart -
+     * [KO] 수평 시작 각도 (라디안, 기본값: 0)
+     * [EN] Horizontal start angle in radians (default: 0)
+     * @param phiLength -
+     * [KO] 수평 중심각 크기 (라디안, 기본값: `Math.PI * 2`)
+     * [EN] Horizontal central angle in radians (default: `Math.PI * 2`)
+     * @param thetaStart -
+     * [KO] 수직 시작 각도 (라디안, 기본값: 0)
+     * [EN] Vertical start angle in radians (default: 0)
+     * @param thetaLength -
+     * [KO] 수직 중심각 크기 (라디안, 기본값: `Math.PI`)
+     * [EN] Vertical central angle in radians (default: `Math.PI`)
      */
     constructor(
         redGPUContext: RedGPUContext,

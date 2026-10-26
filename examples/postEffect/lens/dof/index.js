@@ -1,19 +1,20 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
  * [KO] Depth of Field (DOF) 예제
  * [EN] Depth of Field (DOF) example
+ *
+ * [KO] 포스트 이펙트를 사용하여 피사계 심도(Depth of Field) 아웃포커싱 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply Depth of Field (DOF) out-of-focus effects using post effects.
  */
 
-// 1. Create and append a container and canvas
 const container = document.createElement('div');
 document.body.appendChild(container);
 
 const canvas = document.createElement('canvas');
 container.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
@@ -23,14 +24,15 @@ RedGPU.init(
         controller.tilt = -15;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
+        // [KO] DOF 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create DOF post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -46,26 +48,39 @@ RedGPU.init(
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
             if (isNarrow) {
-                viewNormal.setSize('100%', '50%'); viewNormal.setPosition(0, 0);
-                viewEffect.setSize('100%', '50%'); viewEffect.setPosition(0, '50%');
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('100%', '50%');
+                viewEffect.setPosition(0, '50%');
             } else {
-                viewNormal.setSize('50%', '100%'); viewNormal.setPosition(0, 0);
-                viewEffect.setSize('50%', '100%'); viewEffect.setPosition('50%', 0);
+                viewNormal.setSize('50%', '100%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('50%', '100%');
+                viewEffect.setPosition('50%', 0);
             }
         };
         updateLayout();
         window.addEventListener('resize', updateLayout);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, viewEffect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, container);
     },
-    (failReason) => console.error(failReason)
+    (failReason) => {
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
+    }
 );
 
-function setupDOFScene(redGPUContext, scene) {
-    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'))
+const setupDOFScene = (redGPUContext, scene) => {
+    const material = new RedGPU.Material.BitmapMaterial(
+        redGPUContext,
+        new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
+    );
     const zLineObjects = 15;
     const zStart = -30;
     const zEnd = 40;
@@ -73,76 +88,52 @@ function setupDOFScene(redGPUContext, scene) {
 
     for (let i = 0; i < zLineObjects; i++) {
         const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), material);
-        mesh.x = 0; mesh.y = 0; mesh.z = zStart + (i * zInterval);
+        mesh.setPosition(0, 0, zStart + i * zInterval);
         const normalizedDistance = i / (zLineObjects - 1);
         mesh.setScale(2 + normalizedDistance * 3);
         mesh.rotationY = i * 20;
         scene.addChild(mesh);
     }
-}
+};
 
-const renderTestPane = async (redGPUContext, targetView, container) => {
-
+const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
-        gui:pane=>{
-            const effect = targetView.postEffectManager.getEffectAt(0);
+        gui: (pane) => {
+            const config = {DOF: true};
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            const TEST_STATE = {
-                DOF: true,
-                focusDistance: effect.focusDistance,
-                aperture: effect.aperture,
-                maxCoC: effect.maxCoC,
-                nearPlane: effect.nearPlane,
-                farPlane: effect.farPlane,
-                nearBlurSize: effect.nearBlurSize,
-                farBlurSize: effect.farBlurSize,
-                nearStrength: effect.nearStrength,
-                farStrength: effect.farStrength,
-            }
-
-            const folder = pane.addFolder({title: 'DOF Settings', expanded: true})
-            folder.addBinding(TEST_STATE, 'DOF').on('change', (v) => {
+            folder.addBinding(config, 'DOF').on('change', (v) => {
                 if (v.value) {
-                    const newEffect = new RedGPU.PostEffect.DOF(redGPUContext);
-                    Object.assign(newEffect, TEST_STATE);
-                    targetView.postEffectManager.addEffect(newEffect);
+                    targetView.postEffectManager.addEffect(effect);
                 } else {
                     targetView.postEffectManager.removeAllEffect();
                 }
+                controls.forEach((c) => c.disabled = !v.value);
+                presetFolder.disabled = !v.value;
             });
 
             const controls = [
-                folder.addBinding(TEST_STATE, 'focusDistance', {min: 0, max: 100}),
-                folder.addBinding(TEST_STATE, 'aperture', {min: 0.1, max: 22.0}),
-                folder.addBinding(TEST_STATE, 'maxCoC', {min: 0, max: 100}),
-                folder.addBinding(TEST_STATE, 'nearPlane', {min: 0, max: 10}),
-                folder.addBinding(TEST_STATE, 'farPlane', {min: 10, max: 2000}),
-                folder.addBinding(TEST_STATE, 'nearBlurSize', {min: 0, max: 100}),
-                folder.addBinding(TEST_STATE, 'farBlurSize', {min: 0, max: 100}),
-                folder.addBinding(TEST_STATE, 'nearStrength', {min: 0, max: 3.0}),
-                folder.addBinding(TEST_STATE, 'farStrength', {min: 0, max: 3.0}),
+                folder.addBinding(effect, 'focusDistance', {min: 0, max: 100}),
+                folder.addBinding(effect, 'aperture', {min: 0.1, max: 22.0}),
+                folder.addBinding(effect, 'maxCoC', {min: 0, max: 100}),
+                folder.addBinding(effect, 'nearPlane', {min: 0, max: 10}),
+                folder.addBinding(effect, 'farPlane', {min: 10, max: 2000}),
+                folder.addBinding(effect, 'nearBlurSize', {min: 0, max: 100}),
+                folder.addBinding(effect, 'farBlurSize', {min: 0, max: 100}),
+                folder.addBinding(effect, 'nearStrength', {min: 0, max: 3.0}),
+                folder.addBinding(effect, 'farStrength', {min: 0, max: 3.0})
             ];
 
-            pane.on('change', () => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) {
-                    Object.assign(currentEffect, TEST_STATE);
-                }
-            });
-
-            const presetFolder = folder.addFolder({title: 'Presets', expanded: false});
+            const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
             const addPresetButton = (title, method) => {
                 presetFolder.addButton({title}).on('click', () => {
-                    const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                    if (currentEffect) {
-                        currentEffect[method]();
-                        updateUI(currentEffect);
-                    }
+                    effect[method]();
+                    pane.refresh();
                 });
             };
 
@@ -153,23 +144,6 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             addPresetButton('Macro', 'setMacro');
             addPresetButton('Sports', 'setSports');
             addPresetButton('Night Mode', 'setNightMode');
-
-            function updateUI(effect) {
-                Object.assign(TEST_STATE, {
-                    focusDistance: effect.focusDistance,
-                    aperture: effect.aperture,
-                    maxCoC: effect.maxCoC,
-                    nearPlane: effect.nearPlane,
-                    farPlane: effect.farPlane,
-                    nearBlurSize: effect.nearBlurSize,
-                    farBlurSize: effect.farBlurSize,
-                    nearStrength: effect.nearStrength,
-                    farStrength: effect.farStrength,
-                });
-                pane.refresh();
-            }
         }
     });
-
-
 };

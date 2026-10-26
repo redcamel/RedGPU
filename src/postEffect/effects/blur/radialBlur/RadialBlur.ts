@@ -9,27 +9,37 @@ import defineUint from "../../../../defineProperty/funcs/number/defineUint";
 
 
 interface RadialBlur {
-    /** [KO] 블러 강도. 값이 클수록 회전 번짐이 강해집니다. [EN] Blur strength. Higher values increase rotational bleeding. */
+    /**
+     * [KO] 블러 강도 (0 이상)
+     * [EN] Blur strength (0 or greater)
+     * @defaultValue 50
+     */
     amount: number
-    /** [KO] 블러의 중심점 X 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Blur center X offset (in pixels, 0 is screen center). */
+    /**
+     * [KO] 블러 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Blur center X offset (unit: pixels, 0 = screen center)
+     * @defaultValue 0
+     */
     centerX: number
-    /** [KO] 블러의 중심점 Y 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Blur center Y offset (in pixels, 0 is screen center). */
+    /**
+     * [KO] 블러 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Blur center Y offset (unit: pixels, 0 = screen center)
+     * @defaultValue 0
+     */
     centerY: number
-    /** [KO] 샘플링 횟수 (2 ~ 100). 값이 클수록 부드럽지만 성능 소모가 늘어납니다. [EN] Number of samples (2 to 100). Higher values are smoother but increase performance cost. */
+    /**
+     * [KO] 샘플링 횟수 (2 ~ 100)
+     * [EN] Number of samples (2 ~ 100)
+     * @defaultValue 16
+     */
     sampleCount: number
 }
 
 /**
- * [KO] 방사형 회전 블러(Radial Blur) 후처리 이펙트입니다.
- * [EN] Radial Blur post-processing effect.
+ * [KO] 화면의 특정 지점을 기준으로 회전 번짐을 적용하는 방사형 회전 블러 후처리 이펙트입니다.
+ * [EN] Radial Blur post-processing effect that applies rotational blur around a specific screen point.
  *
- * [KO] 화면의 특정 지점을 기준으로 이미지를 회전시키며 블러 처리를 하여, 역동적인 회전감이나 집중 효과를 만듭니다. (0,0)은 화면의 정중앙을 의미합니다.
- * [EN] Applies blur by rotating the image around a specific point, creating a dynamic sense of rotation or focus. (0,0) refers to the exact center of the screen.
- *
- * [KO] 하드웨어 선형 샘플러를 사용하여 회전 궤적의 계단 현상을 최소화하고 매끄러운 결과물을 제공합니다.
- * [EN] Minimizes aliasing in the rotation trajectory and provides smooth results using a hardware linear sampler.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.RadialBlur(redGPUContext);
  * effect.amount = 50;
@@ -37,7 +47,9 @@ interface RadialBlur {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [RadialBlur example](/RedGPU/examples/postEffect/blur/radialBlur/)
  * @category Blur
  */
 class RadialBlur extends ASinglePassPostEffect {
@@ -46,12 +58,17 @@ class RadialBlur extends ASinglePassPostEffect {
      * [KO] RadialBlur 인스턴스를 생성합니다.
      * [EN] Creates a RadialBlur instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.RadialBlur(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.init(
             redGPUContext,
             'POST_EFFECT_RADIAL_BLUR',

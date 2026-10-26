@@ -22,16 +22,33 @@ import parseInterleaveData_GLTF from "./parseInterleaveData_GLTF";
 import parseSparse_GLTF from "./parseSparse_GLTF";
 import calculateTangents from "../../../math/calculateTangents";
 
+/**
+ * [KO] glTF 메시 데이터를 파싱하여 프리미티브별 지오메트리, 재질, 모프 타겟이 적용된 `Mesh` 배열을 생성합니다.
+ * [EN] Parses glTF mesh data and creates an array of `Mesh` instances with geometry, material, and morph targets applied per primitive.
+ *
+ * @param gltfLoader -
+ * [KO] 대상 `GLTFLoader` 인스턴스
+ * [EN] Target `GLTFLoader` instance
+ * @param gltfData -
+ * [KO] 원본 `GLTF` 데이터 객체
+ * [EN] Source `GLTF` data object
+ * @param gltfMesh -
+ * [KO] 파싱할 glTF 메시 데이터
+ * [EN] glTF mesh data to parse
+ * @param nodeGlTfId -
+ * [KO] 메시가 속한 노드의 glTF 식별자
+ * [EN] glTF identifier of the node to which the mesh belongs
+ * @returns
+ * [KO] 생성된 `Mesh` 인스턴스 배열
+ * [EN] Array of created `Mesh` instances
+ * @category GLTF
+ */
 const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMesh: GltfMesh, nodeGlTfId: GlTfId) {
     const {redGPUContext} = gltfLoader
-    // keepLog('gltfMesh',nodeGlTfId,gltfMesh)
     let tName;
     if (gltfMesh.name) tName = gltfMesh.name;
     const tMeshList = [];
     const {primitives} = gltfMesh
-    // primitives.forEach((meshPrimitive: MeshPrimitive) => {
-    //
-    // });
     let i = 0
     const primitivesLength = primitives.length
     for (i; i < primitivesLength; i++) {
@@ -39,7 +56,6 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         let tMesh: Mesh;
         let tMaterial;
         let indices = [];
-        // 어트리뷰트에서 파싱되는놈들
         let vertices = [];
         let verticesColor_0 = [];
         let uvs = [];
@@ -50,20 +66,16 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         let joints = [];
         let tangents = [];
         let tDrawMode: GPUPrimitiveTopology;
-        // 형상 파싱
         const {attributes} = meshPrimitive
         const temp = new Map()
         if (attributes) {
             for (const key in attributes) {
-                // 엑세서를 통해서 정보파악하고
                 const accessorGlTfId = attributes[key];
                 const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
-                // 어트리뷰트 갈궈서 파악함
                 const isTexcoord = key.indexOf('TEXCOORD_') > -1
                 if (isTexcoord) {
                     const name = `TEXCOORD_${temp.size}`
                     temp.set(key, name)
-                    // keepLog(name)
                 }
 
                 parseAttributeInfo_GLTF(
@@ -74,7 +86,6 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                     jointWeights, joints,
                     verticesColor_0, tangents
                 );
-                // 스파스 정보도 갈굼
                 if (accessorInfo.accessor.sparse) {
                     parseSparse_GLTF(
                         gltfLoader, key,
@@ -85,90 +96,63 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                 }
             }
         }
-        // 인덱스 파싱
         if ('indices' in meshPrimitive) {
-            // 버퍼뷰의 위치를 말하므로...이를 추적파싱항
             let accessorGlTfId = meshPrimitive.indices;
             let accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
             parseIndicesInfo_GLTF(accessorInfo, indices);
         }
-        // keepLog('-----')
-        // 재질파싱
         tMaterial = parseMaterialInfo_GLTF(gltfLoader, gltfData, meshPrimitive);
         if (tMaterial instanceof PBRMaterial) {
             gltfLoader.parsingResult.materials.push(tMaterial);
         }
         let noIndexBuffer = false
-        // 모드 파싱
         if ('mode' in meshPrimitive) {
-            // 0 POINTS
-            // 1 LINES
-            // 2 LINE_LOOP
-            // 3 LINE_STRIP
-            // 4 TRIANGLES
-            // 5 TRIANGLE_STRIP
-            // 6 TRIANGLE_FAN
             switch (meshPrimitive.mode) {
                 case 0 :
-                    // POINTS
                     tDrawMode = GPU_PRIMITIVE_TOPOLOGY.POINT_LIST;
                     break;
                 case 1 :
-                    // LINES
                     tDrawMode = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
                     break;
                 case 2 :
-                    // LINE_LOOP
                     tDrawMode = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
                     break;
                 case 3 :
-                    // LINE_STRIP
                     tDrawMode = GPU_PRIMITIVE_TOPOLOGY.LINE_STRIP;
                     noIndexBuffer = true
                     break;
                 case 4 :
-                    // TRIANGLES
                     tDrawMode = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
                     break;
                 case 5 :
-                    // TRIANGLE_STRIP
                     tDrawMode = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_STRIP;
                     noIndexBuffer = true
                     break;
                 case 6 :
-                    // TRIANGLE_FAN
                     tDrawMode = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
                     break;
             }
         }
-        /////////////////////////////////////////////////////////
-        // 최종데이터 생산
-        if (verticesColor_0.length) tMaterial.useVertexColor_0 = true;
+        if (verticesColor_0.length) {
+            tMaterial.useVertexColor = true;
+            (tMaterial as any).useVertexColor_0 = true;
+        }
 
         let normalData;
-        // keepLog('normals',normals,vertices,indices)
         if (!normals.length) {
             normalData = calculateNormals(vertices, indices);
 
         } else normalData = normals;
 
-        // keepLog('normalData',normalData)
         {
-
-            // keepLog(tangents)
             if (tangents.length > 0) {
-                // tangents = calculateTangents(vertices, normalData, uvs, indices, tangents);
             } else {
                 tangents = Array.from(calculateTangents(vertices, normalData, uvs, indices));
             }
-            // tMaterial.useVertexTangent = true;
         }
         if (tangents.length) tMaterial.useVertexTangent = true;
         let interleaveData = [];
         parseInterleaveData_GLTF(interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents);
-        // console.log('interleaveData', interleaveData);
-        /////////////////////////////////////////////////////////
-        // 메쉬 생성
         let tGeo: Geometry;
         let tInterleaveInfoList = {};
         if (vertices.length) tInterleaveInfoList['aVertexPosition'] = VertexInterleaveType.float32x3
@@ -178,10 +162,6 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         else if (uvs1.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
         else if (uvs.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
         tInterleaveInfoList['aVertexColor_0'] = VertexInterleaveType.float32x4
-        // if (jointWeights.length)
-        // tInterleaveInfoList['aVertexWeight'] = VertexInterleaveType.float32x4
-        // if (joints.length)
-        // tInterleaveInfoList['aVertexJoint'] = VertexInterleaveType.float32x4
         tInterleaveInfoList['aVertexTangent'] = VertexInterleaveType.float32x4
         const weightData = []
         const jointData = []
@@ -204,9 +184,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             `Joint_${gltfLoader.url}_${nodeGlTfId}_${i}`
         )
-        /////////////////////////////////////////////////////////
         let morphInfo = new MorphInfo_GLTF(gltfLoader, gltfData, meshPrimitive, gltfMesh.weights);
-        /////////////////////////////////////////////////////
         const vertexCacheKey = `Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}_${morphInfo.weights.length ? createUUID() : ''}`
         const hasVertexBuffer = redGPUContext.resourceManager['managedVertexBufferState'].table.get(vertexCacheKey)?.buffer
         tGeo = new Geometry(
@@ -228,8 +206,6 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                 `Index_${gltfLoader.url}_${nodeGlTfId}_${i}`
             ) : null
         );
-        // console.log(tDrawMode,indices)
-        // console.log('tGeo', tGeo)
         if (!tMaterial) {
             consoleAndThrowError('재질을 파싱할수없는경우 ', meshPrimitive);
         }
@@ -248,33 +224,26 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         }
         if (tDrawMode) tMesh.primitiveState.topology = tDrawMode;
         else tMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-        //
         if (tMesh.material.doubleSided) {
             tMesh.primitiveState.cullMode = GPU_CULL_MODE.NONE;
         }
         if (tMesh.material.use2PathRender) {
             tMesh.primitiveState.cullMode = GPU_CULL_MODE.NONE;
             tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS_EQUAL
-            // tMesh.depthStencilState.depthWriteEnabled = false
         }
         if (tMesh.material.alphaBlend === 2) {
-            // TODO
             tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS_EQUAL
         }
         tMesh.animationInfo.morphInfo = morphInfo;
         tMesh.animationInfo.morphInfo.origin = new Float32Array(interleaveData);
-        /////////////////////////////////////////////////////
         let targetGeometryData = tMesh.geometry.vertexBuffer.data
         if (!tMesh.gpuRenderInfo) tMesh.initGPURenderInfos()
         let NUM = 0;
         {
-            // console.log('여긴가',new VertexInterleavedStruct(tInterleaveInfoList),tMesh.geometry.vertexBuffer)
             for (const k in tInterleaveInfoList) {
-                // console.log('여긴가', k, tInterleaveInfoList[k],)
                 NUM += tInterleaveInfoList[k].numElements
             }
         }
-        // console.log('여긴가', NUM)
         if (!hasVertexBuffer) {
             const list = tMesh.animationInfo.morphInfo.morphInfoDataList;
             let index = 0;
@@ -296,16 +265,8 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         }
         tMesh.geometry.vertexBuffer.updateAllData(targetGeometryData);
         tMesh.animationInfo.morphInfo.origin = new Float32Array(targetGeometryData);
-        /////////////////////////////////////////////////////
         meshPrimitive['Mesh'] = tMesh;
         tMeshList.push(tMesh);
-        // console.log('vertices', vertices);
-        // console.log('normalData', normalData);
-        // console.log('uvs', uvs);
-        // console.log('joints', joints);
-        // console.log('jointWeights', jointWeights);
-        // console.log('tangents', tangents);
-        // console.log('indices', indices)
     }
     return tMeshList;
 };

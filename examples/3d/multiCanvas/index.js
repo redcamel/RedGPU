@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
  * [KO] 독립적인 컨텍스트 영역을 설정하고 이벤트를 연결하는 함수 (최소화된 클로저 패턴)
@@ -31,7 +31,7 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
 
             // 2. 씬 구성 (입체감을 위해 광원 1개와 PhongMaterial 추가)
             const scene = new RedGPU.Display.Scene();
-            scene.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+
 
             scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
             scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
@@ -43,6 +43,7 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
 
             // 3. 뷰 추가 및 렌더 가동
             const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+            view.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
             redGPUContext.addView(view);
 
             const renderer = new RedGPU.Renderer();

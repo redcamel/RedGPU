@@ -36,7 +36,10 @@ jobs:
 
       # 6. 매뉴얼 빌드 (VitePress & TypeDoc API)
       - name: Build documentation
-        run: npm run vitePress:build
+        run: |
+          cd manual
+          npm ci
+          npm run build
 
       # 7. 전체 사이트맵 인덱스 생성 (SEO 최적화)
       - name: Build sitemap
@@ -48,11 +51,14 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # docs 폴더 및 기존 sitemap.xml 삭제 반영 (존재할 경우에만)
-          git rm -rf --ignore-unmatch docs/ sitemap/ sitemap.xml
+          # manual 내부 임시 빌드/의존성 폴더 제외 처리
+          rm -rf manual/node_modules manual/.vitepress/dist manual/.vitepress/cache
+          
+          # docs 폴더 및 기존 sitemap_v2.xml 삭제 반영 (존재할 경우에만)
+          git rm -rf --ignore-unmatch docs/ sitemap/ sitemap_v2.xml
           
           # 빌드 결과물 및 사이트맵 파일 추가
-          git add dist/ manual/ examples/ sitemap_v2.xml sitemap-examples.xml -f
+          git add dist/ manual/ examples/ sitemap.xml sitemap-examples.xml -f
           
           # sitemap 폴더가 있을 경우 추가 (없을 수도 있음)
           git add sitemap/ -f || true

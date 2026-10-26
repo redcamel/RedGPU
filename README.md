@@ -4,7 +4,7 @@ applications. Built for the next generation of web graphics.</p>
 
 <p>
   <a href="https://twitter.com/redcamel15"><img src="https://img.shields.io/twitter/follow/redcamel15.svg?style=social" alt="Twitter Follow" /></a>
-  <a href="LICENSE.md"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
+  <a href="LICENCE.md"><img src="https://img.shields.io/github/license/redcamel/RedGPU?colorB=ff0000" alt="License"></a>
   <img src="https://img.shields.io/github/last-commit/redcamel/RedGPU" alt="Last Commit">
   <img src="https://img.shields.io/github/issues/redcamel/RedGPU" alt="Issues">
 </p>

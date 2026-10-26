@@ -1,39 +1,37 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
  * [KO] Directional Blur 예제
  * [EN] Directional Blur example
  *
  * [KO] 방향성 블러(Directional Blur) 포스트 이펙트를 시연합니다.
- * [EN] Demonstrates directional blur post effect.
+ * [EN] Demonstrates the directional blur post effect.
  */
 
-// 1. Create and append a container and canvas
 const container = document.createElement('div');
 document.body.appendChild(container);
 
 const canvas = document.createElement('canvas');
 container.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 3;
         controller.speedDistance = 0.1;
-        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
+        // [KO] DirectionalBlur 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create DirectionalBlur post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -44,7 +42,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -64,68 +68,44 @@ RedGPU.init(
         window.addEventListener('resize', updateLayout);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, viewEffect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => scene.addChild(v['resultMesh']));
-}
-
-const renderTestPane = async (redGPUContext, targetView, container) => {
-
+const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
-        gui:pane=>{
-            const effect = targetView.postEffectManager.getEffectAt(0);
+        gui: (pane) => {
+            const config = {DirectionalBlur: true};
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            const TEST_STATE = {
-                DirectionalBlur: true,
-                amount: effect.amount,
-                angle: effect.angle,
-                sampleCount: effect.sampleCount,
-            }
-            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-
-            folder.addBinding(TEST_STATE, 'DirectionalBlur').on('change', (v) => {
+            folder.addBinding(config, 'DirectionalBlur').on('change', (v) => {
                 if (v.value) {
-                    const newEffect = new RedGPU.PostEffect.DirectionalBlur(redGPUContext);
-                    newEffect.amount = TEST_STATE.amount;
-                    newEffect.angle = TEST_STATE.angle;
-                    targetView.postEffectManager.addEffect(newEffect);
+                    targetView.postEffectManager.addEffect(effect);
                 } else {
                     targetView.postEffectManager.removeAllEffect();
                 }
-                amountControl.disabled = !v.value;
-                angleControl.disabled = !v.value;
-                sampleCountControl.disabled = !v.value;
+                controls.forEach((c) => c.disabled = !v.value);
             });
 
-            const amountControl = folder.addBinding(TEST_STATE, 'amount', {min: 0, max: 100}).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.amount = v.value
-            })
-            const angleControl = folder.addBinding(TEST_STATE, 'angle', {min: 0, max: 360}).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.angle = v.value
-            })
-            const sampleCountControl = folder.addBinding(TEST_STATE, 'sampleCount', {
-                min: 1,
-                max: 100,
-                step: 1
-            }).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.sampleCount = v.value
-            })
+            const controls = [
+                folder.addBinding(effect, 'amount', {min: 0, max: 100}),
+                folder.addBinding(effect, 'angle', {min: 0, max: 360}),
+                folder.addBinding(effect, 'sampleCount', {min: 1, max: 100, step: 1})
+            ];
         }
     });
 };

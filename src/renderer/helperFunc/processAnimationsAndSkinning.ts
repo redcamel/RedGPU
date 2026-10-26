@@ -4,6 +4,24 @@ import ParsedSkinInfo_GLTF from "../../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import GltfAnimationLooperManager from "../../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import View3D from "../../display/view/View3D";
 
+/**
+ * [KO] 컴퓨트 패스를 통해 glTF 애니메이션 업데이트 및 정점 스키닝 연산을 수행합니다.
+ * [EN] Performs glTF animation updates and vertex skinning calculations via a compute pass.
+ *
+ * @param redGPUContext -
+ * [KO] `RedGPUContext` 인스턴스
+ * [EN] `RedGPUContext` instance
+ * @param renderViewStateData -
+ * [KO] 현재 뷰의 렌더링 상태 데이터 (`RenderViewStateData`)
+ * [EN] Render state data of the current view (`RenderViewStateData`)
+ * @param gltfAnimationLooperManager -
+ * [KO] glTF 애니메이션 루퍼 매니저 인스턴스 (`GltfAnimationLooperManager`)
+ * [EN] glTF animation looper manager instance (`GltfAnimationLooperManager`)
+ * @param view -
+ * [KO] 대상 `View3D` 인스턴스
+ * [EN] Target `View3D` instance
+ * @category Renderer
+ */
 const processAnimationsAndSkinning = (
     redGPUContext: RedGPUContext,
     renderViewStateData: RenderViewStateData,
@@ -26,24 +44,20 @@ const processAnimationsAndSkinning = (
             )
         }
 
-        // @group(0): 시스템 유니폼 바인드 그룹 연결
         passEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
 
         for (let i = 0; i < skinListNum; i++) {
             const mesh = skinList[i];
             const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
-            // 사용된 조인트 인덱스 초기화
             if (!skinInfo.usedJoints) {
                 skinInfo.usedJoints = skinInfo.getUsedJointIndices(mesh);
             }
-            // 조인트 행렬 저장 버퍼 크기 확인 및 초기화
             const neededSize = (1 + skinInfo.usedJoints.length) * 16;
             if (!skinInfo.jointData || skinInfo.jointData.length !== neededSize) {
                 skinInfo.jointData = new Float32Array(neededSize);
                 skinInfo.computeShader = null
             }
 
-            // 모델 행렬의 역행렬 계산
             skinInfo.invertNodeGlobalTransform = skinInfo.invertNodeGlobalTransform || new Float32Array(16);
             {
                 const sourceMatrix = mesh.modelMatrix;
@@ -107,7 +121,6 @@ const processAnimationsAndSkinning = (
                 }
             }
 
-            // Compute Shader 초기화 (최초 1회)
             if (!skinInfo.computeShader) {
                 skinInfo.createCompute(
                     redGPUContext,
@@ -119,7 +132,6 @@ const processAnimationsAndSkinning = (
                 );
             }
 
-            // 매 프레임 모델 역행렬 데이터 업로드
             const invertNodeGlobalTransformOffset = 16 + (skinInfo.joints.length * 16) + (skinInfo.joints.length * 64) + 16 + (Math.ceil(skinInfo.usedJoints.length / 4) * 16);
             gpuDevice.queue.writeBuffer(
                 skinInfo.uniformBuffer,
@@ -136,9 +148,7 @@ const processAnimationsAndSkinning = (
                 )
             }
 
-            // Compute Pass 설정 및 Dispatch
             passEncoder.setPipeline(skinInfo.computePipeline);
-            // @group(1): 스키닝 전용 바인드 그룹 연결
             passEncoder.setBindGroup(1, skinInfo.bindGroup);
             passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / skinInfo.WORK_SIZE));
         }

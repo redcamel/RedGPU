@@ -1,13 +1,16 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
- * [KO] Mesh Child Method 예제
- * [EN] Mesh Child Method example
+ * [KO] Child Method 예제
+ * [EN] Child Method example
  *
- * [KO] Mesh의 자식 객체 관리 기능(추가, 검색, 순서 변경, 삭제 등)을 시연합니다.
- * [EN] Demonstrates child object management features (add, get, swap, remove, etc.) of Mesh.
+ * [KO] 컨테이너의 자식 관리 API(addChild, addChildAt, getChildAt, getChildIndex, setChildIndex, swapChildren, swapChildrenAt, removeChildAt, removeAllChildren)를 시연합니다.
+ * [EN] Demonstrates container child management APIs (addChild, addChildAt, getChildAt, getChildIndex, setChildIndex, swapChildren, swapChildrenAt, removeChildAt, removeAllChildren).
  */
+
+const LAYOUT_RADIUS = 5;
+const LAYOUT_EASING = 0.1;
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -15,180 +18,108 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. [KO] 카메라 컨트롤러 설정
-        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 0.3;
 
-        // 2. [KO] 씬 및 뷰 구성
-        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
-        // 3. [KO] 초기 자식 객체 생성
-        // [EN] Create Initial Children
-        createInitialMeshes(redGPUContext, scene);
+        for (let i = 0; i < 6; i++) {
+            scene.addChild(createChild(redGPUContext, '#ffffff'));
+        }
+        relabelChildren(scene);
 
-        // 4. [KO] 렌더러 생성 및 루프 시작
-        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        const render = () => {
-            const radius = 5;
-            const numChildren = view.scene.children.length;
-
-            // [KO] 자식들을 원형으로 배치하는 애니메이션
-            // [EN] Animate children in a circular layout
-            view.scene.children.forEach((mesh, index) => {
-                const angle = (index / numChildren) * Math.PI * 2;
-                const endX = Math.cos(angle) * radius;
-                const endZ = Math.sin(angle) * radius;
-
-                mesh.setPosition(
-                    mesh.x + (endX - mesh.x) * 0.1,
-                    mesh.y + (0 - mesh.y) * 0.1,
-                    mesh.z + (endZ - mesh.z) * 0.1
+        renderer.start(redGPUContext, (time) => {
+            // [KO] 자식 인덱스 순서대로 원형 배치 - 인덱스가 바뀌면 위치가 부드럽게 이동
+            // [EN] Arrange children in a circle by index - positions ease when indices change
+            const children = scene.children;
+            const numChildren = children.length;
+            for (let i = 0; i < numChildren; i++) {
+                const child = children[i];
+                const angle = (i / numChildren) * Math.PI * 2;
+                child.setPosition(
+                    child.x + (Math.cos(angle) * LAYOUT_RADIUS - child.x) * LAYOUT_EASING,
+                    child.y - child.y * LAYOUT_EASING,
+                    child.z + (Math.sin(angle) * LAYOUT_RADIUS - child.z) * LAYOUT_EASING
                 );
+            }
+        });
 
-                if (mesh.text !== `Child ${index}`) {
-                    mesh.text = `Child ${index}`;
-                }
-            });
-        };
-        renderer.start(redGPUContext, render);
-
-        // 5. [KO] 테스트용 GUI 렌더링
-        // [EN] Render Test GUI
         renderTestPane(redGPUContext, scene);
+    },
+    (failReason) => {
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] 초기 메시들을 생성합니다.
- * [EN] Creates initial meshes.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- */
-const createInitialMeshes = (redGPUContext, scene) => {
-    for (let i = 0; i < 6; i++) {
-        addChildMesh(redGPUContext, scene, '#ffffff');
+const getRandomHexColor = () => `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+
+const createChild = (redGPUContext, color = getRandomHexColor()) => {
+    const child = new RedGPU.Display.TextField3D(redGPUContext);
+    child.useBillboard = true;
+    child.fontSize = 32;
+    child.color = color;
+    return child;
+};
+
+const relabelChildren = (scene) => {
+    const children = scene.children;
+    for (let i = 0; i < children.length; i++) {
+        children[i].text = `Child ${i}`;
     }
 };
 
-/**
- * [KO] 자식 관리를 위한 GUI 패널을 구성합니다.
- * [EN] Configures GUI panel for child management.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- */
 const renderTestPane = (redGPUContext, scene) => {
+    // [KO] 자식 순서를 변경하는 API 호출 후 라벨을 현재 인덱스로 갱신
+    // [EN] Refresh labels to current indices after APIs that change child order
+    const addOrderButton = (pane, title, action) => {
+        pane.addButton({title}).on('click', () => {
+            action();
+            relabelChildren(scene);
+        });
+    };
+
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // [KO] 자식 추가
-            // [EN] Add Child
-            pane.addButton({title: 'Add Child'}).on('click', () => {
-                addChildMesh(redGPUContext, scene);
+            addOrderButton(pane, 'addChild', () => {
+                scene.addChild(createChild(redGPUContext));
+            });
+            addOrderButton(pane, 'addChildAt(child, 2)', () => {
+                scene.addChildAt(createChild(redGPUContext, '#ff0000'), 2);
             });
 
-            // [KO] 특정 인덱스에 추가
-            // [EN] Add Child at Specific Index
-            pane.addButton({title: 'Add Child at Index 2'}).on('click', () => {
-                const newChild = new RedGPU.Display.TextField3D(redGPUContext);
-                newChild.useBillboard = true;
-                newChild.fontSize = 32;
-                newChild.text = 'Inserted Child';
-                newChild.color = '#ff0000';
-                newChild.setPosition(0, 0, 0);
-                scene.addChildAt(newChild, 2);
-            });
-
-            // [KO] 인덱스로 객체 가져오기
-            // [EN] Get Child by Index
-            pane.addButton({title: 'Get Child at Index 1'}).on('click', () => {
+            pane.addButton({title: 'getChildAt(1)'}).on('click', () => {
                 const child = scene.getChildAt(1);
-                if (child) {
-                    child.color = getRandomHexColor();
-                }
+                if (child) child.color = getRandomHexColor();
             });
-
-            // [KO] 객체 인덱스 확인
-            // [EN] Get Child Index
-            pane.addButton({title: 'Get Index of Child 0'}).on('click', () => {
+            pane.addButton({title: 'getChildIndex(child0)'}).on('click', () => {
                 const firstChild = scene.getChildAt(0);
-                if (firstChild) {
-                    const index = scene.getChildIndex(firstChild);
-                    scene.getChildAt(index).color = getRandomHexColor();
-                }
+                if (firstChild) scene.getChildAt(scene.getChildIndex(firstChild)).color = getRandomHexColor();
             });
 
-            // [KO] 객체 인덱스 변경
-            // [EN] Change Child Index
-            pane.addButton({title: 'Set Index of Child 0 to 4'}).on('click', () => {
-                if (scene.numChildren > 4) {
-                    const firstChild = scene.getChildAt(0);
-                    if (firstChild) {
-                        scene.setChildIndex(firstChild, 4);
-                    }
-                }
+            addOrderButton(pane, 'setChildIndex(child0, 4)', () => {
+                const firstChild = scene.getChildAt(0);
+                if (firstChild && scene.numChildren > 4) scene.setChildIndex(firstChild, 4);
             });
-
-            // [KO] 인덱스로 위치 교체
-            // [EN] Swap Children at Indices
-            pane.addButton({title: 'Swap Children at 0 and 1'}).on('click', () => {
+            addOrderButton(pane, 'swapChildrenAt(0, 1)', () => {
                 scene.swapChildrenAt(0, 1);
             });
-
-            // [KO] 객체로 위치 교체
-            // [EN] Swap Specific Children
-            pane.addButton({title: 'Swap First & Last Child'}).on('click', () => {
+            addOrderButton(pane, 'swapChildren(first, last)', () => {
                 const numChildren = scene.numChildren;
-                if (numChildren > 1) {
-                    const firstChild = scene.getChildAt(0);
-                    const lastChild = scene.getChildAt(numChildren - 1);
-                    if (firstChild && lastChild) {
-                        scene.swapChildren(firstChild, lastChild);
-                    }
-                }
+                if (numChildren > 1) scene.swapChildren(scene.getChildAt(0), scene.getChildAt(numChildren - 1));
             });
-
-            // [KO] 자식 삭제
-            // [EN] Remove Child
-            pane.addButton({title: 'Remove Child at Index 1'}).on('click', () => {
+            addOrderButton(pane, 'removeChildAt(1)', () => {
                 scene.removeChildAt(1);
             });
-
-            // [KO] 모든 자식 삭제
-            // [EN] Remove All Children
-            pane.addButton({title: 'Remove All Children'}).on('click', () => {
+            addOrderButton(pane, 'removeAllChildren()', () => {
                 scene.removeAllChildren();
             });
         }
     });
-};
-
-/**
- * [KO] 무작위 16진수 색상 값을 반환합니다.
- * [EN] Returns a random hex color value.
- * @returns {string}
- */
-const getRandomHexColor = () => {
-    return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-};
-
-/**
- * [KO] 자식 메시를 생성하여 추가합니다.
- * [EN] Creates and adds a child mesh.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {string} [color]
- */
-const addChildMesh = (redGPUContext, scene, color = getRandomHexColor()) => {
-    const mesh = new RedGPU.Display.TextField3D(redGPUContext);
-    mesh.useBillboard = true;
-    mesh.fontSize = 32;
-    mesh.text = `Child ${scene.numChildren}`;
-    mesh.color = color;
-    mesh.setPosition(0, 0, 0);
-    scene.addChild(mesh);
 };

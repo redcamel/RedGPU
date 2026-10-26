@@ -1,6 +1,6 @@
 ---
 title: Shadow System
-order: 3
+order: 4
 ---
 
 <script setup>
@@ -17,7 +17,9 @@ const shadowGraph = `
 
 # Shadow System
 
-In 3D space, shadows are a key element in determining an object's three-dimensionality and its spatial relationship with other objects. RedGPU provides a physically based shadow system, allowing you to express realistic shadows with simple configuration.
+In 3D space, shadows are a key element in determining an object's three-dimensionality and its spatial relationship with
+other objects. RedGPU provides a physically based shadow system, allowing you to express realistic shadows with simple
+configuration.
 
 <ClientOnly>
   <MermaidResponsive :definition="shadowGraph" />
@@ -27,17 +29,18 @@ In 3D space, shadows are a key element in determining an object's three-dimensio
 
 For shadows to appear on the screen, the following three elements must be configured properly:
 
-1.  **Light**: The light source that will create the shadow. Currently, **DirectionalLight** supports shadow generation.
-2.  **Caster**: The object that **creates** the shadow. (e.g., character, building) -> `mesh.castShadow = true`
-3.  **Receiver**: The object that **receives** the shadow. (e.g., floor, wall) -> `mesh.receiveShadow = true`
+1. **Light**: The light source that will create the shadow. Currently, `DirectionalLight` supports shadow generation.
+2. **Caster**: The object that **creates** the shadow. (e.g., character, building) -> `mesh.castShadow = true`
+3. **Receiver**: The object that **receives** the shadow. (e.g., floor, wall) -> `mesh.receiveShadow = true`
 
 ::: warning [Performance Note]
-Shadow calculations consume significant GPU resources. Therefore, rather than applying them to all objects, it is better for performance optimization to selectively apply them to visually important objects and surfaces.
+Shadow calculations consume significant GPU resources. Therefore, rather than applying them to all objects, it is better
+for performance optimization to selectively apply them to visually important objects and surfaces.
 :::
 
 ## 2. Object Configuration (Cast & Receive)
 
-Every **Mesh** object in RedGPU has independent properties that determine whether it creates or receives shadows.
+Every `Mesh` object in RedGPU has independent properties that determine whether it creates or receives shadows.
 
 ```javascript
 // 1. Object creating the shadow (Caster)
@@ -51,17 +54,28 @@ floor.receiveShadow = true;
 
 ## 3. Shadow Quality Management (ShadowManager)
 
-The **Scene** owns a **ShadowManager** internally, allowing you to manage shadow resolution or quality globally.
+The `Scene` owns a `ShadowManager` and `DirectionalShadowManager` internally, allowing you to globally configure
+Cascaded Shadow Maps (CSM) and soft shadow (PCSS) quality.
 
 ```javascript
-// Set shadow map resolution (Default: 1024)
-// Larger values lead to sharper shadow edges but increase the performance cost.
-scene.shadowManager.directionalShadowManager.shadowDepthTextureSize = 2048;
+const directionalShadowManager = scene.shadowManager.directionalShadowManager;
+
+// 1. Set shadow map resolution (Default: 2048)
+directionalShadowManager.shadowDepthTextureSize = 2048;
+
+// 2. Cascade (CSM) split count and maximum shadow distance
+directionalShadowManager.cascadeCount = 4;        // Split count (1 ~ 4, Default: 4)
+directionalShadowManager.maxShadowDistance = 200; // Maximum shadow distance (Default: 200)
+
+// 3. Shadow strength and soft shadow (PCSS) control
+directionalShadowManager.strength = 0.9;      // Shadow darkness (0.0 ~ 1.0, Default: 0.9)
+directionalShadowManager.pcssLightSize = 1.0; // Virtual light size (larger values soften edges, Default: 1.0)
+directionalShadowManager.bias = 0.00015;      // Shadow bias to prevent shadow acne (Default: 0.00015)
 ```
 
 ## 4. Practical Example: Configuring a Scene with Shadows
 
-An example of casting a rotating hexahedron's shadow onto the floor using a DirectionalLight.
+An example of casting a rotating box's shadow onto the floor using a `DirectionalLight`.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -71,9 +85,8 @@ const canvas = document.getElementById('redgpu-canvas');
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
-    // 1. Setup light and shadows
-    const light = new RedGPU.Light.DirectionalLight();
-    light.x = -5; light.y = 10; light.z = 5;
+    // 1. Setup directional light (specify light direction vector)
+    const light = new RedGPU.Light.DirectionalLight([-1, -1, -1]);
     scene.lightManager.addDirectionalLight(light);
 
     // 2. Create floor (Receiver)
@@ -125,13 +138,12 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    
+
     // Light
-    const light = new RedGPU.Light.DirectionalLight();
-    light.x = -3; light.y = 5; light.z = 3;
+    const light = new RedGPU.Light.DirectionalLight([-1, -1, -1]);
     scene.lightManager.addDirectionalLight(light);
 
-    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.3);
+    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 50);
 
     // Floor (Receiver)
     const floor = new RedGPU.Display.Mesh(
@@ -166,14 +178,18 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
+---
 
--   **castShadow**: Set an object to cast a shadow.
--   **receiveShadow**: Set a shadow to be cast on an object's surface.
--   **Quality Control**: You can adjust the balance between performance and sharpness through the `ShadowManager`.
+## Related Examples
+
+- [Directional Shadow](/RedGPU/examples/3d/shadow/directionalShadow/)
+- [glTF Model Directional Shadow](/RedGPU/examples/3d/shadow/gltfDirectionalShadow/)
+
+---
 
 ## Next Steps
 
-Learn how to add infinite backgrounds and photorealistic environment light to spaces where three-dimensionality has been brought to life with shadows.
+Learn how to add infinite backgrounds and photorealistic environment light to spaces where three-dimensionality has been
+brought to life with shadows.
 
 - **[Environment](../environment/index.md)**

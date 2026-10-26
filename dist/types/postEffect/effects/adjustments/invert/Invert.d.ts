@@ -1,26 +1,27 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 interface Invert {
+    /**
+     * [KO] 반전 효과 적용 강도 (0 ~ 1)
+     * [EN] Invert effect application intensity (0 ~ 1)
+     * @defaultValue 1
+     */
     amount: number;
 }
 /**
- * [KO] 색상 반전(Invert) 후처리 이펙트입니다.
- * [EN] Invert post-processing effect.
+ * [KO] 화면의 색상을 보색으로 반전시키는 후처리 이펙트입니다.
+ * [EN] Post-processing effect that inverts screen colors to their complementary colors.
  *
- * [KO] 화면의 모든 색상을 보색으로 반전시킵니다. (예: 빨강 -> 시안, 파랑 -> 노랑)
- * [EN] Inverts all colors on the screen to their complementary colors (e.g., Red -> Cyan, Blue -> Yellow).
- *
- * [KO] `amount` 속성을 통해 원본과 반전된 이미지 사이의 혼합 비율을 조절할 수 있습니다.
- * [EN] The mix ratio between the original and inverted image can be adjusted via the `amount` property.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Invert(redGPUContext);
- * effect.amount = 1.0; // 전체 반전
+ * effect.amount = 1.0;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Invert example](/RedGPU/examples/postEffect/adjustments/invert/)
  * @category Adjustments
  */
 declare class Invert extends ASinglePassPostEffect {
@@ -28,7 +29,14 @@ declare class Invert extends ASinglePassPostEffect {
      * [KO] Invert 인스턴스를 생성합니다.
      * [EN] Creates an Invert instance.
      *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Invert(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
 }

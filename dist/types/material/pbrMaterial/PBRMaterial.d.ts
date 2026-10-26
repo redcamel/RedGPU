@@ -4,8 +4,9 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 /**
- * [KO] PBRMaterial 속성 인터페이스
- * [EN] PBRMaterial property interface
+ * [KO] PBRMaterial의 동적 PBR 속성 및 glTF 확장(KHR) 속성 인터페이스입니다.
+ * [EN] Dynamic PBR and glTF extension (KHR) property interface for PBRMaterial.
+ * @category Material
  */
 interface PBRMaterial {
     /**
@@ -14,23 +15,23 @@ interface PBRMaterial {
      */
     useVertexColor: boolean;
     /**
-     * [KO] 알파 컷오프 사용 여부
-     * [EN] Whether to use alpha cutoff
+     * [KO] 알파 컷오프(MASK) 사용 여부
+     * [EN] Whether to use alpha cutoff (MASK)
      */
     useCutOff: boolean;
     /**
-     * [KO] 알파 컷오프 값
-     * [EN] Alpha cutoff value
+     * [KO] 알파 컷오프 임계값
+     * [EN] Alpha cutoff threshold value
      */
     cutOff: number;
     /**
-     * [KO] 알파 블렌딩 모드
-     * [EN] Alpha blending mode
+     * [KO] 알파 블렌딩 모드 값
+     * [EN] Alpha blending mode value
      */
     alphaBlend: number;
     /**
-     * [KO] 2패스 렌더링 사용 여부
-     * [EN] Whether to use 2-pass rendering
+     * [KO] 2패스 투명 렌더링 사용 여부
+     * [EN] Whether to use 2-pass transparent rendering
      */
     use2PathRender: boolean;
     /**
@@ -44,28 +45,28 @@ interface PBRMaterial {
      */
     baseColorTextureSampler: Sampler;
     /**
-     * [KO] 베이스 컬러 팩터
-     * [EN] Base color factor
+     * [KO] 베이스 컬러 팩터 `[r, g, b, a]`
+     * [EN] Base color factor `[r, g, b, a]`
      */
     baseColorFactor: number[];
     /**
-     * [KO] 베이스 컬러 텍스처 UV 인덱스
-     * [EN] Base color texture UV index
+     * [KO] 베이스 컬러 텍스처 UV 채널 인덱스
+     * [EN] Base color texture UV channel index
      */
     baseColorTexture_texCoord_index: number;
     /**
-     * [KO] KHR_materials_clearcoat 확장 사용 여부
-     * [EN] Whether to use KHR_materials_clearcoat extension
+     * [KO] `KHR_materials_clearcoat` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_clearcoat` extension
      */
     useKHR_materials_clearcoat: boolean;
     /**
-     * [KO] 클리어코트 노멀 스케일
-     * [EN] Clearcoat normal scale
+     * [KO] 클리어코트 노멀 맵 스케일
+     * [EN] Clearcoat normal map scale
      */
     KHR_clearcoatNormalScale: number;
     /**
-     * [KO] 클리어코트 팩터
-     * [EN] Clearcoat factor
+     * [KO] 클리어코트 강도 팩터
+     * [EN] Clearcoat intensity factor
      */
     KHR_clearcoatFactor: number;
     /**
@@ -104,33 +105,33 @@ interface PBRMaterial {
      */
     KHR_clearcoatRoughnessTextureSampler: Sampler;
     /**
-     * [KO] 클리어코트 텍스처 UV 인덱스
-     * [EN] Clearcoat texture UV index
+     * [KO] 클리어코트 텍스처 UV 채널 인덱스
+     * [EN] Clearcoat texture UV channel index
      */
     KHR_clearcoatTexture_texCoord_index: number;
     /**
-     * [KO] 클리어코트 노멀 텍스처 UV 인덱스
-     * [EN] Clearcoat normal texture UV index
+     * [KO] 클리어코트 노멀 텍스처 UV 채널 인덱스
+     * [EN] Clearcoat normal texture UV channel index
      */
     KHR_clearcoatNormalTexture_texCoord_index: number;
     /**
-     * [KO] 클리어코트 거칠기 텍스처 UV 인덱스
-     * [EN] Clearcoat roughness texture UV index
+     * [KO] 클리어코트 거칠기 텍스처 UV 채널 인덱스
+     * [EN] Clearcoat roughness texture UV channel index
      */
     KHR_clearcoatRoughnessTexture_texCoord_index: number;
     /**
-     * [KO] KHR_materials_anisotropy 확장 사용 여부
-     * [EN] Whether to use KHR_materials_anisotropy extension
+     * [KO] `KHR_materials_anisotropy` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_anisotropy` extension
      */
     useKHR_materials_anisotropy: boolean;
     /**
-     * [KO] 이방성 강도
+     * [KO] 이방성(Anisotropy) 강도
      * [EN] Anisotropy strength
      */
     KHR_anisotropyStrength: number;
     /**
-     * [KO] 이방성 회전
-     * [EN] Anisotropy rotation
+     * [KO] 이방성 회전 각도 (라디안)
+     * [EN] Anisotropy rotation angle (in radians)
      */
     KHR_anisotropyRotation: number;
     /**
@@ -144,18 +145,18 @@ interface PBRMaterial {
      */
     KHR_anisotropyTextureSampler: Sampler;
     /**
-     * [KO] 이방성 텍스처 UV 인덱스
-     * [EN] Anisotropy texture UV index
+     * [KO] 이방성 텍스처 UV 채널 인덱스
+     * [EN] Anisotropy texture UV channel index
      */
     KHR_anisotropyTexture_texCoord_index: number;
     /**
-     * [KO] KHR_materials_transmission 확장 사용 여부
-     * [EN] Whether to use KHR_materials_transmission extension
+     * [KO] `KHR_materials_transmission` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_transmission` extension
      */
     useKHR_materials_transmission: boolean;
     /**
-     * [KO] 투과 팩터
-     * [EN] Transmission factor
+     * [KO] 광학 투과(Transmission) 팩터
+     * [EN] Optical transmission factor
      */
     KHR_transmissionFactor: number;
     /**
@@ -169,23 +170,23 @@ interface PBRMaterial {
      */
     KHR_transmissionTextureSampler: Sampler;
     /**
-     * [KO] 투과 텍스처 UV 인덱스
-     * [EN] Transmission texture UV index
+     * [KO] 투과 텍스처 UV 채널 인덱스
+     * [EN] Transmission texture UV channel index
      */
     KHR_transmissionTexture_texCoord_index: number;
     /**
-     * [KO] KHR_materials_diffuse_transmission 확장 사용 여부
-     * [EN] Whether to use KHR_materials_diffuse_transmission extension
+     * [KO] `KHR_materials_diffuse_transmission` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_diffuse_transmission` extension
      */
     useKHR_materials_diffuse_transmission: boolean;
     /**
-     * [KO] 확산 투과 팩터
+     * [KO] 확산 투과(Diffuse Transmission) 팩터
      * [EN] Diffuse transmission factor
      */
     KHR_diffuseTransmissionFactor: number;
     /**
-     * [KO] 확산 투과 컬러 팩터
-     * [EN] Diffuse transmission color factor
+     * [KO] 확산 투과 컬러 팩터 `[r, g, b]`
+     * [EN] Diffuse transmission color factor `[r, g, b]`
      */
     KHR_diffuseTransmissionColorFactor: [number, number, number];
     /**
@@ -199,8 +200,8 @@ interface PBRMaterial {
      */
     KHR_diffuseTransmissionTextureSampler: Sampler;
     /**
-     * [KO] 확산 투과 텍스처 UV 인덱스
-     * [EN] Diffuse transmission texture UV index
+     * [KO] 확산 투과 텍스처 UV 채널 인덱스
+     * [EN] Diffuse transmission texture UV channel index
      */
     KHR_diffuseTransmissionTexture_texCoord_index: number;
     /**
@@ -214,53 +215,53 @@ interface PBRMaterial {
      */
     KHR_diffuseTransmissionColorTextureSampler: Sampler;
     /**
-     * [KO] 확산 투과 컬러 텍스처 UV 인덱스
-     * [EN] Diffuse transmission color texture UV index
+     * [KO] 확산 투과 컬러 텍스처 UV 채널 인덱스
+     * [EN] Diffuse transmission color texture UV channel index
      */
     KHR_diffuseTransmissionColorTexture_texCoord_index: number;
     /**
-     * [KO] KHR_materials_volume 확장 사용 여부
-     * [EN] Whether to use KHR_materials_volume extension
+     * [KO] `KHR_materials_volume` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_volume` extension
      */
     useKHR_materials_volume: boolean;
     /**
-     * [KO] 두께 팩터
-     * [EN] Thickness factor
+     * [KO] 볼륨 두께 팩터
+     * [EN] Volume thickness factor
      */
     KHR_thicknessFactor: number;
     /**
-     * [KO] 감쇠 거리
-     * [EN] Attenuation distance
+     * [KO] 볼륨 내 빛 감쇠 거리
+     * [EN] Light attenuation distance within the volume
      */
     KHR_attenuationDistance: number;
     /**
-     * [KO] 감쇠 컬러
-     * [EN] Attenuation color
+     * [KO] 볼륨 감쇠 컬러 `[r, g, b]`
+     * [EN] Volume attenuation color `[r, g, b]`
      */
     KHR_attenuationColor: number[];
     /**
-     * [KO] 두께 텍스처
-     * [EN] Thickness texture
+     * [KO] 볼륨 두께 텍스처
+     * [EN] Volume thickness texture
      */
     KHR_thicknessTexture: BitmapTexture;
     /**
-     * [KO] 두께 텍스처 샘플러
-     * [EN] Thickness texture sampler
+     * [KO] 볼륨 두께 텍스처 샘플러
+     * [EN] Volume thickness texture sampler
      */
     KHR_thicknessTextureSampler: Sampler;
     /**
-     * [KO] 두께 텍스처 UV 인덱스
-     * [EN] Thickness texture UV index
+     * [KO] 볼륨 두께 텍스처 UV 채널 인덱스
+     * [EN] Volume thickness texture UV channel index
      */
     KHR_thicknessTexture_texCoord_index: number;
     /**
-     * [KO] KHR_materials_sheen 확장 사용 여부
-     * [EN] Whether to use KHR_materials_sheen extension
+     * [KO] `KHR_materials_sheen` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_sheen` extension
      */
     useKHR_materials_sheen: boolean;
     /**
-     * [KO] 광택 컬러 팩터
-     * [EN] Sheen color factor
+     * [KO] 광택(Sheen) 컬러 팩터 `[r, g, b]`
+     * [EN] Sheen color factor `[r, g, b]`
      */
     KHR_sheenColorFactor: [number, number, number];
     /**
@@ -289,18 +290,18 @@ interface PBRMaterial {
      */
     KHR_sheenRoughnessTextureSampler: Sampler;
     /**
-     * [KO] KHR_materials_specular 확장 사용 여부
-     * [EN] Whether to use KHR_materials_specular extension
+     * [KO] `KHR_materials_specular` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_specular` extension
      */
     useKHR_materials_specular: boolean;
     /**
-     * [KO] 스펙큘러 팩터
-     * [EN] Specular factor
+     * [KO] 스펙큘러 반사 강도 팩터
+     * [EN] Specular reflection strength factor
      */
     KHR_specularFactor: number;
     /**
-     * [KO] 스펙큘러 컬러 팩터
-     * [EN] Specular color factor
+     * [KO] 스펙큘러 컬러 팩터 `[r, g, b]`
+     * [EN] Specular color factor `[r, g, b]`
      */
     KHR_specularColorFactor: [number, number, number];
     /**
@@ -324,38 +325,38 @@ interface PBRMaterial {
      */
     KHR_specularColorTextureSampler: Sampler;
     /**
-     * [KO] KHR_materials_iridescence 확장 사용 여부
-     * [EN] Whether to use KHR_materials_iridescence extension
+     * [KO] `KHR_materials_iridescence` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_iridescence` extension
      */
     useKHR_materials_iridescence: boolean;
     /**
-     * [KO] 무지개빛 팩터
-     * [EN] Iridescence factor
+     * [KO] 무지개빛(Iridescence) 강도 팩터
+     * [EN] Iridescence intensity factor
      */
     KHR_iridescenceFactor: number;
     /**
-     * [KO] 무지개빛 IOR
-     * [EN] Iridescence IOR
+     * [KO] 무지개빛 박막 굴절률 (IOR)
+     * [EN] Iridescence thin-film index of refraction (IOR)
      */
     KHR_iridescenceIor: number;
     /**
-     * [KO] 무지개빛 최소 두께
-     * [EN] Iridescence thickness minimum
+     * [KO] 무지개빛 박막 최소 두께 (nm)
+     * [EN] Iridescence thin-film minimum thickness (nm)
      */
     KHR_iridescenceThicknessMinimum: number;
     /**
-     * [KO] 무지개빛 최대 두께
-     * [EN] Iridescence thickness maximum
+     * [KO] 무지개빛 박막 최대 두께 (nm)
+     * [EN] Iridescence thin-film maximum thickness (nm)
      */
     KHR_iridescenceThicknessMaximum: number;
     /**
-     * [KO] 무지개빛 텍스처
-     * [EN] Iridescence texture
+     * [KO] 무지개빛 강도 텍스처
+     * [EN] Iridescence intensity texture
      */
     KHR_iridescenceTexture: BitmapTexture;
     /**
-     * [KO] 무지개빛 텍스처 샘플러
-     * [EN] Iridescence texture sampler
+     * [KO] 무지개빛 강도 텍스처 샘플러
+     * [EN] Iridescence intensity texture sampler
      */
     KHR_iridescenceTextureSampler: Sampler;
     /**
@@ -369,18 +370,18 @@ interface PBRMaterial {
      */
     KHR_iridescenceThicknessTextureSampler: Sampler;
     /**
-     * [KO] KHR_materials_unlit 확장 사용 여부
-     * [EN] Whether to use KHR_materials_unlit extension
+     * [KO] `KHR_materials_unlit` 확장 사용 여부
+     * [EN] Whether to use the `KHR_materials_unlit` extension
      */
     useKHR_materials_unlit: boolean;
     /**
-     * [KO] KHR_materials_ior 확장 IOR 값
-     * [EN] KHR_materials_ior extension IOR value
+     * [KO] `KHR_materials_ior` 굴절률(IOR) 값 (기본값: `1.5`)
+     * [EN] `KHR_materials_ior` index of refraction (IOR) value (default: `1.5`)
      */
     KHR_materials_ior: number;
     /**
-     * [KO] 노멀 스케일
-     * [EN] Normal scale
+     * [KO] 노멀 맵 스케일
+     * [EN] Normal map scale
      */
     normalScale: number;
     /**
@@ -389,22 +390,22 @@ interface PBRMaterial {
      */
     useNormalTexture: boolean;
     /**
-     * [KO] 노멀 텍스처
-     * [EN] Normal texture
+     * [KO] 노멀 맵 텍스처
+     * [EN] Normal map texture
      */
     normalTexture: BitmapTexture;
     /**
-     * [KO] 노멀 텍스처 샘플러
-     * [EN] Normal texture sampler
+     * [KO] 노멀 맵 텍스처 샘플러
+     * [EN] Normal map texture sampler
      */
     normalTextureSampler: Sampler;
     /**
-     * [KO] 노멀 텍스처 UV 인덱스
-     * [EN] Normal texture UV index
+     * [KO] 노멀 맵 텍스처 UV 채널 인덱스
+     * [EN] Normal map texture UV channel index
      */
     normalTexture_texCoord_index: number;
     /**
-     * [KO] 발광 텍스처
+     * [KO] 발광(Emissive) 텍스처
      * [EN] Emissive texture
      */
     emissiveTexture: BitmapTexture;
@@ -414,23 +415,23 @@ interface PBRMaterial {
      */
     emissiveTextureSampler: Sampler;
     /**
-     * [KO] 발광 텍스처 UV 인덱스
-     * [EN] Emissive texture UV index
+     * [KO] 발광 텍스처 UV 채널 인덱스
+     * [EN] Emissive texture UV channel index
      */
     emissiveTexture_texCoord_index: number;
     /**
-     * [KO] 발광 팩터
-     * [EN] emissive factor
+     * [KO] 발광 컬러 팩터 `[r, g, b]`
+     * [EN] Emissive color factor `[r, g, b]`
      */
     emissiveFactor: number[];
     /**
-     * [KO] 발광 강도
-     * [EN] emissive strength
+     * [KO] 발광 강도 배율 (`KHR_materials_emissive_strength`)
+     * [EN] Emissive strength multiplier (`KHR_materials_emissive_strength`)
      */
     emissiveStrength: number[];
     /**
-     * [KO] 오클루전 텍스처
-     * [EN] Occlusion texture
+     * [KO] 오클루전(AO) 텍스처
+     * [EN] Occlusion (AO) texture
      */
     occlusionTexture: BitmapTexture;
     /**
@@ -439,17 +440,17 @@ interface PBRMaterial {
      */
     occlusionTextureSampler: Sampler;
     /**
-     * [KO] 오클루전 텍스처 UV 인덱스
-     * [EN] Occlusion texture UV index
+     * [KO] 오클루전 텍스처 UV 채널 인덱스
+     * [EN] Occlusion texture UV channel index
      */
     occlusionTexture_texCoord_index: number;
     /**
-     * [KO] 오클루전 강도
-     * [EN] Occlusion strength
+     * [KO] 오클루전 적용 강도
+     * [EN] Occlusion application strength
      */
     occlusionStrength: number;
     /**
-     * [KO] 금속성-거칠기 텍스처
+     * [KO] 금속성-거칠기(Metallic-Roughness) 텍스처
      * [EN] Metallic-Roughness texture
      */
     metallicRoughnessTexture: BitmapTexture;
@@ -459,97 +460,124 @@ interface PBRMaterial {
      */
     metallicRoughnessTextureSampler: Sampler;
     /**
-     * [KO] 금속성-거칠기 텍스처 UV 인덱스
-     * [EN] Metallic-Roughness texture UV index
+     * [KO] 금속성-거칠기 텍스처 UV 채널 인덱스
+     * [EN] Metallic-Roughness texture UV channel index
      */
     metallicRoughnessTexture_texCoord_index: number;
     /**
-     * [KO] 금속성 팩터
-     * [EN] Metallic factor
+     * [KO] 금속성(Metallic) 팩터 (0.0 ~ 1.0)
+     * [EN] Metallic factor (0.0 to 1.0)
      */
     metallicFactor: number;
     /**
-     * [KO] 거칠기 팩터
-     * [EN] Roughness factor
+     * [KO] 거칠기(Roughness) 팩터 (0.0 ~ 1.0)
+     * [EN] Roughness factor (0.0 to 1.0)
      */
     roughnessFactor: number;
     /**
      * [KO] 양면 렌더링 여부
-     * [EN] Whether it is double-sided
+     * [EN] Whether double-sided rendering is enabled
      */
     doubleSided: boolean;
     /**
-     * [KO] KHR_dispersion 확장 사용 여부
-     * [EN] Whether to use KHR_dispersion extension
+     * [KO] 식생(Two-Sided Foliage) 셰이딩 모델 활성화 여부
+     * [EN] Whether Two-Sided Foliage shading model is enabled
+     */
+    isFoliage: boolean;
+    /**
+     * [KO] `KHR_materials_dispersion` 색분산 강도
+     * [EN] `KHR_materials_dispersion` dispersion strength
      */
     KHR_dispersion: boolean;
 }
 /**
- * [KO] PBR(Physically Based Rendering) 머티리얼 클래스입니다.
- * [EN] PBR (Physically Based Rendering) material class.
+ * [KO] 물리 기반 렌더링(Physically Based Rendering) 및 glTF 2.0 재질 확장을 지원하는 머티리얼 클래스입니다.
+ * [EN] Material class supporting Physically Based Rendering (PBR) and glTF 2.0 material extensions.
  *
- * [KO] ABitmapBaseMaterial을 상속받아 PBR 렌더링을 위한 머티리얼을 생성합니다.
- * [EN] Inherits from ABitmapBaseMaterial to create a material for PBR rendering.
+ * [KO] 베이스 컬러, 금속성/거칠기, 노멀, 오클루전, 발광 텍스처 및 다양한 `KHR_materials_*` 확장 속성을 통합 관리하고 렌더 파이프라인용 패킹 텍스처를 구성합니다.
+ * [EN] Integrates and manages base color, metallic/roughness, normal, occlusion, emissive textures, and various `KHR_materials_*` extension properties, configuring packed textures for the render pipeline.
+ *
  * @category Material
  */
 declare class PBRMaterial extends AUVTransformBaseMaterial {
     #private;
     /**
-     * [KO] PBRMaterial 생성자
-     * [EN] PBRMaterial constructor
+     * [KO] PBRMaterial 인스턴스를 생성합니다.
+     * [EN] Creates a PBRMaterial instance.
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
     /**
-     * [KO] Clearcoat 및 Transmission 패킹 텍스처 반환
-     * [EN] Returns packed texture for Clearcoat and Transmission
+     * [KO] 클리어코트 및 투과(Transmission)/두께 채널이 결합된 패킹 텍스처를 반환합니다.
+     * [EN] Returns the packed texture combining clearcoat and transmission/thickness channels.
+     *
+     * @returns
+     * [KO] PackedTexture 인스턴스
+     * [EN] PackedTexture instance
      */
     get packedKHR_clearcoatTexture_transmission(): PackedTexture;
     /**
-     * [KO] Iridescence 패킹 텍스처 반환
-     * [EN] Returns packed texture for Iridescence
+     * [KO] 무지개빛(Iridescence) 및 두께 채널이 결합된 패킹 텍스처를 반환합니다.
+     * [EN] Returns the packed texture combining iridescence and thickness channels.
+     *
+     * @returns
+     * [KO] PackedTexture 인스턴스
+     * [EN] PackedTexture instance
      */
     get packedKHR_iridescence(): PackedTexture;
     /**
-     * [KO] ORM(Occlusion, Roughness, Metallic) 패킹 텍스처 반환
-     * [EN] Returns packed texture for ORM (Occlusion, Roughness, Metallic)
+     * [KO] 오클루전(R), 거칠기(G), 금속성(B)이 결합된 ORM 패킹 텍스처를 반환합니다.
+     * [EN] Returns the ORM packed texture combining occlusion (R), roughness (G), and metallic (B).
+     *
+     * @returns
+     * [KO] PackedTexture 인스턴스
+     * [EN] PackedTexture instance
      */
     get packedORMTexture(): PackedTexture;
     /**
-     * [KO] Sheen 패킹 텍스처 반환
-     * [EN] Returns packed texture for Sheen
+     * [KO] 광택(Sheen) 컬러 및 거칠기 채널이 결합된 패킹 텍스처를 반환합니다.
+     * [EN] Returns the packed texture combining sheen color and roughness channels.
+     *
+     * @returns
+     * [KO] PackedTexture 인스턴스
+     * [EN] PackedTexture instance
      */
     get packedKHR_sheen(): PackedTexture;
     /**
-     * [KO] Diffuse Transmission 패킹 텍스처 반환
-     * [EN] Returns packed texture for Diffuse Transmission
+     * [KO] 확산 투과(Diffuse Transmission) 컬러 및 팩터 채널이 결합된 패킹 텍스처를 반환합니다.
+     * [EN] Returns the packed texture combining diffuse transmission color and factor channels.
+     *
+     * @returns
+     * [KO] PackedTexture 인스턴스
+     * [EN] PackedTexture instance
      */
     get packedKHR_diffuse_transmission(): PackedTexture;
     /**
-     * [KO] ORM(Occlusion, Roughness, Metallic) 텍스처 패킹 설정
-     * [EN] Setup ORM (Occlusion, Roughness, Metallic) texture packing
+     * [KO] 오클루전과 금속성-거칠기 텍스처를 단일 ORM 패킹 텍스처로 병합합니다.
+     * [EN] Merges occlusion and metallic-roughness textures into a single ORM packed texture.
      */
     setupPackORMTexture(): Promise<void>;
     /**
-     * [KO] Clearcoat 및 Transmission 텍스처 패킹 설정
-     * [EN] Setup Clearcoat and Transmission texture packing
+     * [KO] 클리어코트, 클리어코트 거칠기, 투과, 볼륨 두께 텍스처를 단일 4채널 텍스처로 패킹합니다.
+     * [EN] Packs clearcoat, clearcoat roughness, transmission, and volume thickness textures into a single 4-channel texture.
      */
     setupPackedKHR_clearcoatTexture_transmission(): Promise<void>;
     /**
-     * [KO] Diffuse Transmission 텍스처 패킹 설정
-     * [EN] Setup Diffuse Transmission texture packing
+     * [KO] 확산 투과 컬러 및 확산 투과 팩터 텍스처를 단일 패킹 텍스처로 병합합니다.
+     * [EN] Merges diffuse transmission color and diffuse transmission factor textures into a single packed texture.
      */
     setupPackedKHR_diffuse_transmission(): Promise<void>;
     /**
-     * [KO] Sheen 텍스처 패킹 설정
-     * [EN] Setup Sheen texture packing
+     * [KO] 광택(Sheen) 컬러 및 광택 거칠기 텍스처를 단일 패킹 텍스처로 병합합니다.
+     * [EN] Merges sheen color and sheen roughness textures into a single packed texture.
      */
     setupPackedKHR_sheen(): Promise<void>;
     /**
-     * [KO] Iridescence 텍스처 패킹 설정
-     * [EN] Setup Iridescence texture packing
+     * [KO] 무지개빛(Iridescence) 및 무지개빛 두께 텍스처를 단일 패킹 텍스처로 병합합니다.
+     * [EN] Merges iridescence and iridescence thickness textures into a single packed texture.
      */
     setupPackedKHR_iridescence(): Promise<void>;
 }

@@ -1,13 +1,17 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
  * [KO] Mesh AABB Intersects 예제
  * [EN] Mesh AABB Intersects example
  *
- * [KO] 두 메시 간의 AABB(Axis-Aligned Bounding Box) 충돌 감지를 시연합니다.
- * [EN] Demonstrates AABB (Axis-Aligned Bounding Box) collision detection between two meshes.
+ * [KO] boundingAABB.intersects()로 두 메시 간 AABB(Axis-Aligned Bounding Box) 충돌을 실시간으로 감지합니다.
+ * [EN] Detects AABB (Axis-Aligned Bounding Box) collision between two meshes in real-time via boundingAABB.intersects().
  */
+
+const COLOR_FIXED = '#4CAF50';
+const COLOR_MOVING = '#2196F3';
+const COLOR_HIT = '#FF5722';
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -15,132 +19,77 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. [KO] 카메라 컨트롤러 설정 [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.speedDistance = 0.3;
         controller.distance = 15;
+        controller.speedDistance = 0.3;
 
-        // 2. [KO] 씬 및 뷰 구성 [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
-        // 3. [KO] 충돌 테스트용 객체 생성 [EN] Create Objects for Collision Test
-        const {mesh1, mesh2, intersectionLabel} = createIntersectionTest(redGPUContext, scene);
+        const fixedMesh = createTestMesh(redGPUContext, scene, 3, COLOR_FIXED, -2, 'Fixed Mesh', 2.5);
+        const movingMesh = createTestMesh(redGPUContext, scene, 2, COLOR_MOVING, 2, 'Moving Mesh', 2.0);
 
-        // 4. [KO] 렌더러 생성 및 루프 시작 [EN] Create Renderer and Start Loop
+        const statusLabel = new RedGPU.Display.TextField3D(redGPUContext, 'No Intersection');
+        statusLabel.setPosition(0, 5, 0);
+        statusLabel.fontSize = 48;
+        statusLabel.worldSize = 1.3;
+        scene.addChild(statusLabel);
+
+        let wasIntersecting = false;
+
         const renderer = new RedGPU.Renderer();
-        const render = (time) => {
-            // [KO] 애니메이션 로직 [EN] Animation logic
-            mesh2.rotationX += 0.3;
-            mesh2.rotationY += 0.3;
-            mesh2.rotationZ += 0.3;
-            mesh2.x = Math.sin(time * 0.001) * 5;
-            mesh2.z = Math.cos(time * 0.001) * 3;
+        renderer.start(redGPUContext, (time) => {
+            movingMesh.rotationX += 0.3;
+            movingMesh.rotationY += 0.3;
+            movingMesh.rotationZ += 0.3;
+            movingMesh.x = Math.sin(time * 0.001) * 5;
+            movingMesh.z = Math.cos(time * 0.001) * 3;
 
-            // [KO] 실시간 AABB 충돌 체크 [EN] Real-time AABB collision check
-            checkAABBIntersection(mesh1, mesh2, intersectionLabel);
-        };
-        renderer.start(redGPUContext, render);
+            // [KO] 월드 공간 AABB 간 교차 판정 (상태가 바뀔 때만 시각 피드백 갱신)
+            // [EN] Test world-space AABB intersection (update visual feedback only on state change)
+            const isIntersecting = fixedMesh.boundingAABB.intersects(movingMesh.boundingAABB);
+            if (isIntersecting !== wasIntersecting) {
+                wasIntersecting = isIntersecting;
+                statusLabel.text = isIntersecting ? 'INTERSECTION DETECTED!' : 'No Intersection';
+                statusLabel.color = isIntersecting ? COLOR_HIT : '#FFFFFF';
+                fixedMesh.material.color.setColorByHEX(isIntersecting ? COLOR_HIT : COLOR_FIXED);
+                movingMesh.material.color.setColorByHEX(isIntersecting ? COLOR_HIT : COLOR_MOVING);
+            }
+        });
 
-        // 5. [KO] 테스트용 GUI 렌더링 [EN] Render Test GUI
         renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
-        document.body.innerHTML = `<div>Error: ${failReason}</div>`;
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 구성합니다.
- * [EN] Configures GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
+const createTestMesh = (redGPUContext, scene, size, color, x, text, labelY) => {
+    const mesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, size, size, size),
+        new RedGPU.Material.ColorMaterial(redGPUContext, color)
+    );
+    mesh.setPosition(x, 0, 0);
+    mesh.enableDebugger = true;
+    mesh.drawDebugger.debugMode = 'AABB';
+    scene.addChild(mesh);
+
+    const label = new RedGPU.Display.TextField3D(redGPUContext, text);
+    label.setPosition(0, labelY, 0);
+    label.color = color;
+    label.fontSize = 14;
+    label.worldSize = 0.7;
+    mesh.addChild(label);
+
+    return mesh;
+};
+
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };
-
-/**
- * [KO] 교차 테스트를 위한 객체들을 생성하고 배치합니다.
- * [EN] Creates and places objects for intersection testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {Object} {mesh1, mesh2, intersectionLabel}
- */
-function createIntersectionTest(redGPUContext, scene) {
-    // [KO] 메시 1 (고정) [EN] Mesh 1 (Fixed)
-    const material1 = new RedGPU.Material.ColorMaterial(redGPUContext, '#4CAF50');
-    const geometry1 = new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3);
-    const mesh1 = new RedGPU.Display.Mesh(redGPUContext, geometry1, material1);
-    mesh1.setPosition(-2, 0, 0);
-    mesh1.enableDebugger = true;
-    mesh1.drawDebugger.debugMode = 'AABB';
-    scene.addChild(mesh1);
-
-    // [KO] 메시 2 (이동) [EN] Mesh 2 (Moving)
-    const material2 = new RedGPU.Material.ColorMaterial(redGPUContext, '#2196F3');
-    const geometry2 = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
-    const mesh2 = new RedGPU.Display.Mesh(redGPUContext, geometry2, material2);
-    mesh2.setPosition(2, 0, 0);
-    mesh2.enableDebugger = true;
-    mesh2.drawDebugger.debugMode = 'AABB';
-    scene.addChild(mesh2);
-
-    // [KO] 상태 표시용 라벨 [EN] Status Display Label
-    const intersectionLabel = new RedGPU.Display.TextField3D(redGPUContext, 'No Intersection');
-    intersectionLabel.setPosition(0, 5, 0);
-    intersectionLabel.fontSize = 48;
-    intersectionLabel.worldSize = 1.3;
-    scene.addChild(intersectionLabel);
-
-    // [KO] 개별 객체 라벨 [EN] Individual Object Labels
-    const label1 = new RedGPU.Display.TextField3D(redGPUContext, 'Fixed Mesh');
-    label1.setPosition(0, 2.5, 0);
-    label1.color = '#4CAF50';
-    label1.fontSize = 14;
-    label1.worldSize = 0.7;
-    mesh1.addChild(label1);
-
-    const label2 = new RedGPU.Display.TextField3D(redGPUContext, 'Moving Mesh');
-    label2.setPosition(0, 2.0, 0);
-    label2.color = '#2196F3';
-    label2.fontSize = 14;
-    label2.worldSize = 0.7;
-    mesh2.addChild(label2);
-
-    return {mesh1, mesh2, intersectionLabel};
-}
-
-/**
- * [KO] 두 메시의 AABB 교차 여부를 실시간으로 체크하고 시각화합니다.
- * [EN] Real-time check and visualization of AABB intersection between two meshes.
- * @param {RedGPU.Display.Mesh} mesh1
- * @param {RedGPU.Display.Mesh} mesh2
- * @param {RedGPU.Display.TextField3D} label
- */
-function checkAABBIntersection(mesh1, mesh2, label) {
-    const aabb1 = mesh1.boundingAABB;
-    const aabb2 = mesh2.boundingAABB;
-
-    if (!aabb1 || !aabb2) {
-        label.text = 'AABB Calculation Failed';
-        label.color = '#FFAA00';
-        return;
-    }
-
-    const isIntersecting = aabb1.intersects(aabb2);
-
-    if (isIntersecting) {
-        label.text = 'INTERSECTION DETECTED!';
-        label.color = '#FF5722';
-        mesh1.material.color.setColorByHEX('#FF5722');
-        mesh2.material.color.setColorByHEX('#FF5722');
-    } else {
-        label.text = 'No Intersection';
-        label.color = '#FFFFFF';
-        mesh1.material.color.setColorByHEX('#4CAF50');
-        mesh2.material.color.setColorByHEX('#2196F3');
-    }
-}

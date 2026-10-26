@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import AUniformBaseBuffer from "../core/AUniformBaseBuffer";
 /**
- * [KO] Storage 버퍼를 관리하는 클래스입니다.
- * [EN] Class that manages storage buffers.
+ * [KO] 스토리지 버퍼(`GPUBuffer`)를 관리하는 클래스입니다.
+ * [EN] Class that manages storage buffers (`GPUBuffer`).
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const storageBuffer = new RedGPU.Resource.StorageBuffer(redGPUContext, data);
  * ```
@@ -15,7 +15,7 @@ declare class StorageBuffer extends AUniformBaseBuffer {
      * [KO] StorageBuffer 인스턴스를 생성합니다.
      * [EN] Creates a StorageBuffer instance.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * const storageBuffer = new RedGPU.Resource.StorageBuffer(redGPUContext, data, 'MyStorageBuffer');
      * ```

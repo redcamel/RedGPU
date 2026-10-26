@@ -1,46 +1,49 @@
 /**
- * `defineColorRGB` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ * [KO] `defineColorRGB` 함수에 전달할 RGB 색상 프로퍼티 정의 옵션 인터페이스입니다.
+ * [EN] Interface defining RGB color property options for the `defineColorRGB` function.
+ *
+ * @category DefineProperty
  */
 export interface DefineColorRGBInfo {
     /**
-     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
-     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     * [KO] 대상 프로토타입에 정의할 프로퍼티 키 이름입니다.
+     * [EN] Property key name to define on the target prototype.
      */
     key: string;
     /**
-     * [KO] 초기 16진수 색상 코드값 (예: `#ff0000`). 지정하지 않을 경우 기본값은 `#fff`입니다.
-     * [EN] Initial hex color code (e.g., `#ff0000`). If not specified, defaults to `#fff`.
+     * [KO] 초기 16진수 색상 코드 문자열(예: `'#ff0000'`)입니다. 기본값은 `'#fff'`입니다.
+     * [EN] Initial hex color code string (e.g., `'#ff0000'`). Default is `'#fff'`.
      */
     value?: string;
 }
 /**
- * 지정된 클래스의 프로토타입에 GPU와 연동되는 RGB 색상(ColorRGB) 속성을 정의합니다.
+ * [KO] 대상 클래스의 프로토타입에 GPU 유니폼 버퍼와 연동되는 `ColorRGB` 프로퍼티를 동적으로 정의합니다.
+ * [EN] Dynamically defines `ColorRGB` properties linked to the GPU uniform buffer on the target class prototype.
  *
- * @remarks
- * **[KO]**
- * - 해당 속성의 getter는 {@link ColorRGB} 인스턴스를 반환합니다.
- * - setter는 16진수 문자열(예: `#ff0000`) 또는 {@link ColorRGB} 인스턴스를 허용합니다.
- * - 값이 설정되거나 내부 RGB 값이 바뀌면 감지하여 자동으로 GPU의 유니폼 버퍼에 정규화된 선형 RGB 값(rgbNormalLinear)을 업데이트합니다.
+ * [KO] Setter는 16진수 색상 문자열(예: `'#ff0000'`) 또는 `ColorRGB` 인스턴스를 허용하며, 값 변경 시 정규화된 선형 RGB 값(`rgbNormalLinear`)을 유니폼 버퍼에 자동 기록합니다.
+ * [EN] The setter accepts a hex color string (e.g., `'#ff0000'`) or a `ColorRGB` instance, automatically writing normalized linear RGB values (`rgbNormalLinear`) to the uniform buffer on change.
  *
- * **[EN]**
- * - The getter returns a {@link ColorRGB} instance.
- * - The setter accepts a hex color string (e.g. `#ff0000`) or a {@link ColorRGB} instance.
- * - When the value changes, it automatically normalizes and writes to the GPU globalStruct buffer as linear RGB values (rgbNormalLinear).
- *
- * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link DefineColorRGBInfo} 설정 또는 그 배열 [EN] A single {@link DefineColorRGBInfo} configuration or an array of configurations
- *
- * @example
+ * ### Example
  * ```typescript
- * // 단일 설정
+ * // [KO] 단일 RGB 색상 프로퍼티 정의
+ * // [EN] Define a single RGB color property
  * RedGPU.DefineGPUProperty.defineColorRGB(MyMaterial, { key: 'albedoColor', value: '#ff0000' });
  *
- * // 여러 속성 일괄 정의
+ * // [KO] 다중 RGB 색상 프로퍼티 일괄 정의
+ * // [EN] Define multiple RGB color properties at once
  * RedGPU.DefineGPUProperty.defineColorRGB(MyMaterial, [
- *   { key: 'emissiveColor', value: '#000000' },
- *   { key: 'specularColor', value: '#ffffff' }
+ *     { key: 'emissiveColor', value: '#000000' },
+ *     { key: 'specularColor', value: '#ffffff' }
  * ]);
  * ```
+ *
+ * @param target -
+ * [KO] 프로퍼티를 정의할 대상 클래스 생성자
+ * [EN] Target class constructor to define properties on
+ * @param defineInfo -
+ * [KO] 단일 `DefineColorRGBInfo` 설정 객체 또는 설정 배열
+ * [EN] Single `DefineColorRGBInfo` configuration object or array of configurations
+ * @category DefineProperty
  */
 declare const defineColorRGB: (target: any, defineInfo: DefineColorRGBInfo | DefineColorRGBInfo[]) => void;
 export default defineColorRGB;

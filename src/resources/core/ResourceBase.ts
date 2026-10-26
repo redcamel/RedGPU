@@ -7,8 +7,8 @@ import RedGPUObject from "../../base/RedGPUObject";
  * [EN] The top-level base class inherited by all resource classes in RedGPU.
  *
  * ::: warning
- * [KO] 이 클래스는 직접 인스턴스를 생성하지 마십시오.
- * [EN] Do not create an instance of this class directly.
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Resource
@@ -17,10 +17,6 @@ class ResourceBase extends RedGPUObject {
 
     readonly #gpuDevice: GPUDevice
     #cacheKey: string
-    /**
-     * [KO] 더티 상태 리스너 배열입니다.
-     * [EN] Array of dirty state listeners.
-     */
     #dirtyListeners: any[] = [];
     #resourceManagerKey: string
     #revision: number = 0
@@ -28,6 +24,7 @@ class ResourceBase extends RedGPUObject {
     /**
      * [KO] ResourceBase 인스턴스를 생성합니다.
      * [EN] Creates a ResourceBase instance.
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
@@ -41,23 +38,30 @@ class ResourceBase extends RedGPUObject {
         this.#gpuDevice = redGPUContext.gpuDevice
     }
 
-    /** [KO] 리소스의 리비전(업데이트 횟수)을 반환합니다. [EN] Returns the revision (update count) of the resource. */
+    /**
+     * [KO] 리소스의 리비전(업데이트 횟수)을 반환합니다.
+     * [EN] Returns the revision (update count) of the resource.
+     *
+     * @returns
+     * [KO] 리소스 리비전 번호
+     * [EN] Resource revision number
+     */
     get revision(): number {
         return this.#revision;
     }
 
     /**
-     * [KO] 캐시 키를 반환합니다.
-     * [EN] Returns the cache key.
+     * [KO] 캐시 키를 반환하거나 설정합니다.
+     * [EN] Gets or sets the cache key.
+     *
+     * @returns
+     * [KO] 캐시 키 문자열
+     * [EN] Cache key string
      */
     get cacheKey(): string {
         return this.#cacheKey;
     }
 
-    /**
-     * [KO] 캐시 키를 설정합니다.
-     * [EN] Sets the cache key.
-     */
     set cacheKey(value: string) {
         this.#cacheKey = value;
     }
@@ -65,14 +69,22 @@ class ResourceBase extends RedGPUObject {
     /**
      * [KO] 리소스 매니저 키를 반환합니다.
      * [EN] Returns the resource manager key.
+     *
+     * @returns
+     * [KO] 리소스 매니저 키 문자열
+     * [EN] Resource manager key string
      */
     get resourceManagerKey(): string {
         return this.#resourceManagerKey;
     }
 
     /**
-     * [KO] 연관된 GPU 디바이스를 반환합니다.
-     * [EN] Returns the associated GPU device.
+     * [KO] 연관된 GPUDevice를 반환합니다.
+     * [EN] Returns the associated GPUDevice.
+     *
+     * @returns
+     * [KO] GPUDevice 인스턴스
+     * [EN] GPUDevice instance
      */
     get gpuDevice(): GPUDevice {
         return this.#gpuDevice;
@@ -80,11 +92,12 @@ class ResourceBase extends RedGPUObject {
 
 
     /**
-     * [KO] 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
-     * [EN] Adds a listener function to be called when the pipeline becomes dirty.
+     * [KO] 리소스 변경 시 호출될 파이프라인 더티 리스너를 추가합니다.
+     * [EN] Adds a pipeline dirty listener to be called when the resource changes.
+     *
      * @param listener -
-     * [KO] 리스너 함수
-     * [EN] Listener function
+     * [KO] 등록할 리스너 함수
+     * [EN] Listener function to register
      */
     __addDirtyPipelineListener(listener: () => void) {
         this.#manageResourceState(true);
@@ -92,11 +105,12 @@ class ResourceBase extends RedGPUObject {
     }
 
     /**
-     * [KO] 리소스 업데이트 리스너를 제거합니다.
-     * [EN] Removes a resource update listener.
+     * [KO] 등록된 파이프라인 더티 리스너를 제거합니다.
+     * [EN] Removes a registered pipeline dirty listener.
+     *
      * @param listener -
      * [KO] 제거할 리스너 함수
-     * [EN] Listener function to be removed
+     * [EN] Listener function to remove
      */
     __removeDirtyPipelineListener(listener: () => void) {
         const index = this.#dirtyListeners.indexOf(listener);
@@ -109,9 +123,10 @@ class ResourceBase extends RedGPUObject {
     /**
      * [KO] 리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
      * [EN] Notifies registered listeners that the resource has been updated.
+     *
      * @param resetList -
-     * [KO] 실행 후 리스너 목록 초기화 여부 (기본값: false)
-     * [EN] Whether to reset the listener list after firing (default: false)
+     * [KO] 알림 실행 후 리스너 목록 초기화 여부 (기본값: false)
+     * [EN] Whether to reset the listener list after notification (default: false)
      */
     notifyUpdate(resetList: boolean = false) {
         this.#revision++;
@@ -119,22 +134,15 @@ class ResourceBase extends RedGPUObject {
         if (resetList) this.#dirtyListeners.length = 0
     }
 
-    /**
-     * [KO] 리소스 상태를 관리합니다 (참조 횟수 증감).
-     * [EN] Manages the state of a resource (increments/decrements reference count).
-     * @param isAddingListener -
-     * [KO] 리스너 추가 여부
-     * [EN] Whether adding a listener
-     */
     #manageResourceState(isAddingListener: boolean) {
-        const {resourceManager} = this;
-        if (this.constructor.name === 'Sampler') {
-            return
+        if (!this.#resourceManagerKey) {
+            return;
         }
+        const {resourceManager} = this;
         if (resourceManager) {
-            const targetResourceManagedState = resourceManager[this.#resourceManagerKey]
+            const targetResourceManagedState = resourceManager[this.#resourceManagerKey];
             if (!targetResourceManagedState) {
-                consoleAndThrowError('need managedStateKey', this.constructor.name)
+                consoleAndThrowError('need managedStateKey', this.#resourceManagerKey);
             }
             const targetState = targetResourceManagedState?.table.get(this.cacheKey);
             if (targetState) {

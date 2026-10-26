@@ -2,61 +2,36 @@ import type RedGPUContext from "../RedGPUContext";
 import RedGPUObject from "../../base/RedGPUObject";
 
 /**
- * [KO] RedGPUContext의 캔버스 환경 변화(부모 변경, 크기/위치 변화)를 감지하는 클래스입니다.
- * [EN] Class that detects changes in the RedGPUContext's canvas environment (parent changes, size/position changes).
+ * [KO] `RedGPUContext`에 연결된 HTML 캔버스의 DOM 부모 변경 및 레이아웃(크기·위치) 변화를 감지하는 관찰자 클래스입니다.
+ * [EN] Observer class that detects DOM parent changes and layout (size/position) changes of the HTML canvas attached to `RedGPUContext`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
+ *
+ * @category Context
  */
 export default class RedGPUContextObserver extends RedGPUObject {
 
-    /**
-     * [KO] 관찰 대상 HTML 캔버스 엘리먼트
-     * [EN] Target HTML canvas element to observe
-     */
     readonly #htmlCanvas: HTMLCanvasElement;
-    /**
-     * [KO] 레이아웃 변화 시 실행될 콜백 함수
-     * [EN] Callback function to execute when layout changes
-     */
     readonly #updateCallback: () => void;
-    /**
-     * [KO] 현재 캔버스의 부모 엘리먼트
-     * [EN] Current parent element of the canvas
-     */
     #currentParent: HTMLElement | null = null;
-    /**
-     * [KO] 부모 엘리먼트 크기 감지용 ResizeObserver
-     * [EN] ResizeObserver for detecting parent element size changes
-     */
     #resizeObserver: ResizeObserver | null = null;
-    /**
-     * [KO] DOM 변화 감지용 MutationObserver
-     * [EN] MutationObserver for detecting DOM structure changes
-     */
     #mutationObserver: MutationObserver | null = null;
-    /**
-     * [KO] 위치/화면 노출 여부 감지용 IntersectionObserver
-     * [EN] IntersectionObserver for detecting position and screen visibility changes
-     */
     #intersectionObserver: IntersectionObserver | null = null;
-    /**
-     * [KO] 윈도우 리사이즈 이벤트 핸들러 참조
-     * [EN] Window resize event handler reference
-     */
     #resizeHandler: (() => void) | null = null;
 
     /**
-     * [KO] RedGPUContextObserver 생성자
-     * [EN] RedGPUContextObserver constructor
+     * [KO] RedGPUContextObserver 인스턴스를 생성합니다.
+     * [EN] Creates a RedGPUContextObserver instance.
+     *
      * @param redGPUContext -
      * [KO] 관찰할 RedGPUContext 인스턴스
      * [EN] RedGPUContext instance to observe
      * @param updateCallback -
-     * [KO] 레이아웃 변화 시 호출할 콜백
-     * [EN] Callback to call when layout changes
+     * [KO] 레이아웃 변화 감지 시 호출할 콜백 함수
+     * [EN] Callback function invoked when a layout change is detected
      */
     constructor(redGPUContext: RedGPUContext, updateCallback: () => void) {
         super(redGPUContext);
@@ -66,8 +41,8 @@ export default class RedGPUContextObserver extends RedGPUObject {
     }
 
     /**
-     * [KO] 모든 옵저버를 파기하고 이벤트를 해제합니다.
-     * [EN] Destroys all observers and removes event listeners.
+     * [KO] 등록된 모든 옵저버 연결을 해제하고 윈도우 리사이즈 이벤트 리스너를 제거합니다.
+     * [EN] Disconnects all registered observers and removes the window resize event listener.
      */
     destroy() {
         this.#mutationObserver?.disconnect();
@@ -79,18 +54,10 @@ export default class RedGPUContextObserver extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 옵저버 초기화
-     * [EN] Initialize observers
-     */
     #init() {
-        // [KO] MutationObserver: 부모 객체의 변경(추가/삭제/이동) 감지
-        // [EN] MutationObserver: Detect changes in parent object (add/delete/move)
         this.#mutationObserver = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 if (mutation.type === 'childList') {
-                    // [KO] 캔버스의 부모가 바뀌었는지 확인
-                    // [EN] Check if the canvas's parent has changed
                     if (this.#currentParent !== this.#htmlCanvas.parentElement) {
                         this.#updateObservers();
                     }
@@ -99,13 +66,9 @@ export default class RedGPUContextObserver extends RedGPUObject {
         });
 
         if (typeof document !== 'undefined') {
-            // [KO] document.body를 관찰하여 캔버스의 이동을 감지합니다.
-            // [EN] Observe document.body to detect canvas movement.
             this.#mutationObserver.observe(document.body, {childList: true, subtree: true});
         }
 
-        // [KO] IntersectionObserver: 위치 변화(top, left 등) 감지
-        // [EN] IntersectionObserver: Detect position changes (top, left, etc.)
         this.#intersectionObserver = new IntersectionObserver(() => {
             this.#handleLayoutChange();
         }, {
@@ -113,18 +76,12 @@ export default class RedGPUContextObserver extends RedGPUObject {
         });
         this.#intersectionObserver.observe(this.#htmlCanvas);
 
-        // [KO] 즉각적인 반응성을 위해 윈도우 리사이즈 및 스크롤 이벤트도 함께 사용합니다.
-        // [EN] For immediate responsiveness, window resize and scroll events are also used.
         this.#resizeHandler = () => this.#handleLayoutChange();
         window.addEventListener('resize', this.#resizeHandler);
 
         this.#updateObservers();
     }
 
-    /**
-     * [KO] 부모 요소 관찰자 업데이트
-     * [EN] Update parent element observer
-     */
     #updateObservers() {
         const newParent = this.#htmlCanvas.parentElement;
         if (this.#currentParent !== newParent) {
@@ -143,13 +100,7 @@ export default class RedGPUContextObserver extends RedGPUObject {
         this.#handleLayoutChange();
     }
 
-    /**
-     * [KO] 레이아웃 변화 처리
-     * [EN] Handle layout change
-     */
     #handleLayoutChange() {
-        // [KO] RedGPUContext의 boundingClientRect 업데이트 및 setSize 호출
-        // [EN] Update RedGPUContext's boundingClientRect and call setSize
         this.#updateCallback();
         this.redGPUContext.sizeManager.setSize();
     }

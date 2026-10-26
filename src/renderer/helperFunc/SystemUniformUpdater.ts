@@ -7,22 +7,21 @@ import DirectionalLight from "../../light/lights/DirectionalLight";
 import AmbientLight from "../../light/lights/AmbientLight";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import SkyAtmosphere from "../../display/skyAtmosphere/SkyAtmosphere";
+import WindManager from "../../wind/WindManager";
 
 let temp3 = mat4.create()
+const tempCascadeTexelSizes = new Float32Array(4);
 
 /**
- * [KO] 시스템 유니폼 데이터를 업데이트하는 유틸리티 클래스입니다.
- * [EN] A utility class for updating system globalStruct data.
- *
- * [KO] 카메라, 조명, 그림자 등 시스템 전역에서 공통으로 사용되는 WGSL 구조체 데이터를 Float32Array/Uint32Array 버퍼에 매핑합니다.
- * [EN] Maps WGSL structure data commonly used globally in the system, such as cameras, lights, and shadows, to Float32Array/Uint32Array buffers.
+ * [KO] 카메라, 조명, 그림자, 대기 산란, 바람 등 시스템 전역 WGSL 유니폼 구조체 데이터를 `Float32Array`/`Uint32Array` 버퍼에 업데이트하는 유틸리티 클래스입니다.
+ * [EN] Utility class that updates system-wide WGSL uniform structure data such as camera, lights, shadows, sky atmosphere, and wind to `Float32Array`/`Uint32Array` buffers.
  *
  * @category Renderer
  */
 class SystemUniformUpdater {
     /**
-     * [KO] 카메라 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates camera information to globalStruct data.
+     * [KO] 카메라 정보를 시스템 유니폼 버퍼에 업데이트합니다.
+     * [EN] Updates camera information to the system uniform buffer.
      *
      * @param camera -
      * [KO] 업데이트할 카메라 인스턴스
@@ -31,15 +30,15 @@ class SystemUniformUpdater {
      * [KO] WGSL 카메라 구조체 멤버 정보
      * [EN] WGSL camera structure member information
      * @param uniformDataF32 -
-     * [KO] 대상 Float32Array 버퍼
-     * [EN] Target Float32Array buffer
+     * [KO] 대상 `Float32Array` 버퍼
+     * [EN] Target `Float32Array` buffer
      * @param uniformDataU32 -
-     * [KO] 대상 Uint32Array 버퍼
-     * [EN] Target Uint32Array buffer
+     * [KO] 대상 `Uint32Array` 버퍼
+     * [EN] Target `Uint32Array` buffer
      */
     static updateCamera(
         camera: PerspectiveCamera | Camera2D | OrthographicCamera,
-        cameraMembers: any, //TODO 타입을 정해야하나...
+        cameraMembers: any,
         uniformDataF32: Float32Array,
         uniformDataU32: Uint32Array
     ) {
@@ -98,21 +97,21 @@ class SystemUniformUpdater {
     }
 
     /**
-     * [KO] 그림자 설정 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates shadow configuration information to globalStruct data.
+     * [KO] 그림자 설정 및 캐스케이드 행렬 정보를 시스템 유니폼 버퍼에 업데이트합니다.
+     * [EN] Updates shadow configuration and cascade matrix information to the system uniform buffer.
      *
      * @param shadowManager -
-     * [KO] 쉐도우 매니저 인스턴스
+     * [KO] 섀도우 매니저 인스턴스
      * [EN] Shadow manager instance
      * @param shadowMembers -
      * [KO] WGSL 그림자 구조체 멤버 정보
      * [EN] WGSL shadow structure member information
      * @param uniformDataF32 -
-     * [KO] 대상 Float32Array 버퍼
-     * [EN] Target Float32Array buffer
+     * [KO] 대상 `Float32Array` 버퍼
+     * [EN] Target `Float32Array` buffer
      * @param uniformDataU32 -
-     * [KO] 대상 Uint32Array 버퍼
-     * [EN] Target Uint32Array buffer
+     * [KO] 대상 `Uint32Array` 버퍼
+     * [EN] Target `Uint32Array` buffer
      */
     static updateShadow(
         shadowManager: any,
@@ -120,45 +119,89 @@ class SystemUniformUpdater {
         uniformDataF32: Float32Array,
         uniformDataU32: Uint32Array
     ) {
+        const directionalShadowManager = shadowManager.directionalShadowManager;
+        const cascadePV = directionalShadowManager.cascadeProjectionViewMatrices;
+        const cascadeSplits = directionalShadowManager.cascadeSplitDepths;
+        const depthTexSize = directionalShadowManager.shadowDepthTextureSize;
+        const oneOverTextureSize = 1.0 / Math.max(1, depthTexSize);
+
+        for (let i = 0; i < 4; i++) {
+            const mat = cascadePV[i];
+            if (mat) {
+                const m0 = mat[0];
+                const m1 = mat[1];
+                const m2 = mat[2];
+                const orthoScaleSq = m0 * m0 + m1 * m1 + m2 * m2;
+                const invOrthoScale = orthoScaleSq > 1e-8 ? 1.0 / Math.sqrt(orthoScaleSq) : 100.0;
+                tempCascadeTexelSizes[i] = (orthoScaleSq > 1e-8 ? 2.0 * invOrthoScale : 0.01) * oneOverTextureSize;
+            } else {
+                tempCascadeTexelSizes[i] = 0.01 * oneOverTextureSize;
+            }
+        }
+
         updateSystemUniformData(
             shadowMembers, uniformDataF32, uniformDataU32,
             [
                 {
                     key: 'directionalShadowDepthTextureSize',
-                    value: shadowManager.directionalShadowManager.shadowDepthTextureSize,
+                    value: directionalShadowManager.shadowDepthTextureSize,
                 },
                 {
                     key: 'directionalShadowBias',
-                    value: shadowManager.directionalShadowManager.bias,
+                    value: directionalShadowManager.bias,
                 },
                 {
                     key: 'directionalShadowStrength',
-                    value: shadowManager.directionalShadowManager.strength,
+                    value: directionalShadowManager.strength,
                 },
                 {
-                    key: 'directionalShadowFilterScale',
-                    value: shadowManager.directionalShadowManager.filterScale,
+                    key: 'cascadeCount',
+                    value: directionalShadowManager.cascadeCount,
+                },
+                {
+                    key: 'cascadeSplitDepths',
+                    value: cascadeSplits,
+                },
+                {
+                    key: 'cascadeTexelSizes',
+                    value: tempCascadeTexelSizes,
+                },
+                {
+                    key: 'casterBoundingCenter',
+                    value: directionalShadowManager.casterBoundingCenter,
+                },
+                {
+                    key: 'casterBoundingRadiusSq',
+                    value: directionalShadowManager.casterBoundingRadiusSq,
                 }
             ]
-        )
+        );
+
+        const matricesInfo = shadowMembers.cascadeLightViewProjectionMatrices;
+        if (matricesInfo) {
+            const startOffset = matricesInfo.uniformOffset / Float32Array.BYTES_PER_ELEMENT;
+            for (let i = 0; i < 4; i++) {
+                uniformDataF32.set(cascadePV[i], startOffset + i * 16);
+            }
+        }
     }
 
     /**
-     * [KO] 대기 산란(SkyAtmosphere) 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates SkyAtmosphere information to globalStruct data.
+     * [KO] 대기 산란(`SkyAtmosphere`) 정보를 시스템 유니폼 버퍼에 업데이트합니다.
+     * [EN] Updates `SkyAtmosphere` information to the system uniform buffer.
      *
      * @param skyAtmosphere -
-     * [KO] 대기 산란 인스턴스
-     * [EN] SkyAtmosphere instance
-     * @param skyAtmosphereMembers -
-     * [KO] WGSL 대기 산란 구조체 멤버 정보
-     * [EN] WGSL SkyAtmosphere structure member information
+     * [KO] `SkyAtmosphere` 인스턴스
+     * [EN] `SkyAtmosphere` instance
+     * @param systemMembers -
+     * [KO] WGSL 시스템 유니폼 구조체 멤버 정보
+     * [EN] WGSL system uniform structure member information
      * @param uniformDataF32 -
-     * [KO] 대상 Float32Array 버퍼
-     * [EN] Target Float32Array buffer
+     * [KO] 대상 `Float32Array` 버퍼
+     * [EN] Target `Float32Array` buffer
      * @param uniformDataU32 -
-     * [KO] 대상 Uint32Array 버퍼
-     * [EN] Target Uint32Array buffer
+     * [KO] 대상 `Uint32Array` 버퍼
+     * [EN] Target `Uint32Array` buffer
      */
     static updateSkyAtmosphere(
         skyAtmosphere: SkyAtmosphere,
@@ -169,13 +212,11 @@ class SystemUniformUpdater {
         const params = skyAtmosphere?.params;
         const skyAtmosphereMembers = systemMembers.skyAtmosphere.members;
 
-        // 1. 전역 플래그 업데이트
         updateSystemUniformData(
             systemMembers, uniformDataF32, uniformDataU32,
             [{key: 'useSkyAtmosphere', value: skyAtmosphere ? 1 : 0}]
         );
 
-        // 2. 물리 구조체 업데이트
         updateSystemUniformData(
             skyAtmosphereMembers, uniformDataF32, uniformDataU32,
             [
@@ -192,7 +233,6 @@ class SystemUniformUpdater {
                 {key: 'skyLuminanceFactor', value: params?.skyLuminanceFactor || [1, 1, 1]},
                 {key: 'multiScatteringFactor', value: params?.multiScatteringFactor || 0},
                 {key: 'sunDirection', value: params?.sunDirection || [0, 0, 0]},
-                {key: 'transmittanceMinLightElevationAngle', value: params?.transmittanceMinLightElevationAngle || 0},
                 {key: 'groundRadius', value: params?.groundRadius || 0},
                 {key: 'atmosphereHeight', value: params?.atmosphereHeight || 0},
                 {key: 'aerialPerspectiveDistanceScale', value: params?.aerialPerspectiveDistanceScale || 100.0},
@@ -202,7 +242,6 @@ class SystemUniformUpdater {
                 {key: 'sunLimbDarkening', value: params?.sunLimbDarkening || 0.0},
                 {key: 'cameraHeight', value: params?.cameraHeight || 0},
                 {key: 'cloudTime', value: params?.cloudTime || 0},
-                {key: 'cloudTimeMultiplier', value: params?.cloudTimeMultiplier || 0},
                 {key: 'cloudCoverage', value: params?.cloudCoverage || 0},
                 {key: 'cloudDensity', value: params?.cloudDensity || 0},
                 {key: 'cloudHeight', value: params?.cloudHeight || 0},
@@ -211,21 +250,21 @@ class SystemUniformUpdater {
     }
 
     /**
-     * [KO] 시간 관련 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates time-related information to globalStruct data.
+     * [KO] 시간 및 프레임 관련 정보를 시스템 유니폼 버퍼에 업데이트합니다.
+     * [EN] Updates time and frame-related information to the system uniform buffer.
      *
      * @param timeInfo -
-     * [KO] 시간 정보 객체
-     * [EN] Time information object
+     * [KO] 시간 정보 객체 또는 `RenderViewStateData` 인스턴스
+     * [EN] Time information object or `RenderViewStateData` instance
      * @param timeMembers -
      * [KO] WGSL 시간 구조체 멤버 정보
      * [EN] WGSL time structure member information
      * @param uniformDataF32 -
-     * [KO] 대상 Float32Array 버퍼
-     * [EN] Target Float32Array buffer
+     * [KO] 대상 `Float32Array` 버퍼
+     * [EN] Target `Float32Array` buffer
      * @param uniformDataU32 -
-     * [KO] 대상 Uint32Array 버퍼
-     * [EN] Target Uint32Array buffer
+     * [KO] 대상 `Uint32Array` 버퍼
+     * [EN] Target `Uint32Array` buffer
      */
     static updateTime(
         timeInfo: {
@@ -262,8 +301,8 @@ class SystemUniformUpdater {
     }
 
     /**
-     * [KO] 투영 관련 행렬 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates projection-related matrix information to globalStruct data.
+     * [KO] 투영 및 뷰-투영 행렬 정보를 시스템 유니폼 버퍼에 업데이트합니다.
+     * [EN] Updates projection and view-projection matrix information to the system uniform buffer.
      *
      * @param projectionInfo -
      * [KO] 투영 행렬 정보 객체
@@ -272,11 +311,11 @@ class SystemUniformUpdater {
      * [KO] WGSL 투영 구조체 멤버 정보
      * [EN] WGSL projection structure member information
      * @param uniformDataF32 -
-     * [KO] 대상 Float32Array 버퍼
-     * [EN] Target Float32Array buffer
+     * [KO] 대상 `Float32Array` 버퍼
+     * [EN] Target `Float32Array` buffer
      * @param uniformDataU32 -
-     * [KO] 대상 Uint32Array 버퍼
-     * [EN] Target Uint32Array buffer
+     * [KO] 대상 `Uint32Array` 버퍼
+     * [EN] Target `Uint32Array` buffer
      */
     static updateProjection(
         projectionInfo: {
@@ -328,21 +367,21 @@ class SystemUniformUpdater {
     }
 
     /**
-     * [KO] 직사광(DirectionalLight) 배열 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates DirectionalLight array information to globalStruct data.
+     * [KO] 직사광(`DirectionalLight`) 배열 정보를 시스템 유니폼 버퍼에 업데이트합니다.
+     * [EN] Updates `DirectionalLight` array information to the system uniform buffer.
      *
      * @param directionalLights -
-     * [KO] 업데이트할 직사광 배열
-     * [EN] Array of DirectionalLight to update
+     * [KO] 업데이트할 직사광 배열 (`DirectionalLight[]`)
+     * [EN] Array of directional lights to update (`DirectionalLight[]`)
      * @param directionalLightsMemberList -
      * [KO] WGSL 직사광 구조체 배열 멤버 리스트
-     * [EN] Member list of WGSL DirectionalLight structure array
+     * [EN] Member list of WGSL `DirectionalLight` structure array
      * @param uniformDataF32 -
-     * [KO] 대상 Float32Array 버퍼
-     * [EN] Target Float32Array buffer
+     * [KO] 대상 `Float32Array` 버퍼
+     * [EN] Target `Float32Array` buffer
      * @param uniformDataU32 -
-     * [KO] 대상 Uint32Array 버퍼
-     * [EN] Target Uint32Array buffer
+     * [KO] 대상 `Uint32Array` 버퍼
+     * [EN] Target `Uint32Array` buffer
      */
     static updateDirectionalLights(
         directionalLights: DirectionalLight[],
@@ -373,21 +412,21 @@ class SystemUniformUpdater {
     }
 
     /**
-     * [KO] 환경광(AmbientLight) 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates AmbientLight information to globalStruct data.
+     * [KO] 환경광(`AmbientLight`) 정보를 시스템 유니폼 버퍼에 업데이트합니다.
+     * [EN] Updates `AmbientLight` information to the system uniform buffer.
      *
      * @param ambientLight -
-     * [KO] 업데이트할 환경광 인스턴스
-     * [EN] AmbientLight instance to update
+     * [KO] 업데이트할 환경광 인스턴스 (`AmbientLight`)
+     * [EN] `AmbientLight` instance to update
      * @param ambientLightMembers -
      * [KO] WGSL 환경광 구조체 멤버 정보
-     * [EN] WGSL AmbientLight structure member information
+     * [EN] WGSL `AmbientLight` structure member information
      * @param uniformDataF32 -
-     * [KO] 대상 Float32Array 버퍼
-     * [EN] Target Float32Array buffer
+     * [KO] 대상 `Float32Array` 버퍼
+     * [EN] Target `Float32Array` buffer
      * @param uniformDataU32 -
-     * [KO] 대상 Uint32Array 버퍼
-     * [EN] Target Uint32Array buffer
+     * [KO] 대상 `Uint32Array` 버퍼
+     * [EN] Target `Uint32Array` buffer
      */
     static updateAmbientLight(
         ambientLight: AmbientLight,
@@ -408,6 +447,61 @@ class SystemUniformUpdater {
                 },
             ]
         )
+    }
+
+    /**
+     * [KO] 바람(`WindManager`) 환경 정보를 시스템 유니폼 버퍼에 직접 복사하여 업데이트합니다.
+     * [EN] Updates `WindManager` environmental information by directly copying it into the system uniform buffer.
+     *
+     * @param windManager -
+     * [KO] 업데이트할 `WindManager` 인스턴스
+     * [EN] `WindManager` instance to update
+     * @param windMembersInfo -
+     * [KO] WGSL 바람 구조체 멤버 정보
+     * [EN] WGSL wind structure member information
+     * @param uniformDataF32 -
+     * [KO] 대상 `Float32Array` 버퍼
+     * [EN] Target `Float32Array` buffer
+     * @param uniformDataU32 -
+     * [KO] 대상 `Uint32Array` 버퍼
+     * [EN] Target `Uint32Array` buffer
+     */
+    static updateWind(
+        windManager: WindManager,
+        windMembersInfo: any,
+        uniformDataF32: Float32Array,
+        uniformDataU32: Uint32Array
+    ) {
+        if (!windMembersInfo) return;
+        const members = windMembersInfo.members || windMembersInfo;
+        const enabledInfo = members.enabled;
+        if (!enabledInfo) return;
+
+        const enabledIdx = (enabledInfo.uniformOffset ?? enabledInfo.offset) / 4;
+        if (!windManager || !windManager.enabled) {
+            uniformDataU32[enabledIdx] = 0;
+            return;
+        }
+
+        const dirInfo = members.direction;
+        if (dirInfo) {
+            const dirIdx = (dirInfo.uniformOffset ?? dirInfo.offset) / 4;
+            uniformDataF32[dirIdx] = windManager.directionX;
+            uniformDataF32[dirIdx + 1] = 0.0;
+            uniformDataF32[dirIdx + 2] = windManager.directionZ;
+        }
+
+        const speedInfo = members.speed;
+        if (speedInfo) {
+            uniformDataF32[(speedInfo.uniformOffset ?? speedInfo.offset) / 4] = windManager.speed;
+        }
+
+        const strengthInfo = members.strength;
+        if (strengthInfo) {
+            uniformDataF32[(strengthInfo.uniformOffset ?? strengthInfo.offset) / 4] = windManager.strength;
+        }
+
+        uniformDataU32[enabledIdx] = 1;
     }
 }
 

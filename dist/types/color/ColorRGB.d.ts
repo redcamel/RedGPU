@@ -4,7 +4,7 @@
  *
  * [KO] 이 클래스는 RGB 색상 값을 생성, 조작, 변환하는 메서드를 제공합니다. 색상 구성 요소의 유효성 검사 및 선택적 변경 알림을 지원합니다.
  * [EN] This class provides methods to create, manipulate, and convert RGB color values. It supports validation of color components and optional change notifications.
- * * ### Example
+ * ### Example
  * ```typescript
  * // [KO] 흰색 생성
  * // [EN] Create white
@@ -33,7 +33,7 @@ declare class ColorRGB {
     /**
      * [KO] ColorRGB 클래스의 새 인스턴스를 생성합니다.
      * [EN] Creates a new instance of the ColorRGB class.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
      * ```
@@ -54,144 +54,77 @@ declare class ColorRGB {
      * [KO] RGB 값이 0-255 범위를 벗어나면 오류가 발생합니다.
      * [EN] Throws an error if RGB values are out of the 0-255 range.
      */
-    constructor(r?: number, g?: number, b?: number, onChange?: Function);
+    constructor(r?: number, g?: number, b?: number, onChange?: (() => void) | undefined);
     /**
-     * [KO] 빨간색 구성 요소를 가져옵니다.
-     * [EN] Gets the red component.
-     * * ### Example
-     * ```typescript
-     * const r = color.r;
-     * ```
+     * [KO] 빨간색(R) 채널 값을 가져오거나 설정합니다. (0 ~ 255)
+     * [EN] Gets or sets the red (R) channel value. (0 ~ 255)
+     *
      * @returns
      * [KO] 0에서 255 사이의 빨간색 값
      * [EN] Red value between 0 and 255
      */
     get r(): number;
-    /**
-     * [KO] 빨간색 구성 요소를 설정합니다.
-     * [EN] Sets the red component.
-     * * ### Example
-     * ```typescript
-     * color.r = 255;
-     * ```
-     * @param value -
-     * [KO] 설정할 빨간색 값 (0-255)
-     * [EN] Red value to set (0-255)
-     * @throws
-     * [KO] 값이 0-255 범위를 벗어나면 오류가 발생합니다.
-     * [EN] Throws an error if the value is out of the 0-255 range.
-     */
     set r(value: number);
     /**
-     * [KO] 초록색 구성 요소를 가져옵니다.
-     * [EN] Gets the green component.
-     * * ### Example
-     * ```typescript
-     * const g = color.g;
-     * ```
+     * [KO] 초록색(G) 채널 값을 가져오거나 설정합니다. (0 ~ 255)
+     * [EN] Gets or sets the green (G) channel value. (0 ~ 255)
+     *
      * @returns
      * [KO] 0에서 255 사이의 초록색 값
      * [EN] Green value between 0 and 255
      */
     get g(): number;
-    /**
-     * [KO] 초록색 구성 요소를 설정합니다.
-     * [EN] Sets the green component.
-     * * ### Example
-     * ```typescript
-     * color.g = 255;
-     * ```
-     * @param value -
-     * [KO] 설정할 초록색 값 (0-255)
-     * [EN] Green value to set (0-255)
-     * @throws
-     * [KO] 값이 0-255 범위를 벗어나면 오류가 발생합니다.
-     * [EN] Throws an error if the value is out of the 0-255 range.
-     */
     set g(value: number);
     /**
-     * [KO] 파란색 구성 요소를 가져옵니다.
-     * [EN] Gets the blue component.
-     * * ### Example
-     * ```typescript
-     * const b = color.b;
-     * ```
+     * [KO] 파란색(B) 채널 값을 가져오거나 설정합니다. (0 ~ 255)
+     * [EN] Gets or sets the blue (B) channel value. (0 ~ 255)
+     *
      * @returns
      * [KO] 0에서 255 사이의 파란색 값
      * [EN] Blue value between 0 and 255
      */
     get b(): number;
-    /**
-     * [KO] 파란색 구성 요소를 설정합니다.
-     * [EN] Sets the blue component.
-     * * ### Example
-     * ```typescript
-     * color.b = 255;
-     * ```
-     * @param value -
-     * [KO] 설정할 파란색 값 (0-255)
-     * [EN] Blue value to set (0-255)
-     * @throws
-     * [KO] 값이 0-255 범위를 벗어나면 오류가 발생합니다.
-     * [EN] Throws an error if the value is out of the 0-255 range.
-     */
     set b(value: number);
     /**
-     * [KO] 색상의 RGB 값을 포함하는 배열을 반환합니다.
+     * [KO] 색상의 RGB 값을 배열로 반환합니다.
      * [EN] Returns an array containing the RGB values of the color.
-     * * ### Example
-     * ```typescript
-     * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
-     * console.log(color.rgb); // [255, 128, 0]
-     * ```
+     *
      * @returns
-     * [KO] [r, g, b] 형식의 RGB 값을 나타내는 숫자 배열
-     * [EN] Array of numbers representing RGB values in [r, g, b] format
+     * [KO] `[r, g, b]` 형식의 숫자 배열
+     * [EN] Array of numbers in `[r, g, b]` format
      */
     get rgb(): number[];
     /**
-     * [KO] 정규화된 RGB 값을 배열로 반환합니다. 각 값은 0에서 1 사이로 정규화됩니다.
-     * [EN] Returns normalized RGB values as an array. Each value is normalized between 0 and 1.
-     * * ### Example
-     * ```typescript
-     * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
-     * console.log(color.rgbNormal); // [1, 0.501, 0]
-     * ```
+     * [KO] 0에서 1 사이로 정규화된 RGB 값을 배열로 반환합니다.
+     * [EN] Returns normalized RGB values between 0 and 1 as an array.
+     *
      * @returns
-     * [KO] 정규화된 RGB 값을 포함하는 배열 [r/255, g/255, b/255]
-     * [EN] Array containing normalized RGB values [r/255, g/255, b/255]
+     * [KO] 정규화된 RGB 배열 `[r/255, g/255, b/255]`
+     * [EN] Normalized RGB array `[r/255, g/255, b/255]`
      */
     get rgbNormal(): number[];
     /**
-     * [KO] 감마 보정된(Linear) 정규화된 RGB 값을 배열로 반환합니다.
-     * [EN] Returns gamma-corrected (Linear) normalized RGB values as an array.
-     * * ### Example
-     * ```typescript
-     * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
-     * console.log(color.rgbNormalLinear);
-     * ```
+     * [KO] 감마 보정(2.2)이 적용된 선형(Linear) 정규화 RGB 값을 배열로 반환합니다.
+     * [EN] Returns gamma-corrected (2.2) linear normalized RGB values as an array.
+     *
      * @returns
-     * [KO] 감마 보정된(2.2) 정규화된 RGB 값을 포함하는 배열
-     * [EN] Array containing gamma-corrected (2.2) normalized RGB values
+     * [KO] 감마 보정된 선형 정규화 RGB 배열
+     * [EN] Gamma-corrected linear normalized RGB array
      */
     get rgbNormalLinear(): number[];
     /**
-     * [KO] RGB 색상의 16진수 표현을 반환합니다.
-     * [EN] Returns the hexadecimal representation of the RGB color.
-     * * ### Example
-     * ```typescript
-     * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
-     * console.log(color.hex); // "#FF8000"
-     * ```
+     * [KO] RGB 색상의 16진수(HEX) 문자열 표현을 반환합니다.
+     * [EN] Returns the hexadecimal (HEX) string representation of the RGB color.
+     *
      * @returns
-     * [KO] 16진수 색상 값 (예: "#FF8000")
-     * [EN] Hexadecimal color value (e.g., "#FF8000")
+     * [KO] 16진수 색상 문자열 (예: `"#FF8000"`)
+     * [EN] Hexadecimal color string (e.g., `"#FF8000"`)
      */
     get hex(): string;
     /**
      * [KO] 제공된 RGB 값을 기반으로 객체의 색상을 설정합니다.
      * [EN] Sets the color of the object based on the provided RGB values.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB();
      * color.setColorByRGB(255, 128, 0);
@@ -213,7 +146,7 @@ declare class ColorRGB {
     /**
      * [KO] 16진수 색상 코드를 사용하여 객체의 색상을 설정합니다.
      * [EN] Sets the color of the object using a hexadecimal color code.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB();
      * color.setColorByHEX('#FF8000');
@@ -230,7 +163,7 @@ declare class ColorRGB {
     /**
      * [KO] RGB 색상 값을 나타내는 문자열을 파싱하여 객체의 색상을 설정합니다.
      * [EN] Parses a string representing an RGB color value and sets the object's color.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB();
      * color.setColorByRGBString('rgb(255, 128, 0)');

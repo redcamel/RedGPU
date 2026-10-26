@@ -4,18 +4,20 @@ import {PhysicsBodyType} from "./PhysicsBodyType";
 import {PhysicsShape} from "./PhysicsShape";
 
 /**
- * [KO] 물리 바디 생성을 위한 파라미터 인터페이스입니다.
- * [EN] Parameter interface for creating a physics body.
+ * [KO] 물리 바디 생성을 위한 설정 파라미터 인터페이스입니다.
+ * [EN] Configuration parameter interface for creating a physics body.
+ *
+ * @category Physics
  */
 export interface BodyParams {
     /**
-     * [KO] 물리 바디의 타입 (정적, 동적, 키네마틱)
-     * [EN] Type of the physics body (Static, Dynamic, Kinematic)
+     * [KO] 물리 바디의 시뮬레이션 타입 (정적, 동적, 키네마틱)
+     * [EN] Simulation type of the physics body (Static, Dynamic, Kinematic)
      */
     type?: PhysicsBodyType;
     /**
      * [KO] 충돌체의 형상
-     * [EN] Shape of the collider
+     * [EN] Collider shape
      */
     shape?: PhysicsShape;
     /**
@@ -29,23 +31,23 @@ export interface BodyParams {
      */
     friction?: number;
     /**
-     * [KO] 탄성 계수
+     * [KO] 반발(탄성) 계수
      * [EN] Restitution coefficient
      */
     restitution?: number;
     /**
-     * [KO] 선형 감쇠
+     * [KO] 선형 감쇠율
      * [EN] Linear damping
      */
     linearDamping?: number;
     /**
-     * [KO] 각감쇠
+     * [KO] 각감쇠율
      * [EN] Angular damping
      */
     angularDamping?: number;
     /**
-     * [KO] 센서 여부 (충돌 반응 없이 이벤트만 발생)
-     * [EN] Whether it is a sensor (Generates events without collision response)
+     * [KO] 물리적 충돌 반응 없이 이벤트만 발생시키는 센서 여부
+     * [EN] Whether it acts as a sensor that triggers events without physical collision response
      */
     isSensor?: boolean;
     /**
@@ -54,18 +56,18 @@ export interface BodyParams {
      */
     enableCCD?: boolean;
     /**
-     * [KO] 높이맵 데이터 (shape가 HEIGHTFIELD일 경우 필수)
-     * [EN] Heightfield data (Required if shape is HEIGHTFIELD)
+     * [KO] 높이맵 데이터 (`shape`가 `HEIGHTFIELD`일 경우 필수)
+     * [EN] Heightfield data (Required when `shape` is `HEIGHTFIELD`)
      */
     heightData?: {
         /**
          * [KO] 세로(Z축) 세그먼트 수
-         * [EN] Number of subdivisions along the Z axis
+         * [EN] Number of subdivisions along the Z-axis
          */
         nrows: number;
         /**
          * [KO] 가로(X축) 세그먼트 수
-         * [EN] Number of subdivisions along the X axis
+         * [EN] Number of subdivisions along the X-axis
          */
         ncols: number;
         /**
@@ -95,24 +97,25 @@ export interface BodyParams {
  */
 export interface IPhysicsEngine {
     /**
-     * [KO] 물리 엔진의 원본 월드 인스턴스 (Escape Hatch)
-     * [EN] The native world instance of the physics engine (Escape Hatch)
+     * [KO] 물리 엔진의 원본 월드 인스턴스
+     * [EN] Native world instance of the physics engine
      */
     readonly nativeWorld: any;
     /**
-     * [KO] 물리 엔진 라이브러리 네임스페이스 (Escape Hatch)
-     * [EN] The physics engine library namespace (Escape Hatch)
+     * [KO] 물리 엔진 라이브러리 네임스페이스
+     * [EN] Physics engine library namespace
      */
     readonly RAPIER: any;
     /**
-     * [KO] 엔진에서 관리 중인 모든 물리 바디 리스트
+     * [KO] 엔진에서 관리 중인 모든 물리 바디 목록
      * [EN] List of all physics bodies managed by the engine
      */
     readonly bodies: IPhysicsBody[];
 
     /**
-     * [KO] 물리 엔진에서 충돌이 시작될 때 호출되는 콜백입니다.
-     * [EN] Callback called when a collision starts in the physics engine.
+     * [KO] 충돌이 시작될 때 호출되는 콜백 함수입니다.
+     * [EN] Callback function invoked when a collision starts.
+     *
      * @param handle1 -
      * [KO] 첫 번째 충돌체의 핸들
      * [EN] Handle of the first collider
@@ -122,56 +125,54 @@ export interface IPhysicsEngine {
      */
     onCollisionStarted: (handle1: number, handle2: number) => void;
     /**
-     * [KO] 중력을 설정하거나 가져옵니다.
-     * [EN] Sets or gets the gravity.
-     *
-     * ### Example
-     * ```typescript
-     * physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
-     * ```
+     * [KO] 물리 월드의 중력 가속도 벡터
+     * [EN] Gravity acceleration vector of the physics world
      */
     gravity: { x: number, y: number, z: number };
 
     /**
-     * [KO] 물리 엔진을 초기화합니다. (WASM 로딩 등)
-     * [EN] Initializes the physics engine. (WASM loading, etc.)
+     * [KO] 물리 엔진을 비동기로 초기화합니다.
+     * [EN] Asynchronously initializes the physics engine.
      *
      * @returns
-     * [KO] 초기화 완료를 보장하는 Promise
-     * [EN] Promise that guarantees initialization completion
+     * [KO] 초기화 완료 `Promise<void>`
+     * [EN] Initialization completion `Promise<void>`
      */
     init(): Promise<void>;
 
     /**
      * [KO] 물리 시뮬레이션을 한 단계 진행합니다.
-     * [EN] Steps the physics simulation.
+     * [EN] Advances the physics simulation by one step.
+     *
      * @param deltaTime -
-     * [KO] 프레임 간 시간 간격
-     * [EN] Time interval between frames
+     * [KO] 프레임 간 경과 시간(초)
+     * [EN] Elapsed time between frames in seconds
      */
     step(deltaTime: number): void;
 
     /**
-     * [KO] 메쉬에 물리 바디를 생성하고 연결합니다.
+     * [KO] 메시에 물리 바디를 생성하여 연결합니다.
      * [EN] Creates and attaches a physics body to a mesh.
+     *
      * @param mesh -
-     * [KO] 대상 메쉬
-     * [EN] Target mesh
+     * [KO] 대상 메시 객체
+     * [EN] Target mesh object
      * @param params -
-     * [KO] 바디 생성 파라미터
-     * [EN] Body creation parameters
+     * [KO] 바디 생성 설정 파라미터
+     * [EN] Body creation configuration parameters
      * @returns
-     * [KO] 생성된 물리 바디
-     * [EN] Created physics body
+     * [KO] 생성된 `IPhysicsBody` 인스턴스
+     * [EN] Created `IPhysicsBody` instance
      */
     createBody(mesh: Mesh, params: BodyParams): IPhysicsBody;
 
     /**
-     * [KO] 물리 바디를 제거합니다.
-     * [EN] Removes a physics body.
+     * [KO] 물리 월드에서 물리 바디를 제거합니다.
+     * [EN] Removes a physics body from the physics world.
+     *
      * @param body -
-     * [KO] 제거할 바디
-     * [EN] Body to remove
+     * [KO] 제거할 물리 바디
+     * [EN] Physics body to remove
      */
     removeBody(body: IPhysicsBody): void;
 
@@ -180,11 +181,11 @@ export interface IPhysicsEngine {
      * [EN] Creates a character controller.
      *
      * @param offset -
-     * [KO] 지면과의 간격
-     * [EN] Offset from the ground
+     * [KO] 지면과의 오프셋 간격
+     * [EN] Offset distance from the ground
      * @returns
-     * [KO] 캐릭터 컨트롤러 인스턴스
-     * [EN] Character controller instance
+     * [KO] 생성된 캐릭터 컨트롤러 인스턴스
+     * [EN] Created character controller instance
      */
     createCharacterController(offset: number): any;
 }

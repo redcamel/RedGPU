@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
@@ -99,18 +99,6 @@ const renderTestPane = (redGPUContext, targetView) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
         ibl: true,
-        skybox: true,
-        gui: (pane) => {
-            const {skyAtmosphere} = targetView;
-            if (skyAtmosphere) {
-                pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
-                pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
-                pane.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'Sea Level (km)'});
-
-                const f_sun = pane.addFolder({title: 'Sun Position'});
-                f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'Sun Elevation'});
-                f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'Sun Azimuth'});
-            }
-        }
+        skybox: true
     });
 };

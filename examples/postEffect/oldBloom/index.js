@@ -1,36 +1,37 @@
-import * as RedGPU from "../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
  * [KO] Old Bloom 예제
  * [EN] Old Bloom example
+ *
+ * [KO] 포스트 이펙트를 사용하여 구버전 블룸(Old Bloom) 빛 번짐 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply the classic bloom (Old Bloom) glow effect using post effects.
  */
 
-// 1. Create and append a container and canvas
 const container = document.createElement('div');
 document.body.appendChild(container);
 
 const canvas = document.createElement('canvas');
 container.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 3;
         controller.speedDistance = 0.1;
-        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
-
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
+        // [KO] OldBloom 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create OldBloom post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -41,7 +42,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -61,63 +68,45 @@ RedGPU.init(
         window.addEventListener('resize', updateLayout);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, viewEffect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, container);
     },
-    (failReason) => console.error(failReason)
+    (failReason) => {
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
+    }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => scene.addChild(v['resultMesh']));
-}
-
-const renderTestPane = async (redGPUContext, targetView, container) => {
-
+const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
-        gui: pane => {
-            const effect = targetView.postEffectManager.getEffectAt(0);
+        gui: (pane) => {
+            const config = {OldBloom: true};
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            const TEST_STATE = {
-                OldBloom: true,
-                threshold: effect.threshold,
-                gaussianBlurSize: effect.gaussianBlurSize,
-                exposure: effect.exposure,
-                bloomStrength: effect.bloomStrength,
-            }
-            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-
-            folder.addBinding(TEST_STATE, 'OldBloom').on('change', (v) => {
+            folder.addBinding(config, 'OldBloom').on('change', (v) => {
                 if (v.value) {
-                    const newEffect = new RedGPU.PostEffect.OldBloom(redGPUContext);
-                    Object.assign(newEffect, TEST_STATE);
-                    targetView.postEffectManager.addEffect(newEffect);
+                    targetView.postEffectManager.addEffect(effect);
                 } else {
                     targetView.postEffectManager.removeAllEffect();
                 }
-                controls.forEach(c => c.disabled = !v.value);
+                controls.forEach((c) => c.disabled = !v.value);
             });
 
             const controls = [
-                folder.addBinding(TEST_STATE, 'threshold', {min: 1, max: 255}),
-                folder.addBinding(TEST_STATE, 'gaussianBlurSize', {min: 0, max: 256}),
-                folder.addBinding(TEST_STATE, 'exposure', {min: 0, max: 3}),
-                folder.addBinding(TEST_STATE, 'bloomStrength', {min: 0, max: 3}),
+                folder.addBinding(effect, 'threshold', {min: 1, max: 255, step: 1}),
+                folder.addBinding(effect, 'gaussianBlurSize', {min: 0, max: 256, step: 0.1}),
+                folder.addBinding(effect, 'exposure', {min: 0, max: 3, step: 0.01}),
+                folder.addBinding(effect, 'bloomStrength', {min: 0, max: 3, step: 0.01})
             ];
-
-            pane.on('change', () => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) {
-                    Object.assign(currentEffect, TEST_STATE);
-                }
-            });
         }
     });
-
-
 };

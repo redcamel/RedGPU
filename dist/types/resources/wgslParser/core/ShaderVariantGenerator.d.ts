@@ -1,10 +1,7 @@
 import { ConditionalBlock } from "../WGSLParser";
 /**
- * [KO] 조건부 블록과 define 문자열을 기반으로 WGSL 셰이더의 다양한 변형(variant) 코드를 생성하는 유틸리티 클래스입니다.
- * [EN] Utility class that generates various variant codes for WGSL shaders based on conditional blocks and define strings.
- *
- * [KO] 변형 키(variantKey)에 따라 조건부 블록을 처리하여, 각기 다른 셰이더 소스를 동적으로 생성하고 캐싱합니다.
- * [EN] Processes conditional blocks according to the variant key (variantKey), dynamically generating and caching different shader sources.
+ * [KO] 조건부 블록과 define 문자열을 기반으로 WGSL 셰이더의 다양한 변형(Variant) 코드를 동적으로 생성하고 캐싱하는 유틸리티 클래스입니다.
+ * [EN] Utility class that dynamically generates and caches various WGSL shader variant codes based on conditional blocks and define strings.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

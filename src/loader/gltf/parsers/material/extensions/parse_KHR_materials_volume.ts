@@ -1,6 +1,21 @@
 import PBRMaterial from "../../../../../material/pbrMaterial/PBRMaterial";
 import parseMaterialTexture from "../parseMaterialTexture";
 
+/**
+ * [KO] glTF의 `KHR_materials_volume` 확장을 파싱하여 재질에 적용합니다.
+ * [EN] Parses the `KHR_materials_volume` glTF extension and applies it to the material.
+ *
+ * @param currentMaterial -
+ * [KO] 확장 속성을 적용할 대상 PBR 재질
+ * [EN] Target PBR material to apply extension properties
+ * @param KHR_materials_volume -
+ * [KO] `KHR_materials_volume` 확장 데이터 객체
+ * [EN] `KHR_materials_volume` extension data object
+ * @param gltfLoader -
+ * [KO] 텍스처 로드를 수행할 GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance for loading textures
+ * @category GLTF
+ */
 const parse_KHR_materials_volume = (currentMaterial: PBRMaterial, KHR_materials_volume, gltfLoader) => {
     currentMaterial.useKHR_materials_volume = true
     currentMaterial.KHR_thicknessFactor = KHR_materials_volume.thicknessFactor || 1.0

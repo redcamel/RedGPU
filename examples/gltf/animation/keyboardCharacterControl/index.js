@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
 
 /**
  * Keyboard Character Control 예제
@@ -78,6 +78,8 @@ RedGPU.init(
 // GLTF 캐릭터 로드
 // ──────────────────────────────────────────
 function loadCharacter(redGPUContext, scene, view) {
+    // [KO] 캐릭터 모델 로드 (출처: https://threejs.org/examples/models/gltf/Soldier.glb)
+    // [EN] Load character model (Source: https://threejs.org/examples/models/gltf/Soldier.glb)
     const MODEL_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
 
     new RedGPU.GLTFLoader(

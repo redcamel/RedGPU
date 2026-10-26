@@ -102,7 +102,10 @@ declare class HDRTexture extends ManagementResourceBase {
      * [EN] Source info to set
      */
     set src(value: HDRSrcInfo);
-    /** [KO] 리소스를 파괴합니다. [EN] Destroys the texture resource. */
+    /**
+     * [KO] 리소스를 파괴합니다.
+     * [EN] Destroys the texture resource.
+     */
     destroy(): void;
 }
 export default HDRTexture;

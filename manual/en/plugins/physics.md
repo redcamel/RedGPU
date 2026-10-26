@@ -5,28 +5,39 @@ order: 1
 
 # Physics Plugin (Rapier)
 
-RedGPU supports the high-performance WASM-based physics engine **Rapier** as a plugin. Through this plugin, you can seamlessly integrate rigid body simulation, precise collision detection, and character controllers in 3D space into the engine.
+RedGPU supports the high-performance WASM-based physics engine **Rapier** as a plugin. Through this plugin, you can
+seamlessly integrate rigid body simulation, precise collision detection, and character controllers in 3D space into the
+engine.
 
 ::: warning Experimental Feature
-The physics engine plugin is currently in the **experimental stage**. Please be aware that API specifications or behaviors may change without notice during development.
+The physics engine plugin is currently in the **experimental stage**. Please be aware that API specifications or
+behaviors may change without notice during development.
 :::
 
 ## 0. Design Intent for Interface/Plugin Separation and Integration
 
-RedGPU's physics system is designed with a strict separation between the common interface (`IPhysicsEngine`) and the actual implementation (Plugin) for seamless integration.
+RedGPU's physics system is designed with a strict separation between the common interface (`IPhysicsEngine`) and the
+actual implementation (Plugin) for seamless integration.
 
-1.  **Bundle Size Optimization**:
-    Physics engines (especially WASM-based ones) occupy significant binary space. Since not all projects require physics, excluding it from the main engine bundle optimizes initial loading speed.
-2.  **Seamless Integration**:
-    One of the most tedious tasks when using a physics engine is 'copying the coordinates of the physics world to 3D meshes every frame.' RedGPU automates this at the engine level, so a single `createBody` call automatically reflects position, rotation, scale, and even **complex child mesh hierarchies** into the physics world.
-3.  **Interchangeability**:
-    User code depends on the established `IPhysicsEngine` interface. This provides the flexibility to switch to other physics engines (e.g., Cannon, Ammo, etc.) in the future with minimal modifications to existing scene configurations or logic code.
-4.  **Asynchronous Initialization Control**:
-    WASM loading is inherently an asynchronous task. By separating it into a plugin, developers can clearly control when the physics engine is ready without interfering with the main engine's initialization flow.
+1. **Bundle Size Optimization**:
+   Physics engines (especially WASM-based ones) occupy significant binary space. Since not all projects require physics,
+   excluding it from the main engine bundle optimizes initial loading speed.
+2. **Seamless Integration**:
+   One of the most tedious tasks when using a physics engine is 'copying the coordinates of the physics world to 3D
+   meshes every frame.' RedGPU automates this at the engine level, so a single `createBody` call automatically reflects
+   position, rotation, scale, and even **complex child mesh hierarchies** into the physics world.
+3. **Interchangeability**:
+   User code depends on the established `IPhysicsEngine` interface. This provides the flexibility to switch to other
+   physics engines (e.g., Cannon, Ammo, etc.) in the future with minimal modifications to existing scene configurations
+   or logic code.
+4. **Asynchronous Initialization Control**:
+   WASM loading is inherently an asynchronous task. By separating it into a plugin, developers can clearly control when
+   the physics engine is ready without interfering with the main engine's initialization flow.
 
 ## 1. Initialization and Setup
 
-The physics engine is separated from the main engine bundle and must be imported separately. Since it involves loading WASM binaries, initialization is performed asynchronously.
+The physics engine is separated from the main engine bundle and must be imported separately. Since it involves loading
+WASM binaries, initialization is performed asynchronously.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -45,18 +56,21 @@ scene.physicsEngine = physicsEngine;
 
 ## 2. Automatic Simulation Integration
 
-RedGPU synchronizes the physics engine registered in the Scene with the rendering loop and **updates it automatically**. Therefore, developers do not need to call a separate `step()` function every frame.
+RedGPU synchronizes the physics engine registered in the Scene with the rendering loop and **updates it automatically**.
+Therefore, developers do not need to call a separate `step()` function every frame.
 
 ```javascript
 // Automatic simulation starts just by registering the physics engine to the scene.
 scene.physicsEngine = physicsEngine;
 ```
 
-By default, physics calculations are performed at a fixed interval of 60 times per second (60FPS), ensuring consistent physics laws even in monitor environments with different refresh rates.
+By default, physics calculations are performed at a fixed interval of 60 times per second (60FPS), ensuring consistent
+physics laws even in monitor environments with different refresh rates.
 
 ## 3. Creating and Connecting Physics Bodies
 
-To grant physical properties to a general mesh object, use `createBody()`. RedGPU's physics system automatically synchronizes the state (position, rotation) of the created body to the mesh's transform.
+To grant physical properties to a general mesh object, use `createBody()`. RedGPU's physics system automatically
+synchronizes the state (position, rotation) of the created body to the mesh's transform.
 
 ```typescript
 const box = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
@@ -75,12 +89,16 @@ body.applyImpulse([0, 10, 0]);
 ```
 
 ### Compound Colliders
-If the mesh passed when calling `createBody` includes child meshes, RedGPU automatically analyzes the hierarchy and creates a **compound collider** that includes the shapes of all children.
+
+If the mesh passed when calling `createBody` includes child meshes, RedGPU automatically analyzes the hierarchy and
+creates a **compound collider** that includes the shapes of all children.
 
 ## 4. Full Constants and Settings Specification
 
 ### PHYSICS_BODY_TYPE
+
 Defines the physical nature of how an object interacts with the world.
+
 - `DYNAMIC`: Reacts to gravity and collisions, moving freely.
 - `STATIC`: Fixed in space, does not move, and only participates in collisions. (Floors, walls, etc.)
 - `KINEMATIC`: (Default) Ignores physics laws and controls movement directly via code.
@@ -88,7 +106,9 @@ Defines the physical nature of how an object interacts with the world.
 - `KINEMATIC_VELOCITY`: Controls movement by specifying velocity.
 
 ### PHYSICS_SHAPE
+
 The shape of the collider used in the simulation.
+
 - `BOX`: Rectangular cuboid shape.
 - `SPHERE`: Spherical shape.
 - `CAPSULE`: Capsule shape.
@@ -97,7 +117,9 @@ The shape of the collider used in the simulation.
 - `MESH`: Precise collider using complex mesh geometry as is.
 
 ### BodyParams (createBody configuration options)
+
 All options that can be passed as the second argument when calling `createBody()`.
+
 - `type`: Body type (`PHYSICS_BODY_TYPE`)
 - `shape`: Collider shape (`PHYSICS_SHAPE`)
 - `mass`: Mass (Default: 1.0)
@@ -116,23 +138,30 @@ All options that can be passed as the second argument when calling `createBody()
 Explore practical use cases of the physics engine through these categorized examples.
 
 ### 5.1 Basics & Shapes
+
 - [Basic Simulation & Gravity Test](https://redcamel.github.io/RedGPU/examples/physics/basic/)
 - [Various Collider Shapes](https://redcamel.github.io/RedGPU/examples/physics/shapes/)
 - [Terrain (Heightfield) Simulation](https://redcamel.github.io/RedGPU/examples/physics/heightField/)
 
 ### 5.2 Controllers & Interaction
+
 - [Kinematic Character Control](https://redcamel.github.io/RedGPU/examples/physics/characterController/)
 - [Advanced Character Controller (Stairs/Slopes)](https://redcamel.github.io/RedGPU/examples/physics/advancedCharacterController/)
 - [Mouse Click & Raycast Interaction](https://redcamel.github.io/RedGPU/examples/physics/raycast/)
 
 ### 5.3 Joints & Advanced Physics
+
 - [Basic Joints](https://redcamel.github.io/RedGPU/examples/physics/joints/)
 - [Revolute Joint](https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/)
 - [Spring & Flexible Connection](https://redcamel.github.io/RedGPU/examples/physics/springJoint/)
 
 ---
 
-## Key Summary
-1. `RapierPhysics` must be imported separately and requires **asynchronous initialization**.
-2. After registering `scene.physicsEngine`, simulation runs automatically.
-3. `createBody` automatically reflects the mesh hierarchy in the physics world.
+## Related Examples
+
+- **Basics &
+  Shapes**: [Basic Simulation & Gravity](/RedGPU/examples/physics/basic/) · [Collider Shapes](/RedGPU/examples/physics/shapes/) · [Terrain Heightfield](/RedGPU/examples/physics/heightField/)
+- **Controllers &
+  Interaction**: [Kinematic Character Control](/RedGPU/examples/physics/characterController/) · [Advanced Character Controller](/RedGPU/examples/physics/advancedCharacterController/) · [Click & Raycast](/RedGPU/examples/physics/raycast/)
+-
+**Joints**: [Basic Joints](/RedGPU/examples/physics/joints/) · [Revolute Joint](/RedGPU/examples/physics/revoluteJoint/) · [Spring Joint](/RedGPU/examples/physics/springJoint/)

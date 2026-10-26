@@ -19,19 +19,16 @@ import SkyBoxMaterial from "./core/SkyBoxMaterial";
 import vertexModuleSource from './shader/vertex.wgsl';
 import RedGPUObject from "../../../base/RedGPUObject";
 
-/** 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SKYBOX'
-/** 버텍스 바인드 그룹 디스크립터 이름 */
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_SKYBOX'
-/** 파이프라인 디스크립터 레이블 */
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
 
 /**
- * [KO] 3D 씬의 원경 및 환경 맵 정보로 사용되는 스카이박스(Skybox) 클래스입니다.
- * [EN] Skybox class used as the distant view and environment map information for 3D scenes.
+ * [KO] 큐브맵 텍스처를 사용하여 3D 씬의 무한 원경 배경을 렌더링하는 스카이박스 클래스입니다.
+ * [EN] Skybox class that renders an infinite distant background for a 3D scene using a cubemap texture.
  *
- * [KO] 큐브 맵 텍스처를 이용하여 무한한 공간 배경을 렌더링합니다. 물리 기반 렌더링에 적합한 물리적 휘도(Luminance) 설정, 아티스트용 강도 배율, 실시간 전환 효과(Transition) 및 블러(Blur)와 불투명도 조절 기능을 지원합니다.
- * [EN] Renders an infinite background space using a cube map texture. It supports physical luminance configuration suitable for PBR, artistic intensity multipliers, real-time transition effects, and control over blur and opacity.
+ * [KO] 물리적 휘도(Nit), 강도 배율, 블러(Blur), 불투명도 조절 및 노이즈 마스크 기반의 실시간 텍스처 전환(Transition) 효과를 지원합니다.
+ * [EN] Supports physical luminance (Nit), intensity multiplier, blur, opacity control, and real-time texture transition effects using a noise mask.
  *
  * ### Example
  * ```typescript
@@ -39,25 +36,23 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  * view.skybox = skybox;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" ></iframe>
+ * <iframe src="/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" style="width:100%; height:500px;"></iframe>
  *
- * [KO] 아래는 SkyBox의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of SkyBox.
  * @see [SkyBox basic example](/RedGPU/examples/3d/skybox/skybox/)
+ * @see [SkyBox IBL example](/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)
  * @see [SkyBox transition example](/RedGPU/examples/3d/skybox/transition/skyboxTransition/)
- * @see [SkyBox transition example2](/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/)
- *
+ * @see [SkyBox transition with noise texture](/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/)
  * @category SkyBox
  */
 class SkyBox extends RedGPUObject {
     /**
-     * [KO] 스카이박스 메쉬 모델 변환 행렬
-     * [EN] Skybox mesh model transformation matrix
+     * [KO] 스카이박스 모델 변환 행렬
+     * [EN] Skybox model transformation matrix
      */
     modelMatrix = mat4.create()
     /**
-     * [KO] GPU 렌더링 및 유니폼 정보 객체
-     * [EN] GPU rendering and globalStruct information object
+     * [KO] 버텍스 GPU 렌더링 정보 객체
+     * [EN] Vertex GPU render info object
      */
     gpuRenderInfo: VertexGPURenderInfo
 
@@ -79,16 +74,22 @@ class SkyBox extends RedGPUObject {
 
     /**
      * [KO] SkyBox 인스턴스를 생성합니다.
-     * [EN] Creates an instance of SkyBox.
+     * [EN] Creates a SkyBox instance.
+     *
+     * ### Example
+     * ```typescript
+     * const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture, 25000);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param texture -
      * [KO] 배경으로 사용할 큐브 텍스처 객체
      * [EN] Cube texture object to use as the background
      * @param luminance -
-     * [KO] 물리적 휘도 (단위: cd/m² 또는 Nit, 기본값: 25000 Nit)
-     * [EN] Physical luminance (unit: cd/m² or Nit, default: 25000 Nit)
+     * [KO] 물리적 휘도 (단위: Nit, 기본값: 25000)
+     * [EN] Physical luminance (unit: Nit, default: 25000)
      */
     constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture, luminance: number = 25000) {
         super(redGPUContext)
@@ -97,7 +98,7 @@ class SkyBox extends RedGPUObject {
         this.#material = new SkyBoxMaterial(redGPUContext, this.#texture)
         this.luminance = this.#luminance = luminance;
         this.#primitiveState = new PrimitiveState(this)
-        this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
+        this.#primitiveState.cullMode = GPU_CULL_MODE.FRONT
         this.#depthStencilState = new DepthStencilState(this)
         this.#depthStencilState.depthWriteEnabled = false
     }
@@ -105,6 +106,10 @@ class SkyBox extends RedGPUObject {
     /**
      * [KO] 스카이박스 배경으로 적용된 현재 큐브 텍스처를 가져오거나 설정합니다.
      * [EN] Gets or sets the current cube texture applied as the skybox background.
+     *
+     * @returns
+     * [KO] 현재 큐브 텍스처 인스턴스
+     * [EN] Current cube texture instance
      */
     get texture(): CubeTexture | DirectCubeTexture {
         return this.#texture;
@@ -119,6 +124,10 @@ class SkyBox extends RedGPUObject {
     /**
      * [KO] 물리 기반 광학 시뮬레이션용 휘도(Nit) 값을 가져오거나 설정합니다.
      * [EN] Gets or sets the luminance value (Nit) for physical optics simulation.
+     *
+     * @returns
+     * [KO] 휘도 값 (단위: Nit)
+     * [EN] Luminance value (unit: Nit)
      */
     get luminance(): number {
         return this.#luminance;
@@ -130,8 +139,12 @@ class SkyBox extends RedGPUObject {
     }
 
     /**
-     * [KO] 시각적인 라이팅 강도를 조절하기 위한 강도 배율을 가져오거나 설정합니다.
-     * [EN] Gets or sets the intensity multiplier to adjust visual lighting strength.
+     * [KO] 시각적 밝기 조절을 위한 강도 배율을 가져오거나 설정합니다.
+     * [EN] Gets or sets the intensity multiplier for visual brightness adjustment.
+     *
+     * @returns
+     * [KO] 강도 배율
+     * [EN] Intensity multiplier
      */
     get intensityMultiplier(): number {
         return this.#material.intensityMultiplier;
@@ -142,8 +155,12 @@ class SkyBox extends RedGPUObject {
     }
 
     /**
-     * [KO] 배경 텍스처의 블러 세기(0.0 ~ 1.0)를 가져오거나 설정합니다.
+     * [KO] 배경 텍스처의 블러 강도(0.0 ~ 1.0)를 가져오거나 설정합니다.
      * [EN] Gets or sets the blur strength (0.0 to 1.0) of the background texture.
+     *
+     * @returns
+     * [KO] 블러 강도 (0.0 ~ 1.0)
+     * [EN] Blur strength (0.0 to 1.0)
      */
     get blur(): number {
         return this.#material.blur;
@@ -155,8 +172,12 @@ class SkyBox extends RedGPUObject {
     }
 
     /**
-     * [KO] 스카이박스 배경의 최종 불투명도(0.0 ~ 1.0)를 가져오거나 설정합니다.
-     * [EN] Gets or sets the final opacity (0.0 to 1.0) of the skybox background.
+     * [KO] 스카이박스 배경의 불투명도(0.0 ~ 1.0)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the opacity (0.0 to 1.0) of the skybox background.
+     *
+     * @returns
+     * [KO] 불투명도 (0.0 ~ 1.0)
+     * [EN] Opacity (0.0 to 1.0)
      */
     get opacity(): number {
         return this.#material.opacity;
@@ -168,25 +189,35 @@ class SkyBox extends RedGPUObject {
     }
 
     /**
-     * [KO] 텍스처 전환 애니메이션 도중의 목표가 되는 텍스처를 가져옵니다.
-     * [EN] Gets the target texture during a texture transition animation.
+     * [KO] 텍스처 전환 애니메이션의 목표 큐브 텍스처를 반환합니다.
+     * [EN] Returns the target cube texture of the texture transition animation.
+     *
+     * @returns
+     * [KO] 전환 목표 큐브 텍스처
+     * [EN] Target cube texture for transition
      */
     get transitionTexture(): CubeTexture | DirectCubeTexture {
         return this.#transitionTexture;
     }
 
     /**
-     * [KO] 지정된 다른 큐브 텍스처로 부드럽게 배경을 전환하는 마스킹 애니메이션을 기동합니다.
-     * [EN] Starts a masking animation to smoothly transition the background to the specified target cube texture.
+     * [KO] 지정된 대상 큐브 텍스처로 배경을 전환하는 애니메이션을 시작합니다.
+     * [EN] Starts an animation that transitions the background to the specified target cube texture.
+     *
+     * ### Example
+     * ```typescript
+     * skybox.transition(nextCubeTexture, 500, noiseTexture);
+     * ```
+     *
      * @param targetTexture -
-     * [KO] 새롭게 전환할 대상 큐브 텍스처
-     * [EN] The new target cube texture to transition to
+     * [KO] 전환할 대상 큐브 텍스처
+     * [EN] Target cube texture to transition to
      * @param duration -
-     * [KO] 전환에 걸리는 지속 시간 (ms, 기본값: 300)
-     * [EN] The duration of the transition (in ms, default: 300)
+     * [KO] 전환 지속 시간 (단위: ms, 기본값: 300)
+     * [EN] Transition duration (unit: ms, default: 300)
      * @param mask -
-     * [KO] 전환 효과에 적용할 노이즈 마스크 텍스처
-     * [EN] Noise mask texture to apply to the transition effect
+     * [KO] 전환 효과에 사용할 노이즈 마스크 텍스처
+     * [EN] Noise mask texture to use for the transition effect
      */
     transition(targetTexture: CubeTexture | DirectCubeTexture, duration: number = 300, mask: ANoiseTexture) {
         this.#transitionTexture = targetTexture;
@@ -197,11 +228,12 @@ class SkyBox extends RedGPUObject {
     }
 
     /**
-     * [KO] 스카이박스를 화면 배경에 드로우합니다. 텍스처 전환이 진행 중이면 경과 시간을 기준으로 진척도를 계산해 업로드합니다.
-     * [EN] Draws the skybox on the screen background. If a texture transition is in progress, computes and uploads progress based on elapsed time.
+     * [KO] 스카이박스를 렌더링하고 진행 중인 텍스처 전환 상태를 갱신합니다.
+     * [EN] Renders the skybox and updates any active texture transition state.
+     *
      * @param renderViewStateData -
-     * [KO] 현재 뷰 및 렌더 상태 데이터
-     * [EN] Current view and render state data
+     * [KO] 현재 뷰의 렌더링 상태 데이터
+     * [EN] Render state data of the current view
      */
     render(renderViewStateData: RenderViewStateData) {
         const {currentRenderPassEncoder, viewRenderStartTime, view} = renderViewStateData
@@ -259,8 +291,8 @@ class SkyBox extends RedGPUObject {
     }
 
     /**
-     * [KO] 스카이박스 인스턴스를 파기하고 할당된 자원을 즉시 해제합니다.
-     * [EN] Destroys the SkyBox instance and immediately releases the allocated resources.
+     * [KO] 스카이박스 인스턴스를 파기하고 할당된 GPU 리소스를 해제합니다.
+     * [EN] Destroys the SkyBox instance and releases allocated GPU resources.
      */
     destroy() {
         this.#SHADER_INFO = null
@@ -300,11 +332,8 @@ class SkyBox extends RedGPUObject {
     #initGPURenderInfos() {
         const {resourceManager, redGPUContext} = this
 
-        /** 파싱된 WGSL 셰이더 정보 */
         this.#SHADER_INFO = resourceManager.wgslParser.parse('SKYBOX_VERTEX', vertexModuleSource)
-        /** 버텍스 유니폼 구조체 정보 */
         const UNIFORM_STRUCT = this.#SHADER_INFO.uniforms.vertexUniforms;
-        //
         const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
             'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
             getVertexBindGroupLayoutDescriptorFromShaderInfo(this.#SHADER_INFO, 1)

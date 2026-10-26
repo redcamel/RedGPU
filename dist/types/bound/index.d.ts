@@ -1,6 +1,7 @@
 /**
- * [KO] AABB, OBB 등 객체의 경계 영역(Bounding Box)을 계산하고 관리하는 클래스와 유틸리티 함수들을 제공합니다.
- * [EN] Provides classes and utility functions to calculate and manage bounding volumes of objects, such as AABB and OBB.
+ * [KO] `AABB`, `OBB` 경계 볼륨 클래스 및 지오메트리·메시 바운딩 계산 유틸리티를 제공합니다.
+ * [EN] Provides `AABB` and `OBB` bounding volume classes and geometry/mesh bounding calculation utilities.
+ *
  * @packageDocumentation
  */
 import AABB from "./AABB";

@@ -1,39 +1,44 @@
 /**
- * `defineSampler` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ * [KO] `defineSampler` 함수에 전달할 속성 정의 옵션 인터페이스입니다.
+ * [EN] Interface for property definition options passed to the `defineSampler` function.
+ *
+ * @category DefineProperty
  */
 export interface DefineSamplerInfo {
     /**
-     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
-     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     * [KO] 대상 객체 프로토타입에 정의할 속성 키 이름
+     * [EN] Property key name to define on the target object's prototype
      */
     key: string;
 }
 /**
- * 지정된 클래스의 프로토타입에 GPU와 연동되는 텍스처 샘플러(Sampler) 속성을 정의합니다.
+ * [KO] 지정된 대상의 프로토타입에 GPU 바인드 그룹과 연동되는 텍스처 샘플러 속성을 정의합니다.
+ * [EN] Defines texture sampler properties on the target's prototype that synchronize with GPU bind groups.
  *
- * @remarks
- * **[KO]**
- * - 해당 속성의 getter/setter는 {@link Sampler} 인스턴스를 처리합니다.
- * - 샘플러가 설정되면 자동으로 바인드 그룹을 업데이트하기 위해 대상 인스턴스의 `updateSampler(prevSampler, sampler)` 메서드가 호출됩니다.
+ * [KO] 샘플러 변경 시 대상의 `updateSampler(prevSampler, sampler)`를 호출하여 바인드 그룹을 자동 갱신합니다.
+ * [EN] Invokes `updateSampler(prevSampler, sampler)` on the target when changed to automatically update the bind group.
  *
- * **[EN]**
- * - Handles {@link Sampler} instances.
- * - When a sampler is set, it invokes `updateSampler(prevSampler, sampler)` on the target instance to update bind groups.
- *
- * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link DefineSamplerInfo} 설정 또는 그 배열 [EN] A single {@link DefineSamplerInfo} configuration or an array of configurations
- *
- * @example
+ * ### Example
  * ```typescript
- * // 단일 설정
+ * // [KO] 단일 샘플러 속성 정의
+ * // [EN] Define a single sampler property
  * RedGPU.DefineGPUProperty.defineSampler(MyMaterial, { key: 'diffuseSampler' });
  *
- * // 여러 속성 일괄 정의
+ * // [KO] 다중 샘플러 속성 일괄 정의
+ * // [EN] Define multiple sampler properties at once
  * RedGPU.DefineGPUProperty.defineSampler(MyMaterial, [
  *   { key: 'diffuseSampler' },
  *   { key: 'normalSampler' }
  * ]);
  * ```
+ *
+ * @param target -
+ * [KO] 속성을 정의할 대상 클래스 또는 프로토타입
+ * [EN] Target class or prototype to define properties on
+ * @param defineInfo -
+ * [KO] 단일 `DefineSamplerInfo` 설정 또는 설정 배열
+ * [EN] Single `DefineSamplerInfo` configuration or an array of configurations
+ * @category DefineProperty
  */
 declare const defineSampler: (target: any, defineInfo: DefineSamplerInfo | DefineSamplerInfo[]) => void;
 export default defineSampler;

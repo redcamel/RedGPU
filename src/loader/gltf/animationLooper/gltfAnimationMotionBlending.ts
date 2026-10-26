@@ -3,15 +3,23 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import AniTrack_GLTF from "../cls/anitrack/AniTrack_GLTF";
 import {PlayAnimationInfo} from "../GLTFLoader";
 
-// 최적화: 매 프레임의 중복 산술 연산 및 변수 생성을 방지하기 위해 상수를 파일 모듈 스코프로 승격
 const PI_180 = 180 / Math.PI;
 
 /**
- * [KO] 단일 키프레임 포즈 샘플링 헬퍼 (이진 탐색 및 보간 - 정수형 타입 & 캐싱 우회 & 호이스팅 적용)
- * [EN] Keyframe pose sampling helper (binary search and interpolation - optimized)
+ * [KO] 지정된 시간에서 단일 애니메이션 트랙의 키프레임 포즈를 샘플링합니다.
+ * [EN] Samples the keyframe pose of a single animation track at the specified time.
+ *
+ * @param track -
+ * [KO] 샘플링할 대상 애니메이션 트랙
+ * [EN] Target animation track to sample
+ * @param time -
+ * [KO] 샘플링할 애니메이션 시간 (초)
+ * [EN] Animation time to sample (in seconds)
+ * @returns
+ * [KO] 샘플링된 포즈 데이터 또는 `null`
+ * [EN] Sampled pose data or `null`
  */
 function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | null {
-    // [최적화] 변수 호이스팅
     let timeAnimationInfo = track.timeAnimationInfo;
     let aniDataAnimationInfo = track.aniDataAnimationInfo;
     let interpolationType = track.interpolationType;
@@ -43,7 +51,7 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
     let omega: number, sinom: number;
     let idx: number;
     let morphLength: number;
-    let weightMeshes: any[]; // 누락되었던 로컬 스코프 변수 선언 추가
+    let weightMeshes: any[];
 
     if (lastHint < targetTimeDataListLength - 1) {
         if (targetTimeDataList[lastHint] <= time && time < targetTimeDataList[lastHint + 1]) {
@@ -116,7 +124,7 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
         s0 = 1 - s2;
         s1 = s3 - pp + p;
     } else {
-        if (interpolationType === 0) { // STEP
+        if (interpolationType === 0) {
             interpolationValue = 0;
         } else {
             timeRatio = (time - previousTimeFrame) / (nextTimeFrame - previousTimeFrame);
@@ -126,9 +134,8 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
 
     track.lastInterpolationValue = interpolationValue;
 
-    // 최적화: keyType 사용
     switch (track.keyType) {
-        case 1: { // rotation
+        case 1: {
             pose = new Float32Array(4);
             if (previousTimeDataIDX === targetTimeDataListLength - 1) {
                 idx = previousTimeDataIDX << 2;
@@ -216,7 +223,6 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
                 nextIdx = nextTimeDataIDX << 2;
                 numericCacheKey = (prevIdx << 16) | nextIdx;
 
-                // 최적화: 캐시 테이블 탐색 우회 가동
                 cached = track.lastCachedItem;
                 if (!cached || track.lastCachedKey !== numericCacheKey) {
                     cached = track.cacheTable[numericCacheKey];
@@ -302,7 +308,7 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
             return pose;
         }
         case 2:
-        case 3: { // translation or scale
+        case 3: {
             pose = new Float32Array(3);
             if (previousTimeDataIDX === targetTimeDataListLength - 1) {
                 idx = previousTimeDataIDX * 3;
@@ -346,7 +352,7 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
             }
             return pose;
         }
-        case 4: { // weights
+        case 4: {
             weightMeshes = track.weightMeshes;
             morphLength = weightMeshes[0]?.animationInfo.morphInfo.morphInfoDataList.length || 0;
             pose = new Float32Array(morphLength);
@@ -363,8 +369,27 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
 }
 
 /**
- * [KO] 단일 포즈 뼈대 적용 헬퍼 (쿼터니언-오일러 인라인 연산 포함 - 호이스팅 적용)
- * [EN] Single pose mesh application helper (includes inline quaternion-to-Euler conversion)
+ * [KO] 샘플링된 단일 포즈를 대상 메쉬 또는 모프 타겟에 적용합니다.
+ * [EN] Applies a sampled single pose to the target mesh or morph target.
+ *
+ * @param mesh -
+ * [KO] 포즈를 적용할 대상 메쉬
+ * [EN] Target mesh to apply the pose to
+ * @param keyType -
+ * [KO] 애니메이션 키 타입 (1: 회전, 2: 이동, 3: 스케일, 4: 모프 가중치)
+ * [EN] Animation key type (1: rotation, 2: translation, 3: scale, 4: morph weights)
+ * @param pose -
+ * [KO] 적용할 포즈 데이터 배열
+ * [EN] Pose data array to apply
+ * @param redGPUContext -
+ * [KO] RedGPU 컨텍스트
+ * [EN] RedGPU context
+ * @param computePassEncoder -
+ * [KO] 컴퓨트 패스 인코더
+ * [EN] Compute pass encoder
+ * @param track -
+ * [KO] 애니메이션 트랙 인스턴스
+ * [EN] Animation track instance
  */
 function applySinglePose(
     mesh: any,
@@ -374,7 +399,6 @@ function applySinglePose(
     computePassEncoder: GPUComputePassEncoder,
     track: AniTrack_GLTF
 ) {
-    // [최적화] 변수 호이스팅
     let tempX: number, tempY: number, tempZ: number, tempW: number;
     let x2: number, y2: number, z2: number;
     let xx: number, xy: number, xz: number;
@@ -388,12 +412,12 @@ function applySinglePose(
     let animationTargetIndex: number;
 
     switch (keyType) {
-        case 2: // translation
+        case 2:
             mesh.x = pose[0];
             mesh.y = pose[1];
             mesh.z = pose[2];
             break;
-        case 1: { // rotation
+        case 1: {
             tempX = pose[0];
             tempY = pose[1];
             tempZ = pose[2];
@@ -430,12 +454,12 @@ function applySinglePose(
             mesh.rotationZ = rotZ * PI_180;
             break;
         }
-        case 3: // scale
+        case 3:
             mesh.scaleX = pose[0];
             mesh.scaleY = pose[1];
             mesh.scaleZ = pose[2];
             break;
-        case 4: { // weights
+        case 4: {
             weightMeshes = track.weightMeshes;
             animationTargetIndex = weightMeshes.length;
             while (animationTargetIndex--) {
@@ -454,8 +478,36 @@ function applySinglePose(
 }
 
 /**
- * [KO] 두 포즈 믹싱 보간 뼈대 적용 헬퍼 (LERP/SLERP 및 쿼터니언-오일러 인라인 수학식 포함 - 호이스팅 적용)
- * [EN] Blended pose mixing helper (includes inline LERP/SLERP and quaternion-to-Euler conversion)
+ * [KO] 두 개의 샘플링된 포즈를 가중치에 따라 보간(LERP/SLERP)하여 대상 메쉬에 적용합니다.
+ * [EN] Interpolates (LERP/SLERP) two sampled poses according to the blend weight and applies them to the target mesh.
+ *
+ * @param mesh -
+ * [KO] 포즈를 적용할 대상 메쉬
+ * [EN] Target mesh to apply the pose to
+ * @param keyType -
+ * [KO] 애니메이션 키 타입 (1: 회전, 2: 이동, 3: 스케일, 4: 모프 가중치)
+ * [EN] Animation key type (1: rotation, 2: translation, 3: scale, 4: morph weights)
+ * @param poseFrom -
+ * [KO] 시작 애니메이션의 샘플링된 포즈
+ * [EN] Sampled pose of the source animation
+ * @param poseTo -
+ * [KO] 목표 애니메이션의 샘플링된 포즈
+ * [EN] Sampled pose of the target animation
+ * @param blendWeight -
+ * [KO] 블렌딩 가중치 (0.0 ~ 1.0)
+ * [EN] Blending weight (0.0 to 1.0)
+ * @param redGPUContext -
+ * [KO] RedGPU 컨텍스트
+ * [EN] RedGPU context
+ * @param computePassEncoder -
+ * [KO] 컴퓨트 패스 인코더
+ * [EN] Compute pass encoder
+ * @param trackFrom -
+ * [KO] 시작 애니메이션 트랙
+ * [EN] Source animation track
+ * @param trackTo -
+ * [KO] 목표 애니메이션 트랙
+ * [EN] Target animation track
  */
 function applyBlendedPose(
     mesh: any,
@@ -468,7 +520,6 @@ function applyBlendedPose(
     trackFrom: AniTrack_GLTF,
     trackTo: AniTrack_GLTF
 ) {
-    // [최적화] 변수 호이스팅
     let fromX: number, fromY: number, fromZ: number;
     let toX: number, toY: number, toZ: number;
     let q1x: number, q1y: number, q1z: number, q1w: number;
@@ -489,7 +540,7 @@ function applyBlendedPose(
     let animationTargetIndex: number;
 
     switch (keyType) {
-        case 2: { // translation
+        case 2: {
             fromX = poseFrom[0];
             fromY = poseFrom[1];
             fromZ = poseFrom[2];
@@ -501,7 +552,7 @@ function applyBlendedPose(
             mesh.z = fromZ + blendWeight * (toZ - fromZ);
             break;
         }
-        case 1: { // rotation
+        case 1: {
             q1x = poseFrom[0];
             q1y = poseFrom[1];
             q1z = poseFrom[2];
@@ -535,7 +586,6 @@ function applyBlendedPose(
             tempZ = scale0 * q1z + scale1 * q2z;
             tempW = scale0 * q1w + scale1 * q2w;
 
-            // [quatToEuler inline]
             x2 = tempX + tempX;
             y2 = tempY + tempY;
             z2 = tempZ + tempZ;
@@ -568,7 +618,7 @@ function applyBlendedPose(
             mesh.rotationZ = rotZ * PI_180;
             break;
         }
-        case 3: { // scale
+        case 3: {
             fromX = poseFrom[0];
             fromY = poseFrom[1];
             fromZ = poseFrom[2];
@@ -580,7 +630,7 @@ function applyBlendedPose(
             mesh.scaleZ = fromZ + blendWeight * (toZ - fromZ);
             break;
         }
-        case 4: { // weights
+        case 4: {
             selectedTrack = blendWeight < 0.5 ? trackFrom : trackTo;
             weightMeshes = selectedTrack.weightMeshes;
             animationTargetIndex = weightMeshes.length;
@@ -600,8 +650,22 @@ function applyBlendedPose(
 }
 
 /**
- * [KO] glTF 애니메이션 모션 Blending 메인 진입 함수 (호이스팅 최적화 적용)
- * [EN] Main entry function for glTF animation motion blending
+ * [KO] 두 glTF 애니메이션 클립 간의 모션 블렌딩을 계산하고 대상 메쉬들에 적용합니다.
+ * [EN] Computes motion blending between two glTF animation clips and applies it to the target meshes.
+ *
+ * @param redGPUContext -
+ * [KO] RedGPU 컨텍스트
+ * [EN] RedGPU context
+ * @param timestamp -
+ * [KO] 현재 프레임 타임스탬프 (밀리초)
+ * [EN] Current frame timestamp (in milliseconds)
+ * @param computePassEncoder -
+ * [KO] 컴퓨트 패스 인코더
+ * [EN] Compute pass encoder
+ * @param targetPlayAnimationInfo -
+ * [KO] 블렌딩할 애니메이션 재생 정보
+ * [EN] Animation playback information to blend
+ * @category GLTF
  */
 export default function gltfAnimationMotionBlending(
     redGPUContext: RedGPUContext,
@@ -609,7 +673,6 @@ export default function gltfAnimationMotionBlending(
     computePassEncoder: GPUComputePassEncoder,
     targetPlayAnimationInfo: PlayAnimationInfo
 ) {
-    // [최적화] 변수 호이스팅
     let fromClip = targetPlayAnimationInfo.fromClip!;
     let toClip = targetPlayAnimationInfo.toClip!;
     let blendWeight = targetPlayAnimationInfo.blendWeight ?? 0.5;
@@ -637,7 +700,6 @@ export default function gltfAnimationMotionBlending(
     let trackFromSingle: any;
     let poseToSingle: any;
 
-    // fromClip을 주축으로 돌며 동일 조인트 트랙 매칭 보간
     for (i = 0; i < fromClip.clip.tracks.length; i++) {
         trackFrom = fromClip.clip.tracks[i];
         mesh = trackFrom.animationTargetMesh;
@@ -679,7 +741,6 @@ export default function gltfAnimationMotionBlending(
         }
     }
 
-    // toClip에만 있고 fromClip에는 없는 독자 조인트 트랙 처리
     for (j = 0; j < toClip.clip.tracks.length; j++) {
         trackToSingle = toClip.clip.tracks[j];
         meshSingle = trackToSingle.animationTargetMesh;

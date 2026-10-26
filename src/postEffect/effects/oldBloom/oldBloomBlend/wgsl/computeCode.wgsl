@@ -1,13 +1,13 @@
-// [KO] 1. 인덱스 계산 및 화면 경계 검사
-// [EN] 1. Index calculation and screen boundary check
+// [KO] 1. 인덱스 및 UV 좌표 계산
+// [EN] 1. Index and UV coordinates calculation
 let index = vec2<u32>(global_id.xy);
-let dimensions: vec2<u32> = textureDimensions(sourceTexture0);
-if (index.x >= dimensions.x || index.y >= dimensions.y) { return; }
+let dimensions: vec2<f32> = vec2<f32>(postEffectOutputDimensions);
+let uv = (vec2<f32>(index) + 0.5) / dimensions;
 
-// [KO] 2. 원본 디퓨즈와 블러된 블룸 데이터 로드
-// [EN] 2. Load original diffuse and blurred bloom data
+// [KO] 2. 원본 디퓨즈(무손실 Load)와 다운샘플 블러된 블룸 데이터(Bilinear 업샘플링) 로드
+// [EN] 2. Load original diffuse (lossless Load) and downsampled blurred bloom data (Bilinear upsampling)
 let diffuseSample = textureLoad(sourceTexture0, index, 0);
-let blurSample = textureLoad(sourceTexture1, index, 0);
+let blurSample = textureSampleLevel(sourceTexture1, basicSampler, uv, 0.0);
 
 let diffuseRGB = diffuseSample.rgb;
 let blurRGB = blurSample.rgb * uniforms.bloomStrength;

@@ -1,4 +1,5 @@
 import {mat4} from "gl-matrix";
+import RedGPUObject from "../base/RedGPUObject";
 import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
@@ -6,82 +7,53 @@ import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
-import TAASharpen from "../antialiasing/taa/sharpen/TAASharpen";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
-import {keepLog} from "../utils";
-
+import keepLog from "../utils/keepLog";
 
 /**
- * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
- * [EN] Class for managing post-processing effects.
+ * [KO] `View3D`의 HDR/LDR 후처리 파이프라인(SSAO, SSR, TAA, ToneMapping, FXAA 및 사용자 이펙트)을 통합 관리하는 클래스입니다.
+ * [EN] Class that manages the HDR/LDR post-processing pipeline (SSAO, SSR, TAA, ToneMapping, FXAA, and user effects) of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
- * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
- * view.postEffectManager.addEffect(effect);
+ * // [KO] View3D의 postEffectManager를 통해 접근
+ * // [EN] Access via View3D's postEffectManager
+ * const postEffectManager = view.postEffectManager;
+ * postEffectManager.addEffect(new RedGPU.PostEffect.Sharpen(redGPUContext));
  * ```
  *
- * @category Core
+ * @category PostEffect
  */
-class PostEffectManager {
-    /**
-     * [KO] 연결된 View3D 인스턴스 (읽기 전용)
-     * [EN] Connected View3D instance (read-only)
-     */
-    readonly #view: View3D
-    /**
-     * [KO] 등록된 후처리 이펙트 리스트
-     * [EN] List of registered post-processing effects
-     */
+class PostEffectManager extends RedGPUObject {
+    #view: View3D
     #postEffects: Array<ASinglePassPostEffect | AMultiPassPostEffect> = []
-    /**
-     * [KO] 텍스처 풀
-     * [EN] Texture pool
-     */
     #texturePool: PostEffectTexturePool
 
-    /**
-     * [KO] 이전 프레임 텍스처 크기
-     * [EN] Texture size of the previous frame
-     */
-    #previousDimensions: { width: number, height: number }
-    /**
-     * [KO] 시스템 유니폼 버퍼
-     * [EN] System globalStruct buffer
-     */
+    #prevWidth: number = 0
+    #prevHeight: number = 0
     #postEffectSystemUniformBuffer: UniformBuffer;
-    /**
-     * [KO] 시스템 유니폼 버퍼 구조 정보
-     * [EN] System globalStruct buffer struct info
-     */
     #postEffectSystemUniformBufferStructInfo;
-    /**
-     * [KO] 비디오 메모리 사용량 (byte)
-     * [EN] Video memory usage (bytes)
-     */
     #videoMemorySize: number = 0
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
-    #taaSharpenEffect: TAASharpen
     #ssao: SSAO;
     #useSSAO: boolean = false;
     #ssr: SSR;
     #useSSR: boolean = false;
     #autoExposure: AutoExposure;
+    #initialResult: IPostEffectResult = {texture: null as any, textureView: null as any};
 
-    // G-Buffer 공유 자원 관련
     #gbufferBindGroupLayoutMSAA: GPUBindGroupLayout;
     #gbufferBindGroupLayoutNonMSAA: GPUBindGroupLayout;
     #gbufferBindGroup_swap0: GPUBindGroup;
@@ -94,59 +66,60 @@ class PostEffectManager {
      * [EN] Creates a PostEffectManager instance.
      *
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 연결할 `View3D` 인스턴스
+     * [EN] `View3D` instance to bind
      */
     constructor(view: View3D) {
+        super(view.redGPUContext);
         this.#view = view;
-        this.#texturePool = new PostEffectTexturePool(this.#view.redGPUContext);
+        this.#texturePool = new PostEffectTexturePool(this.redGPUContext);
         this.#init();
         this.#initGBufferLayouts();
     }
 
     /**
-     * [KO] 현재 MSAA 상태에 맞는 표준 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
-     * [EN] Returns the standard G-Buffer bind group layout for the current MSAA state.
+     * [KO] 현재 MSAA 상태에 맞는 공유 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
+     * [EN] Returns the shared G-Buffer bind group layout matching the current MSAA state.
      *
      * @returns
-     * [KO] G-Buffer 바인드 그룹 레이아웃
-     * [EN] G-Buffer bind group layout
+     * [KO] G-Buffer `GPUBindGroupLayout`
+     * [EN] G-Buffer `GPUBindGroupLayout`
      */
     get gbufferBindGroupLayout(): GPUBindGroupLayout {
-        return this.#view.redGPUContext.antialiasingManager.useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
+        return this.antialiasingManager.useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
     }
 
     /**
-     * [KO] 현재 스왑 인덱스에 맞는 공유 G-Buffer 바인드 그룹을 반환합니다.
-     * [EN] Returns the shared G-Buffer bind group for the current swap index.
+     * [KO] 현재 스왑 버퍼 인덱스에 맞는 공유 G-Buffer 바인드 그룹을 반환합니다.
+     * [EN] Returns the shared G-Buffer bind group for the current swap buffer index.
      *
      * @returns
-     * [KO] 공유 G-Buffer 바인드 그룹
-     * [EN] Shared G-Buffer bind group
+     * [KO] 공유 G-Buffer `GPUBindGroup`
+     * [EN] Shared G-Buffer `GPUBindGroup`
      */
     get gbufferBindGroup(): GPUBindGroup {
         return this.#view.renderViewStateData.swapBufferIndex ? this.#gbufferBindGroup_swap1 : this.#gbufferBindGroup_swap0;
     }
 
     /**
-     * [KO] 텍스처 풀 인스턴스를 반환합니다.
-     * [EN] Returns the texture pool instance.
+     * [KO] 후처리 텍스처 풀 인스턴스를 반환합니다.
+     * [EN] Returns the post-effect texture pool instance.
      *
      * @returns
-     * [KO] 포스트 이펙트 텍스처 풀 인스턴스
-     * [EN] Post-effect texture pool instance
+     * [KO] `PostEffectTexturePool` 인스턴스
+     * [EN] `PostEffectTexturePool` instance
      */
     get texturePool(): PostEffectTexturePool {
         return this.#texturePool;
     }
 
     /**
-     * [KO] 자동 노출(Auto Exposure) 인스턴스를 반환합니다.
-     * [EN] Returns the Auto Exposure instance.
+     * [KO] 자동 노출(`AutoExposure`) 인스턴스를 반환합니다.
+     * [EN] Returns the `AutoExposure` instance.
      *
      * @returns
-     * [KO] 자동 노출 인스턴스
-     * [EN] Auto Exposure instance
+     * [KO] `AutoExposure` 인스턴스
+     * [EN] `AutoExposure` instance
      */
     get autoExposure(): AutoExposure {
         if (!this.#autoExposure) {
@@ -156,25 +129,18 @@ class PostEffectManager {
     }
 
     /**
-     * [KO] SSAO 사용 여부를 반환합니다.
-     * [EN] Returns whether SSAO is used.
+     * [KO] SSAO(Screen Space Ambient Occlusion) 활성화 여부입니다.
+     * [EN] Whether SSAO (Screen Space Ambient Occlusion) is enabled.
      *
+     * @defaultValue false
      * @returns
-     * [KO] SSAO 사용 여부
-     * [EN] Whether SSAO is used
+     * [KO] SSAO 활성화 여부
+     * [EN] Whether SSAO is enabled
      */
     get useSSAO(): boolean {
         return this.#useSSAO;
     }
 
-    /**
-     * [KO] SSAO 사용 여부를 설정합니다.
-     * [EN] Sets whether SSAO is used.
-     *
-     * @param value -
-     * [KO] SSAO 사용 여부
-     * [EN] Whether SSAO is used
-     */
     set useSSAO(value: boolean) {
         this.#useSSAO = value;
         this.#checkSSAO()
@@ -185,8 +151,8 @@ class PostEffectManager {
      * [EN] Returns the SSAO effect instance.
      *
      * @returns
-     * [KO] SSAO 인스턴스
-     * [EN] SSAO instance
+     * [KO] `SSAO` 인스턴스
+     * [EN] `SSAO` instance
      */
     get ssao(): SSAO {
         if (!this.#ssao) {
@@ -196,25 +162,18 @@ class PostEffectManager {
     }
 
     /**
-     * [KO] SSR 사용 여부를 반환합니다.
-     * [EN] Returns whether SSR is used.
+     * [KO] SSR(Screen Space Reflection) 활성화 여부입니다.
+     * [EN] Whether SSR (Screen Space Reflection) is enabled.
      *
+     * @defaultValue false
      * @returns
-     * [KO] SSR 사용 여부
-     * [EN] Whether SSR is used
+     * [KO] SSR 활성화 여부
+     * [EN] Whether SSR is enabled
      */
     get useSSR(): boolean {
         return this.#useSSR;
     }
 
-    /**
-     * [KO] SSR 사용 여부를 설정합니다.
-     * [EN] Sets whether SSR is used.
-     *
-     * @param value -
-     * [KO] SSR 사용 여부
-     * [EN] Whether SSR is used
-     */
     set useSSR(value: boolean) {
         this.#useSSR = value;
         this.#checkSSR()
@@ -225,8 +184,8 @@ class PostEffectManager {
      * [EN] Returns the SSR effect instance.
      *
      * @returns
-     * [KO] SSR 인스턴스
-     * [EN] SSR instance
+     * [KO] `SSR` 인스턴스
+     * [EN] `SSR` instance
      */
     get ssr(): SSR {
         if (!this.#ssr) {
@@ -236,65 +195,67 @@ class PostEffectManager {
     }
 
     /**
-     * [KO] 시스템 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the system globalStruct buffer.
+     * [KO] 후처리 시스템 공용 유니폼 버퍼를 반환합니다.
+     * [EN] Returns the post-effect system common uniform buffer.
      *
      * @returns
-     * [KO] UniformBuffer 인스턴스
-     * [EN] UniformBuffer instance
+     * [KO] 시스템 `UniformBuffer` 인스턴스
+     * [EN] System `UniformBuffer` instance
      */
     get postEffectSystemUniformBuffer(): UniformBuffer {
         return this.#postEffectSystemUniformBuffer;
     }
 
     /**
-     * [KO] 연결된 View3D 인스턴스를 반환합니다.
-     * [EN] Returns the connected View3D instance.
+     * [KO] 연결된 `View3D` 인스턴스를 반환합니다.
+     * [EN] Returns the bound `View3D` instance.
      *
      * @returns
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] `View3D` 인스턴스
+     * [EN] `View3D` instance
      */
     get view(): View3D {
         return this.#view;
     }
 
     /**
-     * [KO] 등록된 이펙트 리스트를 반환합니다.
-     * [EN] Returns the list of registered effects.
+     * [KO] 등록된 사용자 후처리 이펙트 배열을 반환합니다.
+     * [EN] Returns the array of registered user post-processing effects.
      *
      * @returns
-     * [KO] 후처리 이펙트 배열
-     * [EN] Array of post-processing effects
+     * [KO] 후처리 이펙트 배열 (`Array<ASinglePassPostEffect | AMultiPassPostEffect>`)
+     * [EN] Array of post-processing effects (`Array<ASinglePassPostEffect | AMultiPassPostEffect>`)
      */
     get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
         return this.#postEffects;
     }
 
     /**
-     * [KO] 비디오 메모리 사용량을 반환합니다.
-     * [EN] Returns video memory usage.
+     * [KO] 텍스처 풀과 등록된 이펙트들의 총 비디오 메모리 사용량(바이트)을 반환합니다.
+     * [EN] Returns the total video memory usage (in bytes) of the texture pool and registered effects.
      *
      * @returns
-     * [KO] 비디오 메모리 사용량 (bytes)
-     * [EN] Video memory usage (bytes)
+     * [KO] 비디오 메모리 사용량 (단위: 바이트)
+     * [EN] Video memory usage (unit: bytes)
      */
     get videoMemorySize(): number {
         this.#calcVideoMemory()
         return this.#videoMemorySize;
     }
 
+    /**
+     * [KO] 등록된 모든 후처리 이펙트, 텍스처 풀, 시스템 버퍼를 파기합니다.
+     * [EN] Destroys all registered post-processing effects, texture pool, and system buffers.
+     */
     destroy() {
         if (this.#destroyed) return;
         this.#destroyed = true
 
-        // 1. 사용자 추가 이펙트들 파괴
         this.#postEffects.forEach(effect => {
             effect.destroy()
         })
         this.#postEffects = null
 
-        // 2. 내부 고정 멤버 필터들의 명시적 파괴 연동
         if (this.#ssao) {
             this.#ssao.destroy();
             this.#ssao = null;
@@ -303,16 +264,11 @@ class PostEffectManager {
             this.#ssr.destroy();
             this.#ssr = null;
         }
-        if (this.#taaSharpenEffect) {
-            this.#taaSharpenEffect.destroy();
-            this.#taaSharpenEffect = null;
-        }
         if (this.#autoExposure) {
             this.#autoExposure.destroy();
             this.#autoExposure = null;
         }
 
-        // 3. 텍스처 풀 및 시스템 버퍼 파괴
         this.#texturePool.clear();
         this.#texturePool = null
 
@@ -323,44 +279,44 @@ class PostEffectManager {
     }
 
     /**
-     * [KO] 이펙트를 추가합니다.
-     * [EN] Adds an effect.
+     * [KO] 후처리 파이프라인에 이펙트를 추가합니다.
+     * [EN] Adds an effect to the post-processing pipeline.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
-     * view.postEffectManager.addEffect(new RedGPU.PostEffect.Bloom(redGPUContext));
+     * view.postEffectManager.addEffect(new RedGPU.PostEffect.Sharpen(redGPUContext));
      * ```
      *
      * @param v -
-     * [KO] 추가할 이펙트
-     * [EN] Effect to add
+     * [KO] 추가할 후처리 이펙트 인스턴스
+     * [EN] Post-processing effect instance to add
      */
     addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
         this.#postEffects.push(v)
     }
 
     /**
-     * [KO] 특정 인덱스의 이펙트를 반환합니다.
-     * [EN] Returns the effect at a specific index.
+     * [KO] 지정된 인덱스의 후처리 이펙트를 반환합니다.
+     * [EN] Returns the post-processing effect at the specified index.
      *
      * @param index -
-     * [KO] 인덱스
-     * [EN] Index
+     * [KO] 조회할 인덱스
+     * [EN] Index to retrieve
      * @returns
-     * [KO] 해당 인덱스의 이펙트
-     * [EN] Effect at the given index
+     * [KO] 해당 인덱스의 후처리 이펙트 인스턴스
+     * [EN] Post-processing effect instance at the specified index
      */
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
     }
 
     /**
-     * [KO] 특정 이펙트를 제거합니다.
-     * [EN] Removes a specific effect.
+     * [KO] 특정 후처리 이펙트를 파이프라인에서 제거하고 리소스를 정리합니다.
+     * [EN] Removes a specific post-processing effect from the pipeline and clears its resources.
      *
      * @param v -
-     * [KO] 제거할 이펙트
-     * [EN] Effect to remove
+     * [KO] 제거할 후처리 이펙트 인스턴스
+     * [EN] Post-processing effect instance to remove
      */
     removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
         const index = this.#postEffects.indexOf(v);
@@ -371,12 +327,12 @@ class PostEffectManager {
     }
 
     /**
-     * [KO] 특정 인덱스의 이펙트를 제거합니다.
-     * [EN] Removes the effect at a specific index.
+     * [KO] 지정된 인덱스의 후처리 이펙트를 파이프라인에서 제거하고 리소스를 정리합니다.
+     * [EN] Removes the post-processing effect at the specified index from the pipeline and clears its resources.
      *
      * @param index -
-     * [KO] 인덱스
-     * [EN] Index
+     * [KO] 제거할 이펙트의 인덱스
+     * [EN] Index of the effect to remove
      */
     removeEffectAt(index: number) {
         if (this.#postEffects[index]) {
@@ -386,8 +342,8 @@ class PostEffectManager {
     }
 
     /**
-     * [KO] 모든 이펙트를 제거합니다.
-     * [EN] Removes all effects.
+     * [KO] 등록된 모든 후처리 이펙트를 제거하고 리소스를 정리합니다.
+     * [EN] Removes all registered post-processing effects and clears their resources.
      */
     removeAllEffect() {
         this.#postEffects.forEach(effect => {
@@ -397,12 +353,12 @@ class PostEffectManager {
     }
 
     /**
-     * [KO] 후처리 파이프라인을 렌더링합니다.
-     * [EN] Renders the post-processing pipeline.
+     * [KO] 전체 후처리 파이프라인을 실행하고 최종 출력 텍스처 정보를 반환합니다.
+     * [EN] Executes the entire post-processing pipeline and returns the final output texture information.
      *
      * @returns
-     * [KO] 렌더링 결과 텍스처 정보
-     * [EN] Rendering result texture information
+     * [KO] 최종 렌더링 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Final rendering result texture information (`IPostEffectResult`)
      */
     render(): IPostEffectResult {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
@@ -411,15 +367,9 @@ class PostEffectManager {
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {width, height} = gBufferColorTexture;
 
-        // MSAA 상태가 바뀌면 텍스처 풀을 클리어 (리소스 규격이나 처리 흐름이 바뀔 수 있음)
         if (this.#prevMSAAID_for_gbuffer !== msaaID) {
             this.#texturePool.clear();
         }
-
-        // 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
-        const initialSourceTexture = useMSAA
-            ? viewRenderTextureManager.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
-            : viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
 
         this.#updateSystemUniforms();
         this.#updateGbufferBindGroup();
@@ -427,122 +377,64 @@ class PostEffectManager {
 
         let currentTextureView = this.#renderToStorageTexture(this.#view);
 
-        // [KO] 1. HDR 단계: SkyAtmosphere, SSAO, SSR (장면 구성 요소)
-        // [EN] 1. HDR Phase: SkyAtmosphere, SSAO, SSR (Scene components)
         if (this.#view.skyAtmosphere) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.skyAtmosphere.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(this.#view.skyAtmosphere, currentTextureView, width, height);
         }
 
         if (this.#useSSAO) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => this.ssao.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(this.ssao, currentTextureView, width, height);
         }
         if (this.#useSSR) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => this.ssr.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(this.ssr, currentTextureView, width, height);
         }
 
-        // [KO] 2. 노출 및 사용자 이펙트 단계 (Smart Tone Mapping Transition)
-        // [EN] 2. Exposure and User Effects Phase (Smart Tone Mapping Transition)
+        if (useTAA && this.#view.constructor.name === 'View3D') {
+            currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
+        }
+
         if (useAutoExposure) {
             this.autoExposure.render(currentTextureView);
         }
 
         let toneMapped = false;
-        this.#postEffects.forEach(effect => {
-            // [KO] 처음으로 LDR 이펙트를 만나면 그 즉시 톤매핑 수행
-            // [EN] Perform tone mapping immediately upon encountering the first LDR effect
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            const effect = effects[i];
             if (effect.isLdr && !toneMapped) {
-                currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.toneMappingManager.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                ));
+                currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
                 toneMapped = true;
             }
 
-            currentTextureView = this.#applyEffect(currentTextureView, () => effect.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView,
-            ));
-        });
+            currentTextureView = this.#applySingleEffect(effect, currentTextureView, width, height);
+        }
 
-        // [KO] 루프가 끝날 때까지 톤매핑이 수행되지 않았다면 마지막에 수행
-        // [EN] If tone mapping hasn't been performed by the end of the loop, perform it at the end
         if (!toneMapped) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.toneMappingManager.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
         }
 
-
-        // [KO] 3. LDR 단계: AA (FXAA / TAA)
-        // [EN] 3. LDR Phase: AA (FXAA / TAA)
-        if (useFXAA) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => fxaa.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+        if (this.#view.grid) {
+            const singleSampleDepthView = useMSAA
+                ? viewRenderTextureManager.renderPath1DepthResultTextureView
+                : viewRenderTextureManager.depthTextureView;
+            this.#view.grid.render(this.#view, currentTextureView.textureView, singleSampleDepthView);
         }
 
-        if (useTAA) {
-            if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
-                currentTextureView = this.#applyEffect(currentTextureView, () => taa.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                ));
-                if (!this.#taaSharpenEffect) {
-                    this.#taaSharpenEffect = new TAASharpen(redGPUContext)
-                }
-                currentTextureView = this.#applyEffect(currentTextureView, () => this.#taaSharpenEffect.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                ));
-            } else {
-                currentTextureView = this.#applyEffect(currentTextureView, () => fxaa.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                ));
-            }
+        if (useFXAA || (useTAA && this.#view.constructor.name !== 'View3D')) {
+            currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
         }
 
-        // 프레임 렌더링 종료 후 사용된 텍스처 일괄 회수
+        if (useTAA && this.#view.constructor.name === 'View3D' && taa.sharpness > 0) {
+            currentTextureView = this.#applySingleEffect(taa.casPass, currentTextureView, width, height);
+        }
+
         this.#texturePool.releaseAll();
 
-        // keepLog(this.#view.name, this.#texturePool)
         return currentTextureView;
     }
 
     /**
-     * [KO] 모든 이펙트 리소스를 정리합니다.
-     * [EN] Clears all effect resources.
+     * [KO] 등록된 모든 이펙트와 텍스처 풀의 캐시된 리소스를 비웁니다.
+     * [EN] Clears cached resources of all registered effects and the texture pool.
      */
     clear() {
         this.#postEffects.forEach(effect => {
@@ -553,8 +445,15 @@ class PostEffectManager {
         }
     }
 
-    #applyEffect(currentTextureView: IPostEffectResult, renderFn: () => IPostEffectResult): IPostEffectResult {
-        const nextTextureView = renderFn();
+    #applySingleEffect(
+        effect: {
+            render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult
+        },
+        currentTextureView: IPostEffectResult,
+        width: number,
+        height: number
+    ): IPostEffectResult {
+        const nextTextureView = effect.render(this.#view, width, height, currentTextureView);
         if (currentTextureView && currentTextureView.texture) {
             this.#texturePool.release(currentTextureView.texture);
         }
@@ -569,16 +468,16 @@ class PostEffectManager {
                 binding: 0,
                 visibility: GPUShaderStage.COMPUTE,
                 texture: {sampleType: 'depth', multisampled: useMSAA}
-            }, // depthTexture
-            {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}}, // gBufferNormalTexture
-            {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {}}, // gBufferMotionVector
+            },
+            {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
+            {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {}},
             {
                 binding: 3,
                 visibility: GPUShaderStage.COMPUTE,
                 texture: {sampleType: 'depth', multisampled: useMSAA}
-            }, // prevDepthTexture
-            {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}, // systemUniforms
-            {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {}} // basicSampler
+            },
+            {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
+            {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {}}
         ];
 
         this.#gbufferBindGroupLayoutMSAA = gpuDevice.createBindGroupLayout({
@@ -600,7 +499,7 @@ class PostEffectManager {
         const {width, height} = gBufferColorTexture;
 
         const msaaChanged = this.#prevMSAAID_for_gbuffer !== msaaID;
-        const dimensionsChanged = this.#previousDimensions?.width !== width || this.#previousDimensions?.height !== height;
+        const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
 
         if (msaaChanged || dimensionsChanged) {
             const depthView0 = viewRenderTextureManager.depthTextureView;
@@ -682,13 +581,10 @@ class PostEffectManager {
         const projectionViewMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
         const noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix);
 
-        // Update Camera
         SystemUniformUpdater.updateCamera(rawCamera, camera.members, this.#uniformDataF32, this.#uniformDataU32);
 
-        // Update Time
         SystemUniformUpdater.updateTime(renderViewStateData, time.members, this.#uniformDataF32, this.#uniformDataU32);
 
-        // Update Projection
         SystemUniformUpdater.updateProjection(
             {
                 projectionMatrix,
@@ -704,10 +600,8 @@ class PostEffectManager {
             this.#uniformDataU32
         );
 
-        // Update SkyAtmosphere
         SystemUniformUpdater.updateSkyAtmosphere(skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32);
 
-        // Update Exposure and DPR
         updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
             {key: 'preExposure', value: this.autoExposure.preExposure},
             {key: 'devicePixelRatio', value: devicePixelRatio}
@@ -731,12 +625,9 @@ class PostEffectManager {
 
     #calcVideoMemory() {
         this.#videoMemorySize = 0;
-        // 텍스처 풀의 전체 메모리 합산 (활성 + 유휴 텍스처 모두 포함)
         if (this.#texturePool) {
             this.#videoMemorySize += this.#texturePool.videoMemorySize;
         }
-        // 개별 이펙트들이 풀링되지 않는 별도의 자원(버퍼 등)을 가지고 있을 경우를 위해 호출 유지
-        // ASinglePassPostEffect의 videoMemorySize는 이미 풀 텍스처를 중복 계산하지 않음
         this.#postEffects.forEach(effect => {
             this.#videoMemorySize += effect.videoMemorySize
         })
@@ -748,19 +639,22 @@ class PostEffectManager {
         const {antialiasingManager} = redGPUContext;
         const {width, height} = gBufferColorTexture;
 
-        const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
+        const dimensionsChanged = width !== this.#prevWidth || height !== this.#prevHeight;
         if (dimensionsChanged) {
             this.#texturePool.clear();
-            this.#previousDimensions = {width, height};
+            this.#prevWidth = width;
+            this.#prevHeight = height;
         }
         const initialSourceTexture = antialiasingManager.useMSAA
             ? viewRenderTextureManager.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
             : viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
 
-        return {
-            texture: initialSourceTexture,
-            textureView: antialiasingManager.useMSAA ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR) : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR)
-        };
+        this.#initialResult.texture = initialSourceTexture;
+        this.#initialResult.textureView = antialiasingManager.useMSAA
+            ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR)
+            : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR);
+
+        return this.#initialResult;
     }
 }
 

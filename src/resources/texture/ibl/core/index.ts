@@ -1,6 +1,6 @@
 /**
- * [KO] IBL 생성을 위한 핵심 클래스 및 제너레이터를 제공합니다.
- * [EN] Provides core classes and generators for IBL generation.
+ * [KO] BRDF LUT, Irradiance, Prefilter 맵 생성기 등 IBL 구성용 코어 모듈을 제공합니다.
+ * [EN] Provides core modules for building IBL, such as BRDF LUT, irradiance, and prefilter map generators.
  * @packageDocumentation
  */
 

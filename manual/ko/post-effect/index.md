@@ -5,79 +5,92 @@ order: 9
 
 # 포스트 이펙트
 
-포스트 이펙트는 3D 씬 렌더링이 완료된 후, 최종 2D 이미지에 시각적 효과를 더하는 기술입니다. RedGPU의 후처리 시스템은 **설정의 편의성**과 **실행의 효율성**을 위해 이원화된 인터페이스를 제공합니다.
+포스트 이펙트 (Post-Effect)는 3D 씬의 G-Buffer 렌더링이 완료된 후, 컴퓨트 셰이더 기반 파이프라인을 통해 최종 화면에 공간 광원 효과, 색보정, 렌즈 효과 및 안티앨리어싱을 적용하는 후처리
+시스템입니다.
 
 <script setup>
 const postEffectGraph = `
     graph TB
-        subgraph Control ["Control Interface (API)"]
-            direction TB
-            TMM["view.toneMappingManager"]:::controlNode
-            PEM["view.postEffectManager"]:::controlNode
-        end
-
-        subgraph HDR ["1. HDR Phase (Scene Components)"]
+        subgraph HDR ["1. HDR Built-in & Temporal Phase"]
             direction TB
             SA["SkyAtmosphere"]:::pipelineNode
-            SSAO["SSAO (Built-in)"]:::pipelineNode
-            SSR["SSR (Built-in)"]:::pipelineNode
-            SA --> SSAO --> SSR
-        end
-
-        subgraph Transition ["2. Transition Phase (Exposure & User Effects)"]
-            direction TB
+            SSAO["SSAO (useSSAO)"]:::pipelineNode
+            SSR["SSR (useSSR)"]:::pipelineNode
+            TAA["TAA (Temporal Accumulation)"]:::pipelineNode
             AE["AutoExposure"]:::pipelineNode
-            GE["User General Effects (Loop)"]:::pipelineNode
-            TM["Tone Mapping"]:::pipelineNode
-            AE --> GE --> TM
+            SA --> SSAO --> SSR --> TAA --> AE
         end
 
-        AA["3. LDR Phase (FXAA / TAA)"]:::pipelineNode
+        subgraph Transition ["2. User Effects & Tone Mapping Phase"]
+            direction TB
+            HDR_EFF["HDR User Effects (OldBloom, etc.)"]:::pipelineNode
+            TM["ToneMappingManager (HDR → LDR)"]:::pipelineNode
+            LDR_EFF["LDR User Effects (Blur, DoF, etc.)"]:::pipelineNode
+            HDR_EFF --> TM --> LDR_EFF
+        end
 
-    TMM -.->|Inject Settings| TM
-    PEM -.->|Manage & Execute| Transition
-    Control --> HDR
-    HDR --> Transition
-    Transition --> AA
+        subgraph Final ["3. LDR Finalization Phase"]
+            direction TB
+            AA["FXAA / TAA CAS Sharpen"]:::pipelineNode
+        end
 
-    classDef controlNode fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px;
+        HDR --> Transition --> Final
+
     classDef pipelineNode fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px;
-    
-    style Control fill:#f4f4f5,stroke:#e4e4e7,stroke-width:1px,color:#27272a;
     style HDR fill:#e4e4e7,stroke:#d4d4d8,stroke-width:1px,color:#18181b;
     style Transition fill:#e4e4e7,stroke:#d4d4d8,stroke-width:1px,color:#18181b;
+    style Final fill:#f4f4f5,stroke:#e4e4e7,stroke-width:1px,color:#27272a;
 `
 </script>
-
-## 1. 시스템 구조: 제어와 실행
-
-사용자는 목적에 따라 두 개의 매니저를 통해 후처리를 제어하지만, 실제 연산은 `PostEffectManager` 가 총괄하는 하나의 파이프라인 내에서 순차적으로 실행됩니다.
-
-*   **ToneMappingManager** (`view.toneMappingManager`): 씬의 가장 기본적인 색조, 노출, 대비 등 **색상 변환 설정**을 담당하는 전용 창구입니다.
-*   **PostEffectManager** (`view.postEffectManager`): 일반 이펙트의 추가/삭제 및 파이프라인의 **전체 실행**을 담당합니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="postEffectGraph" />
 </ClientOnly>
 
-## 2. 렌더링 파이프라인 흐름
+## 1. 제어 인터페이스
 
-모든 효과는 아래 순서에 따라 처리됩니다. 이 순서는 그래픽스 최적화와 시각적 결과의 일관성을 위해 고정되어 있습니다.
+`View3D`는 후처리 목적에 따라 두 개의 매니저 속성을 제공하며, 실제 파이프라인 실행과 텍스처 풀링 (`PostEffectTexturePool`)은 `PostEffectManager`가 통합 관리합니다.
 
-1. **HDR Phase (장면 구성 요소)**: `SkyAtmosphere`, `SSAO`(SSAO), `SSR`(실시간 반사) 등 물리적인 씬 정보를 조립하는 단계입니다.
-2. **Exposure & Transition (노출 및 톤매핑 전환)**:
-    * `AutoExposure`(자동 노출) 연산이 수행됩니다.
-    * 사용자가 `addEffect()`로 등록한 **일반 이펙트** 루프를 실행합니다.
-    * 루프 도중 첫 번째 LDR(Low Dynamic Range) 이펙트를 만나는 시점에 즉시 **Tone Mapping**을 수행하며, 만약 루프가 끝날 때까지 수행되지 않았다면 루프 종료 시점에 수행합니다.
-3. **LDR Phase (안티앨리어싱)**: 최종 이미지를 보정하는 마지막 단계로, 활성화 상태에 따라 `FXAA` 또는 `TAA` (및 `TAASharpen`) 연산이 수행됩니다.
+- **`view.postEffectManager` (`PostEffectManager`)**: 빌트인 이펙트 (`useSSAO`, `useSSR`) 활성화와 일반 이펙트 체인 (`addEffect`,
+  `removeEffect`)을 관리하고 전체 후처리 파이프라인을 실행합니다.
+- **`view.toneMappingManager` (`ToneMappingManager`)**: HDR 데이터를 디스플레이 출력 범위 (LDR)로 변환하는 톤 매핑 알고리즘 (`mode`), 대비
+  (`contrast`), 밝기 (`brightness`)를 제어합니다.
 
-::: tip [라이브 데모]
-[RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect)에서 모든 효과의 실시간 작동 모습을 확인할 수 있습니다.
-:::
+---
 
-## 3. 학습 가이드
+## 2. 렌더링 파이프라인 실행 순서
 
-*   **[일반 이펙트](./general-effects.md)** : 블룸, 블러, 흑백 등 다양한 효과 추가하기
-*   **[톤 매핑](./tone-mapping.md)** : 씬의 기본 색감과 노출 설정하기
-*   **[빌트인 이펙트](./builtin-effects.md)** : SSAO, SSR 등 고성능 효과 활성화하기
-* **[안티앨리어싱](../antialiasing/index.md)** : 화면 외곽선 정리하기
+`PostEffectManager`는 물리적 정확도와 화질 보존을 위해 아래 3단계 순서로 후처리를 수행합니다.
+
+1. **HDR 빌트인 및 시간 누적 단계 (`HDR Built-in & Temporal Phase`)**
+    - 씬의 원본 HDR 컬러 및 G-Buffer (깊이, 노말, 모션 벡터)를 활용하여 `SkyAtmosphere`, `SSAO`, `SSR`을 순차적으로 합성합니다.
+    - `TAA`가 활성화된 경우 톤 매핑 이전의 HDR 상태에서 모션 벡터 기반 시간 누적 (Temporal Accumulation)을 수행하며, 이어서 카메라 자동 노출 (`AutoExposure`) 휘도를
+      계산합니다.
+2. **사용자 이펙트 및 스마트 톤 매핑 전환 (`User Effects & Tone Mapping Phase`)**
+    - `view.postEffectManager.addEffect()`로 등록한 이펙트 배열을 순회합니다.
+    - `OldBloom` 등 HDR 기반 이펙트 (`isLdr: false`)는 HDR 상태에서 먼저 실행되며, 루프 도중 **최초의 LDR 이펙트 (`isLdr: true`)를 만나는 시점에 즉시
+      `ToneMappingManager`가 실행**되어 LDR 색공간으로 전환됩니다 (LDR 이펙트가 없을 경우 루프 종료 직후 톤 매핑 수행).
+3. **LDR 마감 단계 (`LDR Finalization Phase`)**
+    - 그리드 (`view.grid`)가 활성화된 경우 깊이 버퍼를 참조하여 합성합니다.
+    - 안티앨리어싱 설정에 따라 `FXAA` 또는 `TAA`의 적응형 선명화 (`CAS Sharpen`) 패스를 거쳐 최종 이미지를 완성합니다.
+
+---
+
+## 3. 세부 구성 요소
+
+1. **[일반 이펙트](./general-effects.md)**: `addEffect()`를 통해 블룸, 피사계 심도 (DoF), 블러, 안개, 색조 보정 등 다양한 필터 체인을 구성합니다.
+2. **[톤 매핑](./tone-mapping.md)**: `ToneMappingManager`를 통해 HDR 씬의 색감과 노출을 LDR 화면 범위로 매핑합니다.
+3. **[빌트인 이펙트](./builtin-effects.md)**: G-Buffer와 연동되는 고성능 `SSAO` 및 `SSR` 효과를 활성화합니다.
+
+---
+
+## 관련 예제
+
+- [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/ssao/)
+- [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/ssr/)
+- [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/lens/dof/)
+- [블룸 (OldBloom)](/RedGPU/examples/postEffect/oldBloom/)
+
+---
+
+[다음 단계: 일반 이펙트 배우기](./general-effects.md)

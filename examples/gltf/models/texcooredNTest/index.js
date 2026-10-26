@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -18,6 +18,8 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         // Load GLTF model
+        // [KO] 캐릭터 모델 로드 (출처: https://threejs.org/examples/models/gltf/Soldier.glb)
+        // [EN] Load character model (Source: https://threejs.org/examples/models/gltf/Soldier.glb)
         const MODEL_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
         loadGLTF(view, MODEL_URL);
 

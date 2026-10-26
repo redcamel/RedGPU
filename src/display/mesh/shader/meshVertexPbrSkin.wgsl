@@ -1,5 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include shadow.getShadowCoord;
 #redgpu_include shadow.getShadowClipPosition;
 
 #redgpu_include systemStruct.globalVertexStruct;
@@ -50,7 +49,6 @@ struct VertexOutput {
     @location(11) combinedOpacity: f32,
 
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
@@ -81,10 +79,6 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
     let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
 
-    // [KO] 조명 데이터 캐싱
-    // [EN] Cache lighting data
-    let su_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-
     // [KO] 컴퓨트 셰이더에서 구워진 스키닝된 데이터 로드
     // [EN] Load skinned data baked in Compute Shader
     let skinnedPosData = skinnedVertices[inputData.idx];
@@ -101,28 +95,24 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     // [EN] Tangent transformation
     output.vertexTangent = vec4<f32>(normalize((gu_normalModelMatrix * vec4<f32>(skinnedPosData.tangent.xyz, 0.0)).xyz), skinnedPosData.tangent.w);
 
-    // [KO] 출력 데이터 할당
-    // [EN] Assign output data
-    output.position = su_projectionViewMatrix * position;
+    // [KO] 출력 데이터 할당 (카메라 상대적 고정밀 투영 변환: 대규모 오픈월드 부동소수점 지터 완벽 제거)
+    // [EN] Assign output data with camera-relative projection
+    let relPos = position.xyz - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    output.position = su_projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.vertexPosition = position.xyz;
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
     output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
-    // [KO] 그림자 좌표 계산
-    // [EN] Calculate shadow coordinates
-    #redgpu_if receiveShadow
-    {
-        output.shadowCoord = getShadowCoord(position.xyz, su_directionalLightProjectionViewMatrix);
-        output.receiveShadow = globalVertexData.receiveShadow;
-    }
-    #redgpu_endIf
+    // [KO] 그림자 플래그 설정
+    output.receiveShadow = globalVertexData.receiveShadow;
 
-    // [KO] 모션 벡터 계산을 위한 클립 좌표 저장 (컴퓨트 셰이더에서 구워진 최종 클립 좌표들을 바로 사용)
+    // [KO] 모션 벡터 계산을 위한 클립 좌표 저장 (고정밀 카메라 상대 좌표 기반)
     // [EN] Store clip coordinates for motion vector calculation
     {
-        output.currentClipPos = skinnedPosData.currentClipPos;
+        output.currentClipPos = su_projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
         output.prevClipPos = prevSkinnedVertices[inputData.idx];
     }
 
@@ -178,7 +168,9 @@ fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     // [EN] Calculate skinned picking position
     let skinnedPosData = skinnedVertices[inputData.idx];
     let position = globalVertexData.matrixList.modelMatrix * vec4<f32>(skinnedPosData.position, 1.0);
-    output.position = systemUniforms.projection.projectionViewMatrix * position;
+    let relPos = position.xyz - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    output.position = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
 
     return output;

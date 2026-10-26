@@ -1,0 +1,30 @@
+{
+  "name": "redgpu-manual",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RedGPU Manual & Documentation Site",
+  "scripts": {
+    "api:ko": "node ../buildScripts/syncShaderDoc.js && cross-env DOC_LANG=ko npx typedoc --options typedoc.config.js && node ../buildScripts/github/filterLanguageFiles.js ko",
+    "api:en": "node ../buildScripts/syncShaderDoc.js && cross-env DOC_LANG=en npx typedoc --options typedoc.config.js && node ../buildScripts/github/filterLanguageFiles.js en",
+    "api:all": "npm run api:ko && npm run api:en",
+    "dev": "npm run api:all && vitepress dev",
+    "build": "cross-env NODE_ENV=production npm run api:all && vitepress build && node ../buildScripts/github/deploy-manual.js",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "mermaid": "^11.17.2",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.13.1",
+    "typescript": "^5.9.3",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17",
+    "vitepress-sidebar": "^1.40.0"
+  },
+  "overrides": {
+    "qsu": "1.12.0",
+    "katex": "^0.19.1",
+    "esbuild": "^0.25.0",
+    "vite": "^6.4.4"
+  }
+}

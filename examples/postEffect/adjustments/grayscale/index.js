@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js?t=1792986001111";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986001111";
 
 /**
  * [KO] Grayscale 예제
@@ -9,41 +9,46 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17842648
  * [EN] Demonstrates how to convert the screen to grayscale using post effects.
  */
 
-// 1. Create and append a container and canvas
 const container = document.createElement('div');
 document.body.appendChild(container);
 
 const canvas = document.createElement('canvas');
 container.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 3;
         controller.speedDistance = 0.1;
-        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
+        // [KO] Grayscale 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create Grayscale post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.Grayscale(redGPUContext));
+        const effect = new RedGPU.PostEffect.Grayscale(redGPUContext);
+        viewEffect.postEffectManager.addEffect(effect);
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -63,55 +68,42 @@ RedGPU.init(
         window.addEventListener('resize', updateLayout);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, viewEffect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => scene.addChild(v['resultMesh']));
-}
-
-const renderTestPane = async (redGPUContext, targetView, container) => {
-
+const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
         gui: (pane) => {
-            const effect = targetView.postEffectManager.getEffectAt(0);
-            const TEST_STATE = {
-                Grayscale: true,
-                amount: effect.amount,
-            }
-            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-            folder.addBinding(TEST_STATE, 'Grayscale').on('change', (v) => {
-                if (v.value) {
-                    const newEffect = new RedGPU.PostEffect.Grayscale(redGPUContext);
-                    newEffect.amount = TEST_STATE.amount;
-                    targetView.postEffectManager.addEffect(newEffect)
-                } else {
-                    targetView.postEffectManager.removeAllEffect()
-                }
-                amountControl.disabled = !v.value;
-            })
+            const config = {Grayscale: true};
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            const amountControl = folder.addBinding(TEST_STATE, 'amount', {
-                min: 0,
-                max: 1,
-                step: 0.01
-            }).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.amount = v.value
-            })
+            folder.addBinding(config, 'Grayscale').on('change', (v) => {
+                if (v.value) {
+                    targetView.postEffectManager.addEffect(effect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                controls.forEach((c) => c.disabled = !v.value);
+            });
+
+            const controls = [
+                folder.addBinding(effect, 'amount', {min: 0, max: 1, step: 0.01})
+            ];
         }
     });
-
-
 };

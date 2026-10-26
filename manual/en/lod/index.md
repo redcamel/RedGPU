@@ -5,8 +5,10 @@ order: 9
 
 # LOD
 
-**LOD** (Level of Detail) is an optimization technique that shows different levels of detail (Geometry) depending on the distance between the camera and the object.
-By using high-resolution models for objects that are close and low-resolution models for objects that are far away, you can maximize rendering performance while maintaining visual quality.
+**LOD** (Level of Detail) is an optimization technique that shows different levels of detail (Geometry) depending on the
+distance between the camera and the object.
+By using high-resolution models for objects that are close and low-resolution models for objects that are far away, you
+can maximize rendering performance while maintaining visual quality.
 
 RedGPU supports LOD in a consistent way by embedding **`LODManager`** in both `Mesh` and `InstancingMesh`.
 
@@ -16,6 +18,15 @@ The way LOD works differs depending on the object type. Refer to the document th
 
 1. **[Mesh LOD](./mesh-lod.md)**: Applied to general single objects (CPU-based)
 2. **[Instancing Mesh LOD](./instanced-lod.md)**: Applied to massive instancing objects (GPU-based)
+
+---
+
+## Related Examples
+
+- [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
+- [Mesh CPU LOD (Per-Level Material)](/RedGPU/examples/3d/lod/MeshCPULOD_material/)
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+- [InstancingMesh GPU LOD (Per-Level Material)](/RedGPU/examples/3d/lod/InstanceMeshGPULOD_material/)
 
 ---
 

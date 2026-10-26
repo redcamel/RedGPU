@@ -13,50 +13,54 @@ import RedGPUObject from "../../base/RedGPUObject";
 /**
  * [KO] GLTF 파일 파싱 결과 정보를 담고 있는 타입입니다.
  * [EN] Represents the result of parsing a GLTF file.
+ *
+ * @category Loader
  */
 type GLTFParsingResult = {
     /**
      * [KO] GLTF 파일에 정의된 그룹 목록
-     * [EN] The groups defined in the GLTF file.
+     * [EN] Groups defined in the GLTF file
      */
     groups: any[],
     /**
      * [KO] GLTF 파일에 정의된 재질 목록
-     * [EN] The materials defined in the GLTF file.
+     * [EN] Materials defined in the GLTF file
      */
     materials: any[],
     /**
-     * [KO] GLTF 파일에 정의된 URI 정보
-     * [EN] The URIs defined in the GLTF file.
+     * [KO] GLTF 파일에 정의된 URI 버퍼 정보
+     * [EN] URI buffer information defined in the GLTF file
      */
     uris: {
         buffers: any[]
     },
     /**
      * [KO] GLTF 파일에 정의된 텍스처 맵
-     * [EN] The textures defined in the GLTF file.
+     * [EN] Textures defined in the GLTF file
      */
     textures: Record<string, any>,
     /**
      * [KO] GLTF 파일에 정의된 원시 텍스처 목록
-     * [EN] The list of raw textures defined in the GLTF file.
+     * [EN] List of raw textures defined in the GLTF file
      */
     textureRawList: any[],
     /**
      * [KO] GLTF 파일에 정의된 카메라 목록
-     * [EN] The cameras defined in the GLTF file.
+     * [EN] Cameras defined in the GLTF file
      */
     cameras: any[],
     /**
      * [KO] GLTF 파일에 정의된 파싱된 애니메이션 클립 목록
-     * [EN] The parsed animation clips defined in the GLTF file.
+     * [EN] Parsed animation clips defined in the GLTF file
      */
     animations: ClipAnimState[]
 }
 
 /**
- * [KO] GLTF 로딩 진행 상황 정보를 담고 있는 타입입니다.
- * [EN] Represents information about the GLTF loading progress.
+ * [KO] GLTF 로딩 진행 상태 정보를 나타내는 타입입니다.
+ * [EN] Type representing GLTF loading progress information.
+ *
+ * @category Loader
  */
 export type GLTFLoadingProgressInfo = {
     url: string,
@@ -81,22 +85,19 @@ export type GLTFLoadingProgressInfo = {
 };
 
 /**
- * [KO] GLTF 2.0 포맷의 3D 모델 파일을 로드하고 파싱하는 로더입니다.
- * [EN] Loader that loads and parses 3D model files in GLTF 2.0 format.
+ * [KO] GLTF 2.0 포맷(`.gltf`, `.glb`)의 3D 모델 파일을 로드하고 메쉬, 재질, 텍스처, 애니메이션, 스킨을 RedGPU 객체로 파싱하는 로더 클래스입니다.
+ * [EN] Loader class that loads 3D model files in GLTF 2.0 format (`.gltf`, `.glb`) and parses meshes, materials, textures, animations, and skins into RedGPU objects.
  *
- * [KO] .gltf (JSON) 및 .glb (Binary) 형식을 모두 지원하며, 메쉬, 재질, 텍스처, 애니메이션, 스킨 등을 자동으로 파싱하여 RedGPU 객체로 변환합니다.
- * [EN] Supports both .gltf (JSON) and .glb (Binary) formats, and automatically parses meshes, materials, textures, animations, skins, etc., converting them into RedGPU objects.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const loader = new RedGPU.GLTFLoader(
  *     redGPUContext,
  *     'assets/gltf/models/DamagedHelmet/glTF/DamagedHelmet.gltf',
  *     (loader) => {
- *         console.log('Load Complete:', loader);
  *         scene.addChild(loader.resultMesh);
  *
- *         // 애니메이션 재생 (Play animation)
+ *         // [KO] 애니메이션 재생
+ *         // [EN] Play animation
  *         if (loader.parsingResult.animations.length > 0) {
  *             loader.playAnimation(loader.parsingResult.animations[0]);
  *         }
@@ -124,9 +125,10 @@ class GLTFLoader extends RedGPUObject {
      */
     resultMesh: Mesh
     /**
-     * @internal
+     * [KO] GLTF 파싱 옵션
+     * [EN] GLTF parsing options
      */
-    parsingOption // TODO - 이거뭔지 알아내야함
+    parsingOption
     /**
      * [KO] 현재 재생 중인 애니메이션 정보 목록
      * [EN] List of currently playing animation information
@@ -204,28 +206,30 @@ class GLTFLoader extends RedGPUObject {
         return this.#loadingProgressInfo;
     }
 
-
     /**
      * [KO] 파일 경로를 반환합니다.
      * [EN] Returns the file path.
+     *
+     * @returns
+     * [KO] 파일 디렉터리 경로 문자열
+     * [EN] File directory path string
      */
     get filePath(): string {
         return this.#filePath;
     }
 
     /**
-     * [KO] 원본 GLTF 데이터를 반환합니다.
-     * [EN] Returns the raw GLTF data.
+     * [KO] 원본 GLTF 데이터를 가져오거나 설정합니다.
+     * [EN] Gets or sets the raw GLTF data.
+     *
+     * @returns
+     * [KO] 원본 GLTF 데이터 객체
+     * [EN] Raw GLTF data object
      */
     get gltfData(): GLTF {
         return this.#gltfData;
     }
 
-    /**
-     * [KO] 원본 GLTF 데이터를 설정합니다.
-     * [EN] Sets the raw GLTF data.
-     * @internal
-     */
     set gltfData(value: GLTF) {
         this.#gltfData = value;
     }
@@ -233,6 +237,10 @@ class GLTFLoader extends RedGPUObject {
     /**
      * [KO] 파일 이름을 반환합니다.
      * [EN] Returns the file name.
+     *
+     * @returns
+     * [KO] 파일 이름 문자열
+     * [EN] File name string
      */
     get fileName(): string {
         return this.#fileName;
@@ -241,24 +249,20 @@ class GLTFLoader extends RedGPUObject {
     /**
      * [KO] 파일 URL을 반환합니다.
      * [EN] Returns the file URL.
+     *
+     * @returns
+     * [KO] 파일 URL 문자열
+     * [EN] File URL string
      */
     get url(): string {
         return this.#url;
     }
 
-    // stopAnimation(parsedSingleClip: GLTFParsedSingleClip) {
-    //     const {activeAnimations} = this
-    //     let index = activeAnimations.indexOf(parsedSingleClip);
-    //     if (index > -1) {
-    //         activeAnimations.splice(index, 1);
-    //     }
-    // };
-
     /**
      * [KO] 모든 활성화된 애니메이션을 중지합니다.
      * [EN] Stops all active animations.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * loader.stopAnimation();
      * ```
@@ -271,7 +275,7 @@ class GLTFLoader extends RedGPUObject {
      * [KO] 특정 애니메이션 클립을 재생합니다.
      * [EN] Plays a specific animation clip.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * const clip = loader.parsingResult.animations[0];
      * loader.playAnimation(clip);
@@ -302,7 +306,10 @@ class GLTFLoader extends RedGPUObject {
         }
     }
 
-
+    /**
+     * [KO] GLTFLoader 인스턴스와 파싱된 애니메이션 트랙 및 참조 리소스를 해제합니다.
+     * [EN] Releases and destroys the GLTFLoader instance, parsed animation tracks, and referenced resources.
+     */
     destroy() {
         this.stopAnimation();
         if (this.parsingResult) {
@@ -336,8 +343,8 @@ Object.freeze(GLTFLoader);
 export default GLTFLoader;
 
 /**
- * [KO] 재생 중인 애니메이션 정보를 담는 클래스입니다.
- * [EN] Class containing information about the animation being played.
+ * [KO] 재생 중인 애니메이션 상태 및 모션 블렌딩 정보를 담는 클래스입니다.
+ * [EN] Class containing active animation state and motion blending information.
  *
  * @category Animation
  */
@@ -349,17 +356,43 @@ export class PlayAnimationInfo {
     startTime: number
     /**
      * [KO] 재생 중인 애니메이션 클립 상태
-     * [EN] The animation clip state being played
+     * [EN] Animation clip state being played
      */
     targetGLTFParsedSingleClip: ClipAnimState
-
-    // 블렌딩 및 상태 머신 지원 필드 추가
+    /**
+     * [KO] 모션 블렌딩 활성화 여부
+     * [EN] Whether motion blending is active
+     */
     isBlending?: boolean
+    /**
+     * [KO] 블렌딩 시작 클립 상태
+     * [EN] Source clip state for blending
+     */
     fromClip?: ClipAnimState
+    /**
+     * [KO] 블렌딩 대상 클립 상태
+     * [EN] Target clip state for blending
+     */
     toClip?: ClipAnimState
+    /**
+     * [KO] 블렌딩 가중치 (0~1)
+     * [EN] Blending weight (0~1)
+     */
     blendWeight?: number
+    /**
+     * [KO] 시작 클립의 재생 시작 시간 (ms)
+     * [EN] Playback start time of the source clip (ms)
+     */
     startTimeFrom?: number
+    /**
+     * [KO] 대상 클립의 재생 시작 시간 (ms)
+     * [EN] Playback start time of the target clip (ms)
+     */
     startTimeTo?: number
+    /**
+     * [KO] 연결된 애니메이션 상태 머신 인스턴스
+     * [EN] Associated animation state machine instance
+     */
     animStateMachine?: any
 
     /**
@@ -367,11 +400,11 @@ export class PlayAnimationInfo {
      * [EN] Creates a PlayAnimationInfo instance.
      *
      * @param startTime -
-     * [KO] 시작 시간
-     * [EN] Start time
-     * @param targetAniTrackList -
-     * [KO] 대상 애니메이션 클립
-     * [EN] Target animation clip
+     * [KO] 시작 시간 (ms)
+     * [EN] Start time (ms)
+     * @param clipState -
+     * [KO] 대상 애니메이션 클립 상태
+     * [EN] Target animation clip state
      */
     constructor(startTime: number, clipState: ClipAnimState) {
         this.startTime = startTime

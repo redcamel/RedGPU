@@ -6,12 +6,15 @@ order: 3
 # Instancing Mesh LOD
 
 This section covers how to apply LOD to **Instancing Mesh**, which is used for rendering massive amounts of objects.
-LOD for `InstancingMesh` calculates the distance for each instance in parallel within the **GPU Shader**. This means there is virtually no CPU overhead, even when applying LOD to tens of thousands of objects.
+LOD for `InstancingMesh` calculates the distance for each instance in parallel within the **GPU Shader**. This means
+there is virtually no CPU overhead, even when applying LOD to tens of thousands of objects.
 
 ## 1. How it Works
 
-When LOD is registered to an `InstancingMesh`, **Sub-Draw Calls** equal to the number of LOD levels may be created internally.
-However, through rendering pipeline optimization, the GPU determines the camera distance for each instance and references the appropriate geometry buffer for rendering.
+When LOD is registered to an `InstancingMesh`, **Sub-Draw Calls** equal to the number of LOD levels may be created
+internally.
+However, through rendering pipeline optimization, the GPU determines the camera distance for each instance and
+references the appropriate geometry buffer for rendering.
 
 ## 2. Usage
 
@@ -38,7 +41,8 @@ scene.addChild(instancedMesh);
 
 ## 3. Live Example: 2,000 LOD Objects
 
-Observe how 2,000 objects change their shape depending on their distance from the camera. If you zoom in or out, distant objects appear as **Boxes**, while close objects appear as **Spheres**.
+Observe how 2,000 objects change their shape depending on their distance from the camera. If you zoom in or out, distant
+objects appear as **Boxes**, while close objects appear as **Spheres**.
 
 <ClientOnly>
 <CodePen title="RedGPU - Instancing LOD Example" slugHash="lod-instancing">
@@ -62,7 +66,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
     
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.5;
+    ambientLight.intensity = 0.5;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Create InstancingMesh
@@ -121,7 +125,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
 
-- **GPU Acceleration**: Since the GPU determines distances without CPU calculation, there is almost no performance degradation even with a massive number of objects.
-- **Memory Optimization**: Using low-resolution models for distant objects dramatically reduces vertex processing costs.
+## Related Examples
+
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+- [InstancingMesh GPU LOD (Per-Level Material)](/RedGPU/examples/3d/lod/InstanceMeshGPULOD_material/)

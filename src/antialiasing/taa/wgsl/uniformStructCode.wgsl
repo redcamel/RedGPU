@@ -1,85 +1,68 @@
-#redgpu_include color.getLuminance
 #redgpu_include color.rgbToYCoCg
 #redgpu_include color.YCoCgToRgb
 #redgpu_include depth.getLinearizeDepth
 #redgpu_include math.EPSILON
 
-// ===== 1. 구조체 및 유틸리티 (Alpha 지원 확장) =====
+// TAA uniform buffer layout (16-byte aligned)
 struct Uniforms {
-    frameIndex: f32,
     currJitterOffset: vec2<f32>,
-    prevJitterOffset: vec2<f32>,
+    frameIndex: f32,
+    pad0: f32, // 16-byte tail alignment
 };
 
+// 3x3 neighborhood statistical moments and AABB bounds in YCoCg space (64 bytes, 16B aligned per slot)
 struct NeighborhoodStats {
     minColor: vec3<f32>,
+    minAlpha: f32, // 12B + 4B = 16B
     maxColor: vec3<f32>,
+    maxAlpha: f32, // 12B + 4B = 16B
     mean: vec3<f32>,
+    meanAlpha: f32, // 12B + 4B = 16B
     stdDev: vec3<f32>,
-    minAlpha: f32,    
-    maxAlpha: f32,    
-    meanAlpha: f32,   
-    meanLuminance: f32,
-    stdDevLuminance: f32,
+    pad0: f32, // 16-byte tail alignment
 };
 
 struct SampledColor {
     rgb: vec3<f32>,
     ycocg: vec3<f32>,
-    alpha: f32,       
+    alpha: f32,
 };
 
-fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
+// Evaluates depth continuity confidence between current and reprojected depth to detect disocclusion
+fn get_geometric_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let currLinear = getLinearizeDepth(currDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
     let prevLinear = getLinearizeDepth(prevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
     let depthDiff = abs(currLinear - prevLinear);
-    // [KO] 선형 거리 차이에 따른 신뢰도 계산 (0.1m 차이부터 감쇄 시작, 0.5m 이상이면 신뢰도 0)
-    // [EN] Depth confidence based on linear distance (Decay starts at 0.1m, 0 confidence if > 0.5m)
-    return 1.0 - clamp((depthDiff - 0.1) / 0.4, 0.0, 1.0);
+
+    let tolerance = max(0.15, currLinear * 0.04);
+    return 1.0 - saturate((depthDiff - tolerance * 0.5) / (tolerance * 1.5));
 }
 
-fn fetch_depth_bilinear(uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
-    let samplePos = uv * screenSize - 0.5;
-    let f = fract(samplePos);
-    let base = vec2<i32>(floor(samplePos));
-    let size = vec2<i32>(textureDimensions(prevDepthTexture));
+// 10x10 workgroup shared memory (8x8 active tile + 1-pixel halo border)
+var<workgroup> s_color : array<array<vec4<f32>, 10>, 10>;
+var<workgroup> s_depth : array<array<f32, 10>, 10>;
 
-    let d00 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(0, 0), vec2<i32>(0), size - 1), 0);
-    let d10 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(1, 0), vec2<i32>(0), size - 1), 0);
-    let d01 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(0, 1), vec2<i32>(0), size - 1), 0);
-    let d11 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(1, 1), vec2<i32>(0), size - 1), 0);
-
-    return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
-}
-
-fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -> NeighborhoodStats {
-    let screenSize = vec2<f32>(screenSizeU);
+// Computes 3x3 YCoCg mean, standard deviation, and min/max bounds from workgroup shared memory
+fn calculate_neighborhood_stats_ycocg_lds(localCoord: vec2<i32>) -> NeighborhoodStats {
     var m1 = vec3<f32>(0.0);
     var m2 = vec3<f32>(0.0);
-    var m1L = 0.0;
-    var m2L = 0.0;
-    var m1A = 0.0;
     var minC = vec3<f32>(1e5);
     var maxC = vec3<f32>(-1e5);
+    var sumAlpha = 0.0;
     var minA = 1e5;
     var maxA = -1e5;
 
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
-            let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
-            let colorRGBA = textureLoad(sourceTexture, sampleCoord, 0);
-            let colorRGB = colorRGBA.rgb;
-            let colorYCoCg = rgbToYCoCg(colorRGB);
-            let lum = getLuminance(colorRGB);
-            let alpha = colorRGBA.a;
+            let sampleRGBA = s_color[localCoord.y + y][localCoord.x + x];
+            let colorYCoCg = rgbToYCoCg(sampleRGBA.rgb);
+            let alpha = sampleRGBA.a;
 
             m1 += colorYCoCg;
             m2 += colorYCoCg * colorYCoCg;
-            m1L += lum;
-            m2L += lum * lum;
-            m1A += alpha;
             minC = min(minC, colorYCoCg);
             maxC = max(maxC, colorYCoCg);
+            sumAlpha += alpha;
             minA = min(minA, alpha);
             maxA = max(maxA, alpha);
         }
@@ -89,24 +72,51 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
     var stats: NeighborhoodStats;
     stats.mean = m1 / sampleCount;
     stats.stdDev = sqrt(max((m2 / sampleCount) - (stats.mean * stats.mean), vec3<f32>(0.0)));
-    stats.meanLuminance = m1L / sampleCount;
-    stats.stdDevLuminance = sqrt(max((m2L / sampleCount) - (stats.meanLuminance * stats.meanLuminance), 0.0));
     stats.minColor = minC;
     stats.maxColor = maxC;
     stats.minAlpha = minA;
     stats.maxAlpha = maxA;
-    stats.meanAlpha = m1A / sampleCount;
+    stats.meanAlpha = sumAlpha / sampleCount;
+    stats.pad0 = 0.0;
 
     return stats;
 }
 
-fn get_color_discrepancy_weight(stats: NeighborhoodStats, histRGB: vec3<f32>) -> f32 {
-    let histLuminance = getLuminance(histRGB);
-    let diff = abs(stats.meanLuminance - histLuminance);
-    let threshold = max(stats.stdDevLuminance * 0.45, 0.01);
+// Reconstructs unjittered current pixel color using a 3x3 sub-pixel Gaussian filter in shared memory
+fn reconstruct_current_color_ycocg_lds(localCoord: vec2<i32>, jitterOffsetPix: vec2<f32>) -> SampledColor {
+    var sumRGB = vec3<f32>(0.0);
+    var sumAlpha = 0.0;
+    var sumWeight = 0.0;
+
+    for (var y: i32 = -1; y <= 1; y++) {
+        for (var x: i32 = -1; x <= 1; x++) {
+            let delta = vec2<f32>(f32(x), f32(y)) + jitterOffsetPix;
+            let distSq = dot(delta, delta);
+            let w = exp(-4.85 * distSq);
+
+            let sampleRGBA = s_color[localCoord.y + y][localCoord.x + x];
+            sumRGB += sampleRGBA.rgb * w;
+            sumAlpha += sampleRGBA.a * w;
+            sumWeight += w;
+        }
+    }
+
+    let invW = 1.0 / max(sumWeight, EPSILON);
+    var result: SampledColor;
+    result.rgb = sumRGB * invW;
+    result.ycocg = rgbToYCoCg(result.rgb);
+    result.alpha = sumAlpha * invW;
+    return result;
+}
+
+// Measures luminance discrepancy between neighborhood mean and clipped history luminance
+fn get_color_discrepancy_weight(stats: NeighborhoodStats, historyLuminance: f32) -> f32 {
+    let diff = abs(stats.mean.x - historyLuminance);
+    let threshold = max(stats.stdDev.x * 0.45, 0.01);
     return smoothstep(threshold, threshold * 2.0, diff);
 }
 
+// 5-tap bicubic Catmull-Rom history sampler to minimize reprojection resampling blur
 fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> SampledColor {
     let samplePos = uv * texSize;
     let texPos1 = floor(samplePos - 0.5) + 0.5;
@@ -134,22 +144,15 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
     );
 
     var sumRGB = vec3<f32>(0.0);
-    var sumYCoCg = vec3<f32>(0.0);
     var sumAlpha = 0.0;
     var sumW = 0.0;
 
-    for(var i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
         let sampleRGBA = textureSampleLevel(tex, smp, coords[i], 0.0);
         let sampleRGB = max(sampleRGBA.rgb, vec3<f32>(0.0));
-        let sampleYCoCg = rgbToYCoCg(sampleRGB);
-        let sampleLum = getLuminance(sampleRGB);
-
-        // [KO] 엔진 표준 휘도(Rec. 709)를 기반으로 안티 플리커 가중치 계산
-        // [EN] Calculate anti-flicker weight based on engine standard luminance (Rec. 709)
-        let w = weights[i] * (1.0 / (1.0 + sampleLum));
+        let w = weights[i];
 
         sumRGB += sampleRGB * w;
-        sumYCoCg += sampleYCoCg * w;
         sumAlpha += sampleRGBA.a * w;
         sumW += w;
     }
@@ -157,14 +160,74 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
     var result: SampledColor;
     let invSumW = 1.0 / max(sumW, EPSILON);
     result.rgb = sumRGB * invSumW;
-    result.ycocg = sumYCoCg * invSumW;
+    result.ycocg = rgbToYCoCg(result.rgb);
     result.alpha = sumAlpha * invSumW;
     return result;
 }
 
-fn clip_history_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
-    let gamma = mix(0.2, 0.7, motion);
-    let v_min = min(stats.minColor, stats.mean - stats.stdDev * gamma);
-    let v_max = max(stats.maxColor, stats.mean + stats.stdDev * gamma);
+// Computes local screen-space velocity variance across 4-cardinal neighbors to detect motion boundaries
+fn calculate_velocity_variance(tex: texture_2d<f32>, centerCoord: vec2<i32>, centerVel: vec2<f32>, screenSize: vec2<f32>) -> f32 {
+    let velR = textureLoad(tex, centerCoord + vec2<i32>(1, 0), 0).xy;
+    let velL = textureLoad(tex, centerCoord - vec2<i32>(1, 0), 0).xy;
+    let velU = textureLoad(tex, centerCoord + vec2<i32>(0, 1), 0).xy;
+    let velD = textureLoad(tex, centerCoord - vec2<i32>(0, 1), 0).xy;
+
+    let dR = (velR - centerVel) * screenSize;
+    let dL = (velL - centerVel) * screenSize;
+    let dU = (velU - centerVel) * screenSize;
+    let dD = (velD - centerVel) * screenSize;
+
+    let varSq = dot(dR, dR) + dot(dL, dL) + dot(dU, dU) + dot(dD, dD);
+    return sqrt(varSq * 0.25);
+}
+
+// Increases current-frame blend weight in translucent regions where motion vectors may not match
+fn get_reactive_transparency_weight(stats: NeighborhoodStats) -> f32 {
+    return saturate(1.0 - stats.meanAlpha);
+}
+
+// Karis reversible luminance-weighted tone map to suppress HDR fireflies during temporal filtering
+fn reversible_tonemap(rgb: vec3<f32>) -> vec3<f32> {
+    let luma = max(dot(rgb, vec3<f32>(0.2126, 0.7152, 0.0722)), 0.0);
+    return rgb / (1.0 + luma);
+}
+
+// Inverse Karis tone map to restore linear HDR radiance before storing to the history buffer
+fn inverse_tonemap(rgb: vec3<f32>) -> vec3<f32> {
+    let luma = max(dot(rgb, vec3<f32>(0.2126, 0.7152, 0.0722)), 0.0);
+    return rgb / max(1.0 - luma, 1e-4);
+}
+
+// Clips history YCoCg color toward current pixel color against a variance-guided AABB using slab intersection
+fn clip_history_ray_box_ycocg(
+    historyYCoCg: vec3<f32>,
+    currentYCoCg: vec3<f32>,
+    stats: NeighborhoodStats,
+    motion: f32,
+    velVariance: f32
+) -> vec3<f32> {
+    let edgeTighten = smoothstep(0.1, 1.5, velVariance);
+    let baseGamma = mix(2.25, 2.75, motion);
+    let gamma = mix(baseGamma, 1.5, edgeTighten);
+
+    let v_min = max(stats.minColor, stats.mean - stats.stdDev * gamma);
+    let v_max = min(stats.maxColor, stats.mean + stats.stdDev * gamma);
+
+    let rayDir = currentYCoCg - historyYCoCg;
+    let invDir = 1.0 / select(rayDir, sign(rayDir) * 1e-5, abs(rayDir) < vec3<f32>(1e-5));
+
+    let t0 = (v_min - historyYCoCg) * invDir;
+    let t1 = (v_max - historyYCoCg) * invDir;
+
+    let tMin = min(t0, t1);
+    let tMax = max(t0, t1);
+
+    let tEnter = max(max(tMin.x, tMin.y), tMin.z);
+    let tExit = min(min(tMax.x, tMax.y), tMax.z);
+
+    if (tEnter <= tExit && tEnter >= 0.0 && tEnter <= 1.0) {
+        return historyYCoCg + rayDir * tEnter;
+    }
+
     return clamp(historyYCoCg, v_min, v_max);
 }

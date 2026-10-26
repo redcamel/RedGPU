@@ -1,24 +1,21 @@
 /**
- * [KO] 정점 배열과 인덱스 배열을 기반으로 노멀 벡터를 계산합니다.
- * [EN] Calculates vertex normals from vertex and index arrays.
- *
- * [KO] 삼각형 면 단위로 노멀을 구한 뒤 평균화 및 정규화하여 반환합니다.
- * [EN] Calculates face normals, then returns averaged and normalized vertex normals.
+ * [KO] 정점 위치 배열과 삼각형 인덱스 배열로부터 정규화된 정점 법선(Normal) 벡터 배열을 계산합니다.
+ * [EN] Calculates a normalized vertex normal vector array from vertex position and triangle index arrays.
  *
  * ### Example
  * ```typescript
- * const normals = RedGPU.math.calculateNormals(vertices, indices);
+ * const normals = RedGPU.Math.calculateNormals(vertices, indices);
  * ```
  *
  * @param vertexArray -
- * [KO] 정점 위치 배열 (x, y, z 순서)
- * [EN] Vertex position array (x, y, z order)
+ * [KO] 정점 위치 배열 (`[x, y, z, ...]`)
+ * [EN] Vertex position array (`[x, y, z, ...]`)
  * @param indexArray -
- * [KO] 삼각형 정점 인덱스 배열
- * [EN] Vertex index array defining triangles
+ * [KO] 삼각형 정점 인덱스 배열 (비어 있을 경우 정점 순서대로 처리)
+ * [EN] Triangle vertex index array (processed in vertex order if empty)
  * @returns
- * [KO] 계산된 정점 노멀 배열
- * [EN] Calculated vertex normal array
+ * [KO] 정규화된 정점 법선 벡터 배열 (`[nx, ny, nz, ...]`)
+ * [EN] Normalized vertex normal vector array (`[nx, ny, nz, ...]`)
  * @category Math
  */
 declare const calculateNormals: (vertexArray: number[], indexArray: number[]) => number[];

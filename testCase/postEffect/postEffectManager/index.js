@@ -6,7 +6,7 @@ const redUnit = new RedUnit('RedGPU - PostEffectManager');
 redUnit.testGroup(
     'RedGPU.PostEffect.PostEffectManager',
     (runner) => {
-        const setup = (callback) => {
+        const setup = (run, callback) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -18,15 +18,15 @@ redUnit.testGroup(
                     redGPUContext.destroy();
                 } catch (e) {
                     redGPUContext.destroy();
-                    throw e;
+                    run(false, e);
                 }
-            }, (error) => { throw error; });
+            }, (error) => run(false, error));
         };
 
         runner.defineTest('Success Test: Initial state and Getters', (run) => {
-            setup((ctx, manager, view) => {
+            setup(run, (ctx, manager, view) => {
                 const checkView = manager.view === view;
-                const checkPool = manager.texturePool instanceof RedGPU.PostEffect.PostEffectTexturePool;
+                const checkPool = manager.texturePool instanceof RedGPU.PostEffect.Core.PostEffectTexturePool;
                 const checkUniform = manager.postEffectSystemUniformBuffer instanceof RedGPU.Resource.UniformBuffer;
                 const checkList = Array.isArray(manager.effectList) && manager.effectList.length === 0;
                 run(checkView && checkPool && checkUniform && checkList);
@@ -34,7 +34,7 @@ redUnit.testGroup(
         }, true);
 
         runner.defineTest('Success Test: Effect Management (add, get, remove)', (run) => {
-            setup((ctx, manager) => {
+            setup(run, (ctx, manager) => {
                 const effect = { clear: () => {}, render: () => {} }; // Mock
                 manager.addEffect(effect);
                 const checkAdd = manager.effectList.length === 1 && manager.getEffectAt(0) === effect;
@@ -56,15 +56,15 @@ redUnit.testGroup(
         }, true);
 
         runner.defineTest('Success Test: Lazy Loaded Effects (SSAO, SSR, AutoExposure)', (run) => {
-            setup((ctx, manager) => {
+            setup(run, (ctx, manager) => {
                 const ssao = manager.ssao;
-                const checkSSAO = ssao instanceof RedGPU.PostEffect.SSAO;
+                const checkSSAO = ssao instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
                 
                 const ssr = manager.ssr;
-                const checkSSR = ssr instanceof RedGPU.PostEffect.SSR;
+                const checkSSR = ssr instanceof RedGPU.PostEffect.Core.ASinglePassPostEffect;
                 
                 const ae = manager.autoExposure;
-                const checkAE = ae instanceof RedGPU.Camera.AutoExposure;
+                const checkAE = ae instanceof RedGPU.Camera.Core.AutoExposure;
                 
                 manager.useSSAO = true;
                 manager.useSSR = true;
@@ -75,7 +75,7 @@ redUnit.testGroup(
         }, true);
 
         runner.defineTest('Success Test: G-Buffer resources', (run) => {
-            setup((ctx, manager) => {
+            setup(run, (ctx, manager) => {
                 const layout = manager.gbufferBindGroupLayout;
                 const bg = manager.gbufferBindGroup;
                 // These might be null initially if not rendered, but should be accessible
@@ -84,13 +84,13 @@ redUnit.testGroup(
         }, true);
 
         runner.defineTest('Success Test: videoMemorySize', (run) => {
-            setup((ctx, manager) => {
+            setup(run, (ctx, manager) => {
                 run(typeof manager.videoMemorySize === 'number');
             });
         }, true);
 
         runner.defineTest('Success Test: clear() and render() basic access', (run) => {
-            setup((ctx, manager) => {
+            setup(run, (ctx, manager) => {
                 try {
                     manager.clear();
                     // render() requires a full frame setup, but we check if it's a function

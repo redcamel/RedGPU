@@ -3,32 +3,34 @@
 @group(0) @binding(0) var transmittanceLUT: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
 
-@compute @workgroup_size(16, 16)
+/**
+ * [KO] 고도와 천정각에 따른 대기 투과율(Transmittance) 2D LUT를 사전 계산하는 컴퓨트 셰이더입니다.
+ * [EN] Compute shader that precomputes the 2D Transmittance LUT by altitude and zenith angle.
+ */
+@compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    // [KO] 1. 인덱스 계산 및 정규화된 UV 산출
-    // [EN] 1. Index calculation and normalized UV derivation
     let size = textureDimensions(transmittanceLUT);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
 
-    // [KO] 2. 파라미터 매핑 (UV -> 물리 수치)
-    // [EN] 2. Parameter mapping (UV -> Physical values)
-    // x축: 광학적 두께를 고려한 고도각 (Cos Theta)
-    // y축: 대기권 내의 높이 (View Height)
+    // [KO] UV 좌표를 천정각 코사인(cosTheta)과 대기 고도(viewHeight)로 역매핑합니다.
+    // [EN] Inverse-map UV coordinates to zenith cosine (cosTheta) and atmospheric altitude (viewHeight).
     let x = uv.x * 2.0 - 1.0;
     let cosTheta = sign(x) * x * x;
     let viewHeight = clamp((1.0 - uv.y) * params.atmosphereHeight, 0.0, params.atmosphereHeight);
 
-    // [KO] 3. 광학 깊이(Optical Depth) 적분 및 투과율 산출
-    // [EN] 3. Integrate Optical Depth and calculate Transmittance
-    let T = exp(-min(getOpticalDepth(viewHeight, cosTheta), vec3<f32>(100.0)));
+    // [KO] 광학 깊이를 적분하여 Beer-Lambert 법칙 기반의 투과율을 산출합니다.
+    // [EN] Integrate optical depth and compute transmittance via the Beer-Lambert law.
+    let T = exp(-min(getOpticalDepth(viewHeight, cosTheta), vec3<f32>(MAX_TAU)));
 
-    // [KO] 4. 결과 저장
-    // [EN] 4. Store result
     textureStore(transmittanceLUT, global_id.xy, vec4<f32>(T, 1.0));
 }
 
+/**
+ * [KO] 지정된 고도와 시선 천정각에서 대기권 외곽까지의 누적 광학 깊이를 계산합니다.
+ * [EN] Computes cumulative optical depth from a given altitude and zenith angle to the top of the atmosphere.
+ */
 fn getOpticalDepth(viewHeight: f32, cosTheta: f32) -> vec3<f32> {
     let groundRadius = params.groundRadius;
     let rayOrigin = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);

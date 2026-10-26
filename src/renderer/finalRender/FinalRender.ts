@@ -22,14 +22,34 @@ const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_FINAL_RE
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_FINAL_RENDER'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_FINAL_RENDER'
 
+/**
+ * [KO] 최종 렌더 패스에서 사용되는 컬러 어태치먼트 확장 인터페이스입니다.
+ * [EN] Extended color attachment interface used in the final render pass.
+ * @category Renderer
+ */
 export interface FinalRenderPassColorAttachment extends GPURenderPassColorAttachment {
+    /**
+     * [KO] 후처리 효과가 적용된 결과 텍스처 뷰
+     * [EN] Result texture view with post-effects applied
+     */
     postEffectView?: GPUTextureView;
+    /**
+     * [KO] 피킹 결과 텍스처 뷰
+     * [EN] Picking result texture view
+     */
     pickingView?: GPUTextureView;
 }
 
 /**
- * Class representing the final rendering process.
- * @class
+ * [KO] 개별 뷰(`View3D`)의 렌더링 결과 텍스처들을 최종 캔버스 화면에 합성하여 출력하는 클래스입니다.
+ * [EN] Class that composites and outputs rendering result textures of individual views (`View3D`) onto the final canvas screen.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Renderer
  */
 class FinalRender {
     #vertexUniformBuffers: UniformBuffer[] = []
@@ -37,13 +57,10 @@ class FinalRender {
     #vertexBindGroupLayout: GPUBindGroupLayout
     #vertexShader: GPUShaderModule
     #vertexState: GPUVertexState
-    //
     #fragmentBindGroupLayout: GPUBindGroupLayout
     #fragmentShader: GPUShaderModule
     #fragmentBindGroupCache: WeakMap<GPUTextureView, GPUBindGroup>[] = []
-    //
     #pipeline: GPURenderPipeline
-    //
     #sampler: Sampler
     #fragmentBuffer: GPUBuffer[] = []
     #fragmentBufferData: Float32Array[] = []
@@ -52,17 +69,23 @@ class FinalRender {
     #FRAGMENT_SHADER_INFO: any
     #VERTEX_UNIFORM_STRUCT: any
 
+    /**
+     * [KO] `FinalRender` 인스턴스를 생성합니다.
+     * [EN] Creates a `FinalRender` instance.
+     */
     constructor() {
     }
 
+    /**
+     * [KO] `FinalRender` 내부에서 생성된 WebGPU 버퍼, 셰이더 모듈, 파이프라인 및 바인드 그룹 캐시 자원을 모두 해제합니다.
+     * [EN] Releases all WebGPU buffers, shader modules, pipelines, and bind group cache resources created within `FinalRender`.
+     */
     destroy(): void {
         this.#FRAGMENT_SHADER_INFO = null
         this.#VERTEX_SHADER_INFO = null
         this.#VERTEX_UNIFORM_STRUCT = null
-        // 1. 생성된 모든 UniformBuffer들의 WebGPU 내부 자원 해제 및 배열 비우기
         this.#vertexUniformBuffers.forEach(buffer => {
             if (buffer) {
-                // UniformBuffer 클래스 내부에 자체 destroy가 있다면 호출, 없다면 gpuBuffer.destroy()
                 if (typeof buffer.destroy === 'function') buffer.destroy();
                 else if (buffer.gpuBuffer) buffer.gpuBuffer.destroy();
             }
@@ -70,35 +93,35 @@ class FinalRender {
         this.#vertexUniformBuffers = [];
         this.#vertexUniformBindGroups = [];
 
-        // 2. Fragment Uniform Buffer(GPUBuffer) 해제 및 배열 비우기
         this.#fragmentBuffer.forEach(buffer => {
-            if (buffer) buffer.destroy(); // WebGPU Buffer 명시적 파기
+            if (buffer) buffer.destroy();
         });
         this.#fragmentBuffer = [];
         this.#fragmentBufferData = [];
 
-        // 3. 내부 셰이더 모듈 및 파이프라인 참조 제거
         this.#vertexShader = null;
         this.#fragmentShader = null;
         this.#pipeline = null;
         this.#vertexState = null;
 
-        // 4. 레이아웃 및 샘플러 참조 해제
         this.#vertexBindGroupLayout = null;
         this.#fragmentBindGroupLayout = null;
 
-
-        // 5. WeakMap 캐시 배열 비우기
         this.#fragmentBindGroupCache = [];
 
         console.log('✅ FinalRender 인스턴스 자원 해제 완료');
     }
 
     /**
-     * Renders the given list of render passes to the specified canvas.
+     * [KO] 전달된 뷰별 렌더 패스 디스크립터 목록의 결과물들을 최종 캔버스에 렌더링합니다.
+     * [EN] Renders the outputs of the given per-view render pass descriptor list onto the final canvas.
      *
-     * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
-     * @param {GPURenderPassDescriptor[]} viewList_renderPassDescriptorList - The list of render passes to be rendered.
+     * @param redGPUContext -
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
+     * @param viewList_renderPassDescriptorList -
+     * [KO] 렌더링할 뷰별 렌더 패스 디스크립터 배열
+     * [EN] Array of per-view render pass descriptors to render
      */
     render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]): void {
         const {sizeManager, antialiasingManager, commandEncoderManager} = redGPUContext
@@ -108,13 +131,11 @@ class FinalRender {
 
 
         if (canvasW === 0 || canvasH === 0) return
-        //
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
         const finalRenderPassDesc: GPURenderPassDescriptor = this.#getFinalRenderPassDesc(redGPUContext)
         commandEncoderManager.addMainRenderPass(finalRenderPassDesc, (finalRenderPassEnc) => {
             finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
             finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
-            //
             if (!this.#vertexBindGroupLayout || dirtyMSAA) {
                 this.#initGPUDetails(redGPUContext);
                 this.#fragmentBindGroupCache = [];
@@ -193,7 +214,6 @@ class FinalRender {
                 this.#VERTEX_UNIFORM_STRUCT.members.modelMatrix.uniformOffset,
                 projectionMatrix as Float32Array as BufferSource
             )
-            //
             if (!this.#fragmentBindGroupCache[index] || dirtyMSAA) {
                 this.#fragmentBindGroupCache[index] = null
                 this.#fragmentBindGroupCache[index] = new WeakMap();
@@ -229,11 +249,6 @@ class FinalRender {
         })
     }
 
-    /**
-     * Initializes GPU details for rendering.
-     * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
-
-     */
     #initGPUDetails(redGPUContext: RedGPUContext) {
         const {resourceManager,} = redGPUContext
         this.#VERTEX_SHADER_INFO = resourceManager.wgslParser.parse('FINAL_RENDER_VERTEX', vertexModuleSource)
@@ -253,12 +268,6 @@ class FinalRender {
         this.#sampler = new Sampler(redGPUContext, {minFilter: 'linear'})
     }
 
-    /**
-     * Validates and sets up the necessary GPU bind groups for a given GPU texture view.
-     *
-     * @param {RedGPUContext} redGPUContext - The RedGPU context.
-     * @param {number} index - The index of the texture view in the bind groups array.
-     */
     #validateViewGpuDetails(redGPUContext: RedGPUContext, index: number) {
         const {gpuDevice} = redGPUContext
         if (!this.#vertexUniformBuffers[index]) {

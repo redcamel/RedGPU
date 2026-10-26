@@ -5,8 +5,8 @@ const sourceDir = path.join(__dirname, '../../manual/.vitepress/dist');
 const targetDir = path.join(__dirname, '../../manual');
 
 // manual 폴더 내의 기존 파일 삭제 (소스 제외)
-const excludeDirs = ['.vitepress', 'api', 'ko', 'en', 'public', 'assets'];
-const excludeFiles = ['index.md'];
+const excludeDirs = ['.vitepress', 'api', 'ko', 'en', 'public', 'assets', 'node_modules'];
+const excludeFiles = ['index.md', 'package.json', 'package-lock.json', 'typedoc.config.js'];
 
 function cleanManualDir() {
   const items = fs.readdirSync(targetDir);

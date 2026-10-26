@@ -5,16 +5,17 @@ import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SY
 
 const MANAGED_STATE_KEY = 'managedIndexBufferState'
 /**
- * [KO] 인덱스 버퍼 데이터 타입입니다.
- * [EN] Index buffer data type.
+ * [KO] 인덱스 버퍼 데이터에 사용할 수 있는 배열 타입입니다.
+ * [EN] Array type available for index buffer data.
+ * @category Buffer
  */
-export type NumberArray = Array<number> | Uint32Array;
+export type NumberArray = Array<number> | Uint32Array | Uint16Array;
 
 /**
- * [KO] 인덱스 버퍼를 관리하는 클래스입니다.
- * [EN] Class that manages index buffers.
+ * [KO] 인덱스 버퍼(`GPUBuffer`)를 관리하는 클래스입니다.
+ * [EN] Class that manages index buffers (`GPUBuffer`).
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const indexBuffer = new RedGPU.Resource.IndexBuffer(redGPUContext, [0, 1, 2]);
  * ```
@@ -25,24 +26,15 @@ class IndexBuffer extends ABaseBuffer {
      * [KO] 인덱스 데이터가 저장되는 내부 버퍼입니다.
      * [EN] Internal buffer where index data is stored.
      */
-    [GPU_BUFFER_DATA_SYMBOL]: Uint32Array
-    /**
-     * [KO] 인덱스 개수입니다.
-     * [EN] Number of indices.
-     */
+    [GPU_BUFFER_DATA_SYMBOL]: Uint32Array | Uint16Array
     #indexCount: number = 0
-    /**
-     * [KO] 삼각형 개수입니다.
-     * [EN] Number of triangles.
-     */
     #triangleCount: number = 0
-    #format: GPUIndexFormat = GPU_INDEX_FORMAT.UINT32
 
     /**
      * [KO] IndexBuffer 인스턴스를 생성합니다.
      * [EN] Creates an IndexBuffer instance.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * const indexBuffer = new RedGPU.Resource.IndexBuffer(redGPUContext, [0, 1, 2], GPUBufferUsage.INDEX, 'MyIndexBuffer');
      * ```
@@ -51,13 +43,13 @@ class IndexBuffer extends ABaseBuffer {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param data -
-     * [KO] 인덱스 데이터 (`Array<number>` 또는 `Uint32Array`)
-     * [EN] Index data (`Array<number>` or `Uint32Array`)
+     * [KO] 인덱스 데이터 (`Array<number>`, `Uint32Array` 또는 `Uint16Array`)
+     * [EN] Index data (`Array<number>`, `Uint32Array` or `Uint16Array`)
      * @param usage -
      * [KO] GPUBufferUsageFlags (기본값: `GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST`)
      * [EN] GPUBufferUsageFlags (default: `GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST`)
      * @param cacheKey -
-     * [KO] 버퍼 캐시 키 (옵션)
+     * [KO] 버퍼 캐시 키 (선택)
      * [EN] Buffer cache key (optional)
      */
     constructor(
@@ -82,15 +74,18 @@ class IndexBuffer extends ABaseBuffer {
     }
 
     /**
-     * [KO] GPU 인덱스 형식을 반환합니다.
+     * [KO] GPU 인덱스 포맷을 반환합니다.
      * [EN] Returns the GPU index format.
      *
      * @returns
-     * [KO] GPUIndexFormat (기본값: 'uint32')
-     * [EN] GPUIndexFormat (Default: 'uint32')
+     * [KO] GPUIndexFormat (`'uint16'` 또는 `'uint32'`)
+     * [EN] GPUIndexFormat (`'uint16'` or `'uint32'`)
      */
     get format(): GPUIndexFormat {
-        return this.#format;
+        if (this[GPU_BUFFER_DATA_SYMBOL] instanceof Uint16Array) {
+            return GPU_INDEX_FORMAT.UINT16;
+        }
+        return GPU_INDEX_FORMAT.UINT32;
     }
 
     /**
@@ -130,17 +125,17 @@ class IndexBuffer extends ABaseBuffer {
     }
 
     /**
-     * [KO] 인덱스 버퍼의 데이터를 변경합니다.
-     * [EN] Changes the data of the index buffer.
+     * [KO] 인덱스 버퍼의 데이터를 갱신합니다.
+     * [EN] Updates the data of the index buffer.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * indexBuffer.changeData([3, 4, 5]);
      * ```
      *
      * @param data -
-     * [KO] 새로운 인덱스 데이터 (`Array<number>` 또는 `Uint32Array`)
-     * [EN] New index data (`Array<number>` or `Uint32Array`)
+     * [KO] 새로운 인덱스 데이터 (`Array<number>`, `Uint32Array` 또는 `Uint16Array`)
+     * [EN] New index data (`Array<number>`, `Uint32Array` or `Uint16Array`)
      */
     changeData(data: NumberArray) {
         const {gpuDevice} = this;

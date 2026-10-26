@@ -44,7 +44,9 @@ const flowGraph = `
 
 # Getting Started
 
-RedGPU is a high-performance 3D engine built on **WebGPU**, the next-generation web graphics standard. By leveraging powerful **Compute Shaders** and maintaining low overhead, it delivers native-level immersive graphics experiences directly in the web browser.
+RedGPU is a high-performance 3D engine built on **WebGPU**, the next-generation web graphics standard. By leveraging
+powerful **Compute Shaders** and maintaining low overhead, it delivers native-level immersive graphics experiences
+directly in the web browser.
 
 This guide will walk you through the process of building your first 3D application using RedGPU step-by-step.
 
@@ -93,7 +95,8 @@ Configure the `<canvas>` element where the rendering output will be displayed.
 
 ### JavaScript Implementation (`main.js`)
 
-In RedGPU, the workflow follows this sequence: **Initialization (Init)** → **Resource Creation (Scene/Camera/Mesh)** → **View Setup (View)** → **Rendering Loop (Start)**.
+In RedGPU, the workflow follows this sequence: **Initialization (Init)** → **Resource Creation (Scene/Camera/Mesh)** →
+**View Setup (View)** → **Rendering Loop (Start)**.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -112,7 +115,8 @@ RedGPU.init(
         // 3. Create a Camera: Set up a Perspective projection camera
         const camera = new RedGPU.Camera.PerspectiveCamera();
         camera.z = -5; // Move the camera back from the origin
-        camera.lookAt(0, 0, 0)
+        camera.lookAt(0,0,0)
+        
 
         // 4. Create a Mesh: A combination of a shape (Box) and a material (Color)
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
@@ -163,9 +167,9 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const scene = new RedGPU.Display.Scene();
-const camera = new RedGPU.Camera.PerspectiveCamera();
+const camera = new RedGPU.Camera.PerspectiveCamera ();
         camera.z = -5;
-camera.lookAt(0,0,0)
+camera.lookAt (0,0,0)
 
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
         const material = new RedGPU.Material.ColorMaterial(redGPUContext, "#00CC99");
@@ -204,16 +208,25 @@ This diagram illustrates the relationships between major classes and the applica
 
 ### Core Components
 
-| Class | Role Definition |
-| :--- | :--- |
-| **`RedGPU.init`** | Requests WebGPU device permission and creates the engine's core context. |
-| **`RedGPU.Renderer`** | Manages the rendering loop that draws registered views to the GPU hardware. |
-| **`RedGPU.Display.Scene`** | The root container for the virtual 3D space where meshes, lights, and other objects reside. |
+| Class                       | Role Definition                                                                               |
+|:----------------------------|:----------------------------------------------------------------------------------------------|
+| **`RedGPU.init`**           | Requests WebGPU device permission and creates the engine's core context.                      |
+| **`RedGPU.Renderer`**       | Manages the rendering loop that draws registered views to the GPU hardware.                   |
+| **`RedGPU.Display.Scene`**  | The root container for the virtual 3D space where meshes, lights, and other objects reside.   |
 | **`RedGPU.Display.View3D`** | The unit that determines which scene is rendered from which viewpoint (Camera) to the screen. |
 
 <ClientOnly>
   <MermaidResponsive :definition="systemGraph" />
 </ClientOnly>
+
+---
+
+## Related Examples
+
+- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
+- [Hello World 2D](/RedGPU/examples/2d/helloWorld2D/)
+
+---
 
 ## Next Steps
 
@@ -222,6 +235,7 @@ Now that you've learned basic screen composition, explore the more powerful feat
 - **[RedGPU Context](../context/index.md)**: A detailed guide to engine context settings and advanced options.
 - **[Inspector](../inspector/index.md)**: A developer tool for performance profiling and real-time scene debugging.
 - **[Mesh](../basic-objects/mesh.md)**: How to create and control objects by combining geometry and material.
-- **[Lighting & Shadow](../lighting-and-shadow/phong-material.md)**: Realistic texture and shadow expression reacting to light.
+- **[Lighting & Shadow](../lighting-and-shadow/phong-material.md)**: Realistic texture and shadow expression reacting to
+  light.
 - **[Environment](../environment/skybox.md)**: How to set up Skybox and IBL.
-- **[Extended Objects](../assets/model-loading/index.md)**: How to use external 3D models and sprites.
+- **[Extended Objects](../extended-objects/model-loading/index.md)**: How to use external 3D models and sprites.

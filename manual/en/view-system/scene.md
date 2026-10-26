@@ -5,11 +5,11 @@ order: 3
 <script setup>
 const sceneGraph = `
     graph TD
-        Scene["RedGPU.Display.Scene (Root Node)"]
+        Scene["RedGPU.Display.Scene (Root Scene)"]
         LightMgr["LightManager"]
         ShadowMgr["ShadowManager"]
         PhysicsEngine["PhysicsEngine"]
-        Children["Child Nodes (Mesh, Group)"]
+        Children["Child Nodes (Mesh, Group3D)"]
         Ambient["AmbientLight"]
         DirLight["DirectionalLight"]
 
@@ -21,7 +21,7 @@ const sceneGraph = `
         LightMgr -->|Manages| Ambient
         LightMgr -->|Manages| DirLight
         
-        %% Grayscale styles applied to all nodes
+        %% Grayscale styles applied
         style Scene fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
         style LightMgr fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
         style ShadowMgr fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
@@ -34,63 +34,31 @@ const sceneGraph = `
 
 # Scene
 
-If **View3D** is the 'window' that displays the scene, **Scene** is the 'stage' that unfolds beyond that window. It acts as the highest root node of the **Scene Graph**, containing all 3D objects (Mesh, Group) and lights (Light) to be rendered.
+If `View3D` is the 'window' that displays a view, `Scene` is the 'stage' unfolding beyond that window. It serves as the
+**root container** (`Object3DContainer`) of the **Scene Graph** that centrally manages all 3D display objects (`Mesh`,
+`Group3D`, etc.), lighting, shadows, natural environments, and physics engines placed in 3D space.
 
 ## 1. Architecture and Role
 
-A **Scene** goes beyond being a simple container and performs the following core functions:
+Beyond acting as a simple container, `Scene` performs the following core roles:
 
 <ClientOnly>
   <MermaidResponsive :definition="sceneGraph" />
 </ClientOnly>
 
-*   **Hierarchy Management**: Manages parent-child relationships of objects through `addChild()` and `removeChild()` methods.
-*   **Lighting Data Management**: Centrally manages lighting data that affects the entire scene through the included **LightManager**, using GPU buffers (Uniform Buffers).
+- **3D Object Hierarchy Management**: Manages parent-child tree structures (`children`) of 3D objects to render via
+  `addChild(child)` and `removeChild(child)`.
+- **Integrated Lighting & Shadow Control**: Centrally manages scene-wide light sources and shadow quality through the
+  built-in `lightManager` and `shadowManager`.
+- **Natural Environment & Simulation Integration**: Binds and controls open-world terrain (`landscape`), water bodies
+  (`addWater`), global wind (`windManager`), and physics engines (`physicsEngine`) per scene.
 
-## 2. Object Management (Hierarchy)
+---
 
-The most basic role of a **Scene** is to hold the 3D objects to be rendered. Created objects must be added to the scene via `addChild()` to appear on the screen.
+## 2. Basic Usage
 
-```javascript
-// 1. Create a Scene
-const scene = new RedGPU.Display.Scene();
-
-// 2. Create and add a 3D object (Mesh)
-// Don't worry if the concept of a Mesh is still unfamiliar.
-// Detailed creation methods will be covered in the following Basic Objects section.
-const box = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-
-// Place the object in space by setting its position.
-box.x = 0;
-box.y = 1;
-box.z = -5;
-
-scene.addChild(box);
-```
-
-::: info [Learning Guide]
-Even if you are not yet familiar with how to compose objects, observe the visual changes when adding various elements to the **Scene**. (The code provided is for reference only.)
-:::
-
-## 3. Light Manager
-
-To implement deep shading and realistic three-dimensionality, rather than simply painting colors on objects, lights are required. A **Scene** owns a **LightManager** internally and centrally manages various registered light sources so they act organically throughout the scene.
-
-```javascript
-// Set up Ambient Light (Global environment light)
-scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
-
-// Add a Directional Light
-const dirLight = new RedGPU.Light.DirectionalLight();
-scene.lightManager.addDirectionalLight(dirLight);
-
-// [Note] To see lighting effects, you must use materials that react to light, such as PhongMaterial.
-// const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-```
-
-## 4. Practical Example
-
-Configure a complete scene by combining the object addition and lighting setup learned earlier. We've used a **TorusKnot** model, which highlights three-dimensionality well, and activated **Grid** and **Axis** to provide a sense of space.
+The fundamental role of `Scene` is to hold the 3D objects and lights to be rendered. Created 3D objects must be added
+via `scene.addChild()` to appear on screen, and light sources are registered through `scene.lightManager`.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -99,12 +67,12 @@ const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    
-    // 1. Set up Light
+
+    // 1. Register light (LightManager)
     const dirLight = new RedGPU.Light.DirectionalLight();  
     scene.lightManager.addDirectionalLight(dirLight);
 
-    // 2. Add an Object (TorusKnot)
+    // 2. Add 3D object (addChild)
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext, 
         new RedGPU.Primitive.TorusKnot(redGPUContext, 2, 0.6, 128, 32),
@@ -112,7 +80,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     );
     scene.addChild(mesh);
 
-    // 3. Link the View and activate debugging tools
+    // 3. Connect view and start rendering
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     view.grid = true;
@@ -148,10 +116,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     // Lighting
     const dirLight = new RedGPU.Light.DirectionalLight();
-  
     scene.lightManager.addDirectionalLight(dirLight);
 
-    // Add an Object (TorusKnot)
+    // Add Object (TorusKnot)
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext, 
         new RedGPU.Primitive.TorusKnot(redGPUContext, 2, 0.6, 128, 32),
@@ -176,59 +143,44 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 5. Key API Properties and Methods
+---
 
-The `Scene` class provides various APIs for background clearing, light/shadow management, physics engine binding, and
-hierarchical child management.
+## 3. Custom Scene Background Color
 
-### 5.1 Background Color Configuration
+By default, viewports use `redGPUContext.backgroundColor`. Enabling `scene.useBackgroundColor = true` applies an
+independent background color (`ColorRGBA`) specific to that `Scene`.
 
-* **`backgroundColor`** (`ColorRGBA`): The background color filled when clearing the scene. Must be assigned a valid
-  `ColorRGBA` instance.
-* **`useBackgroundColor`** (`boolean`, default: `false`): If set to `true`, background clearing with the specified
-  `backgroundColor` is enabled.
-
-### 5.2 Engine & Manager Integration
-
-* **`lightManager`** (`LightManager`, Read-only): A manager that integrates and controls various light sources (Ambient,
-  Directional, etc.) placed inside the scene.
-* **`shadowManager`** (`ShadowManager`, Read-only): A manager that controls shadow map generation, resources, and
-  computation pipelines.
-* **`physicsEngine`** (`IPhysicsEngine`): Binds a physics engine plugin to run real-time physics simulations inside the
-  scene.
-
-### 5.3 Child Node Management (Inherited from Object3DContainer)
-
-* **`addChild(child)`**: Registers a 3D object (Mesh) or a group (Group) as a child in the scene space. Only registered
-  objects participate in the rendering cycle.
-* **`removeChild(child)`**: Removes a specific child object from the scene graph, preventing it from being rendered.
-* **`children`** (`any[]`, Read-only): Gets a list of all child nodes currently registered in the scene.
+```javascript
+scene.useBackgroundColor = true;
+scene.backgroundColor.setColorByHEX('#1a1a2e');
+```
 
 ---
 
-## 6. Shared Model
+## 4. Sharing a Scene Across Views
 
-A **Scene** is a model that contains the data and state to be rendered. Multiple **View3D** instances can refer to a single **Scene** instance simultaneously.
-
-Through this, features such as observing changes in objects or lights added to the same scene from different viewpoints (Cameras) in real-time can be efficiently implemented.
+Connecting a single `Scene` instance to multiple `View3D` instances renders the same 3D space simultaneously from
+different camera viewpoints.
 
 ```javascript
-// Create one Scene (Shared data)
 const sharedScene = new RedGPU.Display.Scene();
 
-// Refer to the same Scene from multiple Views
-const view1 = new RedGPU.Display.View3D(redGPUContext, sharedScene, camera1);
-const view2 = new RedGPU.Display.View3D(redGPUContext, sharedScene, camera2);
+const mainView = new RedGPU.Display.View3D(redGPUContext, sharedScene, mainCamera);
+const subView = new RedGPU.Display.View3D(redGPUContext, sharedScene, subCamera);
 ```
 
-::: tip [Multi-View Layout]
-Refer to the Multi-View System section of the **[View3D](./view3d.md)** document for detailed instructions on placing multiple views on the screen and adjusting their sizes.
-:::
+---
+
+## Related Examples
+
+- [Basic Scene Setup](/RedGPU/examples/3d/scene/)
+- [Multi View Shared Scene](/RedGPU/examples/3d/view/multiView/)
 
 ---
 
 ## Next Steps
 
-Since the **Scene** (stage) is ready, we now need to define the **viewpoint** from which to look at this stage. Learn about the **Camera**, which projects 3D space onto 2D screens.
+Now that the `Scene` (stage) is ready, we need to define the **viewpoint** looking at that stage. Let's explore
+`Camera`, which projects 3D space onto a 2D screen.
 
-- **[Camera](./camera.md)**
+- **[Camera](./camera.md)**: Projecting 3D space onto a 2D screen and controlling camera viewpoints

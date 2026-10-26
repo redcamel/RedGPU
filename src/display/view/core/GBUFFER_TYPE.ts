@@ -1,6 +1,8 @@
 /**
  * [KO] G-Buffer 텍스처 타입 상수 모음입니다.
  * [EN] Collection of G-Buffer texture type constants.
+ *
+ * @category View
  */
 const GBUFFER_TYPE = {
     /**
@@ -22,12 +24,19 @@ const GBUFFER_TYPE = {
      * [KO] 렌더 패스 1 단계 결과 버퍼
      * [EN] Render Path 1 stage result buffer
      */
-    RENDER_PATH1_RESULT: 'renderPath1ResultTexture'
+    RENDER_PATH1_RESULT: 'renderPath1ResultTexture',
+    /**
+     * [KO] 렌더 패스 1 단계 깊이 결과 버퍼
+     * [EN] Render Path 1 stage depth result buffer
+     */
+    RENDER_PATH1_DEPTH_RESULT: 'renderPath1DepthResultTexture'
 } as const;
 
 /**
- * [KO] GBUFFER_TYPE의 타입 정의
- * [EN] Type definition of GBUFFER_TYPE
+ * [KO] `GBUFFER_TYPE`의 유니온 타입 정의입니다.
+ * [EN] Union type definition of `GBUFFER_TYPE`.
+ *
+ * @category View
  */
 type GBUFFER_TYPE = typeof GBUFFER_TYPE[keyof typeof GBUFFER_TYPE];
 Object.freeze(GBUFFER_TYPE)

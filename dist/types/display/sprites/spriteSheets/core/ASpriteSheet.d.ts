@@ -5,23 +5,25 @@ import Mesh from "../../../mesh/Mesh";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 /**
- * [KO] 스프라이트 시트의 기본 속성을 정의하는 인터페이스
- * [EN] Interface defining the base properties of a sprite sheet
+ * [KO] 스프라이트 시트의 격자 분할 및 프레임 인덱싱 속성을 정의하는 인터페이스입니다.
+ * [EN] Interface defining grid division and frame indexing properties of a sprite sheet.
+ *
+ * @category Core
  */
 interface ASpriteSheet {
     /**
-     * [KO] 세그먼트 너비 (격자 가로 개수)
-     * [EN] Segment width (horizontal grid count)
+     * [KO] 가로 세그먼트 분할 수
+     * [EN] Number of horizontal segments
      */
     segmentW: number;
     /**
-     * [KO] 세그먼트 높이 (격자 세로 개수)
-     * [EN] Segment height (vertical grid count)
+     * [KO] 세로 세그먼트 분할 수
+     * [EN] Number of vertical segments
      */
     segmentH: number;
     /**
      * [KO] 총 프레임 수
-     * [EN] Total frame count
+     * [EN] Total number of frames
      */
     totalFrame: number;
     /**
@@ -31,11 +33,8 @@ interface ASpriteSheet {
     currentIndex: number;
 }
 /**
- * [KO] 스프라이트 시트 애니메이션을 처리하는 추상 기본 클래스입니다.
- * [EN] Abstract base class for handling sprite sheet animations.
- *
- * [KO] ASpriteSheet는 2D/3D 스프라이트 애니메이션을 위한 공통 기능을 제공합니다. 하나의 텍스처에 여러 프레임이 격자 형태로 배열된 스프라이트 시트를 시간에 따라 순차적으로 표시하여 애니메이션 효과를 만듭니다.
- * [EN] ASpriteSheet provides common functionality for 2D/3D sprite animations. It creates animation effects by sequentially displaying sprite sheets, where multiple frames are arranged in a grid within a single texture over time.
+ * [KO] 2D 및 3D 스프라이트 시트 애니메이션의 공통 동작을 정의하는 추상 클래스입니다.
+ * [EN] Abstract class that defines common behavior for 2D and 3D sprite sheet animations.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -46,139 +45,107 @@ interface ASpriteSheet {
  * @see [SpriteSheet3D Basic Example](/RedGPU/examples/3d/sprite/spriteSheet3D/)
  * @see [SpriteSheet3D Compare Example](/RedGPU/examples/3d/sprite/spriteSheet3DCompare/)
  * @see [SpriteSheet2D MouseEvent Example](/RedGPU/examples/2d/interaction/mouseEvent/spriteSheet2D/)
- * @see [SpriteSheet3D MouseEvent Example](/RedGPU/examples/3d/mouseEvent/spriteSheet3D/)
- *
+ * @see [SpriteSheet3D MouseEvent Example](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
  * @category Core
  */
 declare class ASpriteSheet extends Mesh {
     #private;
     /**
-     * [KO] ASpriteSheet 인스턴스를 생성합니다.
-     * [EN] Creates an instance of ASpriteSheet.
+     * [KO] ASpriteSheet 인스턴스를 초기화합니다.
+     * [EN] Initializes an ASpriteSheet instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 렌더링 컨텍스트
-     * [EN] RedGPU rendering context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param spriteSheetInfo -
      * [KO] 스프라이트 시트 정보 객체
      * [EN] Sprite sheet information object
      * @param setRenderSize -
-     * [KO] 렌더링 크기 설정 콜백 함수
-     * [EN] Callback function to set rendering size
+     * [KO] 세그먼트 크기 갱신 콜백 함수
+     * [EN] Callback function to update segment render size
      */
     constructor(redGPUContext: RedGPUContext, spriteSheetInfo: SpriteSheetInfo, setRenderSize: (texture: unknown, segmentW: number, segmentH: number) => void);
     /**
-     * [KO] 현재 애니메이션 상태를 반환합니다.
-     * [EN] Returns the current animation state.
+     * [KO] 현재 애니메이션 재생 상태를 반환합니다.
+     * [EN] Returns the current animation playback state.
+     *
      * @returns
-     * [KO] 'play', 'pause', 'stop' 중 하나
-     * [EN] One of 'play', 'pause', 'stop'
+     * [KO] 재생 상태 문자열 (`'play'`, `'pause'`, `'stop'`)
+     * [EN] Playback state string (`'play'`, `'pause'`, `'stop'`)
      */
     get state(): string;
     /**
-     * [KO] 반복 재생 여부를 반환합니다.
-     * [EN] Returns whether to repeat playback.
+     * [KO] 애니메이션 반복 재생 여부를 반환하거나 설정합니다.
+     * [EN] Returns or sets whether the animation loops.
+     *
+     * @returns
+     * [KO] 반복 재생 여부
+     * [EN] Whether playback loops
      */
     get loop(): boolean;
-    /**
-     * [KO] 반복 재생 여부를 설정합니다.
-     * [EN] Sets whether to repeat playback.
-     * @param value -
-     * [KO] 반복 재생 활성화 여부
-     * [EN] Whether to enable loop playback
-     */
     set loop(value: boolean);
     /**
-     * [KO] 애니메이션 프레임 레이트를 반환합니다.
-     * [EN] Returns the animation frame rate.
+     * [KO] 초당 프레임 수(FPS)를 반환하거나 설정합니다. 음수 입력 시 `0`으로 보정됩니다.
+     * [EN] Returns or sets the frame rate (FPS). Negative values are clamped to `0`.
+     *
      * @returns
      * [KO] 초당 프레임 수 (FPS)
      * [EN] Frames per second (FPS)
      */
     get frameRate(): number;
-    /**
-     * [KO] 애니메이션 프레임 레이트를 설정합니다.
-     * [EN] Sets the animation frame rate.
-     * @param value -
-     * [KO] 초당 프레임 수 (음수인 경우 0으로 설정)
-     * [EN] Frames per second (set to 0 if negative)
-     */
     set frameRate(value: number);
     /**
-     * [KO] 지오메트리를 반환합니다.
-     * [EN] Returns the geometry.
+     * [KO] 현재 지오메트리를 반환합니다. 지오메트리 변경 시도는 에러를 발생시킵니다.
+     * [EN] Returns the current geometry. Attempting to change the geometry throws an error.
+     *
      * @returns
-     * [KO] 현재 지오메트리
-     * [EN] The current geometry
+     * [KO] 지오메트리 인스턴스
+     * [EN] Geometry instance
      */
     get geometry(): Geometry | Primitive;
-    /**
-     * [KO] 지오메트리 설정을 시도합니다. (ASpriteSheet는 지오메트리를 변경할 수 없습니다)
-     * [EN] Attempts to set the geometry. (ASpriteSheet cannot change geometry)
-     * @param value -
-     * [KO] 설정하려는 지오메트리
-     * [EN] Geometry to set
-     * @throws
-     * [KO] ASpriteSheet는 지오메트리를 변경할 수 없으므로 에러가 발생합니다.
-     * [EN] Throws error because ASpriteSheet cannot change geometry.
-     */
     set geometry(value: Geometry | Primitive);
     /**
-     * [KO] 머티리얼을 반환합니다.
-     * [EN] Returns the material.
+     * [KO] 현재 머티리얼을 반환합니다. 머티리얼 변경 시도는 에러를 발생시킵니다.
+     * [EN] Returns the current material. Attempting to change the material throws an error.
+     *
      * @returns
-     * [KO] 현재 머티리얼
-     * [EN] The current material
+     * [KO] 머티리얼 인스턴스
+     * [EN] Material instance
      */
     get material(): any;
-    /**
-     * [KO] 머티리얼 설정을 시도합니다. (ASpriteSheet는 머티리얼을 변경할 수 없습니다)
-     * [EN] Attempts to set the material. (ASpriteSheet cannot change material)
-     * @param value -
-     * [KO] 설정하려는 머티리얼
-     * [EN] Material to set
-     * @throws
-     * [KO] ASpriteSheet는 머티리얼을 변경할 수 없으므로 에러가 발생합니다.
-     * [EN] Throws error because ASpriteSheet cannot change material.
-     */
     set material(value: any);
     /**
-     * [KO] 스프라이트 시트 정보를 반환합니다.
-     * [EN] Returns the sprite sheet information.
+     * [KO] 적용된 스프라이트 시트 정보를 반환하거나 설정합니다.
+     * [EN] Returns or sets the applied sprite sheet information.
+     *
      * @returns
-     * [KO] 현재 스프라이트 시트 정보
-     * [EN] The current sprite sheet information
+     * [KO] SpriteSheetInfo 인스턴스
+     * [EN] SpriteSheetInfo instance
      */
     get spriteSheetInfo(): SpriteSheetInfo;
-    /**
-     * [KO] 스프라이트 시트 정보를 설정합니다.
-     * [EN] Sets the sprite sheet information.
-     * @param value -
-     * [KO] 새로운 스프라이트 시트 정보
-     * [EN] New sprite sheet information
-     */
     set spriteSheetInfo(value: SpriteSheetInfo);
     /**
-     * [KO] 애니메이션을 재생합니다. 상태를 'play'로 변경하고 프레임 갱신을 시작합니다.
-     * [EN] Plays the animation. Changes state to 'play' and starts updating frames.
+     * [KO] 애니메이션 재생을 시작하고 상태를 `'play'`로 변경합니다.
+     * [EN] Starts animation playback and changes the state to `'play'`.
      */
     play(): void;
     /**
-     * [KO] 애니메이션을 일시정지합니다. 상태를 'pause'로 변경하고 현재 프레임에서 멈춥니다.
-     * [EN] Pauses the animation. Changes state to 'pause' and pauses at the current frame.
+     * [KO] 현재 프레임에서 애니메이션을 일시정지하고 상태를 `'pause'`로 변경합니다.
+     * [EN] Pauses the animation at the current frame and changes the state to `'pause'`.
      */
     pause(): void;
     /**
-     * [KO] 애니메이션을 정지합니다. 상태를 'stop'으로 변경하고 첫 번째 프레임으로 되돌립니다.
-     * [EN] Stops the animation. Changes state to 'stop' and resets to the first frame.
+     * [KO] 애니메이션을 정지하고 첫 번째 프레임(`0`)으로 초기화한 뒤 상태를 `'stop'`으로 변경합니다.
+     * [EN] Stops the animation, resets to the first frame (`0`), and changes the state to `'stop'`.
      */
     stop(): void;
     /**
-     * [KO] 스프라이트 시트를 렌더링합니다. 시간에 따른 프레임 인덱스 업데이트와 애니메이션 로직을 처리합니다.
-     * [EN] Renders the sprite sheet. Processes frame index updates and animation logic over time.
+     * [KO] 경과 시간에 따라 현재 프레임 인덱스를 갱신하고 스프라이트 시트를 렌더링합니다.
+     * [EN] Updates the current frame index based on elapsed time and renders the sprite sheet.
+     *
      * @param renderViewStateData -
-     * [KO] 렌더링 상태 및 디버그 정보
-     * [EN] Rendering state and debug info
+     * [KO] 뷰 렌더링 상태 데이터
+     * [EN] View rendering state data
      */
     render(renderViewStateData: RenderViewStateData): void;
 }

@@ -146,13 +146,24 @@ redUnit.testGroup(
             } catch (e) { run(false, e); }
         }, true);
 
-        runner.defineTest('Success: computeViewFrustumPlanes', (run) => {
+        runner.defineTest('Success: computeFrustumPlanes', (run) => {
             try {
                 const proj = RedGPU.Math.mat4.create();
                 const view = RedGPU.Math.mat4.create();
-                const planes = RedGPU.Math.computeViewFrustumPlanes(proj, view);
+                const planes = RedGPU.Math.computeFrustumPlanes(proj, view);
                 run(Array.isArray(planes) && planes.length === 6 && planes[0].length === 4);
             } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Success: computeFrustumPlanesFlat', (run) => {
+            try {
+                const proj = RedGPU.Math.mat4.create();
+                const view = RedGPU.Math.mat4.create();
+                const planesFlat = RedGPU.Math.computeFrustumPlanesFlat(proj, view);
+                run(planesFlat instanceof Float32Array && planesFlat.length === 24);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
     }
 );

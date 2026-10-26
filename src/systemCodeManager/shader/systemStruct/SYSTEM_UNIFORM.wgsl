@@ -6,6 +6,7 @@
 #redgpu_include systemStruct.Time
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
+#redgpu_include systemStruct.Wind
 
 /**
  * [KO] 엔진의 표준 시스템 유니폼 및 전역 바인딩 구조체 정의입니다.
@@ -28,17 +29,16 @@ struct SystemUniform {
       //
       directionalLightCount:u32,
       directionalLightProjectionViewMatrix:mat4x4<f32>,
-      directionalLightProjectionMatrix:mat4x4<f32>,
-      directionalLightViewMatrix:mat4x4<f32>,
       directionalLights:array<DirectionalLight,3>,
 	  //
 	  ambientLight:AmbientLight,
-
+	  //
+	  wind:Wind,
 };
 
 @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
 @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
-@group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
+@group(0) @binding(2) var directionalShadowMap: texture_depth_2d_array;
 @group(0) @binding(3) var prefilterTextureSampler: sampler;
 
 @group(0) @binding(7) var renderPath1ResultTextureSampler: sampler;
@@ -62,6 +62,8 @@ struct SystemUniform {
 
 #redgpu_include systemStruct.globalFragmentStructBuiltIn;
 @group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
+
+@group(0) @binding(20) var renderPath1DepthTexture: texture_depth_2d;
 
 #redgpu_include depth.getLinearizeDepth
 

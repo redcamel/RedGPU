@@ -1,14 +1,14 @@
 ---
 title: RedGPU Context
-description: Learn about RedGPUContext, the starting point and resource manager of the RedGPU engine.
+description: Learn about RedGPUContext, the entry point and resource manager of the RedGPU engine.
 order: 2
 ---
 
 <script setup>
 const contextLifeCycle = `
     graph LR
-        Init["Call RedGPU.init()"] -->|Async| Callback["onSuccess Callback"]
-        Callback -->|Get Instance| Setup["Scene & View Setup"]
+        Init["Call RedGPU.init()"] -->|Async| Callback["onWebGPUInitialized Callback"]
+        Callback -->|Acquire Instance| Setup["Scene & View Setup"]
         Setup -->|Start Loop| Render["Renderer.start()"]
         
         %% Grayscale styles applied
@@ -21,248 +21,129 @@ const contextLifeCycle = `
 
 # RedGPUContext
 
-**RedGPUContext** is the top-level core context object upon which the RedGPU engine operates. It handles the complex
-WebGPU initialization process and plays a central role in managing various manager objects required for devices,
-adapters, canvas, resources, and rendering.
+`RedGPUContext` is the top-level context object that serves as the foundation for running the RedGPU engine. It handles
+the complex WebGPU initialization process behind the scenes and plays a central role in managing the device, adapter,
+canvas, resources, and core engine managers required for rendering.
 
 > [!WARNING]
-> `RedGPUContext` is created internally by `RedGPU.init()`.<br/>
-> Do not create an instance directly using the `new` keyword.
+> `RedGPUContext` is instantiated automatically internally via `RedGPU.init()`.<br/>
+> Do not instantiate it directly using the `new` keyword.
 
 ---
 
-## 1. Role and Main Functions
+## 1. Architecture and Role
 
-RedGPUContext manages the overall state of the engine and provides the following functions:
-
-| Function Category                                    | Description                                                                                                                                        |
-|:-----------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Device & Adapter Management**                      | Controls communication and computational resources between the browser and GPU hardware.                                                           |
-| **Canvas Size & Scale Control**                      | Flexibly adjusts the actual physical resolution of the canvas, CSS pixel resolution, and rendering scale ( `renderScale` ).                        |
-| **Resource Control**                                 | Provides `resourceManager` to integrate and manage GPU resources such as textures, meshes, materials, and buffers.                                 |
-| **Rendering Quality Control**                        | You can utilize `antialiasingManager` which manages MSAA, FXAA, and TAA settings to prevent aliasing.                                              |
-| **Command Optimization & Pass Lifecycle Management** | Provides `commandEncoderManager` for safe and efficient batch recording and submission of GPU commands.                                            |
-| **Event Buffering**                                  | Supports real-time canvas resizing detection ( `onResize` ), mouse/touch coordinate picking, and keyboard input buffering ( `keyboardKeyBuffer` ). |
-
----
-
-## 2. Process of Initialization
-
-To build the WebGPU environment, call the `RedGPU.init` function to asynchronously create the context.
+Call `RedGPU.init()` to asynchronously initialize the WebGPU adapter and device and acquire the `RedGPUContext`
+instance.
 
 <ClientOnly>
   <MermaidResponsive :definition="contextLifeCycle" />
 </ClientOnly>
 
+`RedGPUContext` manages the overall engine state and performs the following core roles:
+
+- **View Container Management**: Manages the list of `View3D` (and `View2D`) instances to render (`addView`,
+  `removeView`), supporting split-screen layouts and UI overlays via multi-view rendering.
+- **Canvas Size & Resolution Control**: Automatically detects HTML `<canvas>` size changes (`onResize`) and controls the
+  rendering resolution multiplier (`renderScale`) and default background color (`backgroundColor`).
+- **Built-in Core Managers**: Provides built-in managers for antialiasing (`antialiasingManager`), GPU resource caching
+  (`resourceManager`), command encoding (`commandEncoderManager`), and hardware environment detection (`detector`).
+- **Global Input Buffering**: Provides `keyboardKeyBuffer` to track real-time keyboard key press states.
+
+---
+
+## 2. Basic Initialization Usage
+
+To set up the WebGPU environment, pass the target `<canvas>` element along with success and failure callbacks to
+`RedGPU.init()`.
+
 ```javascript
-import * as RedGPU from "dist/index.js";
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
 const canvas = document.getElementById('redgpu-canvas');
 
-// Request RedGPU initialization
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // Obtain RedGPUContext instance upon successful initialization.
+        // Acquire the redGPUContext instance upon successful initialization
         console.log('RedGPUContext ready:', redGPUContext);
-        
-        // Set background color to black
-        redGPUContext.backgroundColor = new RedGPU.Color.ColorRGBA(0, 0, 0, 1);
+
+        // Configure default background color
+        redGPUContext.backgroundColor.setColorByHEX('#000000');
     },
-    (failReason) => {
-        // Handle initialization failure (e.g., WebGPU not supported)
-        console.error('Initialization failed:', failReason);
+    (error) => {
+        // Handle initialization failure (e.g., unsupported WebGPU environment)
+        console.error('RedGPU initialization failed:', error);
     }
 );
 ```
 
 ---
 
-## 3. Core API Specification
+## 3. Size and Resolution Management
 
-### 3.1 View Registration and Management
+`RedGPUContext` detects layout dimension changes (in CSS pixels) on the HTML canvas element and automatically optimizes
+the rendering resolution.
 
-`RedGPUContext` manages the list of **[View3D](../api/RedGPU-API/namespaces/RedGPU/namespaces/Display/classes/View3D.md)
-** objects to determine what to draw on the screen. Registered views are processed in order within the rendering
-pipeline.
-This interface is implemented by inheriting `RedGPUContextViewContainer`.
+### Key Properties and Methods
 
-| Method / Property             | Description                                                                      |
-|:------------------------------|:---------------------------------------------------------------------------------|
-| `viewList`                    | Returns a list of all registered views. (Read-only, `View3D[]`)                  |
-| `numViews`                    | The number of views currently owned by the container. (Read-only, `number`)      |
-| `addView(view)`               | Registers a view for rendering.                                                  |
-| `addViewAt(view, index)`      | Adds a view at a specific index.                                                 |
-| `removeView(view)`            | Removes a registered view.                                                       |
-| `removeViewAt(index)`         | Removes a view at a specific index.                                              |
-| `removeAllViews()`            | Removes all registered views.                                                    |
-| `getViewAt(index)`            | Returns the view at the specified index. (`View3D`)                              |
-| `getViewIndex(view)`          | Returns the index of a specific view. (`number`)                                 |
-| `setViewIndex(view, index)`   | Changes the rendering order (index) of a registered view.                        |
-| `swapViews(view1, view2)`     | Swaps the rendering positions of two views.                                      |
-| `swapViewsAt(index1, index2)` | Swaps two views at the specified indices.                                        |
-| `contains(view)`              | Checks if the specified view is currently registered in the context. (`boolean`) |
-
----
-
-### 3.2 Canvas Size and Resolution Optimization
-
-RedGPUContext detects changes in the canvas layout size (in CSS pixels) and automatically optimizes the rendering
-resolution.
-
-#### Key Properties & Methods
-
-- **`width` / `height`** (`number | string`): You can get or set the canvas width and height directly. Supports formats
-  like `'100%'`, `'800px'`, and `600`.
+- **`width` / `height`** (`number | string`): Gets or sets the canvas width and height directly. Supports formats such
+  as `'100%'`, `'800px'`, and `600`.
 - **`setSize(width, height)`**: Sets both width and height at once.
-- **`renderScale`** (`number`): Determines the rendering resolution scale. The default is `1`. You can reduce it to
-  `0.5` to lower the resolution for performance optimization on mobile devices.
-- **`screenRectObject`** (`IRedGPURectObject`): Provides the canvas area `{ x, y, width, height }` in CSS pixels.
-- **`pixelRectObject`** (`IRedGPURectObject`): Provides the actual rendering resolution `{ x, y, width, height }` in
-  physical pixels.
+- **`renderScale`** (`number`): Determines the rendering resolution multiplier. Defaults to `1`, and can be adjusted to
+  values like `0.5` to optimize performance on mobile devices.
+- **`screenRectObject`** (`IRedGPURectObject`): Provides the canvas bounding rect `{ x, y, width, height }` in CSS
+  pixels.
+- **`pixelRectObject`** (`IRedGPURectObject`): Provides the actual physical rendering resolution
+  `{ x, y, width, height }` in physical pixels.
 
-#### `onResize` Event Callback
+### `onResize` Event Callback
 
-When the canvas size is adjusted or `setSize` is called and the size changes, you can register an `onResize` callback to
-perform additional computations such as changing the camera aspect ratio. The `event` argument passed to the callback
-follows the `RedResizeEvent<RedGPUContext>` interface.
+When the canvas is resized or `setSize()` is called, you can register an `onResize` callback to perform additional
+operations such as repositioning UI layouts. The `event` parameter conforms to the `RedResizeEvent<RedGPUContext>`
+interface.
 
 ```javascript
 redGPUContext.onResize = (event) => {
     // event.target points to the RedGPUContext instance.
-    const { width, height } = event.screenRectObject; // in CSS pixels
-    const { width: pWidth, height: pHeight } = event.pixelRectObject; // in physical pixels
-    
-    console.log(`CSS Size: ${width}x${height}, Actual Physical Resolution: ${pWidth}x${pHeight}`);
-    
-    // Example: When you want to update the camera aspect ratio for current views
-    redGPUContext.viewList.forEach((view) => {
-        view.camera.aspect = width / height;
-    });
+    const {width, height} = event.screenRectObject; // In CSS pixels
+    const {width: pWidth, height: pHeight} = event.pixelRectObject; // In physical pixels
+
+    console.log(`CSS Size: ${width}x${height}, Physical Resolution: ${pWidth}x${pHeight}`);
 };
 ```
 
 ---
 
-### 3.3 Properties
+## 4. Why Context Injection Is Required
 
-| Property Name           | Type                                                                                                                             | Description                                                                          |
-|:------------------------|:---------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------|
-| `backgroundColor`       | [ColorRGBA](../api/RedGPU-API/namespaces/RedGPU/namespaces/Color/classes/ColorRGBA.md)                                           | Determines the canvas background color. (Default: Black `0, 0, 0, 1`)                |
-| `alphaMode`             | `GPUCanvasAlphaMode`                                                                                                             | Controls the canvas alpha blending mode (`'opaque'` or `'premultiplied'`).           |
-| `keyboardKeyBuffer`     | `{ [key: string]: boolean }`                                                                                                     | A real-time buffer of currently active (pressed) keyboard keys.                      |
-| `detector`              | [RedGPUContextDetector](../api/RedGPU-API/namespaces/RedGPU/namespaces/Context/namespaces/Core/classes/RedGPUContextDetector.md) | Detects user device environments such as mobile usage and browser specs. (Read-only) |
-| `resourceManager`       | [ResourceManager](../api/RedGPU-API/namespaces/RedGPU/namespaces/Resource/namespaces/Core/classes/ResourceManager.md)            | Registers and caches GPU resources and manages memory lifecycles. (Read-only)        |
-| `antialiasingManager`   | [AntialiasingManager](../api/RedGPU-API/namespaces/RedGPU/namespaces/Antialiasing/classes/AntialiasingManager.md)                | Controls engine-wide anti-aliasing (MSAA, etc.) settings. (Read-only)                |
-| `commandEncoderManager` | [CommandEncoderManager](../api/RedGPU-API/namespaces/RedGPU/classes/CommandEncoderManager.md)                                    | An encoder manager that records and submits GPU commands. (Read-only)                |
-| `gpuDevice`             | `GPUDevice`                                                                                                                      | The core logical device object of WebGPU. (Read-only)                                |
-| `gpuAdapter`            | `GPUAdapter`                                                                                                                     | The physical GPU hardware information object. (Read-only)                            |
-| `gpuContext`            | `GPUCanvasContext`                                                                                                               | The WebGPU canvas context connected to the HTML canvas. (Read-only)                  |
-| `htmlCanvas`            | `HTMLCanvasElement`                                                                                                              | The actual DOM canvas element being used for rendering. (Read-only)                  |
+Nearly all 3D objects in RedGPU (meshes, geometries, textures, materials, etc.) require `redGPUContext` as their first
+constructor argument.
 
-#### Other Methods
-
-- **`destroy()`** : Disposes of all WebGPU resources and releases the connected GPU device.
-
----
-
-### 3.4 Key Managers
-
-RedGPUContext owns **4 key manager** instances designed for specific purposes to ensure stable and efficient resource
-utilization throughout the engine.
-
-#### 1) Resource Manager (`resourceManager`)
-
-- **Type
-  **: [ResourceManager](../api/RedGPU-API/namespaces/RedGPU/namespaces/Resource/namespaces/Core/classes/ResourceManager.md)
-- **Role**: Integrates and caches WebGPU shader modules, buffers, bind group layouts, texture views, and resource
-  states.
-- **Key Features**:
-    - `createGPUShaderModule(name, descriptor)` / `getGPUShaderModule(name)` : Creates and retrieves shaders processed
-      by the WGSL preprocessor.
-    - `createBindGroupLayout(name, descriptor)` / `getGPUBindGroupLayout(name)` : Manages bind group layout caching.
-    - `getGPUResourceBitmapTextureView(texture)` / `getGPUResourceCubeTextureView(cubeTexture)` : Performance
-      optimization through texture view caching and reuse.
-    - Provides generators responsible for IBL (Image-Based Lighting) and mipmap creation ( `brdfGenerator`,
-      `mipmapGenerator`, etc.).
-    - Provides default and displacement samplers shared across the engine ( `basicSampler`,
-      `basicDisplacementSampler` ).
-
-#### 2) Device & Browser Environment Detector (`detector`)
-
-- **Type
-  **: [RedGPUContextDetector](../api/RedGPU-API/namespaces/RedGPU/namespaces/Context/namespaces/Core/classes/RedGPUContextDetector.md)
-- **Role**: Analyzes the hardware specs, platforms, browser engines, and WebGPU limits (Limits/Features) of the user
-  device.
-- **Key Features**:
-    - Mobile and OS type detection ( `isMobile`, `isIOS`, `isAndroid` ).
-    - Browser engine detection ( `isChromium`, `isSafari`, `isFirefox` ).
-    - Query device information ( `hardwareConcurrency` core count, `deviceMemory` memory size).
-    - Generates detailed WebGPU support profile reports ( `toReport()` ).
-
-#### 3) Anti-aliasing Manager (`antialiasingManager`)
-
-- **Type
-  **: [AntialiasingManager](../api/RedGPU-API/namespaces/RedGPU/namespaces/Antialiasing/classes/AntialiasingManager.md)
-- **Role**: Centrally controls the anti-aliasing method used in the rendering pipeline to prevent jaggy edges.
-- **Key Features**:
-    - Enable multi-sampling ( `useMSAA` ).
-    - Enable fast approximate anti-aliasing ( `useFXAA` ).
-    - Enable temporal anti-aliasing ( `useTAA` ).
-    - Intelligently auto-selects the default mode based on the device's pixel density ( `devicePixelRatio` ).
-
-#### 4) Command Encoder Manager (`commandEncoderManager`)
-
-- **Type**: [CommandEncoderManager](../api/RedGPU-API/namespaces/RedGPU/classes/CommandEncoderManager.md)
-- **Role**: Manages the lifecycle of `GPUCommandEncoder` and render/compute passes stage-by-stage to maximize execution
-  efficiency.
-- **Note**: This class is initialized automatically within the system and should not be created directly using the `new`
-  keyword.
-- **Key Features**:
-    - Batch registration and optimization of stage-specific passes ( `Resource` -> `PreProcess` -> `Main` ->
-      `PostProcess` ).
-    - Automatically creates separate encoders if nested calls occur while a pass is active to ensure safety.
-    - Immediate execution and submission support ( `immediateRenderPass`, `immediateComputePass`, `immediateSubmit` ).
-    - Provides deferred destruction ( `addDeferredDestroy` ) to release GPU resources at a safe point after commands
-      finish.
-    - Single queue submission ( `submitAll()` ) and real-time stage-by-stage rendering statistics reporting.
-
----
-
-## 4. Necessity of Context Injection
-
-Almost all 3D objects in RedGPU (meshes, geometries, textures, materials, etc.) require `redGPUContext` as the first
-argument of the constructor.
-
-Each graphics object must be dynamically allocated GPU memory, and the connection baseline for **"which GPU
-device ( `gpuDevice` ) should be used to create the resource"** is the `RedGPUContext`.
+Because each graphics object must dynamically allocate GPU memory, `RedGPUContext` serves as the reference that
+determines **which GPU device (`gpuDevice`) and resource manager (`resourceManager`)** will create and manage those
+resources.
 
 ```javascript
-// [O] Correct way: Always inject context as the first argument upon creation.
+// [O] Correct: Always pass redGPUContext as the first argument
 const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
-// [X] Incorrect way: An error occurs if context is not passed.
+// [X] Incorrect: Omitting the context throws an error
 // const material = new RedGPU.Material.ColorMaterial(); 
 ```
 
 ---
 
-## Key Summary
+## Related Examples
 
-- **Engine Control Tower**: Prepared asynchronously via `RedGPU.init` and manages device, adapter, and canvas in an
-  integrated manner.
-- **Parent Container**: Registers and manipulates multiple `View3D` objects to enable layered rendering.
-- **Resource Standard**: Used as the creation standard for all generated graphic resources (buffers, materials,
-  textures), making it a required injection target.
-- **Size & Scale Control**: Automatically updates the resolution in response to canvas size changes and provides easy
-  scale adjustments.
+- [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
+- [Multi Canvas](/RedGPU/examples/3d/multiCanvas/)
 
 ---
 
 ## Next Steps
 
-You are ready to run the engine through RedGPUContext. However, the screen is still empty.
+With `RedGPUContext`, the engine is ready to run. Now let's learn how to place a **camera** (`Camera`) on the blank
+canvas and define a **scene** (`Scene`) to hold objects and render a 3D world on screen.
 
-Now it's time to learn how to compose the actual 3D world by placing a **Camera** on the empty canvas and defining a **Scene** to hold objects.
-
-- **[Screen Configuration](../view-system/)**
+- **[View System](../view-system/index.md)**: Combining `View3D`, `Scene`, and `Camera` to render a 3D stage on screen

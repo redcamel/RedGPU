@@ -1,6 +1,6 @@
 /**
- * [KO] GPU 리소스를 통합 관리하는 `ResourceManager`와 관련 상태 정보를 제공합니다.
- * [EN] Provides the `ResourceManager`, which integrates and manages GPU resources, and related status information.
+ * [KO] GPU 리소스를 통합 관리하는 `ResourceManager` 및 리소스별 상태 클래스를 제공합니다.
+ * [EN] Provides `ResourceManager` for integrated GPU resource management and resource-specific state classes.
  * @packageDocumentation
  */
 import ResourceManager, { ImmutableKeyMap, ResourceState, ResourceStateBitmapTexture, ResourceStateCubeTexture, ResourceStateHDRTexture, ResourceStateIndexBuffer, ResourceStateStorageBuffer, ResourceStateUniformBuffer, ResourceStateVertexBuffer } from "./ResourceManager";

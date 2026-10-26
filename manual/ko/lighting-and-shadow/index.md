@@ -9,9 +9,20 @@ order: 5
 
 ## 학습 주제
 
-1. **[Light](./light.md)** : 다양한 광원의 종류와 조명 관리자(`LightManager`) 사용법
+1. **[Light](./light.md)** : 다양한 광원의 종류와 조명 관리자 (`LightManager`) 사용법
 2. **[Phong Material](./phong-material.md)** : 빛에 반응하는 사실적인 재질의 속성 학습
-3. **[Shadow](./shadow.md)** : 그림자 생성 원리와 품질 설정
+3. **[PBR Material](./pbr-material.md)** : 물리 기반 렌더링 (PBR) 재질 시스템 이해
+4. **[Shadow](./shadow.md)** : 그림자 생성 원리와 품질 설정
+
+---
+
+## 관련 예제
+
+- [방향광 (DirectionalLight)](/RedGPU/examples/3d/light/directionalLight/)
+- [점광원 (PointLight)](/RedGPU/examples/3d/light/pointLight/)
+- [집중광 (SpotLight)](/RedGPU/examples/3d/light/spotLight/)
+- [PhongMaterial 다중 텍스처](/RedGPU/examples/3d/material/phongMaterialTextures/)
+- [캐스케이드 방향광 그림자](/RedGPU/examples/3d/shadow/directionalShadow/)
 
 ---
 

@@ -1,5 +1,5 @@
 import RedGPUContext from "./context/RedGPUContext";
-import {keepLog} from "./utils";
+import keepLog from "./utils/keepLog";
 
 const DEFAULT_REQUEST_ADAPTER_OPTIONS: GPURequestAdapterOptions = {
     powerPreference: "high-performance",
@@ -10,49 +10,49 @@ const BOT_PATTERN = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|f
 
 
 /**
- * [KO] WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
- * [EN] Asynchronously initializes WebGPU and creates a RedGPUContext.
+ * [KO] WebGPU 어댑터와 디바이스를 비동기로 초기화하고 `RedGPUContext` 인스턴스를 생성합니다.
+ * [EN] Asynchronously initializes the WebGPU adapter and device, and creates a `RedGPUContext` instance.
  *
- * [KO] 브라우저의 WebGPU 지원 여부를 확인하고, GPU 어댑터와 디바이스를 요청한 후 최종적으로 RedGPUContext 인스턴스를 생성하여 콜백을 통해 전달합니다.
- * [EN] Checks for WebGPU support in the browser, requests a GPU adapter and device, and finally creates a RedGPUContext instance, passing it through a callback.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * await RedGPU.init(
  *   canvas,
  *   (redGPUContext) => {
- *     console.log('WebGPU 초기화 성공!', redGPUContext);
- *     // 렌더링 루프 시작 (Start rendering loop)
+ *     // [KO] 초기화 성공 후 렌더링 시작
+ *     // [EN] Start rendering after successful initialization
+ *     console.log(redGPUContext);
  *   },
  *   (errorMessage) => {
- *     console.error('초기화 실패:', errorMessage);
+ *     // [KO] 초기화 실패 처리
+ *     // [EN] Handle initialization failure
+ *     console.error(errorMessage);
  *   }
  * );
  * ```
  *
  * @param canvas -
- * [KO] WebGPU를 초기화할 HTML 캔버스 요소
- * [EN] HTML canvas element to initialize WebGPU
+ * [KO] WebGPU 컨텍스트를 바인딩할 `HTMLCanvasElement`
+ * [EN] `HTMLCanvasElement` to bind the WebGPU context
  * @param onWebGPUInitialized -
- * [KO] 성공 시 호출될 콜백 함수 (RedGPUContext 인스턴스가 인자로 전달됨)
- * [EN] Callback function to be called on success (RedGPUContext instance is passed as an argument)
+ * [KO] 초기화 성공 시 생성된 `RedGPUContext`를 전달받는 콜백 함수
+ * [EN] Callback function receiving the created `RedGPUContext` upon successful initialization
  * @param onFailInitialized -
- * [KO] 실패 시 호출될 선택적 콜백 함수 (에러 메시지가 인자로 전달됨)
- * [EN] Optional callback function to be called on failure (error message is passed as an argument)
+ * [KO] 초기화 실패 시 에러 메시지를 전달받는 선택적 콜백 함수
+ * [EN] Optional callback function receiving an error message upon initialization failure
  * @param onDestroy -
- * [KO] 디바이스 유실 시 호출될 선택적 콜백 함수
- * [EN] Optional callback function to be called when the device is lost
+ * [KO] GPU 디바이스 손실(`GPUDeviceLostInfo`) 발생 시 호출되는 선택적 콜백 함수
+ * [EN] Optional callback function invoked when the GPU device is lost (`GPUDeviceLostInfo`)
  * @param alphaMode -
- * [KO] 캔버스 알파 모드 (기본값: 'premultiplied')
- * [EN] Canvas alpha mode (Default: 'premultiplied')
+ * [KO] 캔버스 알파 합성 모드 (기본값: `'premultiplied'`)
+ * [EN] Canvas alpha compositing mode (default: `'premultiplied'`)
  * @param requestAdapterOptions -
- * [KO] 어댑터 요청 옵션 (기본값: 고성능 설정)
- * [EN] Adapter request options (Default: high-performance setup)
+ * [KO] WebGPU 어댑터 요청 옵션 (기본값: `DEFAULT_REQUEST_ADAPTER_OPTIONS`)
+ * [EN] WebGPU adapter request options (default: `DEFAULT_REQUEST_ADAPTER_OPTIONS`)
  * @returns
- * [KO] 초기화 프로세스 완료를 나타내는 Promise
- * [EN] Promise representing the completion of the initialization process
+ * [KO] 초기화 완료를 나타내는 `Promise<void>`
+ * [EN] `Promise<void>` representing the completion of initialization
  * @category Core
- * */
+ */
 const init = async (
     canvas: HTMLCanvasElement,
     onWebGPUInitialized: (redGPUContext: RedGPUContext) => void,
@@ -90,14 +90,12 @@ const init = async (
     }
 
     try {
-        // 1. Request Adapter
         const adapter = await gpu.requestAdapter(requestAdapterOptions);
         if (!adapter) {
             throw new Error("Failed to request WebGPU adapter. Check options or browser support.");
         }
         keepLog('PASS adapter', adapter);
 
-        // 2. Request Device
         const gpuDeviceDescriptor: GPUDeviceDescriptor = {
             requiredFeatures: getRequiredFeature(adapter),
             requiredLimits: getRequiredLimits(adapter)
@@ -108,7 +106,6 @@ const init = async (
         }
         keepLog('PASS device', device);
 
-        // 3. Initialize Context
         const context = canvas.getContext('webgpu');
         if (!context) {
             throw new Error(`Failed to get WebGPU context from canvas: ${canvas.id || 'anonymous canvas'}`);
@@ -125,16 +122,12 @@ export default init
 const getRequiredFeature = (adapter: GPUAdapter): GPUFeatureName[] => {
     const requiredFeatures: GPUFeatureName[] = [];
     const featuresToRequest: GPUFeatureName[] = [
-        // "texture-compression-astc",
-        // "texture-compression-bc",
-        // "texture-compression-etc2",
-        // "shader-f16",
-        // "timestamp-query",
-        // "depth-clip-control",
+        "texture-compression-astc",
+        "texture-compression-bc",
+        "texture-compression-etc2",
+        "texture-formats-tier1",
         "indirect-first-instance",
-        // "rg11b10ufloat-renderable",
-        // "bgra8unorm-storage",
-        // "float32-filterable"
+        "float32-filterable"
     ];
 
     featuresToRequest.forEach(feature => {
@@ -164,7 +157,8 @@ const getRequiredLimits = (adapter: GPUAdapter): Record<string, number> => {
         'maxComputeWorkgroupSizeX',
         'maxComputeWorkgroupSizeY',
         'maxComputeWorkgroupSizeZ',
-        'maxComputeWorkgroupsPerDimension'
+        'maxComputeWorkgroupsPerDimension',
+        'maxTextureArrayLayers'
     ];
     limitKeys.forEach(key => {
         if (key !== '__brand') {
@@ -176,7 +170,6 @@ const getRequiredLimits = (adapter: GPUAdapter): Record<string, number> => {
 
 const generateErrorMessage = (e: any, defaultMsg: string): string => {
     let msg = defaultMsg;
-    // Check if 'e' is an instance of Error
     if (e instanceof Error) {
         msg = e.message ?? defaultMsg;
         if (typeof e.stack === 'string') {
@@ -189,7 +182,7 @@ const generateErrorMessage = (e: any, defaultMsg: string): string => {
 }
 const isSearchEngineBot = (): boolean => {
     if (typeof navigator === 'undefined' || typeof window === 'undefined') {
-        return true; // SSR 환경에서는 봇으로 간주
+        return true;
     }
     const userAgent = navigator.userAgent.toLowerCase();
     return BOT_PATTERN.test(userAgent);
