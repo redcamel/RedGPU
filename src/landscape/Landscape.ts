@@ -1109,17 +1109,13 @@ class Landscape extends RedGPUObject {
             const {
                 vhtAtlasTexture,
                 vntAtlasTexture,
-                vbtBaseColorAtlas,
-                vbtNormalAtlas,
-                vbtORMAtlas,
+                vbtAtlasArrayView,
                 globalHeightTexture
             } = this.#tileStreamer;
             this.#instanceBuffer.updateBindGroup(
                 vhtAtlasTexture.gpuTextureView,
                 vntAtlasTexture.gpuTextureView,
-                vbtBaseColorAtlas?.gpuTextureView,
-                vbtNormalAtlas?.gpuTextureView,
-                vbtORMAtlas?.gpuTextureView
+                vbtAtlasArrayView ?? undefined
             );
             if (globalHeightTexture) {
                 this.#bakeGlobalBaseToVHT();

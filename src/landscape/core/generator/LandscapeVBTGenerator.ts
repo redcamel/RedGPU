@@ -56,15 +56,9 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      * @param vntAtlas -
      * [KO] 가상 노멀 텍스처(VNT) 아틀라스
      * [EN] Virtual Normal Texture (VNT) atlas
-     * @param vbtBaseColorArray -
-     * [KO] 베이킹 결과를 저장할 VBT BaseColor 아틀라스 텍스처
-     * [EN] VBT BaseColor atlas texture to store the baked result
-     * @param vbtNormalArray -
-     * [KO] 베이킹 결과를 저장할 VBT Normal 아틀라스 텍스처
-     * [EN] VBT Normal atlas texture to store the baked result
-     * @param vbtORMArray -
-     * [KO] 베이킹 결과를 저장할 VBT ORM(Occlusion, Roughness, Metallic) 아틀라스 텍스처
-     * [EN] VBT ORM (Occlusion, Roughness, Metallic) atlas texture to store the baked result
+     * @param vbtAtlas -
+     * [KO] 베이킹 결과를 저장할 3-레이어 VBT(BaseColor, Normal, ORM) 아틀라스 텍스처
+     * [EN] 3-layer VBT (BaseColor, Normal, ORM) atlas texture to store the baked result
      * @param material -
      * [KO] 합성할 레이어 정보를 가진 `LandscapeMaterial` 인스턴스
      * [EN] `LandscapeMaterial` instance containing layer information to composite
@@ -74,18 +68,17 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      */
     bakeAtlas(
         vntAtlas: DirectTexture,
-        vbtBaseColorArray: DirectTexture,
-        vbtNormalArray: DirectTexture,
-        vbtORMArray: DirectTexture,
+        vbtAtlas: DirectTexture,
         material: LandscapeMaterial,
         singleTilePixels: number = 256
     ): void {
         if (!this.computePipeline || !this.bindGroupLayout) return;
         if (!vntAtlas?.gpuTexture) return;
-        if (!vbtBaseColorArray?.gpuTexture || !vbtNormalArray?.gpuTexture || !vbtORMArray?.gpuTexture) return;
+        if (!vbtAtlas?.gpuTexture) return;
 
         const {gpuDevice} = this.redGPUContext;
-        const {width, height} = vbtBaseColorArray.gpuTexture;
+        const vbtGpuTexture = vbtAtlas.gpuTexture;
+        const {width, height} = vbtGpuTexture;
 
         const fArr = this.#uniformFloatArray;
         const uArr = this.#uniformUintArray;
@@ -120,9 +113,9 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const uniformBuffer = this.acquireUniformBuffer(this.#vbtUniformByteLength);
         gpuDevice.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, this.#vbtUniformByteLength);
 
-        const vbtBaseColorStorageView = this.#getStorageTextureView(vbtBaseColorArray.gpuTexture, 0);
-        const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture, 0);
-        const vbtORMStorageView = this.#getStorageTextureView(vbtORMArray.gpuTexture, 0);
+        const vbtBaseColorStorageView = this.#getStorageTextureView(vbtGpuTexture, 0, 0);
+        const vbtNormalStorageView = this.#getStorageTextureView(vbtGpuTexture, 0, 1);
+        const vbtORMStorageView = this.#getStorageTextureView(vbtGpuTexture, 0, 2);
 
         const {baseColorView, normalView, ormView, weightMapView} = material.getInternalLayerViews();
         const bindGroup = gpuDevice.createBindGroup({
@@ -145,9 +138,7 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         this.dispatchBakePass(bindGroup, width, height, 0, 0);
 
         this.#dispatchTileMipmaps(
-            vbtBaseColorArray.gpuTexture,
-            vbtNormalArray.gpuTexture,
-            vbtORMArray.gpuTexture,
+            vbtGpuTexture,
             0,
             0,
             width,
@@ -190,25 +181,23 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     }
 
     #getOrCreateTileMipBindGroup(
-        bcTex: GPUTexture,
-        normTex: GPUTexture,
-        ormTex: GPUTexture,
+        vbtTex: GPUTexture,
         mipLevel: number
     ): GPUBindGroup {
-        let bgMap = this.#tileMipBindGroupsCache.get(bcTex);
+        let bgMap = this.#tileMipBindGroupsCache.get(vbtTex);
         if (!bgMap) {
             bgMap = new Map();
-            this.#tileMipBindGroupsCache.set(bcTex, bgMap);
+            this.#tileMipBindGroupsCache.set(vbtTex, bgMap);
         }
         let bindGroup = bgMap.get(mipLevel);
         if (!bindGroup) {
             const mipUniformBuffer = this.#getOrCreateTileMipUniformBuffer(mipLevel);
-            const srcBcView = this.#getSampleTextureView(bcTex, mipLevel - 1);
-            const dstBcView = this.#getStorageTextureView(bcTex, mipLevel);
-            const srcNormView = this.#getSampleTextureView(normTex, mipLevel - 1);
-            const dstNormView = this.#getStorageTextureView(normTex, mipLevel);
-            const srcOrmView = this.#getSampleTextureView(ormTex, mipLevel - 1);
-            const dstOrmView = this.#getStorageTextureView(ormTex, mipLevel);
+            const srcBcView = this.#getSampleTextureView(vbtTex, mipLevel - 1, 0);
+            const dstBcView = this.#getStorageTextureView(vbtTex, mipLevel, 0);
+            const srcNormView = this.#getSampleTextureView(vbtTex, mipLevel - 1, 1);
+            const dstNormView = this.#getStorageTextureView(vbtTex, mipLevel, 1);
+            const srcOrmView = this.#getSampleTextureView(vbtTex, mipLevel - 1, 2);
+            const dstOrmView = this.#getStorageTextureView(vbtTex, mipLevel, 2);
 
             bindGroup = this.redGPUContext.gpuDevice.createBindGroup({
                 label: `Landscape_TileMip_BindGroup_Mip${mipLevel}`,
@@ -228,40 +217,46 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         return bindGroup;
     }
 
-    #getStorageTextureView(tex: GPUTexture, mipLevel: number = 0): GPUTextureView {
+    #getStorageTextureView(tex: GPUTexture, mipLevel: number = 0, arrayLayer: number = 0): GPUTextureView {
         let views = this.#storageViewsCache.get(tex);
         if (!views) {
             views = new Map();
             this.#storageViewsCache.set(tex, views);
         }
-        let view = views.get(mipLevel);
+        const key = (mipLevel << 8) | arrayLayer;
+        let view = views.get(key);
         if (!view) {
             view = tex.createView({
                 dimension: '2d',
                 baseMipLevel: mipLevel,
                 mipLevelCount: 1,
-                label: `Landscape_VBT_StorageView_Mip${mipLevel}`
+                baseArrayLayer: arrayLayer,
+                arrayLayerCount: 1,
+                label: `Landscape_VBT_StorageView_L${arrayLayer}_Mip${mipLevel}`
             });
-            views.set(mipLevel, view);
+            views.set(key, view);
         }
         return view;
     }
 
-    #getSampleTextureView(tex: GPUTexture, mipLevel: number = 0): GPUTextureView {
+    #getSampleTextureView(tex: GPUTexture, mipLevel: number = 0, arrayLayer: number = 0): GPUTextureView {
         let views = this.#sampleViewsCache.get(tex);
         if (!views) {
             views = new Map();
             this.#sampleViewsCache.set(tex, views);
         }
-        let view = views.get(mipLevel);
+        const key = (mipLevel << 8) | arrayLayer;
+        let view = views.get(key);
         if (!view) {
             view = tex.createView({
                 dimension: '2d',
                 baseMipLevel: mipLevel,
                 mipLevelCount: 1,
-                label: `Landscape_VBT_SampleView_Mip${mipLevel}`
+                baseArrayLayer: arrayLayer,
+                arrayLayerCount: 1,
+                label: `Landscape_VBT_SampleView_L${arrayLayer}_Mip${mipLevel}`
             });
-            views.set(mipLevel, view);
+            views.set(key, view);
         }
         return view;
     }
@@ -324,9 +319,7 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     }
 
     #dispatchTileMipmaps(
-        bcTex: GPUTexture,
-        normTex: GPUTexture,
-        ormTex: GPUTexture,
+        vbtTex: GPUTexture,
         originX: number,
         originZ: number,
         tileSizePixels: number,
@@ -357,7 +350,7 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 const mipUniformBuffer = this.#getOrCreateTileMipUniformBuffer(m);
                 gpuDevice.queue.writeBuffer(mipUniformBuffer, 0, uArr.buffer, 0, this.#tileMipUniformByteLength);
 
-                const mipBindGroup = this.#getOrCreateTileMipBindGroup(bcTex, normTex, ormTex, m);
+                const mipBindGroup = this.#getOrCreateTileMipBindGroup(vbtTex, m);
 
                 const pass = commandEncoder.beginComputePass({
                     label: `Landscape_TileMipmap_Pass_Level_${m}_[${originX},${originZ}]`
