@@ -2,59 +2,80 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import ColorRGB from "../../../../color/ColorRGB";
 interface Fog {
-    /** [KO] 안개의 밀도 (0 ~ 1) [EN] Density of the fog (0 ~ 1) */
+    /**
+     * [KO] 안개 밀도 (0 ~ 1)
+     * [EN] Fog density (0 ~ 1)
+     * @defaultValue 0.1
+     */
     density: number;
-    /** [KO] 안개가 시작되는 카메라로부터의 거리 [EN] Distance from the camera where the fog starts */
+    /**
+     * [KO] 안개 시작 거리 (0 이상)
+     * [EN] Fog start distance from camera (0 or greater)
+     * @defaultValue 5.0
+     */
     nearDistance: number;
-    /** [KO] 안개가 최대 밀도에 도달하는 거리 [EN] Distance where the fog reaches maximum density */
+    /**
+     * [KO] 안개 최대 밀도 도달 거리 (0.1 이상)
+     * [EN] Fog maximum density distance (0.1 or greater)
+     * @defaultValue 50
+     */
     farDistance: number;
-    /** [KO] 안개 계산 방식 (0: 지수형, 1: 지수제곱형) [EN] Fog calculation type (0: Exponential, 1: Exponential Squared) */
+    /**
+     * [KO] 안개 계산 방식 (`Fog.EXPONENTIAL`: 0, `Fog.EXPONENTIAL_SQUARED`: 1)
+     * [EN] Fog calculation type (`Fog.EXPONENTIAL`: 0, `Fog.EXPONENTIAL_SQUARED`: 1)
+     * @defaultValue 0
+     */
     fogType: number;
-    /** [KO] 안개의 색상 [EN] Color of the fog */
+    /**
+     * [KO] 안개 색상 객체 (`ColorRGB`)
+     * [EN] Fog color object (`ColorRGB`)
+     * @defaultValue '#c8d2ff'
+     */
     fogColor: ColorRGB;
 }
 /**
- * [KO] 거리 기반 안개(Fog) 후처리 이펙트입니다.
- * [EN] Distance-based Fog post-processing effect.
+ * [KO] 깊이 정보를 기반으로 원거리 물체를 안개 색상과 합성하는 거리 기반 안개 후처리 이펙트입니다.
+ * [EN] Distance-based Fog post-processing effect that blends distant objects with fog color based on depth information.
  *
- * [KO] 장면의 깊이 정보를 기반으로 원거리의 물체를 안개 색상과 합성하여 공간감을 부여합니다.
- * [EN] Blends distant objects with the fog color based on the scene's depth information to provide a sense of space.
- *
- * [KO] 이 효과는 HDR 공간에서 동작하여 스카이박스 및 밝은 광원과의 자연스러운 대기 산란 합성을 지원합니다.
- * [EN] This effect operates in HDR space, supporting natural atmospheric scattering composition with the skybox and bright light sources.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Fog(redGPUContext);
  * effect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED;
  * effect.density = 0.1;
  * effect.nearDistance = 5.0;
  * effect.farDistance = 40.0;
- * effect.fogColor.setRGB(200, 220, 255);
+ * effect.fogColor.setColorByRGB(200, 210, 255);
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/fog/fog/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/fog/fog/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Fog example](/RedGPU/examples/postEffect/fog/fog/)
  * @category Fog
  */
 declare class Fog extends ASinglePassPostEffect {
     /**
-     * [KO] 지수 안개 타입
-     * [EN] Exponential fog type
+     * [KO] 지수(Exponential) 안개 타입 (`0`)
+     * [EN] Exponential fog type (`0`)
      */
     static EXPONENTIAL: number;
     /**
-     * [KO] 지수제곱 안개 타입
-     * [EN] Exponential Squared fog type
+     * [KO] 지수제곱(Exponential Squared) 안개 타입 (`1`)
+     * [EN] Exponential Squared fog type (`1`)
      */
     static EXPONENTIAL_SQUARED: number;
     /**
      * [KO] Fog 인스턴스를 생성합니다.
      * [EN] Creates a Fog instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Fog(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
 }

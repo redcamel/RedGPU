@@ -4,252 +4,181 @@ import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer
 import METERING_MODE from "../METERING_MODE";
 import RedGPUObject from "../../../base/RedGPUObject";
 /**
- * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
- * [EN] Class that performs auto-exposure and eye adaptation.
+ * [KO] 컴퓨트 셰이더 기반 256-bin 로그 휘도 히스토그램 분석을 통해 자동 노출(Auto-Exposure)과 눈 적응(Eye Adaptation)을 수행하는 클래스입니다. `PostEffectManager` 내부에서 자동으로 생성됩니다.
+ * [EN] Class that performs auto-exposure and eye adaptation via compute-shader-based 256-bin log-luminance histogram analysis. Automatically created inside `PostEffectManager`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * ### Example
+ * ```typescript
+ * // [KO] View3D의 postEffectManager를 통해 접근
+ * // [EN] Access via postEffectManager of View3D
+ * const autoExposure = view.postEffectManager.autoExposure;
+ * autoExposure.exposureCompensation = 0.5;
+ * autoExposure.meteringMode = RedGPU.Camera.Core.METERING_MODE.CENTER_WEIGHTED;
+ * ```
+ *
  * @category Core
  */
 declare class AutoExposure extends RedGPUObject {
     #private;
+    /**
+     * [KO] `AutoExposure` 인스턴스를 초기화합니다.
+     * [EN] Initializes an `AutoExposure` instance.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     */
     constructor(view: View3D);
     /**
-     * [KO] 노출 보정(Exposure Compensation) 값을 반환합니다.
-     * [EN] Returns the exposure compensation value.
+     * [KO] EV 스탑 단위의 노출 보정(Exposure Compensation) 값을 가져오거나 설정합니다. (기본값: `0.0`)
+     * [EN] Gets or sets the exposure compensation value in EV stops. (Default: `0.0`)
      *
      * @returns
-     * [KO] 노출 보정 값
-     * [EN] Exposure compensation value
+     * [KO] 노출 보정 값 (EV)
+     * [EN] Exposure compensation value in EV
      */
     get exposureCompensation(): number;
-    /**
-     * [KO] 노출 보정(Exposure Compensation) 값을 설정합니다.
-     * [EN] Sets the exposure compensation value.
-     *
-     * @param value -
-     * [KO] 설정할 노출 보정 값
-     * [EN] Exposure compensation value to set
-     */
     set exposureCompensation(value: number);
     /**
-     * [KO] 목표 휘도를 반환합니다.
-     * [EN] Returns the target luminance.
+     * [KO] 자동 노출이 수렴하려는 목표 평균 휘도(18% 미들 그레이 기준)를 가져오거나 설정합니다. (`0` 이상, 기본값: `0.18`)
+     * [EN] Gets or sets the target average luminance (based on 18% middle gray) toward which auto-exposure converges. (Min `0`, Default: `0.18`)
      *
      * @returns
      * [KO] 목표 휘도 값
      * [EN] Target luminance value
      */
     get targetLuminance(): number;
-    /**
-     * [KO] 목표 휘도를 설정합니다.
-     * [EN] Sets the target luminance.
-     *
-     * @param value -
-     * [KO] 설정할 목표 휘도 값
-     * [EN] Target luminance value to set
-     */
     set targetLuminance(value: number);
     /**
-     * [KO] 자동 노출 최소 EV100을 반환합니다.
-     * [EN] Returns the minimum EV100 for auto-exposure.
+     * [KO] 자동 노출이 허용하는 최소 EV100 하한값을 가져오거나 설정합니다. (기본값: `-2.0`)
+     * [EN] Gets or sets the minimum EV100 lower bound allowed by auto-exposure. (Default: `-2.0`)
      *
      * @returns
      * [KO] 최소 EV100 값
      * [EN] Minimum EV100 value
      */
     get minEV100(): number;
-    /**
-     * [KO] 자동 노출 최소 EV100을 설정합니다.
-     * [EN] Sets the minimum EV100 for auto-exposure.
-     *
-     * @param value -
-     * [KO] 설정할 최소 EV100 값
-     * [EN] Minimum EV100 value to set
-     */
     set minEV100(value: number);
     /**
-     * [KO] 자동 노출 최대 EV100을 반환합니다.
-     * [EN] Returns the maximum EV100 for auto-exposure.
+     * [KO] 자동 노출이 허용하는 최대 EV100 상한값을 가져오거나 설정합니다. (기본값: `16.0`)
+     * [EN] Gets or sets the maximum EV100 upper bound allowed by auto-exposure. (Default: `16.0`)
      *
      * @returns
      * [KO] 최대 EV100 값
      * [EN] Maximum EV100 value
      */
     get maxEV100(): number;
-    /**
-     * [KO] 자동 노출 최대 EV100을 설정합니다.
-     * [EN] Sets the maximum EV100 for auto-exposure.
-     *
-     * @param value -
-     * [KO] 설정할 최대 EV100 값
-     * [EN] Maximum EV100 value to set
-     */
     set maxEV100(value: number);
     /**
-     * [KO] 눈 적응 속도(밝아질 때)를 반환합니다.
-     * [EN] Returns the eye adaptation speed (brightening).
+     * [KO] 어두운 곳에서 밝은 곳으로 전환될 때의 눈 적응 속도를 가져오거나 설정합니다. (`0` 이상, 기본값: `3.0`)
+     * [EN] Gets or sets the eye adaptation speed when transitioning from dark to bright environments. (Min `0`, Default: `3.0`)
      *
      * @returns
-     * [KO] 눈 적응 속도 (상승)
-     * [EN] Eye adaptation speed (upward)
+     * [KO] 밝아질 때의 적응 속도
+     * [EN] Brightening adaptation speed
      */
     get adaptationSpeedUp(): number;
-    /**
-     * [KO] 눈 적응 속도(밝아질 때)를 설정합니다.
-     * [EN] Sets the eye adaptation speed (brightening).
-     *
-     * @param value -
-     * [KO] 설정할 눈 적응 속도 (상승)
-     * [EN] Eye adaptation speed (upward) to set
-     */
     set adaptationSpeedUp(value: number);
     /**
-     * [KO] 눈 적응 속도(어두워질 때)를 반환합니다.
-     * [EN] Returns the eye adaptation speed (darkening).
+     * [KO] 밝은 곳에서 어두운 곳으로 전환될 때의 눈 적응 속도를 가져오거나 설정합니다. (`0` 이상, 기본값: `1.0`)
+     * [EN] Gets or sets the eye adaptation speed when transitioning from bright to dark environments. (Min `0`, Default: `1.0`)
      *
      * @returns
-     * [KO] 눈 적응 속도 (하강)
-     * [EN] Eye adaptation speed (downward)
+     * [KO] 어두워질 때의 적응 속도
+     * [EN] Darkening adaptation speed
      */
     get adaptationSpeedDown(): number;
-    /**
-     * [KO] 눈 적응 속도(어두워질 때)를 설정합니다.
-     * [EN] Sets the eye adaptation speed (darkening).
-     *
-     * @param value -
-     * [KO] 설정할 눈 적응 속도 (하강)
-     * [EN] Eye adaptation speed (downward) to set
-     */
     set adaptationSpeedDown(value: number);
     /**
-     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 반환합니다.
-     * [EN] Returns the histogram analysis range (exclude bottom percentile).
+     * [KO] 히스토그램 평균 산출 시 제외할 하위 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.8`)
+     * [EN] Gets or sets the lower percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.8`)
      *
      * @returns
-     * [KO] 하위 백분위 값 (0 ~ 1)
-     * [EN] Low percentile value (0 - 1)
+     * [KO] 하위 백분위 값 (`0` ~ `1`)
+     * [EN] Low percentile value (`0` to `1`)
      */
     get lowPercentile(): number;
-    /**
-     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 설정합니다.
-     * [EN] Sets the histogram analysis range (exclude bottom percentile).
-     *
-     * @param value -
-     * [KO] 설정할 하위 백분위 값 (0 ~ 1)
-     * [EN] Low percentile value to set (0 - 1)
-     */
     set lowPercentile(value: number);
     /**
-     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 반환합니다.
-     * [EN] Returns the histogram analysis range (exclude top percentile).
+     * [KO] 히스토그램 평균 산출 시 제외할 상위 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.95`)
+     * [EN] Gets or sets the upper percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.95`)
      *
      * @returns
-     * [KO] 상위 백분위 값 (0 ~ 1)
-     * [EN] High percentile value (0 - 1)
+     * [KO] 상위 백분위 값 (`0` ~ `1`)
+     * [EN] High percentile value (`0` to `1`)
      */
     get highPercentile(): number;
-    /**
-     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 설정합니다.
-     * [EN] Sets the histogram analysis range (exclude top percentile).
-     *
-     * @param value -
-     * [KO] 설정할 상위 백분위 값 (0 ~ 1)
-     * [EN] High percentile value to set (0 - 1)
-     */
     set highPercentile(value: number);
     /**
-     * [KO] 자동 노출의 최대 증폭 배율을 반환합니다.
-     * [EN] Returns the maximum exposure multiplier for auto-exposure.
+     * [KO] 어두운 장면에서 허용할 최대 노출 증폭 배율을 가져오거나 설정합니다. (`1.0` 이상, 기본값: `64.0`)
+     * [EN] Gets or sets the maximum exposure amplification multiplier allowed in dark scenes. (Min `1.0`, Default: `64.0`)
      *
      * @returns
      * [KO] 최대 노출 증폭 배율
-     * [EN] Maximum exposure multiplier
+     * [EN] Maximum exposure amplification multiplier
      */
     get maxExposureMultiplier(): number;
-    /**
-     * [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 64.0)
-     * [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 64.0)
-     *
-     * @param value -
-     * [KO] 설정할 최대 노출 증폭 배율
-     * [EN] Maximum exposure multiplier to set
-     */
     set maxExposureMultiplier(value: number);
     /**
-     * [KO] 자동 노출의 측광 모드(Metering Mode)를 반환합니다.
-     * [EN] Returns the metering mode for auto-exposure.
+     * [KO] 화면 휘도 측정 시 사용할 측광 모드(`METERING_MODE`)를 가져오거나 설정합니다. (기본값: `METERING_MODE.AVERAGE`)
+     * [EN] Gets or sets the metering mode (`METERING_MODE`) used when measuring screen luminance. (Default: `METERING_MODE.AVERAGE`)
      *
      * @returns
-     * [KO] 측광 모드
-     * [EN] Metering mode
+     * [KO] 현재 측광 모드
+     * [EN] Current metering mode
      */
     get meteringMode(): METERING_MODE;
-    /**
-     * [KO] 자동 노출의 측광 모드(Metering Mode)를 설정합니다.
-     * [EN] Sets the metering mode for auto-exposure.
-     *
-     * @param value -
-     * [KO] 설정할 측광 모드
-     * [EN] Metering mode to set
-     */
     set meteringMode(value: METERING_MODE);
     /**
-     * [KO] 현재 적응된 노출 배율(preExposure)을 반환합니다.
-     * [EN] Returns the currently adapted exposure multiplier (preExposure).
+     * [KO] 카메라의 현재 `ev100`과 `exposureCompensation`을 반영하여 계산된 사전 노출 배율(`preExposure`)을 반환합니다.
+     * [EN] Returns the pre-exposure multiplier (`preExposure`) calculated from the camera's current `ev100` and `exposureCompensation`.
      *
      * @returns
-     * [KO] 현재 노출 배율
-     * [EN] Current exposure multiplier
+     * [KO] 사전 노출 배율
+     * [EN] Pre-exposure multiplier
      */
     get preExposure(): number;
     /**
-     * [KO] 현재 적응된 EV100 값을 반환합니다.
-     * [EN] Returns the currently adapted EV100 value.
+     * [KO] 현재 적응된 EV100 값을 가져오거나 설정합니다. 값을 설정하면 내부 GPU 스토리지 버퍼도 즉시 갱신됩니다.
+     * [EN] Gets or sets the currently adapted EV100 value. Setting this value immediately updates the internal GPU storage buffer.
      *
      * @returns
-     * [KO] 적응된 EV100 값
-     * [EN] Adapted EV100 value
+     * [KO] 현재 적응된 EV100 값
+     * [EN] Currently adapted EV100 value
      */
     get currentAdaptedEV100(): number;
-    /**
-     * [KO] 현재 적응된 EV100 값을 설정합니다. (GPU 버퍼도 함께 갱신)
-     * [EN] Sets the currently adapted EV100 value. (Also updates the GPU buffer)
-     *
-     * @param value -
-     * [KO] 설정할 EV100 값
-     * [EN] EV100 value to set
-     */
     set currentAdaptedEV100(value: number);
     /**
-     * [KO] 적응된 EV100 데이터가 저장되는 GPU 스토리지 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer where adapted EV100 data is stored.
+     * [KO] 적응된 EV100 값이 기록되는 GPU `StorageBuffer` 인스턴스를 반환합니다.
+     * [EN] Returns the GPU `StorageBuffer` instance storing the adapted EV100 value.
      *
      * @returns
-     * [KO] 스토리지 버퍼 인스턴스
-     * [EN] Storage buffer instance
+     * [KO] 적응된 EV100 `StorageBuffer`
+     * [EN] Adapted EV100 `StorageBuffer`
      */
     get adaptedLuminanceBuffer(): StorageBuffer;
     /**
-     * [KO] 자동 노출 처리를 수행합니다. (커맨드 기록)
-     * [EN] Performs auto exposure processing. (Record commands)
+     * [KO] 소스 컬러 텍스처의 로그 휘도 히스토그램 생성 및 눈 적응 컴퓨트 패스를 기록합니다.
+     * [EN] Records the log-luminance histogram generation and eye adaptation compute passes for the source color texture.
      *
      * @param sourceTextureInfo -
-     * [KO] 소스 텍스처 정보
-     * [EN] Source texture information
+     * [KO] 후처리 입력 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Post-processing input texture information (`IPostEffectResult`)
      */
     render(sourceTextureInfo: IPostEffectResult): void;
     /**
-     * [KO] GPU 작업 완료 후 데이터를 비동기적으로 읽어옵니다. (Renderer에서 호출)
-     * [EN] Asynchronously reads back data after GPU work completion. (Called by Renderer)
+     * [KO] GPU에서 계산된 적응형 EV100 값을 리드백 버퍼로부터 비동기 매핑하여 CPU 상태에 동기화합니다.
+     * [EN] Asynchronously maps the readback buffer to synchronize the GPU-computed adapted EV100 value to CPU state.
      */
     resolveReadback(): void;
     /**
-     * [KO] AutoExposure 인스턴스를 파기하고 할당된 물리 GPU 버퍼들을 모두 소멸시킵니다.
-     * [EN] Destroys the AutoExposure instance and releases all allocated physical GPU buffers.
+     * [KO] 할당된 GPU 버퍼 및 컴퓨트 파이프라인 리소스를 모두 해제합니다.
+     * [EN] Releases all allocated GPU buffers and compute pipeline resources.
      */
     destroy(): void;
 }

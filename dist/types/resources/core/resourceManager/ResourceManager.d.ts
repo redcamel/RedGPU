@@ -17,45 +17,138 @@ import PackedTextureManager from "../../texture/packedTexture/PackedTextureManag
 import GLTFCacheManager from "../../../loader/gltf/core/GLTFCacheManager";
 import WGSLParser from "../../wgslParser/WGSLParser";
 export type { ResourceStateIndexBuffer, ResourceStateStorageBuffer, ResourceStateUniformBuffer, ResourceStateVertexBuffer, ResourceStateBitmapTexture, ResourceStateCubeTexture, ResourceStateHDRTexture };
+/**
+ * [KO] 관리 대상 리소스 상태 타입들의 유니온 타입입니다.
+ * [EN] Union type of managed resource state types.
+ *
+ * @category Resource
+ */
 export type ResourceState = ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer | ResourceStateCubeTexture | ResourceStateBitmapTexture | ResourceStateHDRTexture;
 /**
- * [KO] RedGPU의 모든 GPU 리소스를 통합 관리하는 핵심 클래스입니다.
- * [EN] The core class that integrates and manages all GPU resources in RedGPU.
+ * [KO] RedGPU의 모든 GPU 리소스를 통합 관리하는 클래스입니다.
+ * [EN] Class that integrates and manages all GPU resources in RedGPU.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * // RedGPUContext를 통해 접근합니다.
+ * // [KO] RedGPUContext를 통해 접근합니다.
+ * // [EN] Access via RedGPUContext.
  * const resourceManager = redGPUContext.resourceManager;
  * ```
+ *
  * @category Resource
  */
 declare class ResourceManager extends RedGPUObject {
     #private;
+    /**
+     * [KO] 시스템 공용 바인드 그룹 레이아웃 프리셋 키
+     * [EN] System common bind group layout preset key
+     */
     static PRESET_GPUBindGroupLayout_System: string;
+    /**
+     * [KO] 인스턴싱 전역 정점 바인드 그룹 레이아웃 프리셋 키
+     * [EN] Instancing global vertex bind group layout preset key
+     */
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing: string;
+    /**
+     * [KO] 전역 정점 바인드 그룹 레이아웃 프리셋 키
+     * [EN] Global vertex bind group layout preset key
+     */
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout: string;
+    /**
+     * [KO] 정점 바인드 그룹 레이아웃 프리셋 키
+     * [EN] Vertex bind group layout preset key
+     */
     static PRESET_VERTEX_GPUBindGroupLayout: string;
+    /**
+     * [KO] 스키닝 전역 정점 바인드 그룹 레이아웃 프리셋 키
+     * [EN] Skinning global vertex bind group layout preset key
+     */
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN: string;
     /**
-     * [KO] ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
-     * [EN] Creates a ResourceManager instance. (Internal system only)
+     * [KO] ResourceManager 인스턴스를 생성합니다.
+     * [EN] Creates a ResourceManager instance.
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
+    /**
+     * [KO] PBR 전역 프래그먼트 구조체 포맷 정보를 반환합니다.
+     * [EN] Returns the PBR global fragment struct format information.
+     *
+     * @returns
+     * [KO] PBR 전역 프래그먼트 구조체 포맷 정보
+     * [EN] PBR global fragment struct format information
+     */
     get GLOBAL_FRAGMENT_STRUCT_PBR(): any;
+    /**
+     * [KO] 빌트인 전역 프래그먼트 구조체 포맷 정보를 반환합니다.
+     * [EN] Returns the built-in global fragment struct format information.
+     *
+     * @returns
+     * [KO] 빌트인 전역 프래그먼트 구조체 포맷 정보
+     * [EN] Built-in global fragment struct format information
+     */
     get GLOBAL_FRAGMENT_STRUCT_BUILT_IN(): any;
+    /**
+     * [KO] 전역 정점 구조체 포맷 정보를 반환합니다.
+     * [EN] Returns the global vertex struct format information.
+     *
+     * @returns
+     * [KO] 전역 정점 구조체 포맷 정보
+     * [EN] Global vertex struct format information
+     */
     get GLOBAL_VERTEX_STRUCT(): any;
+    /**
+     * [KO] PBR 메시 셰이더 파싱 정보를 반환합니다.
+     * [EN] Returns the PBR mesh shader parsing information.
+     *
+     * @returns
+     * [KO] PBR 메시 셰이더 정보
+     * [EN] PBR mesh shader information
+     */
     get SHADER_INFO_PBR(): any;
+    /**
+     * [KO] 기본 메시 셰이더 파싱 정보를 반환합니다.
+     * [EN] Returns the basic mesh shader parsing information.
+     *
+     * @returns
+     * [KO] 기본 메시 셰이더 정보
+     * [EN] Basic mesh shader information
+     */
     get SHADER_INFO_BASIC(): any;
+    /**
+     * [KO] 프래그먼트 전용 PBR 메시 셰이더 파싱 정보를 반환합니다.
+     * [EN] Returns the fragment-only PBR mesh shader parsing information.
+     *
+     * @returns
+     * [KO] 프래그먼트 전용 PBR 메시 셰이더 정보
+     * [EN] Fragment-only PBR mesh shader information
+     */
     get SHADER_INFO_ONLY_FRAGMENT_PBR(): any;
+    /**
+     * [KO] 정점 전용 PBR 메시 셰이더 파싱 정보를 반환합니다.
+     * [EN] Returns the vertex-only PBR mesh shader parsing information.
+     *
+     * @returns
+     * [KO] 정점 전용 PBR 메시 셰이더 정보
+     * [EN] Vertex-only PBR mesh shader information
+     */
     get SHADER_INFO_ONLY_VERTEX_PBR(): any;
+    /**
+     * [KO] WGSL 파서 인스턴스를 반환합니다.
+     * [EN] Returns the WGSL parser instance.
+     *
+     * @returns
+     * [KO] WGSLParser 인스턴스
+     * [EN] WGSLParser instance
+     */
     get wgslParser(): WGSLParser;
     /**
      * [KO] 기본 샘플러를 반환합니다.
@@ -71,7 +164,7 @@ declare class ResourceManager extends RedGPUObject {
      * [EN] Returns the basic displacement sampler.
      *
      * @returns
-     * [KO] displacement Sampler 인스턴스
+     * [KO] 디스플레이스먼트용 Sampler 인스턴스
      * [EN] Displacement Sampler instance
      */
     get basicDisplacementSampler(): Sampler;
@@ -112,13 +205,21 @@ declare class ResourceManager extends RedGPUObject {
      */
     get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator;
     /**
-     * [KO] 텍스처 패킹 매니저를 반환합니다.
-     * [EN] Returns the texture packing manager.
+     * [KO] 패킹 텍스처 매니저를 반환합니다.
+     * [EN] Returns the packed texture manager.
+     *
+     * @returns
+     * [KO] PackedTextureManager 인스턴스
+     * [EN] PackedTextureManager instance
      */
     get packedTextureManager(): PackedTextureManager;
     /**
      * [KO] GLTF 캐시 매니저를 반환합니다.
      * [EN] Returns the GLTF cache manager.
+     *
+     * @returns
+     * [KO] GLTFCacheManager 인스턴스
+     * [EN] GLTFCacheManager instance
      */
     get gltfCacheManager(): GLTFCacheManager;
     /**
@@ -140,8 +241,8 @@ declare class ResourceManager extends RedGPUObject {
      */
     get downSampleCubeMapGenerator(): DownSampleCubeMapGenerator;
     /**
-     * [KO] 캐시된 버퍼 상태를 반환합니다.
-     * [EN] Returns the cached buffer state.
+     * [KO] 캐시된 버퍼 상태 객체를 반환합니다.
+     * [EN] Returns the cached buffer state object.
      *
      * @returns
      * [KO] 캐시된 버퍼 상태 객체
@@ -162,8 +263,8 @@ declare class ResourceManager extends RedGPUObject {
      * [EN] Returns the empty 2D texture array view.
      *
      * @returns
-     * [KO] 빈 2D Array GPUTextureView
-     * [EN] Empty 2D Array GPUTextureView
+     * [KO] 빈 2D 배열 GPUTextureView
+     * [EN] Empty 2D array GPUTextureView
      */
     get emptyTexture2DArrayView(): GPUTextureView;
     /**
@@ -194,18 +295,30 @@ declare class ResourceManager extends RedGPUObject {
      */
     get emptyDepthTextureView(): GPUTextureView;
     /**
-     * [KO] 빈 1x1 R32Float 텍스처 뷰(HZB 폴백 등)를 반환합니다.
-     * [EN] Returns an empty 1x1 R32Float texture view (e.g. for HZB fallback).
+     * [KO] 빈 1x1 R32Float 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty 1x1 R32Float texture view.
+     *
+     * @returns
+     * [KO] 빈 R32Float GPUTextureView
+     * [EN] Empty R32Float GPUTextureView
      */
     get emptyR32FloatTextureView(): GPUTextureView;
     /**
-     * [KO] WebGPU 전역 공용 빈 바인드그룹 레이아웃 (entries: [])을 반환합니다. 파이프라인 레이아웃 구성 시 미사용 바인딩 슬롯 정합성 유지에 사용됩니다.
-     * [EN] Returns the WebGPU global empty bind group layout (entries: []). Used to satisfy binding slot requirements when configuring pipeline layouts.
+     * [KO] 전역 공용 빈 바인드 그룹 레이아웃(`entries: []`)을 반환합니다.
+     * [EN] Returns the global empty bind group layout (`entries: []`).
+     *
+     * @returns
+     * [KO] 빈 GPUBindGroupLayout 인스턴스
+     * [EN] Empty GPUBindGroupLayout instance
      */
     get emptyBindGroupLayout(): GPUBindGroupLayout;
     /**
-     * [KO] WebGPU 전역 공용 빈 바인드그룹 (entries: [])을 반환합니다. 섀도우 패스, 뎁스 프리패스 등 바인딩 슬롯 정합성 유지를 위한 더미 바인드그룹으로 공용 사용됩니다.
-     * [EN] Returns the WebGPU global empty bind group (entries: []). Used as a dummy bind group across shadow passes, depth prepasses, etc.
+     * [KO] 전역 공용 빈 바인드 그룹(`entries: []`)을 반환합니다.
+     * [EN] Returns the global empty bind group (`entries: []`).
+     *
+     * @returns
+     * [KO] 빈 GPUBindGroup 인스턴스
+     * [EN] Empty GPUBindGroup instance
      */
     get emptyBindGroup(): GPUBindGroup;
     /**
@@ -218,11 +331,11 @@ declare class ResourceManager extends RedGPUObject {
      */
     get managedBitmapTextureState(): ResourceStatusInfo;
     /**
-     * [KO] 텍스처 어레이 관리 상태를 반환합니다.
+     * [KO] 텍스처 배열 관리 상태를 반환합니다.
      * [EN] Returns the managed texture array state.
      *
      * @returns
-     * [KO] 텍스처 어레이 관리 상태 정보 객체
+     * [KO] 텍스처 배열 관리 상태 정보 객체
      * [EN] Managed texture array status info object
      */
     get managedTextureArrayState(): ResourceStatusInfo;
@@ -246,19 +359,19 @@ declare class ResourceManager extends RedGPUObject {
     get managedHDRTextureState(): ResourceStatusInfo;
     /**
      * [KO] 유니폼 버퍼 관리 상태를 반환합니다.
-     * [EN] Returns the managed globalStruct buffer state.
+     * [EN] Returns the managed uniform buffer state.
      *
      * @returns
      * [KO] 유니폼 버퍼 관리 상태 정보 객체
-     * [EN] Managed globalStruct buffer status info object
+     * [EN] Managed uniform buffer status info object
      */
     get managedUniformBufferState(): ResourceStatusInfo;
     /**
-     * [KO] 버텍스 버퍼 관리 상태를 반환합니다.
+     * [KO] 정점 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed vertex buffer state.
      *
      * @returns
-     * [KO] 버텍스 버퍼 관리 상태 정보 객체
+     * [KO] 정점 버퍼 관리 상태 정보 객체
      * [EN] Managed vertex buffer status info object
      */
     get managedVertexBufferState(): ResourceStatusInfo;
@@ -272,7 +385,7 @@ declare class ResourceManager extends RedGPUObject {
      */
     get managedIndexBufferState(): ResourceStatusInfo;
     /**
-     * [KO] Storage 버퍼 관리 상태를 반환합니다.
+     * [KO] 스토리지 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed storage buffer state.
      *
      * @returns
@@ -285,21 +398,32 @@ declare class ResourceManager extends RedGPUObject {
      * [EN] Returns the internal resource map.
      *
      * @returns
-     * [KO] ImmutableKeyMap 기반 리소스 맵
-     * [EN] ImmutableKeyMap based resource map
+     * [KO] `ImmutableKeyMap` 기반 리소스 맵
+     * [EN] `ImmutableKeyMap` based resource map
      */
     get resources(): ImmutableKeyMap;
     /**
      * [KO] 캐시에서 샘플러를 조회하거나 존재하지 않으면 새로 생성하여 반환합니다.
      * [EN] Retrieves a sampler from cache, or creates and returns a new one if it does not exist.
+     *
+     * @param descriptorKey -
+     * [KO] 샘플러 디스크립터 캐시 키
+     * [EN] Sampler descriptor cache key
+     * @param samplerOptions -
+     * [KO] GPUSamplerDescriptor 옵션 객체
+     * [EN] GPUSamplerDescriptor options object
+     * @returns
+     * [KO] 캐싱되었거나 새로 생성된 GPUSampler
+     * [EN] Cached or newly created GPUSampler
      */
     createSampler(descriptorKey: string, samplerOptions: GPUSamplerDescriptor): GPUSampler;
     /**
      * [KO] 리소스를 관리 대상으로 등록합니다.
      * [EN] Registers a resource for management.
+     *
      * @param target -
-     * [KO] 대상 리소스
-     * [EN] Target resource
+     * [KO] 등록할 대상 리소스
+     * [EN] Target resource to register
      * @param resourceState -
      * [KO] 리소스 상태 정보
      * [EN] Resource state information
@@ -308,30 +432,33 @@ declare class ResourceManager extends RedGPUObject {
     /**
      * [KO] 리소스를 관리 대상에서 해제합니다.
      * [EN] Unregisters a resource from management.
+     *
      * @param target -
-     * [KO] 대상 리소스
-     * [EN] Target resource
+     * [KO] 해제할 대상 리소스
+     * [EN] Target resource to unregister
      */
     unregisterManagementResource(target: ManagementResourceBase): void;
     /**
-     * [KO] ResourceManager 인스턴스를 파기하고 캐싱된 모든 WebGPU 자원들을 물리적으로 해제합니다.
-     * [EN] Destroys the ResourceManager instance and physically releases all cached WebGPU resources.
+     * [KO] ResourceManager 인스턴스를 파기하고 캐싱된 모든 WebGPU 자원들을 해제합니다.
+     * [EN] Destroys the ResourceManager instance and releases all cached WebGPU resources.
      */
     destroy(): void;
     /**
-     * [KO] GPU 텍스처를 생성하고 관리합니다.
-     * [EN] Creates and manages a GPU texture.
+     * [KO] 관리형 GPU 텍스처를 생성합니다.
+     * [EN] Creates a managed GPU texture.
+     *
      * @param desc -
      * [KO] 텍스처 디스크립터
      * [EN] Texture descriptor
      * @returns
-     * [KO] 생성된 GPUTexture
-     * [EN] Created GPUTexture
+     * [KO] 생성된 GPUTexture 인스턴스
+     * [EN] Created GPUTexture instance
      */
     createManagedTexture(desc: GPUTextureDescriptor): GPUTexture;
     /**
-     * [KO] 비트맵 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
+     * [KO] 비트맵 텍스처의 뷰를 캐시에서 가져오거나 새로 생성하여 반환합니다.
      * [EN] Retrieves or creates a view for a bitmap texture from cache.
+     *
      * @param texture -
      * [KO] 대상 텍스처 (BitmapTexture, PackedTexture, DirectTexture 또는 GPUTexture)
      * [EN] Target texture (BitmapTexture, PackedTexture, DirectTexture, or GPUTexture)
@@ -339,13 +466,14 @@ declare class ResourceManager extends RedGPUObject {
      * [KO] 뷰 디스크립터 (선택)
      * [EN] View descriptor (optional)
      * @returns
-     * [KO] GPUTextureView
-     * [EN] GPUTextureView
+     * [KO] GPUTextureView 인스턴스 또는 null
+     * [EN] GPUTextureView instance or null
      */
     getGPUResourceBitmapTextureView(texture: any, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null;
     /**
-     * [KO] 큐브 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
+     * [KO] 큐브 텍스처의 뷰를 캐시에서 가져오거나 새로 생성하여 반환합니다.
      * [EN] Retrieves or creates a view for a cube texture from cache.
+     *
      * @param cubeTexture -
      * [KO] 대상 큐브 텍스처 (CubeTexture, DirectCubeTexture 또는 GPUTexture)
      * [EN] Target cube texture (CubeTexture, DirectCubeTexture, or GPUTexture)
@@ -353,13 +481,14 @@ declare class ResourceManager extends RedGPUObject {
      * [KO] 뷰 디스크립터 (선택)
      * [EN] View descriptor (optional)
      * @returns
-     * [KO] GPUTextureView
-     * [EN] GPUTextureView
+     * [KO] GPUTextureView 인스턴스 또는 null
+     * [EN] GPUTextureView instance or null
      */
     getGPUResourceCubeTextureView(cubeTexture: any, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null;
     /**
      * [KO] GPUShaderModule을 생성하고 캐싱합니다.
      * [EN] Creates and caches a GPUShaderModule.
+     *
      * @param name -
      * [KO] 셰이더 모듈 이름
      * [EN] Shader module name
@@ -374,17 +503,19 @@ declare class ResourceManager extends RedGPUObject {
     /**
      * [KO] 캐싱된 GPUShaderModule을 반환합니다.
      * [EN] Returns the cached GPUShaderModule.
+     *
      * @param name -
      * [KO] 셰이더 모듈 이름
      * [EN] Shader module name
      * @returns
-     * [KO] GPUShaderModule
-     * [EN] GPUShaderModule
+     * [KO] 캐싱된 GPUShaderModule
+     * [EN] Cached GPUShaderModule
      */
     getGPUShaderModule(name: string): GPUShaderModule;
     /**
-     * [KO] GPUShaderModule을 삭제합니다.
-     * [EN] Deletes a GPUShaderModule.
+     * [KO] 캐싱된 GPUShaderModule을 삭제합니다.
+     * [EN] Deletes a cached GPUShaderModule.
+     *
      * @param name -
      * [KO] 셰이더 모듈 이름
      * [EN] Shader module name
@@ -393,6 +524,7 @@ declare class ResourceManager extends RedGPUObject {
     /**
      * [KO] GPUBindGroupLayout을 생성하고 캐싱합니다.
      * [EN] Creates and caches a GPUBindGroupLayout.
+     *
      * @param name -
      * [KO] 레이아웃 이름
      * [EN] Layout name
@@ -400,24 +532,26 @@ declare class ResourceManager extends RedGPUObject {
      * [KO] 바인드 그룹 레이아웃 디스크립터
      * [EN] Bind group layout descriptor
      * @returns
-     * [KO] GPUBindGroupLayout
-     * [EN] GPUBindGroupLayout
+     * [KO] 생성된 GPUBindGroupLayout
+     * [EN] Created GPUBindGroupLayout
      */
     createBindGroupLayout(name: string, bindGroupLayoutDescriptor: GPUBindGroupLayoutDescriptor): GPUBindGroupLayout;
     /**
      * [KO] 캐싱된 GPUBindGroupLayout을 반환합니다.
      * [EN] Returns the cached GPUBindGroupLayout.
+     *
      * @param name -
      * [KO] 레이아웃 이름
      * [EN] Layout name
      * @returns
-     * [KO] GPUBindGroupLayout
-     * [EN] GPUBindGroupLayout
+     * [KO] 캐싱된 GPUBindGroupLayout
+     * [EN] Cached GPUBindGroupLayout
      */
     getGPUBindGroupLayout(name: string): GPUBindGroupLayout;
     /**
-     * [KO] GPUBindGroupLayout을 삭제합니다.
-     * [EN] Deletes a GPUBindGroupLayout.
+     * [KO] 캐싱된 GPUBindGroupLayout을 삭제합니다.
+     * [EN] Deletes a cached GPUBindGroupLayout.
+     *
      * @param name -
      * [KO] 레이아웃 이름
      * [EN] Layout name
@@ -426,20 +560,22 @@ declare class ResourceManager extends RedGPUObject {
     /**
      * [KO] GPUPipelineLayout을 생성하고 캐싱합니다.
      * [EN] Creates and caches a GPUPipelineLayout.
+     *
      * @param name -
-     * [KO] 레이아웃 이름
-     * [EN] Layout name
+     * [KO] 파이프라인 레이아웃 이름
+     * [EN] Pipeline layout name
      * @param gpuPipelineLayoutDescriptor -
      * [KO] 파이프라인 레이아웃 디스크립터
      * [EN] Pipeline layout descriptor
      * @returns
-     * [KO] GPUPipelineLayout
-     * [EN] GPUPipelineLayout
+     * [KO] 생성된 GPUPipelineLayout
+     * [EN] Created GPUPipelineLayout
      */
     createGPUPipelineLayout(name: string, gpuPipelineLayoutDescriptor: GPUPipelineLayoutDescriptor): any;
     /**
      * [KO] GPUBuffer를 생성하고 캐싱합니다.
      * [EN] Creates and caches a GPUBuffer.
+     *
      * @param name -
      * [KO] 버퍼 이름
      * [EN] Buffer name
@@ -452,13 +588,49 @@ declare class ResourceManager extends RedGPUObject {
      */
     createGPUBuffer(name: string, gpuBufferDescriptor: GPUBufferDescriptor): any;
     /**
-     * [KO] 시스템 프리셋을 초기화합니다.
-     * [EN] Initializes system presets.
+     * [KO] 시스템 프리셋 리소스들을 초기화합니다.
+     * [EN] Initializes system preset resources.
      */
     initPresets(): void;
 }
 export default ResourceManager;
+/**
+ * [KO] 한 번 등록된 키의 값을 변경할 수 없는 불변 키 맵 클래스입니다.
+ * [EN] Map class with immutable keys whose values cannot be changed once set.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Resource
+ */
 export declare class ImmutableKeyMap extends Map {
+    /**
+     * [KO] ImmutableKeyMap 인스턴스를 생성합니다.
+     * [EN] Creates an ImmutableKeyMap instance.
+     *
+     * @param initValues -
+     * [KO] 초기 `[key, value]` 엔트리 배열
+     * [EN] Initial `[key, value]` entry array
+     */
     constructor(initValues?: [any, any][]);
+    /**
+     * [KO] 새로운 키와 값을 등록합니다. 이미 존재하는 키의 값은 변경할 수 없습니다.
+     * [EN] Sets a new key and value. Values of existing keys cannot be modified.
+     *
+     * @param key -
+     * [KO] 등록할 키
+     * [EN] Key to register
+     * @param value -
+     * [KO] 등록할 값
+     * [EN] Value to register
+     * @returns
+     * [KO] 현재 `ImmutableKeyMap` 인스턴스
+     * [EN] Current `ImmutableKeyMap` instance
+     * @throws
+     * [KO] 이미 존재하는 키에 값을 설정하려 할 때 Error 발생
+     * [EN] Throws Error when attempting to change the value of an existing key
+     */
     set(key: any, value: any): this;
 }

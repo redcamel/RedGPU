@@ -1,21 +1,18 @@
 /**
- * [KO] 앞면(Front Face)을 판단하는 정점의 순서를 정의하는 상수군입니다.
- * [EN] Constants defining the vertex winding order used to determine the front face.
- *
- * [KO] 정점이 배치된 순서에 따라 어느 쪽이 앞면인지 결정합니다.
- * [EN] Determines which side is the front face based on the order in which vertices are arranged.
+ * [KO] 폴리곤의 정점 감기 순서(Winding Order)에 따라 어느 방향을 앞면(Front Face)으로 판별할지 정의하는 상수입니다.
+ * [EN] Constants defining which polygon side is considered the front face based on vertex winding order.
  *
  * @category Constants
  */
 declare const GPU_FRONT_FACE: {
     /**
-     * [KO] 시계 방향(Clockwise)으로 배치된 면을 앞면으로 간주합니다.
-     * [EN] Considers faces with clockwise winding as the front face.
+     * [KO] 정점이 시계 방향(Clockwise, `'cw'`)으로 감긴 폴리곤 면을 앞면으로 간주합니다.
+     * [EN] Considers polygons with clockwise (`'cw'`) vertex winding as the front face.
      */
     readonly CW: "cw";
     /**
-     * [KO] 반시계 방향(Counter-Clockwise)으로 배치된 면을 앞면으로 간주합니다.
-     * [EN] Considers faces with counter-clockwise winding as the front face.
+     * [KO] 정점이 반시계 방향(Counter-Clockwise, `'ccw'`)으로 감긴 폴리곤 면을 앞면으로 간주합니다.
+     * [EN] Considers polygons with counter-clockwise (`'ccw'`) vertex winding as the front face.
      */
     readonly CCW: "ccw";
 };

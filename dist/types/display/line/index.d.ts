@@ -1,9 +1,6 @@
 /**
- * [KO] 3D 및 2D 공간에서 직선과 곡선을 표현할 수 있는 라인 시스템을 제공합니다.
- * [EN] Provides a line system capable of representing straight lines and curves in 3D and 2D space.
- *
- * [KO] 점들의 집합을 통해 경로를 구성하며, 베지어(Bezier) 및 캣멀-롬(Catmull-Rom) 곡선 보간과 단순화 알고리즘을 지원합니다.
- * [EN] It constructs paths through sets of points and supports Bezier and Catmull-Rom curve interpolation along with simplification algorithms.
+ * [KO] 2D 및 3D 공간에서 직선과 곡선(Bezier, Catmull-Rom)을 렌더링하는 라인 시스템(`Line2D`, `Line3D`, `LINE_TYPE`)을 제공합니다.
+ * [EN] Provides a line system (`Line2D`, `Line3D`, `LINE_TYPE`) for rendering straight lines and curves (Bezier, Catmull-Rom) in 2D and 3D space.
  *
  * @packageDocumentation
  */

@@ -2,9 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="../../../assets/css/example.css" rel="stylesheet">
-    <script src="index.js" type="module"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Layer Splatting</title>
+    <meta name="description" content="Demonstrates registering (addLayer) and blending 4 PBR material layers (Grass, Rock, Gravel, Leave) driven by RGBA splatmap weights (weightTexture, weightChannel) with stochastic tiling and height blending.">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, multiLayerSplatting, Multi-Layer Splatting">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/landscape/multiLayerSplatting/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/multiLayerSplatting/">
+    <meta property="og:title" content="Multi-Layer Splatting">
+    <meta property="og:description" content="Demonstrates registering (addLayer) and blending 4 PBR material layers (Grass, Rock, Gravel, Leave) driven by RGBA splatmap weights (weightTexture, weightChannel) with stochastic tiling and height blending.">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/multiLayerSplatting/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/multiLayerSplatting/">
+    <meta property="twitter:title" content="Multi-Layer Splatting">
+    <meta property="twitter:description" content="Demonstrates registering (addLayer) and blending 4 PBR material layers (Grass, Rock, Gravel, Leave) driven by RGBA splatmap weights (weightTexture, weightChannel) with stochastic tiling and height blending.">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/multiLayerSplatting/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Multi-Layer Splatting",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web",
+  "description": "Demonstrates registering (addLayer) and blending 4 PBR material layers (Grass, Rock, Gravel, Leave) driven by RGBA splatmap weights (weightTexture, weightChannel) with stochastic tiling and height blending.",
+  "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/multiLayerSplatting/",
+  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/multiLayerSplatting/thumb.webp",
+  "author": {
+    "@type": "Person",
+    "name": "redcamel"
+  }
+}</script>
+
+    <!-- Module Preload -->
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1792986001111">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792986001111">
+
+    <!-- Assets -->
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792986001111">
+    <script src="index.js?t=1792986001111" type="module"></script>
 </head>
 <body>
 </body>

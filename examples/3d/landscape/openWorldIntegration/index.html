@@ -1,43 +1,53 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <title>Landscape Step 6: Open World Integration - RedGPU</title>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="대규모 타일 스트리밍 지형, 멀티레이어 PBR 스플랫, 절차적 잔디, 수목 식생 임포스터와 3D 캐릭터 컨트롤러를 하나로 결합한 오픈월드 통합 환경 예제입니다."
-          name="description">
-    <meta content="RedGPU, WebGPU, Landscape, Open World, Character Controller, Foliage, Grass, 3D, Integration"
-          name="keywords">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open World Integration</title>
+    <meta name="description" content="Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, openWorldIntegration, Open World Integration">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/">
 
-    <!-- Assets Preload -->
-    <link as="style" href="../../../assets/css/example.css" rel="preload">
-    <link href="index.js" rel="modulepreload">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/">
+    <meta property="og:title" content="Open World Integration">
+    <meta property="og:description" content="Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/">
+    <meta property="twitter:title" content="Open World Integration">
+    <meta property="twitter:description" content="Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Open World Integration",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web",
+  "description": "Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.",
+  "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/",
+  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/thumb.webp",
+  "author": {
+    "@type": "Person",
+    "name": "redcamel"
+  }
+}</script>
+
+    <!-- Module Preload -->
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1792986001111">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792986001111">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css" rel="stylesheet">
-    <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: #000 !important;
-        }
-
-        canvas {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
-        }
-    </style>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792986001111">
+    <script src="index.js?t=1792986001111" type="module"></script>
 </head>
 <body>
-<h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">
-    Landscape Step 6: Open World Integration</h1>
-<script src="index.js" type="module"></script>
+
+
 </body>
 </html>

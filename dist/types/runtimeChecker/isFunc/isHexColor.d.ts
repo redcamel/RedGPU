@@ -1,11 +1,8 @@
 /**
- * [KO] 주어진 값이 유효한 16진수(Hex) 색상 형식인지 검사합니다.
- * [EN] Checks if the given value is a valid hexadecimal (Hex) color format.
+ * [KO] 주어진 값이 유효한 16진수(Hex) 색상 형식인지 검사합니다. '#' 접두사가 포함된 3자리/6자리 문자열 또는 0~0xFFFFFF 범위의 정수를 지원합니다.
+ * [EN] Checks if the given value is a valid hexadecimal (Hex) color format. Supports 3/6-digit strings with '#' prefix or integers in the range 0 to 0xFFFFFF.
  *
- * [KO] '#' 접두사가 붙은 3자리 또는 6자리 16진수 색상 문자열 또는 0에서 0xFFFFFF 사이의 정수를 지원합니다.
- * [EN] Supports 3-digit or 6-digit hex color strings with '#' prefix or integers between 0 and 0xFFFFFF.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const isValidStr = RedGPU.RuntimeChecker.isHexColor('#FF0000');
  * const isValidNum = RedGPU.RuntimeChecker.isHexColor(0xFF0000);

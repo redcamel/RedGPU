@@ -9,257 +9,315 @@ import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferM
 import DrawBufferManager from "../renderer/core/DrawBufferManager";
 import Renderer from "../renderer/Renderer";
 /**
- * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
- * [EN] The RedGPUContext class is the top-level context object provided after WebGPU initialization.
- *
- * [KO] GPU, 캔버스, 디바이스, 어댑터 등 WebGPU의 핵심 정보를 속성으로 가집니다.
- * [EN] It holds core WebGPU information such as GPU, canvas, device, and adapter as properties.
- * [KO] View3D 객체를 소유하며, 실제 최상위 컨테이너 역할을 합니다.
- * [EN] It owns View3D objects and acts as the actual top-level container.
- * [KO] 리사이즈, 배경색, 디버그 패널, 안티앨리어싱, 리소스 관리 등 다양한 기능을 제공합니다.
- * [EN] It provides various features such as resizing, background color, debug panel, anti-aliasing, and resource management.
+ * [KO] WebGPU 초기화 후 생성되는 최상위 컨텍스트 클래스로, GPU 디바이스/어댑터, 캔버스, `View3D` 컨테이너, 리소스·커맨드·안티앨리어싱 매니저를 통합 관리합니다.
+ * [EN] Top-level context class created after WebGPU initialization, managing the GPU device/adapter, canvas, `View3D` container, and resource, command, and anti-aliasing managers.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * RedGPU.init(canvas, (redGPUContext) => {
- *     console.log('Context created:', redGPUContext);
  *     redGPUContext.backgroundColor = new RedGPU.Color.ColorRGBA(0, 0, 0, 1);
  * });
  * ```
  *
+ * <iframe src="/RedGPU/examples/3d/helloWorld/" style="width:100%; height:500px;"></iframe>
+ * @see [Hello World example](/RedGPU/examples/3d/helloWorld/)
  * @category Context
  */
 declare class RedGPUContext extends RedGPUContextViewContainer {
     #private;
     /**
-     * [KO] 현재 requestAnimationFrame ID (프레임 루프 관리용)
-     * [EN] Current requestAnimationFrame ID (for frame loop management)
+     * [KO] 현재 실행 중인 `requestAnimationFrame` 루프 ID
+     * [EN] Currently active `requestAnimationFrame` loop ID
      */
     currentRequestAnimationFrame: number;
     /**
-     * [KO] 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출)
-     * [EN] Resize event handler (called when canvas size changes)
-     * @param event - [KO] 리사이즈 이벤트 객체 [EN] Resize event object
+     * [KO] 캔버스 크기 변경 시 호출되는 리사이즈 이벤트 콜백 (`RedResizeEvent<RedGPUContext>`)
+     * [EN] Resize event callback invoked when the canvas size changes (`RedResizeEvent<RedGPUContext>`)
      */
     onResize: ((event: RedResizeEvent<RedGPUContext>) => void) | null;
     /**
-     * [KO] 현재 시간(프레임 기준, ms)
-     * [EN] Current time (frame based, ms)
+     * [KO] 현재 프레임의 타임스탬프 (ms)
+     * [EN] Timestamp of the current frame (ms)
      */
     currentTime: number;
+    /**
+     * [KO] 현재 컨텍스트를 렌더링 중인 대상 `Renderer` 인스턴스
+     * [EN] Target `Renderer` instance currently rendering this context
+     */
     targetRenderer: Renderer;
     /**
-     * [KO] RedGPUContext 생성자
-     * [EN] RedGPUContext constructor
+     * [KO] RedGPUContext 인스턴스를 생성합니다.
+     * [EN] Creates a RedGPUContext instance.
+     *
      * @param htmlCanvas -
-     * [KO] 렌더링할 HTMLCanvasElement
-     * [EN] HTMLCanvasElement to render
+     * [KO] 렌더링 대상 `HTMLCanvasElement`
+     * [EN] Target `HTMLCanvasElement` for rendering
      * @param gpuAdapter -
-     * [KO] WebGPU Adapter
-     * [EN] WebGPU Adapter
+     * [KO] 초기화된 WebGPU `GPUAdapter`
+     * [EN] Initialized WebGPU `GPUAdapter`
      * @param gpuDevice -
-     * [KO] WebGPU Device
-     * [EN] WebGPU Device
+     * [KO] 초기화된 WebGPU `GPUDevice`
+     * [EN] Initialized WebGPU `GPUDevice`
      * @param gpuContext -
-     * [KO] WebGPU Canvas Context
-     * [EN] WebGPU Canvas Context
+     * [KO] 캔버스 WebGPU 컨텍스트 (`GPUCanvasContext`)
+     * [EN] Canvas WebGPU context (`GPUCanvasContext`)
      * @param alphaMode -
-     * [KO] 캔버스 알파 모드
-     * [EN] Canvas alpha mode
+     * [KO] 캔버스 알파 합성 모드 (`GPUCanvasAlphaMode`)
+     * [EN] Canvas alpha compositing mode (`GPUCanvasAlphaMode`)
      * @param onDestroy -
-     * [KO] 디바이스 유실 시 호출될 선택적 콜백 함수
-     * [EN] Optional callback function to be called when the device is lost
+     * [KO] 디바이스 파괴 시 호출될 선택적 콜백 함수
+     * [EN] Optional callback function invoked when the device is destroyed
      */
     constructor(htmlCanvas: HTMLCanvasElement, gpuAdapter: GPUAdapter, gpuDevice: GPUDevice, gpuContext: GPUCanvasContext, alphaMode: GPUCanvasAlphaMode, onDestroy?: (info: GPUDeviceLostInfo) => void);
+    /**
+     * [KO] 컨텍스트가 파기(`destroy`)되었는지 여부를 반환합니다.
+     * [EN] Returns whether the context has been destroyed.
+     *
+     * @returns
+     * [KO] 컨텍스트 파기 여부
+     * [EN] Whether the context is destroyed
+     */
     get destroyed(): boolean;
     /**
-     * [KO] 드로우 버퍼 매니저를 반환합니다.
-     * [EN] Returns the draw buffer manager.
+     * [KO] 드로우 버퍼 매니저(`DrawBufferManager`)를 반환합니다.
+     * [EN] Returns the draw buffer manager (`DrawBufferManager`).
+     *
+     * @returns
+     * [KO] `DrawBufferManager` 인스턴스
+     * [EN] `DrawBufferManager` instance
      */
     get drawBufferManager(): DrawBufferManager;
     /**
-     * [KO] 커맨드 인코더 매니저를 반환합니다.
-     * [EN] Returns the command encoder manager.
+     * [KO] 커맨드 인코더 매니저(`CommandEncoderManager`)를 반환합니다.
+     * [EN] Returns the command encoder manager (`CommandEncoderManager`).
+     *
+     * @returns
+     * [KO] `CommandEncoderManager` 인스턴스
+     * [EN] `CommandEncoderManager` instance
      */
     get commandEncoderManager(): CommandEncoderManager;
     /**
-     * [KO] HTML 캔버스의 BoundingClientRect 정보를 반환합니다.
-     * [EN] Returns the BoundingClientRect info of the HTML canvas.
+     * [KO] HTML 캔버스의 `DOMRect` 영역 정보를 반환합니다.
+     * [EN] Returns the `DOMRect` bounding area of the HTML canvas.
+     *
+     * @returns
+     * [KO] 캔버스 `DOMRect` 객체
+     * [EN] Canvas `DOMRect` object
      */
     get boundingClientRect(): DOMRect;
     /**
-     * [KO] 안티앨리어싱 매니저를 반환합니다.
-     * [EN] Returns the antialiasing manager.
+     * [KO] 안티앨리어싱 매니저(`AntialiasingManager`)를 반환합니다.
+     * [EN] Returns the anti-aliasing manager (`AntialiasingManager`).
+     *
+     * @returns
+     * [KO] `AntialiasingManager` 인스턴스
+     * [EN] `AntialiasingManager` instance
      */
     get antialiasingManager(): AntialiasingManager;
     /**
-     * [KO] 글로벌 SSAO 버텍스 버퍼 매니저를 반환합니다.
-     * [EN] Returns the global SSAO vertex buffer manager.
+     * [KO] 글로벌 버텍스 스토리지 버퍼 매니저(`GlobalStorageBufferManager`)를 반환합니다.
+     * [EN] Returns the global vertex storage buffer manager (`GlobalStorageBufferManager`).
+     *
+     * @returns
+     * [KO] 글로벌 버텍스 `GlobalStorageBufferManager` 인스턴스
+     * [EN] Global vertex `GlobalStorageBufferManager` instance
      */
     get globalVertexSSBO(): GlobalStorageBufferManager;
     /**
-     * [KO] 글로벌 SSAO 프래그먼트 버퍼 매니저를 반환합니다.
-     * [EN] Returns the global SSAO fragment buffer manager.
+     * [KO] PBR 머티리얼용 글로벌 프래그먼트 스토리지 버퍼 매니저(`GlobalStorageBufferManager`)를 반환합니다.
+     * [EN] Returns the global fragment storage buffer manager (`GlobalStorageBufferManager`) for PBR materials.
+     *
+     * @returns
+     * [KO] PBR용 글로벌 프래그먼트 `GlobalStorageBufferManager` 인스턴스
+     * [EN] Global fragment `GlobalStorageBufferManager` instance for PBR
      */
     get globalFragmentSSBO_PBR(): GlobalStorageBufferManager;
+    /**
+     * [KO] 빌트인 머티리얼용 글로벌 프래그먼트 스토리지 버퍼 매니저(`GlobalStorageBufferManager`)를 반환합니다.
+     * [EN] Returns the global fragment storage buffer manager (`GlobalStorageBufferManager`) for built-in materials.
+     *
+     * @returns
+     * [KO] 빌트인용 글로벌 프래그먼트 `GlobalStorageBufferManager` 인스턴스
+     * [EN] Global fragment `GlobalStorageBufferManager` instance for built-in materials
+     */
     get globalFragmentSSBO_BuiltIn(): GlobalStorageBufferManager;
     /**
-     * [KO] 배경색을 반환합니다.
-     * [EN] Returns the background color.
+     * [KO] 컨텍스트의 기본 배경색(`ColorRGBA`)을 반환하거나 설정합니다.
+     * [EN] Gets or sets the default background color (`ColorRGBA`) of the context.
+     *
+     * @returns
+     * [KO] 배경색 `ColorRGBA` 인스턴스
+     * [EN] Background `ColorRGBA` instance
+     * @throws
+     * [KO] 설정 시 `ColorRGBA` 인스턴스가 아닐 경우 에러 발생
+     * [EN] Throws an error when setting a value that is not a `ColorRGBA` instance
      */
     get backgroundColor(): ColorRGBA;
-    /**
-     * [KO] 배경색을 설정합니다.
-     * [EN] Sets the background color.
-     * @param value -
-     * [KO] 설정할 ColorRGBA 객체
-     * [EN] ColorRGBA object to set
-     * @throws
-     * [KO] value가 ColorRGBA 인스턴스가 아닐 경우 에러 발생
-     * [EN] Throws error if value is not an instance of ColorRGBA
-     */
     set backgroundColor(value: ColorRGBA);
     /**
-     * [KO] RedGPUContextDetector 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContextDetector instance.
+     * [KO] 하드웨어 및 브라우저 환경 감지 매니저(`RedGPUContextDetector`)를 반환합니다.
+     * [EN] Returns the hardware and browser environment detector (`RedGPUContextDetector`).
+     *
+     * @returns
+     * [KO] `RedGPUContextDetector` 인스턴스
+     * [EN] `RedGPUContextDetector` instance
      */
     get detector(): RedGPUContextDetector;
     /**
-     * [KO] GPU 캔버스 구성 정보를 반환합니다.
-     * [EN] Returns the GPU canvas configuration information.
+     * [KO] WebGPU 캔버스 구성 정보(`GPUCanvasConfiguration`)를 반환합니다.
+     * [EN] Returns the WebGPU canvas configuration (`GPUCanvasConfiguration`).
+     *
+     * @returns
+     * [KO] `GPUCanvasConfiguration` 객체
+     * [EN] `GPUCanvasConfiguration` object
      */
     get configurationDescription(): GPUCanvasConfiguration;
     /**
-     * [KO] GPU 어댑터를 반환합니다.
-     * [EN] Returns the GPU adapter.
+     * [KO] WebGPU 어댑터(`GPUAdapter`)를 반환합니다.
+     * [EN] Returns the WebGPU adapter (`GPUAdapter`).
+     *
+     * @returns
+     * [KO] `GPUAdapter` 인스턴스
+     * [EN] `GPUAdapter` instance
      */
     get gpuAdapter(): GPUAdapter;
     /**
-     * [KO] 캔버스의 알파 모드를 반환합니다.
-     * [EN] Returns the alpha mode of the canvas.
+     * [KO] 캔버스의 알파 합성 모드(`GPUCanvasAlphaMode`)를 반환하거나 설정합니다.
+     * [EN] Gets or sets the alpha compositing mode (`GPUCanvasAlphaMode`) of the canvas.
+     *
+     * @returns
+     * [KO] 현재 설정된 `GPUCanvasAlphaMode`
+     * [EN] Currently configured `GPUCanvasAlphaMode`
      */
     get alphaMode(): GPUCanvasAlphaMode;
-    /**
-     * [KO] 캔버스의 알파 모드를 설정합니다.
-     * [EN] Sets the alpha mode of the canvas.
-     * @param value -
-     * [KO] 설정할 GPUCanvasAlphaMode 값
-     * [EN] GPUCanvasAlphaMode value to set
-     */
     set alphaMode(value: GPUCanvasAlphaMode);
     /**
-     * [KO] GPU 캔버스 컨텍스트를 반환합니다.
-     * [EN] Returns the GPU canvas context.
+     * [KO] WebGPU 캔버스 컨텍스트(`GPUCanvasContext`)를 반환합니다.
+     * [EN] Returns the WebGPU canvas context (`GPUCanvasContext`).
+     *
+     * @returns
+     * [KO] `GPUCanvasContext` 인스턴스
+     * [EN] `GPUCanvasContext` instance
      */
     get gpuContext(): GPUCanvasContext;
     /**
-     * [KO] GPU 디바이스를 반환합니다.
-     * [EN] Returns the GPU device.
+     * [KO] WebGPU 논리 디바이스(`GPUDevice`)를 반환합니다.
+     * [EN] Returns the WebGPU logical device (`GPUDevice`).
+     *
+     * @returns
+     * [KO] `GPUDevice` 인스턴스
+     * [EN] `GPUDevice` instance
      */
     get gpuDevice(): GPUDevice;
     /**
-     * [KO] HTML 캔버스 요소를 반환합니다.
-     * [EN] Returns the HTML canvas element.
+     * [KO] 렌더링 대상 `HTMLCanvasElement`를 반환합니다.
+     * [EN] Returns the target `HTMLCanvasElement` for rendering.
+     *
+     * @returns
+     * [KO] `HTMLCanvasElement` 인스턴스
+     * [EN] `HTMLCanvasElement` instance
      */
     get htmlCanvas(): HTMLCanvasElement;
     /**
-     * [KO] 키보드 입력 상태 버퍼를 반환합니다.
-     * [EN] Returns the keyboard input state buffer.
+     * [KO] 키보드 키 입력 상태 버퍼를 반환하거나 설정합니다.
+     * [EN] Gets or sets the keyboard key input state buffer.
+     *
+     * @returns
+     * [KO] 키별 눌림 상태 맵 (`{ [key: string]: boolean }`)
+     * [EN] Key press state map (`{ [key: string]: boolean }`)
      */
     get keyboardKeyBuffer(): {
         [p: string]: boolean;
     };
-    /**
-     * [KO] 키보드 입력 상태 버퍼를 설정합니다.
-     * [EN] Sets the keyboard input state buffer.
-     * @param value -
-     * [KO] 키보드 상태 객체
-     * [EN] Keyboard state object
-     */
     set keyboardKeyBuffer(value: {
         [p: string]: boolean;
     });
     /**
-     * [KO] 리소스 매니저를 반환합니다.
-     * [EN] Returns the resource manager.
+     * [KO] GPU 리소스 매니저(`ResourceManager`)를 반환합니다.
+     * [EN] Returns the GPU resource manager (`ResourceManager`).
+     *
+     * @returns
+     * [KO] `ResourceManager` 인스턴스
+     * [EN] `ResourceManager` instance
      */
     get resourceManager(): ResourceManager;
     /**
-     * [KO] RedGPUContextSizeManager 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContextSizeManager instance.
+     * [KO] 캔버스 크기 및 해상도 관리 매니저(`RedGPUContextSizeManager`)를 반환합니다.
+     * [EN] Returns the canvas size and resolution manager (`RedGPUContextSizeManager`).
+     *
+     * @returns
+     * [KO] `RedGPUContextSizeManager` 인스턴스
+     * [EN] `RedGPUContextSizeManager` instance
      */
     get sizeManager(): RedGPUContextSizeManager;
     /**
-     * [KO] 너비를 반환합니다.
-     * [EN] Returns the width.
+     * [KO] 캔버스의 가로 크기(숫자 또는 `px`/`%` 문자열)를 반환하거나 설정합니다.
+     * [EN] Gets or sets the canvas width (number or `px`/`%` string).
+     *
+     * @returns
+     * [KO] 설정된 가로 크기 값
+     * [EN] Configured width value
      */
     get width(): number | string;
-    /**
-     * [KO] 너비를 설정합니다.
-     * [EN] Sets the width.
-     * @param value -
-     * [KO] 너비 값 (숫자 또는 문자열)
-     * [EN] Width value (number or string)
-     */
     set width(value: number | string);
     /**
-     * [KO] 높이를 반환합니다.
-     * [EN] Returns the height.
+     * [KO] 캔버스의 세로 크기(숫자 또는 `px`/`%` 문자열)를 반환하거나 설정합니다.
+     * [EN] Gets or sets the canvas height (number or `px`/`%` string).
+     *
+     * @returns
+     * [KO] 설정된 세로 크기 값
+     * [EN] Configured height value
      */
     get height(): number | string;
-    /**
-     * [KO] 높이를 설정합니다.
-     * [EN] Sets the height.
-     * @param value -
-     * [KO] 높이 값 (숫자 또는 문자열)
-     * [EN] Height value (number or string)
-     */
     set height(value: number | string);
     /**
-     * [KO] 화면 크기 정보(Screen)를 반환합니다. (CSS 픽셀 단위)
-     * [EN] Returns the screen size information. (in CSS pixels)
+     * [KO] CSS 논리 픽셀 단위의 화면 영역 정보를 반환합니다.
+     * [EN] Returns the screen area information in CSS logical pixels.
+     *
+     * @returns
+     * [KO] CSS 픽셀 영역 객체 (`IRedGPURectObject`)
+     * [EN] CSS pixel rect object (`IRedGPURectObject`)
      */
     get screenRectObject(): IRedGPURectObject;
     /**
-     * [KO] 픽셀 단위 화면 크기 정보(Pixel)를 반환합니다. (물리 픽셀 단위)
-     * [EN] Returns the pixel size information. (in physical pixels)
+     * [KO] 물리 픽셀 단위의 렌더링 영역 정보를 반환합니다.
+     * [EN] Returns the rendering area information in physical pixels.
+     *
+     * @returns
+     * [KO] 물리 픽셀 영역 객체 (`IRedGPURectObject`)
+     * [EN] Physical pixel rect object (`IRedGPURectObject`)
      */
     get pixelRectObject(): IRedGPURectObject;
     /**
-     * [KO] 렌더 스케일을 반환합니다.
-     * [EN] Returns the render scale.
+     * [KO] 렌더링 해상도 배율을 반환하거나 설정합니다.
+     * [EN] Gets or sets the rendering resolution scale factor.
+     *
+     * @returns
+     * [KO] 현재 렌더링 스케일 배율
+     * [EN] Current rendering scale factor
      */
     get renderScale(): number;
-    /**
-     * [KO] 렌더 스케일을 설정합니다.
-     * [EN] Sets the render scale.
-     * @param value -
-     * [KO] 렌더 스케일 값
-     * [EN] Render scale value
-     */
     set renderScale(value: number);
     /**
-     * [KO] RedGPUContext 인스턴스를 파기하고 모든 렌더러와 리소스를 해제합니다.
-     * [EN] Destroys the RedGPUContext instance and releases all renderers and resources.
-     * @param isPageHide -
-     * [KO] pagehide 이벤트에 의해 임시로 소멸이 기동되었는지 여부 (bfcache 복원용 pageshow 리스너 보존을 위함)
-     * [EN] Whether the destruction was temporarily triggered by a pagehide event (to preserve pageshow listener for bfcache restoration)
+     * [KO] RedGPUContext 인스턴스를 파기하고 등록된 모든 뷰, 매니저, 이벤트 리스너 및 WebGPU 디바이스 리소스를 해제합니다.
+     * [EN] Destroys the RedGPUContext instance and releases all registered views, managers, event listeners, and WebGPU device resources.
      */
     destroy(): void;
     /**
-     * [KO] 컨텍스트의 크기를 설정합니다.
-     * [EN] Sets the size of the context.
+     * [KO] 컨텍스트(캔버스)의 가로 및 세로 크기를 설정합니다.
+     * [EN] Sets the width and height of the context (canvas).
+     *
      * @param w -
-     * [KO] 너비 (기본값: 현재 width)
-     * [EN] Width (default: current width)
+     * [KO] 가로 크기 (기본값: 현재 설정된 `width`)
+     * [EN] Width (default: currently configured `width`)
      * @param h -
-     * [KO] 높이 (기본값: 현재 height)
-     * [EN] Height (default: current height)
+     * [KO] 세로 크기 (기본값: 현재 설정된 `height`)
+     * [EN] Height (default: currently configured `height`)
      */
     setSize(w?: string | number, h?: string | number): void;
 }

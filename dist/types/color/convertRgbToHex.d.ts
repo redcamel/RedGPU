@@ -5,7 +5,7 @@
  * [KO] 각 채널(R, G, B)을 2자리 16진수 대문자 문자열('#RRGGBB')로 변환합니다.
  * [EN] Converts each channel (R, G, B) into a 2-digit uppercase hexadecimal string ('#RRGGBB').
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const hex = RedGPU.Color.convertRgbToHex(255, 0, 0); // '#FF0000'
  * ```

@@ -1,45 +1,51 @@
 /**
- * [KO] 피킹 이벤트 타입 정의 객체입니다.
- * [EN] Object defining picking event types.
+ * [KO] 마우스 피킹 이벤트 타입 상수를 정의한 객체입니다.
+ * [EN] Object defining mouse picking event type constants.
  *
  * ### Example
  * ```typescript
  * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+ * // [KO] 클릭 피킹 이벤트 리스너 등록
+ * // [EN] Register a click picking event listener
  * mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
  *     console.log('Clicked!', e);
  * });
  * ```
+ *
+ * @see [MouseEvent (Mesh) example](/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
+ * @see [MouseEvent (Raycasting) example](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
+ * @see [MouseEvent (Sprite2D) example](/RedGPU/examples/2d/interaction/mouseEvent/sprite2D/)
  * @category Picking
  */
 declare const PICKING_EVENT_TYPE: {
     /**
-     * [KO] 마우스 이동 (마우스가 객체 위에서 움직일 때)
-     * [EN] Mouse move (When the mouse moves over the object)
+     * [KO] 마우스가 객체 위에서 이동할 때 발생하는 이벤트 타입 (`'move'`)
+     * [EN] Event type triggered when the mouse moves over the object (`'move'`)
      */
     readonly MOVE: "move";
     /**
-     * [KO] 마우스 다운 (마우스 버튼을 눌렀을 때)
-     * [EN] Mouse down (When a mouse button is pressed)
+     * [KO] 객체 위에서 마우스 버튼을 눌렀을 때 발생하는 이벤트 타입 (`'down'`)
+     * [EN] Event type triggered when a mouse button is pressed over the object (`'down'`)
      */
     readonly DOWN: "down";
     /**
-     * [KO] 마우스 업 (마우스 버튼을 뗐을 때)
-     * [EN] Mouse up (When a mouse button is released)
+     * [KO] 객체 위에서 마우스 버튼을 뗐을 때 발생하는 이벤트 타입 (`'up'`)
+     * [EN] Event type triggered when a mouse button is released over the object (`'up'`)
      */
     readonly UP: "up";
     /**
-     * [KO] 마우스 오버 (마우스가 객체 영역 안으로 들어왔을 때)
-     * [EN] Mouse over (When the mouse enters the object area)
+     * [KO] 마우스가 객체 영역 안으로 진입했을 때 발생하는 이벤트 타입 (`'over'`)
+     * [EN] Event type triggered when the mouse enters the object area (`'over'`)
      */
     readonly OVER: "over";
     /**
-     * [KO] 마우스 아웃 (마우스가 객체 영역 밖으로 나갔을 때)
-     * [EN] Mouse out (When the mouse leaves the object area)
+     * [KO] 마우스가 객체 영역 밖으로 벗어났을 때 발생하는 이벤트 타입 (`'out'`)
+     * [EN] Event type triggered when the mouse leaves the object area (`'out'`)
      */
     readonly OUT: "out";
     /**
-     * [KO] 마우스 클릭 (마우스 다운 후 동일 객체에서 업이 발생했을 때)
-     * [EN] Mouse click (When a mouse up occurs on the same object after a mouse down)
+     * [KO] 객체 위에서 마우스 다운 후 동일 객체에서 업이 발생했을 때의 이벤트 타입 (`'click'`)
+     * [EN] Event type triggered when a mouse up occurs on the same object after a mouse down (`'click'`)
      */
     readonly CLICK: "click";
 };

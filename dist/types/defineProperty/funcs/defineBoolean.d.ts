@@ -1,50 +1,49 @@
 /**
- * `defineBoolean` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ * [KO] `defineBoolean` 함수에 전달할 불리언 프로퍼티 정의 옵션 인터페이스입니다.
+ * [EN] Interface defining boolean property options for the `defineBoolean` function.
  *
- * @remarks
- * [KO] GPU는 불리언(Boolean)을 직접 지원하지 않으므로, 유니폼 버퍼에 기록 시 정수 0 또는 1로 변환됩니다.
- * [EN] Since GPUs do not natively support booleans, they are converted to 0 or 1 integers when written to the globalStruct buffer.
+ * @category DefineProperty
  */
 export interface DefineBooleanInfo {
     /**
-     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
-     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     * [KO] 대상 프로토타입에 정의할 프로퍼티 키 이름입니다.
+     * [EN] Property key name to define on the target prototype.
      */
     key: string;
     /**
-     * [KO] 속성의 초기 불리언 값.
+     * [KO] 프로퍼티의 초기 불리언 값입니다.
      * [EN] Initial boolean value of the property.
      */
     value: boolean;
 }
 /**
- * 지정된 클래스의 프로토타입에 GPU와 연동되는 사용자 정의 불리언(Boolean) 속성을 정의합니다.
+ * [KO] 대상 클래스의 프로토타입에 GPU 유니폼 버퍼와 연동되는 불리언(`boolean`) 프로퍼티를 동적으로 정의합니다.
+ * [EN] Dynamically defines boolean (`boolean`) properties linked to the GPU uniform buffer on the target class prototype.
  *
- * @remarks
- * **[KO]**
- * - GPU 버퍼는 불리언을 지원하지 않으므로, setter는 `true` → `1`, `false` → `0`으로 변환하여 {@link updateTargetUniform}에 전달합니다.
- * - 속성에 `boolean`이 아닌 값을 할당하면 `console.warn`으로 경고합니다.
- * - 값 변경 시 `dirtyPipeline = true`로 설정하여 렌더 파이프라인 재빌드를 트리거합니다.
+ * [KO] 값 변경 시 GPU 유니폼 버퍼에는 `1`(`true`) 또는 `0`(`false`)으로 변환되어 기록되며, `dirtyPipeline` 플래그를 `true`로 갱신합니다.
+ * [EN] On value change, writes `1` (`true`) or `0` (`false`) to the GPU uniform buffer and sets the `dirtyPipeline` flag to `true`.
  *
- * **[EN]**
- * - Since GPU buffers do not support booleans, the setter converts `true` → `1` and `false` → `0` before calling {@link updateTargetUniform}.
- * - Assigning a non-boolean value emits a `console.warn`.
- * - Sets `dirtyPipeline = true` on change to trigger render pipeline rebuild.
- *
- * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link DefineBooleanInfo} 설정 또는 그 배열 [EN] A single {@link DefineBooleanInfo} configuration or an array of configurations
- *
- * @example
+ * ### Example
  * ```typescript
- * // 단일 설정
+ * // [KO] 단일 불리언 프로퍼티 정의
+ * // [EN] Define a single boolean property
  * RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
  *
- * // 여러 속성 일괄 정의
+ * // [KO] 다중 불리언 프로퍼티 일괄 정의
+ * // [EN] Define multiple boolean properties at once
  * RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, [
- *   { key: 'useAlphaTest', value: true },
- *   { key: 'useNormalMap', value: false },
+ *     { key: 'useAlphaTest', value: true },
+ *     { key: 'useNormalMap', value: false }
  * ]);
  * ```
+ *
+ * @param target -
+ * [KO] 프로퍼티를 정의할 대상 클래스 생성자
+ * [EN] Target class constructor to define properties on
+ * @param defineInfo -
+ * [KO] 단일 `DefineBooleanInfo` 설정 객체 또는 설정 배열
+ * [EN] Single `DefineBooleanInfo` configuration object or array of configurations
+ * @category DefineProperty
  */
 declare const defineBoolean: (target: any, defineInfo: DefineBooleanInfo | DefineBooleanInfo[]) => void;
 export default defineBoolean;

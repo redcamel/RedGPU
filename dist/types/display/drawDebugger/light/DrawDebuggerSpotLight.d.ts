@@ -3,27 +3,47 @@ import SpotLight from "../../../light/lights/SpotLight";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 /**
- * 스포트라이트({@link SpotLight})의 원추형 조사 범위, 방향, 도달거리를 입체 기하 형태로 시각화하는 디버거 클래스입니다.
+ * [KO] 스포트라이트(`SpotLight`)의 원추형 조사 범위(`innerCutoff`, `outerCutoff`), 방향, 도달 거리(`radius`)를 3D 공간에 시각화하는 디버거 클래스입니다.
+ * [EN] Debugger class that visualizes the conical light range (`innerCutoff`, `outerCutoff`), direction, and reach distance (`radius`) of a `SpotLight` in 3D space.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @remarks
- * **[KO]**
- * - 🔦 모양의 레이블 아이콘과 함께, 조명의 조사각 설정(`innerCutoff` 및 `outerCutoff`)에 정렬된 이중 원뿔 선 형태를 노란색 와이어프레임으로 제공합니다.
- * - 도달 거리 경계 원호와 중심선, 시작점 조준 십자선 등을 조합하여 광원의 유효 방향을 입체적으로 인지하기 좋습니다.
+ * ### Example
+ * ```typescript
+ * // [KO] SpotLight의 enableDebugger 프로퍼티를 통해 활성화합니다.
+ * // [EN] Enable via the enableDebugger property of SpotLight.
+ * spotLight.enableDebugger = true;
+ * ```
  *
- * **[EN]**
- * - Renders nested cones corresponding to the inner (`innerCutoff`) and outer (`outerCutoff`) bounds of a target {@link SpotLight}.
- * - Employs a flashlight emoji ('🔦') label alongside yellow guidelines mapping directions, lengths, and point anchors.
- *
+ * @see [SpotLight example](/RedGPU/examples/3d/light/spotLight/)
+ * @see [DrawDebugger basic example](/RedGPU/examples/3d/drawDebugger/basic/)
  * @category Debugger
  */
 declare class DrawDebuggerSpotLight extends ADrawDebuggerLight<SpotLight> {
     #private;
+    /**
+     * [KO] `DrawDebuggerSpotLight` 인스턴스를 생성합니다.
+     * [EN] Creates a `DrawDebuggerSpotLight` instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param target -
+     * [KO] 디버깅할 대상 스포트라이트 객체
+     * [EN] Target spot light object to debug
+     */
     constructor(redGPUContext: RedGPUContext, target: SpotLight);
+    /**
+     * [KO] 스포트라이트 디버그 가이드와 아이콘 레이블을 렌더링합니다.
+     * [EN] Renders the spot light debug guide and icon label.
+     *
+     * @param renderViewStateData -
+     * [KO] 현재 뷰의 렌더링 상태 데이터
+     * [EN] Render state data of the current view
+     */
     render(renderViewStateData: RenderViewStateData): void;
 }
 export default DrawDebuggerSpotLight;

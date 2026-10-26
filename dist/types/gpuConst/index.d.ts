@@ -1,3 +1,9 @@
+/**
+ * [KO] 텍스처 샘플링 및 색상 블렌딩, 깊이 비교, 렌더 패스 연산 등을 위한 WebGPU 표준 열거형 상수 객체를 제공합니다.
+ * [EN] Provides standard WebGPU enumeration constant objects for texture sampling, color blending, depth comparison, and render pass operations.
+ *
+ * @packageDocumentation
+ */
 import GPU_ADDRESS_MODE from "./GPU_ADDRESS_MODE";
 import GPU_BLEND_FACTOR from "./GPU_BLEND_FACTOR";
 import GPU_BLEND_OPERATION from "./GPU_BLEND_OPERATION";

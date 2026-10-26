@@ -1,11 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import { PlayAnimationInfo } from "../GLTFLoader";
 /**
- * [KO] GLTF 애니메이션 재생을 프레임 단위로 처리하는 매니저 클래스입니다.
- * [EN] Manager class that processes GLTF animation playback on a per-frame basis.
- *
- * [KO] 단일 재생 및 모션 블렌딩 두 가지 모드를 지원하며, 쿼터니언 보간(SLERP/CUBICSPLINE) 및 번역·스케일 보간을 최적화된 방식으로 수행합니다.
- * [EN] Supports both single playback and motion blending modes, performing quaternion interpolation (SLERP/CUBICSPLINE) and translation/scale interpolation in an optimized manner.
+ * [KO] GLTF 애니메이션의 단일 재생 및 모션 블렌딩을 프레임 단위로 처리하고 회전·이동·스케일·모프 가중치 보간을 수행하는 매니저 클래스입니다.
+ * [EN] Manager class that processes single playback and motion blending of GLTF animations per frame and interpolates rotation, translation, scale, and morph weights.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

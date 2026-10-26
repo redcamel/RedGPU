@@ -6,5 +6,4 @@
 import AntialiasingManager from "./AntialiasingManager";
 import FXAA from "./fxaa/FXAA";
 import TAA from "./taa/TAA";
-import TAASharpen from "./taa/sharpen/TAASharpen";
-export { AntialiasingManager, FXAA, TAA, TAASharpen };
+export { AntialiasingManager, FXAA, TAA };

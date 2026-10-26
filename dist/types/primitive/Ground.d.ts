@@ -1,18 +1,17 @@
 import RedGPUContext from "../context/RedGPUContext";
 import Primitive from "./core/Primitive";
 /**
- * [KO] Ground(그라운드) 기본 도형 클래스입니다.
- * [EN] Ground primitive geometry class.
- *
- * [KO] XZ 평면에 배치된 평면 데이터를 생성하여 관리합니다. 주로 바닥이나 지형의 기반으로 사용됩니다.
- * [EN] Generates and manages planar data placed on the XZ plane. Primarily used as a base for floors or terrain.
+ * [KO] XZ 평면(수평면)에 배치된 바닥 형태의 정점 및 인덱스 데이터를 생성하는 기본 도형 클래스입니다.
+ * [EN] Primitive geometry class that generates vertex and index data for a horizontal plane placed on the XZ plane.
  *
  * ### Example
  * ```typescript
- * // 10x10 크기의 그라운드 생성
- * const ground = new RedGPU.Ground(redGPUContext, 10, 10);
+ * const ground = new RedGPU.Primitive.Ground(redGPUContext, 10, 10, 1, 1, false);
  * ```
  * <iframe src="/RedGPU/examples/3d/primitive/ground/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Ground example](/RedGPU/examples/3d/primitive/ground/)
+ * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)
  * @category Primitive
  */
 declare class Ground extends Primitive {
@@ -22,15 +21,27 @@ declare class Ground extends Primitive {
      *
      * ### Example
      * ```typescript
-     * const ground = new RedGPU.Ground(redGPUContext, 10, 10, 1, 1, false);
+     * const ground = new RedGPU.Primitive.Ground(redGPUContext, 10, 10, 1, 1, false);
      * ```
      *
-     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param width - [KO] 가로 길이 (기본값 1) [EN] Width (default 1)
-     * @param height - [KO] 세로 길이 (기본값 1) [EN] Height (default 1)
-     * @param widthSegments - [KO] 가로(X축) 세그먼트 수 (기본값 1) [EN] Width (X-axis) segments (default 1)
-     * @param heightSegments - [KO] 세로(Z축) 세그먼트 수 (기본값 1) [EN] Height (Z-axis) segments (default 1)
-     * @param flipY - [KO] Y축 UV 뒤집기 여부 (기본값 false) [EN] Whether to flip UV on the Y-axis (default false)
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param width -
+     * [KO] 가로(X축) 길이 (기본값: 1)
+     * [EN] Width along the X-axis (default: 1)
+     * @param height -
+     * [KO] 세로(Z축) 길이 (기본값: 1)
+     * [EN] Depth along the Z-axis (default: 1)
+     * @param widthSegments -
+     * [KO] 가로(X축) 분할 수 (기본값: 1)
+     * [EN] Number of segments along the X-axis (default: 1)
+     * @param heightSegments -
+     * [KO] 세로(Z축) 분할 수 (기본값: 1)
+     * [EN] Number of segments along the Z-axis (default: 1)
+     * @param flipY -
+     * [KO] Y축 UV 좌표 반전 여부 (기본값: false)
+     * [EN] Whether to flip UV coordinates along the Y-axis (default: false)
      */
     constructor(redGPUContext: RedGPUContext, width?: number, height?: number, widthSegments?: number, heightSegments?: number, flipY?: boolean);
 }

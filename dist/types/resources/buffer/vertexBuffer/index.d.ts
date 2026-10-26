@@ -1,6 +1,6 @@
 /**
- * [KO] `VertexBuffer`와 관련된 구조 및 인터리브 타입을 제공합니다.
- * [EN] Provides structures and interleaved types related to `VertexBuffer`.
+ * [KO] 정점 버퍼(`VertexBuffer`)와 정점 인터리브 구조 및 타입 정의를 제공합니다.
+ * [EN] Provides vertex buffer (`VertexBuffer`) and vertex interleaved structure and type definitions.
  * @packageDocumentation
  */
 import VertexBuffer from "./VertexBuffer";

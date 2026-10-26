@@ -1,21 +1,18 @@
 /**
- * [KO] 인덱스 버퍼에서 사용하는 데이터 포맷을 정의하는 상수군입니다.
- * [EN] Constants defining the data format used in index buffers.
- *
- * [KO] 인덱스 값의 비트 수와 데이터 형식을 결정합니다.
- * [EN] Determines the number of bits and data type for index values.
+ * [KO] 인덱스 버퍼(Index Buffer)에 저장된 정점 인덱스 데이터의 정수 비트 폭 포맷 상수입니다.
+ * [EN] Integer bit-width format constants for vertex index data stored in an index buffer.
  *
  * @category Constants
  */
 declare const GPU_INDEX_FORMAT: {
     /**
-     * [KO] 16비트 부호 없는 정수(Uint16) 포맷을 사용합니다.
-     * [EN] Uses 16-bit unsigned integer (Uint16) format.
+     * [KO] 16비트 부호 없는 정수(`Uint16Array`, `'uint16'`) 인덱스 포맷입니다.
+     * [EN] 16-bit unsigned integer (`Uint16Array`, `'uint16'`) index format.
      */
     readonly UINT16: "uint16";
     /**
-     * [KO] 32비트 부호 없는 정수(Uint32) 포맷을 사용합니다.
-     * [EN] Uses 32-bit unsigned integer (Uint32) format.
+     * [KO] 32비트 부호 없는 정수(`Uint32Array`, `'uint32'`) 인덱스 포맷입니다.
+     * [EN] 32-bit unsigned integer (`Uint32Array`, `'uint32'`) index format.
      */
     readonly UINT32: "uint32";
 };

@@ -4,66 +4,70 @@ import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import BaseObject from "./BaseObject";
 /**
- * [KO] GPU 컨텍스트를 사용하는 모든 엔진 객체의 기반 클래스입니다.
- * [EN] Base class for all engine objects using GPU context.
+ * [KO] `RedGPUContext`를 기반으로 동작하는 모든 엔진 객체의 추상 베이스 클래스로, 디바이스 및 주요 매니저에 대한 공통 접근자를 제공합니다.
+ * [EN] Abstract base class for all engine objects operating on `RedGPUContext`, providing common getters for the GPU device and core managers.
  *
- * [KO] RedGPUContext 및 관련 매니저들(ResourceManager, AntialiasingManager 등)에 대한 공통 접근 경로를 제공합니다.
- * [EN] Provides common access paths to RedGPUContext and related managers (ResourceManager, AntialiasingManager, etc.).
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Core
  */
 declare abstract class RedGPUObject extends BaseObject {
     #private;
     /**
-     * [KO] RedGPUObject 생성자입니다. (추상 클래스로 직접 인스턴스 생성은 불가합니다)
-     * [EN] RedGPUObject constructor. (Abstract class, cannot be instantiated directly)
+     * [KO] 새로운 RedGPUObject 인스턴스를 초기화하고 `RedGPUContext`의 유효성을 검증합니다.
+     * [EN] Initializes a new RedGPUObject instance and validates the provided `RedGPUContext`.
      *
      * @param redGPUContext -
-     * [KO] 사용할 RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance to use
+     * [KO] 바인딩할 `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance to bind
      */
-    protected constructor(redGPUContext: RedGPUContext);
+    constructor(redGPUContext: RedGPUContext);
     /**
-     * [KO] RedGPUContext 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContext instance.
+     * [KO] 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
+     * [EN] Returns the bound `RedGPUContext` instance.
      *
      * @returns
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     get redGPUContext(): RedGPUContext;
     /**
-     * [KO] WebGPU 디바이스 객체를 반환합니다. (단축 경로)
-     * [EN] Returns the WebGPU device object. (Short-cut path)
+     * [KO] 컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
+     * [EN] Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
      *
      * @returns
-     * [KO] GPUDevice 인스턴스
-     * [EN] GPUDevice instance
+     * [KO] `GPUDevice` 인스턴스
+     * [EN] `GPUDevice` instance
      */
     get gpuDevice(): GPUDevice;
     /**
-     * [KO] 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
-     * [EN] Returns the ResourceManager instance. (Short-cut path)
+     * [KO] 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
+     * [EN] Returns the `ResourceManager` instance managing global GPU resources.
      *
      * @returns
-     * [KO] ResourceManager 인스턴스
-     * [EN] ResourceManager instance
+     * [KO] `ResourceManager` 인스턴스
+     * [EN] `ResourceManager` instance
      */
     get resourceManager(): ResourceManager;
     /**
-     * [KO] 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
-     * [EN] Returns the AntialiasingManager instance. (Short-cut path)
+     * [KO] 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
+     * [EN] Returns the `AntialiasingManager` instance managing anti-aliasing settings.
      *
      * @returns
-     * [KO] AntialiasingManager 인스턴스
-     * [EN] AntialiasingManager instance
+     * [KO] `AntialiasingManager` 인스턴스
+     * [EN] `AntialiasingManager` instance
      */
     get antialiasingManager(): AntialiasingManager;
     /**
-     * [KO] 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
-     * [EN] Returns the CommandEncoderManager instance. (Short-cut path)
+     * [KO] WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
+     * [EN] Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
      *
      * @returns
-     * [KO] CommandEncoderManager 인스턴스
-     * [EN] CommandEncoderManager instance
+     * [KO] `CommandEncoderManager` 인스턴스
+     * [EN] `CommandEncoderManager` instance
      */
     get commandEncoderManager(): CommandEncoderManager;
 }

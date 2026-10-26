@@ -7,7 +7,7 @@ import View3D from "../display/view/View3D";
  * [KO] 렌더링 루프를 관리하고, 각 뷰(View3D)의 렌더링 패스를 실행하며, 최종적으로 화면에 결과를 표시합니다. 디버그 렌더링 및 애니메이션 업데이트도 담당합니다.
  * [EN] Manages the rendering loop, executes rendering passes for each View3D, and finally displays the result on the screen. It also handles debug rendering and animation updates.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const renderer = new RedGPU.Renderer();
  * renderer.start(redGPUContext, (time) => {
@@ -24,7 +24,7 @@ declare class Renderer {
      * [KO] 렌더링 루프를 시작합니다.
      * [EN] Starts the rendering loop.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * renderer.start(redGPUContext, (time) => {
      *     // 매 프레임 호출되는 콜백 (Callback called every frame)
@@ -39,12 +39,20 @@ declare class Renderer {
      * [EN] User-defined callback function to be executed every frame
      */
     start(redGPUContext: RedGPUContext, render: Function): void;
+    /**
+     * [KO] 렌더러 리소스를 정리하고 렌더 루프를 중단합니다.
+     * [EN] Cleans up renderer resources and stops the rendering loop.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스 (선택적)
+     * [EN] RedGPUContext instance (optional)
+     */
     destroy(redGPUContext?: RedGPUContext): void;
     /**
      * [KO] 렌더링 루프를 정지합니다.
      * [EN] Stops the rendering loop.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * renderer.stop(redGPUContext);
      * ```

@@ -1,32 +1,33 @@
 import { mat4 } from "gl-matrix";
 /**
- * [KO] 로컬 좌표를 월드 좌표로 변환합니다.
- * [EN] Converts local coordinates to world coordinates.
+ * [KO] 4x4 변환 행렬(`targetMatrix`)을 사용하여 로컬 좌표(`[x, y, z]`)를 3D 월드 좌표(`[x, y, z]`)로 변환합니다.
+ * [EN] Transforms local coordinates (`[x, y, z]`) into 3D world coordinates (`[x, y, z]`) using a 4x4 transformation matrix (`targetMatrix`).
  *
  * ### Example
  * ```typescript
- * const worldPos = RedGPU.math.localToWorld(mesh.modelMatrix, 0, 1, 0);
+ * const [worldX, worldY, worldZ] = RedGPU.Math.localToWorld(mesh.modelMatrix, 0, 1, 0);
  * ```
  *
  * @param targetMatrix -
- * [KO] 변환에 사용할 4x4 행렬
- * [EN] 4x4 matrix to use for transformation
+ * [KO] 기준 객체의 4x4 월드 변환 행렬 (`mat4`, 열 우선)
+ * [EN] 4x4 world transformation matrix of the target object (`mat4`, column-major)
  * @param x -
- * [KO] 로컬 x 좌표
- * [EN] Local x coordinate
+ * [KO] 변환할 로컬 X 좌표
+ * [EN] Local X coordinate to transform
  * @param y -
- * [KO] 로컬 y 좌표
- * [EN] Local y coordinate
+ * [KO] 변환할 로컬 Y 좌표
+ * [EN] Local Y coordinate to transform
  * @param z -
- * [KO] 로컬 z 좌표
- * [EN] Local z coordinate
+ * [KO] 변환할 로컬 Z 좌표
+ * [EN] Local Z coordinate to transform
  * @returns
- * [KO] 변환된 월드 좌표 [x, y, z]
- * [EN] Converted world coordinates [x, y, z]
+ * [KO] 변환된 3D 월드 좌표 튜플 (`[x, y, z]`)
+ * [EN] Transformed 3D world coordinate tuple (`[x, y, z]`)
  * @throws
- * [KO] 입력 좌표가 숫자가 아니면 Error 발생
- * [EN] Throws Error if coordinates are not numbers
- * @category Coordinates
+ * [KO] `x`, `y`, `z` 중 하나라도 유효한 숫자가 아닐 경우 에러 발생
+ * [EN] Throws an error if any of `x`, `y`, or `z` is not a valid number
+ * @see [World to Local example](/RedGPU/examples/3d/coordinateTransformation/worldToLocal/)
+ * @category Math
  */
 declare const localToWorld: (targetMatrix: mat4, x: number, y: number, z: number) => [number, number, number];
 export default localToWorld;

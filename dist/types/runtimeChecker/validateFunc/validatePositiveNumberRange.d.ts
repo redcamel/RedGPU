@@ -1,30 +1,27 @@
 /**
- * [KO] 주어진 값이 0 이상의 양수이며 지정된 범위 내에 있는지 검증합니다.
- * [EN] Validates if the given value is a positive number within the specified range.
+ * [KO] 값이 0 이상이며 [minRange, maxRange] 범위 내의 숫자인지 검증하며, 실패 시 예외를 발생시킵니다.
+ * [EN] Validates that the value is a non-negative number within [minRange, maxRange] and throws an exception on failure.
  *
- * [KO] 값이 0 미만이거나 지정된 범위를 벗어날 경우 예외를 발생시킵니다.
- * [EN] Throws an exception if the value is less than 0 or out of range.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * RedGPU.RuntimeChecker.validatePositiveNumberRange(10, 0, 100);
  * ```
  *
  * @param value -
  * [KO] 검증할 숫자 값
- * [EN] Value to validate
+ * [EN] Numeric value to validate
  * @param minRange -
- * [KO] 허용되는 최소값 (0 이상, 기본값: 0)
- * [EN] Minimum allowed value (>= 0, default: 0)
+ * [KO] 허용 최소값 (0 이상, 기본값: 0)
+ * [EN] Minimum allowed value (must be >= 0, default: 0)
  * @param maxRange -
- * [KO] 허용되는 최대값 (기본값: Number.MAX_VALUE)
+ * [KO] 허용 최대값 (기본값: Number.MAX_VALUE)
  * [EN] Maximum allowed value (default: Number.MAX_VALUE)
  * @returns
- * [KO] 범위 내의 양수이면 true
- * [EN] True if the value is a positive number within range
+ * [KO] 범위 내의 0 이상 숫자이면 true
+ * [EN] True if the value is a non-negative number within range
  * @throws
- * [KO] 입력값이 숫자가 아니거나, 0 미만이거나, 범위를 벗어날 경우 Error 발생
- * [EN] Throws Error if inputs are not numbers, negative, or the value is out of range
+ * [KO] 인자가 숫자가 아니거나 NaN, minRange 또는 값이 음수, 값이 범위를 벗어난 경우 Error 발생
+ * [EN] Throws Error if any argument is not a number or NaN, minRange or the value is negative, or the value is out of range
  * @category Validation
  */
 declare const validatePositiveNumberRange: (value: number, minRange?: number, maxRange?: number) => boolean;

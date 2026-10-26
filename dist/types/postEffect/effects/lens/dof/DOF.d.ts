@@ -3,19 +3,10 @@ import View3D from "../../../../display/view/View3D";
 import AMultiPassPostEffect from "../../../core/AMultiPassPostEffect";
 import { IPostEffectResult } from "../../../core/types";
 /**
- * [KO] 피사계 심도(DOF, Depth of Field) 후처리 이펙트입니다.
- * [EN] Depth of Field (DOF) post-processing effect.
+ * [KO] 착란원(CoC) 모델을 기반으로 초점 거리에 따른 블러와 보케(Bokeh)를 시뮬레이션하는 피사계 심도(DOF) 후처리 이펙트입니다.
+ * [EN] Depth of Field (DOF) post-processing effect that simulates distance-based blur and bokeh based on the Circle of Confusion (CoC) model.
  *
- * [KO] 실제 카메라 렌즈의 특성을 시뮬레이션하여, 초점이 맞는 영역은 선명하게 하고 그 외의 영역은 거리에 따라 부드럽게 블러 처리합니다.
- * [EN] Simulates real camera lens characteristics by keeping focused areas sharp while smoothly blurring other areas based on distance.
- *
- * [KO] CoC(Circle of Confusion) 모델을 기반으로 물리적으로 정확한 심도 표현을 제공하며, 고품질 하드웨어 샘플링을 통해 매끄러운 보케(Bokeh) 질감을 구현합니다.
- * [EN] Provides physically accurate depth representation based on the CoC (Circle of Confusion) model and implements smooth bokeh textures through high-quality hardware sampling.
- *
- * [KO] 이 효과는 HDR 공간에서 동작하여 밝은 광원의 보케 형태를 아름답게 보존합니다.
- * [EN] This effect operates in HDR space, beautifully preserving the bokeh shapes of bright light sources.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.DOF(redGPUContext);
  * effect.focusDistance = 10;
@@ -25,7 +16,9 @@ import { IPostEffectResult } from "../../../core/types";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/dof/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/dof/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [DOF example](/RedGPU/examples/postEffect/lens/dof/)
  * @category Lens
  */
 declare class DOF extends AMultiPassPostEffect {
@@ -34,227 +27,169 @@ declare class DOF extends AMultiPassPostEffect {
      * [KO] DOF 인스턴스를 생성합니다.
      * [EN] Creates a DOF instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.DOF(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
     /**
-     * [KO] 초점 거리를 반환합니다.
-     * [EN] Returns the focus distance.
+     * [KO] 초점 거리를 반환하거나 설정합니다.
+     * [EN] Returns or sets the focus distance.
      *
+     * @defaultValue 15.0
      * @returns
      * [KO] 초점 거리
      * [EN] Focus distance
      */
     get focusDistance(): number;
-    /**
-     * [KO] 초점 거리를 설정합니다.
-     * [EN] Sets the focus distance.
-     *
-     * @param value -
-     * [KO] 초점 거리
-     * [EN] Focus distance
-     */
     set focusDistance(value: number);
     /**
-     * [KO] 조리개 값을 반환합니다.
-     * [EN] Returns the aperture value.
+     * [KO] 조리개 값(F-number)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the aperture value (F-number).
      *
+     * @defaultValue 2.8
      * @returns
-     * [KO] 조리개 값 (F값)
+     * [KO] 조리개 값 (F-number)
      * [EN] Aperture value (F-number)
      */
     get aperture(): number;
-    /**
-     * [KO] 조리개 값을 설정합니다.
-     * [EN] Sets the aperture value.
-     *
-     * @param value -
-     * [KO] 조리개 값 (F값)
-     * [EN] Aperture value (F-number)
-     */
     set aperture(value: number);
     /**
-     * [KO] 최대 CoC 값을 반환합니다.
-     * [EN] Returns the max CoC value.
+     * [KO] 최대 착란원(CoC) 크기(0 ~ 100)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the maximum Circle of Confusion (CoC) size (0 ~ 100).
      *
+     * @defaultValue 25.0
      * @returns
-     * [KO] 최대 CoC 값
-     * [EN] Max CoC value
+     * [KO] 최대 CoC 크기
+     * [EN] Maximum CoC size
      */
     get maxCoC(): number;
-    /**
-     * [KO] 최대 CoC 값을 설정합니다.
-     * [EN] Sets the max CoC value.
-     *
-     * @param value -
-     * [KO] 최대 CoC 값
-     * [EN] Max CoC value
-     */
     set maxCoC(value: number);
     /**
-     * [KO] 근평면 값을 반환합니다.
-     * [EN] Returns the near plane value.
+     * [KO] 근평면 거리(0 이상)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the near plane distance (0 or greater).
      *
+     * @defaultValue 0.1
      * @returns
      * [KO] 근평면 거리
      * [EN] Near plane distance
      */
     get nearPlane(): number;
-    /**
-     * [KO] 근평면 값을 설정합니다.
-     * [EN] Sets the near plane value.
-     *
-     * @param value -
-     * [KO] 근평면 거리
-     * [EN] Near plane distance
-     */
     set nearPlane(value: number);
     /**
-     * [KO] 원평면 값을 반환합니다.
-     * [EN] Returns the far plane value.
+     * [KO] 원평면 거리(0.1 이상)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the far plane distance (0.1 or greater).
      *
+     * @defaultValue 1000.0
      * @returns
      * [KO] 원평면 거리
      * [EN] Far plane distance
      */
     get farPlane(): number;
-    /**
-     * [KO] 원평면 값을 설정합니다.
-     * [EN] Sets the far plane value.
-     *
-     * @param value -
-     * [KO] 원평면 거리
-     * [EN] Far plane distance
-     */
     set farPlane(value: number);
     /**
-     * [KO] 근거리 블러 크기를 반환합니다.
-     * [EN] Returns the near blur size.
+     * [KO] 근거리 블러 크기(단위: 픽셀)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the near blur size (in pixels).
      *
+     * @defaultValue 15
      * @returns
-     * [KO] 근거리 블러 크기 (픽셀 단위)
-     * [EN] Near blur size in pixels
+     * [KO] 근거리 블러 크기 (단위: 픽셀)
+     * [EN] Near blur size (in pixels)
      */
     get nearBlurSize(): number;
-    /**
-     * [KO] 근거리 블러 크기를 설정합니다.
-     * [EN] Sets the near blur size.
-     *
-     * @param value -
-     * [KO] 근거리 블러 크기 (픽셀 단위)
-     * [EN] Near blur size in pixels
-     */
     set nearBlurSize(value: number);
     /**
-     * [KO] 원거리 블러 크기를 반환합니다.
-     * [EN] Returns the far blur size.
+     * [KO] 원거리 블러 크기(단위: 픽셀)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the far blur size (in pixels).
      *
+     * @defaultValue 15
      * @returns
-     * [KO] 원거리 블러 크기 (픽셀 단위)
-     * [EN] Far blur size in pixels
+     * [KO] 원거리 블러 크기 (단위: 픽셀)
+     * [EN] Far blur size (in pixels)
      */
     get farBlurSize(): number;
-    /**
-     * [KO] 원거리 블러 크기를 설정합니다.
-     * [EN] Sets the far blur size.
-     *
-     * @param value -
-     * [KO] 원거리 블러 크기 (픽셀 단위)
-     * [EN] Far blur size in pixels
-     */
     set farBlurSize(value: number);
     /**
-     * [KO] 근거리 블러 강도를 반환합니다.
-     * [EN] Returns the near blur strength.
+     * [KO] 근거리 블러 강도를 반환하거나 설정합니다.
+     * [EN] Returns or sets the near blur strength.
      *
+     * @defaultValue 1.0
      * @returns
      * [KO] 근거리 블러 강도
      * [EN] Near blur strength
      */
     get nearStrength(): number;
-    /**
-     * [KO] 근거리 블러 강도를 설정합니다.
-     * [EN] Sets the near blur strength.
-     *
-     * @param value -
-     * [KO] 근거리 블러 강도
-     * [EN] Near blur strength
-     */
     set nearStrength(value: number);
     /**
-     * [KO] 원거리 블러 강도를 반환합니다.
-     * [EN] Returns the far blur strength.
+     * [KO] 원거리 블러 강도를 반환하거나 설정합니다.
+     * [EN] Returns or sets the far blur strength.
      *
+     * @defaultValue 1.0
      * @returns
      * [KO] 원거리 블러 강도
      * [EN] Far blur strength
      */
     get farStrength(): number;
-    /**
-     * [KO] 원거리 블러 강도를 설정합니다.
-     * [EN] Sets the far blur strength.
-     *
-     * @param value -
-     * [KO] 원거리 블러 강도
-     * [EN] Far blur strength
-     */
     set farStrength(value: number);
     /**
-     * [KO] 게임 기본 프리셋을 적용합니다. (균형잡힌 품질/성능)
-     * [EN] Applies the Game Default preset. (Balanced quality/performance)
+     * [KO] 게임 기본 프리셋을 적용합니다.
+     * [EN] Applies the Game Default preset.
      */
     setGameDefault(): void;
     /**
-     * [KO] 시네마틱 프리셋을 적용합니다. (강한 DOF, 영화같은 느낌)
-     * [EN] Applies the Cinematic preset. (Strong DOF, cinematic feel)
+     * [KO] 시네마틱 프리셋을 적용합니다.
+     * [EN] Applies the Cinematic preset.
      */
     setCinematic(): void;
     /**
-     * [KO] 인물 사진 프리셋을 적용합니다. (배경 흐림, 인물 포커스)
-     * [EN] Applies the Portrait preset. (Blurred background, focused subject)
+     * [KO] 인물 사진 프리셋을 적용합니다.
+     * [EN] Applies the Portrait preset.
      */
     setPortrait(): void;
     /**
-     * [KO] 풍경 사진 프리셋을 적용합니다. (전체적으로 선명, 약간의 원거리 흐림)
-     * [EN] Applies the Landscape preset. (Generally sharp, slight far blur)
+     * [KO] 풍경 사진 프리셋을 적용합니다.
+     * [EN] Applies the Landscape preset.
      */
     setLandscape(): void;
     /**
-     * [KO] 매크로 촬영 프리셋을 적용합니다. (극도로 얕은 심도)
-     * [EN] Applies the Macro preset. (Extremely shallow depth of field)
+     * [KO] 매크로 촬영 프리셋을 적용합니다.
+     * [EN] Applies the Macro preset.
      */
     setMacro(): void;
     /**
-     * [KO] 액션/스포츠 프리셋을 적용합니다. (빠른 움직임에 적합)
-     * [EN] Applies the Action/Sports preset. (Suitable for fast motion)
+     * [KO] 액션/스포츠 프리셋을 적용합니다.
+     * [EN] Applies the Action/Sports preset.
      */
     setSports(): void;
     /**
-     * [KO] 야간 촬영 프리셋을 적용합니다. (저조도 환경)
-     * [EN] Applies the Night Mode preset. (Low light environment)
+     * [KO] 야간 촬영 프리셋을 적용합니다.
+     * [EN] Applies the Night Mode preset.
      */
     setNightMode(): void;
     /**
-     * [KO] DOF 효과를 렌더링합니다.
-     * [EN] Renders the DOF effect.
+     * [KO] DOF 다중 패스 후처리 효과를 렌더링합니다.
+     * [EN] Renders the multi-pass DOF post-processing effect.
      *
-     * @param view
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
-     * @param width
-     * [KO] 너비
-     * [EN] Width
-     * @param height
-     * [KO] 높이
-     * [EN] Height
-     * @param sourceTextureInfo
-     * [KO] 소스 텍스처 정보
-     * [EN] Source texture info
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
      * @returns
-     * [KO] 최종 DOF 처리 결과
-     * [EN] Final DOF result
+     * [KO] DOF 처리된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] DOF output texture information (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }

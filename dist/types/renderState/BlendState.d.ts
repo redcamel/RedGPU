@@ -1,71 +1,74 @@
 /**
- * [KO] 머티리얼의 색상 및 알파 블렌딩 동작을 제어하는 상태 클래스입니다.
- * [EN] State class that controls color and alpha blending behavior for materials.
+ * [KO] 머티리얼의 색상 및 알파 블렌딩 동작을 제어하는 렌더 상태 클래스입니다.
+ * [EN] Render state class that controls color and alpha blending behavior for materials.
  *
- * [KO] 렌더 파이프라인에서 소스와 대상 색상을 어떻게 혼합할지 정의하며, 투명도나 합성 효과를 구현하는 데 사용됩니다.
- * [EN] Defines how source and destination colors are mixed in the render pipeline, used to implement transparency or compositing effects.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const blendState = material.blendState;
+ * const blendState = material.blendStateColor;
  * blendState.operation = RedGPU.GPU_BLEND_OPERATION.ADD;
  * blendState.srcFactor = RedGPU.GPU_BLEND_FACTOR.SRC_ALPHA;
  * blendState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
  * ```
+ *
  * @category RenderState
  */
 declare class BlendState {
     #private;
     /**
-     * [KO] 최종 GPUBlendComponent 상태 객체
-     * [EN] Final GPUBlendComponent state object
+     * [KO] 최종 생성된 `GPUBlendComponent` 상태 객체
+     * [EN] Final generated `GPUBlendComponent` state object
      */
     state: GPUBlendComponent;
     /**
      * [KO] BlendState 인스턴스를 생성합니다.
-     * [EN] Creates an instance of BlendState.
+     * [EN] Creates a BlendState instance.
      *
      * @param targetMaterial -
-     * [KO] 블렌드 상태가 적용될 머티리얼
-     * [EN] Material to which the blend state is applied
+     * [KO] 블렌드 상태가 적용될 대상 머티리얼
+     * [EN] Target material to which the blend state is applied
      * @param srcFactor -
-     * [KO] 소스 블렌드 팩터
-     * [EN] Source blend factor
+     * [KO] 소스 블렌드 팩터 (기본값: `GPU_BLEND_FACTOR.SRC_ALPHA`)
+     * [EN] Source blend factor (default: `GPU_BLEND_FACTOR.SRC_ALPHA`)
      * @param dstFactor -
-     * [KO] 대상 블렌드 팩터
-     * [EN] Destination blend factor
+     * [KO] 대상 블렌드 팩터 (기본값: `GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA`)
+     * [EN] Destination blend factor (default: `GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA`)
      * @param operation -
-     * [KO] 블렌드 연산
-     * [EN] Blend operation
+     * [KO] 블렌드 연산 방식 (기본값: `GPU_BLEND_OPERATION.ADD`)
+     * [EN] Blend operation mode (default: `GPU_BLEND_OPERATION.ADD`)
      */
     constructor(targetMaterial: any, srcFactor?: GPUBlendFactor, dstFactor?: GPUBlendFactor, operation?: GPUBlendOperation);
     /**
-     * [KO] 블렌드 연산 방식을 가져오거나 설정합니다.
-     * [EN] Gets or sets the blend operation.
+     * [KO] 블렌드 연산 방식을 반환하거나 설정합니다.
+     * [EN] Gets or sets the blend operation mode.
      *
      * @returns
-     * [KO] 현재 설정된 GPUBlendOperation
-     * [EN] Current GPUBlendOperation
+     * [KO] 현재 설정된 `GPUBlendOperation` 값
+     * [EN] Currently configured `GPUBlendOperation` value
      */
     get operation(): GPUBlendOperation;
     set operation(newOperation: GPUBlendOperation);
     /**
-     * [KO] 소스(Source) 블렌드 팩터를 가져오거나 설정합니다.
+     * [KO] 소스(Source) 블렌드 팩터를 반환하거나 설정합니다.
      * [EN] Gets or sets the source blend factor.
      *
      * @returns
-     * [KO] 현재 설정된 GPUBlendFactor
-     * [EN] Current GPUBlendFactor
+     * [KO] 현재 설정된 소스 `GPUBlendFactor` 값
+     * [EN] Currently configured source `GPUBlendFactor` value
      */
     get srcFactor(): GPUBlendFactor;
     set srcFactor(newSrcFactor: GPUBlendFactor);
     /**
-     * [KO] 대상(Destination) 블렌드 팩터를 가져오거나 설정합니다.
+     * [KO] 대상(Destination) 블렌드 팩터를 반환하거나 설정합니다.
      * [EN] Gets or sets the destination blend factor.
      *
      * @returns
-     * [KO] 현재 설정된 GPUBlendFactor
-     * [EN] Current GPUBlendFactor
+     * [KO] 현재 설정된 대상 `GPUBlendFactor` 값
+     * [EN] Currently configured destination `GPUBlendFactor` value
      */
     get dstFactor(): GPUBlendFactor;
     set dstFactor(newDstFactor: GPUBlendFactor);

@@ -6,8 +6,8 @@ export declare const GPU_BUFFER_DATA_SYMBOL_F32: unique symbol;
 export declare const GPU_BUFFER_DATA_SYMBOL_U32: unique symbol;
 export declare const GPU_BUFFER_CACHE_KEY: unique symbol;
 /**
- * [KO] RedGPU에서 사용하는 모든 버퍼 리소스의 기본 추상 클래스입니다.
- * [EN] Abstract base class for all buffer resources used in RedGPU.
+ * [KO] RedGPU의 모든 GPU 버퍼 리소스가 상속하는 기본 추상 클래스입니다.
+ * [EN] Abstract base class inherited by all GPU buffer resources in RedGPU.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -21,47 +21,71 @@ declare abstract class ABaseBuffer extends ManagementResourceBase {
     [GPU_BUFFER_SYMBOL]: GPUBuffer;
     [GPU_BUFFER_CACHE_KEY]: string;
     /**
-     * [KO] ABaseBuffer 인스턴스를 초기화합니다.
-     * [EN] Initializes an ABaseBuffer instance.
+     * [KO] 버퍼 공통 상태를 초기화합니다.
+     * [EN] Initializes the common buffer state.
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param managedStateKey -
-     * [KO] 관리 상태 키
-     * [EN] Managed state key
+     * [KO] 리소스 매니저의 관리 상태 키
+     * [EN] Managed state key of the resource manager
      * @param usage -
      * [KO] GPU 버퍼 사용 플래그
      * [EN] GPU buffer usage flags
      */
     protected constructor(redGPUContext: RedGPUContext, managedStateKey: string, usage: GPUBufferUsageFlags);
     /**
-     * [KO] 캐시 키를 반환합니다.
-     * [EN] Returns the cache key.
+     * [KO] 버퍼 캐시 키를 반환합니다. 지정되지 않은 경우 uuid를 반환합니다.
+     * [EN] Returns the buffer cache key. Returns the uuid if not specified.
+     *
+     * @returns
+     * [KO] 캐시 키
+     * [EN] Cache key
      */
     get cacheKey(): string;
     /**
-     * [KO] GPUBuffer 객체를 반환합니다.
-     * [EN] Returns the GPUBuffer object.
+     * [KO] 내부 GPUBuffer 객체를 반환합니다.
+     * [EN] Returns the internal GPUBuffer object.
+     *
+     * @returns
+     * [KO] GPUBuffer 객체
+     * [EN] GPUBuffer object
      */
     get gpuBuffer(): GPUBuffer;
     /**
-     * [KO] GPUBufferUsageFlags를 반환합니다.
-     * [EN] Returns the GPUBufferUsageFlags.
+     * [KO] GPU 버퍼 사용 플래그를 반환합니다.
+     * [EN] Returns the GPU buffer usage flags.
+     *
+     * @returns
+     * [KO] GPUBufferUsageFlags 값
+     * [EN] GPUBufferUsageFlags value
      */
     get usage(): GPUBufferUsageFlags;
     /**
-     * [KO] 버퍼의 크기(byte)를 반환합니다.
-     * [EN] Returns the size of the buffer in bytes.
+     * [KO] 버퍼 데이터 크기(byte)를 반환합니다.
+     * [EN] Returns the buffer data size in bytes.
+     *
+     * @returns
+     * [KO] 바이트 크기 (데이터가 없으면 0)
+     * [EN] Size in bytes (0 if no data)
      */
     get size(): number;
     /**
      * [KO] 비디오 메모리 사용량(byte)을 반환합니다.
      * [EN] Returns the video memory usage in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량
+     * [EN] Video memory usage
      */
     get videoMemorySize(): number;
     /**
-     * [KO] 리소스를 파괴합니다.
-     * [EN] Destroys the resource.
+     * [KO] GPU 버퍼를 해제하고 리소스 매니저에서 등록을 해제합니다.
+     * [EN] Releases the GPU buffer and unregisters it from the resource manager.
+     *
+     * [KO] GPUBuffer 파괴는 CommandEncoderManager를 통해 지연 처리됩니다.
+     * [EN] GPUBuffer destruction is deferred through CommandEncoderManager.
      */
     destroy(): void;
 }

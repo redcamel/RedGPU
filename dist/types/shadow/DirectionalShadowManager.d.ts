@@ -12,10 +12,37 @@ import { mat4 } from "gl-matrix";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * ### Example
+ * ```typescript
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
+ * const directionalShadowManager = view.directionalShadowManager;
+ * ```
+ *
  * @category Shadow
  */
 declare class DirectionalShadowManager {
     #private;
+    /**
+     * [KO] 각 캐스케이드의 월드 공간 외접구 정보 [center.x, center.y, center.z, radius] * 4 (길이 16 Float32Array)를 반환합니다.
+     * [EN] Returns the world-space bounding sphere info [center.x, center.y, center.z, radius] * 4 (length 16 Float32Array) for each cascade.
+     */
+    get cascadeBoundingSpheres(): Float32Array;
+    /**
+     * [KO] 각 캐스케이드 중심으로부터 광원 역방향(-lightDir)으로 설정된 실제 직교 광원 거리 배열(길이 4 Float32Array)을 반환합니다.
+     * [EN] Returns the array of orthographic light distances (length 4 Float32Array) along the inverse light direction (-lightDir) from each cascade center.
+     */
+    get cascadeLightDistances(): Float32Array;
+    /**
+     * [KO] 캐스터들의 그림자 유효 영역 중심 좌표(vec3)를 반환합니다.
+     * [EN] Returns the center coordinates (vec3) of the casters' effective shadow volume.
+     */
+    get casterBoundingCenter(): Float32Array;
+    /**
+     * [KO] 캐스터들의 그림자 유효 영역 반경 제곱값을 반환합니다. (0.0: 캐스터 없음, <0.0: 전역 캐스터 존재로 가드 우회, >0.0: 유효 반경 제곱)
+     * [EN] Returns the squared radius of the casters' effective shadow volume (0.0: no casters, <0.0: global casters bypass, >0.0: valid squared radius).
+     */
+    get casterBoundingRadiusSq(): number;
     /**
      * [KO] 현재 섀도우 맵이 사용하는 비디오 메모리 크기(Bytes)를 반환합니다.
      * [EN] Returns the video memory size (Bytes) used by the current shadow map.
@@ -103,10 +130,12 @@ declare class DirectionalShadowManager {
      */
     get maxShadowDistance(): number;
     /**
-     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(언리얼 엔진 표준 기본값: 200m)를 설정합니다.
-     * [EN] Sets the maximum shadow distance (Unreal Engine standard default: 200m).
+     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(기본값: 200m)를 설정합니다.
+     * [EN] Sets the maximum shadow distance (default: 200m).
      *
-     * @param value - 최대 그림자 가시거리 (m)
+     * @param value -
+     * [KO] 최대 그림자 가시거리 (m)
+     * [EN] Maximum shadow distance in meters
      */
     set maxShadowDistance(value: number);
     /**
@@ -155,21 +184,15 @@ declare class DirectionalShadowManager {
      */
     set shadowDepthTextureSize(value: number);
     /**
-     * [KO] PCSS 광원의 가상 크기(Light Radius / Angular Size, 기본값: 2.0)를 반환합니다.
-     * [EN] Returns the virtual light size for PCSS (Light Radius / Angular Size, default: 2.0).
-     */
-    get pcssLightSize(): number;
-    /**
-     * [KO] PCSS 광원의 가상 크기(Light Radius / Angular Size, 기본값: 2.0)를 설정합니다. (0.0 이상)
-     * [EN] Sets the virtual light size for PCSS (Light Radius / Angular Size, default: 2.0). (0.0 or greater)
-     */
-    set pcssLightSize(value: number);
-    /**
-     * [KO] 특정 캐스케이드 레이어의 단일 2D 뎁스 텍스처 뷰를 반환합니다. (캐스케이드 렌더 패스 Attachment용)
-     * [EN] Returns a single 2D depth texture view for a specific cascade layer. (For cascade render pass attachment)
+     * [KO] 특정 캐스케이드 레이어의 단일 2D 뎁스 텍스처 뷰를 반환합니다.
+     * [EN] Returns a single 2D depth texture view for a specific cascade layer.
      *
-     * @param index - 캐스케이드 인덱스 (0 ~ 3)
-     * @returns 해당 레이어의 2D GPUTextureView
+     * @param index -
+     * [KO] 캐스케이드 인덱스 (0 ~ 3)
+     * [EN] Cascade index (0 to 3)
+     * @returns
+     * [KO] 해당 레이어의 2D GPUTextureView
+     * [EN] 2D GPUTextureView of the layer
      */
     getCascadeLayerView(index: number): GPUTextureView;
     /**
@@ -178,14 +201,19 @@ declare class DirectionalShadowManager {
      */
     resetCastingList(): void;
     /**
-     * [KO] 언리얼 엔진 5(UE5) 표준 지수 분할(Exponential Distribution Exponent = 3.0) 및
-     *      해석적 외접구(Analytical Bounding Sphere) 텍셀 스냅핑 알고리즘을 적용하여
-     *      CSM 행렬과 분할 깊이를 직접(In-Place) 계산합니다.
-     * [EN] In-place calculates jitter-free high-precision CSM matrices and split depths directly into member buffers.
+     * [KO] Auto-CSM 물리 기반 텍셀 밀도 역산 모델 및 절두체 8정점 완전 포섭 대칭 외접구(Symmetric Bounding Sphere)
+     *      알고리즘을 적용하여 CSM 행렬과 분할 깊이를 직접(In-Place) 계산합니다.
+     * [EN] In-place calculates jitter-free high-precision CSM matrices and split depths directly into member buffers
+     *      using the Auto-CSM physical texel density inversion model and symmetric bounding sphere algorithm.
      *
      * @param view - 대상 View3D
      */
     calculateCSMMatrices(view: View3D): void;
+    /**
+     * [KO] 사용 중인 GPU 리소스를 해제합니다.
+     * [EN] Releases GPU resources in use.
+     */
+    destroy(): void;
     /**
      * [KO] 내부 상태를 업데이트합니다. (주로 해상도 변경 체크)
      * [EN] Updates internal state. (Mainly checks for resolution changes)
@@ -195,10 +223,5 @@ declare class DirectionalShadowManager {
      * [EN] RedGPUContext instance
      */
     update(redGPUContext: RedGPUContext): boolean;
-    /**
-     * [KO] 사용 중인 GPU 리소스를 해제합니다.
-     * [EN] Releases GPU resources in use.
-     */
-    destroy(): void;
 }
 export default DirectionalShadowManager;

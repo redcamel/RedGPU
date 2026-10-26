@@ -1,6 +1,6 @@
 /**
- * [KO] Simplex, Voronoi 등 실시간 생성이 가능한 다양한 노이즈 텍스처를 제공합니다.
- * [EN] Provides various noise textures that can be generated in real-time, such as Simplex and Voronoi.
+ * [KO] Simplex, Voronoi 등 컴퓨트 셰이더로 실시간 생성되는 노이즈 텍스처를 제공합니다.
+ * [EN] Provides noise textures generated in real time by compute shaders, such as Simplex and Voronoi.
  * @packageDocumentation
  */
 import NOISE_DIMENSION from "./simplex/NOISE_DIMENSION";

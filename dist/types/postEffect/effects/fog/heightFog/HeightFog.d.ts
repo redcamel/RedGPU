@@ -1,33 +1,97 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 interface HeightFog {
-    /** [KO] 안개의 밀도 (0 ~ 5) [EN] Density of the fog (0 ~ 5) */
+    /**
+     * [KO] 안개 밀도 (0 ~ 5)
+     * [EN] Fog density (0 ~ 5)
+     * @defaultValue 1.0
+     */
     density: number;
-    /** [KO] 안개가 시작되는 월드 기준 높이 [EN] Base height in world space where the fog starts */
+    /**
+     * [KO] 안개 시작 월드 기준 높이
+     * [EN] Base height in world space where the fog starts
+     * @defaultValue 0.0
+     */
     baseHeight: number;
-    /** [KO] 안개의 수직 두께 [EN] Vertical thickness of the fog */
+    /**
+     * [KO] 안개의 수직 두께 (0.1 이상)
+     * [EN] Vertical thickness of the fog (0.1 or greater)
+     * @defaultValue 20.0
+     */
     thickness: number;
-    /** [KO] 높이에 따른 안개 감쇠율 [EN] Fog falloff rate based on height */
+    /**
+     * [KO] 높이에 따른 안개 감쇠율 (0.001 ~ 2)
+     * [EN] Fog falloff rate based on height (0.001 ~ 2)
+     * @defaultValue 0.5
+     */
     falloff: number;
-    /** [KO] 안개가 시작되는 카메라 기준 원거리 (m) [EN] Start distance from camera for fog (m) */
+    /**
+     * [KO] 안개 시작 카메라 거리 (0.0 이상)
+     * [EN] Start distance from camera for fog (0.0 or greater)
+     * @defaultValue 0.0
+     */
     startDepth: number;
-    /** [KO] 안개가 최대 밀도에 도달하는 원거리 (m) [EN] End distance from camera for fog (m) */
+    /**
+     * [KO] 안개 최대 밀도 도달 거리 (0.0 이상)
+     * [EN] End distance from camera for fog (0.0 or greater)
+     * @defaultValue 50.0
+     */
     endDepth: number;
-    /** [KO] 안개 계산 방식 (0: 지수형, 1: 지수제곱형) [EN] Fog calculation type (0: Exponential, 1: Exponential Squared) */
+    /**
+     * [KO] 안개 계산 방식 (`HeightFog.EXPONENTIAL`: 0, `HeightFog.EXPONENTIAL_SQUARED`: 1)
+     * [EN] Fog calculation type (`HeightFog.EXPONENTIAL`: 0, `HeightFog.EXPONENTIAL_SQUARED`: 1)
+     * @defaultValue 0
+     */
     fogType: number;
-    /** [KO] 안개의 색상 [EN] Color of the fog */
+    /**
+     * [KO] 안개 색상
+     * [EN] Fog color
+     * @defaultValue '#c8d2ff'
+     */
     fogColor: string;
 }
 /**
- * [KO] 높이 기반 안개(Height Fog) 후처리 이펙트입니다.
- * [EN] Height Fog post-processing effect.
+ * [KO] 월드 좌표의 높이(Y축)와 카메라 거리를 기준으로 안개 농도를 계산하는 높이 기반 안개 후처리 이펙트입니다.
+ * [EN] Height Fog post-processing effect that calculates fog density based on world height (Y-axis) and camera distance.
  *
- * [KO] 월드 좌표의 높이(Y축) 및 카메라 거리(startDepth~endDepth)를 기준으로 안개 농도를 결정하여 지표면 및 원경 지평선 안개를 시뮬레이션합니다.
- * [EN] Simulates fog effects near ground and distant horizons based on world height (Y-axis) and camera distance (startDepth~endDepth).
+ * ### Example
+ * ```typescript
+ * const effect = new RedGPU.PostEffect.HeightFog(redGPUContext);
+ * effect.density = 1.5;
+ * effect.baseHeight = 0.0;
+ * effect.thickness = 20.0;
+ * view.postEffectManager.addEffect(effect);
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/fog/heightFog/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [HeightFog example](/RedGPU/examples/postEffect/fog/heightFog/)
+ * @category Fog
  */
 declare class HeightFog extends ASinglePassPostEffect {
+    /**
+     * [KO] 지수(Exponential) 안개 타입 (`0`)
+     * [EN] Exponential fog type (`0`)
+     */
     static EXPONENTIAL: number;
+    /**
+     * [KO] 지수제곱(Exponential Squared) 안개 타입 (`1`)
+     * [EN] Exponential Squared fog type (`1`)
+     */
     static EXPONENTIAL_SQUARED: number;
+    /**
+     * [KO] HeightFog 인스턴스를 생성합니다.
+     * [EN] Creates a HeightFog instance.
+     *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.HeightFog(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext);
 }
 export default HeightFog;

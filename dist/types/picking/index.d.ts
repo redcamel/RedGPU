@@ -1,9 +1,6 @@
 /**
- * [KO] 마우스 피킹, 레이캐스팅 및 이벤트 처리를 위한 핵심 기능을 제공합니다.
- * [EN] Provides core functionality for mouse picking, raycasting, and event handling.
- *
- * [KO] GPU 기반 픽셀 피킹 시스템과 CPU 기반 레이캐스팅(2D/3D)을 모두 지원하여 정밀한 객체 선택 및 상호작용을 가능하게 합니다.
- * [EN] Supports both GPU-based pixel picking and CPU-based raycasting (2D/3D), enabling precise object selection and interaction.
+ * [KO] GPU 기반 픽셀 피킹, CPU 기반 2D/3D 레이캐스팅 및 피킹 이벤트 처리를 위한 핵심 기능을 제공합니다.
+ * [EN] Provides core functionality for GPU-based pixel picking, CPU-based 2D/3D raycasting, and picking event handling.
  * @packageDocumentation
  */
 import PickingEvent from "./core/PickingEvent";

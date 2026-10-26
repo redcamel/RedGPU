@@ -1,25 +1,55 @@
 import RedGPUContext from "../context/RedGPUContext";
 import Primitive from "./core/Primitive";
 /**
- * [KO] 모서리가 둥근 박스 지오메트리 클래스입니다.
- * [EN] Rounded box geometry class.
+ * [KO] 모서리가 둥근 6면체 박스 형태의 정점 및 인덱스 데이터를 생성하는 기본 도형 클래스입니다.
+ * [EN] Primitive geometry class that generates vertex and index data for a rounded-edge hexahedral box.
  *
+ * ### Example
+ * ```typescript
+ * const roundedBox = new RedGPU.Primitive.RoundedBox(redGPUContext, 1, 1, 1, 1, 1, 1, 0.1, 4);
+ * ```
+ *
+ * @see [RoundedBox example](/RedGPU/examples/3d/primitive/roundedBox/)
+ * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)
  * @category Primitive
  */
 export default class RoundedBox extends Primitive {
     /**
      * [KO] RoundedBox 인스턴스를 생성합니다.
-     * [EN] Creates a RoundedBox instance.
+     * [EN] Creates an instance of RoundedBox.
      *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
-     * @param width - [KO] 가로 길이 [EN] Width
-     * @param height - [KO] 세로 길이 [EN] Height
-     * @param depth - [KO] 깊이 길이 [EN] Depth
-     * @param widthSegments - [KO] 가로 분할 수 [EN] Width segments
-     * @param heightSegments - [KO] 세로 분할 수 [EN] Height segments
-     * @param depthSegments - [KO] 깊이 분할 수 [EN] Depth segments
-     * @param radius - [KO] 모서리 반지름 [EN] Corner radius
-     * @param radiusSegments - [KO] 모서리 분할 수 [EN] Corner segments
+     * ### Example
+     * ```typescript
+     * const roundedBox = new RedGPU.Primitive.RoundedBox(redGPUContext, 1, 1, 1, 1, 1, 1, 0.1, 4);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param width -
+     * [KO] 가로(X축) 길이 (기본값: 1)
+     * [EN] Width along the X-axis (default: 1)
+     * @param height -
+     * [KO] 세로(Y축) 길이 (기본값: 1)
+     * [EN] Height along the Y-axis (default: 1)
+     * @param depth -
+     * [KO] 깊이(Z축) 길이 (기본값: 1)
+     * [EN] Depth along the Z-axis (default: 1)
+     * @param widthSegments -
+     * [KO] 가로(X축) 분할 수 (기본값: 1)
+     * [EN] Number of segments along the X-axis (default: 1)
+     * @param heightSegments -
+     * [KO] 세로(Y축) 분할 수 (기본값: 1)
+     * [EN] Number of segments along the Y-axis (default: 1)
+     * @param depthSegments -
+     * [KO] 깊이(Z축) 분할 수 (기본값: 1)
+     * [EN] Number of segments along the Z-axis (default: 1)
+     * @param radius -
+     * [KO] 모서리 곡률 반지름 (기본값: 0.1)
+     * [EN] Corner fillet radius (default: 0.1)
+     * @param radiusSegments -
+     * [KO] 모서리 곡면 분할 수 (기본값: 4)
+     * [EN] Number of segments for the rounded corners (default: 4)
      */
     constructor(redGPUContext: RedGPUContext, width?: number, height?: number, depth?: number, widthSegments?: number, heightSegments?: number, depthSegments?: number, radius?: number, radiusSegments?: number);
 }

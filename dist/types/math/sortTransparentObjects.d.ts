@@ -1,21 +1,21 @@
 /**
- * [KO] 카메라 거리를 기준으로 투명 객체를 원근 거리 내림차순 정렬합니다.
- * [EN] Sorts transparent objects by distance from camera (descending).
+ * [KO] 카메라 위치로부터의 거리 제곱을 기준으로 투명 렌더링 번들(`GPURenderBundle`) 배열을 내림차순(먼 것부터 가까운 순서) 정렬합니다.
+ * [EN] Sorts an array of transparent render bundles (`GPURenderBundle`) in descending order (back-to-front) by squared distance from the camera position.
  *
  * ### Example
  * ```typescript
- * const sorted = RedGPU.math.sortTransparentObjects(camera.position, transparentObjects);
+ * const sortedBundles = RedGPU.Math.sortTransparentObjects(camera, transparentBundles);
  * ```
  *
  * @param cameraPos -
- * [KO] 카메라 위치 {x, y, z}
- * [EN] Camera position {x, y, z}
+ * [KO] 카메라의 3D 월드 좌표 (`{ x: number, y: number, z: number }`)
+ * [EN] 3D world coordinates of the camera (`{ x: number, y: number, z: number }`)
  * @param objects -
- * [KO] 정렬할 `GPURenderBundle` 배열
- * [EN] Array of `GPURenderBundle` objects
+ * [KO] 정렬할 `Array<GPURenderBundle>` 배열
+ * [EN] `Array<GPURenderBundle>` to sort
  * @returns
- * [KO] 정렬된 `GPURenderBundle` 배열
- * [EN] Sorted `GPURenderBundle` array
+ * [KO] 카메라 거리 내림차순으로 정렬된 `Array<GPURenderBundle>` 배열
+ * [EN] `Array<GPURenderBundle>` sorted in descending order of camera distance
  * @category Math
  */
 declare function sortTransparentObjects(cameraPos: {

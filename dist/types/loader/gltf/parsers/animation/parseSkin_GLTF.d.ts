@@ -2,13 +2,22 @@ import Mesh from "../../../../display/mesh/Mesh";
 import { GLTF, Skin } from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 /**
-
- * Parse skin information from GLTF data and assign it to a mesh.
+ * [KO] GLTF 스킨(Skin) 정보와 역바인드 행렬(Inverse Bind Matrices)을 파싱하여 메쉬에 할당합니다.
+ * [EN] Parses GLTF skin information and inverse bind matrices and assigns them to the mesh.
  *
- * @param {GLTFLoader} gltfLoader - The GLTFLoader instance used to load the GLTF data.
- * @param {GLTF} scenesData - The GLTF data containing the scene information.
- * @param {Skin} skin - The skin object containing the joint and skeleton information.
- * @param {Mesh} mesh - The mesh object to which the skin information should be assigned.
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param scenesData -
+ * [KO] GLTF 데이터 객체
+ * [EN] GLTF data object
+ * @param skin -
+ * [KO] 조인트 및 스켈레톤 정보를 포함하는 GLTF Skin 객체
+ * [EN] GLTF Skin object containing joint and skeleton information
+ * @param mesh -
+ * [KO] 스킨 정보가 할당될 대상 메쉬
+ * [EN] Target mesh to which skin information will be assigned
+ * @category Loader
  */
 declare const parseSkin_GLTF: (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, mesh: Mesh) => void;
 export default parseSkin_GLTF;

@@ -3,16 +3,10 @@ import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import { IPostEffectResult } from "../../core/types";
 /**
- * [KO] 올드 블룸(Old Bloom) 후처리 이펙트입니다.
- * [EN] Old Bloom post-processing effect.
+ * [KO] 밝은 영역 추출(Threshold), 가우시안 블러(Gaussian Blur), 원본 합성을 통해 빛 번짐을 구현하는 올드 블룸(Old Bloom) 후처리 이펙트입니다.
+ * [EN] Old Bloom post-processing effect that implements light bleeding by extracting bright areas (Threshold), applying Gaussian Blur, and blending with the original image.
  *
- * [KO] 클래식한 방식의 블룸 효과를 구현합니다. 밝은 영역을 추출(Threshold)하고, 가우시안 블러(Gaussian Blur)를 적용한 뒤, 원본 이미지와 합성(Blend)하여 부드러운 빛 번짐 효과를 만듭니다.
- * [EN] Implements a classic bloom effect. It extracts bright areas (Threshold), applies Gaussian Blur, and then blends them with the original image to create a soft glow effect.
- *
- * [KO] 이 효과는 HDR 공간에서 동작하여 1.0 이상의 밝기 에너지를 보존하며 시네마틱한 결과물을 제공합니다.
- * [EN] This effect operates in HDR space, preserving brightness energy above 1.0 to provide cinematic results.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
  * effect.threshold = 180;
@@ -20,7 +14,9 @@ import { IPostEffectResult } from "../../core/types";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/oldBloom/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/oldBloom/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [OldBloom example](/RedGPU/examples/postEffect/oldBloom/)
  * @category Visual Effects
  */
 declare class OldBloom extends AMultiPassPostEffect {
@@ -28,88 +24,80 @@ declare class OldBloom extends AMultiPassPostEffect {
     /**
      * [KO] OldBloom 인스턴스를 생성합니다.
      * [EN] Creates an OldBloom instance.
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+     *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
     /**
-     * [KO] 임계값을 반환합니다.
-     * [EN] Returns the threshold.
+     * [KO] 밝은 영역 추출 기준 임계값(1 ~ 255)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the threshold value (1 ~ 255) for extracting bright areas.
      *
+     * @defaultValue 156
      * @returns
-     * [KO] 최소 밝기 기준값
-     * [EN] Minimum brightness threshold
+     * [KO] 밝기 임계값
+     * [EN] Brightness threshold
      */
     get threshold(): number;
-    /**
-     * [KO] 임계값을 설정합니다.
-     * [EN] Sets the threshold.
-     *
-     * @param value -
-     * [KO] 최소 밝기 기준값
-     * [EN] Minimum brightness threshold
-     */
     set threshold(value: number);
     /**
-     * [KO] 가우시안 블러 크기를 반환합니다.
-     * [EN] Returns the Gaussian blur size.
+     * [KO] 가우시안 블러 반경 크기(단위: 픽셀)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the Gaussian blur radius size (in pixels).
      *
+     * @defaultValue 32
      * @returns
-     * [KO] 블러 크기 (반경)
-     * [EN] Blur size (radius)
+     * [KO] 블러 반경 크기
+     * [EN] Blur radius size
      */
     get gaussianBlurSize(): number;
-    /**
-     * [KO] 가우시안 블러 크기를 설정합니다.
-     * [EN] Sets the Gaussian blur size.
-     *
-     * @param value -
-     * [KO] 블러 크기 (반경)
-     * [EN] Blur size (radius)
-     */
     set gaussianBlurSize(value: number);
     /**
-     * [KO] 노출값을 반환합니다.
-     * [EN] Returns the exposure value.
+     * [KO] 노출 보정값을 반환하거나 설정합니다.
+     * [EN] Returns or sets the exposure compensation value.
      *
+     * @defaultValue 1.0
      * @returns
      * [KO] 노출 보정값
      * [EN] Exposure compensation value
      */
     get exposure(): number;
-    /**
-     * [KO] 노출값을 설정합니다.
-     * [EN] Sets the exposure value.
-     *
-     * @param value -
-     * [KO] 노출 보정값
-     * [EN] Exposure compensation value
-     */
     set exposure(value: number);
     /**
-     * [KO] 블룸 강도를 반환합니다.
-     * [EN] Returns the bloom strength.
+     * [KO] 블룸 효과 강도를 반환하거나 설정합니다.
+     * [EN] Returns or sets the bloom effect strength.
      *
+     * @defaultValue 1.2
      * @returns
      * [KO] 블룸 강도
      * [EN] Bloom strength
      */
     get bloomStrength(): number;
-    /**
-     * [KO] 블룸 강도를 설정합니다.
-     * [EN] Sets the bloom strength.
-     *
-     * @param value -
-     * [KO] 블룸 강도
-     * [EN] Bloom strength
-     */
     set bloomStrength(value: number);
     /**
-     * [KO] 올드 블룸 효과를 단계별로 렌더링합니다.
-     * [EN] Renders the old bloom effect step by step.
+     * [KO] 올드 블룸 다중 패스 후처리 효과를 렌더링합니다.
+     * [EN] Renders the multi-pass Old Bloom post-processing effect.
      *
-     * [KO] 1단계: 1/2 해상도로 밝은 영역 다운샘플링 추출 (Threshold)
-     * [KO] 2단계: 1/2 해상도에서 블러 처리 (GaussianBlur - 연산량 75% 절감)
-     * [KO] 3단계: Full-Res 원본과 1/2 블러 결과(Bilinear 보간)를 YCoCg 공간에서 가산 합성 (OldBloomBlend)
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 블룸 합성된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Bloom composited output texture information (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }

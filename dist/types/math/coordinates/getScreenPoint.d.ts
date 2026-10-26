@@ -1,30 +1,27 @@
 import { mat4 } from "gl-matrix";
 import View3D from "../../display/view/View3D";
 /**
- * [KO] 3D 모델 행렬을 이용해 화면 상의 2D 픽셀 좌표를 계산합니다.
- * [EN] Calculates 2D screen pixel coordinates from a 3D model matrix.
- *
- * [KO] View3D의 카메라 및 프로젝션 정보를 바탕으로 화면 좌표로 변환합니다.
- * [EN] Converts to screen coordinates based on View3D's camera and projection.
+ * [KO] 대상의 4x4 월드 모델 행렬과 `View3D`의 카메라·투영 행렬을 사용하여 CSS 픽셀 단위의 2D 화면 좌표(`[x, y]`)를 계산합니다.
+ * [EN] Calculates 2D screen coordinates (`[x, y]`) in CSS pixels using the target's 4x4 world model matrix and `View3D`'s camera and projection matrices.
  *
  * ### Example
  * ```typescript
- * const [px, py] = RedGPU.math.getScreenPoint(view, mesh.modelMatrix);
+ * const [screenX, screenY] = RedGPU.Math.getScreenPoint(view, mesh.modelMatrix);
  * ```
  *
  * @param view -
- * [KO] 변환에 사용할 View3D 인스턴스
- * [EN] View3D instance to use for conversion
+ * [KO] 투영 및 뷰포트 정보를 제공하는 `View3D` 인스턴스
+ * [EN] `View3D` instance providing projection and viewport information
  * @param targetMatrix -
- * [KO] 변환할 대상의 모델 행렬
- * [EN] Model matrix of the target to convert
+ * [KO] 변환할 대상의 4x4 모델 행렬 (`mat4`, 열 우선)
+ * [EN] 4x4 model matrix of the target to transform (`mat4`, column-major)
  * @returns
- * [KO] 변환된 화면 픽셀 좌표 [x, y]
- * [EN] Converted screen pixel coordinates [x, y]
+ * [KO] 변환된 2D 화면 좌표 튜플 (`[x, y]`, CSS 픽셀 단위)
+ * [EN] Transformed 2D screen coordinate tuple (`[x, y]`, in CSS pixels)
  * @throws
- * [KO] view가 View3D 인스턴스가 아니면 Error 발생
- * [EN] Throws Error if view is not a View3D instance
- * @category Coordinates
+ * [KO] `view`가 `View3D` 인스턴스가 아닐 경우 에러 발생
+ * [EN] Throws an error if `view` is not a `View3D` instance
+ * @category Math
  */
 declare const getScreenPoint: (view: View3D, targetMatrix: mat4) => [number, number];
 export default getScreenPoint;

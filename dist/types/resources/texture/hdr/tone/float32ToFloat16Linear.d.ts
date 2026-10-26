@@ -2,6 +2,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 /**
  * [KO] Float16 변환 옵션 인터페이스입니다.
  * [EN] Interface for Float16 conversion options.
+ * @category IBL
  */
 export interface Float16ConversionOptions {
     /**
@@ -23,6 +24,7 @@ export interface Float16ConversionOptions {
 /**
  * [KO] Float16 변환 결과 인터페이스입니다.
  * [EN] Interface for Float16 conversion results.
+ * @category IBL
  */
 export interface Float16ConversionResult {
     /**
@@ -37,11 +39,8 @@ export interface Float16ConversionResult {
     executionTime: number;
 }
 /**
- * [KO] Float32 데이터를 Float16(Half-float)으로 변환하여 대상 텍스처에 업로드합니다.
- * [EN] Converts Float32 data to Float16 (Half-float) and uploads it to the target texture.
- *
- * [KO] GPU 컴퓨트 셰이더를 사용하여 선형 색공간을 유지하며 고속으로 변환을 수행하고, 결과를 직접 텍스처로 복사합니다.
- * [EN] Performs high-speed conversion using GPU compute shaders while maintaining linear color space, and copies the result directly to the texture.
+ * [KO] Float32 데이터를 GPU 컴퓨트 셰이더를 통해 Float16(Half-float)으로 변환하여 대상 텍스처에 업로드합니다.
+ * [EN] Converts Float32 data to Float16 (Half-float) via GPU compute shader and uploads it to the target texture.
  *
  * ### Example
  * ```typescript

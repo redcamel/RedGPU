@@ -1,45 +1,53 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <title>RedGPU - Landscape & Water System</title>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="대규모 랜드스케이프 지형과 물리 기반 호수 수체(Lake)를 결합하여 수위, 파도 시뮬레이션, 수중 굴절 및 심도 기반 광학 효과를 구현하는 통합 시스템 예제입니다."
-          name="description">
-    <meta content="RedGPU, WebGPU, Landscape, Water, Lake, Ocean, Waves, Refraction, 3D, Integration"
-          name="keywords">
-    <link href="../../../assets/images/favicon.ico" rel="icon" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landscape & Water System</title>
+    <meta name="description" content="Combines tile-streaming terrain (Landscape) valleys with a Lake water body (scene.addWater), featuring water level control, dual-normal waves, underwater refraction/caustics, and character walking ripple interactions (enableWaterInteraction, interactionFollowTarget).">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, landscapeAndWater, Landscape & Water System">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/">
 
-    <!-- Assets Preload -->
-    <link as="style" href="../../../assets/css/example.css" rel="preload">
-    <link href="index.js" rel="modulepreload">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/">
+    <meta property="og:title" content="Landscape & Water System">
+    <meta property="og:description" content="Combines tile-streaming terrain (Landscape) valleys with a Lake water body (scene.addWater), featuring water level control, dual-normal waves, underwater refraction/caustics, and character walking ripple interactions (enableWaterInteraction, interactionFollowTarget).">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/">
+    <meta property="twitter:title" content="Landscape & Water System">
+    <meta property="twitter:description" content="Combines tile-streaming terrain (Landscape) valleys with a Lake water body (scene.addWater), featuring water level control, dual-normal waves, underwater refraction/caustics, and character walking ripple interactions (enableWaterInteraction, interactionFollowTarget).">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Landscape & Water System",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web",
+  "description": "Combines tile-streaming terrain (Landscape) valleys with a Lake water body (scene.addWater), featuring water level control, dual-normal waves, underwater refraction/caustics, and character walking ripple interactions (enableWaterInteraction, interactionFollowTarget).",
+  "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/",
+  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/thumb.webp",
+  "author": {
+    "@type": "Person",
+    "name": "redcamel"
+  }
+}</script>
+
+    <!-- Module Preload -->
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1792986001111">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792986001111">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css" rel="stylesheet">
-    <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: #000 !important;
-        }
-
-        canvas {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
-        }
-    </style>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792986001111">
+    <script src="index.js?t=1792986001111" type="module"></script>
 </head>
 <body>
-<h1 style="position:fixed;top:-9999px;left:-9999px;opacity:0;">
-    Landscape & Water System - RedGPU
-</h1>
-<script src="index.js" type="module"></script>
+
+
 </body>
 </html>
