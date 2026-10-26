@@ -71,32 +71,23 @@ declare class LandscapeTileStreamer extends RedGPUObject {
      */
     get vntAtlasTexture(): DirectTexture | null;
     /**
-     * [KO] 가상 블렌드 BaseColor 아틀라스(VBT) 텍스처를 반환합니다.
-     * [EN] Returns the Virtual Blend Texture (VBT) BaseColor atlas.
+     * [KO] 가상 블렌드 텍스처(VBT: BaseColor, Normal, ORM) 3-레이어 아틀라스 `DirectTexture`를 반환합니다. 기본 `gpuTextureView`는 Layer 0(BaseColor)의 2D 뷰를 제공합니다.
+     * [EN] Returns the 3-layer Virtual Blend Texture (VBT: BaseColor, Normal, ORM) atlas `DirectTexture`. Its default `gpuTextureView` provides the 2D view of Layer 0 (BaseColor).
      *
      * @returns
-     * [KO] VBT BaseColor 아틀라스 `DirectTexture` 또는 `null`
-     * [EN] VBT BaseColor atlas `DirectTexture` or `null`
+     * [KO] VBT 아틀라스 `DirectTexture` 또는 `null`
+     * [EN] VBT atlas `DirectTexture` or `null`
      */
     get vbtBaseColorAtlas(): DirectTexture | null;
     /**
-     * [KO] 가상 블렌드 Normal 아틀라스(VBT) 텍스처를 반환합니다.
-     * [EN] Returns the Virtual Blend Texture (VBT) Normal atlas.
+     * [KO] 지형 프래그먼트 셰이더 바인딩을 위한 VBT 3-레이어(BaseColor, Normal, ORM) `2d-array` 텍스처 뷰를 반환합니다.
+     * [EN] Returns the VBT 3-layer (BaseColor, Normal, ORM) `2d-array` texture view for terrain fragment shader binding.
      *
      * @returns
-     * [KO] VBT Normal 아틀라스 `DirectTexture` 또는 `null`
-     * [EN] VBT Normal atlas `DirectTexture` or `null`
+     * [KO] VBT `2d-array` `GPUTextureView` 또는 `null`
+     * [EN] VBT `2d-array` `GPUTextureView` or `null`
      */
-    get vbtNormalAtlas(): DirectTexture | null;
-    /**
-     * [KO] 가상 블렌드 ORM(Occlusion/Roughness/Metallic) 아틀라스(VBT) 텍스처를 반환합니다.
-     * [EN] Returns the Virtual Blend Texture (VBT) ORM (Occlusion/Roughness/Metallic) atlas.
-     *
-     * @returns
-     * [KO] VBT ORM 아틀라스 `DirectTexture` 또는 `null`
-     * [EN] VBT ORM atlas `DirectTexture` or `null`
-     */
-    get vbtORMAtlas(): DirectTexture | null;
+    get vbtAtlasArrayView(): GPUTextureView | null;
     /**
      * [KO] LOD 0 단계의 축당 쿼드 분할 수를 가져오거나 설정합니다.
      * [EN] Gets or sets the quad subdivision count per axis at LOD 0.
