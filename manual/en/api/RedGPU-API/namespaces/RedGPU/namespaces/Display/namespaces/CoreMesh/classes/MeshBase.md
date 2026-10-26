@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,18 @@
 
 # Class: MeshBase
 
-Defined in: [src/display/mesh/core/MeshBase.ts:30](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L30)
+Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L32)
 
-Abstract base class defining common functionality for Mesh and other display objects.
+Base class defining common rendering states and matrix transformations for Mesh and other display objects.
 
 ::: warning
-This class is a base class used internally by the system.<br/>Do not create or use instances directly.
+This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
 :::
+
+## See
+
+- [World to local example](https://redcamel.github.io/RedGPU/examples/3d/coordinateTransformation/worldToLocal/)
+ - [Screen to world example](https://redcamel.github.io/RedGPU/examples/3d/coordinateTransformation/screenToWorld/)
 
 ## Extends
 
@@ -24,17 +29,23 @@ This class is a base class used internally by the system.<br/>Do not create or u
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new MeshBase**(`redGPUContext`): `MeshBase`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L58)
+Defined in: [src/display/mesh/core/MeshBase.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L104)
+
+Creates a MeshBase instance.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 
 #### Returns
 
@@ -46,11 +57,17 @@ Defined in: [src/display/mesh/core/MeshBase.ts:58](https://github.com/redcamel/R
 
 ## Properties
 
+
+
+***
+
 ### animationInfo
 
 > **animationInfo**: `object`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L32)
+Defined in: [src/display/mesh/core/MeshBase.ts:42](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L42)
+
+GLTF morph, skin, and clip animation information.
 
 #### animationsList
 
@@ -74,11 +91,17 @@ Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/R
 
 ***
 
+***
+
 ### dirtyOpacity
 
 > **dirtyOpacity**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L48)
+Defined in: [src/display/mesh/core/MeshBase.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L74)
+
+Whether the opacity needs to be updated.
+
+***
 
 ***
 
@@ -86,7 +109,11 @@ Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/R
 
 > **dirtyPipeline**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L46)
+Defined in: [src/display/mesh/core/MeshBase.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L64)
+
+Whether the render pipeline needs to be updated.
+
+***
 
 ***
 
@@ -94,7 +121,11 @@ Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/R
 
 > **dirtyTransform**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L47)
+Defined in: [src/display/mesh/core/MeshBase.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L69)
+
+Whether the transform matrix needs to be updated.
+
+***
 
 ***
 
@@ -102,7 +133,11 @@ Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/R
 
 > **gltfLoaderInfo**: [`GLTFLoader`](../../../../../classes/GLTFLoader.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L45)
+Defined in: [src/display/mesh/core/MeshBase.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L59)
+
+GLTFLoader instance information that loaded this object.
+
+***
 
 ***
 
@@ -110,7 +145,11 @@ Defined in: [src/display/mesh/core/MeshBase.ts:45](https://github.com/redcamel/R
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](VertexGPURenderInfo.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L31)
+Defined in: [src/display/mesh/core/MeshBase.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L37)
+
+GPU vertex render information object.
+
+***
 
 ***
 
@@ -118,7 +157,11 @@ Defined in: [src/display/mesh/core/MeshBase.ts:31](https://github.com/redcamel/R
 
 > **localMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L50)
+Defined in: [src/display/mesh/core/MeshBase.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L84)
+
+Local transformation matrix relative to the parent.
+
+***
 
 ***
 
@@ -126,9 +169,9 @@ Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/R
 
 > **modelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L49)
+Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L79)
 
-이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
+Model matrix with world transformation applied.
 
 #### Overrides
 
@@ -136,13 +179,21 @@ Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/R
 
 ***
 
+***
+
 ### normalModelMatrix
 
 > **normalModelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L51)
+Defined in: [src/display/mesh/core/MeshBase.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L89)
+
+Normal model matrix used for normal vector transformation.
 
 ## Accessors
+
+
+
+***
 
 ### currentShaderModuleName
 
@@ -150,17 +201,21 @@ Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/R
 
 > **get** **currentShaderModuleName**(): `string`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:67](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L67)
+Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L121)
+
+Gets or sets the name of the currently applied vertex shader module.
 
 ##### Returns
 
 `string`
 
+Current vertex shader module name
+
 #### Set Signature
 
 > **set** **currentShaderModuleName**(`value`): `void`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:71](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L71)
+Defined in: [src/display/mesh/core/MeshBase.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L125)
 
 ##### Parameters
 
@@ -174,17 +229,25 @@ Defined in: [src/display/mesh/core/MeshBase.ts:71](https://github.com/redcamel/R
 
 ***
 
+***
+
 ### depthStencilState
 
 #### Get Signature
 
-> **get** **depthStencilState**(): [`DepthStencilState`](../../../../RenderState/classes/DepthStencilState.md)
+> <span class="readonly-badge">readonly</span> **get** **depthStencilState**(): [`DepthStencilState`](../../../../RenderState/classes/DepthStencilState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:80](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L80)
+Defined in: [src/display/mesh/core/MeshBase.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L149)
+
+Returns the depth/stencil rendering state (`DepthStencilState`) of the object.
 
 ##### Returns
 
 [`DepthStencilState`](../../../../RenderState/classes/DepthStencilState.md)
+
+DepthStencilState instance
+
+***
 
 ***
 
@@ -192,17 +255,19 @@ Defined in: [src/display/mesh/core/MeshBase.ts:80](https://github.com/redcamel/R
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L88)
+Defined in: [src/display/mesh/core/MeshBase.ts:161](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L161)
 
-Retrieves the GPU device associated with the current instance.
+Returns the WebGPU device associated with the current instance.
 
 ##### Returns
 
 `GPUDevice`
 
-The GPU device.
+GPUDevice instance
+
+***
 
 ***
 
@@ -210,13 +275,19 @@ The GPU device.
 
 #### Get Signature
 
-> **get** **primitiveState**(): [`PrimitiveState`](../../../../RenderState/classes/PrimitiveState.md)
+> <span class="readonly-badge">readonly</span> **get** **primitiveState**(): [`PrimitiveState`](../../../../RenderState/classes/PrimitiveState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L76)
+Defined in: [src/display/mesh/core/MeshBase.ts:137](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L137)
+
+Returns the primitive rendering state (`PrimitiveState`) of the object.
 
 ##### Returns
 
 [`PrimitiveState`](../../../../RenderState/classes/PrimitiveState.md)
+
+PrimitiveState instance
+
+***
 
 ***
 
@@ -224,17 +295,23 @@ Defined in: [src/display/mesh/core/MeshBase.ts:76](https://github.com/redcamel/R
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:97](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L97)
+Defined in: [src/display/mesh/core/MeshBase.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L173)
 
-Retrieves the RedGPUContext instance.
+Returns the RedGPUContext associated with the current instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-The RedGPUContext instance.
+RedGPUContext instance
+
+***
+
+## Methods
+
+
 
 ***
 
@@ -242,17 +319,28 @@ The RedGPUContext instance.
 
 > **getScreenPoint**(`view`): \[`number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L109)
+Defined in: [src/display/mesh/core/MeshBase.ts:245](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L245)
+
+Returns the 2D screen coordinates of this object based on the specified view.
+
+#### Example
+```typescript
+const screenPos = mesh.getScreenPoint(view3D);
+```
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `view` | [`View3D`](../../../classes/View3D.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](../../../classes/View3D.md) | Reference View3D instance |
 
 #### Returns
 
 \[`number`, `number`\]
+
+Screen coordinates `[x, y]`
+
+***
 
 ***
 
@@ -260,19 +348,30 @@ Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/
 
 > **localToWorld**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:105](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L105)
+Defined in: [src/display/mesh/core/MeshBase.ts:225](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L225)
+
+Converts this object's local space coordinates to world space coordinates.
+
+#### Example
+```typescript
+const worldPos = mesh.localToWorld(0, 1, 0);
+```
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `x` | `number` |
-| `y` | `number` |
-| `z` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `x` | `number` | Local X coordinate |
+| `y` | `number` | Local Y coordinate |
+| `z` | `number` | Local Z coordinate |
 
 #### Returns
 
 \[`number`, `number`, `number`\]
+
+Converted world coordinates `[x, y, z]`
+
+***
 
 ***
 
@@ -280,61 +379,81 @@ Defined in: [src/display/mesh/core/MeshBase.ts:105](https://github.com/redcamel/
 
 > **worldToLocal**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:101](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/MeshBase.ts#L101)
+Defined in: [src/display/mesh/core/MeshBase.ts:199](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/MeshBase.ts#L199)
+
+Converts world space coordinates to this object's local space coordinates.
+
+#### Example
+```typescript
+const localPos = mesh.worldToLocal(10, 5, 0);
+```
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `x` | `number` |
-| `y` | `number` |
-| `z` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `x` | `number` | World X coordinate |
+| `y` | `number` | World Y coordinate |
+| `z` | `number` | World Z coordinate |
 
 #### Returns
 
 \[`number`, `number`, `number`\]
 
+Converted local coordinates `[x, y, z]`
 
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
+<summary>View inherited properties (Click to expand)</summary>
+
+### children
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **children**(): [`Mesh`](../../../classes/Mesh.md)[]
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L46)
+
+Returns the array of child objects.
+
+##### Returns
+
+[`Mesh`](../../../classes/Mesh.md)[]
+
+Array of child Meshes (`Mesh[]`)
+
+#### Inherited from
+
+[`Object3DContainer`](Object3DContainer.md).[`children`](Object3DContainer.md#children)
+
+***
+
+***
 
 ### instanceId
 
-> `readonly` **instanceId**: `number`
+#### Get Signature
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Instance sequence ID per class
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
 
 #### Inherited from
 
 [`Object3DContainer`](Object3DContainer.md).[`instanceId`](Object3DContainer.md#instanceid)
 
 ***
-
-### children
-
-#### Get Signature
-
-> **get** **children**(): [`Mesh`](../../../classes/Mesh.md)[]
-
-Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L44)
-
-현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
-
-##### Returns
-
-[`Mesh`](../../../classes/Mesh.md)[]
-
-자식 객체 배열
-
-#### Inherited from
-
-[`Object3DContainer`](Object3DContainer.md).[`children`](Object3DContainer.md#children)
 
 ***
 
@@ -344,29 +463,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/r
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -378,21 +495,23 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### numChildren
 
 #### Get Signature
 
-> **get** **numChildren**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L52)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L58)
 
-자식 객체의 개수를 반환합니다.
+Returns the number of registered child objects.
 
 ##### Returns
 
 `number`
 
-자식 수
+Number of child objects
 
 #### Inherited from
 
@@ -400,13 +519,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/r
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -414,33 +535,41 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
 [`Object3DContainer`](Object3DContainer.md).[`uuid`](Object3DContainer.md#uuid)
 
-## Methods
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
 
 ### addChild()
 
 > **addChild**(`child`): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L71)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L89)
 
-자식 Mesh를 컨테이너에 추가합니다.
+Appends a child object to the end of the container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](../../../classes/Mesh.md) | 추가할 자식 객체 |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | Child object to add |
 
 #### Returns
 
 [`Mesh`](../../../classes/Mesh.md)
 
-추가된 객체 또는 실패 시 null
+Added child object (`null` on failure)
 
 #### Inherited from
 
@@ -448,26 +577,28 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/r
 
 ***
 
+***
+
 ### addChildAt()
 
 > **addChildAt**(`child`, `index`): `MeshBase`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L89)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L115)
 
-자식 Mesh를 특정 인덱스에 추가합니다.
+Inserts a child object at the specified index position.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](../../../classes/Mesh.md) | 추가할 자식 객체 |
-| `index` | `number` | 삽입 위치 |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | Child object to add |
+| `index` | `number` | Index position to insert at |
 
 #### Returns
 
 `MeshBase`
 
-현재 컨테이너
+Current container instance
 
 #### Inherited from
 
@@ -475,25 +606,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/r
 
 ***
 
+***
+
 ### contains()
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L61)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L73)
 
-특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
+Checks whether the specified object is a child of this container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](../../../classes/Mesh.md) | 확인할 자식 객체 |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | Child object to check |
 
 #### Returns
 
 `boolean`
 
-포함 여부
+Whether the child is contained
 
 #### Inherited from
 
@@ -501,11 +634,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/r
 
 ***
 
+***
+
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:243](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L243)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:322](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L322)
+
+Destroys all child objects in the container and removes them.
 
 #### Returns
 
@@ -517,25 +654,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:243](https://github.com/
 
 ***
 
+***
+
 ### getChildAt()
 
 > **getChildAt**(`index`): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L111)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L143)
 
-지정된 인덱스의 자식 Mesh를 반환합니다.
+Returns the child object at the specified index.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `index` | `number` | 조회할 위치 |
+| `index` | `number` | Index position to retrieve |
 
 #### Returns
 
 [`Mesh`](../../../classes/Mesh.md)
 
-해당 위치의 자식 객체 또는 undefined
+Child object at the index (`undefined` if out of bounds)
 
 #### Inherited from
 
@@ -543,25 +682,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/
 
 ***
 
+***
+
 ### getChildIndex()
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L125)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L163)
 
-특정 자식 객체의 인덱스를 반환합니다.
+Returns the index of the specified child object.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](../../../classes/Mesh.md) | 조회할 자식 객체 |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | Child object to find the index of |
 
 #### Returns
 
 `number`
 
-인덱스 또는 -1
+Index of the child object (`-1` if not found)
 
 #### Inherited from
 
@@ -569,19 +710,21 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/
 
 ***
 
+***
+
 ### removeAllChildren()
 
 > **removeAllChildren**(): `MeshBase`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L234)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:309](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L309)
 
-모든 자식 객체를 제거합니다.
+Removes all child objects from the container.
 
 #### Returns
 
 `MeshBase`
 
-현재 컨테이너
+Current container instance
 
 #### Inherited from
 
@@ -589,25 +732,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/
 
 ***
 
+***
+
 ### removeChild()
 
 > **removeChild**(`child`): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L203)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:265](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L265)
 
-특정 자식 객체를 제거합니다.
+Removes the specified child object from the container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](../../../classes/Mesh.md) | 제거할 자식 객체 |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | Child object to remove |
 
 #### Returns
 
 [`Mesh`](../../../classes/Mesh.md)
 
-제거된 객체
+Removed child object
 
 #### Inherited from
 
@@ -615,25 +760,31 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/
 
 ***
 
+***
+
 ### removeChildAt()
 
 > **removeChildAt**(`index`): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L219)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:290](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L290)
 
-지정된 인덱스의 자식 객체를 제거합니다.
+Removes the child object at the specified index from the container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `index` | `number` | 제거할 위치 |
+| `index` | `number` | Index of the child object to remove |
 
 #### Returns
 
 [`Mesh`](../../../classes/Mesh.md)
 
-제거된 객체
+Removed child object
+
+#### Throws
+
+Throws Error if no child exists at the provided index
 
 #### Inherited from
 
@@ -641,20 +792,22 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/
 
 ***
 
+***
+
 ### setChildIndex()
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L140)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L184)
 
-자식 객체의 위치를 변경합니다.
+Changes the index position of a child object.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](../../../classes/Mesh.md) | 대상 자식 객체 |
-| `index` | `number` | 새 인덱스 |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | Child object to reposition |
+| `index` | `number` | New index to assign |
 
 #### Returns
 
@@ -666,20 +819,22 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/
 
 ***
 
+***
+
 ### swapChildren()
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L163)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:213](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L213)
 
-두 자식 객체의 위치를 서로 바꿉니다.
+Swaps the order (indices) of two child objects within the container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child1` | [`Mesh`](../../../classes/Mesh.md) | 첫 번째 객체 |
-| `child2` | [`Mesh`](../../../classes/Mesh.md) | 두 번째 객체 |
+| `child1` | [`Mesh`](../../../classes/Mesh.md) | First child object |
+| `child2` | [`Mesh`](../../../classes/Mesh.md) | Second child object |
 
 #### Returns
 
@@ -691,20 +846,22 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/
 
 ***
 
+***
+
 ### swapChildrenAt()
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L183)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L239)
 
-두 인덱스의 자식 객체 위치를 서로 바꿉니다.
+Swaps the child objects at the two specified indices.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `index1` | `number` | 첫 번째 인덱스 |
-| `index2` | `number` | 두 번째 인덱스 |
+| `index1` | `number` | First index |
+| `index2` | `number` | Second index |
 
 #### Returns
 
@@ -715,6 +872,5 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/
 [`Object3DContainer`](Object3DContainer.md).[`swapChildrenAt`](Object3DContainer.md#swapchildrenat)
 
 ***
-
 
 </details>

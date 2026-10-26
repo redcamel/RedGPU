@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **calculateMeshCombinedAABB**(`mesh`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/math/calculateMeshCombinedAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateMeshCombinedAABB.ts#L21)
 
-메시와 모든 자식 메시의 AABB를 통합하여 계산합니다.
+메시와 모든 자식 메시의 바운딩 볼륨을 통합한 AABB를 계산합니다.
 
-메시 계층 구조를 순회하며 모든 바운딩 볼륨을 통합한 새로운 AABB를 반환합니다.
-
-* ### Example
+### Example
 ```typescript
 const combinedAABB = RedGPU.Bound.calculateMeshCombinedAABB(rootMesh);
 ```
@@ -23,7 +21,7 @@ const combinedAABB = RedGPU.Bound.calculateMeshCombinedAABB(rootMesh);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | AABB를 계산할 루트 메시 객체
+| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | AABB를 계산할 루트 메시 객체 |
 
 ## Returns
 

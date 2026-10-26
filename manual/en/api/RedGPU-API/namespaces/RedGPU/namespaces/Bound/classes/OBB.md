@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,13 @@
 
 # Class: OBB
 
-Defined in: [src/bound/OBB.ts:19](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L19)
+Defined in: [src/bound/OBB.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L19)
 
 3D Oriented Bounding Box (OBB) class.
 
-Defines a bounding box with arbitrary orientation and provides SAT-based intersection and containment tests.
+Defines an oriented bounding box using center coordinates, half-extents along three axes, and an orientation matrix (`mat4`), providing Separating Axis Theorem (SAT) intersection and point containment tests.
 
-* ### Example
+### Example
 ```typescript
 const obb = new RedGPU.Bound.OBB([0, 0, 0], [1, 1, 1], orientationMatrix);
 const intersects = obb.intersects(otherOBB);
@@ -24,17 +24,22 @@ const intersects = obb.intersects(otherOBB);
 
 > **new OBB**(`center`, `halfExtents`, `orientation`): `OBB`
 
-Defined in: [src/bound/OBB.ts:85](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L85)
+Defined in: [src/bound/OBB.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L90)
 
-Creates an OBB instance.
+Creates an `OBB` instance.
+
+#### Example
+```typescript
+const obb = new RedGPU.Bound.OBB([0, 0, 0], [1, 2, 1], orientationMatrix);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `center` | \[`number`, `number`, `number`\] | Center coordinates [x, y, z] |
-| `halfExtents` | \[`number`, `number`, `number`\] | Half extents [x, y, z] |
-| `orientation` | [`mat4`](../../Math/type-aliases/mat4.md) | Orientation matrix (mat4) |
+| `center` | \[`number`, `number`, `number`\] | Center coordinates `[x, y, z]` |
+| `halfExtents` | \[`number`, `number`, `number`\] | Half extents `[x, y, z]` along each axis |
+| `orientation` | [`mat4`](../../Math/type-aliases/mat4.md) | 4x4 orientation matrix (`mat4`) |
 
 #### Returns
 
@@ -44,101 +49,101 @@ Creates an OBB instance.
 
 ### center
 
-> `readonly` **center**: \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **center**: \[`number`, `number`, `number`\]
 
-Defined in: [src/bound/OBB.ts:59](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L59)
+Defined in: [src/bound/OBB.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L59)
 
-Center coordinates [x, y, z]
+Center coordinates `[x, y, z]` tuple of the bounding box.
 
 ***
 
 ### centerX
 
-> `readonly` **centerX**: `number`
+> <span class="readonly-badge">readonly</span> **centerX**: `number`
 
-Defined in: [src/bound/OBB.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L24)
+Defined in: [src/bound/OBB.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L24)
 
-Center X coordinate
+Center X coordinate.
 
 ***
 
 ### centerY
 
-> `readonly` **centerY**: `number`
+> <span class="readonly-badge">readonly</span> **centerY**: `number`
 
-Defined in: [src/bound/OBB.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L29)
+Defined in: [src/bound/OBB.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L29)
 
-Center Y coordinate
+Center Y coordinate.
 
 ***
 
 ### centerZ
 
-> `readonly` **centerZ**: `number`
+> <span class="readonly-badge">readonly</span> **centerZ**: `number`
 
-Defined in: [src/bound/OBB.ts:34](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L34)
+Defined in: [src/bound/OBB.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L34)
 
-Center Z coordinate
+Center Z coordinate.
 
 ***
 
 ### geometryRadius
 
-> `readonly` **geometryRadius**: `number`
+> <span class="readonly-badge">readonly</span> **geometryRadius**: `number`
 
-Defined in: [src/bound/OBB.ts:69](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L69)
+Defined in: [src/bound/OBB.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L69)
 
-Distance from center to vertex (radius)
+Euclidean distance from the center of the bounding box to a corner vertex (bounding sphere radius).
 
 ***
 
 ### halfExtents
 
-> `readonly` **halfExtents**: \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **halfExtents**: \[`number`, `number`, `number`\]
 
-Defined in: [src/bound/OBB.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L64)
+Defined in: [src/bound/OBB.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L64)
 
-Half extents [x, y, z]
+Half extents `[x, y, z]` tuple along the three axes of the bounding box.
 
 ***
 
 ### halfExtentX
 
-> `readonly` **halfExtentX**: `number`
+> <span class="readonly-badge">readonly</span> **halfExtentX**: `number`
 
-Defined in: [src/bound/OBB.ts:39](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L39)
+Defined in: [src/bound/OBB.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L39)
 
-X half extent
+Half extent along the local X-axis.
 
 ***
 
 ### halfExtentY
 
-> `readonly` **halfExtentY**: `number`
+> <span class="readonly-badge">readonly</span> **halfExtentY**: `number`
 
-Defined in: [src/bound/OBB.ts:44](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L44)
+Defined in: [src/bound/OBB.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L44)
 
-Y half extent
+Half extent along the local Y-axis.
 
 ***
 
 ### halfExtentZ
 
-> `readonly` **halfExtentZ**: `number`
+> <span class="readonly-badge">readonly</span> **halfExtentZ**: `number`
 
-Defined in: [src/bound/OBB.ts:49](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L49)
+Defined in: [src/bound/OBB.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L49)
 
-Z half extent
+Half extent along the local Z-axis.
 
 ***
 
 ### orientation
 
-> `readonly` **orientation**: [`mat4`](../../Math/type-aliases/mat4.md)
+> <span class="readonly-badge">readonly</span> **orientation**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/bound/OBB.ts:54](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L54)
+Defined in: [src/bound/OBB.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L54)
 
-Orientation matrix (mat4)
+4x4 matrix (`mat4`) representing the rotational orientation of the bounding box.
 
 ## Methods
 
@@ -146,15 +151,20 @@ Orientation matrix (mat4)
 
 > **clone**(): `OBB`
 
-Defined in: [src/bound/OBB.ts:186](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L186)
+Defined in: [src/bound/OBB.ts:204](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L204)
 
-Clones the OBB instance.
+Clones and returns a new `OBB` instance with the same properties as the current `OBB`.
+
+#### Example
+```typescript
+const clonedOBB = obb.clone();
+```
 
 #### Returns
 
 `OBB`
 
-Cloned OBB instance
+Cloned `OBB` instance
 
 ***
 
@@ -162,23 +172,29 @@ Cloned OBB instance
 
 > **contains**(`pointOrX`, `y?`, `z?`): `boolean`
 
-Defined in: [src/bound/OBB.ts:160](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L160)
+Defined in: [src/bound/OBB.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L173)
 
-Returns whether a point or coordinate is contained within the OBB.
+Checks whether the specified 3D coordinate or point is contained within the `OBB`.
+
+#### Example
+```typescript
+const isInside = obb.contains(0, 0, 0);
+const isPointInside = obb.contains([0, 0, 0]);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `pointOrX` | `number` \| \[`number`, `number`, `number`\] | [x, y, z] array or x coordinate |
-| `y?` | `number` | y coordinate |
-| `z?` | `number` | z coordinate |
+| `pointOrX` | `number` \| \[`number`, `number`, `number`\] | `[x, y, z]` coordinate tuple array or X-axis coordinate |
+| `y?` | `number` | Y-axis coordinate (used when `pointOrX` is a number) |
+| `z?` | `number` | Z-axis coordinate (used when `pointOrX` is a number) |
 
 #### Returns
 
 `boolean`
 
-True if contained, otherwise false
+`true` if contained, otherwise `false`
 
 ***
 
@@ -186,18 +202,23 @@ True if contained, otherwise false
 
 > **intersects**(`other`): `boolean`
 
-Defined in: [src/bound/OBB.ts:117](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/OBB.ts#L117)
+Defined in: [src/bound/OBB.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/OBB.ts#L127)
 
-Returns whether it intersects with another OBB.
+Determines whether this box intersects with another `OBB` instance using the Separating Axis Theorem (SAT).
+
+#### Example
+```typescript
+const isIntersecting = obb.intersects(otherOBB);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `other` | `OBB` | OBB instance to check for intersection |
+| `other` | `OBB` | Target `OBB` instance to test for intersection |
 
 #### Returns
 
 `boolean`
 
-True if intersecting, otherwise false
+`true` if intersecting, otherwise `false`

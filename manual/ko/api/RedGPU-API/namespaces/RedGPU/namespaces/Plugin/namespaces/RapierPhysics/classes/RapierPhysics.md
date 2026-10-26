@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,13 @@
 
 # Class: RapierPhysics
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L26)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L25)
 
 **`Experimental`**
 
 Rapier 물리 엔진을 사용하는 RedGPU 물리 플러그인 구현체입니다.
 
-이 클래스는 WASM 기반의 Rapier 엔진을 RedGPU 환경에 통합하며, 고성능 물리 시뮬레이션 월드를 관리합니다. 강체 생성, 충돌 감지, 캐릭터 컨트롤러 및 중력 설정과 같은 핵심 물리 기능을 제공합니다.
+WASM 기반의 Rapier 엔진을 통합하여 강체 생성, 충돌 감지, 캐릭터 컨트롤러 및 중력 설정 등 물리 시뮬레이션 월드를 관리합니다.
 
 ::: warning
 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
@@ -20,7 +20,7 @@ Rapier 물리 엔진을 사용하는 RedGPU 물리 플러그인 구현체입니�
 
 ## See
 
- -[물리 플러그인 매뉴얼](https://redcamel.github.io/RedGPU/manual/ko/plugins/physics)
+[Basic Physics example](https://redcamel.github.io/RedGPU/examples/physics/basic/)
 
 ## Implements
 
@@ -44,18 +44,18 @@ Rapier 물리 엔진을 사용하는 RedGPU 물리 플러그인 구현체입니�
 
 > **onCollisionStarted**: (`handle1`, `handle2`) => `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L38)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L37)
 
 **`Experimental`**
 
-물리 엔진에서 충돌이 시작될 때 호출되는 콜백입니다.
+물리 엔진에서 충돌이 시작될 때 호출되는 콜백 함수입니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `handle1` | `number` | 첫 번째 충돌체의 핸들
-| `handle2` | `number` | 두 번째 충돌체의 핸들
+| `handle1` | `number` | 첫 번째 콜라이더 핸들 |
+| `handle2` | `number` | 두 번째 콜라이더 핸들 |
 
 #### Returns
 
@@ -71,17 +71,19 @@ Defined in: [src/plugins/rapier/RapierPhysics.ts:38](https://github.com/redcamel
 
 #### Get Signature
 
-> **get** **bodies**(): [`RapierBody`](RapierBody.md)[]
+> <span class="readonly-badge">readonly</span> **get** **bodies**(): [`RapierBody`](RapierBody.md)[]
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:66](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L66)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L74)
 
 **`Experimental`**
 
-엔진에서 관리 중인 모든 RapierBody 리스트를 반환합니다.
+엔진에서 관리 중인 모든 `RapierBody` 목록을 반환합니다.
 
 ##### Returns
 
 [`RapierBody`](RapierBody.md)[]
+
+`RapierBody` 인스턴스 배열
 
 #### Implementation of
 
@@ -95,13 +97,13 @@ Defined in: [src/plugins/rapier/RapierPhysics.ts:66](https://github.com/redcamel
 
 > **get** **gravity**(): `object`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L81)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L93)
 
 **`Experimental`**
 
-물리 월드의 중력 가속도를 설정하거나 반환합니다.
+물리 월드의 중력 가속도를 가져오거나 설정합니다.
 
-* ### Example
+#### Example
 ```typescript
 // 중력 설정
 physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
@@ -111,26 +113,23 @@ physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 
 `object`
 
+X, Y, Z 축 중력 가속도 벡터
+
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L81) |
-| `y` | `number` | [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L81) |
-| `z` | `number` | [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L81) |
+| `x` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L93) |
+| `y` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L93) |
+| `z` | `number` | [src/plugins/rapier/RapierPhysics.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L93) |
 
 #### Set Signature
 
 > **set** **gravity**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:85](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L85)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:97](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L97)
 
 **`Experimental`**
 
-중력을 설정하거나 가져옵니다.
-
-### Example
-```typescript
-physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
-```
+물리 월드의 중력 가속도 벡터
 
 ##### Parameters
 
@@ -155,9 +154,9 @@ physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 
 #### Get Signature
 
-> **get** **nativeWorld**(): `World`
+> <span class="readonly-badge">readonly</span> **get** **nativeWorld**(): `World`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:48](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L48)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L50)
 
 **`Experimental`**
 
@@ -166,6 +165,8 @@ Defined in: [src/plugins/rapier/RapierPhysics.ts:48](https://github.com/redcamel
 ##### Returns
 
 `World`
+
+Rapier 원본 월드 객체
 
 #### Implementation of
 
@@ -177,9 +178,9 @@ Defined in: [src/plugins/rapier/RapierPhysics.ts:48](https://github.com/redcamel
 
 #### Get Signature
 
-> **get** **RAPIER**(): `__module`
+> <span class="readonly-badge">readonly</span> **get** **RAPIER**(): `__module`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:57](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L57)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L62)
 
 **`Experimental`**
 
@@ -188,6 +189,8 @@ Rapier 라이브러리 네임스페이스를 반환합니다.
 ##### Returns
 
 `__module`
+
+Rapier 네임스페이스 객체
 
 #### Implementation of
 
@@ -199,13 +202,13 @@ Rapier 라이브러리 네임스페이스를 반환합니다.
 
 > **createBody**(`mesh`, `params`): [`RapierBody`](RapierBody.md)
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:181](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L181)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L191)
 
 **`Experimental`**
 
-특정 메쉬에 물리 바디를 생성하고 엔진에 등록합니다.
+대상 메쉬에 물리 바디와 콜라이더를 생성하고 물리 월드에 등록합니다.
 
-* ### Example
+#### Example
 ```typescript
 const body = physicsEngine.createBody(mesh, {
     type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
@@ -218,14 +221,14 @@ const body = physicsEngine.createBody(mesh, {
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../../../Display/classes/Mesh.md) | 대상 RedGPU 메쉬
-| `params` | [`BodyParams`](../../../../Physics/interfaces/BodyParams.md) | 바디 생성 설정 파라미터
+| `mesh` | [`Mesh`](../../../../Display/classes/Mesh.md) | 물리 바디를 적용할 대상 메쉬 |
+| `params` | [`BodyParams`](../../../../Physics/interfaces/BodyParams.md) | 물리 바디 생성 설정 파라미터 |
 
 #### Returns
 
 [`RapierBody`](RapierBody.md)
 
-생성된 RapierBody 인스턴스
+생성된 `RapierBody` 인스턴스
 
 #### Implementation of
 
@@ -237,13 +240,13 @@ const body = physicsEngine.createBody(mesh, {
 
 > **createCharacterController**(`offset`): `KinematicCharacterController`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:236](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L236)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L241)
 
 **`Experimental`**
 
-캐릭터 컨트롤러를 생성하여 반환합니다.
+경사로 및 계단 오르기와 지면 밀착이 활성화된 캐릭터 컨트롤러를 생성하여 반환합니다.
 
-* ### Example
+#### Example
 ```typescript
 const controller = physicsEngine.createCharacterController(0.1);
 ```
@@ -252,13 +255,13 @@ const controller = physicsEngine.createCharacterController(0.1);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `offset` | `number` | 캐릭터와 지면 사이의 간격
+| `offset` | `number` | 캐릭터와 주변 장애물 사이의 여유 간격 |
 
 #### Returns
 
 `KinematicCharacterController`
 
-Rapier 캐릭터 컨트롤러 인스턴스
+생성된 `RAPIER.KinematicCharacterController` 인스턴스
 
 #### Implementation of
 
@@ -270,13 +273,13 @@ Rapier 캐릭터 컨트롤러 인스턴스
 
 > **getBodyByColliderHandle**(`handle`): [`RapierBody`](RapierBody.md)
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:105](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L105)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L117)
 
 **`Experimental`**
 
-콜라이더 핸들을 통해 관리 중인 RapierBody를 찾아서 반환합니다.
+콜라이더 핸들로 관리 중인 `RapierBody`를 조회하여 반환합니다.
 
-* ### Example
+#### Example
 ```typescript
 const body = physicsEngine.getBodyByColliderHandle(handle);
 ```
@@ -285,13 +288,13 @@ const body = physicsEngine.getBodyByColliderHandle(handle);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `handle` | `number` | 찾을 콜라이더의 고유 핸들
+| `handle` | `number` | 조회할 콜라이더의 고유 핸들 |
 
 #### Returns
 
 [`RapierBody`](RapierBody.md)
 
-찾은 RapierBody (없으면 undefined)
+조회된 `RapierBody` 인스턴스 (존재하지 않으면 `undefined`)
 
 ***
 
@@ -299,13 +302,13 @@ const body = physicsEngine.getBodyByColliderHandle(handle);
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:122](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L122)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:134](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L134)
 
 **`Experimental`**
 
-Rapier 엔진을 초기화하고 물리 월드를 생성합니다.
+Rapier 엔진을 초기화하고 기본 중력이 적용된 물리 월드를 생성합니다.
 
-* ### Example
+#### Example
 ```typescript
 await physicsEngine.init();
 ```
@@ -314,7 +317,7 @@ await physicsEngine.init();
 
 `Promise`\<`void`\>
 
-초기화 완료를 보장하는 Promise
+초기화 완료 `Promise`
 
 #### Implementation of
 
@@ -326,13 +329,13 @@ await physicsEngine.init();
 
 > **removeBody**(`body`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:215](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L215)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L220)
 
 **`Experimental`**
 
-물리 바디를 엔진에서 제거합니다.
+물리 바디를 물리 월드에서 제거합니다.
 
-* ### Example
+#### Example
 ```typescript
 // 물리 바디 제거
 physicsEngine.removeBody(body);
@@ -342,7 +345,7 @@ physicsEngine.removeBody(body);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `body` | [`RapierBody`](RapierBody.md) | 제거할 RapierBody 인스턴스
+| `body` | [`RapierBody`](RapierBody.md) | 제거할 `RapierBody` 인스턴스 |
 
 #### Returns
 
@@ -358,13 +361,13 @@ physicsEngine.removeBody(body);
 
 > **step**(`deltaTime`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:145](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierPhysics.ts#L145)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierPhysics.ts#L157)
 
 **`Experimental`**
 
-물리 시뮬레이션을 한 단계 진행하고 메쉬 트랜스폼을 동기화합니다.
+물리 시뮬레이션을 한 스텝 진행하고 충돌 이벤트 처리 및 메쉬 트랜스폼 동기화를 수행합니다.
 
-* ### Example
+#### Example
 ```typescript
 // 렌더링 루프에서 물리 시뮬레이션 진행
 renderer.start(redGPUContext, (time, deltaTime) => {
@@ -376,7 +379,7 @@ renderer.start(redGPUContext, (time, deltaTime) => {
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `deltaTime` | `number` | 프레임 간 시간 간격 (초 단위)
+| `deltaTime` | `number` | 프레임 간 시간 간격 (초 단위) |
 
 #### Returns
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -8,25 +8,18 @@
 
 **`Experimental`**
 
-Provides core interfaces and common types for physics engine integration.
-
-RedGPU's physics system is designed with a plugin-based architecture. It provides a structure that allows various physics libraries to be flexibly connected through a common interface that is not dependent on a specific physics engine.
-
-Currently, the **Rapier** physics engine is supported as the primary plugin.
+Provides core interfaces and common types (`IPhysicsEngine`, `IPhysicsBody`, `PHYSICS_BODY_TYPE`, `PHYSICS_SHAPE`) for physics engine integration.
 
 ::: warning
 The features in this package are currently in the experimental stage. The API may change in the future.
 :::
 
-## Other
-
-- [BodyParams](interfaces/BodyParams.md)
-- [PhysicsBodyType](type-aliases/PhysicsBodyType.md)
-- [PhysicsShape](type-aliases/PhysicsShape.md)
-
 ## Physics
 
+- [BodyParams](interfaces/BodyParams.md)
 - [IPhysicsBody](interfaces/IPhysicsBody.md)
 - [IPhysicsEngine](interfaces/IPhysicsEngine.md)
+- [PhysicsBodyType](type-aliases/PhysicsBodyType.md)
+- [PhysicsShape](type-aliases/PhysicsShape.md)
 - [PHYSICS\_BODY\_TYPE](variables/PHYSICS_BODY_TYPE.md)
 - [PHYSICS\_SHAPE](variables/PHYSICS_SHAPE.md)

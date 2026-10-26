@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,18 +6,25 @@
 
 # Class: CubeTexture
 
-Defined in: [src/resources/texture/CubeTexture.ts:30](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L30)
+Defined in: [src/resources/texture/CubeTexture.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L35)
 
-Cube texture class that uses 6 images.
+Class that loads 6 face (+X, -X, +Y, -Y, +Z, -Z) images and manages them as a GPU cubemap (`cube`) texture.
 
-* ### Example
+***
+
+### Example
 ```typescript
 const texture = new RedGPU.Resource.CubeTexture(redGPUContext, [
-  'right.png', 'left.png',
-  'top.png', 'bottom.png',
-  'front.png', 'back.png'
+    'right.png', 'left.png',
+    'top.png', 'bottom.png',
+    'front.png', 'back.png'
 ]);
 ```
+
+## See
+
+- [SkyBox basic example](https://redcamel.github.io/RedGPU/examples/3d/skybox/skybox/)
+ - [SkyBox transition example](https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/)
 
 ## Extends
 
@@ -25,24 +32,40 @@ const texture = new RedGPU.Resource.CubeTexture(redGPUContext, [
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new CubeTexture**(`redGPUContext`, `srcList`, `useMipMap?`, `onLoad?`, `onError?`, `format?`): `CubeTexture`
 
-Defined in: [src/resources/texture/CubeTexture.ts:82](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L82)
+Defined in: [src/resources/texture/CubeTexture.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L92)
 
-Creates a CubeTexture instance.
+Creates a CubeTexture instance. Returns the existing cached instance if the same `cacheKey` already exists.
+
+#### Example
+```typescript
+const cubeTexture = new RedGPU.Resource.CubeTexture(
+    redGPUContext,
+    ['px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png'],
+    true,
+    (loadedTexture) => {
+        console.log('CubeTexture loaded:', loadedTexture);
+    }
+);
+```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
-| `srcList` | [`CubeSrcInfo`](../type-aliases/CubeSrcInfo.md) | `undefined` | Cube texture source information (Array of URLs or object) |
-| `useMipMap` | `boolean` | `true` | Whether to use mipmaps (default: true) |
-| `onLoad?` | (`cubeTextureInstance?`) => `void` | `undefined` | Load complete callback |
-| `onError?` | (`error`) => `void` | `undefined` | Error callback |
-| `format?` | `GPUTextureFormat` | `undefined` | Texture format (optional) |
+| `srcList` | [`CubeSrcInfo`](../type-aliases/CubeSrcInfo.md) | `undefined` | 6-face cube texture source information (array of URLs or object with cache key) |
+| `useMipMap?` | `boolean` | `true` | Whether to generate mipmaps (default: `true`) |
+| `onLoad?` | (`cubeTextureInstance?`) => `void` | `undefined` | Callback function called when loading completes |
+| `onError?` | (`error`) => `void` | `undefined` | Callback function called when loading fails |
+| `format?` | `GPUTextureFormat` | `undefined` | GPU texture pixel format (default: preferred canvas format with `-srgb`) |
 
 #### Returns
 
@@ -54,31 +77,41 @@ Creates a CubeTexture instance.
 
 ## Properties
 
+
+
+***
+
 ### defaultViewDescriptor
 
 > `static` **defaultViewDescriptor**: `GPUTextureViewDescriptor`
 
-Defined in: [src/resources/texture/CubeTexture.ts:32](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L32)
+Defined in: [src/resources/texture/CubeTexture.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L40)
 
-Default view descriptor
+Default `GPUTextureViewDescriptor` configuration for cube textures.
 
 ## Accessors
+
+
+
+***
 
 ### gpuTexture
 
 #### Get Signature
 
-> **get** **gpuTexture**(): `GPUTexture`
+> <span class="readonly-badge">readonly</span> **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/CubeTexture.ts:146](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L146)
+Defined in: [src/resources/texture/CubeTexture.ts:156](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L156)
 
-Returns the GPUTexture object.
+Returns the created `GPUTexture` instance.
 
 ##### Returns
 
 `GPUTexture`
 
-GPUTexture instance
+`GPUTexture` instance
+
+***
 
 ***
 
@@ -86,11 +119,11 @@ GPUTexture instance
 
 #### Get Signature
 
-> **get** **mipLevelCount**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **mipLevelCount**(): `number`
 
-Defined in: [src/resources/texture/CubeTexture.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L158)
+Defined in: [src/resources/texture/CubeTexture.ts:168](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L168)
 
-Returns the number of mipmap levels.
+Returns the number of generated mipmap levels.
 
 ##### Returns
 
@@ -100,39 +133,41 @@ Number of mipmap levels
 
 ***
 
+***
+
 ### srcList
 
 #### Get Signature
 
 > **get** **srcList**(): `string`[]
 
-Defined in: [src/resources/texture/CubeTexture.ts:170](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L170)
+Defined in: [src/resources/texture/CubeTexture.ts:180](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L180)
 
-Returns the list of texture source paths.
+Gets or sets the array of 6-face image source paths. Changing this value reloads the cube texture asynchronously.
 
 ##### Returns
 
 `string`[]
 
-List of source paths
+Array of image source paths (`string[]`)
 
 #### Set Signature
 
 > **set** **srcList**(`value`): `void`
 
-Defined in: [src/resources/texture/CubeTexture.ts:182](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L182)
-
-Sets the list of texture source paths and starts loading.
+Defined in: [src/resources/texture/CubeTexture.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L184)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | [`CubeSrcInfo`](../type-aliases/CubeSrcInfo.md) | Cube texture source info |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`CubeSrcInfo`](../type-aliases/CubeSrcInfo.md) |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -142,9 +177,9 @@ Sets the list of texture source paths and starts loading.
 
 > **get** **useMipmap**(): `boolean`
 
-Defined in: [src/resources/texture/CubeTexture.ts:196](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L196)
+Defined in: [src/resources/texture/CubeTexture.ts:198](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L198)
 
-Returns whether mipmaps are used.
+Gets or sets whether mipmaps are used. Changing this value recreates the texture.
 
 ##### Returns
 
@@ -156,15 +191,13 @@ Whether mipmaps are used
 
 > **set** **useMipmap**(`value`): `void`
 
-Defined in: [src/resources/texture/CubeTexture.ts:208](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L208)
-
-Sets whether to use mipmaps and recreates the texture.
+Defined in: [src/resources/texture/CubeTexture.ts:202](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L202)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | Whether to use mipmaps |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
 
 ##### Returns
 
@@ -172,15 +205,17 @@ Sets whether to use mipmaps and recreates the texture.
 
 ***
 
+***
+
 ### videoMemorySize
 
 #### Get Signature
 
-> **get** **videoMemorySize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/CubeTexture.ts:134](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L134)
+Defined in: [src/resources/texture/CubeTexture.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L144)
 
-Returns the video memory usage in bytes.
+Returns the video memory size in bytes occupied by the texture.
 
 ##### Returns
 
@@ -190,46 +225,54 @@ Video memory usage in bytes
 
 ***
 
+***
+
 ### viewDescriptor
 
 #### Get Signature
 
-> **get** **viewDescriptor**(): `object`
+> <span class="readonly-badge">readonly</span> **get** **viewDescriptor**(): `object`
 
-Defined in: [src/resources/texture/CubeTexture.ts:119](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L119)
+Defined in: [src/resources/texture/CubeTexture.ts:129](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L129)
 
-Returns the view descriptor.
+Returns the `GPUTextureViewDescriptor` object reflecting the current mipmap level count.
 
 ##### Returns
 
-GPUTextureViewDescriptor object
+`GPUTextureViewDescriptor` object
 
 | Name | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| `arrayLayerCount?` | `number` | How many array layers, starting with [GPUTextureViewDescriptor#baseArrayLayer](#viewdescriptorviewdescriptor), are accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1845 |
-| `aspect?` | `GPUTextureAspect` | Which GPUTextureAspect \| aspect(s) of the texture are accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1827 |
-| `baseArrayLayer?` | `number` | The index of the first array layer accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1840 |
-| `baseMipLevel?` | `number` | The first (most detailed) mipmap level accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1831 |
-| `dimension?` | `GPUTextureViewDimension` | The dimension to view the texture as. | node\_modules/@webgpu/types/dist/index.d.ts:1814 |
-| `format?` | `GPUTextureFormat` | The format of the texture view. Must be either the GPUTextureDescriptor#format of the texture or one of the GPUTextureDescriptor#viewFormats specified during its creation. | node\_modules/@webgpu/types/dist/index.d.ts:1810 |
-| `label?` | `string` | The initial value of GPUObjectBase#label \| GPUObjectBase.label. | node\_modules/@webgpu/types/dist/index.d.ts:1058 |
-| `mipLevelCount` | `number` | - | [src/resources/texture/CubeTexture.ts:122](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L122) |
-| `swizzle?` | `string` | A string of length four, with each character mapping to the texture view's red/green/blue/alpha channels, respectively. When accessed by a shader, the red/green/blue/alpha channels are replaced by the value corresponding to the component specified in `swizzle[0]`, `swizzle[1]`, `swizzle[2]`, and `swizzle[3]`, respectively: - `"r"`: Take its value from the red channel of the texture. - `"g"`: Take its value from the green channel of the texture. - `"b"`: Take its value from the blue channel of the texture. - `"a"`: Take its value from the alpha channel of the texture. - `"0"`: Force its value to 0. - `"1"`: Force its value to 1. Requires the GPUFeatureName `"texture-component-swizzle"` feature to be enabled. | node\_modules/@webgpu/types/dist/index.d.ts:1860 |
-| `usage?` | `number` | The allowed GPUTextureUsage \| usage(s) for the texture view. Must be a subset of the GPUTexture#usage flags of the texture. If 0, defaults to the full set of GPUTexture#usage flags of the texture. Note: If the view's [GPUTextureViewDescriptor#format](#viewdescriptorviewdescriptor) doesn't support all of the texture's GPUTextureDescriptor#usages, the default will fail, and the view's [GPUTextureViewDescriptor#usage](#viewdescriptorviewdescriptor) must be specified explicitly. | node\_modules/@webgpu/types/dist/index.d.ts:1823 |
+| `arrayLayerCount?` | `number` | How many array layers, starting with GPUTextureViewDescriptor#baseArrayLayer, are accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1849 |
+| `aspect?` | `GPUTextureAspect` | Which GPUTextureAspect \| aspect(s) of the texture are accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1831 |
+| `baseArrayLayer?` | `number` | The index of the first array layer accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1844 |
+| `baseMipLevel?` | `number` | The first (most detailed) mipmap level accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1835 |
+| `dimension?` | `GPUTextureViewDimension` | The dimension to view the texture as. | node\_modules/@webgpu/types/dist/index.d.ts:1818 |
+| `format?` | `GPUTextureFormat` | The format of the texture view. Must be either the GPUTextureDescriptor#format of the texture or one of the GPUTextureDescriptor#viewFormats specified during its creation. | node\_modules/@webgpu/types/dist/index.d.ts:1814 |
+| `label?` | `string` | The initial value of GPUObjectBase#label \| GPUObjectBase.label. | node\_modules/@webgpu/types/dist/index.d.ts:1062 |
+| `mipLevelCount` | `number` | - | [src/resources/texture/CubeTexture.ts:132](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L132) |
+| `swizzle?` | `string` | A string of length four, with each character mapping to the texture view's red/green/blue/alpha channels, respectively. When accessed by a shader, the red/green/blue/alpha channels are replaced by the value corresponding to the component specified in `swizzle[0]`, `swizzle[1]`, `swizzle[2]`, and `swizzle[3]`, respectively: - `"r"`: Take its value from the red channel of the texture. - `"g"`: Take its value from the green channel of the texture. - `"b"`: Take its value from the blue channel of the texture. - `"a"`: Take its value from the alpha channel of the texture. - `"0"`: Force its value to 0. - `"1"`: Force its value to 1. Requires the GPUFeatureName `"texture-component-swizzle"` feature to be enabled. | node\_modules/@webgpu/types/dist/index.d.ts:1864 |
+| `usage?` | `number` | The allowed GPUTextureUsage \| usage(s) for the texture view. Must be a subset of the GPUTexture#usage flags of the texture. If 0, defaults to the full set of GPUTexture#usage flags of the texture. Note: If the view's GPUTextureViewDescriptor#format doesn't support all of the texture's GPUTextureDescriptor#usages, the default will fail, and the view's GPUTextureViewDescriptor#usage must be specified explicitly. | node\_modules/@webgpu/types/dist/index.d.ts:1827 |
 
 ## Methods
+
+
+
+***
 
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/CubeTexture.ts:214](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L214)
+Defined in: [src/resources/texture/CubeTexture.ts:212](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L212)
 
-Destroys the texture resource.
+Releases the texture GPU resource and unregisters it from the resource manager.
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -237,63 +280,50 @@ Destroys the texture resource.
 
 > **setGPUTextureDirectly**(`gpuTexture`, `cacheKey?`, `useMipmap?`): `void`
 
-Defined in: [src/resources/texture/CubeTexture.ts:250](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/CubeTexture.ts#L250)
+Defined in: [src/resources/texture/CubeTexture.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/CubeTexture.ts#L238)
 
-Sets the GPUTexture directly.
+Directly injects and sets an externally created `GPUTexture` object.
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `gpuTexture` | `GPUTexture` | `undefined` | `GPUTexture` object to set |
-| `cacheKey?` | `string` | `undefined` | Cache key (optional) |
-| `useMipmap?` | `boolean` | `true` | Whether to use mipmaps (default: true) |
+| `cacheKey?` | `string` | `undefined` | Cache key (uses UUID-based key if omitted) |
+| `useMipmap?` | `boolean` | `true` | Whether to use mipmaps (default: `true`) |
 
 #### Returns
 
 `void`
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`instanceId`](../namespaces/Core/classes/ManagementResourceBase.md#instanceid)
-
-***
+<summary>View inherited properties (Click to expand)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
 
 #### Inherited from
 
 [`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`antialiasingManager`](../namespaces/Core/classes/ManagementResourceBase.md#antialiasingmanager)
+
+***
 
 ***
 
@@ -303,21 +333,21 @@ AntialiasingManager instance
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L53)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L61)
 
-Returns the cache key.
+Gets or sets the cache key.
 
 ##### Returns
 
 `string`
 
+Cache key string
+
 #### Set Signature
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L61)
-
-Sets the cache key.
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L65)
 
 ##### Parameters
 
@@ -331,7 +361,9 @@ Sets the cache key.
 
 #### Inherited from
 
-[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`cacheKey`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#cachekey)
+[`OctahedralImpostorMaterial`](../../Landscape/namespaces/Foliage/namespaces/Core/classes/OctahedralImpostorMaterial.md).[`cacheKey`](../../Landscape/namespaces/Foliage/namespaces/Core/classes/OctahedralImpostorMaterial.md#cachekey)
+
+***
 
 ***
 
@@ -339,17 +371,17 @@ Sets the cache key.
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
 
 #### Inherited from
 
@@ -357,23 +389,53 @@ CommandEncoderManager instance
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L89)
 
-Returns the associated GPU device.
+Returns the associated GPUDevice.
 
 ##### Returns
 
 `GPUDevice`
 
+GPUDevice instance
+
 #### Inherited from
 
 [`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`gpuDevice`](../namespaces/Core/classes/ManagementResourceBase.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`instanceId`](../namespaces/Core/classes/ManagementResourceBase.md#instanceid)
+
+***
 
 ***
 
@@ -383,29 +445,27 @@ Returns the associated GPU device.
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -413,7 +473,9 @@ Sets the name of the object.
 
 #### Inherited from
 
-[`PostEffectTexturePool`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md).[`name`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md#name)
+[`LakeWaveSimulator`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeWaveSimulator.md).[`name`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeWaveSimulator.md#name)
+
+***
 
 ***
 
@@ -421,17 +483,17 @@ Sets the name of the object.
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
 
 #### Inherited from
 
@@ -439,21 +501,23 @@ RedGPUContext instance
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 #### Inherited from
 
@@ -461,13 +525,15 @@ ResourceManager instance
 
 ***
 
+***
+
 ### resourceManagerKey
 
 #### Get Signature
 
-> **get** **resourceManagerKey**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L69)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L77)
 
 Returns the resource manager key.
 
@@ -475,9 +541,13 @@ Returns the resource manager key.
 
 `string`
 
+Resource manager key string
+
 #### Inherited from
 
 [`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`resourceManagerKey`](../namespaces/Core/classes/ManagementResourceBase.md#resourcemanagerkey)
+
+***
 
 ***
 
@@ -485,9 +555,9 @@ Returns the resource manager key.
 
 #### Get Signature
 
-> **get** **revision**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L45)
+Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L49)
 
 Returns the revision (update count) of the resource.
 
@@ -495,9 +565,13 @@ Returns the revision (update count) of the resource.
 
 `number`
 
+Resource revision number
+
 #### Inherited from
 
 [`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`revision`](../namespaces/Core/classes/ManagementResourceBase.md#revision)
+
+***
 
 ***
 
@@ -505,9 +579,9 @@ Returns the revision (update count) of the resource.
 
 #### Get Signature
 
-> **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
+> <span class="readonly-badge">readonly</span> **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ManagementResourceBase.ts#L50)
 
 Returns the managed state information of the resource.
 
@@ -515,9 +589,13 @@ Returns the managed state information of the resource.
 
 [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
+Resource managed status info object
+
 #### Inherited from
 
 [`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`targetResourceManagedState`](../namespaces/Core/classes/ManagementResourceBase.md#targetresourcemanagedstate)
+
+***
 
 ***
 
@@ -525,9 +603,9 @@ Returns the managed state information of the resource.
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -535,7 +613,7 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
@@ -543,19 +621,29 @@ UUID string
 
 ***
 
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
+
 ### \_\_addDirtyPipelineListener()
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L102)
 
-Adds a listener function to be called when the pipeline becomes dirty.
+Adds a pipeline dirty listener to be called when the resource changes.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `listener` | () => `void` | Listener function |
+| `listener` | () => `void` | Listener function to register |
 
 #### Returns
 
@@ -567,19 +655,21 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 ***
 
+***
+
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L101)
+Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L115)
 
-Removes a resource update listener.
+Removes a registered pipeline dirty listener.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `listener` | () => `void` | Listener function to be removed |
+| `listener` | () => `void` | Listener function to remove |
 
 #### Returns
 
@@ -591,11 +681,13 @@ Removes a resource update listener.
 
 ***
 
+***
+
 ### notifyUpdate()
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L131)
 
 Notifies registered listeners that the resource has been updated.
 
@@ -603,7 +695,7 @@ Notifies registered listeners that the resource has been updated.
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | Whether to reset the listener list after firing (default: false) |
+| `resetList?` | `boolean` | `false` | Whether to reset the listener list after notification (default: false) |
 
 #### Returns
 
@@ -614,6 +706,5 @@ Notifies registered listeners that the resource has been updated.
 [`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`notifyUpdate`](../namespaces/Core/classes/ManagementResourceBase.md#notifyupdate)
 
 ***
-
 
 </details>

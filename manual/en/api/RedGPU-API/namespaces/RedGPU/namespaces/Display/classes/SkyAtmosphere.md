@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,26 @@
 
 # Class: SkyAtmosphere
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L38)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L54)
 
-The SkyAtmosphere class is a physics-based atmospheric scattering simulation system.
+Physically based atmospheric simulation class that precomputes Rayleigh scattering, Mie scattering, and Ozone absorption into multi-stage LUTs to generate real-time sky backgrounds, aerial perspective, and indirect lighting (IBL).
 
-Simulates Rayleigh scattering, Mie scattering, and Ozone absorption to create realistic sky, sunset, and aerial perspective effects.
+***
 
-This system utilizes multiple LUT (Look Up Table) generation passes to process computationally intensive physical calculations in real-time.
+### Example
+```typescript
+const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+view.skyAtmosphere = skyAtmosphere;
+```
+
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/" style="width:100%; height:500px;"></iframe>
+
+## See
+
+- [SkyAtmosphere Basic Example](https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
+ - [SkyAtmosphere Scattering Test](https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/)
+ - [SkyAtmosphere GLTF Example](https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/gltf/)
+ - [SkyAtmosphere LUT Generator Test](https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/generator/)
 
 ## Extends
 
@@ -20,17 +33,28 @@ This system utilizes multiple LUT (Look Up Table) generation passes to process c
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new SkyAtmosphere**(`redGPUContext`): `SkyAtmosphere`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:128](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L128)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L149)
+
+Creates a SkyAtmosphere instance.
+
+#### Example
+```typescript
+const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+```
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 
 #### Returns
 
@@ -40,35 +64,65 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:128](https://github.com/
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../BaseObject/classes/RedGPUObject.md#constructor)
 
-## Properties
+## Accessors
 
-### absorptionCoefficient
+
+
+***
+
+### absorption
 
 #### Get Signature
 
-> **get** **absorptionCoefficient**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **absorption**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:290](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L290)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:479](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L479)
+
+Returns the Ozone layer light absorption RGB color (`ColorRGB`) object. (Default: `ColorRGB(88, 255, 12)`)
 
 ##### Returns
 
-\[`number`, `number`, `number`\]
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+Ozone absorption `ColorRGB` instance
+
+***
+
+***
+
+### absorptionScale
+
+#### Get Signature
+
+> **get** **absorptionScale**(): `number`
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:491](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L491)
+
+Gets or sets the Ozone layer absorption coefficient scale (unit: km⁻¹, 0 or greater). (Default: 0.001881)
+
+##### Returns
+
+`number`
+
+Ozone absorption coefficient scale (km⁻¹)
 
 #### Set Signature
 
-> **set** **absorptionCoefficient**(`v`): `void`
+> **set** **absorptionScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:294](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L294)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:495](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L495)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -78,27 +132,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:294](https://github.com/
 
 > **get** **absorptionTentWidth**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:306](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L306)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:525](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L525)
+
+Gets or sets the distribution width of the Ozone layer (unit: km, range: 1 to 50). (Default: 15.0)
 
 ##### Returns
 
 `number`
 
+Ozone distribution width (km)
+
 #### Set Signature
 
-> **set** **absorptionTentWidth**(`v`): `void`
+> **set** **absorptionTentWidth**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:310](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L310)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:529](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L529)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -108,27 +168,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:310](https://github.com/
 
 > **get** **absorptionTipAltitude**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:298](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L298)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:509](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L509)
+
+Gets or sets the altitude where Ozone density peaks (unit: km, range: 0 to 100). (Default: 25.0)
 
 ##### Returns
 
 `number`
 
+Ozone peak density altitude (km)
+
 #### Set Signature
 
-> **set** **absorptionTipAltitude**(`v`): `void`
+> **set** **absorptionTipAltitude**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:302](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L302)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:513](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L513)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -138,23 +204,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:302](https://github.com/
 
 > **get** **aerialPerspectiveDistanceScale**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:194](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L194)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:265](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L265)
+
+Gets or sets the distance scale for the aerial perspective effect (range: 1 to 1000). (Default: 100.0)
 
 ##### Returns
 
 `number`
 
+Distance scale
+
 #### Set Signature
 
-> **set** **aerialPerspectiveDistanceScale**(`v`): `void`
+> **set** **aerialPerspectiveDistanceScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:198](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L198)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:269](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L269)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -162,17 +232,25 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:198](https://github.com/
 
 ***
 
+***
+
 ### aerialPerspectiveLUT
 
 #### Get Signature
 
-> **get** **aerialPerspectiveLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **aerialPerspectiveLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:358](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L358)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:637](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L637)
+
+Returns the Aerial Perspective volume LUT texture storing distance-based atmospheric scattering.
 
 ##### Returns
 
 [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+
+Aerial Perspective LUT texture
+
+***
 
 ***
 
@@ -182,27 +260,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:358](https://github.com/
 
 > **get** **aerialPerspectiveStartDepth**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:202](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L202)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:281](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L281)
+
+Gets or sets the starting depth for the aerial perspective effect (range: 0 to 100). (Default: 0.0)
 
 ##### Returns
 
 `number`
 
+Start depth
+
 #### Set Signature
 
-> **set** **aerialPerspectiveStartDepth**(`v`): `void`
+> **set** **aerialPerspectiveStartDepth**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:206](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L206)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L285)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -212,23 +296,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:206](https://github.com/
 
 > **get** **atmosphereHeight**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:226](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L226)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L313)
+
+Gets or sets the atmosphere thickness (unit: km). (Default: 60.0)
 
 ##### Returns
 
 `number`
 
+Atmosphere height (km)
+
 #### Set Signature
 
-> **set** **atmosphereHeight**(`v`): `void`
+> **set** **atmosphereHeight**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:230](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L230)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:317](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L317)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -236,17 +324,25 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:230](https://github.com/
 
 ***
 
+***
+
 ### atmosphereSampler
 
 #### Get Signature
 
-> **get** **atmosphereSampler**(): [`Sampler`](../../Resource/classes/Sampler.md)
+> <span class="readonly-badge">readonly</span> **get** **atmosphereSampler**(): [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:374](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L374)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:673](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L673)
+
+Returns the linear sampler used for atmospheric LUT sampling.
 
 ##### Returns
 
 [`Sampler`](../../Resource/classes/Sampler.md)
+
+Sampler instance
+
+***
 
 ***
 
@@ -256,27 +352,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:374](https://github.com/
 
 > **get** **cloudCoverage**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:170](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L170)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L217)
+
+Gets or sets the cloud coverage across the sky (0.0 to 1.0). (Default: 0.4)
 
 ##### Returns
 
 `number`
 
+Cloud coverage (0.0 to 1.0)
+
 #### Set Signature
 
-> **set** **cloudCoverage**(`v`): `void`
+> **set** **cloudCoverage**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:174](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L174)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L221)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -286,27 +388,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:174](https://github.com/
 
 > **get** **cloudDensity**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:178](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L178)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:233](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L233)
+
+Gets or sets the cloud density (0.0 to 1.0). (Default: 0.7)
 
 ##### Returns
 
 `number`
 
+Cloud density (0.0 to 1.0)
+
 #### Set Signature
 
-> **set** **cloudDensity**(`v`): `void`
+> **set** **cloudDensity**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:182](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L182)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:237](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L237)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -316,27 +424,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:182](https://github.com/
 
 > **get** **cloudHeight**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:186](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L186)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:249](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L249)
+
+Gets or sets the altitude at which clouds form (unit: km, range: 0.1 to 20.0). (Default: 5.0)
 
 ##### Returns
 
 `number`
 
+Cloud altitude (km)
+
 #### Set Signature
 
-> **set** **cloudHeight**(`v`): `void`
+> **set** **cloudHeight**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:190](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L190)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:253](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L253)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -346,23 +460,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:190](https://github.com/
 
 > **get** **cloudTimeMultiplier**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:162](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L162)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:201](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L201)
+
+Gets or sets the cloud animation time multiplier. (Default: 0.0)
 
 ##### Returns
 
 `number`
 
+Cloud time multiplier
+
 #### Set Signature
 
-> **set** **cloudTimeMultiplier**(`v`): `void`
+> **set** **cloudTimeMultiplier**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:166](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L166)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L205)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -370,33 +488,25 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:166](https://github.com/
 
 ***
 
+***
+
 ### groundAlbedo
 
 #### Get Signature
 
-> **get** **groundAlbedo**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **groundAlbedo**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:282](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L282)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:467](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L467)
 
-##### Returns
-
-\[`number`, `number`, `number`\]
-
-#### Set Signature
-
-> **set** **groundAlbedo**(`v`): `void`
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:286](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L286)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+Returns the ground albedo RGB color (`ColorRGB`) object. (Default: `ColorRGB(102, 102, 102)`)
 
 ##### Returns
 
-`void`
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+Ground albedo `ColorRGB` instance
+
+***
 
 ***
 
@@ -406,23 +516,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:286](https://github.com/
 
 > **get** **groundRadius**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:218](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L218)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:297](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L297)
+
+Gets or sets the planet radius (unit: km). (Default: 6360.0)
 
 ##### Returns
 
 `number`
 
+Planet radius (km)
+
 #### Set Signature
 
-> **set** **groundRadius**(`v`): `void`
+> **set** **groundRadius**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:222](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L222)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:301](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L301)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -430,33 +544,81 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:222](https://github.com/
 
 ***
 
+***
+
+### irradianceLUT
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **irradianceLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:649](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L649)
+
+Returns the atmospheric scattering-based indirect diffuse (Irradiance) cube texture.
+
+##### Returns
+
+[`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+
+Irradiance cube texture
+
+***
+
+***
+
 ### mieAbsorption
 
 #### Get Signature
 
-> **get** **mieAbsorption**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **mieAbsorption**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:242](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L242)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:359](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L359)
+
+Returns the Mie absorption RGB color (`ColorRGB`) object. (Default: `ColorRGB(255, 255, 255)`)
 
 ##### Returns
 
-\[`number`, `number`, `number`\]
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+Mie absorption `ColorRGB` instance
+
+***
+
+***
+
+### mieAbsorptionScale
+
+#### Get Signature
+
+> **get** **mieAbsorptionScale**(): `number`
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:371](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L371)
+
+Gets or sets the Mie absorption coefficient scale (unit: km⁻¹, 0 or greater). (Default: 0.000444)
+
+##### Returns
+
+`number`
+
+Mie absorption coefficient scale (km⁻¹)
 
 #### Set Signature
 
-> **set** **mieAbsorption**(`v`): `void`
+> **set** **mieAbsorptionScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:246](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L246)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:375](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L375)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -466,27 +628,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:246](https://github.com/
 
 > **get** **mieAnisotropy**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:274](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L274)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:451](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L451)
+
+Gets or sets the Mie scattering anisotropy factor (range: 0 to 0.999). (Default: 0.8)
 
 ##### Returns
 
 `number`
 
+Mie anisotropy factor
+
 #### Set Signature
 
-> **set** **mieAnisotropy**(`v`): `void`
+> **set** **mieAnisotropy**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:278](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L278)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:455](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L455)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -496,27 +664,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:278](https://github.com/
 
 > **get** **mieExponentialDistribution**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:266](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L266)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:435](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L435)
+
+Gets or sets the exponential distribution altitude for Mie scattering particles (unit: km, range: 0.1 to 100). (Default: 1.2)
 
 ##### Returns
 
 `number`
 
+Mie distribution altitude (km)
+
 #### Set Signature
 
-> **set** **mieExponentialDistribution**(`v`): `void`
+> **set** **mieExponentialDistribution**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:270](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L270)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:439](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L439)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -524,43 +698,55 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:270](https://github.com/
 
 #### Get Signature
 
-> **get** **mieScattering**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **mieScattering**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:234](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L234)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L329)
+
+Returns the Mie scattering RGB color (`ColorRGB`) object. (Default: `ColorRGB(255, 255, 255)`)
 
 ##### Returns
 
-\[`number`, `number`, `number`\]
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+Mie scattering `ColorRGB` instance
+
+***
+
+***
+
+### mieScatteringScale
+
+#### Get Signature
+
+> **get** **mieScatteringScale**(): `number`
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:341](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L341)
+
+Gets or sets the Mie scattering coefficient scale (unit: km⁻¹, 0 or greater). (Default: 0.003996)
+
+##### Returns
+
+`number`
+
+Mie scattering coefficient scale (km⁻¹)
 
 #### Set Signature
 
-> **set** **mieScattering**(`v`): `void`
+> **set** **mieScatteringScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:238](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L238)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:345](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L345)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
 
 ***
-
-### multiScatLUT
-
-#### Get Signature
-
-> **get** **multiScatLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:350](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L350)
-
-##### Returns
-
-[`DirectTexture`](../../Resource/classes/DirectTexture.md)
 
 ***
 
@@ -570,23 +756,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:350](https://github.com/
 
 > **get** **multiScatteringFactor**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:314](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L314)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:541](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L541)
+
+Gets or sets the multi-scattering contribution factor (range: 0 to 10). (Default: 1.0)
 
 ##### Returns
 
 `number`
 
+Multi-scattering factor
+
 #### Set Signature
 
-> **set** **multiScatteringFactor**(`v`): `void`
+> **set** **multiScatteringFactor**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:318](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L318)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:545](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L545)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -594,61 +784,78 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:318](https://github.com/
 
 ***
 
+***
+
+### multiScatteringLUT
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **multiScatteringLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:613](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L613)
+
+Returns the Multi-Scattering 2D LUT texture.
+
+##### Returns
+
+[`DirectTexture`](../../Resource/classes/DirectTexture.md)
+
+Multi-Scattering LUT texture
+
+***
+
+***
+
 ### params
 
 #### Get Signature
 
-> **get** **params**(): `object`
+> <span class="readonly-badge">readonly</span> **get** **params**(): `object`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L158)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:189](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L189)
+
+Returns the atmospheric physical simulation parameters object.
+
+::: warning
+This property is for internal system uniform updates only.<br/>Do not directly modify properties of the returned object.
+:::
 
 ##### Returns
 
-| Name | Type | Default value | Description | Defined in |
-| ------ | ------ | ------ | ------ | ------ |
-| `absorptionCoefficient` | `number`[] | - | Ozone absorption coefficient | [src/display/skyAtmosphere/SkyAtmosphere.ts:75](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L75) |
-| `absorptionTentWidth` | `number` | `15.0` | Ozone distribution width | [src/display/skyAtmosphere/SkyAtmosphere.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L81) |
-| `absorptionTipAltitude` | `number` | `25.0` | Ozone peak density altitude (km) | [src/display/skyAtmosphere/SkyAtmosphere.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L77) |
-| `aerialPerspectiveDistanceScale` | `number` | `100.0` | Aerial Perspective distance scale | [src/display/skyAtmosphere/SkyAtmosphere.ts:95](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L95) |
-| `aerialPerspectiveStartDepth` | `number` | `0.0` | Aerial Perspective start depth | [src/display/skyAtmosphere/SkyAtmosphere.ts:97](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L97) |
-| `atmosphereHeight` | `number` | `60.0` | Atmosphere height (km) | [src/display/skyAtmosphere/SkyAtmosphere.ts:93](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L93) |
-| `cameraHeight` | `number` | `0.001` | Current camera height (km) | [src/display/skyAtmosphere/SkyAtmosphere.ts:105](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L105) |
-| `cloudCoverage` | `number` | `0.4` | Cloud coverage (0 to 1) | [src/display/skyAtmosphere/SkyAtmosphere.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L111) |
-| `cloudDensity` | `number` | `0.7` | Cloud density (0 to 1) | [src/display/skyAtmosphere/SkyAtmosphere.ts:113](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L113) |
-| `cloudHeight` | `number` | `5.0` | Cloud height (km) | [src/display/skyAtmosphere/SkyAtmosphere.ts:115](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L115) |
-| `cloudTime` | `number` | `0.0` | Cloud animation time | [src/display/skyAtmosphere/SkyAtmosphere.ts:107](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L107) |
-| `cloudTimeMultiplier` | `number` | `0.0` | Cloud time multiplier | [src/display/skyAtmosphere/SkyAtmosphere.ts:109](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L109) |
-| `groundAlbedo` | `number`[] | - | Ground albedo | [src/display/skyAtmosphere/SkyAtmosphere.ts:79](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L79) |
-| `groundRadius` | `number` | `6360.0` | Planet ground radius (km) | [src/display/skyAtmosphere/SkyAtmosphere.ts:91](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L91) |
-| `mieAbsorption` | `number`[] | - | Mie absorption coefficient | [src/display/skyAtmosphere/SkyAtmosphere.ts:71](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L71) |
-| `mieAnisotropy` | `number` | `0.8` | Mie anisotropy coefficient (G-factor) | [src/display/skyAtmosphere/SkyAtmosphere.ts:69](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L69) |
-| `mieExponentialDistribution` | `number` | `1.2` | Mie exponential distribution altitude (km) | [src/display/skyAtmosphere/SkyAtmosphere.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L73) |
-| `mieScattering` | `number`[] | - | Mie scattering coefficient | [src/display/skyAtmosphere/SkyAtmosphere.ts:67](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L67) |
-| `multiScatteringFactor` | `number` | `1.0` | Multi-scattering correction factor | [src/display/skyAtmosphere/SkyAtmosphere.ts:85](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L85) |
-| `rayleighExponentialDistribution` | `number` | `8.0` | Rayleigh exponential distribution altitude (km) | [src/display/skyAtmosphere/SkyAtmosphere.ts:65](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L65) |
-| `rayleighScattering` | `number`[] | - | Rayleigh scattering coefficient | [src/display/skyAtmosphere/SkyAtmosphere.ts:63](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L63) |
-| `skyLuminanceFactor` | `number`[] | - | Overall sky luminance factor | [src/display/skyAtmosphere/SkyAtmosphere.ts:83](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L83) |
-| `sunDirection` | `Float32Array`\<`ArrayBuffer`\> | - | Sun direction vector | [src/display/skyAtmosphere/SkyAtmosphere.ts:87](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L87) |
-| `sunIntensity` | `number` | `100000.0` | Sun intensity (lux) | [src/display/skyAtmosphere/SkyAtmosphere.ts:99](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L99) |
-| `sunLimbDarkening` | `number` | `0.5` | Sun limb darkening intensity | [src/display/skyAtmosphere/SkyAtmosphere.ts:103](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L103) |
-| `sunSize` | `number` | `0.533` | Visual size of the sun | [src/display/skyAtmosphere/SkyAtmosphere.ts:101](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L101) |
-| `transmittanceMinLightElevationAngle` | `number` | `-90.0` | Minimum light elevation angle for transmittance | [src/display/skyAtmosphere/SkyAtmosphere.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L89) |
+`object`
+
+Simulation parameters object
+
+| Name | Type | Default value | Defined in |
+| ------ | ------ | ------ | ------ |
+| `absorptionCoefficient` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:76](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L76) |
+| `absorptionTentWidth` | `number` | `15.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L79) |
+| `absorptionTipAltitude` | `number` | `25.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L77) |
+| `aerialPerspectiveDistanceScale` | `number` | `100.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L85) |
+| `aerialPerspectiveStartDepth` | `number` | `0.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L86) |
+| `atmosphereHeight` | `number` | `60.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L84) |
+| `cameraHeight` | `number` | `0.001` | [src/display/skyAtmosphere/SkyAtmosphere.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L90) |
+| `cloudCoverage` | `number` | `0.4` | [src/display/skyAtmosphere/SkyAtmosphere.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L93) |
+| `cloudDensity` | `number` | `0.7` | [src/display/skyAtmosphere/SkyAtmosphere.ts:94](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L94) |
+| `cloudHeight` | `number` | `5.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:95](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L95) |
+| `cloudTime` | `number` | `0.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L91) |
+| `cloudTimeMultiplier` | `number` | `0.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L92) |
+| `groundAlbedo` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:78](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L78) |
+| `groundRadius` | `number` | `6360.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L83) |
+| `mieAbsorption` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L74) |
+| `mieAnisotropy` | `number` | `0.8` | [src/display/skyAtmosphere/SkyAtmosphere.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L73) |
+| `mieExponentialDistribution` | `number` | `1.2` | [src/display/skyAtmosphere/SkyAtmosphere.ts:75](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L75) |
+| `mieScattering` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:72](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L72) |
+| `multiScatteringFactor` | `number` | `1.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L81) |
+| `rayleighExponentialDistribution` | `number` | `8.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L71) |
+| `rayleighScattering` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L70) |
+| `skyLuminanceFactor` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L80) |
+| `sunDirection` | `Float32Array`\<`ArrayBuffer`\> | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:82](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L82) |
+| `sunIntensity` | `number` | `100000.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L87) |
+| `sunLimbDarkening` | `number` | `0.5` | [src/display/skyAtmosphere/SkyAtmosphere.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L89) |
+| `sunSize` | `number` | `0.533` | [src/display/skyAtmosphere/SkyAtmosphere.ts:88](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L88) |
 
 ***
-
-### postEffect
-
-#### Get Signature
-
-> **get** **postEffect**(): [`SkyAtmospherePostEffect`](../namespaces/CoreSkyAtmosphere/classes/SkyAtmospherePostEffect.md)
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:154](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L154)
-
-Returns Post Effect instance
-
-##### Returns
-
-[`SkyAtmospherePostEffect`](../namespaces/CoreSkyAtmosphere/classes/SkyAtmospherePostEffect.md)
 
 ***
 
@@ -658,27 +865,33 @@ Returns Post Effect instance
 
 > **get** **rayleighExponentialDistribution**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:258](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L258)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:419](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L419)
+
+Gets or sets the exponential distribution altitude for Rayleigh scattering particles (unit: km, range: 0.1 to 100). (Default: 8.0)
 
 ##### Returns
 
 `number`
 
+Rayleigh distribution altitude (km)
+
 #### Set Signature
 
-> **set** **rayleighExponentialDistribution**(`v`): `void`
+> **set** **rayleighExponentialDistribution**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:262](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L262)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:423](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L423)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -686,25 +899,49 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:262](https://github.com/
 
 #### Get Signature
 
-> **get** **rayleighScattering**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **rayleighScattering**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:250](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L250)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:389](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L389)
+
+Returns the Rayleigh scattering RGB color (`ColorRGB`) object. (Default: `ColorRGB(45, 104, 255)`)
 
 ##### Returns
 
-\[`number`, `number`, `number`\]
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+Rayleigh scattering `ColorRGB` instance
+
+***
+
+***
+
+### rayleighScatteringScale
+
+#### Get Signature
+
+> **get** **rayleighScatteringScale**(): `number`
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:401](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L401)
+
+Gets or sets the Rayleigh scattering coefficient scale (unit: km⁻¹, 0 or greater). (Default: 0.0331)
+
+##### Returns
+
+`number`
+
+Rayleigh scattering coefficient scale (km⁻¹)
 
 #### Set Signature
 
-> **set** **rayleighScattering**(`v`): `void`
+> **set** **rayleighScatteringScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:254](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L254)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:405](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L405)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+| `value` | `number` |
 
 ##### Returns
 
@@ -712,45 +949,25 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:254](https://github.com/
 
 ***
 
-### skyAtmosphereIrradianceLUT
+***
+
+### reflectionLUT
 
 #### Get Signature
 
-> **get** **skyAtmosphereIrradianceLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **reflectionLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:362](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L362)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:661](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L661)
+
+Returns the atmospheric scattering-based indirect specular (Reflection) cube texture.
 
 ##### Returns
 
 [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-***
-
-### skyAtmosphereReflectionLUT
-
-#### Get Signature
-
-> **get** **skyAtmosphereReflectionLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:366](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L366)
-
-##### Returns
-
-[`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+Reflection cube texture
 
 ***
-
-### skyLight
-
-#### Get Signature
-
-> **get** **skyLight**(): [`SkyLight`](../namespaces/CoreSkyAtmosphere/classes/SkyLight.md)
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:370](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L370)
-
-##### Returns
-
-[`SkyLight`](../namespaces/CoreSkyAtmosphere/classes/SkyLight.md)
 
 ***
 
@@ -758,29 +975,19 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:370](https://github.com/
 
 #### Get Signature
 
-> **get** **skyLuminanceFactor**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **skyLuminanceFactor**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:338](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L338)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:589](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L589)
 
-##### Returns
-
-\[`number`, `number`, `number`\]
-
-#### Set Signature
-
-> **set** **skyLuminanceFactor**(`v`): `void`
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:342](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L342)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+Returns the overall sky RGB luminance factor color (`ColorRGB`) object. (Default: `ColorRGB(255, 255, 255)`)
 
 ##### Returns
 
-`void`
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+Sky luminance factor `ColorRGB` instance
+
+***
 
 ***
 
@@ -788,13 +995,19 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:342](https://github.com/
 
 #### Get Signature
 
-> **get** **skyViewLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **skyViewLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:354](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L354)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:625](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L625)
+
+Returns the Sky View 2D LUT texture.
 
 ##### Returns
 
 [`DirectTexture`](../../Resource/classes/DirectTexture.md)
+
+Sky View LUT texture
+
+***
 
 ***
 
@@ -804,27 +1017,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:354](https://github.com/
 
 > **get** **sunLimbDarkening**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:330](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L330)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:573](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L573)
+
+Gets or sets the sun limb darkening intensity (range: 0 to 10.0). (Default: 0.5)
 
 ##### Returns
 
 `number`
 
+Sun limb darkening intensity
+
 #### Set Signature
 
-> **set** **sunLimbDarkening**(`v`): `void`
+> **set** **sunLimbDarkening**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:334](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L334)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:577](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L577)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -834,27 +1053,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:334](https://github.com/
 
 > **get** **sunSize**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:322](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L322)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:557](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L557)
+
+Gets or sets the visual angular size of the sun disk (range: 0.01 to 10.0). (Default: 0.533)
 
 ##### Returns
 
 `number`
 
+Visual sun size
+
 #### Set Signature
 
-> **set** **sunSize**(`v`): `void`
+> **set** **sunSize**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:326](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L326)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:561](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L561)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -862,43 +1087,23 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:326](https://github.com/
 
 #### Get Signature
 
-> **get** **transmittanceLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **transmittanceLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:346](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L346)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:601](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L601)
+
+Returns the Transmittance 2D LUT texture.
 
 ##### Returns
 
 [`DirectTexture`](../../Resource/classes/DirectTexture.md)
 
+Transmittance LUT texture
+
 ***
 
-### transmittanceMinLightElevationAngle
+## Methods
 
-#### Get Signature
 
-> **get** **transmittanceMinLightElevationAngle**(): `number`
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:210](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L210)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **transmittanceMinLightElevationAngle**(`v`): `void`
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:214](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L214)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `v` | `number` |
-
-##### Returns
-
-`void`
 
 ***
 
@@ -906,11 +1111,15 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:214](https://github.com/
 
 > **destroy**(): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:414](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L414)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:749](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L749)
+
+Releases the SkyAtmosphere instance along with all internal generators, buffers, and resources.
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -918,22 +1127,26 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:414](https://github.com/
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:396](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L396)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:715](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L715)
 
-Performs post-effect rendering. (Dedicated to atmospheric transmittance on object regions)
+Updates the atmospheric state and LUTs, and applies the aerial perspective post-effect to scene object regions.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `view` | [`View3D`](View3D.md) |
-| `width` | `number` |
-| `height` | `number` |
-| `sourceTextureInfo` | [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](View3D.md) | Target View3D instance for rendering |
+| `width` | `number` | Render target width |
+| `height` | `number` | Render target height |
+| `sourceTextureInfo` | [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) | Input source texture information |
 
 #### Returns
 
 [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
+
+Post-effect result with atmospheric effects applied
+
+***
 
 ***
 
@@ -941,19 +1154,21 @@ Performs post-effect rendering. (Dedicated to atmospheric transmittance on objec
 
 > **renderBackground**(`renderViewStateData`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:382](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L382)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:685](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L685)
 
-Performs background rendering. (Dedicated to infinite distance background processing)
+Renders the sky background at infinite distance.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | Render state data of the current view |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -961,55 +1176,42 @@ Performs background rendering. (Dedicated to infinite distance background proces
 
 > **update**(`view`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:401](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L401)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:728](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L728)
+
+Detects changes in sun light direction, camera altitude, and view matrix to update the atmospheric uniform buffer and LUTs.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `view` | [`View3D`](View3D.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](View3D.md) | Reference View3D instance |
 
 #### Returns
 
 `void`
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
-
-## Accessors
+<summary>View inherited properties (Click to expand)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
 
 #### Inherited from
 
@@ -1017,21 +1219,23 @@ AntialiasingManager instance
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
 
 #### Inherited from
 
@@ -1039,25 +1243,53 @@ CommandEncoderManager instance
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-Returns the WebGPU device object. (Short-cut path)
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice instance
+`GPUDevice` instance
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
 
 ***
 
@@ -1067,29 +1299,27 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -1101,21 +1331,23 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
 
 #### Inherited from
 
@@ -1123,21 +1355,23 @@ RedGPUContext instance
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 #### Inherited from
 
@@ -1145,13 +1379,15 @@ ResourceManager instance
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -1159,13 +1395,10 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../BaseObject/classes/RedGPUObject.md#uuid)
-
-## Methods
-
 
 </details>

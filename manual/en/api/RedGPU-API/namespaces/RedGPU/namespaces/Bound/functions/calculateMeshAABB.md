@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,15 +6,13 @@
 
 # Function: calculateMeshAABB()
 
-> **calculateMeshAABB**(`mesh`): [`AABB`](../classes/AABB.md)
+> **calculateMeshAABB**(`mesh`, `targetAABB?`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshAABB.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/math/calculateMeshAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshAABB.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateMeshAABB.ts#L24)
 
-Calculates mesh world-space AABB from its local AABB.
+Calculates the world-space Axis-Aligned Bounding Box (`AABB`) by applying `modelMatrix` to the local geometry volume of a mesh.
 
-Transforms the geometry volume using modelMatrix and returns a world-space AABB.
-
-* ### Example
+### Example
 ```typescript
 const meshAABB = RedGPU.Bound.calculateMeshAABB(mesh);
 ```
@@ -23,10 +21,11 @@ const meshAABB = RedGPU.Bound.calculateMeshAABB(mesh);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | Mesh object to calculate AABB from |
+| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | Target `Mesh` instance to calculate the world-space `AABB` from |
+| `targetAABB?` | [`AABB`](../classes/AABB.md) | Target `AABB` instance to store the result in-place (creates a new instance if omitted) |
 
 ## Returns
 
 [`AABB`](../classes/AABB.md)
 
-Calculated world-space AABB instance
+Calculated world-space `AABB` instance

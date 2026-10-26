@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,13 @@
 
 # Class: GeometryGPURenderInfo
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:7](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/primitive/core/GeometryGPURenderInfo.ts#L7)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L12)
 
-Class that stores GPU rendering layout information for geometry.
+Class that holds GPU vertex buffer layout information for geometry.
+
+::: warning
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+:::
 
 ## Constructors
 
@@ -16,15 +20,15 @@ Class that stores GPU rendering layout information for geometry.
 
 > **new GeometryGPURenderInfo**(`buffers`): `GeometryGPURenderInfo`
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/primitive/core/GeometryGPURenderInfo.ts#L22)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L27)
 
-Creates an instance of GeometryGPURenderInfo.
+Creates a GeometryGPURenderInfo instance.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | Array of buffer layouts to set |
+| `buffers` | `GPUVertexBufferLayout`[] | Array of vertex buffer layouts to set |
 
 #### Returns
 
@@ -36,6 +40,6 @@ Creates an instance of GeometryGPURenderInfo.
 
 > **buffers**: `GPUVertexBufferLayout`[]
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:12](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/primitive/core/GeometryGPURenderInfo.ts#L12)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L17)
 
-Array of vertex buffer layouts
+Array of GPU vertex buffer layouts (`GPUVertexBufferLayout`).

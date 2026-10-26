@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # RenderState
 
-Provides various render state management classes for manipulating the render pipeline.
-
-Includes tools for finely defining GPU rendering behaviors such as blending, depth/stencil testing, primitive topology, and culling.
+Provides state management classes for the GPU render pipeline, including blending, depth/stencil testing, primitive topology, and culling.
 
 ## RenderState
 

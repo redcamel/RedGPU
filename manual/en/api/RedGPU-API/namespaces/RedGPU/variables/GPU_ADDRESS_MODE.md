@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,16 +8,14 @@
 
 > `const` **GPU\_ADDRESS\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_ADDRESS\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_ADDRESS_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_ADDRESS\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_ADDRESS_MODE.ts#L7)
 
-Constants defining address mode options for texture sampling and wrapping.
-
-Determines how textures are sampled when coordinates are outside the [0, 1] range.
+Sampling wrapping mode constants applied when texture coordinates fall outside the normalized range (`[0, 1]`).
 
 ## Type Declaration
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-clamp_to_edge"></a> `CLAMP_TO_EDGE` | `"clamp-to-edge"` | `'clamp-to-edge'` | Clamps texture coordinates to the [0, 1] range. | [src/gpuConst/GPU\_ADDRESS\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_ADDRESS_MODE.ts#L15) |
-| <a id="property-mirrored_repeat"></a> `MIRRORED_REPEAT` | `"mirror-repeat"` | `'mirror-repeat'` | Repeats the texture in a tiled fashion, mirroring each alternate tile. | [src/gpuConst/GPU\_ADDRESS\_MODE.ts:25](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_ADDRESS_MODE.ts#L25) |
-| <a id="property-repeat"></a> `REPEAT` | `"repeat"` | `'repeat'` | Repeats the texture in a tiled fashion. | [src/gpuConst/GPU\_ADDRESS\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_ADDRESS_MODE.ts#L20) |
+| <a id="property-clamp_to_edge"></a> `CLAMP_TO_EDGE` | `"clamp-to-edge"` | `'clamp-to-edge'` | Clamps out-of-range coordinates to the edge values (`0.0` or `1.0`). | [src/gpuConst/GPU\_ADDRESS\_MODE.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_ADDRESS_MODE.ts#L12) |
+| <a id="property-mirrored_repeat"></a> `MIRRORED_REPEAT` | `"mirror-repeat"` | `'mirror-repeat'` | Repeats the texture tile while mirroring it across each integer boundary. | [src/gpuConst/GPU\_ADDRESS\_MODE.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_ADDRESS_MODE.ts#L22) |
+| <a id="property-repeat"></a> `REPEAT` | `"repeat"` | `'repeat'` | Repeats the texture tile periodically by taking only the fractional part of coordinates. | [src/gpuConst/GPU\_ADDRESS\_MODE.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_ADDRESS_MODE.ts#L17) |

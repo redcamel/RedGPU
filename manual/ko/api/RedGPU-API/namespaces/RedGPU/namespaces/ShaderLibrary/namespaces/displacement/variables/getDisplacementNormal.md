@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getDisplacementNormal**: `string` = `getDisplacementNormal_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2806](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L2806)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2903](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2903)
 
 바이큐빅 필터링 헬퍼 (B-Spline 기반 고정밀 버전)
 
@@ -16,30 +16,42 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:2806](https://github.com/red
 
 ## Param
 
+**uv**
+
 샘플링할 UV 좌표
 //
 
 ## Param
+
+**tex**
 
 샘플링할 텍스처
 //
 
 ## Param
 
+**smp**
+
 샘플러
 //
 
 ## Param
+
+**dims**
 
 텍스처 크기
 //
 
 ## Param
 
+**invSize**
+
 텍스처 크기의 역수
 //
 
 ## Param
+
+**mip**
 
 밉맵 레벨
 //

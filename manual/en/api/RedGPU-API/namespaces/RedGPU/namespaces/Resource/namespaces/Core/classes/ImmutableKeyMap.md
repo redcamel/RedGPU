@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,13 @@
 
 # Class: ImmutableKeyMap
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1120](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L1120)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1380](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1380)
+
+Map class with immutable keys whose values cannot be changed once set.
+
+::: warning
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+:::
 
 ## Extends
 
@@ -14,17 +20,23 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1120](https:/
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new ImmutableKeyMap**(`initValues?`): `ImmutableKeyMap`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1121](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L1121)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1389](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1389)
+
+Creates an ImmutableKeyMap instance.
 
 #### Parameters
 
-| Parameter | Type | Default value |
-| ------ | ------ | ------ |
-| `initValues` | \[`any`, `any`\][] | `[]` |
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `initValues?` | \[`any`, `any`\][] | `[]` | Initial `[key, value]` entry array |
 
 #### Returns
 
@@ -36,24 +48,38 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1121](https:/
 
 ## Properties
 
+
+
+## Methods
+
+
+
+***
+
 ### set()
 
 > **set**(`key`, `value`): `this`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1126](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L1126)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:1411](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/ResourceManager.ts#L1411)
 
-Adds a new element with a specified key and value to the Map. If an element with the same key already exists, the element will be updated.
+Sets a new key and value. Values of existing keys cannot be modified.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `key` | `any` |
-| `value` | `any` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `key` | `any` | Key to register |
+| `value` | `any` | Value to register |
 
 #### Returns
 
 `this`
+
+Current `ImmutableKeyMap` instance
+
+#### Throws
+
+Throws Error when attempting to change the value of an existing key
 
 #### Overrides
 
@@ -61,19 +87,18 @@ Adds a new element with a specified key and value to the Map. If an element with
 
 ***
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
+<summary>View inherited properties (Click to expand)</summary>
 
 ### \[toStringTag\]
 
-> `readonly` **\[toStringTag\]**: `string`
+> <span class="readonly-badge">readonly</span> **\[toStringTag\]**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:137
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:137
 
 #### Inherited from
 
@@ -81,11 +106,13 @@ Defined in: node\_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:137
 
 ***
 
+***
+
 ### size
 
-> `readonly` **size**: `number`
+> <span class="readonly-badge">readonly</span> **size**: `number`
 
-Defined in: node\_modules/typescript/lib/lib.es2015.collection.d.ts:45
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.collection.d.ts:45
 
 #### Returns
 
@@ -97,23 +124,33 @@ the number of elements in the Map.
 
 ***
 
+***
+
 ### \[species\]
 
-> `readonly` `static` **\[species\]**: `MapConstructor`
+> <span class="readonly-badge">readonly</span> `static` **\[species\]**: `MapConstructor`
 
-Defined in: node\_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:319
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:319
 
 #### Inherited from
 
 `Map.[species]`
 
-## Methods
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
 
 ### \[iterator\]()
 
 > **\[iterator\]**(): `MapIterator`\<\[`any`, `any`\]\>
 
-Defined in: node\_modules/typescript/lib/lib.es2015.iterable.d.ts:143
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.iterable.d.ts:143
 
 Returns an iterable of entries in the map.
 
@@ -127,11 +164,13 @@ Returns an iterable of entries in the map.
 
 ***
 
+***
+
 ### clear()
 
 > **clear**(): `void`
 
-Defined in: node\_modules/typescript/lib/lib.es2015.collection.d.ts:20
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.collection.d.ts:20
 
 #### Returns
 
@@ -143,11 +182,13 @@ Defined in: node\_modules/typescript/lib/lib.es2015.collection.d.ts:20
 
 ***
 
+***
+
 ### delete()
 
 > **delete**(`key`): `boolean`
 
-Defined in: node\_modules/typescript/lib/lib.es2015.collection.d.ts:24
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.collection.d.ts:24
 
 #### Parameters
 
@@ -167,11 +208,13 @@ true if an element in the Map existed and has been removed, or false if the elem
 
 ***
 
+***
+
 ### entries()
 
 > **entries**(): `MapIterator`\<\[`any`, `any`\]\>
 
-Defined in: node\_modules/typescript/lib/lib.es2015.iterable.d.ts:148
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.iterable.d.ts:148
 
 Returns an iterable of key, value pairs for every entry in the map.
 
@@ -185,11 +228,13 @@ Returns an iterable of key, value pairs for every entry in the map.
 
 ***
 
+***
+
 ### forEach()
 
 > **forEach**(`callbackfn`, `thisArg?`): `void`
 
-Defined in: node\_modules/typescript/lib/lib.es2015.collection.d.ts:28
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.collection.d.ts:28
 
 Executes a provided function once per each key/value pair in the Map, in insertion order.
 
@@ -210,11 +255,13 @@ Executes a provided function once per each key/value pair in the Map, in inserti
 
 ***
 
+***
+
 ### get()
 
 > **get**(`key`): `any`
 
-Defined in: node\_modules/typescript/lib/lib.es2015.collection.d.ts:33
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.collection.d.ts:33
 
 Returns a specified element from the Map object. If the value that is associated to the provided key is an object, then you will get a reference to that object and any change made to that object will effectively modify it inside the Map.
 
@@ -236,11 +283,13 @@ Returns the element associated with the specified key. If no element is associat
 
 ***
 
+***
+
 ### has()
 
 > **has**(`key`): `boolean`
 
-Defined in: node\_modules/typescript/lib/lib.es2015.collection.d.ts:37
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.collection.d.ts:37
 
 #### Parameters
 
@@ -260,11 +309,13 @@ boolean indicating whether an element with the specified key exists or not.
 
 ***
 
+***
+
 ### keys()
 
 > **keys**(): `MapIterator`\<`any`\>
 
-Defined in: node\_modules/typescript/lib/lib.es2015.iterable.d.ts:153
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.iterable.d.ts:153
 
 Returns an iterable of keys in the map
 
@@ -278,11 +329,13 @@ Returns an iterable of keys in the map
 
 ***
 
+***
+
 ### values()
 
 > **values**(): `MapIterator`\<`any`\>
 
-Defined in: node\_modules/typescript/lib/lib.es2015.iterable.d.ts:158
+Defined in: manual/node\_modules/typescript/lib/lib.es2015.iterable.d.ts:158
 
 Returns an iterable of values in the map
 
@@ -296,11 +349,13 @@ Returns an iterable of values in the map
 
 ***
 
+***
+
 ### groupBy()
 
 > `static` **groupBy**\<`K`, `T`\>(`items`, `keySelector`): `Map`\<`K`, `T`[]\>
 
-Defined in: node\_modules/typescript/lib/lib.es2024.collection.d.ts:25
+Defined in: manual/node\_modules/typescript/lib/lib.es2024.collection.d.ts:25
 
 Groups members of an iterable according to the return value of the passed callback.
 
@@ -308,8 +363,8 @@ Groups members of an iterable according to the return value of the passed callba
 
 | Type Parameter |
 | ------ |
-| `K` |
-| `T` |
+| <a id="type-parameter-k"></a> `K` |
+| <a id="type-parameter-t"></a> `T` |
 
 #### Parameters
 
@@ -325,6 +380,5 @@ Groups members of an iterable according to the return value of the passed callba
 #### Inherited from
 
 `Map.groupBy`
-
 
 </details>

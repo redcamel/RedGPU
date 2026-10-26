@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,26 @@
 
 # Class: SkyAtmosphere
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L38)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:54](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L54)
 
-SkyAtmosphere 클래스는 물리 기반 대기 산란(Atmospheric Scattering) 시뮬레이션 시스템입니다.
+레일리 산란(Rayleigh), 미 산란(Mie), 오존 흡수(Ozone)를 다단계 LUT로 사전 계산하여 실시간 하늘 배경, 대기 원근(Aerial Perspective) 및 간접 조명(IBL)을 생성하는 물리 기반 대기 시뮬레이션 클래스입니다.
 
-레일리 산란(Rayleigh Scattering), 미 산란(Mie Scattering), 오존 흡수(Ozone Absorption) 등을 시뮬레이션하여 사실적인 하늘과 노을, Aerial Perspective 효과를 생성합니다.
+***
 
-이 시스템은 전산량이 많은 물리 연산을 실시간으로 처리하기 위해 여러 단계의 LUT(Look Up Table) 생성 패스를 거칩니다.
+### Example
+```typescript
+const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+view.skyAtmosphere = skyAtmosphere;
+```
+
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/" style="width:100%; height:500px;"></iframe>
+
+## See
+
+- [SkyAtmosphere Basic Example](https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
+ - [SkyAtmosphere Scattering Test](https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/)
+ - [SkyAtmosphere GLTF Example](https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/gltf/)
+ - [SkyAtmosphere LUT Generator Test](https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/generator/)
 
 ## Extends
 
@@ -20,17 +33,28 @@ SkyAtmosphere 클래스는 물리 기반 대기 산란(Atmospheric Scattering) �
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new SkyAtmosphere**(`redGPUContext`): `SkyAtmosphere`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:128](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L128)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L149)
+
+SkyAtmosphere 인스턴스를 생성합니다.
+
+#### Example
+```typescript
+const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+```
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스 |
 
 #### Returns
 
@@ -40,35 +64,65 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:128](https://github.com/
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../BaseObject/classes/RedGPUObject.md#constructor)
 
-## Properties
+## Accessors
 
-### absorptionCoefficient
+
+
+***
+
+### absorption
 
 #### Get Signature
 
-> **get** **absorptionCoefficient**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **absorption**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:290](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L290)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:479](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L479)
+
+오존층의 빛 흡수 RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(88, 255, 12)`)
 
 ##### Returns
 
-\[`number`, `number`, `number`\]
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+오존 흡수 `ColorRGB` 인스턴스
+
+***
+
+***
+
+### absorptionScale
+
+#### Get Signature
+
+> **get** **absorptionScale**(): `number`
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:491](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L491)
+
+오존층의 빛 흡수 계수 배율(단위: km⁻¹, 0 이상)을 가져오거나 설정합니다. (기본값: 0.001881)
+
+##### Returns
+
+`number`
+
+오존 흡수 계수 배율 (km⁻¹)
 
 #### Set Signature
 
-> **set** **absorptionCoefficient**(`v`): `void`
+> **set** **absorptionScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:294](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L294)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:495](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L495)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -78,27 +132,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:294](https://github.com/
 
 > **get** **absorptionTentWidth**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:306](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L306)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:525](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L525)
+
+오존층 분포의 두께(단위: km, 범위: 1 ~ 50)를 가져오거나 설정합니다. (기본값: 15.0)
 
 ##### Returns
 
 `number`
 
+오존 분포 두께 (km)
+
 #### Set Signature
 
-> **set** **absorptionTentWidth**(`v`): `void`
+> **set** **absorptionTentWidth**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:310](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L310)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:529](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L529)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -108,27 +168,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:310](https://github.com/
 
 > **get** **absorptionTipAltitude**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:298](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L298)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:509](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L509)
+
+오존 밀도가 최대가 되는 고도(단위: km, 범위: 0 ~ 100)를 가져오거나 설정합니다. (기본값: 25.0)
 
 ##### Returns
 
 `number`
 
+오존 최대 밀도 고도 (km)
+
 #### Set Signature
 
-> **set** **absorptionTipAltitude**(`v`): `void`
+> **set** **absorptionTipAltitude**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:302](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L302)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:513](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L513)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -138,23 +204,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:302](https://github.com/
 
 > **get** **aerialPerspectiveDistanceScale**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:194](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L194)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:265](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L265)
+
+대기 원근(Aerial Perspective) 효과의 거리 스케일(범위: 1 ~ 1000)을 가져오거나 설정합니다. (기본값: 100.0)
 
 ##### Returns
 
 `number`
 
+거리 스케일
+
 #### Set Signature
 
-> **set** **aerialPerspectiveDistanceScale**(`v`): `void`
+> **set** **aerialPerspectiveDistanceScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:198](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L198)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:269](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L269)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -162,17 +232,25 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:198](https://github.com/
 
 ***
 
+***
+
 ### aerialPerspectiveLUT
 
 #### Get Signature
 
-> **get** **aerialPerspectiveLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **aerialPerspectiveLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:358](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L358)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:637](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L637)
+
+거리별 대기 산란을 저장한 대기 원근(Aerial Perspective) 볼륨 LUT 텍스처를 반환합니다.
 
 ##### Returns
 
 [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+
+Aerial Perspective LUT 텍스처
+
+***
 
 ***
 
@@ -182,27 +260,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:358](https://github.com/
 
 > **get** **aerialPerspectiveStartDepth**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:202](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L202)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:281](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L281)
+
+대기 원근(Aerial Perspective) 효과가 시작되는 깊이(범위: 0 ~ 100)를 가져오거나 설정합니다. (기본값: 0.0)
 
 ##### Returns
 
 `number`
 
+시작 깊이
+
 #### Set Signature
 
-> **set** **aerialPerspectiveStartDepth**(`v`): `void`
+> **set** **aerialPerspectiveStartDepth**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:206](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L206)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L285)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -212,23 +296,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:206](https://github.com/
 
 > **get** **atmosphereHeight**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:226](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L226)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L313)
+
+대기권의 두께(단위: km)를 가져오거나 설정합니다. (기본값: 60.0)
 
 ##### Returns
 
 `number`
 
+대기권 높이 (km)
+
 #### Set Signature
 
-> **set** **atmosphereHeight**(`v`): `void`
+> **set** **atmosphereHeight**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:230](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L230)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:317](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L317)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -236,17 +324,25 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:230](https://github.com/
 
 ***
 
+***
+
 ### atmosphereSampler
 
 #### Get Signature
 
-> **get** **atmosphereSampler**(): [`Sampler`](../../Resource/classes/Sampler.md)
+> <span class="readonly-badge">readonly</span> **get** **atmosphereSampler**(): [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:374](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L374)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:673](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L673)
+
+대기 LUT 샘플링에 사용되는 선형 샘플러를 반환합니다.
 
 ##### Returns
 
 [`Sampler`](../../Resource/classes/Sampler.md)
+
+Sampler 인스턴스
+
+***
 
 ***
 
@@ -256,27 +352,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:374](https://github.com/
 
 > **get** **cloudCoverage**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:170](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L170)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:217](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L217)
+
+하늘을 덮는 구름의 범위(0.0 ~ 1.0)를 가져오거나 설정합니다. (기본값: 0.4)
 
 ##### Returns
 
 `number`
 
+구름 커버리지 (0.0 ~ 1.0)
+
 #### Set Signature
 
-> **set** **cloudCoverage**(`v`): `void`
+> **set** **cloudCoverage**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:174](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L174)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L221)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -286,27 +388,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:174](https://github.com/
 
 > **get** **cloudDensity**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:178](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L178)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:233](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L233)
+
+구름의 밀도(0.0 ~ 1.0)를 가져오거나 설정합니다. (기본값: 0.7)
 
 ##### Returns
 
 `number`
 
+구름 밀도 (0.0 ~ 1.0)
+
 #### Set Signature
 
-> **set** **cloudDensity**(`v`): `void`
+> **set** **cloudDensity**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:182](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L182)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:237](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L237)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -316,27 +424,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:182](https://github.com/
 
 > **get** **cloudHeight**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:186](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L186)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:249](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L249)
+
+구름이 형성되는 고도(단위: km, 범위: 0.1 ~ 20.0)를 가져오거나 설정합니다. (기본값: 5.0)
 
 ##### Returns
 
 `number`
 
+구름 고도 (km)
+
 #### Set Signature
 
-> **set** **cloudHeight**(`v`): `void`
+> **set** **cloudHeight**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:190](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L190)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:253](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L253)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -346,23 +460,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:190](https://github.com/
 
 > **get** **cloudTimeMultiplier**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:162](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L162)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:201](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L201)
+
+구름 애니메이션 시간 진행 배수를 가져오거나 설정합니다. (기본값: 0.0)
 
 ##### Returns
 
 `number`
 
+구름 시간 배수
+
 #### Set Signature
 
-> **set** **cloudTimeMultiplier**(`v`): `void`
+> **set** **cloudTimeMultiplier**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:166](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L166)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L205)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -370,33 +488,25 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:166](https://github.com/
 
 ***
 
+***
+
 ### groundAlbedo
 
 #### Get Signature
 
-> **get** **groundAlbedo**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **groundAlbedo**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:282](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L282)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:467](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L467)
 
-##### Returns
-
-\[`number`, `number`, `number`\]
-
-#### Set Signature
-
-> **set** **groundAlbedo**(`v`): `void`
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:286](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L286)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+지표면의 반사율(Albedo) RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(102, 102, 102)`)
 
 ##### Returns
 
-`void`
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+지표면 반사율 `ColorRGB` 인스턴스
+
+***
 
 ***
 
@@ -406,23 +516,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:286](https://github.com/
 
 > **get** **groundRadius**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:218](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L218)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:297](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L297)
+
+행성의 반경(단위: km)을 가져오거나 설정합니다. (기본값: 6360.0)
 
 ##### Returns
 
 `number`
 
+행성 반경 (km)
+
 #### Set Signature
 
-> **set** **groundRadius**(`v`): `void`
+> **set** **groundRadius**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:222](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L222)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:301](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L301)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -430,33 +544,81 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:222](https://github.com/
 
 ***
 
+***
+
+### irradianceLUT
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **irradianceLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:649](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L649)
+
+대기 산란 기반 간접 난반사(Irradiance) 큐브 텍스처를 반환합니다.
+
+##### Returns
+
+[`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+
+Irradiance 큐브 텍스처
+
+***
+
+***
+
 ### mieAbsorption
 
 #### Get Signature
 
-> **get** **mieAbsorption**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **mieAbsorption**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:242](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L242)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:359](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L359)
+
+미 흡수(Mie Absorption)의 RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(255, 255, 255)`)
 
 ##### Returns
 
-\[`number`, `number`, `number`\]
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+미 흡수 `ColorRGB` 인스턴스
+
+***
+
+***
+
+### mieAbsorptionScale
+
+#### Get Signature
+
+> **get** **mieAbsorptionScale**(): `number`
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:371](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L371)
+
+미 흡수(Mie Absorption) 계수 배율(단위: km⁻¹, 0 이상)을 가져오거나 설정합니다. (기본값: 0.000444)
+
+##### Returns
+
+`number`
+
+미 흡수 계수 배율 (km⁻¹)
 
 #### Set Signature
 
-> **set** **mieAbsorption**(`v`): `void`
+> **set** **mieAbsorptionScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:246](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L246)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:375](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L375)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -466,27 +628,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:246](https://github.com/
 
 > **get** **mieAnisotropy**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:274](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L274)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:451](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L451)
+
+미 산란의 비등방성 계수(범위: 0 ~ 0.999)를 가져오거나 설정합니다. (기본값: 0.8)
 
 ##### Returns
 
 `number`
 
+미 비등방성 계수
+
 #### Set Signature
 
-> **set** **mieAnisotropy**(`v`): `void`
+> **set** **mieAnisotropy**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:278](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L278)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:455](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L455)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -496,27 +664,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:278](https://github.com/
 
 > **get** **mieExponentialDistribution**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:266](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L266)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:435](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L435)
+
+미 산란 입자의 지수 분포 고도(단위: km, 범위: 0.1 ~ 100)를 가져오거나 설정합니다. (기본값: 1.2)
 
 ##### Returns
 
 `number`
 
+미 분포 고도 (km)
+
 #### Set Signature
 
-> **set** **mieExponentialDistribution**(`v`): `void`
+> **set** **mieExponentialDistribution**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:270](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L270)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:439](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L439)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -524,43 +698,55 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:270](https://github.com/
 
 #### Get Signature
 
-> **get** **mieScattering**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **mieScattering**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:234](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L234)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:329](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L329)
+
+미 산란(Mie Scattering)의 RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(255, 255, 255)`)
 
 ##### Returns
 
-\[`number`, `number`, `number`\]
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+미 산란 `ColorRGB` 인스턴스
+
+***
+
+***
+
+### mieScatteringScale
+
+#### Get Signature
+
+> **get** **mieScatteringScale**(): `number`
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:341](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L341)
+
+미 산란(Mie Scattering) 계수 배율(단위: km⁻¹, 0 이상)을 가져오거나 설정합니다. (기본값: 0.003996)
+
+##### Returns
+
+`number`
+
+미 산란 계수 배율 (km⁻¹)
 
 #### Set Signature
 
-> **set** **mieScattering**(`v`): `void`
+> **set** **mieScatteringScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:238](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L238)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:345](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L345)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
 
 ***
-
-### multiScatLUT
-
-#### Get Signature
-
-> **get** **multiScatLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:350](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L350)
-
-##### Returns
-
-[`DirectTexture`](../../Resource/classes/DirectTexture.md)
 
 ***
 
@@ -570,23 +756,27 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:350](https://github.com/
 
 > **get** **multiScatteringFactor**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:314](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L314)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:541](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L541)
+
+다중 산란(Multi-Scattering) 기여도 배율(범위: 0 ~ 10)을 가져오거나 설정합니다. (기본값: 1.0)
 
 ##### Returns
 
 `number`
 
+다중 산란 배율
+
 #### Set Signature
 
-> **set** **multiScatteringFactor**(`v`): `void`
+> **set** **multiScatteringFactor**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:318](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L318)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:545](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L545)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
@@ -594,61 +784,78 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:318](https://github.com/
 
 ***
 
+***
+
+### multiScatteringLUT
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **multiScatteringLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:613](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L613)
+
+다중 산란(Multi-Scattering) 2D LUT 텍스처를 반환합니다.
+
+##### Returns
+
+[`DirectTexture`](../../Resource/classes/DirectTexture.md)
+
+Multi-Scattering LUT 텍스처
+
+***
+
+***
+
 ### params
 
 #### Get Signature
 
-> **get** **params**(): `object`
+> <span class="readonly-badge">readonly</span> **get** **params**(): `object`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L158)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:189](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L189)
+
+대기 물리 시뮬레이션 파라미터 객체를 반환합니다.
+
+::: warning
+이 속성은 시스템 유니폼 업데이트를 위한 내부 전용입니다.<br/>반환된 객체의 내부 속성을 직접 수정하지 마십시오.
+:::
 
 ##### Returns
 
-| Name | Type | Default value | Description | Defined in |
-| ------ | ------ | ------ | ------ | ------ |
-| `absorptionCoefficient` | `number`[] | - | 오존 흡수 계수
-| `absorptionTentWidth` | `number` | `15.0` | 오존 분포 두께
-| `absorptionTipAltitude` | `number` | `25.0` | 오존 최대 밀도 고도 (km)
-| `aerialPerspectiveDistanceScale` | `number` | `100.0` | Aerial Perspective 거리 스케일
-| `aerialPerspectiveStartDepth` | `number` | `0.0` | Aerial Perspective 시작 깊이
-| `atmosphereHeight` | `number` | `60.0` | 대기권 높이 (km)
-| `cameraHeight` | `number` | `0.001` | 카메라 현재 고도 (km)
-| `cloudCoverage` | `number` | `0.4` | 구름 커버리지 (0 ~ 1)
-| `cloudDensity` | `number` | `0.7` | 구름 밀도 (0 ~ 1)
-| `cloudHeight` | `number` | `5.0` | 구름 고도 (km)
-| `cloudTime` | `number` | `0.0` | 구름 시간 축 정보
-| `cloudTimeMultiplier` | `number` | `0.0` | 구름 속도 배수
-| `groundAlbedo` | `number`[] | - | 지표면 반사율
-| `groundRadius` | `number` | `6360.0` | 행성 반경 (km)
-| `mieAbsorption` | `number`[] | - | 미 흡수 계수
-| `mieAnisotropy` | `number` | `0.8` | 미 비등방성 계수
-| `mieExponentialDistribution` | `number` | `1.2` | 미 분포 고도 (km)
-| `mieScattering` | `number`[] | - | 미 산란 계수
-| `multiScatteringFactor` | `number` | `1.0` | 다중 산란 보정 계수
-| `rayleighExponentialDistribution` | `number` | `8.0` | 레일리 분포 고도 (km)
-| `rayleighScattering` | `number`[] | - | 레일리 산란 계수
-| `skyLuminanceFactor` | `number`[] | - | 하늘 전체 휘도 배수
-| `sunDirection` | `Float32Array`\<`ArrayBuffer`\> | - | 태양 방향 벡터
-| `sunIntensity` | `number` | `100000.0` | 태양 광도
-| `sunLimbDarkening` | `number` | `0.5` | 태양 주변 감쇠 강도
-| `sunSize` | `number` | `0.533` | 태양 시각적 크기
-| `transmittanceMinLightElevationAngle` | `number` | `-90.0` | 투과율 계산 최소 고도각
+`object`
+
+시뮬레이션 파라미터 객체
+
+| Name | Type | Default value | Defined in |
+| ------ | ------ | ------ | ------ |
+| `absorptionCoefficient` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:76](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L76) |
+| `absorptionTentWidth` | `number` | `15.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:79](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L79) |
+| `absorptionTipAltitude` | `number` | `25.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L77) |
+| `aerialPerspectiveDistanceScale` | `number` | `100.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L85) |
+| `aerialPerspectiveStartDepth` | `number` | `0.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L86) |
+| `atmosphereHeight` | `number` | `60.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L84) |
+| `cameraHeight` | `number` | `0.001` | [src/display/skyAtmosphere/SkyAtmosphere.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L90) |
+| `cloudCoverage` | `number` | `0.4` | [src/display/skyAtmosphere/SkyAtmosphere.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L93) |
+| `cloudDensity` | `number` | `0.7` | [src/display/skyAtmosphere/SkyAtmosphere.ts:94](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L94) |
+| `cloudHeight` | `number` | `5.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:95](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L95) |
+| `cloudTime` | `number` | `0.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L91) |
+| `cloudTimeMultiplier` | `number` | `0.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L92) |
+| `groundAlbedo` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:78](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L78) |
+| `groundRadius` | `number` | `6360.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L83) |
+| `mieAbsorption` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L74) |
+| `mieAnisotropy` | `number` | `0.8` | [src/display/skyAtmosphere/SkyAtmosphere.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L73) |
+| `mieExponentialDistribution` | `number` | `1.2` | [src/display/skyAtmosphere/SkyAtmosphere.ts:75](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L75) |
+| `mieScattering` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:72](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L72) |
+| `multiScatteringFactor` | `number` | `1.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L81) |
+| `rayleighExponentialDistribution` | `number` | `8.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L71) |
+| `rayleighScattering` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L70) |
+| `skyLuminanceFactor` | `number`[] | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L80) |
+| `sunDirection` | `Float32Array`\<`ArrayBuffer`\> | - | [src/display/skyAtmosphere/SkyAtmosphere.ts:82](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L82) |
+| `sunIntensity` | `number` | `100000.0` | [src/display/skyAtmosphere/SkyAtmosphere.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L87) |
+| `sunLimbDarkening` | `number` | `0.5` | [src/display/skyAtmosphere/SkyAtmosphere.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L89) |
+| `sunSize` | `number` | `0.533` | [src/display/skyAtmosphere/SkyAtmosphere.ts:88](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L88) |
 
 ***
-
-### postEffect
-
-#### Get Signature
-
-> **get** **postEffect**(): [`SkyAtmospherePostEffect`](../namespaces/CoreSkyAtmosphere/classes/SkyAtmospherePostEffect.md)
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:154](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L154)
-
-Post Effect 인스턴스 반환
-
-##### Returns
-
-[`SkyAtmospherePostEffect`](../namespaces/CoreSkyAtmosphere/classes/SkyAtmospherePostEffect.md)
 
 ***
 
@@ -658,27 +865,33 @@ Post Effect 인스턴스 반환
 
 > **get** **rayleighExponentialDistribution**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:258](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L258)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:419](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L419)
+
+레일리 산란 입자의 지수 분포 고도(단위: km, 범위: 0.1 ~ 100)를 가져오거나 설정합니다. (기본값: 8.0)
 
 ##### Returns
 
 `number`
 
+레일리 분포 고도 (km)
+
 #### Set Signature
 
-> **set** **rayleighExponentialDistribution**(`v`): `void`
+> **set** **rayleighExponentialDistribution**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:262](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L262)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:423](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L423)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -686,25 +899,49 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:262](https://github.com/
 
 #### Get Signature
 
-> **get** **rayleighScattering**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **rayleighScattering**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:250](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L250)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:389](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L389)
+
+레일리 산란(Rayleigh Scattering)의 RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(45, 104, 255)`)
 
 ##### Returns
 
-\[`number`, `number`, `number`\]
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+레일리 산란 `ColorRGB` 인스턴스
+
+***
+
+***
+
+### rayleighScatteringScale
+
+#### Get Signature
+
+> **get** **rayleighScatteringScale**(): `number`
+
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:401](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L401)
+
+레일리 산란(Rayleigh Scattering) 계수 배율(단위: km⁻¹, 0 이상)을 가져오거나 설정합니다. (기본값: 0.0331)
+
+##### Returns
+
+`number`
+
+레일리 산란 계수 배율 (km⁻¹)
 
 #### Set Signature
 
-> **set** **rayleighScattering**(`v`): `void`
+> **set** **rayleighScatteringScale**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:254](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L254)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:405](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L405)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+| `value` | `number` |
 
 ##### Returns
 
@@ -712,45 +949,25 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:254](https://github.com/
 
 ***
 
-### skyAtmosphereIrradianceLUT
+***
+
+### reflectionLUT
 
 #### Get Signature
 
-> **get** **skyAtmosphereIrradianceLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **reflectionLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:362](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L362)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:661](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L661)
+
+대기 산란 기반 간접 정반사(Reflection) 큐브 텍스처를 반환합니다.
 
 ##### Returns
 
 [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-***
-
-### skyAtmosphereReflectionLUT
-
-#### Get Signature
-
-> **get** **skyAtmosphereReflectionLUT**(): [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:366](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L366)
-
-##### Returns
-
-[`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+Reflection 큐브 텍스처
 
 ***
-
-### skyLight
-
-#### Get Signature
-
-> **get** **skyLight**(): [`SkyLight`](../namespaces/CoreSkyAtmosphere/classes/SkyLight.md)
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:370](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L370)
-
-##### Returns
-
-[`SkyLight`](../namespaces/CoreSkyAtmosphere/classes/SkyLight.md)
 
 ***
 
@@ -758,29 +975,19 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:370](https://github.com/
 
 #### Get Signature
 
-> **get** **skyLuminanceFactor**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **skyLuminanceFactor**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:338](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L338)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:589](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L589)
 
-##### Returns
-
-\[`number`, `number`, `number`\]
-
-#### Set Signature
-
-> **set** **skyLuminanceFactor**(`v`): `void`
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:342](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L342)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `v` | \[`number`, `number`, `number`\] |
+하늘 전체의 RGB 휘도 배율 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(255, 255, 255)`)
 
 ##### Returns
 
-`void`
+[`ColorRGB`](../../Color/classes/ColorRGB.md)
+
+하늘 휘도 배율 `ColorRGB` 인스턴스
+
+***
 
 ***
 
@@ -788,13 +995,19 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:342](https://github.com/
 
 #### Get Signature
 
-> **get** **skyViewLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **skyViewLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:354](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L354)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:625](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L625)
+
+스카이 뷰(Sky View) 2D LUT 텍스처를 반환합니다.
 
 ##### Returns
 
 [`DirectTexture`](../../Resource/classes/DirectTexture.md)
+
+Sky View LUT 텍스처
+
+***
 
 ***
 
@@ -804,27 +1017,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:354](https://github.com/
 
 > **get** **sunLimbDarkening**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:330](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L330)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:573](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L573)
+
+태양 가장자리 어두워짐(Limb Darkening) 강도(범위: 0 ~ 10.0)를 가져오거나 설정합니다. (기본값: 0.5)
 
 ##### Returns
 
 `number`
 
+태양 주변 감쇠 강도
+
 #### Set Signature
 
-> **set** **sunLimbDarkening**(`v`): `void`
+> **set** **sunLimbDarkening**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:334](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L334)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:577](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L577)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -834,27 +1053,33 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:334](https://github.com/
 
 > **get** **sunSize**(): `number`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:322](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L322)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:557](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L557)
+
+태양 디스크의 시각적 각크기(범위: 0.01 ~ 10.0)를 가져오거나 설정합니다. (기본값: 0.533)
 
 ##### Returns
 
 `number`
 
+태양 시각적 크기
+
 #### Set Signature
 
-> **set** **sunSize**(`v`): `void`
+> **set** **sunSize**(`value`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:326](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L326)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:561](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L561)
 
 ##### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `v` | `number` |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -862,43 +1087,23 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:326](https://github.com/
 
 #### Get Signature
 
-> **get** **transmittanceLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **transmittanceLUT**(): [`DirectTexture`](../../Resource/classes/DirectTexture.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:346](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L346)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:601](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L601)
+
+대기 투과율(Transmittance) 2D LUT 텍스처를 반환합니다.
 
 ##### Returns
 
 [`DirectTexture`](../../Resource/classes/DirectTexture.md)
 
+Transmittance LUT 텍스처
+
 ***
 
-### transmittanceMinLightElevationAngle
+## Methods
 
-#### Get Signature
 
-> **get** **transmittanceMinLightElevationAngle**(): `number`
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:210](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L210)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **transmittanceMinLightElevationAngle**(`v`): `void`
-
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:214](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L214)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `v` | `number` |
-
-##### Returns
-
-`void`
 
 ***
 
@@ -906,11 +1111,15 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:214](https://github.com/
 
 > **destroy**(): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:414](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L414)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:749](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L749)
+
+SkyAtmosphere 인스턴스와 내부 생성기, 버퍼 및 리소스를 모두 해제합니다.
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -918,22 +1127,26 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:414](https://github.com/
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:396](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L396)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:715](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L715)
 
-포스트 이펙트 렌더링을 수행합니다. (오브젝트 영역 대기 투과 처리 전용)
+대기 상태 및 LUT를 갱신하고 씬 오브젝트 영역에 대기 원근(Aerial Perspective) 포스트 이펙트를 적용합니다.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `view` | [`View3D`](View3D.md) |
-| `width` | `number` |
-| `height` | `number` |
-| `sourceTextureInfo` | [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](View3D.md) | 렌더링 대상 View3D 인스턴스 |
+| `width` | `number` | 렌더 타겟 너비 |
+| `height` | `number` | 렌더 타겟 높이 |
+| `sourceTextureInfo` | [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) | 입력 소스 텍스처 정보 |
 
 #### Returns
 
 [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
+
+대기 효과가 적용된 포스트 이펙트 결과
+
+***
 
 ***
 
@@ -941,19 +1154,21 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:396](https://github.com/
 
 > **renderBackground**(`renderViewStateData`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:382](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L382)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:685](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L685)
 
-배경 렌더링을 수행합니다. (무한 거리 배경 처리 전용)
+무한 거리의 하늘 배경을 렌더링합니다.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | 현재 뷰의 렌더링 상태 데이터 |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -961,55 +1176,42 @@ Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:382](https://github.com/
 
 > **update**(`view`): `void`
 
-Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:401](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyAtmosphere/SkyAtmosphere.ts#L401)
+Defined in: [src/display/skyAtmosphere/SkyAtmosphere.ts:728](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyAtmosphere/SkyAtmosphere.ts#L728)
+
+태양 광원 방향, 카메라 고도 및 뷰 행렬 변화를 감지하여 대기 유니폼 버퍼와 LUT들을 갱신합니다.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `view` | [`View3D`](View3D.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](View3D.md) | 기준 View3D 인스턴스 |
 
 #### Returns
 
 `void`
 
-
 ***
 
-## 상속받은 멤버
+## 상속받은 속성
 
 <details>
-<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-클래스별 인스턴스 순번 ID
-
-#### Inherited from
-
-[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
-
-## Accessors
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager 인스턴스
+`AntialiasingManager` 인스턴스
 
 #### Inherited from
 
@@ -1017,21 +1219,23 @@ AntialiasingManager 인스턴스
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager 인스턴스
+`CommandEncoderManager` 인스턴스
 
 #### Inherited from
 
@@ -1039,25 +1243,53 @@ CommandEncoderManager 인스턴스
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-WebGPU 디바이스 객체를 반환합니다. (단축 경로)
+컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice 인스턴스
+`GPUDevice` 인스턴스
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+
+##### Returns
+
+`number`
+
+클래스별 고유 인스턴스 번호
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
 
 ***
 
@@ -1067,29 +1299,27 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
+객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
 ##### Returns
 
 `string`
 
-객체 이름
+객체 이름 문자열
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-객체의 이름을 설정합니다.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | 설정할 객체 이름
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -1101,21 +1331,23 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-RedGPUContext 인스턴스를 반환합니다.
+바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext 인스턴스
+`RedGPUContext` 인스턴스
 
 #### Inherited from
 
@@ -1123,21 +1355,23 @@ RedGPUContext 인스턴스
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager 인스턴스
+`ResourceManager` 인스턴스
 
 #### Inherited from
 
@@ -1145,13 +1379,15 @@ ResourceManager 인스턴스
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -1159,13 +1395,10 @@ Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/
 
 `string`
 
-UUID 문자열
+객체의 UUID 문자열
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../BaseObject/classes/RedGPUObject.md#uuid)
-
-## Methods
-
 
 </details>

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,22 +8,21 @@
 
 > **init**(`canvas`, `onWebGPUInitialized`, `onFailInitialized?`, `onDestroy?`, `alphaMode?`, `requestAdapterOptions?`): `Promise`\<`void`\>
 
-Defined in: [src/init.ts:56](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/init.ts#L56)
+Defined in: [src/init.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/init.ts#L56)
 
-WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
+WebGPU 어댑터와 디바이스를 비동기로 초기화하고 `RedGPUContext` 인스턴스를 생성합니다.
 
-브라우저의 WebGPU 지원 여부를 확인하고, GPU 어댑터와 디바이스를 요청한 후 최종적으로 RedGPUContext 인스턴스를 생성하여 콜백을 통해 전달합니다.
-
-* ### Example
+### Example
 ```typescript
 await RedGPU.init(
   canvas,
   (redGPUContext) => {
-    console.log('WebGPU 초기화 성공!', redGPUContext);
-    // 렌더링 루프 시작 (Start rendering loop)
+    // 초기화 성공 후 렌더링 시작
+    console.log(redGPUContext);
   },
   (errorMessage) => {
-    console.error('초기화 실패:', errorMessage);
+    // 초기화 실패 처리
+    console.error(errorMessage);
   }
 );
 ```
@@ -32,15 +31,15 @@ await RedGPU.init(
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `canvas` | `HTMLCanvasElement` | `undefined` | WebGPU를 초기화할 HTML 캔버스 요소
-| `onWebGPUInitialized` | (`redGPUContext`) => `void` | `undefined` | 성공 시 호출될 콜백 함수 (RedGPUContext 인스턴스가 인자로 전달됨)
-| `onFailInitialized?` | (`message?`) => `void` | `undefined` | 실패 시 호출될 선택적 콜백 함수 (에러 메시지가 인자로 전달됨)
-| `onDestroy?` | (`info`) => `void` | `undefined` | 디바이스 유실 시 호출될 선택적 콜백 함수
-| `alphaMode?` | `GPUCanvasAlphaMode` | `'premultiplied'` | 캔버스 알파 모드 (기본값: 'premultiplied')
-| `requestAdapterOptions?` | `GPURequestAdapterOptions` | `DEFAULT_REQUEST_ADAPTER_OPTIONS` | 어댑터 요청 옵션 (기본값: 고성능 설정)
+| `canvas` | `HTMLCanvasElement` | `undefined` | WebGPU 컨텍스트를 바인딩할 `HTMLCanvasElement` |
+| `onWebGPUInitialized` | (`redGPUContext`) => `void` | `undefined` | 초기화 성공 시 생성된 `RedGPUContext`를 전달받는 콜백 함수 |
+| `onFailInitialized?` | (`message?`) => `void` | `undefined` | 초기화 실패 시 에러 메시지를 전달받는 선택적 콜백 함수 |
+| `onDestroy?` | (`info`) => `void` | `undefined` | GPU 디바이스 손실(`GPUDeviceLostInfo`) 발생 시 호출되는 선택적 콜백 함수 |
+| `alphaMode?` | `GPUCanvasAlphaMode` | `'premultiplied'` | 캔버스 알파 합성 모드 (기본값: `'premultiplied'`) |
+| `requestAdapterOptions?` | `GPURequestAdapterOptions` | `DEFAULT_REQUEST_ADAPTER_OPTIONS` | WebGPU 어댑터 요청 옵션 (기본값: `DEFAULT_REQUEST_ADAPTER_OPTIONS`) |
 
 ## Returns
 
 `Promise`\<`void`\>
 
-초기화 프로세스 완료를 나타내는 Promise
+초기화 완료를 나타내는 `Promise<void>`

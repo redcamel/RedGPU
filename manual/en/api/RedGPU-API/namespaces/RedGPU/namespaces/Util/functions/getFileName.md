@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,14 +8,16 @@
 
 > **getFileName**(`url`, `withExtension?`): `string`
 
-Defined in: [src/utils/file/getFileName.ts:16](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/file/getFileName.ts#L16)
+Defined in: [src/utils/file/getFileName.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/file/getFileName.ts#L26)
 
-Extracts the file name from a URL or path.
+Returns the part after the last `/` of a URL or path as the file name.
 
-* ### Example
+### Example
 ```typescript
-const nameWithExt = RedGPU.Util.getFileName('path/to/image.png'); // 'image.png'
-const nameOnly = RedGPU.Util.getFileName('path/to/image.png', false); // 'image'
+// Returns 'image.png'
+const nameWithExtension = RedGPU.Util.getFileName('path/to/image.png');
+// Returns 'image'
+const nameOnly = RedGPU.Util.getFileName('path/to/image.png', false);
 ```
 
 ## Parameters
@@ -23,7 +25,7 @@ const nameOnly = RedGPU.Util.getFileName('path/to/image.png', false); // 'image'
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `url` | `string` | `undefined` | Target URL or path |
-| `withExtension` | `boolean` | `true` | Whether to include the extension (Default: true) |
+| `withExtension?` | `boolean` | `true` | Whether to include the extension (Default: `true`) |
 
 ## Returns
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,30 +8,34 @@
 
 > **localToWorld**(`targetMatrix`, `x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/math/coordinates/localToWorld.ts:34](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/coordinates/localToWorld.ts#L34)
+Defined in: [src/math/coordinates/localToWorld.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/localToWorld.ts#L35)
 
-Converts local coordinates to world coordinates.
+Transforms local coordinates (`[x, y, z]`) into 3D world coordinates (`[x, y, z]`) using a 4x4 transformation matrix (`targetMatrix`).
 
 ### Example
 ```typescript
-const worldPos = RedGPU.math.localToWorld(mesh.modelMatrix, 0, 1, 0);
+const [worldX, worldY, worldZ] = RedGPU.Math.localToWorld(mesh.modelMatrix, 0, 1, 0);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `targetMatrix` | [`mat4`](../type-aliases/mat4.md) | 4x4 matrix to use for transformation |
-| `x` | `number` | Local x coordinate |
-| `y` | `number` | Local y coordinate |
-| `z` | `number` | Local z coordinate |
+| `targetMatrix` | [`mat4`](../type-aliases/mat4.md) | 4x4 world transformation matrix of the target object (`mat4`, column-major) |
+| `x` | `number` | Local X coordinate to transform |
+| `y` | `number` | Local Y coordinate to transform |
+| `z` | `number` | Local Z coordinate to transform |
 
 ## Returns
 
 \[`number`, `number`, `number`\]
 
-Converted world coordinates [x, y, z]
+Transformed 3D world coordinate tuple (`[x, y, z]`)
 
 ## Throws
 
-Throws Error if coordinates are not numbers
+Throws an error if any of `x`, `y`, or `z` is not a valid number
+
+## See
+
+[World to Local example](https://redcamel.github.io/RedGPU/examples/3d/coordinateTransformation/worldToLocal/)

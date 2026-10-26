@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getViewDirection**: `string` = `getViewDirection_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:623](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L623)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:644](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L644)
 
 Calculates the normalized view direction vector (vector toward the camera) using world position and camera position.
 
@@ -16,10 +16,14 @@ Calculates the normalized view direction vector (vector toward the camera) using
 
 ## Param
 
+**worldPosition**
+
 World space position
 //
 
 ## Param
+
+**cameraPosition**
 
 Camera position in world space
 //

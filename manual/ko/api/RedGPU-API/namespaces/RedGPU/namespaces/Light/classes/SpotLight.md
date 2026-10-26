@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,25 +6,29 @@
 
 # Class: SpotLight
 
-Defined in: [src/light/lights/SpotLight.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L26)
+Defined in: [src/light/lights/SpotLight.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L28)
 
-스포트라이트(SpotLight)를 정의하는 클래스입니다.
+한 점에서 특정 방향으로 원뿔(Cone) 형태의 빛을 방출하는 스포트라이트(Spot Light) 클래스입니다. 반경(`radius`) 거리 감쇠와 내·외부 컷오프 각도(`innerCutoff`, `outerCutoff`) 기반 가장자리 감쇠를 지원합니다.
 
-이 광원은 특정 위치에서 지정된 방향으로 빛을 방사하며, 내부/외부 컷오프 각도를 통해 빛의 퍼짐 범위를 제어할 수 있습니다.
+***
+
+### Example
 ```typescript
-const light = new RedGPU.Light.SpotLight('#ffffff', 2.0);
-light.setPosition(0, 5, 10);
-light.lookAt(0, 0, 0);
-scene.lightManager.addSpotLight(light);
+const spotLight = new RedGPU.Light.SpotLight('#ffffff', 1000);
+spotLight.setPosition(0, 5, 5);
+spotLight.lookAt(0, 0, 0);
+spotLight.innerCutoff = 15;
+spotLight.outerCutoff = 30;
+scene.lightManager.addSpotLight(spotLight);
 ```
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/light/spotLight/" ></iframe>
 
-아래는 SpotLight 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/light/spotLight/" style="width:100%; height:500px;"></iframe>
 
 ## See
 
- - [SpotLight Cluster Performance example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLightPerformance/)
- - [SpotLight with glTF example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLightWithGltf/)
+- [SpotLight basic example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLight/)
+ - [SpotLight performance example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLightPerformance/)
+ - [SpotLight with GLTF example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLightWithGltf/)
 
 ## Extends
 
@@ -32,20 +36,29 @@ scene.lightManager.addSpotLight(light);
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new SpotLight**(`color?`, `lumen?`): `SpotLight`
 
-Defined in: [src/light/lights/SpotLight.ts:94](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L94)
+Defined in: [src/light/lights/SpotLight.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L57)
 
-새로운 SpotLight 인스턴스를 생성합니다.
+SpotLight 인스턴스를 생성합니다.
+
+#### Example
+```typescript
+const light = new RedGPU.Light.SpotLight('#ffffff', 1000);
+```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `color` | `string` | `'#fff'` | 광원의 색상 (hex 문자열, 예: '#ffffff')
-| `lumen` | `number` | `1000` | 광원의 광선속 (Lumen, lm, 기본값: 1,000)
+| `color?` | `string` | `'#fff'` | 조명의 색상 (HEX 문자열, 기본값: `'#fff'`) |
+| `lumen?` | `number` | `1000` | 조명의 광속 (Lumen 단위, 기본값: `1000`) |
 
 #### Returns
 
@@ -55,7 +68,11 @@ Defined in: [src/light/lights/SpotLight.ts:94](https://github.com/redcamel/RedGP
 
 [`ABaseLight`](../namespaces/Core/classes/ABaseLight.md).[`constructor`](../namespaces/Core/classes/ABaseLight.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### direction
 
@@ -63,33 +80,33 @@ Defined in: [src/light/lights/SpotLight.ts:94](https://github.com/redcamel/RedGP
 
 > **get** **direction**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/SpotLight.ts:293](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L293)
+Defined in: [src/light/lights/SpotLight.ts:210](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L210)
 
-광원의 방향 벡터를 [x, y, z] 형태로 반환합니다.
+빛의 진행 방향 벡터(`[x, y, z]`)를 가져오거나 설정합니다.
 
 ##### Returns
 
 \[`number`, `number`, `number`\]
 
-방향 벡터 [x, y, z]
+방향 벡터 튜플 (`[number, number, number]`)
 
 #### Set Signature
 
 > **set** **direction**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:304](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L304)
-
-광원의 방향 벡터를 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:214](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L214)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | \[`number`, `number`, `number`\] | [x, y, z] 형태의 방향 벡터
+| Parameter | Type |
+| ------ | ------ |
+| `value` | \[`number`, `number`, `number`\] |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -99,33 +116,33 @@ Defined in: [src/light/lights/SpotLight.ts:304](https://github.com/redcamel/RedG
 
 > **get** **directionX**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:227](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L227)
+Defined in: [src/light/lights/SpotLight.ts:162](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L162)
 
-방향 벡터의 X 성분을 반환합니다.
+빛의 진행 방향 X 성분을 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-X 성분 값
+방향 벡터의 X 성분
 
 #### Set Signature
 
 > **set** **directionX**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:238](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L238)
-
-방향 벡터의 X 성분을 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L166)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | X 성분 값
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -135,33 +152,33 @@ Defined in: [src/light/lights/SpotLight.ts:238](https://github.com/redcamel/RedG
 
 > **get** **directionY**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:249](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L249)
+Defined in: [src/light/lights/SpotLight.ts:178](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L178)
 
-방향 벡터의 Y 성분을 반환합니다.
+빛의 진행 방향 Y 성분을 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-Y 성분 값
+방향 벡터의 Y 성분
 
 #### Set Signature
 
 > **set** **directionY**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:260](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L260)
-
-방향 벡터의 Y 성분을 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:182](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L182)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Y 성분 값
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -171,33 +188,53 @@ Defined in: [src/light/lights/SpotLight.ts:260](https://github.com/redcamel/RedG
 
 > **get** **directionZ**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:271](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L271)
+Defined in: [src/light/lights/SpotLight.ts:194](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L194)
 
-방향 벡터의 Z 성분을 반환합니다.
+빛의 진행 방향 Z 성분을 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-Z 성분 값
+방향 벡터의 Z 성분
 
 #### Set Signature
 
 > **set** **directionZ**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:282](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L282)
-
-방향 벡터의 Z 성분을 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:198](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L198)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Z 성분 값
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
+
+***
+
+### drawDebugger
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **drawDebugger**(): [`DrawDebuggerSpotLight`](../../Display/namespaces/DrawDebugger/classes/DrawDebuggerSpotLight.md)
+
+Defined in: [src/light/lights/SpotLight.ts:336](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L336)
+
+스포트라이트의 시각적 디버거(`DrawDebuggerSpotLight`) 인스턴스를 반환합니다.
+
+##### Returns
+
+[`DrawDebuggerSpotLight`](../../Display/namespaces/DrawDebugger/classes/DrawDebuggerSpotLight.md)
+
+디버거 인스턴스 (`DrawDebuggerSpotLight`)
+
+***
 
 ***
 
@@ -207,53 +244,33 @@ Defined in: [src/light/lights/SpotLight.ts:282](https://github.com/redcamel/RedG
 
 > **get** **innerCutoff**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:317](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L317)
+Defined in: [src/light/lights/SpotLight.ts:228](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L228)
 
-내부 컷오프 각도를 반환합니다.
+빛의 세기가 최대로 유지되는 내부 원뿔 각도(도 단위, `degree`)를 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-각도 (degree)
+내부 컷오프 각도 (도 단위, `degree`)
 
 #### Set Signature
 
 > **set** **innerCutoff**(`degrees`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:328](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L328)
-
-내부 컷오프 각도를 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:232](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L232)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `degrees` | `number` | 각도 (degree)
+| Parameter | Type |
+| ------ | ------ |
+| `degrees` | `number` |
 
 ##### Returns
 
 `void`
 
 ***
-
-### innerCutoffCos
-
-#### Get Signature
-
-> **get** **innerCutoffCos**(): `number`
-
-Defined in: [src/light/lights/SpotLight.ts:364](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L364)
-
-내부 컷오프 각도의 코사인 값을 반환합니다.
-
-셰이더 계산 등에 사용됩니다.
-
-##### Returns
-
-`number`
-
-코사인 값
 
 ***
 
@@ -263,33 +280,33 @@ Defined in: [src/light/lights/SpotLight.ts:364](https://github.com/redcamel/RedG
 
 > **get** **lumen**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:106](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L106)
+Defined in: [src/light/lights/SpotLight.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L70)
 
-광원의 광선속(Lumen, lm)을 반환합니다.
+스포트라이트의 광속(Lumen)을 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-광선속 값
+광속 값 (Lumen)
 
 #### Set Signature
 
 > **set** **lumen**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:117](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L117)
-
-광원의 광선속(Lumen, lm)을 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L74)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 광선속 값 (예: 1,000)
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -299,29 +316,27 @@ Defined in: [src/light/lights/SpotLight.ts:117](https://github.com/redcamel/RedG
 
 > **get** **outerCutoff**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:339](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L339)
+Defined in: [src/light/lights/SpotLight.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L244)
 
-외부 컷오프 각도를 반환합니다.
+빛이 완전히 소멸하는 외부 원뿔 각도(도 단위, `degree`)를 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-각도 (degree)
+외부 컷오프 각도 (도 단위, `degree`)
 
 #### Set Signature
 
 > **set** **outerCutoff**(`degrees`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:350](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L350)
-
-외부 컷오프 각도를 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:248](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L248)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `degrees` | `number` | 각도 (degree)
+| Parameter | Type |
+| ------ | ------ |
+| `degrees` | `number` |
 
 ##### Returns
 
@@ -329,41 +344,25 @@ Defined in: [src/light/lights/SpotLight.ts:350](https://github.com/redcamel/RedG
 
 ***
 
-### outerCutoffCos
-
-#### Get Signature
-
-> **get** **outerCutoffCos**(): `number`
-
-Defined in: [src/light/lights/SpotLight.ts:378](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L378)
-
-외부 컷오프 각도의 코사인 값을 반환합니다.
-
-셰이더 계산 등에 사용됩니다.
-
-##### Returns
-
-`number`
-
-코사인 값
-
 ***
 
 ### position
 
 #### Get Signature
 
-> **get** **position**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/SpotLight.ts:194](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L194)
+Defined in: [src/light/lights/SpotLight.ts:134](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L134)
 
-광원의 위치를 [x, y, z] 형태로 반환합니다.
+광원의 월드 위치 좌표(`[x, y, z]`)를 반환합니다.
 
 ##### Returns
 
 \[`number`, `number`, `number`\]
 
-위치 배열 [x, y, z]
+위치 좌표 튜플 (`[number, number, number]`)
+
+***
 
 ***
 
@@ -373,33 +372,33 @@ Defined in: [src/light/lights/SpotLight.ts:194](https://github.com/redcamel/RedG
 
 > **get** **radius**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:205](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L205)
+Defined in: [src/light/lights/SpotLight.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L146)
 
-광원의 반경을 반환합니다.
+빛이 도달하는 최대 감쇠 반경(`radius`)을 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-반경 값
+광원 반경
 
 #### Set Signature
 
 > **set** **radius**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:216](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L216)
-
-광원의 반경을 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L150)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 반경 값 (예: 5.0)
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -409,33 +408,33 @@ Defined in: [src/light/lights/SpotLight.ts:216](https://github.com/redcamel/RedG
 
 > **get** **x**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:128](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L128)
+Defined in: [src/light/lights/SpotLight.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L86)
 
-X 좌표를 반환합니다.
+광원의 월드 X 좌표를 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-X 좌표
+X축 좌표
 
 #### Set Signature
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:139](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L139)
-
-X 좌표를 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L90)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | X 좌표
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -445,33 +444,33 @@ X 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:150](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L150)
+Defined in: [src/light/lights/SpotLight.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L102)
 
-Y 좌표를 반환합니다.
+광원의 월드 Y 좌표를 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-Y 좌표
+Y축 좌표
 
 #### Set Signature
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:161](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L161)
-
-Y 좌표를 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:106](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L106)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Y 좌표
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -481,29 +480,27 @@ Y 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:172](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L172)
+Defined in: [src/light/lights/SpotLight.ts:118](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L118)
 
-Z 좌표를 반환합니다.
+광원의 월드 Z 좌표를 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-Z 좌표
+Z축 좌표
 
 #### Set Signature
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:183](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L183)
-
-Z 좌표를 설정합니다.
+Defined in: [src/light/lights/SpotLight.ts:122](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L122)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Z 좌표
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -511,25 +508,59 @@ Z 좌표를 설정합니다.
 
 ## Methods
 
+
+
+***
+
 ### lookAt()
 
 > **lookAt**(`targetX`, `targetY?`, `targetZ?`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:418](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L418)
+Defined in: [src/light/lights/SpotLight.ts:308](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L308)
 
-특정 타겟 위치를 바라보도록 방향 벡터를 설정합니다.
+광원이 지정된 목표 지점을 바라보도록 방향 벡터(`direction`)를 갱신합니다.
+
+#### Example
+```typescript
+// 원점을 바라보도록 방향 설정
+spotLight.lookAt(0, 0, 0);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `targetX` | `number` \| \[`number`, `number`, `number`\] | 타겟 X 좌표 또는 [x, y, z] 배열
-| `targetY?` | `number` | 타겟 Y 좌표 (targetX가 숫자일 경우)
-| `targetZ?` | `number` | 타겟 Z 좌표 (targetX가 숫자일 경우)
+| `targetX` | `number` \| \[`number`, `number`, `number`\] | 목표 지점의 X 좌표 또는 `[x, y, z]` 좌표 배열 |
+| `targetY?` | `number` | 목표 지점의 Y 좌표 (`targetX`가 숫자인 경우) |
+| `targetZ?` | `number` | 목표 지점의 Z 좌표 (`targetX`가 숫자인 경우) |
 
 #### Returns
 
 `void`
+
+***
+
+***
+
+### render()
+
+> **render**(`debugViewRenderState`): `void`
+
+Defined in: [src/light/lights/SpotLight.ts:348](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L348)
+
+디버거가 활성화된 경우 스포트라이트 디버거 기즈모를 렌더링합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `debugViewRenderState` | [`RenderViewStateData`](../../Display/namespaces/CoreView/classes/RenderViewStateData.md) | 현재 렌더링 뷰의 상태 데이터 (`RenderViewStateData`) |
+
+#### Returns
+
+`void`
+
+***
 
 ***
 
@@ -537,45 +568,37 @@ Defined in: [src/light/lights/SpotLight.ts:418](https://github.com/redcamel/RedG
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:395](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L395)
+Defined in: [src/light/lights/SpotLight.ts:277](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L277)
 
-광원의 위치를 설정합니다.
+광원의 월드 위치를 설정합니다.
+
+#### Example
+```typescript
+// 개별 좌표로 위치 설정
+spotLight.setPosition(0, 5, 5);
+
+// 배열로 위치 설정
+spotLight.setPosition([0, 5, 5]);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` \| \[`number`, `number`, `number`\] | X 좌표 또는 [x, y, z] 배열
-| `y?` | `number` | Y 좌표 (x가 숫자일 경우)
-| `z?` | `number` | Z 좌표 (x가 숫자일 경우)
+| `x` | `number` \| \[`number`, `number`, `number`\] | X축 좌표 또는 `[x, y, z]` 좌표 배열 |
+| `y?` | `number` | Y축 좌표 (`x`가 숫자인 경우) |
+| `z?` | `number` | Z축 좌표 (`x`가 숫자인 경우) |
 
 #### Returns
 
 `void`
 
-
 ***
 
-## 상속받은 멤버
+## 상속받은 속성
 
 <details>
-<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
-
-### drawDebugger
-
-> **drawDebugger**: [`ADrawDebuggerLight`](../../Display/namespaces/drawDebugger/classes/ADrawDebuggerLight.md)\<[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md)\>
-
-Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L22)
-
-광원의 디버깅 시각화를 위한 도우미 객체입니다.
-
-외부에서 설정되며, 광원의 위치나 방향을 시각적으로 표시할 수 있습니다.
-
-#### Inherited from
-
-[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md).[`drawDebugger`](../namespaces/Core/classes/ABaseLight.md#drawdebugger)
-
-## Accessors
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
 
 ### color
 
@@ -583,29 +606,27 @@ Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L61)
 
-광원의 색상을 반환합니다.
+조명의 색상(`ColorRGB`) 인스턴스를 반환하거나 설정합니다.
 
 ##### Returns
 
 [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-ColorRGB 객체
+조명의 `ColorRGB` 인스턴스
 
 #### Set Signature
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L95)
-
-광원의 색상을 설정합니다.
+Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L65)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | [`ColorRGB`](../../Color/classes/ColorRGB.md) | ColorRGB 객체
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`ColorRGB`](../../Color/classes/ColorRGB.md) |
 
 ##### Returns
 
@@ -617,35 +638,35 @@ Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU
 
 ***
 
+***
+
 ### enableDebugger
 
 #### Get Signature
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L62)
+Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L45)
 
-디버깅 시각화 기능의 활성화 여부를 반환합니다.
+조명 시각적 디버거 활성화 여부를 반환하거나 설정합니다.
 
 ##### Returns
 
 `boolean`
 
-활성화 여부
+디버거 활성화 여부
 
 #### Set Signature
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L73)
-
-디버깅 시각화 기능을 활성화하거나 비활성화합니다.
+Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L49)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | true면 디버깅 기능 활성화
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
 
 ##### Returns
 
@@ -657,35 +678,35 @@ Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU
 
 ***
 
+***
+
 ### intensityMultiplier
 
 #### Get Signature
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L109)
+Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L80)
 
-광원의 세기 배율을 반환합니다.
+조명 강도 배율(`0` 이상의 실수)을 반환하거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-배율 값
+조명 강도 배율
 
 #### Set Signature
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L120)
-
-광원의 세기 배율을 설정합니다.
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L84)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 숫자 값 (예: 1.0)
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -696,6 +717,5 @@ Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGP
 [`ABaseLight`](../namespaces/Core/classes/ABaseLight.md).[`intensityMultiplier`](../namespaces/Core/classes/ABaseLight.md#intensitymultiplier)
 
 ***
-
 
 </details>

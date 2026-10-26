@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **validateNumber**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateNumber.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/runtimeChecker/validateFunc/validateNumber.ts#L26)
+Defined in: [src/runtimeChecker/validateFunc/validateNumber.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/runtimeChecker/validateFunc/validateNumber.ts#L23)
 
-Validates if the given value is a number type.
+Validates that the value is a non-NaN number and throws an exception on failure.
 
-Throws an exception if the value is not a number type.
-
-* ### Example
+### Example
 ```typescript
 RedGPU.RuntimeChecker.validateNumber(123);
 ```
@@ -29,8 +27,8 @@ RedGPU.RuntimeChecker.validateNumber(123);
 
 `boolean`
 
-True if the value is a number
+True if the value is a valid number
 
 ## Throws
 
-Throws Error if the value is not a number
+Throws Error if the value is not a number or is NaN

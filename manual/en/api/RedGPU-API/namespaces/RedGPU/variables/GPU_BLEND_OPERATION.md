@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,18 +8,16 @@
 
 > `const` **GPU\_BLEND\_OPERATION**: `object`
 
-Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_BLEND_OPERATION.ts#L10)
+Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L7)
 
-Constants defining mathematical operation options used in blending.
-
-Determines how to combine the source and destination color results.
+Blending arithmetic operator constants that combine weighted source and destination color/alpha values.
 
 ## Type Declaration
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-add"></a> `ADD` | `"add"` | `"add"` | Adds the source and destination results. | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:15](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_BLEND_OPERATION.ts#L15) |
-| <a id="property-max"></a> `MAX` | `"max"` | `"max"` | Selects the maximum of the two results. | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:35](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_BLEND_OPERATION.ts#L35) |
-| <a id="property-min"></a> `MIN` | `"min"` | `"min"` | Selects the minimum of the two results. | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:30](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_BLEND_OPERATION.ts#L30) |
-| <a id="property-reverse_subtract"></a> `REVERSE_SUBTRACT` | `"reverse-subtract"` | `"reverse-subtract"` | Subtracts the destination result from the source result. | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:25](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_BLEND_OPERATION.ts#L25) |
-| <a id="property-subtract"></a> `SUBTRACT` | `"subtract"` | `"subtract"` | Subtracts the source result from the destination result. | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:20](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_BLEND_OPERATION.ts#L20) |
+| <a id="property-add"></a> `ADD` | `"add"` | `"add"` | Adds the weighted source and destination values. (`Src * SrcFactor + Dst * DstFactor`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L12) |
+| <a id="property-max"></a> `MAX` | `"max"` | `"max"` | Selects the maximum value per channel between source and destination. (`max(Src, Dst)`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L32) |
+| <a id="property-min"></a> `MIN` | `"min"` | `"min"` | Selects the minimum value per channel between source and destination. (`min(Src, Dst)`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L27) |
+| <a id="property-reverse_subtract"></a> `REVERSE_SUBTRACT` | `"reverse-subtract"` | `"reverse-subtract"` | Subtracts the weighted source value from the weighted destination value. (`Dst * DstFactor - Src * SrcFactor`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L22) |
+| <a id="property-subtract"></a> `SUBTRACT` | `"subtract"` | `"subtract"` | Subtracts the weighted destination value from the weighted source value. (`Src * SrcFactor - Dst * DstFactor`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L17) |

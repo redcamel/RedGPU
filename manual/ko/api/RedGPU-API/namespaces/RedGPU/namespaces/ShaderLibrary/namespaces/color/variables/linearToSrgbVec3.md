@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,15 @@
 
 > `const` **linearToSrgbVec3**: `string` = `linearToSrgbVec3_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1083](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L1083)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1712](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L1712)
 
 Linear 색 공간의 vec3 색상을 sRGB 색 공간으로 변환합니다.
 
 //
 
 ## Param
+
+**linearColor**
 
 입력 Linear 색상
 //

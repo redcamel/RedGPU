@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getViewNormalFromGNormalBuffer**: `string` = `getViewNormalFromGNormalBuffer_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:765](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L765)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:786](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L786)
 
 Reconstructs view space normal vector from G-Buffer data and camera matrix.
 
@@ -16,10 +16,14 @@ Reconstructs view space normal vector from G-Buffer data and camera matrix.
 
 ## Param
 
+**gBufferNormal**
+
 Normal data sampled from G-Buffer
 //
 
 ## Param
+
+**viewMatrix**
 
 Camera matrix (View Matrix)
 //

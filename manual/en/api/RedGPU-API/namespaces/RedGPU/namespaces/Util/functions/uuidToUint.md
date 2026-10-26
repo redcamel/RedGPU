@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **uuidToUint**(`uuid`): `number`
 
-Defined in: [src/utils/uuid/uuidToUint.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/uuid/uuidToUint.ts#L17)
+Defined in: [src/utils/uuid/uuidToUint.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/uuid/uuidToUint.ts#L18)
 
-Converts a UUID string to a 32-bit unsigned integer (uint32).
+Converts a UUID string to a 32-bit unsigned integer by parsing its first 8 characters (hyphens removed) as hexadecimal.
 
-Interprets and converts the first 8 characters of the UUID as a hexadecimal.
-
-* ### Example
+### Example
 ```typescript
 const uintId = RedGPU.Util.uuidToUint('123e4567-e89b-12d3-a456-426614174000');
 ```
@@ -23,10 +21,10 @@ const uintId = RedGPU.Util.uuidToUint('123e4567-e89b-12d3-a456-426614174000');
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `uuid` | `string` | Target UUID string |
+| `uuid` | `string` | UUID string to convert |
 
 ## Returns
 
 `number`
 
-Converted uint32 value
+Converted uint32 value (0 ~ 4294967295)

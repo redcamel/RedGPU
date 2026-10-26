@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,30 +8,34 @@
 
 > **worldToLocal**(`targetMatrix`, `x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/math/coordinates/worldToLocal.ts:35](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/coordinates/worldToLocal.ts#L35)
+Defined in: [src/math/coordinates/worldToLocal.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/worldToLocal.ts#L36)
 
-월드 좌표를 로컬 좌표로 변환합니다.
+4x4 변환 행렬(`targetMatrix`)의 역행렬을 사용하여 3D 월드 좌표(`[x, y, z]`)를 로컬 좌표(`[x, y, z]`)로 변환합니다.
 
 ### Example
 ```typescript
-const localPos = RedGPU.math.worldToLocal(mesh.modelMatrix, 10, 5, 0);
+const [localX, localY, localZ] = RedGPU.Math.worldToLocal(mesh.modelMatrix, 10, 5, 0);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `targetMatrix` | [`mat4`](../type-aliases/mat4.md) | 변환에 사용할 4x4 행렬
-| `x` | `number` | 월드 x 좌표
-| `y` | `number` | 월드 y 좌표
-| `z` | `number` | 월드 z 좌표
+| `targetMatrix` | [`mat4`](../type-aliases/mat4.md) | 기준 객체의 4x4 월드 변환 행렬 (`mat4`, 열 우선) |
+| `x` | `number` | 변환할 월드 X 좌표 |
+| `y` | `number` | 변환할 월드 Y 좌표 |
+| `z` | `number` | 변환할 월드 Z 좌표 |
 
 ## Returns
 
 \[`number`, `number`, `number`\]
 
-변환된 로컬 좌표 [x, y, z]
+변환된 로컬 좌표 튜플 (`[x, y, z]`)
 
 ## Throws
 
-입력 좌표가 숫자가 아니면 Error 발생
+`x`, `y`, `z` 중 하나라도 유효한 숫자가 아닐 경우 에러 발생
+
+## See
+
+[World to Local example](https://redcamel.github.io/RedGPU/examples/3d/coordinateTransformation/worldToLocal/)

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,15 +8,14 @@
 
 > **getFilePath**(`url`): `string`
 
-Defined in: [src/utils/file/getFilePath.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/file/getFilePath.ts#L17)
+Defined in: [src/utils/file/getFilePath.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/file/getFilePath.ts#L23)
 
-Extracts the directory path containing the file from a URL or path.
+Returns the directory path of a URL or path, including the last `/`.
 
-Returns the leading part of the path, including the last '/'.
-
-* ### Example
+### Example
 ```typescript
-const path = RedGPU.Util.getFilePath('assets/textures/diffuse.png'); // 'assets/textures/'
+// Returns 'assets/textures/'
+const path = RedGPU.Util.getFilePath('assets/textures/diffuse.png');
 ```
 
 ## Parameters
@@ -30,3 +29,7 @@ const path = RedGPU.Util.getFilePath('assets/textures/diffuse.png'); // 'assets/
 `string`
 
 Directory path
+
+## Throws
+
+When `url` is empty or undefined

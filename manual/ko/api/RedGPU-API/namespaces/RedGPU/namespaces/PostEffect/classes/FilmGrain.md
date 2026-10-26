@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,22 +6,24 @@
 
 # Class: FilmGrain
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:42](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L42)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L38)
 
-현대적인 시네마틱 필름 그레인(Film Grain) 후처리 이펙트입니다.
+필름의 입자 질감을 시뮬레이션하는 필름 그레인 후처리 이펙트입니다.
 
-단순한 노이즈가 아닌, 실제 필름의 화학적 입자 질감을 수학적으로 시뮬레이션합니다.
+***
 
-하이라이트 영역보다 어두운 영역에서 입자가 더 도드라지는 물리적 특성을 반영하며, 시간(프레임)에 따라 변하는 동적 질감을 제공합니다.
-
-* ### Example
+### Example
 ```typescript
 const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
 effect.applyPreset(RedGPU.PostEffect.FilmGrain.MEDIUM);
 view.postEffectManager.addEffect(effect);
 ```
 
-<iframe src="https://redcamel.github.io/RedGPU/examples/postEffect/filmGrain/"></iframe>
+<iframe src="https://redcamel.github.io/RedGPU/examples/postEffect/filmGrain/" style="width:100%; height:500px;"></iframe>
+
+## See
+
+[FilmGrain example](https://redcamel.github.io/RedGPU/examples/postEffect/filmGrain/)
 
 ## Extends
 
@@ -29,19 +31,28 @@ view.postEffectManager.addEffect(effect);
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new FilmGrain**(`redGPUContext`): `FilmGrain`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:106](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L106)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:122](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L122)
 
 FilmGrain 인스턴스를 생성합니다.
+
+#### Example
+```typescript
+const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU 컨텍스트
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스 |
 
 #### Returns
 
@@ -53,53 +64,67 @@ FilmGrain 인스턴스를 생성합니다.
 
 ## Properties
 
+
+
+***
+
 ### coloredGrain
 
-> **coloredGrain**: `number`
+> **coloredGrain**: `number` = `0.15`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:62](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L62)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L62)
 
 유색 그레인 적용 비율 (0: 단색, 1: 풀컬러)
 
 ***
 
+***
+
 ### filmGrainIntensity
 
-> **filmGrainIntensity**: `number`
+> **filmGrainIntensity**: `number` = `0.015`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:47](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L47)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L44)
 
-그레인 입자의 전체적인 강도 (0 ~ 1)
+그레인 입자 강도 (0 이상)
+
+***
 
 ***
 
 ### filmGrainResponse
 
-> **filmGrainResponse**: `number`
+> **filmGrainResponse**: `number` = `1.2`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L52)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L50)
 
-명도에 따른 그레인 반응 곡선 (값이 높을수록 어두운 영역에 집중)
+명도에 따른 그레인 반응 곡선 (0 이상)
+
+***
 
 ***
 
 ### filmGrainScale
 
-> **filmGrainScale**: `number`
+> **filmGrainScale**: `number` = `1.8`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:57](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L57)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L56)
 
-그레인 입자의 크기 (스케일)
+그레인 입자 크기 스케일 (0 이상)
+
+***
 
 ***
 
 ### grainSaturation
 
-> **grainSaturation**: `number`
+> **grainSaturation**: `number` = `0.3`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:67](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L67)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L68)
 
-입자의 채도 강도
+그레인 입자 채도 강도 (0 이상)
+
+***
 
 ***
 
@@ -107,7 +132,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:67](https://github.co
 
 > `static` **HEAVY**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:96](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L96)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L102)
 
 강한 질감 프리셋
 
@@ -133,13 +158,15 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:96](https://github.co
 
 ***
 
+***
+
 ### MEDIUM
 
 > `static` **MEDIUM**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:94](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L94)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:97](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L97)
 
-표준적인 질감 프리셋
+표준 질감 프리셋
 
 #### coloredGrain
 
@@ -163,11 +190,13 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:94](https://github.co
 
 ***
 
+***
+
 ### SUBTLE
 
 > `static` **SUBTLE**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:92](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L92)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L92)
 
 미세한 질감 프리셋
 
@@ -193,13 +222,15 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:92](https://github.co
 
 ***
 
+***
+
 ### VINTAGE
 
 > `static` **VINTAGE**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:98](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L98)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:107](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L107)
 
-고전 영화 스타일 프리셋
+빈티지 영화 스타일 프리셋
 
 #### coloredGrain
 
@@ -223,24 +254,38 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:98](https://github.co
 
 ## Accessors
 
+
+
+## Methods
+
+
+
+***
+
 ### applyPreset()
 
 > **applyPreset**(`preset`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:122](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/filmGrain/FilmGrain.ts#L122)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:145](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/effects/filmGrain/FilmGrain.ts#L145)
 
-정의된 프리셋 수치를 이펙트에 즉시 적용합니다.
+프리셋 수치를 이펙트에 적용합니다.
+
+#### Example
+```typescript
+const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
+effect.applyPreset(RedGPU.PostEffect.FilmGrain.SUBTLE);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `preset` | \{ `coloredGrain`: `number`; `filmGrainIntensity`: `number`; `filmGrainResponse`: `number`; `filmGrainScale`: `number`; `grainSaturation`: `number`; \} | 적용할 프리셋 객체
-| `preset.coloredGrain` | `number` | - |
-| `preset.filmGrainIntensity` | `number` | - |
-| `preset.filmGrainResponse` | `number` | - |
-| `preset.filmGrainScale` | `number` | - |
-| `preset.grainSaturation` | `number` | - |
+| `preset` | \{ `coloredGrain`: `number`; `filmGrainIntensity`: `number`; `filmGrainResponse`: `number`; `filmGrainScale`: `number`; `grainSaturation`: `number`; \} | 적용할 프리셋 객체 |
+| `preset.coloredGrain?` | `number` | - |
+| `preset.filmGrainIntensity?` | `number` | - |
+| `preset.filmGrainResponse?` | `number` | - |
+| `preset.filmGrainScale?` | `number` | - |
+| `preset.grainSaturation?` | `number` | - |
 
 #### Returns
 
@@ -248,33 +293,20 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:122](https://github.c
 
 ***
 
-
 ***
 
-## 상속받은 멤버
+## 상속받은 속성
 
 <details>
-<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-클래스별 인스턴스 순번 ID
-
-#### Inherited from
-
-[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`instanceId`](../namespaces/Core/classes/ASinglePassPostEffect.md#instanceid)
-
-***
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
 
 ### isInstanceofPostEffect
 
-> **isInstanceofPostEffect**: `boolean`
+> **isInstanceofPostEffect**: `boolean` = `true`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:12](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L12)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L19)
+
+후처리 이펙트 인스턴스 여부
 
 #### Inherited from
 
@@ -282,35 +314,23 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:12](https://github.com
 
 ***
 
-### isLdr
-
-> **isLdr**: `boolean` = `false`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L29)
-
-이펙트가 LDR(Low Dynamic Range) 공간에서 동작하는지 여부
-
-#### Inherited from
-
-[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`isLdr`](../namespaces/Core/classes/ASinglePassPostEffect.md#isldr)
-
 ***
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager 인스턴스
+`AntialiasingManager` 인스턴스
 
 #### Inherited from
 
@@ -318,21 +338,23 @@ AntialiasingManager 인스턴스
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager 인스턴스
+`CommandEncoderManager` 인스턴스
 
 #### Inherited from
 
@@ -340,25 +362,77 @@ CommandEncoderManager 인스턴스
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-WebGPU 디바이스 객체를 반환합니다. (단축 경로)
+컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice 인스턴스
+`GPUDevice` 인스턴스
 
 #### Inherited from
 
 [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`gpuDevice`](../namespaces/Core/classes/ASinglePassPostEffect.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+
+##### Returns
+
+`number`
+
+클래스별 고유 인스턴스 번호
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`instanceId`](../namespaces/Core/classes/ASinglePassPostEffect.md#instanceid)
+
+***
+
+***
+
+### isLdr
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **isLdr**(): `boolean` = `false`
+
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L112)
+
+톤매핑 이후 LDR(Low Dynamic Range) 공간에서 동작하는지 여부를 반환합니다.
+
+##### Returns
+
+`boolean`
+
+LDR 공간 동작 여부
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`isLdr`](../namespaces/Core/classes/ASinglePassPostEffect.md#isldr)
+
+***
 
 ***
 
@@ -368,29 +442,27 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
+객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
 ##### Returns
 
 `string`
 
-객체 이름
+객체 이름 문자열
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-객체의 이름을 설정합니다.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | 설정할 객체 이름
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -402,21 +474,23 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 ***
 
+***
+
 ### outputTextureView
 
 #### Get Signature
 
-> **get** **outputTextureView**(): `GPUTextureView`
+> <span class="readonly-badge">readonly</span> **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L208)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:235](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L235)
 
-현재 할당된 출력 텍스처 뷰를 반환합니다.
+현재 패스에 할당된 출력 텍스처 뷰를 반환합니다.
 
 ##### Returns
 
 `GPUTextureView`
 
-출력 GPUTextureView
+출력 `GPUTextureView`
 
 #### Inherited from
 
@@ -424,21 +498,23 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.co
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-RedGPUContext 인스턴스를 반환합니다.
+바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext 인스턴스
+`RedGPUContext` 인스턴스
 
 #### Inherited from
 
@@ -446,21 +522,23 @@ RedGPUContext 인스턴스
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager 인스턴스
+`ResourceManager` 인스턴스
 
 #### Inherited from
 
@@ -468,21 +546,23 @@ ResourceManager 인스턴스
 
 ***
 
+***
+
 ### shaderInfo
 
 #### Get Signature
 
-> **get** **shaderInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L124)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L148)
 
-현재 MSAA 상태에 따른 셰이더 정보를 반환합니다.
+현재 MSAA 상태에 대응하는 WGSL 셰이더 파싱 정보를 반환합니다.
 
 ##### Returns
 
 `any`
 
-WGSL 셰이더 분석 정보
+WGSL 셰이더 파싱 정보
 
 #### Inherited from
 
@@ -490,21 +570,23 @@ WGSL 셰이더 분석 정보
 
 ***
 
+***
+
 ### storageInfo
 
 #### Get Signature
 
-> **get** **storageInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L112)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L136)
 
-셰이더의 스토리지 구조 정보를 반환합니다.
+파싱된 셰이더의 스토리지 바인딩 구조 정보를 반환합니다.
 
 ##### Returns
 
 `any`
 
-스토리지 구조 정보
+스토리지 바인딩 구조 정보
 
 #### Inherited from
 
@@ -512,21 +594,23 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.co
 
 ***
 
+***
+
 ### systemUniformsInfo
 
 #### Get Signature
 
-> **get** **systemUniformsInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **systemUniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L160)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L184)
 
-시스템 공용 유니폼 구조 정보를 반환합니다.
+시스템 공용 유니폼 구조체 정보를 반환합니다.
 
 ##### Returns
 
 `any`
 
-시스템 유니폼 구조 정보
+시스템 유니폼 구조체 정보
 
 #### Inherited from
 
@@ -534,13 +618,15 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.co
 
 ***
 
+***
+
 ### uniformBuffer
 
 #### Get Signature
 
-> **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
+> <span class="readonly-badge">readonly</span> **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L136)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L160)
 
 이펙트 전용 유니폼 버퍼를 반환합니다.
 
@@ -548,7 +634,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.co
 
 [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-유니폼 버퍼 인스턴스
+`UniformBuffer` 인스턴스
 
 #### Inherited from
 
@@ -556,21 +642,23 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.co
 
 ***
 
+***
+
 ### uniformsInfo
 
 #### Get Signature
 
-> **get** **uniformsInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L148)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L172)
 
-이펙트 전용 유니폼 구조 정보를 반환합니다.
+이펙트 전용 유니폼 구조체 정보를 반환합니다.
 
 ##### Returns
 
 `any`
 
-유니폼 구조 정보
+유니폼 구조체 정보
 
 #### Inherited from
 
@@ -578,13 +666,15 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.co
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -592,7 +682,7 @@ Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/
 
 `string`
 
-UUID 문자열
+객체의 UUID 문자열
 
 #### Inherited from
 
@@ -600,21 +690,23 @@ UUID 문자열
 
 ***
 
+***
+
 ### videoMemorySize
 
 #### Get Signature
 
-> **get** **videoMemorySize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:99](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L99)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L124)
 
-비디오 메모리 사용량(Bytes)을 반환합니다.
+이펙트 고유 버퍼의 비디오 메모리 사용량(바이트)을 반환합니다.
 
 ##### Returns
 
 `number`
 
-비디오 메모리 사용량 (Bytes)
+비디오 메모리 사용량 (단위: 바이트)
 
 #### Inherited from
 
@@ -622,21 +714,23 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:99](https://github.com
 
 ***
 
+***
+
 ### WORK\_SIZE\_X
 
 #### Get Signature
 
-> **get** **WORK\_SIZE\_X**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **WORK\_SIZE\_X**(): `number` = `16`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L172)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:197](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L197)
 
-워크그룹 사이즈 X를 반환합니다.
+컴퓨트 워크그룹 X축 크기를 반환합니다.
 
 ##### Returns
 
 `number`
 
-워크그룹 사이즈 X
+워크그룹 X 크기
 
 #### Inherited from
 
@@ -644,21 +738,23 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.co
 
 ***
 
+***
+
 ### WORK\_SIZE\_Y
 
 #### Get Signature
 
-> **get** **WORK\_SIZE\_Y**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **WORK\_SIZE\_Y**(): `number` = `16`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L184)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:210](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L210)
 
-워크그룹 사이즈 Y를 반환합니다.
+컴퓨트 워크그룹 Y축 크기를 반환합니다.
 
 ##### Returns
 
 `number`
 
-워크그룹 사이즈 Y
+워크그룹 Y 크기
 
 #### Inherited from
 
@@ -666,35 +762,45 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.co
 
 ***
 
+***
+
 ### WORK\_SIZE\_Z
 
 #### Get Signature
 
-> **get** **WORK\_SIZE\_Z**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **WORK\_SIZE\_Z**(): `number` = `1`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L196)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:223](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L223)
 
-워크그룹 사이즈 Z를 반환합니다.
+컴퓨트 워크그룹 Z축 크기를 반환합니다.
 
 ##### Returns
 
 `number`
 
-워크그룹 사이즈 Z
+워크그룹 Z 크기
 
 #### Inherited from
 
 [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`WORK_SIZE_Z`](../namespaces/Core/classes/ASinglePassPostEffect.md#work_size_z)
 
-## Methods
+</details>
+
+
+***
+
+## 상속받은 메서드
+
+<details>
+<summary>상속받은 메서드 보기 (클릭하여 확장)</summary>
 
 ### clear()
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:216](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L216)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:243](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L243)
 
-이펙트에서 사용 중인 리소스를 해제합니다.
+캐시된 바인드 그룹 및 출력 텍스처 참조를 초기화합니다.
 
 #### Returns
 
@@ -706,11 +812,15 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:216](https://github.co
 
 ***
 
+***
+
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:224](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L224)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:255](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L255)
+
+이펙트의 유니폼 버퍼와 캐시 리소스를 파기합니다.
 
 #### Returns
 
@@ -722,21 +832,23 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:224](https://github.co
 
 ***
 
+***
+
 ### init()
 
 > **init**(`redGPUContext`, `name`, `computeCodes`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:252](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L252)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:283](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L283)
 
-이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
+MSAA/Non-MSAA 컴퓨트 셰이더 모듈과 유니폼 버퍼를 생성하여 이펙트를 초기화합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU 컨텍스트
-| `name` | `string` | 이펙트 이름
-| `computeCodes` | \{ `msaa`: `string`; `nonMsaa`: `string`; \} | MSAA 및 Non-MSAA용 컴퓨트 셰이더 소스 코드
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스 |
+| `name` | `string` | 이펙트 식별 이름 |
+| `computeCodes` | \{ `msaa`: `string`; `nonMsaa`: `string`; \} | MSAA 및 Non-MSAA용 컴퓨트 셰이더 코드 객체 |
 | `computeCodes.msaa` | `string` | - |
 | `computeCodes.nonMsaa` | `string` | - |
 
@@ -750,28 +862,30 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:252](https://github.co
 
 ***
 
+***
+
 ### render()
 
 > **render**(`view`, `width`, `height`, ...`sourceTextureInfo`): [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:310](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L310)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:344](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L344)
 
-이펙트를 렌더링하고 결과를 반환합니다. 필요한 경우 바인드 그룹을 갱신합니다.
+텍스처 풀에서 출력 텍스처를 할당받아 컴퓨트 패스를 실행하고 결과 텍스처 정보를 반환합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | View3D 인스턴스
-| `width` | `number` | 렌더링 너비
-| `height` | `number` | 렌더링 높이
-| ...`sourceTextureInfo` | [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)[] | 입력으로 사용될 소스 텍스처 정보 리스트
+| `view` | [`View3D`](../../Display/classes/View3D.md) | 대상 `View3D` 인스턴스 |
+| `width` | `number` | 렌더링 너비 (단위: 픽셀) |
+| `height` | `number` | 렌더링 높이 (단위: 픽셀) |
+| ...`sourceTextureInfo` | [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)[] | 입력 소스 텍스처 정보 목록 |
 
 #### Returns
 
 [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-렌더링 결과 (텍스처 및 뷰)
+렌더링 결과 텍스처 및 뷰 (`IPostEffectResult`)
 
 #### Inherited from
 
@@ -779,20 +893,22 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:310](https://github.co
 
 ***
 
+***
+
 ### updateUniform()
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:363](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L363)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:387](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L387)
 
-특정 유니폼 값을 업데이트합니다.
+지정된 유니폼 멤버의 값을 유니폼 버퍼에 기록합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `key` | `string` | 유니폼 키 이름
-| `value` | `number` \| `boolean` \| `number`[] | 설정할 값
+| `key` | `string` | 유니폼 멤버 키 이름 |
+| `value` | `number` \| `boolean` \| `number`[] | 기록할 값 |
 
 #### Returns
 
@@ -801,6 +917,5 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:363](https://github.co
 #### Inherited from
 
 [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`updateUniform`](../namespaces/Core/classes/ASinglePassPostEffect.md#updateuniform)
-
 
 </details>

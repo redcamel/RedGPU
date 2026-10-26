@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,38 +8,31 @@
 
 > **defineNumber**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:98](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/number/defineNumber.ts#L98)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/defineNumber.ts#L101)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 일반 숫자(Number) 속성을 정의합니다.
+Defines numeric properties on the target's prototype that synchronize with GPU uniform buffers.
 
-## Parameters
+Validates numeric input upon assignment, clamping out-of-bounds values to `min` or `max` with a warning before updating the uniform buffer.
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `target` | `any` | Class constructor to define properties on |
-| `defineInfo` | [`DefineNumberInfo`](../interfaces/DefineNumberInfo.md) \| [`DefineNumberInfo`](../interfaces/DefineNumberInfo.md)[] | A single [DefineNumberInfo](../interfaces/DefineNumberInfo.md) configuration or an array of configurations |
-
-## Returns
-
-`void`
-
-## Remarks
-
-
-***
-- Performs runtime type check via [validateNumber](../../RuntimeChecker/functions/validateNumber.md) upon setting value.
-- If `min` and `max` are set, values out of bounds trigger `console.warn` and are clamped to the boundaries.
-- Automatically updates the GPU globalStruct buffer on value change.
-
-## Example
-
+### Example
 ```typescript
-// 단일 설정 (범위 제한 포함)
+// Define a single numeric property (with range limits)
 RedGPU.DefineGPUProperty.defineNumber(MyMaterial, { key: 'roughness', value: 0.5, min: 0, max: 1 });
 
-// 여러 속성 일괄 정의
+// Define multiple numeric properties at once
 RedGPU.DefineGPUProperty.defineNumber(MyMaterial, [
   { key: 'opacity', value: 1.0, min: 0, max: 1 },
   { key: 'shininess', value: 30 }
 ]);
 ```
+
+## Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `any` | Target class or prototype to define properties on |
+| `defineInfo` | [`DefineNumberInfo`](../interfaces/DefineNumberInfo.md) \| [`DefineNumberInfo`](../interfaces/DefineNumberInfo.md)[] | Single `DefineNumberInfo` configuration or an array of configurations |
+
+## Returns
+
+`void`

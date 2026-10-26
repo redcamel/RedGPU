@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,9 +8,9 @@
 
 > `const` **POST\_EFFECT\_SYSTEM\_UNIFORM**: `string` = `POST_EFFECT_SYSTEM_UNIFORM_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2988](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L2988)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:3098](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L3098)
 
-포스트 이펙트 시스템 유니폼 구조체입니다.
+포스트 이펙트 시스템 유니폼 구조체입니다. (Non-MSAA)
 
 ```wgsl
 #redgpu_include systemStruct.Camera
@@ -21,12 +21,17 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:2988](https://github.com/red
 struct SystemUniform {
     projection: Projection,
     time: Time,
-    camera:Camera,
+    camera: Camera,
     useSkyAtmosphere: u32,
     preExposure: f32,
     devicePixelRatio: f32,
-    skyAtmosphere:SkyAtmosphere,
+    skyAtmosphere: SkyAtmosphere,
 };
 
+@group(2) @binding(0) var depthTexture : texture_depth_2d;
+@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
+@group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;
+@group(2) @binding(3) var prevDepthTexture : texture_depth_2d;
 @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
+@group(2) @binding(5) var basicSampler : sampler;
 ```

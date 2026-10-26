@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,4 +8,6 @@
 
 > **TypedArrayConstructor** = `Int8ArrayConstructor` \| `Uint8ArrayConstructor` \| `Int16ArrayConstructor` \| `Uint16ArrayConstructor` \| `Int32ArrayConstructor` \| `Uint32ArrayConstructor` \| `Float32ArrayConstructor` \| `Float64ArrayConstructor`
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:1](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/wgslParser/core/WGSLUniformTypes.ts#L1)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:6](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/wgslParser/core/WGSLUniformTypes.ts#L6)
+
+TypedArray 생성자 함수 타입입니다.

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # CoreSpriteSheet
 
-Provides core base classes for the sprite sheet system.
+Provides the core abstract class for the sprite sheet system.
 
 ## Core
 

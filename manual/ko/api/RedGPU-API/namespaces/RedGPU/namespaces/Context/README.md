@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Context
 
-WebGPU 초기화 및 컨텍스트 관리 기능을 제공합니다.
-
-시스템의 최상위 객체인 RedGPUContext를 포함하여 디바이스 감지, 크기 관리, 뷰 컨테이너 등 핵심 인프라를 포함합니다.
+최상위 컨텍스트인 `RedGPUContext`를 비롯하여 디바이스 환경 감지, 캔버스 크기 관리, 뷰 컨테이너 등 WebGPU 초기화 및 컨텍스트 관리 인프라를 제공합니다.
 
 ## Context
 

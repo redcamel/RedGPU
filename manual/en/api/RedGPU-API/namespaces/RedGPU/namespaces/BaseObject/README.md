@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,12 +6,9 @@
 
 # BaseObject
 
-Provides base abstract classes that form the foundation of RedGPU.
+Provides top-level abstract classes for unique engine object identification (`BaseObject`) and `RedGPUContext`-based subsystem access (`RedGPUObject`).
 
 ## Core
 
 - [BaseObject](classes/BaseObject.md)
-
-## Other
-
 - [RedGPUObject](classes/RedGPUObject.md)

@@ -1,10 +1,12 @@
-[**RedGPU API v4.3.0-Alpha**](../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../README.md)
 
 ***
 
 [RedGPU API](../../../README.md) / RedGPU
 
 # RedGPU
+
+Documentation entry point that re-exports RedGPU core modules and the `Plugin` namespace.
 
 ## Constants
 
@@ -31,7 +33,11 @@
 
 ## Loader
 
+- [AnimState](classes/AnimState.md)
+- [AnimStateMachine](classes/AnimStateMachine.md)
+- [ClipAnimState](classes/ClipAnimState.md)
 - [GLTFLoader](classes/GLTFLoader.md)
+- [AnimTransition](interfaces/AnimTransition.md)
 
 ## Other
 
@@ -45,6 +51,7 @@
 - [Context](namespaces/Context/README.md)
 - [DefineGPUProperty](namespaces/DefineGPUProperty/README.md)
 - [Display](namespaces/Display/README.md)
+- [Landscape](namespaces/Landscape/README.md)
 - [Light](namespaces/Light/README.md)
 - [Material](namespaces/Material/README.md)
 - [Math](namespaces/Math/README.md)
@@ -56,16 +63,17 @@
 - [RenderState](namespaces/RenderState/README.md)
 - [Resource](namespaces/Resource/README.md)
 - [RuntimeChecker](namespaces/RuntimeChecker/README.md)
-- [ShaderLibrary](namespaces/ShaderLibrary/README.md)
 - [Shadow](namespaces/Shadow/README.md)
 - [ToneMapping](namespaces/ToneMapping/README.md)
 - [Util](namespaces/Util/README.md)
-- [AnimState](classes/AnimState.md)
-- [AnimStateMachine](classes/AnimStateMachine.md)
-- [ClipAnimState](classes/ClipAnimState.md)
-- [AnimTransition](interfaces/AnimTransition.md)
+- [Water](namespaces/Water/README.md)
+- [Wind](namespaces/Wind/README.md)
 
 ## Renderer
 
 - [Renderer](classes/Renderer.md)
 - [SystemUniformUpdater](classes/SystemUniformUpdater.md)
+
+## Shader
+
+- [ShaderLibrary](namespaces/ShaderLibrary/README.md)

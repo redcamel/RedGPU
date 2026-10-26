@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,21 +8,26 @@
 
 > **calculateTangents**(`vertices`, `normals`, `uvs`, `indices`): `Float32Array`
 
-Defined in: [src/math/calculateTangents.ts:131](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/calculateTangents.ts#L131)
+Defined in: [src/math/calculateTangents.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/calculateTangents.ts#L166)
 
-MikkTSpace 알고리즘 기반으로 정점 탄젠트 벡터를 계산하여 새로운 배열로 반환합니다. (순수 수학 유틸리티)
+정점 위치, 법선, UV, 인덱스 배열로부터 MikkTSpace 알고리즘 기반의 정점 탄젠트 벡터(`Float32Array`)를 계산하여 반환합니다.
+
+### Example
+```typescript
+const tangents = RedGPU.Math.calculateTangents(vertices, normals, uvs, indices);
+```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `vertices` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | 정점 위치 배열
-| `normals` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | 노멀 벡터 배열
-| `uvs` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | UV 좌표 배열
-| `indices` | `number`[] \| `Uint32Array`\<`ArrayBufferLike`\> | 인덱스 데이터
+| `vertices` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | 정점 위치 배열 (`[x, y, z, ...]`) |
+| `normals` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | 정점 법선 벡터 배열 (`[nx, ny, nz, ...]`) |
+| `uvs` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | UV 텍스처 좌표 배열 (`[u, v, ...]`) |
+| `indices` | `number`[] \| `Uint32Array`\<`ArrayBufferLike`\> | 삼각형 정점 인덱스 배열 |
 
 ## Returns
 
 `Float32Array`
 
-계산된 탄젠트 배열
+계산된 정점 탄젠트 배열 (`Float32Array`, `[tx, ty, tz, w, ...]`)

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,27 +6,26 @@
 
 # Function: mixInMesh2D()
 
-> **mixInMesh2D**\<`TBase`\>(`Base`): \{(...`args`): `resultClass`; `prototype`: `resultClass`\<`any`\>; \} & `TBase`
+> **mixInMesh2D**\<`TBase`\>(`Base`): \{new (...`args`): `resultClass`; `prototype`: `resultClass`\<`any`\>; \} & `TBase`
 
-Defined in: [src/display/mesh/core/mixInMesh2D.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/mixInMesh2D.ts#L18)
+Defined in: [src/display/mesh/core/mixInMesh2D.ts:60](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/mixInMesh2D.ts#L60)
+
+Mixin function that combines 2D-specific transform (position, scale, rotation) and blend mode functionality into a base mesh class.
 
 ## Type Parameters
 
-| Type Parameter |
-| ------ |
-| `TBase` *extends* (...`args`) => `Mesh2DBase` |
+| Type Parameter | Description |
+| ------ | ------ |
+| <a id="type-parameter-tbase"></a> `TBase` *extends* new (...`args`) => `Mesh2DBase` | Constructor type satisfying `Mesh2DBase` |
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `Base` | `TBase` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `Base` | `TBase` | Base class to extend |
 
 ## Returns
 
-\{(...`args`): `resultClass`; `prototype`: `resultClass`\<`any`\>; \} & `TBase`
+\{new (...`args`): `resultClass`; `prototype`: `resultClass`\<`any`\>; \} & `TBase`
 
-## Remarks
-
-`시스템 전용 클래스입니다.`\
-이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+Class extended with 2D mesh functionality

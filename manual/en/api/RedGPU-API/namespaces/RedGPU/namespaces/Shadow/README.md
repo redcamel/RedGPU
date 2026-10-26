@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Shadow
 
-Provides managers and utilities related to shadow rendering.
+Provides the directional light shadow manager and the scene-level shadow manager.
 
 ## Shadow
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,14 +6,14 @@
 
 # Class: Object3DContainer
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L22)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L22)
 
-Mesh 객체들을 담는 시각적 컨테이너 클래스입니다.
+3D 객체들을 계층적으로 관리하는 컨테이너 클래스입니다.
 
-Scene의 기반이 되는 구조로, View에서 렌더링할 수 있는 3D 객체들을 계층적으로 관리합니다. 자식 객체의 추가, 제거, 위치 변경, 교환 등의 기능을 제공합니다.
+자식 객체의 추가, 제거, 인덱스 변경 및 정렬 기능을 제공합니다.
 
 ::: warning
-이 클래스는 시스템 내부적으로 사용되는 컨테이너 클래스입니다.<br/>일반적인 사용자는 직접 인스턴스를 생성할 필요가 없습니다.
+이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
 :::
 
 ## Extends
@@ -28,13 +28,17 @@ Scene의 기반이 되는 구조로, View에서 렌더링할 수 있는 3D 객�
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new Object3DContainer**(): `Object3DContainer`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:36](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L36)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L34)
 
-Object3DContainer 생성자입니다.
+Object3DContainer 인스턴스를 생성합니다.
 
 #### Returns
 
@@ -46,31 +50,41 @@ Object3DContainer 생성자입니다.
 
 ## Properties
 
+
+
+***
+
 ### modelMatrix
 
 > **modelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L26)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L27)
 
-이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
+객체의 월드 변환을 나타내는 모델 행렬입니다.
 
 ## Accessors
+
+
+
+***
 
 ### children
 
 #### Get Signature
 
-> **get** **children**(): [`Mesh`](../../../classes/Mesh.md)[]
+> <span class="readonly-badge">readonly</span> **get** **children**(): [`Mesh`](../../../classes/Mesh.md)[]
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L44)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L46)
 
-현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
+자식 객체 배열을 반환합니다.
 
 ##### Returns
 
 [`Mesh`](../../../classes/Mesh.md)[]
 
-자식 객체 배열
+자식 Mesh 배열 (`Mesh[]`)
+
+***
 
 ***
 
@@ -78,17 +92,23 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/r
 
 #### Get Signature
 
-> **get** **numChildren**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L52)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L58)
 
-자식 객체의 개수를 반환합니다.
+등록된 자식 객체의 개수를 반환합니다.
 
 ##### Returns
 
 `number`
 
-자식 수
+자식 객체 개수
+
+***
+
+## Methods
+
+
 
 ***
 
@@ -96,9 +116,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/r
 
 > **addChild**(`child`): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L71)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L89)
 
-자식 Mesh를 컨테이너에 추가합니다.
+자식 객체를 컨테이너 끝에 추가합니다.
 
 #### Parameters
 
@@ -110,7 +130,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/r
 
 [`Mesh`](../../../classes/Mesh.md)
 
-추가된 객체 또는 실패 시 null
+추가된 자식 객체 (실패 시 `null`)
+
+***
 
 ***
 
@@ -118,22 +140,24 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/r
 
 > **addChildAt**(`child`, `index`): `Object3DContainer`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L89)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L115)
 
-자식 Mesh를 특정 인덱스에 추가합니다.
+지정한 인덱스 위치에 자식 객체를 추가합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `child` | [`Mesh`](../../../classes/Mesh.md) | 추가할 자식 객체 |
-| `index` | `number` | 삽입 위치 |
+| `index` | `number` | 삽입할 인덱스 위치 |
 
 #### Returns
 
 `Object3DContainer`
 
-현재 컨테이너
+현재 컨테이너 인스턴스
+
+***
 
 ***
 
@@ -141,9 +165,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/r
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L61)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L73)
 
-특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
+지정한 객체가 현재 컨테이너의 자식인지 확인합니다.
 
 #### Parameters
 
@@ -159,11 +183,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/r
 
 ***
 
+***
+
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:243](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L243)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:322](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L322)
+
+컨테이너 내 모든 자식 객체를 파괴하고 컨테이너에서 제거합니다.
 
 #### Returns
 
@@ -171,25 +199,29 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:243](https://github.com/
 
 ***
 
+***
+
 ### getChildAt()
 
 > **getChildAt**(`index`): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L111)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L143)
 
-지정된 인덱스의 자식 Mesh를 반환합니다.
+지정한 인덱스에 위치한 자식 객체를 반환합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `index` | `number` | 조회할 위치 |
+| `index` | `number` | 조회할 인덱스 위치 |
 
 #### Returns
 
 [`Mesh`](../../../classes/Mesh.md)
 
-해당 위치의 자식 객체 또는 undefined
+해당 위치의 자식 객체 (범위 초과 시 `undefined`)
+
+***
 
 ***
 
@@ -197,21 +229,23 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L125)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L163)
 
-특정 자식 객체의 인덱스를 반환합니다.
+지정한 자식 객체의 인덱스를 반환합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](../../../classes/Mesh.md) | 조회할 자식 객체 |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | 인덱스를 조회할 자식 객체 |
 
 #### Returns
 
 `number`
 
-인덱스 또는 -1
+자식 객체의 인덱스 (존재하지 않으면 `-1`)
+
+***
 
 ***
 
@@ -219,15 +253,17 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/
 
 > **removeAllChildren**(): `Object3DContainer`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L234)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:309](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L309)
 
-모든 자식 객체를 제거합니다.
+컨테이너의 모든 자식 객체를 제거합니다.
 
 #### Returns
 
 `Object3DContainer`
 
-현재 컨테이너
+현재 컨테이너 인스턴스
+
+***
 
 ***
 
@@ -235,9 +271,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/
 
 > **removeChild**(`child`): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L203)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:265](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L265)
 
-특정 자식 객체를 제거합니다.
+지정한 자식 객체를 컨테이너에서 제거합니다.
 
 #### Parameters
 
@@ -249,7 +285,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/
 
 [`Mesh`](../../../classes/Mesh.md)
 
-제거된 객체
+제거된 자식 객체
+
+***
 
 ***
 
@@ -257,21 +295,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/
 
 > **removeChildAt**(`index`): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L219)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:290](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L290)
 
-지정된 인덱스의 자식 객체를 제거합니다.
+지정한 인덱스의 자식 객체를 컨테이너에서 제거합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `index` | `number` | 제거할 위치 |
+| `index` | `number` | 제거할 자식 객체의 인덱스 |
 
 #### Returns
 
 [`Mesh`](../../../classes/Mesh.md)
 
-제거된 객체
+제거된 자식 객체
+
+#### Throws
+
+해당 인덱스에 자식 객체가 존재하지 않을 경우 Error 발생
+
+***
 
 ***
 
@@ -279,20 +323,22 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L140)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L184)
 
-자식 객체의 위치를 변경합니다.
+자식 객체의 인덱스 위치를 변경합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](../../../classes/Mesh.md) | 대상 자식 객체 |
-| `index` | `number` | 새 인덱스 |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | 위치를 변경할 자식 객체 |
+| `index` | `number` | 새로 지정할 인덱스 |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -300,16 +346,16 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L163)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:213](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L213)
 
-두 자식 객체의 위치를 서로 바꿉니다.
+두 자식 객체의 배열 내 순서(인덱스)를 서로 맞바꿉니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child1` | [`Mesh`](../../../classes/Mesh.md) | 첫 번째 객체 |
-| `child2` | [`Mesh`](../../../classes/Mesh.md) | 두 번째 객체 |
+| `child1` | [`Mesh`](../../../classes/Mesh.md) | 첫 번째 자식 객체 |
+| `child2` | [`Mesh`](../../../classes/Mesh.md) | 두 번째 자식 객체 |
 
 #### Returns
 
@@ -317,13 +363,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/
 
 ***
 
+***
+
 ### swapChildrenAt()
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L183)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L239)
 
-두 인덱스의 자식 객체 위치를 서로 바꿉니다.
+지정된 두 인덱스에 있는 자식 객체들의 위치를 서로 맞바꿉니다.
 
 #### Parameters
 
@@ -336,25 +384,34 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/
 
 `void`
 
-
 ***
 
-## 상속받은 멤버
+## 상속받은 속성
 
 <details>
-<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
 
 ### instanceId
 
-> `readonly` **instanceId**: `number`
+#### Get Signature
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-클래스별 인스턴스 순번 ID
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+
+##### Returns
+
+`number`
+
+클래스별 고유 인스턴스 번호
 
 #### Inherited from
 
 [`BaseObject`](../../../../BaseObject/classes/BaseObject.md).[`instanceId`](../../../../BaseObject/classes/BaseObject.md#instanceid)
+
+***
 
 ***
 
@@ -364,29 +421,27 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
+객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
 ##### Returns
 
 `string`
 
-객체 이름
+객체 이름 문자열
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-객체의 이름을 설정합니다.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | 설정할 객체 이름
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -398,13 +453,15 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -412,13 +469,10 @@ Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/
 
 `string`
 
-UUID 문자열
+객체의 UUID 문자열
 
 #### Inherited from
 
 [`BaseObject`](../../../../BaseObject/classes/BaseObject.md).[`uuid`](../../../../BaseObject/classes/BaseObject.md#uuid)
-
-## Methods
-
 
 </details>

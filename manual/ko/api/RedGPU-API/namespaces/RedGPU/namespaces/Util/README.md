@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Util
 
-RedGPU에서 공통적으로 사용되는 다양한 유틸리티 함수와 클래스들을 제공합니다.
-
-파일 처리, 수학 연산, 텍스처 관리 및 고유 ID 생성 등 핵심 시스템을 지원하는 도구들을 포함합니다.
+파일 경로 처리, 텍스처 유틸리티, UUID 생성, GPU 버퍼 복사, 바이트 포맷 변환 등 공통 유틸리티 함수를 제공합니다.
 
 ## File
 
@@ -23,19 +21,18 @@ RedGPU에서 공통적으로 사용되는 다양한 유틸리티 함수와 클�
 
 ## Texture
 
+- [TextureParser](variables/TextureParser.md)
 - [calculateTextureByteSize](functions/calculateTextureByteSize.md)
 - [copyToTextureArray](functions/copyToTextureArray.md)
 - [getMipLevelCount](functions/getMipLevelCount.md)
-- [imageBitmapToGPUTexture](functions/imageBitmapToGPUTexture.md)
-- [loadAndCreateBitmapImage](functions/loadAndCreateBitmapImage.md)
+
+## Utility
+
+- [copyGPUBuffer](functions/copyGPUBuffer.md)
+- [formatBytes](functions/formatBytes.md)
 
 ## UUID
 
 - [InstanceIdGenerator](classes/InstanceIdGenerator.md)
 - [createUUID](functions/createUUID.md)
 - [uuidToUint](functions/uuidToUint.md)
-
-## Utility
-
-- [copyGPUBuffer](functions/copyGPUBuffer.md)
-- [formatBytes](functions/formatBytes.md)

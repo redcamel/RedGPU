@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,26 +6,29 @@
 
 # Class: SpotLight
 
-Defined in: [src/light/lights/SpotLight.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L26)
+Defined in: [src/light/lights/SpotLight.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L28)
 
-Class that defines a spotlight source.
+Spot light class that emits a cone-shaped beam of light in a specific direction from a single point. Supports distance attenuation based on `radius` and smooth edge falloff between `innerCutoff` and `outerCutoff` angles.
 
-This light radiates light in a specific direction from a certain position, and the spread of light can be controlled through inner/outer cutoff angles.
-* ### Example
+***
+
+### Example
 ```typescript
-const light = new RedGPU.Light.SpotLight('#ffffff', 2.0);
-light.setPosition(0, 5, 10);
-light.lookAt(0, 0, 0);
-scene.lightManager.addSpotLight(light);
+const spotLight = new RedGPU.Light.SpotLight('#ffffff', 1000);
+spotLight.setPosition(0, 5, 5);
+spotLight.lookAt(0, 0, 0);
+spotLight.innerCutoff = 15;
+spotLight.outerCutoff = 30;
+scene.lightManager.addSpotLight(spotLight);
 ```
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/light/spotLight/" ></iframe>
 
-Below is a list of additional sample examples to help understand the structure and behavior of SpotLight.
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/light/spotLight/" style="width:100%; height:500px;"></iframe>
 
 ## See
 
- - [SpotLight Cluster Performance example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLightPerformance/)
- - [SpotLight with glTF example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLightWithGltf/)
+- [SpotLight basic example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLight/)
+ - [SpotLight performance example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLightPerformance/)
+ - [SpotLight with GLTF example](https://redcamel.github.io/RedGPU/examples/3d/light/spotLightWithGltf/)
 
 ## Extends
 
@@ -33,20 +36,29 @@ Below is a list of additional sample examples to help understand the structure a
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new SpotLight**(`color?`, `lumen?`): `SpotLight`
 
-Defined in: [src/light/lights/SpotLight.ts:94](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L94)
+Defined in: [src/light/lights/SpotLight.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L57)
 
-Creates a new SpotLight instance.
+Creates a SpotLight instance.
+
+#### Example
+```typescript
+const light = new RedGPU.Light.SpotLight('#ffffff', 1000);
+```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `color` | `string` | `'#fff'` | Color of the light (hex string, e.g., '#ffffff') |
-| `lumen` | `number` | `1000` | Luminous flux of the light (Lumen, lm, default: 1,000) |
+| `color?` | `string` | `'#fff'` | Light color (HEX string, default: `'#fff'`) |
+| `lumen?` | `number` | `1000` | Luminous flux of the light (in Lumens, default: `1000`) |
 
 #### Returns
 
@@ -56,7 +68,11 @@ Creates a new SpotLight instance.
 
 [`ABaseLight`](../namespaces/Core/classes/ABaseLight.md).[`constructor`](../namespaces/Core/classes/ABaseLight.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### direction
 
@@ -64,33 +80,33 @@ Creates a new SpotLight instance.
 
 > **get** **direction**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/SpotLight.ts:293](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L293)
+Defined in: [src/light/lights/SpotLight.ts:210](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L210)
 
-Returns the direction vector of the light in [x, y, z] format.
+Gets or sets the light direction vector (`[x, y, z]`).
 
 ##### Returns
 
 \[`number`, `number`, `number`\]
 
-Direction vector [x, y, z]
+Direction vector tuple (`[number, number, number]`)
 
 #### Set Signature
 
 > **set** **direction**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:304](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L304)
-
-Sets the direction vector of the light.
+Defined in: [src/light/lights/SpotLight.ts:214](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L214)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | \[`number`, `number`, `number`\] | Direction vector in [x, y, z] format |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | \[`number`, `number`, `number`\] |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -100,33 +116,33 @@ Sets the direction vector of the light.
 
 > **get** **directionX**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:227](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L227)
+Defined in: [src/light/lights/SpotLight.ts:162](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L162)
 
-Returns the X component of the direction vector.
+Gets or sets the X component of the light direction.
 
 ##### Returns
 
 `number`
 
-X component value
+X component of the direction vector
 
 #### Set Signature
 
 > **set** **directionX**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:238](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L238)
-
-Sets the X component of the direction vector.
+Defined in: [src/light/lights/SpotLight.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L166)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | X component value |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -136,33 +152,33 @@ Sets the X component of the direction vector.
 
 > **get** **directionY**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:249](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L249)
+Defined in: [src/light/lights/SpotLight.ts:178](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L178)
 
-Returns the Y component of the direction vector.
+Gets or sets the Y component of the light direction.
 
 ##### Returns
 
 `number`
 
-Y component value
+Y component of the direction vector
 
 #### Set Signature
 
 > **set** **directionY**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:260](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L260)
-
-Sets the Y component of the direction vector.
+Defined in: [src/light/lights/SpotLight.ts:182](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L182)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Y component value |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -172,33 +188,53 @@ Sets the Y component of the direction vector.
 
 > **get** **directionZ**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:271](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L271)
+Defined in: [src/light/lights/SpotLight.ts:194](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L194)
 
-Returns the Z component of the direction vector.
+Gets or sets the Z component of the light direction.
 
 ##### Returns
 
 `number`
 
-Z component value
+Z component of the direction vector
 
 #### Set Signature
 
 > **set** **directionZ**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:282](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L282)
-
-Sets the Z component of the direction vector.
+Defined in: [src/light/lights/SpotLight.ts:198](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L198)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Z component value |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
+
+***
+
+### drawDebugger
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **drawDebugger**(): [`DrawDebuggerSpotLight`](../../Display/namespaces/DrawDebugger/classes/DrawDebuggerSpotLight.md)
+
+Defined in: [src/light/lights/SpotLight.ts:336](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L336)
+
+Returns the visual debugger (`DrawDebuggerSpotLight`) instance for the spot light.
+
+##### Returns
+
+[`DrawDebuggerSpotLight`](../../Display/namespaces/DrawDebugger/classes/DrawDebuggerSpotLight.md)
+
+Debugger instance (`DrawDebuggerSpotLight`)
+
+***
 
 ***
 
@@ -208,53 +244,33 @@ Sets the Z component of the direction vector.
 
 > **get** **innerCutoff**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:317](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L317)
+Defined in: [src/light/lights/SpotLight.ts:228](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L228)
 
-Returns the inner cutoff angle.
+Gets or sets the inner cone cutoff angle (in degrees) within which light intensity remains at maximum.
 
 ##### Returns
 
 `number`
 
-Angle (degrees)
+Inner cutoff angle (in degrees)
 
 #### Set Signature
 
 > **set** **innerCutoff**(`degrees`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:328](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L328)
-
-Sets the inner cutoff angle.
+Defined in: [src/light/lights/SpotLight.ts:232](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L232)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `degrees` | `number` | Angle (degrees) |
+| Parameter | Type |
+| ------ | ------ |
+| `degrees` | `number` |
 
 ##### Returns
 
 `void`
 
 ***
-
-### innerCutoffCos
-
-#### Get Signature
-
-> **get** **innerCutoffCos**(): `number`
-
-Defined in: [src/light/lights/SpotLight.ts:364](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L364)
-
-Returns the cosine value of the inner cutoff angle.
-
-Used for shader calculations, etc.
-
-##### Returns
-
-`number`
-
-Cosine value
 
 ***
 
@@ -264,33 +280,33 @@ Cosine value
 
 > **get** **lumen**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:106](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L106)
+Defined in: [src/light/lights/SpotLight.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L70)
 
-Returns the luminous flux (Lumen, lm) of the light source.
+Gets or sets the luminous flux (Lumen) of the spot light.
 
 ##### Returns
 
 `number`
 
-Luminous flux value
+Luminous flux value (Lumen)
 
 #### Set Signature
 
 > **set** **lumen**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:117](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L117)
-
-Sets the luminous flux (Lumen, lm) of the light source.
+Defined in: [src/light/lights/SpotLight.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L74)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Luminous flux value (e.g., 1,000) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -300,29 +316,27 @@ Sets the luminous flux (Lumen, lm) of the light source.
 
 > **get** **outerCutoff**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:339](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L339)
+Defined in: [src/light/lights/SpotLight.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L244)
 
-Returns the outer cutoff angle.
+Gets or sets the outer cone cutoff angle (in degrees) beyond which light completely falls off.
 
 ##### Returns
 
 `number`
 
-Angle (degrees)
+Outer cutoff angle (in degrees)
 
 #### Set Signature
 
 > **set** **outerCutoff**(`degrees`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:350](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L350)
-
-Sets the outer cutoff angle.
+Defined in: [src/light/lights/SpotLight.ts:248](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L248)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `degrees` | `number` | Angle (degrees) |
+| Parameter | Type |
+| ------ | ------ |
+| `degrees` | `number` |
 
 ##### Returns
 
@@ -330,41 +344,25 @@ Sets the outer cutoff angle.
 
 ***
 
-### outerCutoffCos
-
-#### Get Signature
-
-> **get** **outerCutoffCos**(): `number`
-
-Defined in: [src/light/lights/SpotLight.ts:378](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L378)
-
-Returns the cosine value of the outer cutoff angle.
-
-Used for shader calculations, etc.
-
-##### Returns
-
-`number`
-
-Cosine value
-
 ***
 
 ### position
 
 #### Get Signature
 
-> **get** **position**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/SpotLight.ts:194](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L194)
+Defined in: [src/light/lights/SpotLight.ts:134](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L134)
 
-Returns the position of the light in [x, y, z] format.
+Returns the world position coordinates (`[x, y, z]`) of the light source.
 
 ##### Returns
 
 \[`number`, `number`, `number`\]
 
-Position array [x, y, z]
+Position coordinate tuple (`[number, number, number]`)
+
+***
 
 ***
 
@@ -374,33 +372,33 @@ Position array [x, y, z]
 
 > **get** **radius**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:205](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L205)
+Defined in: [src/light/lights/SpotLight.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L146)
 
-Returns the radius of the light.
+Gets or sets the maximum attenuation radius (`radius`) of the light.
 
 ##### Returns
 
 `number`
 
-Radius value
+Light radius
 
 #### Set Signature
 
 > **set** **radius**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:216](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L216)
-
-Sets the radius of the light.
+Defined in: [src/light/lights/SpotLight.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L150)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Radius value (e.g., 5.0) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -410,33 +408,33 @@ Sets the radius of the light.
 
 > **get** **x**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:128](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L128)
+Defined in: [src/light/lights/SpotLight.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L86)
 
-Returns the X coordinate.
+Gets or sets the world X coordinate of the light source.
 
 ##### Returns
 
 `number`
 
-X coordinate
+X-axis coordinate
 
 #### Set Signature
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:139](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L139)
-
-Sets the X coordinate.
+Defined in: [src/light/lights/SpotLight.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L90)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | X coordinate |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -446,33 +444,33 @@ Sets the X coordinate.
 
 > **get** **y**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:150](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L150)
+Defined in: [src/light/lights/SpotLight.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L102)
 
-Returns the Y coordinate.
+Gets or sets the world Y coordinate of the light source.
 
 ##### Returns
 
 `number`
 
-Y coordinate
+Y-axis coordinate
 
 #### Set Signature
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:161](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L161)
-
-Sets the Y coordinate.
+Defined in: [src/light/lights/SpotLight.ts:106](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L106)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Y coordinate |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -482,29 +480,27 @@ Sets the Y coordinate.
 
 > **get** **z**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:172](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L172)
+Defined in: [src/light/lights/SpotLight.ts:118](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L118)
 
-Returns the Z coordinate.
+Gets or sets the world Z coordinate of the light source.
 
 ##### Returns
 
 `number`
 
-Z coordinate
+Z-axis coordinate
 
 #### Set Signature
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:183](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L183)
-
-Sets the Z coordinate.
+Defined in: [src/light/lights/SpotLight.ts:122](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L122)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Z coordinate |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -512,25 +508,59 @@ Sets the Z coordinate.
 
 ## Methods
 
+
+
+***
+
 ### lookAt()
 
 > **lookAt**(`targetX`, `targetY?`, `targetZ?`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:418](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L418)
+Defined in: [src/light/lights/SpotLight.ts:308](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L308)
 
-Sets the direction vector to look at a specific target position.
+Updates the direction vector (`direction`) so that the light points toward the specified target position.
+
+#### Example
+```typescript
+// Point the light toward the origin
+spotLight.lookAt(0, 0, 0);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `targetX` | `number` \| \[`number`, `number`, `number`\] | Target X coordinate or [x, y, z] array |
-| `targetY?` | `number` | Target Y coordinate (if targetX is a number) |
-| `targetZ?` | `number` | Target Z coordinate (if targetX is a number) |
+| `targetX` | `number` \| \[`number`, `number`, `number`\] | Target X coordinate or `[x, y, z]` coordinate array |
+| `targetY?` | `number` | Target Y coordinate (when `targetX` is a number) |
+| `targetZ?` | `number` | Target Z coordinate (when `targetX` is a number) |
 
 #### Returns
 
 `void`
+
+***
+
+***
+
+### render()
+
+> **render**(`debugViewRenderState`): `void`
+
+Defined in: [src/light/lights/SpotLight.ts:348](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L348)
+
+Renders the spot light debugger gizmo when the debugger is enabled.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `debugViewRenderState` | [`RenderViewStateData`](../../Display/namespaces/CoreView/classes/RenderViewStateData.md) | State data of the current render view (`RenderViewStateData`) |
+
+#### Returns
+
+`void`
+
+***
 
 ***
 
@@ -538,45 +568,37 @@ Sets the direction vector to look at a specific target position.
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:395](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/lights/SpotLight.ts#L395)
+Defined in: [src/light/lights/SpotLight.ts:277](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/lights/SpotLight.ts#L277)
 
-Sets the position of the light.
+Sets the world position of the light source.
+
+#### Example
+```typescript
+// Set position with individual coordinates
+spotLight.setPosition(0, 5, 5);
+
+// Set position with an array
+spotLight.setPosition([0, 5, 5]);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` \| \[`number`, `number`, `number`\] | X coordinate or [x, y, z] array |
-| `y?` | `number` | Y coordinate (if x is a number) |
-| `z?` | `number` | Z coordinate (if x is a number) |
+| `x` | `number` \| \[`number`, `number`, `number`\] | X-axis coordinate or `[x, y, z]` coordinate array |
+| `y?` | `number` | Y-axis coordinate (when `x` is a number) |
+| `z?` | `number` | Z-axis coordinate (when `x` is a number) |
 
 #### Returns
 
 `void`
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### drawDebugger
-
-> **drawDebugger**: [`ADrawDebuggerLight`](../../Display/namespaces/drawDebugger/classes/ADrawDebuggerLight.md)\<[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md)\>
-
-Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L22)
-
-Helper object for debugging visualization of the light.
-
-Set externally, it can visually display the position or direction of the light.
-
-#### Inherited from
-
-[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md).[`drawDebugger`](../namespaces/Core/classes/ABaseLight.md#drawdebugger)
-
-## Accessors
+<summary>View inherited properties (Click to expand)</summary>
 
 ### color
 
@@ -584,29 +606,27 @@ Set externally, it can visually display the position or direction of the light.
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L61)
 
-Returns the color of the light.
+Gets or sets the color (`ColorRGB`) instance of the light.
 
 ##### Returns
 
 [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-ColorRGB object
+`ColorRGB` instance of the light
 
 #### Set Signature
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L95)
-
-Sets the color of the light.
+Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L65)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | [`ColorRGB`](../../Color/classes/ColorRGB.md) | ColorRGB object |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`ColorRGB`](../../Color/classes/ColorRGB.md) |
 
 ##### Returns
 
@@ -618,35 +638,35 @@ Sets the color of the light.
 
 ***
 
+***
+
 ### enableDebugger
 
 #### Get Signature
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L62)
+Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L45)
 
-Returns whether the debugging visualization feature is enabled.
+Gets or sets whether the visual light debugger is enabled.
 
 ##### Returns
 
 `boolean`
 
-Whether enabled
+Whether the debugger is enabled
 
 #### Set Signature
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L73)
-
-Enables or disables the debugging visualization feature.
+Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L49)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | If true, enables debugging feature |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
 
 ##### Returns
 
@@ -658,35 +678,35 @@ Enables or disables the debugging visualization feature.
 
 ***
 
+***
+
 ### intensityMultiplier
 
 #### Get Signature
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L109)
+Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L80)
 
-Returns the intensity multiplier of the light.
+Gets or sets the light intensity multiplier (real number `0` or greater).
 
 ##### Returns
 
 `number`
 
-Multiplier value
+Light intensity multiplier
 
 #### Set Signature
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L120)
-
-Sets the intensity multiplier of the light.
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L84)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Number value (e.g., 1.0) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -697,6 +717,5 @@ Sets the intensity multiplier of the light.
 [`ABaseLight`](../namespaces/Core/classes/ABaseLight.md).[`intensityMultiplier`](../namespaces/Core/classes/ABaseLight.md#intensitymultiplier)
 
 ***
-
 
 </details>

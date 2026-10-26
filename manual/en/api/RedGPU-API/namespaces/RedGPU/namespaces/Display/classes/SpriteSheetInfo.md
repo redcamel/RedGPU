@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,45 +6,65 @@
 
 # Class: SpriteSheetInfo
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:25](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L25)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L27)
 
-Class that contains information for sprite sheet animation.
+Data class that defines grid division information and playback settings for sprite sheet animations.
 
-Defines the structure and playback settings of animation frames arranged in a grid within a single texture. Manages animation metadata shared by sprite sheet instances.
+***
 
-* ### Example
+### Example
 ```typescript
 const info = new RedGPU.Display.SpriteSheetInfo(
-   redGPUContext,
-   'path/to/image.png',
-   5, 3, // segmentW, segmentH
-   15,   // totalFrame
-   0     // startIndex
+    redGPUContext,
+    'path/to/image.png',
+    5, 3,
+    15,
+    0,
+    true,
+    60
 );
 ```
 
+## See
+
+- [SpriteSheet2D Basic Example](https://redcamel.github.io/RedGPU/examples/2d/spriteSheet2D/basic/)
+ - [SpriteSheet3D Basic Example](https://redcamel.github.io/RedGPU/examples/3d/sprite/spriteSheet3D/)
+
+## Extends
+
+- [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md)
+
 ## Constructors
+
+
+
+***
 
 ### Constructor
 
 > **new SpriteSheetInfo**(`redGPUContext`, `src`, `segmentW`, `segmentH`, `totalFrame`, `startIndex`, `loop?`, `frameRate?`): `SpriteSheetInfo`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:95](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L95)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L73)
 
-Creates a new SpriteSheetInfo instance.
+Creates a SpriteSheetInfo instance.
+
+#### Example
+```typescript
+const info = new RedGPU.Display.SpriteSheetInfo(redGPUContext, 'sheet.png', 5, 3, 15, 0, true, 60);
+```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPU rendering context |
-| `src` | `string` | `undefined` | Path or URL to the sprite sheet image file |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
+| `src` | `string` | `undefined` | Sprite sheet image path or URL |
 | `segmentW` | `number` | `undefined` | Number of horizontal segments (positive integer) |
 | `segmentH` | `number` | `undefined` | Number of vertical segments (positive integer) |
-| `totalFrame` | `number` | `undefined` | Total number of animation frames (positive integer) |
-| `startIndex` | `number` | `undefined` | Starting frame index (integer of 0 or more) |
-| `loop` | `boolean` | `true` | Whether to repeat playback (default: true) |
-| `frameRate` | `number` | `60` | Animation frame rate (default: 60 FPS) |
+| `totalFrame` | `number` | `undefined` | Total number of frames (positive integer) |
+| `startIndex` | `number` | `undefined` | Starting frame index (non-negative integer) |
+| `loop?` | `boolean` | `true` | Whether to loop playback (default: `true`) |
+| `frameRate?` | `number` | `60` | Frames per second (default: `60`) |
 
 #### Returns
 
@@ -52,17 +72,25 @@ Creates a new SpriteSheetInfo instance.
 
 #### Throws
 
-Throws error if redGPUContext is invalid or parameters are out of range
+Throws an error if numeric parameters are out of valid unsigned integer range
+
+#### Overrides
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../BaseObject/classes/RedGPUObject.md#constructor)
 
 ## Accessors
+
+
+
+***
 
 ### frameRate
 
 #### Get Signature
 
-> **get** **frameRate**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **frameRate**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:179](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L179)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:163](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L163)
 
 Returns the animation frame rate (FPS).
 
@@ -70,7 +98,9 @@ Returns the animation frame rate (FPS).
 
 `number`
 
-Frames per second (FPS)
+Frames per second
+
+***
 
 ***
 
@@ -78,17 +108,19 @@ Frames per second (FPS)
 
 #### Get Signature
 
-> **get** **loop**(): `boolean`
+> <span class="readonly-badge">readonly</span> **get** **loop**(): `boolean`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:190](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L190)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:175](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L175)
 
-Returns whether to repeat playback.
+Returns whether playback loops.
 
 ##### Returns
 
 `boolean`
 
-If true, playback loops; if false, it plays once
+Whether playback loops
+
+***
 
 ***
 
@@ -96,11 +128,11 @@ If true, playback loops; if false, it plays once
 
 #### Get Signature
 
-> **get** **segmentH**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **segmentH**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:135](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L135)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L115)
 
-Returns the number of vertical segments. (Texture division count vertically)
+Returns the number of vertical segments.
 
 ##### Returns
 
@@ -110,15 +142,17 @@ Number of vertical segments
 
 ***
 
+***
+
 ### segmentW
 
 #### Get Signature
 
-> **get** **segmentW**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **segmentW**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:124](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L124)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L103)
 
-Returns the number of horizontal segments. (Texture division count horizontally)
+Returns the number of horizontal segments.
 
 ##### Returns
 
@@ -128,21 +162,25 @@ Number of horizontal segments
 
 ***
 
+***
+
 ### startIndex
 
 #### Get Signature
 
-> **get** **startIndex**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **startIndex**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:157](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L157)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:139](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L139)
 
-Returns the starting frame index. (0-based index)
+Returns the starting frame index.
 
 ##### Returns
 
 `number`
 
-Starting frame index
+Starting frame index (0-based)
+
+***
 
 ***
 
@@ -150,17 +188,19 @@ Starting frame index
 
 #### Get Signature
 
-> **get** **texture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **texture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:168](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L168)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:151](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L151)
 
-Returns the sprite sheet bitmap texture.
+Returns the bitmap texture of the sprite sheet.
 
 ##### Returns
 
 [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Bitmap texture used
+BitmapTexture instance
+
+***
 
 ***
 
@@ -168,9 +208,9 @@ Bitmap texture used
 
 #### Get Signature
 
-> **get** **totalFrame**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **totalFrame**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:146](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L146)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L127)
 
 Returns the total number of animation frames.
 
@@ -179,3 +219,218 @@ Returns the total number of animation frames.
 `number`
 
 Total frame count
+
+***
+
+***
+
+## Inherited Properties
+
+<details>
+<summary>View inherited properties (Click to expand)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
+
+##### Returns
+
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+`AntialiasingManager` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`antialiasingManager`](../../BaseObject/classes/RedGPUObject.md#antialiasingmanager)
+
+***
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+`CommandEncoderManager` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`commandEncoderManager`](../../BaseObject/classes/RedGPUObject.md#commandencodermanager)
+
+***
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
+
+##### Returns
+
+`GPUDevice`
+
+`GPUDevice` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
+
+##### Returns
+
+`string`
+
+Object name string
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`name`](../../BaseObject/classes/RedGPUObject.md#name)
+
+***
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+
+Returns the bound `RedGPUContext` instance.
+
+##### Returns
+
+[`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+
+`RedGPUContext` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`redGPUContext`](../../BaseObject/classes/RedGPUObject.md#redgpucontext)
+
+***
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+
+Returns the `ResourceManager` instance managing global GPU resources.
+
+##### Returns
+
+[`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+`ResourceManager` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`resourceManager`](../../BaseObject/classes/RedGPUObject.md#resourcemanager)
+
+***
+
+***
+
+### uuid
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+
+Returns the universally unique identifier (UUID) of the object.
+
+##### Returns
+
+`string`
+
+UUID string of the object
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../BaseObject/classes/RedGPUObject.md#uuid)
+
+</details>

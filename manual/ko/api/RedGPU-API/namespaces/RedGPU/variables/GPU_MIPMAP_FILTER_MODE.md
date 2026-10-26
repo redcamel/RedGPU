@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,15 +8,13 @@
 
 > `const` **GPU\_MIPMAP\_FILTER\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L7)
 
-밉맵 레벨 간 샘플링 시의 필터링 모드 옵션을 정의하는 상수군입니다.
-
-텍스처의 밉맵 레벨 사이를 어떻게 보간할지 결정합니다.
+텍스처 샘플링 시 서로 다른 밉맵(Mipmap) 레벨 사이의 보간 방식을 정의하는 필터 모드 상수입니다.
 
 ## Type Declaration
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-linear"></a> `LINEAR` | `"linear"` | `'linear'` | 인접한 두 밉맵 레벨 사이를 선형 보간합니다.
-| <a id="property-nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | 가장 가까운 밉맵 레벨에서 샘플링합니다.
+| <a id="property-linear"></a> `LINEAR` | `"linear"` | `'linear'` | 인접한 두 밉맵 레벨에서 각각 샘플링한 뒤 두 값을 선형 보간(Trilinear Filtering)합니다. | [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L17) |
+| <a id="property-nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | 계산된 LOD(Level of Detail)에서 가장 가까운 단일 밉맵 레벨을 선택하여 샘플링합니다. | [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L12) |

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,13 @@
 
 # Class: VertexBuffer
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L19)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L19)
 
-정점(Vertex) 버퍼를 관리하는 클래스입니다.
+정점 버퍼(`GPUBuffer`)를 관리하는 클래스입니다.
 
-* ### Example
+***
+
+### Example
 ```typescript
 const vertexBuffer = new RedGPU.Resource.VertexBuffer(redGPUContext, data, interleavedStruct);
 ```
@@ -21,15 +23,19 @@ const vertexBuffer = new RedGPU.Resource.VertexBuffer(redGPUContext, data, inter
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new VertexBuffer**(`redGPUContext`, `data`, `interleavedStruct`, `usage?`, `cacheKey?`): `VertexBuffer`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:71](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L71)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:55](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L55)
 
 VertexBuffer 인스턴스를 생성합니다.
 
-* ### Example
+#### Example
 ```typescript
 const vertexBuffer = new RedGPU.Resource.VertexBuffer(redGPUContext, data, interleavedStruct, GPUBufferUsage.VERTEX);
 ```
@@ -38,11 +44,11 @@ const vertexBuffer = new RedGPU.Resource.VertexBuffer(redGPUContext, data, inter
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext 인스턴스
-| `data` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | `undefined` | 버텍스 데이터 (`Array<number>` 또는 `Float32Array`)
-| `interleavedStruct` | [`VertexInterleavedStruct`](VertexInterleavedStruct.md) | `undefined` | 버텍스 데이터 구조 정의
-| `usage` | `number` | `...` | GPUBufferUsageFlags (기본값: `VERTEX | COPY_DST | STORAGE`)
-| `cacheKey` | `string` | `''` | 버퍼 캐시 키 (선택)
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext 인스턴스 |
+| `data` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | `undefined` | 정점 데이터 (`Array<number>` 또는 `Float32Array`) |
+| `interleavedStruct` | [`VertexInterleavedStruct`](VertexInterleavedStruct.md) | `undefined` | 정점 데이터 구조 정의 |
+| `usage?` | `number` | `...` | GPUBufferUsageFlags (기본값: `GPUBufferUsage.VERTEX \| GPUBufferUsage.COPY_DST \| GPUBufferUsage.STORAGE`) |
+| `cacheKey?` | `string` | `''` | 버퍼 캐시 키 (선택) |
 
 #### Returns
 
@@ -54,13 +60,23 @@ const vertexBuffer = new RedGPU.Resource.VertexBuffer(redGPUContext, data, inter
 
 ## Properties
 
+
+
+***
+
 ### \[GPU\_BUFFER\_DATA\_SYMBOL\]
 
 > **\[GPU\_BUFFER\_DATA\_SYMBOL\]**: `Float32Array`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L24)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L24)
 
-버텍스 데이터가 저장되는 내부 버퍼입니다.
+정점 데이터가 저장되는 내부 버퍼입니다.
+
+***
+
+## Accessors
+
+
 
 ***
 
@@ -68,17 +84,19 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:24](https://githu
 
 #### Get Signature
 
-> **get** **data**(): `Float32Array`
+> <span class="readonly-badge">readonly</span> **get** **data**(): `Float32Array`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:102](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L102)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L89)
 
-버텍스 데이터를 반환합니다.
+정점 데이터를 반환합니다.
 
 ##### Returns
 
 `Float32Array`
 
-- Float32Array 형식의 버텍스 데이터
+`Float32Array` 형식의 정점 데이터
+
+***
 
 ***
 
@@ -86,17 +104,19 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:102](https://gith
 
 #### Get Signature
 
-> **get** **interleavedStruct**(): [`VertexInterleavedStruct`](VertexInterleavedStruct.md)
+> <span class="readonly-badge">readonly</span> **get** **interleavedStruct**(): [`VertexInterleavedStruct`](VertexInterleavedStruct.md)
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:120](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L120)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:113](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L113)
 
-버텍스 데이터 구조를 반환합니다.
+정점 인터리브 구조 객체를 반환합니다.
 
 ##### Returns
 
 [`VertexInterleavedStruct`](VertexInterleavedStruct.md)
 
-- 버텍스 인터리브 구조 객체
+정점 인터리브 구조 객체
+
+***
 
 ***
 
@@ -104,17 +124,19 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:120](https://gith
 
 #### Get Signature
 
-> **get** **stride**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **stride**(): `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L111)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L101)
 
-stride(버텍스 당 바이트 수)를 반환합니다.
+정점당 요소 개수(stride)를 반환합니다.
 
 ##### Returns
 
 `number`
 
-- stride 바이트 크기
+정점당 요소 개수
+
+***
 
 ***
 
@@ -122,9 +144,9 @@ stride(버텍스 당 바이트 수)를 반환합니다.
 
 #### Get Signature
 
-> **get** **triangleCount**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **triangleCount**(): `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:138](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L138)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:137](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L137)
 
 삼각형 개수를 반환합니다.
 
@@ -132,7 +154,9 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:138](https://gith
 
 `number`
 
-- 삼각형 수
+삼각형 개수
+
+***
 
 ***
 
@@ -140,17 +164,23 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:138](https://gith
 
 #### Get Signature
 
-> **get** **vertexCount**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **vertexCount**(): `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:129](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L129)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L125)
 
-버텍스 개수를 반환합니다.
+정점 개수를 반환합니다.
 
 ##### Returns
 
 `number`
 
-- 버텍스 수
+정점 개수
+
+***
+
+## Methods
+
+
 
 ***
 
@@ -158,11 +188,11 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:129](https://gith
 
 > **changeData**(`data`, `interleavedStruct?`): `void`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L158)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L157)
 
-버텍스 버퍼의 데이터를 변경합니다.
+정점 버퍼의 데이터를 변경합니다.
 
-* ### Example
+#### Example
 ```typescript
 vertexBuffer.changeData(newData);
 ```
@@ -171,8 +201,8 @@ vertexBuffer.changeData(newData);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `data` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | 새로운 버텍스 데이터 (`Array<number>` 또는 `Float32Array`)
-| `interleavedStruct?` | [`VertexInterleavedStruct`](VertexInterleavedStruct.md) | 버텍스 데이터 구조 정의 (선택)
+| `data` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | 새로운 정점 데이터 (`Array<number>` 또는 `Float32Array`) |
+| `interleavedStruct?` | [`VertexInterleavedStruct`](VertexInterleavedStruct.md) | 정점 데이터 구조 정의 (선택) |
 
 #### Returns
 
@@ -180,15 +210,17 @@ vertexBuffer.changeData(newData);
 
 ***
 
+***
+
 ### updateAllData()
 
 > **updateAllData**(`data`): `void`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:221](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L221)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:220](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L220)
 
-버텍스 버퍼의 전체 데이터를 GPU에 다시 업로드합니다.
+정점 버퍼의 전체 데이터를 GPU에 다시 업로드합니다.
 
-* ### Example
+#### Example
 ```typescript
 vertexBuffer.updateAllData(fullData);
 ```
@@ -197,7 +229,7 @@ vertexBuffer.updateAllData(fullData);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `data` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | 새로운 버텍스 데이터 (`Array<number>` 또는 `Float32Array`)
+| `data` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | 새로운 정점 데이터 (`Array<number>` 또는 `Float32Array`) |
 
 #### Returns
 
@@ -205,15 +237,17 @@ vertexBuffer.updateAllData(fullData);
 
 ***
 
+***
+
 ### updateData()
 
 > **updateData**(`data`, `offset?`): `void`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:202](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L202)
+Defined in: [src/resources/buffer/vertexBuffer/VertexBuffer.ts:201](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexBuffer.ts#L201)
 
-버텍스 버퍼의 일부 데이터를 오프셋부터 업데이트합니다.
+정점 버퍼의 일부 데이터를 지정한 오프셋부터 업데이트합니다.
 
-* ### Example
+#### Example
 ```typescript
 vertexBuffer.updateData(partialData, 1024);
 ```
@@ -222,26 +256,25 @@ vertexBuffer.updateData(partialData, 1024);
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `data` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | `undefined` | 새로운 버텍스 데이터 (`Array<number>` 또는 `Float32Array`)
-| `offset` | `number` | `0` | 업데이트 시작 오프셋 (기본값: 0)
+| `data` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | `undefined` | 업데이트할 정점 데이터 (`Array<number>` 또는 `Float32Array`) |
+| `offset?` | `number` | `0` | 바이트 단위 시작 오프셋 (기본값: 0) |
 
 #### Returns
 
 `void`
 
-
 ***
 
-## 상속받은 멤버
+## 상속받은 속성
 
 <details>
-<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
 
 ### \[GPU\_BUFFER\_CACHE\_KEY\]
 
 > **\[GPU\_BUFFER\_CACHE\_KEY\]**: `string`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:23](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/core/ABaseBuffer.ts#L23)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/core/ABaseBuffer.ts#L23)
 
 #### Inherited from
 
@@ -249,11 +282,13 @@ Defined in: [src/resources/buffer/core/ABaseBuffer.ts:23](https://github.com/red
 
 ***
 
+***
+
 ### \[GPU\_BUFFER\_SYMBOL\]
 
 > **\[GPU\_BUFFER\_SYMBOL\]**: `GPUBuffer`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/core/ABaseBuffer.ts#L22)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/core/ABaseBuffer.ts#L22)
 
 #### Inherited from
 
@@ -261,35 +296,21 @@ Defined in: [src/resources/buffer/core/ABaseBuffer.ts:22](https://github.com/red
 
 ***
 
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-클래스별 인스턴스 순번 ID
-
-#### Inherited from
-
-[`ABaseBuffer`](../namespaces/CoreBuffer/classes/ABaseBuffer.md).[`instanceId`](../namespaces/CoreBuffer/classes/ABaseBuffer.md#instanceid)
-
-## Accessors
-
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager 인스턴스
+`AntialiasingManager` 인스턴스
 
 #### Inherited from
 
@@ -297,19 +318,23 @@ AntialiasingManager 인스턴스
 
 ***
 
+***
+
 ### cacheKey
 
 #### Get Signature
 
-> **get** **cacheKey**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/core/ABaseBuffer.ts#L52)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/core/ABaseBuffer.ts#L57)
 
-캐시 키를 반환합니다.
+버퍼 캐시 키를 반환합니다. 지정되지 않은 경우 uuid를 반환합니다.
 
 ##### Returns
 
 `string`
+
+캐시 키
 
 #### Inherited from
 
@@ -317,21 +342,23 @@ Defined in: [src/resources/buffer/core/ABaseBuffer.ts:52](https://github.com/red
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager 인스턴스
+`CommandEncoderManager` 인스턴스
 
 #### Inherited from
 
@@ -339,19 +366,23 @@ CommandEncoderManager 인스턴스
 
 ***
 
+***
+
 ### gpuBuffer
 
 #### Get Signature
 
-> **get** **gpuBuffer**(): `GPUBuffer`
+> <span class="readonly-badge">readonly</span> **get** **gpuBuffer**(): `GPUBuffer`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:60](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/core/ABaseBuffer.ts#L60)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/core/ABaseBuffer.ts#L69)
 
-GPUBuffer 객체를 반환합니다.
+내부 GPUBuffer 객체를 반환합니다.
 
 ##### Returns
 
 `GPUBuffer`
+
+GPUBuffer 객체
 
 #### Inherited from
 
@@ -359,23 +390,53 @@ GPUBuffer 객체를 반환합니다.
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L89)
 
-연관된 GPU 디바이스를 반환합니다.
+연관된 GPUDevice를 반환합니다.
 
 ##### Returns
 
 `GPUDevice`
 
+GPUDevice 인스턴스
+
 #### Inherited from
 
 [`ABaseBuffer`](../namespaces/CoreBuffer/classes/ABaseBuffer.md).[`gpuDevice`](../namespaces/CoreBuffer/classes/ABaseBuffer.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+
+##### Returns
+
+`number`
+
+클래스별 고유 인스턴스 번호
+
+#### Inherited from
+
+[`ABaseBuffer`](../namespaces/CoreBuffer/classes/ABaseBuffer.md).[`instanceId`](../namespaces/CoreBuffer/classes/ABaseBuffer.md#instanceid)
+
+***
 
 ***
 
@@ -385,29 +446,27 @@ Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
+객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
 ##### Returns
 
 `string`
 
-객체 이름
+객체 이름 문자열
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-객체의 이름을 설정합니다.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | 설정할 객체 이름
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -419,21 +478,23 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-RedGPUContext 인스턴스를 반환합니다.
+바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext 인스턴스
+`RedGPUContext` 인스턴스
 
 #### Inherited from
 
@@ -441,21 +502,23 @@ RedGPUContext 인스턴스
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager 인스턴스
+`ResourceManager` 인스턴스
 
 #### Inherited from
 
@@ -463,13 +526,15 @@ ResourceManager 인스턴스
 
 ***
 
+***
+
 ### resourceManagerKey
 
 #### Get Signature
 
-> **get** **resourceManagerKey**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L69)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L77)
 
 리소스 매니저 키를 반환합니다.
 
@@ -477,9 +542,13 @@ Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/
 
 `string`
 
+리소스 매니저 키 문자열
+
 #### Inherited from
 
 [`ABaseBuffer`](../namespaces/CoreBuffer/classes/ABaseBuffer.md).[`resourceManagerKey`](../namespaces/CoreBuffer/classes/ABaseBuffer.md#resourcemanagerkey)
+
+***
 
 ***
 
@@ -487,9 +556,9 @@ Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/
 
 #### Get Signature
 
-> **get** **revision**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L45)
+Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L49)
 
 리소스의 리비전(업데이트 횟수)을 반환합니다.
 
@@ -497,9 +566,13 @@ Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/
 
 `number`
 
+리소스 리비전 번호
+
 #### Inherited from
 
 [`ABaseBuffer`](../namespaces/CoreBuffer/classes/ABaseBuffer.md).[`revision`](../namespaces/CoreBuffer/classes/ABaseBuffer.md#revision)
+
+***
 
 ***
 
@@ -507,15 +580,17 @@ Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/
 
 #### Get Signature
 
-> **get** **size**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **size**(): `number`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/core/ABaseBuffer.ts#L76)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/core/ABaseBuffer.ts#L93)
 
-버퍼의 크기(byte)를 반환합니다.
+버퍼 데이터 크기(byte)를 반환합니다.
 
 ##### Returns
 
 `number`
+
+바이트 크기 (데이터가 없으면 0)
 
 #### Inherited from
 
@@ -523,13 +598,15 @@ Defined in: [src/resources/buffer/core/ABaseBuffer.ts:76](https://github.com/red
 
 ***
 
+***
+
 ### targetResourceManagedState
 
 #### Get Signature
 
-> **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
+> <span class="readonly-badge">readonly</span> **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ManagementResourceBase.ts#L50)
 
 리소스의 관리 상태 정보를 반환합니다.
 
@@ -537,9 +614,13 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com
 
 [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
+리소스 관리 상태 정보 객체
+
 #### Inherited from
 
 [`ABaseBuffer`](../namespaces/CoreBuffer/classes/ABaseBuffer.md).[`targetResourceManagedState`](../namespaces/CoreBuffer/classes/ABaseBuffer.md#targetresourcemanagedstate)
+
+***
 
 ***
 
@@ -547,15 +628,17 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com
 
 #### Get Signature
 
-> **get** **usage**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **usage**(): `number`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:68](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/core/ABaseBuffer.ts#L68)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/core/ABaseBuffer.ts#L81)
 
-GPUBufferUsageFlags를 반환합니다.
+GPU 버퍼 사용 플래그를 반환합니다.
 
 ##### Returns
 
 `number`
+
+GPUBufferUsageFlags 값
 
 #### Inherited from
 
@@ -563,13 +646,15 @@ GPUBufferUsageFlags를 반환합니다.
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -577,7 +662,7 @@ Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/
 
 `string`
 
-UUID 문자열
+객체의 UUID 문자열
 
 #### Inherited from
 
@@ -585,13 +670,15 @@ UUID 문자열
 
 ***
 
+***
+
 ### videoMemorySize
 
 #### Get Signature
 
-> **get** **videoMemorySize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:84](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/core/ABaseBuffer.ts#L84)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:105](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/core/ABaseBuffer.ts#L105)
 
 비디오 메모리 사용량(byte)을 반환합니다.
 
@@ -599,25 +686,35 @@ Defined in: [src/resources/buffer/core/ABaseBuffer.ts:84](https://github.com/red
 
 `number`
 
+비디오 메모리 사용량
+
 #### Inherited from
 
 [`ABaseBuffer`](../namespaces/CoreBuffer/classes/ABaseBuffer.md).[`videoMemorySize`](../namespaces/CoreBuffer/classes/ABaseBuffer.md#videomemorysize)
 
-## Methods
+</details>
+
+
+***
+
+## 상속받은 메서드
+
+<details>
+<summary>상속받은 메서드 보기 (클릭하여 확장)</summary>
 
 ### \_\_addDirtyPipelineListener()
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L102)
 
-파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
+리소스 변경 시 호출될 파이프라인 더티 리스너를 추가합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `listener` | () => `void` | 리스너 함수
+| `listener` | () => `void` | 등록할 리스너 함수 |
 
 #### Returns
 
@@ -629,19 +726,21 @@ Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/
 
 ***
 
+***
+
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L101)
+Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L115)
 
-리소스 업데이트 리스너를 제거합니다.
+등록된 파이프라인 더티 리스너를 제거합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `listener` | () => `void` | 제거할 리스너 함수
+| `listener` | () => `void` | 제거할 리스너 함수 |
 
 #### Returns
 
@@ -653,13 +752,17 @@ Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel
 
 ***
 
+***
+
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:92](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/core/ABaseBuffer.ts#L92)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/core/ABaseBuffer.ts#L116)
 
-리소스를 파괴합니다.
+GPU 버퍼를 해제하고 리소스 매니저에서 등록을 해제합니다.
+
+GPUBuffer 파괴는 CommandEncoderManager를 통해 지연 처리됩니다.
 
 #### Returns
 
@@ -671,11 +774,13 @@ Defined in: [src/resources/buffer/core/ABaseBuffer.ts:92](https://github.com/red
 
 ***
 
+***
+
 ### notifyUpdate()
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L131)
 
 리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
 
@@ -683,7 +788,7 @@ Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | 실행 후 리스너 목록 초기화 여부 (기본값: false)
+| `resetList?` | `boolean` | `false` | 알림 실행 후 리스너 목록 초기화 여부 (기본값: false) |
 
 #### Returns
 
@@ -694,6 +799,5 @@ Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel
 [`ABaseBuffer`](../namespaces/CoreBuffer/classes/ABaseBuffer.md).[`notifyUpdate`](../namespaces/CoreBuffer/classes/ABaseBuffer.md#notifyupdate)
 
 ***
-
 
 </details>

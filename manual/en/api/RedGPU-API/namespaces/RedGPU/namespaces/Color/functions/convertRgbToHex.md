@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,13 @@
 
 > **convertRgbToHex**(`r`, `g`, `b`): `string`
 
-Defined in: [src/color/convertRgbToHex.ts:32](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/color/convertRgbToHex.ts#L32)
+Defined in: [src/color/convertRgbToHex.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/color/convertRgbToHex.ts#L32)
 
 Converts RGB values to a hexadecimal (Hex) color code.
 
 Converts each channel (R, G, B) into a 2-digit uppercase hexadecimal string ('#RRGGBB').
 
-* ### Example
+### Example
 ```typescript
 const hex = RedGPU.Color.convertRgbToHex(255, 0, 0); // '#FF0000'
 ```

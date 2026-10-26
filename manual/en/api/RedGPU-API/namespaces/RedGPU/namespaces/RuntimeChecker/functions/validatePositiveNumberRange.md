@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **validatePositiveNumberRange**(`value`, `minRange?`, `maxRange?`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts#L32)
+Defined in: [src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts#L29)
 
-Validates if the given value is a positive number within the specified range.
+Validates that the value is a non-negative number within [minRange, maxRange] and throws an exception on failure.
 
-Throws an exception if the value is less than 0 or out of range.
-
-* ### Example
+### Example
 ```typescript
 RedGPU.RuntimeChecker.validatePositiveNumberRange(10, 0, 100);
 ```
@@ -23,16 +21,16 @@ RedGPU.RuntimeChecker.validatePositiveNumberRange(10, 0, 100);
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `value` | `number` | `undefined` | Value to validate |
-| `minRange` | `number` | `0` | Minimum allowed value (>= 0, default: 0) |
-| `maxRange` | `number` | `Number.MAX_VALUE` | Maximum allowed value (default: Number.MAX_VALUE) |
+| `value` | `number` | `undefined` | Numeric value to validate |
+| `minRange?` | `number` | `0` | Minimum allowed value (must be >= 0, default: 0) |
+| `maxRange?` | `number` | `Number.MAX_VALUE` | Maximum allowed value (default: Number.MAX_VALUE) |
 
 ## Returns
 
 `boolean`
 
-True if the value is a positive number within range
+True if the value is a non-negative number within range
 
 ## Throws
 
-Throws Error if inputs are not numbers, negative, or the value is out of range
+Throws Error if any argument is not a number or NaN, minRange or the value is negative, or the value is out of range

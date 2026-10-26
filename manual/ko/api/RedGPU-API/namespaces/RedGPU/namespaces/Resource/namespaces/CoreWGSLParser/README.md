@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,15 +6,12 @@
 
 # CoreWGSLParser
 
-WGSL 파서의 핵심 기능(전처리, 변형 생성, 타입 정의 등)을 제공합니다.
-
-## Other
-
-- [TypedArrayConstructor](type-aliases/TypedArrayConstructor.md)
-- [TypeUniform](type-aliases/TypeUniform.md)
+WGSL 파서의 전처리, 셰이더 변형 생성, 유니폼 타입 메타데이터 등의 핵심 기능을 제공합니다.
 
 ## WGSL
 
 - [ShaderVariantGenerator](classes/ShaderVariantGenerator.md)
 - [WGSLUniformTypes](classes/WGSLUniformTypes.md)
+- [TypedArrayConstructor](type-aliases/TypedArrayConstructor.md)
+- [TypeUniform](type-aliases/TypeUniform.md)
 - [~~ensureVertexIndexBuiltin~~](functions/ensureVertexIndexBuiltin.md)

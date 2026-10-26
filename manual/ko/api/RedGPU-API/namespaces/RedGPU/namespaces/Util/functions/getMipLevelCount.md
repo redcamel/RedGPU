@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,12 +8,13 @@
 
 > **getMipLevelCount**(`width`, `height`): `number`
 
-Defined in: [src/utils/texture/getMipLevelCount.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/texture/getMipLevelCount.ts#L17)
+Defined in: [src/utils/texture/getMipLevelCount.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/texture/getMipLevelCount.ts#L25)
 
 주어진 해상도에 대해 생성 가능한 최대 Mipmap 레벨 수를 계산합니다.
 
-* ### Example
+### Example
 ```typescript
+// 1024x1024 해상도의 Mipmap 레벨 수 계산
 const levels = RedGPU.Util.getMipLevelCount(1024, 1024); // 11
 ```
 
@@ -21,11 +22,11 @@ const levels = RedGPU.Util.getMipLevelCount(1024, 1024); // 11
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `width` | `number` | 가로 크기
-| `height` | `number` | 세로 크기
+| `width` | `number` | 텍스처 가로 크기 (픽셀 단위) |
+| `height` | `number` | 텍스처 세로 크기 (픽셀 단위) |
 
 ## Returns
 
 `number`
 
-Mipmap 레벨 수
+계산된 Mipmap 레벨 수

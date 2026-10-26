@@ -1,0 +1,339 @@
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../README.md) / [RedGPU](../../../../../README.md) / [Display](../../../README.md) / [DrawDebugger](../README.md) / DrawDebuggerMesh
+
+# Class: DrawDebuggerMesh
+
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/DrawDebuggerMesh.ts#L48)
+
+Debugger class that visualizes the spatial bounding box (AABB, OBB) of a target 3D `Mesh` as a wireframe.
+
+::: warning
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+:::
+
+***
+
+### Example
+```typescript
+// Enable via the enableDebugger property of Mesh.
+mesh.enableDebugger = true;
+mesh.drawDebugger.debugMode = 'BOTH';
+```
+
+## See
+
+- [DrawDebugger basic example](https://redcamel.github.io/RedGPU/examples/3d/drawDebugger/basic/)
+ - [Mesh BoundBox example](https://redcamel.github.io/RedGPU/examples/3d/mesh/boundBox/meshBoundBox/)
+
+## Extends
+
+- [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md)
+
+## Constructors
+
+
+
+***
+
+### Constructor
+
+> **new DrawDebuggerMesh**(`redGPUContext`, `target`): `DrawDebuggerMesh`
+
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/DrawDebuggerMesh.ts#L70)
+
+Creates a `DrawDebuggerMesh` instance.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
+| `target` | [`Mesh`](../../../classes/Mesh.md) | Target `Mesh` instance to debug |
+
+#### Returns
+
+`DrawDebuggerMesh`
+
+#### Overrides
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../../../BaseObject/classes/RedGPUObject.md#constructor)
+
+## Accessors
+
+
+
+***
+
+### debugMode
+
+#### Get Signature
+
+> **get** **debugMode**(): `DebugMode`
+
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:98](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/DrawDebuggerMesh.ts#L98)
+
+Returns or sets the bounding box debug display mode (`'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB'`).
+
+##### Returns
+
+`DebugMode`
+
+Currently set debug mode
+
+#### Set Signature
+
+> **set** **debugMode**(`value`): `void`
+
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/DrawDebuggerMesh.ts#L102)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `DebugMode` |
+
+##### Returns
+
+`void`
+
+***
+
+## Methods
+
+
+
+***
+
+### render()
+
+> **render**(`renderViewStateData`): `void`
+
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:124](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/drawDebugger/DrawDebuggerMesh.ts#L124)
+
+Renders the bounding volume debug wireframe of the target mesh.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `renderViewStateData` | [`RenderViewStateData`](../../CoreView/classes/RenderViewStateData.md) | Render state data of the current view |
+
+#### Returns
+
+`void`
+
+***
+
+## Inherited Properties
+
+<details>
+<summary>View inherited properties (Click to expand)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
+
+##### Returns
+
+[`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+`AntialiasingManager` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`antialiasingManager`](../../../../BaseObject/classes/RedGPUObject.md#antialiasingmanager)
+
+***
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
+
+##### Returns
+
+[`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+`CommandEncoderManager` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`commandEncoderManager`](../../../../BaseObject/classes/RedGPUObject.md#commandencodermanager)
+
+***
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
+
+##### Returns
+
+`GPUDevice`
+
+`GPUDevice` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
+
+##### Returns
+
+`string`
+
+Object name string
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`name`](../../../../BaseObject/classes/RedGPUObject.md#name)
+
+***
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+
+Returns the bound `RedGPUContext` instance.
+
+##### Returns
+
+[`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+`RedGPUContext` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`redGPUContext`](../../../../BaseObject/classes/RedGPUObject.md#redgpucontext)
+
+***
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+
+Returns the `ResourceManager` instance managing global GPU resources.
+
+##### Returns
+
+[`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+`ResourceManager` instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`resourceManager`](../../../../BaseObject/classes/RedGPUObject.md#resourcemanager)
+
+***
+
+***
+
+### uuid
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+
+Returns the universally unique identifier (UUID) of the object.
+
+##### Returns
+
+`string`
+
+UUID string of the object
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../../../BaseObject/classes/RedGPUObject.md#uuid)
+
+</details>

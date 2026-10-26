@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,24 +6,23 @@
 
 # Function: getComputeBindGroupLayoutDescriptorFromShaderInfo()
 
-> **getComputeBindGroupLayoutDescriptorFromShaderInfo**(`SHADER_INFO`, `targetGroupIndex`, `useMSAA`): `object`
+> **getComputeBindGroupLayoutDescriptorFromShaderInfo**(`SHADER_INFO`, `targetGroupIndex`, `useMSAAOrOverride?`, `overrideEntries?`): `GPUBindGroupLayoutDescriptor`
 
-Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:147](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L147)
+Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:273](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L273)
 
-셰이더 정보로부터 컴퓨트 바인드 그룹 레이아웃 디스크립터를 생성합니다.
+파싱된 셰이더 정보로부터 컴퓨트 스테이지(GPUShaderStage.COMPUTE)용 바인드 그룹 레이아웃 디스크립터를 생성합니다.
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `SHADER_INFO` | `any` | 셰이더 정보
-| `targetGroupIndex` | `number` | 타겟 그룹 인덱스
-| `useMSAA` | `boolean` | MSAA 사용 여부
+| `SHADER_INFO` | `any` | 파싱된 WGSL 셰이더 정보 객체 |
+| `targetGroupIndex` | `number` | 대상 바인드 그룹 인덱스 |
+| `useMSAAOrOverride?` | `boolean` \| `Record`\<`number`, `Partial`\<`GPUBindGroupLayoutEntry`\>\> | MSAA 사용 여부 불리언 또는 바인딩 오버라이드 맵 (`boolean \| Record<number, Partial<GPUBindGroupLayoutEntry>>`, 선택) |
+| `overrideEntries?` | `Record`\<`number`, `Partial`\<`GPUBindGroupLayoutEntry`\>\> | 특정 바인딩 번호의 설정을 덮어쓸 엔트리 맵 (`Record<number, Partial<GPUBindGroupLayoutEntry>>`, 선택) |
 
 ## Returns
 
-`object`
+`GPUBindGroupLayoutDescriptor`
 
-| Name | Type | Defined in |
-| ------ | ------ | ------ |
-| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:105](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L105) |
+컴퓨트용 GPUBindGroupLayoutDescriptor 객체

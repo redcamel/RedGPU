@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,9 @@
 
 # Interface: DefineBooleanInfo
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:12](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/defineBoolean.ts#L12)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:11](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/defineBoolean.ts#L11)
 
-`defineBoolean` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
-
-## Remarks
-
-GPU는 불리언(Boolean)을 직접 지원하지 않으므로, 유니폼 버퍼에 기록 시 정수 0 또는 1로 변환됩니다.
+`defineBoolean` 함수에 전달할 불리언 프로퍼티 정의 옵션 인터페이스입니다.
 
 ## Properties
 
@@ -20,9 +16,9 @@ GPU는 불리언(Boolean)을 직접 지원하지 않으므로, 유니폼 버퍼�
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/defineBoolean.ts#L17)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/defineBoolean.ts#L16)
 
-속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
+대상 프로토타입에 정의할 프로퍼티 키 이름입니다.
 
 ***
 
@@ -30,6 +26,6 @@ Defined in: [src/defineProperty/funcs/defineBoolean.ts:17](https://github.com/re
 
 > **value**: `boolean`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/defineBoolean.ts#L22)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/defineBoolean.ts#L21)
 
-속성의 초기 불리언 값.
+프로퍼티의 초기 불리언 값입니다.

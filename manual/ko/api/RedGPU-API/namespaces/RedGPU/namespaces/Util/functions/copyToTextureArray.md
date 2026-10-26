@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,23 +8,24 @@
 
 > **copyToTextureArray**(`commandEncoder`, `sourceTexture`, `targetArrayTexture`, `sliceIndex`): `void`
 
-Defined in: [src/utils/texture/copyToTextureArray.ts:16](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/texture/copyToTextureArray.ts#L16)
+Defined in: [src/utils/texture/copyToTextureArray.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/texture/copyToTextureArray.ts#L26)
 
 소스 텍스처를 배열 텍스처의 특정 슬라이스(Slice)로 복사합니다.
 
-* ### Example
+### Example
 ```typescript
-RedGPU.Util.copyToTextureArray(commandEncoder, sourceTex, targetArrayTex, 0);
+// 소스 텍스처를 배열 텍스처의 0번 슬라이스로 복사
+RedGPU.Util.copyToTextureArray(commandEncoder, sourceTexture, targetArrayTexture, 0);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `commandEncoder` | `GPUCommandEncoder` | 커맨드 인코더
-| `sourceTexture` | `GPUTexture` | 복사할 소스 텍스처
-| `targetArrayTexture` | `GPUTexture` | 대상 배열 텍스처
-| `sliceIndex` | `number` | 대상 슬라이스 인덱스
+| `commandEncoder` | `GPUCommandEncoder` | 커맨드 인코더 |
+| `sourceTexture` | `GPUTexture` | 복사할 소스 텍스처 |
+| `targetArrayTexture` | `GPUTexture` | 대상 배열 텍스처 |
+| `sliceIndex` | `number` | 대상 슬라이스 인덱스 |
 
 ## Returns
 

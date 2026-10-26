@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,27 +8,27 @@
 
 > **sortTransparentObjects**(`cameraPos`, `objects`): `GPURenderBundle`[]
 
-Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/sortTransparentObjects.ts#L21)
+Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/sortTransparentObjects.ts#L21)
 
-카메라 거리를 기준으로 투명 객체를 원근 거리 내림차순 정렬합니다.
+카메라 위치로부터의 거리 제곱을 기준으로 투명 렌더링 번들(`GPURenderBundle`) 배열을 내림차순(먼 것부터 가까운 순서) 정렬합니다.
 
 ### Example
 ```typescript
-const sorted = RedGPU.math.sortTransparentObjects(camera.position, transparentObjects);
+const sortedBundles = RedGPU.Math.sortTransparentObjects(camera, transparentBundles);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `cameraPos` | \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | 카메라 위치 {x, y, z}
+| `cameraPos` | \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | 카메라의 3D 월드 좌표 (`{ x: number, y: number, z: number }`) |
 | `cameraPos.x` | `number` | - |
 | `cameraPos.y` | `number` | - |
 | `cameraPos.z` | `number` | - |
-| `objects` | `GPURenderBundle`[] | 정렬할 `GPURenderBundle` 배열
+| `objects` | `GPURenderBundle`[] | 정렬할 `Array<GPURenderBundle>` 배열 |
 
 ## Returns
 
 `GPURenderBundle`[]
 
-정렬된 `GPURenderBundle` 배열
+카메라 거리 내림차순으로 정렬된 `Array<GPURenderBundle>` 배열

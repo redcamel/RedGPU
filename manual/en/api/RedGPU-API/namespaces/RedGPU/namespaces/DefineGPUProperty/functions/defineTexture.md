@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,39 +8,31 @@
 
 > **defineTexture**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:75](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/texture/defineTexture.ts#L75)
+Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineTexture.ts#L77)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 일반 텍스처(Texture) 속성을 정의합니다.
+Defines texture properties on the target's prototype that synchronize with GPU bind groups and uniform buffers.
+
+Invokes `updateTexture(prevTexture, texture)` on the target when changed, and automatically updates the boolean state and uniform value (1 or 0) if a corresponding `use{Key}` property exists.
+
+### Example
+```typescript
+// Define a single texture property
+RedGPU.DefineGPUProperty.defineTexture(MyMaterial, { key: 'diffuseTexture' });
+
+// Define multiple texture properties at once
+RedGPU.DefineGPUProperty.defineTexture(MyMaterial, [
+  { key: 'diffuseTexture' },
+  { key: 'normalTexture' }
+]);
+```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `target` | `any` | Class constructor to define properties on |
-| `defineInfo` | [`DefineTextureInfo`](../interfaces/DefineTextureInfo.md) \| [`DefineTextureInfo`](../interfaces/DefineTextureInfo.md)[] | A single [DefineTextureInfo](../interfaces/DefineTextureInfo.md) configuration or an array of configurations |
+| `target` | `any` | Target class or prototype to define properties on |
+| `defineInfo` | [`DefineTextureInfo`](../interfaces/DefineTextureInfo.md) \| [`DefineTextureInfo`](../interfaces/DefineTextureInfo.md)[] | Single `DefineTextureInfo` configuration or an array of configurations |
 
 ## Returns
 
 `void`
-
-## Remarks
-
-
-***
-- Handles [BitmapTexture](../../Resource/classes/BitmapTexture.md), [ANoiseTexture](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md), and [HDRTexture](../../Resource/classes/HDRTexture.md) instances.
-- When a texture is set, it invokes `updateTexture(prevTexture, texture)` on the target instance to update bind groups.
-- If a corresponding `use{Key}` property (e.g. `useDiffuseTexture`) exists on the target, it automatically synchronizes its boolean state and GPU globalStruct value (1 or 0) based on texture presence.
-
-## Example
-
-```typescript
-// 단일 설정
-RedGPU.DefineGPUProperty.defineTexture(MyMaterial, { key: 'diffuseTexture' });
-
-// 여러 속성 일괄 정의
-RedGPU.DefineGPUProperty.defineTexture(MyMaterial, [
-  { key: 'diffuseTexture' },
-  { key: 'normalTexture' },
-  { key: 'displacementTexture' }
-]);
-```

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,13 @@
 
 # Class: ResourceStateBitmapTexture
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:5](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L16)
+
+2D 비트맵 텍스처(`BitmapTexture`, `ANoiseTexture`, `DirectTexture`)의 리소스 관리 상태를 나타내는 클래스입니다.
+
+::: warning
+이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+:::
 
 ## Constructors
 
@@ -14,13 +20,15 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **new ResourceStateBitmapTexture**(`texture`): `ResourceStateBitmapTexture`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:12](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L12)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:51](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L51)
+
+ResourceStateBitmapTexture 인스턴스를 생성합니다.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `texture` | [`BitmapTexture`](../../../classes/BitmapTexture.md) \| [`ANoiseTexture`](../../CoreNoiseTexture/classes/ANoiseTexture.md) \| [`DirectTexture`](../../../classes/DirectTexture.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `texture` | [`BitmapTexture`](../../../classes/BitmapTexture.md) \| [`ANoiseTexture`](../../CoreNoiseTexture/classes/ANoiseTexture.md) \| [`DirectTexture`](../../../classes/DirectTexture.md) | 관리할 텍스처 인스턴스 |
 
 #### Returns
 
@@ -32,7 +40,9 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:8](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L8)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L31)
+
+리소스 캐시 키
 
 ***
 
@@ -40,7 +50,9 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **src**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:7](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L7)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L26)
+
+텍스처 소스 경로
 
 ***
 
@@ -48,7 +60,9 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **texture**: [`BitmapTexture`](../../../classes/BitmapTexture.md) \| [`ANoiseTexture`](../../CoreNoiseTexture/classes/ANoiseTexture.md) \| [`DirectTexture`](../../../classes/DirectTexture.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:6](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L6)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L21)
+
+관리 대상 텍스처 인스턴스
 
 ***
 
@@ -56,7 +70,9 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **useNum**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:9](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L9)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L36)
+
+리소스 참조 횟수
 
 ***
 
@@ -64,4 +80,6 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L10)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L41)
+
+고유 식별자(UUID)

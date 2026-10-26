@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,19 +6,19 @@
 
 # Interface: IPostEffectSourceConfig
 
-Defined in: [src/postEffect/core/types.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L22)
+Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L26)
 
-Post-effect source texture configuration interface
+Interface for post-processing source texture binding configuration.
 
 ## Properties
 
 ### isSampled?
 
-> `optional` **isSampled?**: `boolean`
+> `optional` **isSampled?**: `boolean` = `true`
 
-Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L26)
+Defined in: [src/postEffect/core/types.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L37)
 
-Whether to use as a sampleable type (texture_2d)
+Whether to use as a sampleable texture type (`texture_2d<f32>`) with a sampler
 
 ***
 
@@ -26,6 +26,6 @@ Whether to use as a sampleable type (texture_2d)
 
 > **name**: `string`
 
-Defined in: [src/postEffect/core/types.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L24)
+Defined in: [src/postEffect/core/types.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L31)
 
-Texture name
+Texture binding identifier name in the shader

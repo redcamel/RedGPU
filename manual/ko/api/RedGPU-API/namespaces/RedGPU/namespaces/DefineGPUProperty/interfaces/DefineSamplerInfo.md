@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Interface: DefineSamplerInfo
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:8](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/texture/defineSampler.ts#L8)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:11](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineSampler.ts#L11)
 
-`defineSampler` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+`defineSampler` 함수에 전달할 속성 정의 옵션 인터페이스입니다.
 
 ## Properties
 
@@ -16,6 +16,6 @@ Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:8](https://github
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:13](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/texture/defineSampler.ts#L13)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineSampler.ts#L16)
 
-속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
+대상 객체 프로토타입에 정의할 속성 키 이름

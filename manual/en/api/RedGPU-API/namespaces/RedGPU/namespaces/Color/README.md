@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Color
 
-Module for color processing. Supports RGB and RGBA color models.
+Provides RGB and RGBA color models and HEX-RGB color conversion utilities.
 
 ## Color
 

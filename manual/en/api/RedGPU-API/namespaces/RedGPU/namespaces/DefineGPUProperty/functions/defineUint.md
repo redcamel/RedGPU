@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,37 +8,31 @@
 
 > **defineUint**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/number/defineUint.ts:96](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/number/defineUint.ts#L96)
+Defined in: [src/defineProperty/funcs/number/defineUint.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/defineUint.ts#L101)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 부호 없는 정수(Uint) 속성을 정의합니다.
+Defines unsigned integer (Uint) properties on the target's prototype that synchronize with GPU uniform buffers.
 
-## Parameters
+Validates that the assigned value is an unsigned integer (`>= 0`), clamping out-of-bounds values to `min` (default: 0) or `max` with a warning before updating the uniform buffer.
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `target` | `any` | Class constructor to define properties on |
-| `defineInfo` | [`DefineUintInfo`](../interfaces/DefineUintInfo.md) \| [`DefineUintInfo`](../interfaces/DefineUintInfo.md)[] | A single [DefineUintInfo](../interfaces/DefineUintInfo.md) configuration or an array of configurations |
-
-## Returns
-
-`void`
-
-## Remarks
-
-
-***
-- Validates that the input is an unsigned integer (>= 0) via [validateUintRange](../../RuntimeChecker/functions/validateUintRange.md).
-- Values outside the range print a `console.warn` and are clamped/adjusted before writing to the GPU buffer.
-
-## Example
-
+### Example
 ```typescript
-// 단일 설정
+// Define a single unsigned integer property
 RedGPU.DefineGPUProperty.defineUint(MyMaterial, { key: 'lightType', value: 1, min: 0, max: 10 });
 
-// 여러 속성 일괄 정의
+// Define multiple unsigned integer properties at once
 RedGPU.DefineGPUProperty.defineUint(MyMaterial, [
   { key: 'shadowMode', value: 0 },
   { key: 'maxLights', value: 4, min: 0, max: 16 }
 ]);
 ```
+
+## Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `any` | Target class or prototype to define properties on |
+| `defineInfo` | [`DefineUintInfo`](../interfaces/DefineUintInfo.md) \| [`DefineUintInfo`](../interfaces/DefineUintInfo.md)[] | Single `DefineUintInfo` configuration or an array of configurations |
+
+## Returns
+
+`void`

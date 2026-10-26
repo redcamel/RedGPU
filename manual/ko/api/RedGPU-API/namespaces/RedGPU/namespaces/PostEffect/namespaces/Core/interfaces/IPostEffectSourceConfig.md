@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,19 +6,19 @@
 
 # Interface: IPostEffectSourceConfig
 
-Defined in: [src/postEffect/core/types.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L22)
+Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L26)
 
-후처리 소스 텍스처 설정 인터페이스
+후처리 소스 텍스처 바인딩 설정 인터페이스입니다.
 
 ## Properties
 
 ### isSampled?
 
-> `optional` **isSampled?**: `boolean`
+> `optional` **isSampled?**: `boolean` = `true`
 
-Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L26)
+Defined in: [src/postEffect/core/types.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L37)
 
-샘플링 가능한 타입(texture_2d)으로 사용할지 여부
+샘플러와 함께 사용하는 샘플링 가능 타입(`texture_2d<f32>`) 여부
 
 ***
 
@@ -26,6 +26,6 @@ Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU
 
 > **name**: `string`
 
-Defined in: [src/postEffect/core/types.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L24)
+Defined in: [src/postEffect/core/types.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L31)
 
-텍스처 이름
+셰이더 내 텍스처 바인딩 식별자 이름

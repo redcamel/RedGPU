@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Picking
 
-Provides core functionality for mouse picking, raycasting, and event handling.
-
-Supports both GPU-based pixel picking and CPU-based raycasting (2D/3D), enabling precise object selection and interaction.
+Provides core functionality for GPU-based pixel picking, CPU-based 2D/3D raycasting, and picking event handling.
 
 ## Picking
 

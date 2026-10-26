@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # CoreView
 
-Provides core base classes and rendering state management for the view system.
+Provides core abstract classes (`AView`), transform (`ViewTransform`), render texture manager, and rendering state data for the view system.
 
 ## Core
 

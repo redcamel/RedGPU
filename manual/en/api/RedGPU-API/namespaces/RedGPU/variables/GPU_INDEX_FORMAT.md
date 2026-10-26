@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,15 +8,13 @@
 
 > `const` **GPU\_INDEX\_FORMAT**: `object`
 
-Defined in: [src/gpuConst/GPU\_INDEX\_FORMAT.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_INDEX_FORMAT.ts#L10)
+Defined in: [src/gpuConst/GPU\_INDEX\_FORMAT.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_INDEX_FORMAT.ts#L7)
 
-Constants defining the data format used in index buffers.
-
-Determines the number of bits and data type for index values.
+Integer bit-width format constants for vertex index data stored in an index buffer.
 
 ## Type Declaration
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-uint16"></a> `UINT16` | `"uint16"` | `'uint16'` | Uses 16-bit unsigned integer (Uint16) format. | [src/gpuConst/GPU\_INDEX\_FORMAT.ts:15](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_INDEX_FORMAT.ts#L15) |
-| <a id="property-uint32"></a> `UINT32` | `"uint32"` | `'uint32'` | Uses 32-bit unsigned integer (Uint32) format. | [src/gpuConst/GPU\_INDEX\_FORMAT.ts:20](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_INDEX_FORMAT.ts#L20) |
+| <a id="property-uint16"></a> `UINT16` | `"uint16"` | `'uint16'` | 16-bit unsigned integer (`Uint16Array`, `'uint16'`) index format. | [src/gpuConst/GPU\_INDEX\_FORMAT.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_INDEX_FORMAT.ts#L12) |
+| <a id="property-uint32"></a> `UINT32` | `"uint32"` | `'uint32'` | 32-bit unsigned integer (`Uint32Array`, `'uint32'`) index format. | [src/gpuConst/GPU\_INDEX\_FORMAT.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_INDEX_FORMAT.ts#L17) |

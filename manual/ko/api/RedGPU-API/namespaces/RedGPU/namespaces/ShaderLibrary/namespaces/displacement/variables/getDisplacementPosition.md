@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getDisplacementPosition**: `string` = `getDisplacementPosition_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2727](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L2727)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2824](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2824)
 
 디스플레이스먼트 텍스처를 바이큐빅 필터링으로 샘플링하여 변형된 정점 위치를 계산합니다.
 
@@ -16,35 +16,49 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:2727](https://github.com/red
 
 ## Param
 
+**input\_position**
+
 입력 정점 위치
 //
 
 ## Param
+
+**input\_vertexNormal**
 
 입력 정점 법선
 //
 
 ## Param
 
+**displacementTexture**
+
 디스플레이스먼트 텍스처
 //
 
 ## Param
+
+**displacementTextureSampler**
 
 샘플러
 //
 
 ## Param
 
+**displacementScale**
+
 변위 강도
 //
 
 ## Param
 
+**input\_uv**
+
 입력 UV 좌표
 //
 
 ## Param
+
+**mipLevel**
 
 밉맵 레벨
 //

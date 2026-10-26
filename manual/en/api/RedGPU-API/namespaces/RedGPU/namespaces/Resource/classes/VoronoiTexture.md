@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,18 +6,23 @@
 
 # Class: VoronoiTexture
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:59](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L59)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L64)
 
 **`Experimental`**
 
-Texture class that generates Voronoi noise patterns.
+Texture that generates Voronoi (cellular) noise patterns using a compute shader.
 
-Can generate cellular patterns, stone textures, crack patterns, cell ID outputs, etc.
+***
 
-* ### Example
+### Example
 ```typescript
 const texture = new RedGPU.Resource.VoronoiTexture(redGPUContext);
+texture.setCrackPattern();
 ```
+
+## See
+
+[Voronoi noise texture example](https://redcamel.github.io/RedGPU/examples/3d/noiseTexture/voronoi/basic/)
 
 ## Extends
 
@@ -25,24 +30,33 @@ const texture = new RedGPU.Resource.VoronoiTexture(redGPUContext);
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new VoronoiTexture**(`redGPUContext`, `width?`, `height?`, `define?`, `useMipmap?`): `VoronoiTexture`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:90](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L90)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L101)
 
 **`Experimental`**
 
 Creates a VoronoiTexture instance.
+
+#### Example
+```typescript
+const texture = new RedGPU.Resource.VoronoiTexture(redGPUContext, 512, 512);
+```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
-| `width` | `number` | `1024` | Texture width |
-| `height` | `number` | `1024` | Texture height |
-| `define?` | [`NoiseDefine`](../namespaces/CoreNoiseTexture/interfaces/NoiseDefine.md) | `undefined` | Noise definition object (optional) |
+| `width?` | `number` | `1024` | Texture width (default: 1024) |
+| `height?` | `number` | `1024` | Texture height (default: 1024) |
+| `define?` | [`NoiseDefine`](../namespaces/CoreNoiseTexture/interfaces/NoiseDefine.md) | `undefined` | Noise definition object that extends the shader logic (optional) |
 | `useMipmap?` | `boolean` | `true` | Whether to use mipmaps (default: true) |
 
 #### Returns
@@ -55,43 +69,51 @@ Creates a VoronoiTexture instance.
 
 ## Properties
 
+
+
+## Accessors
+
+
+
+***
+
 ### cellIdColorIntensity
 
 #### Get Signature
 
 > **get** **cellIdColorIntensity**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:322](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L322)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:324](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L324)
 
 **`Experimental`**
 
-Returns the cell ID color intensity.
+Cell color intensity applied in `CELL_ID_COLOR` output. (positive, default: 1.0)
 
 ##### Returns
 
 `number`
 
-- Color intensity
+Color intensity
 
 #### Set Signature
 
 > **set** **cellIdColorIntensity**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:331](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L331)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:328](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L328)
 
 **`Experimental`**
 
-Sets the cell ID color intensity.
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Color intensity to set (positive number) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -101,37 +123,37 @@ Sets the cell ID color intensity.
 
 > **get** **distanceScale**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:157](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L157)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:169](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L169)
 
 **`Experimental`**
 
-Returns the distance scale.
+Scale multiplied to the output distance value. (positive, default: 1.0)
 
 ##### Returns
 
 `number`
 
-- Distance scale value
+Distance scale value
 
 #### Set Signature
 
 > **set** **distanceScale**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:166](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L166)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L173)
 
 **`Experimental`**
 
-Sets the distance scale.
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Distance scale value to set (positive number) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -141,37 +163,41 @@ Sets the distance scale.
 
 > **get** **distanceType**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:256](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L256)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:261](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L261)
 
 **`Experimental`**
 
-Returns the distance calculation method.
+Distance calculation method. Only `VORONOI_DISTANCE_TYPE` values are allowed.
+
+##### Throws
+
+Throws an error if an invalid value is set.
 
 ##### Returns
 
 `number`
 
-- Distance calculation method
+Distance calculation method value
 
 #### Set Signature
 
 > **set** **distanceType**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:265](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L265)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:265](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L265)
 
 **`Experimental`**
 
-Sets the distance calculation method.
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Distance calculation method (one of VORONOI_DISTANCE_TYPE) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -181,37 +207,37 @@ Sets the distance calculation method.
 
 > **get** **frequency**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:137](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L137)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:151](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L151)
 
 **`Experimental`**
 
-Returns the frequency (density/scale).
+Frequency that determines cell density. (positive, default: 8.0)
 
 ##### Returns
 
 `number`
 
-- Frequency value
+Frequency value
 
 #### Set Signature
 
 > **set** **frequency**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:146](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L146)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L155)
 
 **`Experimental`**
 
-Sets the frequency (density/scale).
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Frequency value to set (positive number) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -221,37 +247,37 @@ Sets the frequency (density/scale).
 
 > **get** **jitter**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:302](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L302)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:306](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L306)
 
 **`Experimental`**
 
-Returns the jitter value (randomness of the points).
+Degree of random distribution of cell centers. (0~1, 0 yields a perfect grid, default: 1.0)
 
 ##### Returns
 
 `number`
 
-- Jitter value
+Jitter value
 
 #### Set Signature
 
 > **set** **jitter**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:311](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L311)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:310](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L310)
 
 **`Experimental`**
 
-Sets the jitter value (randomness of the points).
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Jitter value to set (positive number between 0 and 1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -261,37 +287,37 @@ Sets the jitter value (randomness of the points).
 
 > **get** **lacunarity**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:217](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L217)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:223](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L223)
 
 **`Experimental`**
 
-Returns the lacunarity (rate of frequency increase for each octave).
+Frequency increase ratio applied per octave. (positive, default: 2.0)
 
 ##### Returns
 
 `number`
 
-- Lacunarity value
+Lacunarity value
 
 #### Set Signature
 
 > **set** **lacunarity**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:226](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L226)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:227](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L227)
 
 **`Experimental`**
 
-Sets the lacunarity (rate of frequency increase for each octave).
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Lacunarity value to set (positive number) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -301,37 +327,37 @@ Sets the lacunarity (rate of frequency increase for each octave).
 
 > **get** **octaves**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:177](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L177)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L187)
 
 **`Experimental`**
 
-Returns the number of octaves (number of noise layers to combine).
+Number of noise layers (octaves) to combine. (integer 1~8, default: 1)
 
 ##### Returns
 
 `number`
 
-- Number of octaves
+Number of octaves
 
 #### Set Signature
 
 > **set** **octaves**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:186](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L186)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L191)
 
 **`Experimental`**
 
-Sets the number of octaves (number of noise layers to combine).
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Number of octaves to set (integer between 1 and 8) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -341,37 +367,41 @@ Sets the number of octaves (number of noise layers to combine).
 
 > **get** **outputType**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:279](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L279)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L285)
 
 **`Experimental`**
 
-Returns the output type.
+Output type. Only `VORONOI_OUTPUT_TYPE` values are allowed.
+
+##### Throws
+
+Throws an error if an invalid value is set.
 
 ##### Returns
 
 `number`
 
-- Output type
+Output type value
 
 #### Set Signature
 
 > **set** **outputType**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:288](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L288)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:289](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L289)
 
 **`Experimental`**
 
-Sets the output type.
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Output type (one of VORONOI_OUTPUT_TYPE) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -381,37 +411,37 @@ Sets the output type.
 
 > **get** **persistence**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:197](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L197)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L205)
 
 **`Experimental`**
 
-Returns the persistence (rate of amplitude reduction for each octave).
+Amplitude reduction ratio applied per octave. (0~1, default: 0.5)
 
 ##### Returns
 
 `number`
 
-- Persistence value
+Persistence value
 
 #### Set Signature
 
 > **set** **persistence**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:206](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L206)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:209](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L209)
 
 **`Experimental`**
 
-Sets the persistence (rate of amplitude reduction for each octave).
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Persistence value to set (positive number between 0 and 1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -421,37 +451,41 @@ Sets the persistence (rate of amplitude reduction for each octave).
 
 > **get** **seed**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:237](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L237)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L241)
 
 **`Experimental`**
 
-Returns the seed value.
+Seed value of the noise pattern.
 
 ##### Returns
 
 `number`
 
-- Seed value
+Seed value
 
 #### Set Signature
 
 > **set** **seed**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:246](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L246)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:245](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L245)
 
 **`Experimental`**
 
-Sets the seed value.
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Seed value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
+
+## Methods
+
+
 
 ***
 
@@ -459,21 +493,28 @@ Sets the seed value.
 
 > **applySettings**(`settings`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:523](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L523)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:531](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L531)
 
 **`Experimental`**
 
-Applies settings at once.
+Applies only the provided properties at once. Each value passes through its setter's validation.
+
+#### Example
+```typescript
+texture.applySettings({frequency: 4.0, jitter: 0.5});
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `settings` | `Partial`\<[`VoronoiSettings`](../interfaces/VoronoiSettings.md)\> | Object containing partial settings to apply |
+| `settings` | `Partial`\<[`VoronoiSettings`](../interfaces/VoronoiSettings.md)\> | Settings to apply (`Partial<VoronoiSettings>`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -481,17 +522,19 @@ Applies settings at once.
 
 > **getDistanceTypeName**(): `string`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:541](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L541)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:552](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L552)
 
 **`Experimental`**
 
-Returns the name string of the current distance type.
+Returns the name of the current distance calculation method.
 
 #### Returns
 
 `string`
 
-- Distance type name
+Distance type name ('Unknown' if not recognized)
+
+***
 
 ***
 
@@ -499,17 +542,19 @@ Returns the name string of the current distance type.
 
 > **getOutputTypeName**(): `string`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:555](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L555)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:569](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L569)
 
 **`Experimental`**
 
-Returns the name string of the current output type.
+Returns the name of the current output type.
 
 #### Returns
 
 `string`
 
-- Output type name
+Output type name ('Unknown' if not recognized)
+
+***
 
 ***
 
@@ -517,17 +562,19 @@ Returns the name string of the current output type.
 
 > **getSettings**(): [`VoronoiSettings`](../interfaces/VoronoiSettings.md)
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:503](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L503)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:503](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L503)
 
 **`Experimental`**
 
-Returns all currently applied Voronoi settings in an object format.
+Returns the current settings as a new object.
 
 #### Returns
 
 [`VoronoiSettings`](../interfaces/VoronoiSettings.md)
 
-- Current settings object
+Current settings object
+
+***
 
 ***
 
@@ -535,15 +582,17 @@ Returns all currently applied Voronoi settings in an object format.
 
 > **randomizeSeed**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:341](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L341)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:338](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L338)
 
 **`Experimental`**
 
-Randomizes the seed value.
+Changes the seed to a random value in the range 0~1000.
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -551,15 +600,17 @@ Randomizes the seed value.
 
 > **setBiomeMapPattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:491](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L491)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:488](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L488)
 
 **`Experimental`**
 
-Applies the biome map pattern preset.
+Applies the biome map preset. (Cell ID, Euclidean, jitter 0.8, frequency 4.0)
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -567,15 +618,17 @@ Applies the biome map pattern preset.
 
 > **setCellIdColorOutput**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:413](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L413)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:410](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L410)
 
 **`Experimental`**
 
-Sets the output type to Cell ID Color (assigning unique RGB color for each cell).
+Sets the output type to Cell ID Color (unique RGB color per cell).
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -583,15 +636,17 @@ Sets the output type to Cell ID Color (assigning unique RGB color for each cell)
 
 > **setCellIdOutput**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:405](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L405)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:402](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L402)
 
 **`Experimental`**
 
-Sets the output type to Cell ID (quantifying unique ID of each cell).
+Sets the output type to Cell ID (unique grayscale value per cell).
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -599,11 +654,11 @@ Sets the output type to Cell ID (quantifying unique ID of each cell).
 
 > **setCellularPattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:421](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L421)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:418](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L418)
 
 **`Experimental`**
 
-Applies the cellular pattern preset.
+Applies the cellular pattern preset. (F1, Euclidean, jitter 1.0)
 
 #### Returns
 
@@ -611,11 +666,13 @@ Applies the cellular pattern preset.
 
 ***
 
+***
+
 ### setChebyshevDistance()
 
 > **setChebyshevDistance**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:365](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L365)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:362](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L362)
 
 **`Experimental`**
 
@@ -627,19 +684,23 @@ Sets the distance calculation method to Chebyshev.
 
 ***
 
+***
+
 ### setCrackPattern()
 
 > **setCrackPattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:389](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L389)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:386](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L386)
 
 **`Experimental`**
 
-Sets the output type to F2 - F1 (crack pattern).
+Sets the output type to F2 - F1 (cell edge emphasis, crack pattern).
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -647,11 +708,11 @@ Sets the output type to F2 - F1 (crack pattern).
 
 > **setCrystalPattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:459](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L459)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:456](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L456)
 
 **`Experimental`**
 
-Applies the crystal pattern preset.
+Applies the crystal pattern preset. (F2 - F1, Chebyshev, jitter 0.9)
 
 #### Returns
 
@@ -659,11 +720,13 @@ Applies the crystal pattern preset.
 
 ***
 
+***
+
 ### setEuclideanDistance()
 
 > **setEuclideanDistance**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:349](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L349)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:346](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L346)
 
 **`Experimental`**
 
@@ -675,19 +738,23 @@ Sets the distance calculation method to Euclidean.
 
 ***
 
+***
+
 ### setF1Output()
 
 > **setF1Output**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:373](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L373)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:370](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L370)
 
 **`Experimental`**
 
-Sets the output type to F1 (closest distance).
+Sets the output type to F1 (distance to the closest point).
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -695,15 +762,17 @@ Sets the output type to F1 (closest distance).
 
 > **setF2Output**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:381](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L381)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:378](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L378)
 
 **`Experimental`**
 
-Sets the output type to F2 (second closest distance).
+Sets the output type to F2 (distance to the second closest point).
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -711,11 +780,11 @@ Sets the output type to F2 (second closest distance).
 
 > **setGridPattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:450](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L450)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:447](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L447)
 
 **`Experimental`**
 
-Applies the grid pattern preset.
+Applies the grid pattern preset. (jitter 0.0, Euclidean)
 
 #### Returns
 
@@ -723,11 +792,13 @@ Applies the grid pattern preset.
 
 ***
 
+***
+
 ### setManhattanDistance()
 
 > **setManhattanDistance**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:357](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L357)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:354](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L354)
 
 **`Experimental`**
 
@@ -739,19 +810,23 @@ Sets the distance calculation method to Manhattan.
 
 ***
 
+***
+
 ### setMosaicPattern()
 
 > **setMosaicPattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:480](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L480)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:477](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L477)
 
 **`Experimental`**
 
-Applies the mosaic pattern preset.
+Applies the mosaic tile preset. (Cell ID Color, Manhattan, jitter 0.3, color intensity 1.0)
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -759,11 +834,11 @@ Applies the mosaic pattern preset.
 
 > **setOrganicPattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:441](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L441)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:438](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L438)
 
 **`Experimental`**
 
-Applies the organic pattern preset.
+Applies the organic pattern preset. (Manhattan, jitter 0.6)
 
 #### Returns
 
@@ -771,11 +846,13 @@ Applies the organic pattern preset.
 
 ***
 
+***
+
 ### setSmoothBlend()
 
 > **setSmoothBlend**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:397](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L397)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:394](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L394)
 
 **`Experimental`**
 
@@ -787,19 +864,23 @@ Sets the output type to F1 + F2 (smooth blend).
 
 ***
 
+***
+
 ### setStainedGlassPattern()
 
 > **setStainedGlassPattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:469](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L469)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:466](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L466)
 
 **`Experimental`**
 
-Applies the stained glass pattern preset.
+Applies the stained glass preset. (Cell ID Color, Euclidean, jitter 0.7, color intensity 0.8)
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -807,11 +888,11 @@ Applies the stained glass pattern preset.
 
 > **setStonePattern**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:431](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L431)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:428](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L428)
 
 **`Experimental`**
 
-Applies the stone pattern preset.
+Applies the stone pattern preset. (F2 - F1, Euclidean, jitter 0.8)
 
 #### Returns
 
@@ -819,35 +900,18 @@ Applies the stone pattern preset.
 
 ***
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-**`Experimental`**
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`instanceId`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#instanceid)
-
-***
+<summary>View inherited properties (Click to expand)</summary>
 
 ### mipLevelCount
 
 > **mipLevelCount**: `number` = `1`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L38)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L47)
 
 **`Experimental`**
 
@@ -857,11 +921,13 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https:
 
 ***
 
+***
+
 ### src
 
 > **src**: `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L49)
 
 **`Experimental`**
 
@@ -871,11 +937,13 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https:
 
 ***
 
+***
+
 ### useMipmap
 
 > **useMipmap**: `boolean` = `true`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L48)
 
 **`Experimental`**
 
@@ -883,7 +951,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https:
 
 [`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`useMipmap`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#usemipmap)
 
-## Accessors
+***
 
 ### animationSpeed
 
@@ -891,7 +959,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https:
 
 > **get** **animationSpeed**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:102](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L102)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:132](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L132)
 
 **`Experimental`**
 
@@ -905,7 +973,7 @@ Returns the animation speed.
 
 > **set** **animationSpeed**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:107](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L107)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L144)
 
 **`Experimental`**
 
@@ -913,9 +981,9 @@ Sets the animation speed.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | Animation speed |
 
 ##### Returns
 
@@ -927,13 +995,15 @@ Sets the animation speed.
 
 ***
 
+***
+
 ### animationX
 
 #### Get Signature
 
 > **get** **animationX**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:114](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L114)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:154](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L154)
 
 **`Experimental`**
 
@@ -947,7 +1017,7 @@ Returns the animation X value.
 
 > **set** **animationX**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:119](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L119)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L166)
 
 **`Experimental`**
 
@@ -955,9 +1025,9 @@ Sets the animation X value.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | Animation X value |
 
 ##### Returns
 
@@ -969,13 +1039,15 @@ Sets the animation X value.
 
 ***
 
+***
+
 ### animationY
 
 #### Get Signature
 
 > **get** **animationY**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:126](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L126)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:176](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L176)
 
 **`Experimental`**
 
@@ -989,7 +1061,7 @@ Returns the animation Y value.
 
 > **set** **animationY**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:131](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L131)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L188)
 
 **`Experimental`**
 
@@ -997,9 +1069,9 @@ Sets the animation Y value.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | Animation Y value |
 
 ##### Returns
 
@@ -1011,27 +1083,31 @@ Sets the animation Y value.
 
 ***
 
+***
+
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
 **`Experimental`**
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
 
 #### Inherited from
 
 [`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`antialiasingManager`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#antialiasingmanager)
+
+***
 
 ***
 
@@ -1041,25 +1117,25 @@ AntialiasingManager instance
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L53)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L61)
 
 **`Experimental`**
 
-Returns the cache key.
+Gets or sets the cache key.
 
 ##### Returns
 
 `string`
 
+Cache key string
+
 #### Set Signature
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L65)
 
 **`Experimental`**
-
-Sets the cache key.
 
 ##### Parameters
 
@@ -1077,23 +1153,25 @@ Sets the cache key.
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
 **`Experimental`**
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
 
 #### Inherited from
 
@@ -1101,21 +1179,25 @@ CommandEncoderManager instance
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L89)
 
 **`Experimental`**
 
-Returns the associated GPU device.
+Returns the associated GPUDevice.
 
 ##### Returns
 
 `GPUDevice`
+
+GPUDevice instance
 
 #### Inherited from
 
@@ -1123,13 +1205,15 @@ Returns the associated GPU device.
 
 ***
 
+***
+
 ### gpuTexture
 
 #### Get Signature
 
-> **get** **gpuTexture**(): `GPUTexture`
+> <span class="readonly-badge">readonly</span> **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:143](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L143)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:206](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L206)
 
 **`Experimental`**
 
@@ -1145,39 +1229,65 @@ Returns the GPUTexture object.
 
 ***
 
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+**`Experimental`**
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`instanceId`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#instanceid)
+
+***
+
+***
+
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
 **`Experimental`**
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 **`Experimental`**
 
-Sets the name of the object.
-
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -1189,23 +1299,25 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
 **`Experimental`**
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
 
 #### Inherited from
 
@@ -1213,23 +1325,25 @@ RedGPUContext instance
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
 **`Experimental`**
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 #### Inherited from
 
@@ -1237,17 +1351,19 @@ ResourceManager instance
 
 ***
 
+***
+
 ### resourceManagerKey
 
 #### Get Signature
 
-> **get** **resourceManagerKey**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:97](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L97)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:124](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L124)
 
 **`Experimental`**
 
-Resource manager key
+Returns the resource manager state key.
 
 ##### Returns
 
@@ -1259,13 +1375,15 @@ Resource manager key
 
 ***
 
+***
+
 ### revision
 
 #### Get Signature
 
-> **get** **revision**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L45)
+Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L49)
 
 **`Experimental`**
 
@@ -1275,9 +1393,13 @@ Returns the revision (update count) of the resource.
 
 `number`
 
+Resource revision number
+
 #### Inherited from
 
 [`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`revision`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#revision)
+
+***
 
 ***
 
@@ -1285,9 +1407,9 @@ Returns the revision (update count) of the resource.
 
 #### Get Signature
 
-> **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
+> <span class="readonly-badge">readonly</span> **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ManagementResourceBase.ts#L50)
 
 **`Experimental`**
 
@@ -1297,9 +1419,13 @@ Returns the managed state information of the resource.
 
 [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
+Resource managed status info object
+
 #### Inherited from
 
 [`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`targetResourceManagedState`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#targetresourcemanagedstate)
+
+***
 
 ***
 
@@ -1309,7 +1435,7 @@ Returns the managed state information of the resource.
 
 > **get** **time**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:148](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L148)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:214](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L214)
 
 **`Experimental`**
 
@@ -1323,7 +1449,7 @@ Returns the current time.
 
 > **set** **time**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:153](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L153)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:226](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L226)
 
 **`Experimental`**
 
@@ -1331,9 +1457,9 @@ Sets the current time.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | Time in milliseconds |
 
 ##### Returns
 
@@ -1345,17 +1471,19 @@ Sets the current time.
 
 ***
 
+***
+
 ### uniformInfo
 
 #### Get Signature
 
-> **get** **uniformInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **uniformInfo**(): `any`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:138](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L138)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:198](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L198)
 
 **`Experimental`**
 
-Returns the globalStruct information.
+Returns the uniform information.
 
 ##### Returns
 
@@ -1367,13 +1495,15 @@ Returns the globalStruct information.
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 **`Experimental`**
 
@@ -1383,7 +1513,7 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
@@ -1391,17 +1521,19 @@ UUID string
 
 ***
 
+***
+
 ### videoMemorySize
 
 #### Get Signature
 
-> **get** **videoMemorySize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:92](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L92)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L116)
 
 **`Experimental`**
 
-Video memory usage in bytes
+Returns the video memory usage in bytes.
 
 ##### Returns
 
@@ -1411,23 +1543,31 @@ Video memory usage in bytes
 
 [`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`videoMemorySize`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#videomemorysize)
 
-## Methods
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
 
 ### \_\_addDirtyPipelineListener()
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L102)
 
 **`Experimental`**
 
-Adds a listener function to be called when the pipeline becomes dirty.
+Adds a pipeline dirty listener to be called when the resource changes.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `listener` | () => `void` | Listener function |
+| `listener` | () => `void` | Listener function to register |
 
 #### Returns
 
@@ -1439,21 +1579,23 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 ***
 
+***
+
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L101)
+Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L115)
 
 **`Experimental`**
 
-Removes a resource update listener.
+Removes a registered pipeline dirty listener.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `listener` | () => `void` | Listener function to be removed |
+| `listener` | () => `void` | Listener function to remove |
 
 #### Returns
 
@@ -1465,11 +1607,13 @@ Removes a resource update listener.
 
 ***
 
+***
+
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:185](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L185)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L285)
 
 **`Experimental`**
 
@@ -1485,11 +1629,13 @@ Destroys the resource.
 
 ***
 
+***
+
 ### notifyUpdate()
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/ResourceBase.ts#L131)
 
 **`Experimental`**
 
@@ -1499,7 +1645,7 @@ Notifies registered listeners that the resource has been updated.
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | Whether to reset the listener list after firing (default: false) |
+| `resetList?` | `boolean` | `false` | Whether to reset the listener list after notification (default: false) |
 
 #### Returns
 
@@ -1511,11 +1657,13 @@ Notifies registered listeners that the resource has been updated.
 
 ***
 
+***
+
 ### render()
 
 > **render**(`time`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:180](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L180)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:277](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L277)
 
 **`Experimental`**
 
@@ -1523,9 +1671,9 @@ Renders noise at the specified time.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `time` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `time` | `number` | Time to render |
 
 #### Returns
 
@@ -1537,22 +1685,24 @@ Renders noise at the specified time.
 
 ***
 
+***
+
 ### updateUniform()
 
 > **updateUniform**(`name`, `value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:160](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L160)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:243](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L243)
 
 **`Experimental`**
 
-Updates an individual globalStruct parameter.
+Updates an individual uniform parameter.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `name` | `string` |
-| `value` | `any` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `name` | `string` | Uniform name |
+| `value` | `any` | Value to set |
 
 #### Returns
 
@@ -1564,21 +1714,23 @@ Updates an individual globalStruct parameter.
 
 ***
 
+***
+
 ### updateUniforms()
 
 > **updateUniforms**(`uniforms`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:169](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L169)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:259](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L259)
 
 **`Experimental`**
 
-Updates multiple globalStruct parameters at once.
+Updates multiple uniform parameters at once.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `uniforms` | `Record`\<`string`, `any`\> |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `uniforms` | `Record`\<`string`, `any`\> | Record of uniform key-value pairs to update |
 
 #### Returns
 
@@ -1587,6 +1739,5 @@ Updates multiple globalStruct parameters at once.
 #### Inherited from
 
 [`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`updateUniforms`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#updateuniforms)
-
 
 </details>

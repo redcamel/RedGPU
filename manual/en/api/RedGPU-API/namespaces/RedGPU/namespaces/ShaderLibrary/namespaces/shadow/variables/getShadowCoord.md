@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getShadowCoord**: `string` = `getShadowCoord_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:925](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L925)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:946](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L946)
 
 Converts world coordinates to light's clip space coordinates (UV + Depth).
 
@@ -16,10 +16,14 @@ Converts world coordinates to light's clip space coordinates (UV + Depth).
 
 ## Param
 
+**worldPosition**
+
 Position in world space
 //
 
 ## Param
+
+**lightViewProjectionMatrix**
 
 Light's View-Projection matrix
 //

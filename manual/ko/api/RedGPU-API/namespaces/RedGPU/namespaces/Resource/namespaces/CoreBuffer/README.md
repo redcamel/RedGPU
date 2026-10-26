@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # CoreBuffer
 
-버퍼 리소스의 기본 추상 클래스들과 유틸리티 함수를 제공합니다.
+모든 버퍼 리소스가 상속하는 기본 추상 클래스(`ABaseBuffer`, `AUniformBaseBuffer`)를 제공합니다.
 
 ## Buffer
 

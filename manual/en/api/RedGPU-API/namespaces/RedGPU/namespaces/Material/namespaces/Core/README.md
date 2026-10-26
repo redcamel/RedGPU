@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Core
 
-Provides core base classes and utilities for the material system.
+Provides core abstract classes (ABaseMaterial, ABitmapBaseMaterial, AUVTransformBaseMaterial), fragment render information, and bind group layout generation utilities for the material system.
 
 ## Material
 
@@ -14,9 +14,8 @@ Provides core base classes and utilities for the material system.
 - [ABitmapBaseMaterial](classes/ABitmapBaseMaterial.md)
 - [AUVTransformBaseMaterial](classes/AUVTransformBaseMaterial.md)
 - [FragmentGPURenderInfo](classes/FragmentGPURenderInfo.md)
-
-## Other
-
+- [getBindGroupLayoutDescriptorFromShaderInfo](functions/getBindGroupLayoutDescriptorFromShaderInfo.md)
 - [getComputeBindGroupLayoutDescriptorFromShaderInfo](functions/getComputeBindGroupLayoutDescriptorFromShaderInfo.md)
 - [getFragmentBindGroupLayoutDescriptorFromShaderInfo](functions/getFragmentBindGroupLayoutDescriptorFromShaderInfo.md)
+- [getUnionBindGroupLayoutDescriptorFromShaderInfos](functions/getUnionBindGroupLayoutDescriptorFromShaderInfos.md)
 - [getVertexBindGroupLayoutDescriptorFromShaderInfo](functions/getVertexBindGroupLayoutDescriptorFromShaderInfo.md)

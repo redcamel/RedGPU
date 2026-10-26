@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,12 @@
 
 # Core
 
-Provides core interfaces and abstract classes for the RedGPU Light module.
+Provides the base abstract light class (`ABaseLight`) and clustered lighting (`ClusterLight`) core modules.
 
 ## Light
 
 - [ABaseLight](classes/ABaseLight.md)
-- [LightManager](classes/LightManager.md)
+
+## Other
+
+- [ClusterLight](namespaces/ClusterLight/README.md)

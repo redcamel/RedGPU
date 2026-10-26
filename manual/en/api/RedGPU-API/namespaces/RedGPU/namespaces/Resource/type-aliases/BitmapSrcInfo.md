@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,6 +8,6 @@
 
 > **BitmapSrcInfo** = `string` \| \{ `cacheKey`: `string`; `src`: `string`; \}
 
-Defined in: [src/resources/texture/BitmapTexture.ts:15](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/BitmapTexture.ts#L15)
+Defined in: [src/resources/texture/BitmapTexture.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/BitmapTexture.ts#L21)
 
-Texture source information type. Can be an image URL string or an object with src and cacheKey.
+Bitmap texture source information type. Can be an image URL string or an object containing `src` and `cacheKey`.

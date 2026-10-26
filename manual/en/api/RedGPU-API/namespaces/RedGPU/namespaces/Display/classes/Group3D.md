@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,13 @@
 
 # Class: Group3D
 
-Defined in: [src/display/group/Group3D.ts:6](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L6)
+Defined in: [src/display/group/Group3D.ts:6](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L6)
 
-Container class for structurally grouping objects in 3D space.
+Container class that hierarchically groups child objects and applies collective transformations (position, rotation, scale, pivot) in 3D space.
 
-Does not have its own geometry or material, but acts as a scene graph node containing multiple child 3D objects (Mesh, Sprite3D, etc.) to apply collective transformations (position, rotation, scale, pivot) to them.
+***
 
-* ### Example
+### Example
 ```typescript
 const group = new RedGPU.Display.Group3D();
 group.addChild(mesh1);
@@ -21,7 +21,11 @@ group.setPosition(0, 5, 0);
 scene.addChild(group);
 ```
 
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/group3D/basic/" ></iframe>
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/group3D/basic/" style="width:100%; height:500px;"></iframe>
+
+## See
+
+[Group3D basic example](https://redcamel.github.io/RedGPU/examples/3d/group3D/basic/)
 
 ## Extends
 
@@ -33,19 +37,28 @@ scene.addChild(group);
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new Group3D**(`name?`): `Group3D`
 
-Defined in: [src/display/group/Group3D.ts:69](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L69)
+Defined in: [src/display/group/Group3D.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L74)
 
-Creates an instance of Group3D.
+Creates a `Group3D` instance.
+
+#### Example
+```typescript
+const group = new RedGPU.Display.Group3D('myGroup3D');
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `name?` | `string` | Identification name of the group (optional) |
+| `name?` | `string` | Group identification name (optional) |
 
 #### Returns
 
@@ -57,13 +70,23 @@ Creates an instance of Group3D.
 
 ## Properties
 
+
+
+***
+
 ### localMatrix
 
 > **localMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/group/Group3D.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L38)
+Defined in: [src/display/group/Group3D.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L37)
 
-Local transformation matrix of the group
+Local transformation matrix (`mat4`) of the group
+
+***
+
+## Accessors
+
+
 
 ***
 
@@ -73,19 +96,21 @@ Local transformation matrix of the group
 
 > **get** **dirtyTransform**(): `boolean`
 
-Defined in: [src/display/group/Group3D.ts:78](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L78)
+Defined in: [src/display/group/Group3D.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L87)
 
-Sets or gets whether the transformation matrix is in a state requiring update (dirty).
+Gets or sets whether the transformation matrix requires an update (dirty).
 
 ##### Returns
 
 `boolean`
 
+Whether the transformation matrix requires an update
+
 #### Set Signature
 
 > **set** **dirtyTransform**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:82](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L82)
+Defined in: [src/display/group/Group3D.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L91)
 
 ##### Parameters
 
@@ -99,25 +124,29 @@ Defined in: [src/display/group/Group3D.ts:82](https://github.com/redcamel/RedGPU
 
 ***
 
+***
+
 ### parent
 
 #### Get Signature
 
 > **get** **parent**(): [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md)
 
-Defined in: [src/display/group/Group3D.ts:90](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L90)
+Defined in: [src/display/group/Group3D.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L103)
 
-Sets or gets the parent container (Object3DContainer) containing this group object.
+Gets or sets the parent container (`Object3DContainer`) to which this group object belongs.
 
 ##### Returns
 
 [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md)
 
+Parent container object
+
 #### Set Signature
 
 > **set** **parent**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:94](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L94)
+Defined in: [src/display/group/Group3D.ts:107](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L107)
 
 ##### Parameters
 
@@ -131,13 +160,15 @@ Defined in: [src/display/group/Group3D.ts:94](https://github.com/redcamel/RedGPU
 
 ***
 
+***
+
 ### pivotX
 
 #### Get Signature
 
 > **get** **pivotX**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:102](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L102)
+Defined in: [src/display/group/Group3D.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L119)
 
 Gets or sets the X-axis pivot (center point) coordinate.
 
@@ -145,11 +176,13 @@ Gets or sets the X-axis pivot (center point) coordinate.
 
 `number`
 
+X-axis pivot coordinate
+
 #### Set Signature
 
 > **set** **pivotX**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:106](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L106)
+Defined in: [src/display/group/Group3D.ts:123](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L123)
 
 ##### Parameters
 
@@ -160,6 +193,8 @@ Defined in: [src/display/group/Group3D.ts:106](https://github.com/redcamel/RedGP
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -169,7 +204,7 @@ Defined in: [src/display/group/Group3D.ts:106](https://github.com/redcamel/RedGP
 
 > **get** **pivotY**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:115](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L115)
+Defined in: [src/display/group/Group3D.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L136)
 
 Gets or sets the Y-axis pivot (center point) coordinate.
 
@@ -177,11 +212,13 @@ Gets or sets the Y-axis pivot (center point) coordinate.
 
 `number`
 
+Y-axis pivot coordinate
+
 #### Set Signature
 
 > **set** **pivotY**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:119](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L119)
+Defined in: [src/display/group/Group3D.ts:140](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L140)
 
 ##### Parameters
 
@@ -192,6 +229,8 @@ Defined in: [src/display/group/Group3D.ts:119](https://github.com/redcamel/RedGP
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -201,7 +240,7 @@ Defined in: [src/display/group/Group3D.ts:119](https://github.com/redcamel/RedGP
 
 > **get** **pivotZ**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:128](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L128)
+Defined in: [src/display/group/Group3D.ts:153](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L153)
 
 Gets or sets the Z-axis pivot (center point) coordinate.
 
@@ -209,11 +248,13 @@ Gets or sets the Z-axis pivot (center point) coordinate.
 
 `number`
 
+Z-axis pivot coordinate
+
 #### Set Signature
 
 > **set** **pivotZ**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:132](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L132)
+Defined in: [src/display/group/Group3D.ts:157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L157)
 
 ##### Parameters
 
@@ -227,19 +268,25 @@ Defined in: [src/display/group/Group3D.ts:132](https://github.com/redcamel/RedGP
 
 ***
 
+***
+
 ### position
 
 #### Get Signature
 
-> **get** **position**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/group/Group3D.ts:180](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L180)
+Defined in: [src/display/group/Group3D.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L221)
 
-Gets the position coordinate array [x, y, z] of the group.
+Returns the position coordinate array (`[x, y, z]`) of the group.
 
 ##### Returns
 
 \[`number`, `number`, `number`\]
+
+`[x, y, z]` position coordinate array
+
+***
 
 ***
 
@@ -247,15 +294,19 @@ Gets the position coordinate array [x, y, z] of the group.
 
 #### Get Signature
 
-> **get** **rotation**(): `number`[]
+> <span class="readonly-badge">readonly</span> **get** **rotation**(): `number`[]
 
-Defined in: [src/display/group/Group3D.ts:274](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L274)
+Defined in: [src/display/group/Group3D.ts:347](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L347)
 
-Gets the rotation angle array [rotationX, rotationY, rotationZ] of the group in degrees.
+Returns the rotation angle array (`[rotationX, rotationY, rotationZ]`, unit: Degree) of the group.
 
 ##### Returns
 
 `number`[]
+
+`[rotationX, rotationY, rotationZ]` rotation angle array (Degree)
+
+***
 
 ***
 
@@ -265,19 +316,21 @@ Gets the rotation angle array [rotationX, rotationY, rotationZ] of the group in 
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:235](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L235)
+Defined in: [src/display/group/Group3D.ts:296](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L296)
 
-Gets or sets the rotation angle (in degrees) around the X-axis.
+Gets or sets the rotation angle (unit: Degree) around the X-axis.
 
 ##### Returns
 
 `number`
 
+X-axis rotation angle (Degree)
+
 #### Set Signature
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:239](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L239)
+Defined in: [src/display/group/Group3D.ts:300](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L300)
 
 ##### Parameters
 
@@ -288,6 +341,8 @@ Defined in: [src/display/group/Group3D.ts:239](https://github.com/redcamel/RedGP
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -297,19 +352,21 @@ Defined in: [src/display/group/Group3D.ts:239](https://github.com/redcamel/RedGP
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:248](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L248)
+Defined in: [src/display/group/Group3D.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L313)
 
-Gets or sets the rotation angle (in degrees) around the Y-axis.
+Gets or sets the rotation angle (unit: Degree) around the Y-axis.
 
 ##### Returns
 
 `number`
 
+Y-axis rotation angle (Degree)
+
 #### Set Signature
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:252](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L252)
+Defined in: [src/display/group/Group3D.ts:317](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L317)
 
 ##### Parameters
 
@@ -320,6 +377,8 @@ Defined in: [src/display/group/Group3D.ts:252](https://github.com/redcamel/RedGP
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -329,19 +388,21 @@ Defined in: [src/display/group/Group3D.ts:252](https://github.com/redcamel/RedGP
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:261](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L261)
+Defined in: [src/display/group/Group3D.ts:330](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L330)
 
-Gets or sets the rotation angle (in degrees) around the Z-axis.
+Gets or sets the rotation angle (unit: Degree) around the Z-axis.
 
 ##### Returns
 
 `number`
 
+Z-axis rotation angle (Degree)
+
 #### Set Signature
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:265](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L265)
+Defined in: [src/display/group/Group3D.ts:334](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L334)
 
 ##### Parameters
 
@@ -355,19 +416,25 @@ Defined in: [src/display/group/Group3D.ts:265](https://github.com/redcamel/RedGP
 
 ***
 
+***
+
 ### scale
 
 #### Get Signature
 
-> **get** **scale**(): `number`[]
+> <span class="readonly-badge">readonly</span> **get** **scale**(): `number`[]
 
-Defined in: [src/display/group/Group3D.ts:227](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L227)
+Defined in: [src/display/group/Group3D.ts:284](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L284)
 
-Gets the scale factor array [scaleX, scaleY, scaleZ] of the group.
+Returns the scale factor array (`[scaleX, scaleY, scaleZ]`) of the group.
 
 ##### Returns
 
 `number`[]
+
+`[scaleX, scaleY, scaleZ]` scale array
+
+***
 
 ***
 
@@ -377,7 +444,7 @@ Gets the scale factor array [scaleX, scaleY, scaleZ] of the group.
 
 > **get** **scaleX**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:188](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L188)
+Defined in: [src/display/group/Group3D.ts:233](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L233)
 
 Gets or sets the scale factor along the X-axis.
 
@@ -385,11 +452,13 @@ Gets or sets the scale factor along the X-axis.
 
 `number`
 
+X-axis scale factor
+
 #### Set Signature
 
 > **set** **scaleX**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:192](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L192)
+Defined in: [src/display/group/Group3D.ts:237](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L237)
 
 ##### Parameters
 
@@ -400,6 +469,8 @@ Defined in: [src/display/group/Group3D.ts:192](https://github.com/redcamel/RedGP
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -409,7 +480,7 @@ Defined in: [src/display/group/Group3D.ts:192](https://github.com/redcamel/RedGP
 
 > **get** **scaleY**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:201](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L201)
+Defined in: [src/display/group/Group3D.ts:250](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L250)
 
 Gets or sets the scale factor along the Y-axis.
 
@@ -417,11 +488,13 @@ Gets or sets the scale factor along the Y-axis.
 
 `number`
 
+Y-axis scale factor
+
 #### Set Signature
 
 > **set** **scaleY**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:205](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L205)
+Defined in: [src/display/group/Group3D.ts:254](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L254)
 
 ##### Parameters
 
@@ -432,6 +505,8 @@ Defined in: [src/display/group/Group3D.ts:205](https://github.com/redcamel/RedGP
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -441,7 +516,7 @@ Defined in: [src/display/group/Group3D.ts:205](https://github.com/redcamel/RedGP
 
 > **get** **scaleZ**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:214](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L214)
+Defined in: [src/display/group/Group3D.ts:267](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L267)
 
 Gets or sets the scale factor along the Z-axis.
 
@@ -449,11 +524,13 @@ Gets or sets the scale factor along the Z-axis.
 
 `number`
 
+Z-axis scale factor
+
 #### Set Signature
 
 > **set** **scaleZ**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:218](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L218)
+Defined in: [src/display/group/Group3D.ts:271](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L271)
 
 ##### Parameters
 
@@ -464,6 +541,8 @@ Defined in: [src/display/group/Group3D.ts:218](https://github.com/redcamel/RedGP
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -473,7 +552,7 @@ Defined in: [src/display/group/Group3D.ts:218](https://github.com/redcamel/RedGP
 
 > **get** **x**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:141](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L141)
+Defined in: [src/display/group/Group3D.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L170)
 
 Gets or sets the X-axis position coordinate of the group.
 
@@ -481,11 +560,13 @@ Gets or sets the X-axis position coordinate of the group.
 
 `number`
 
+X-axis position coordinate
+
 #### Set Signature
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:145](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L145)
+Defined in: [src/display/group/Group3D.ts:174](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L174)
 
 ##### Parameters
 
@@ -496,6 +577,8 @@ Defined in: [src/display/group/Group3D.ts:145](https://github.com/redcamel/RedGP
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -505,7 +588,7 @@ Defined in: [src/display/group/Group3D.ts:145](https://github.com/redcamel/RedGP
 
 > **get** **y**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:154](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L154)
+Defined in: [src/display/group/Group3D.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L187)
 
 Gets or sets the Y-axis position coordinate of the group.
 
@@ -513,11 +596,13 @@ Gets or sets the Y-axis position coordinate of the group.
 
 `number`
 
+Y-axis position coordinate
+
 #### Set Signature
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L158)
+Defined in: [src/display/group/Group3D.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L191)
 
 ##### Parameters
 
@@ -531,13 +616,15 @@ Defined in: [src/display/group/Group3D.ts:158](https://github.com/redcamel/RedGP
 
 ***
 
+***
+
 ### z
 
 #### Get Signature
 
 > **get** **z**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:167](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L167)
+Defined in: [src/display/group/Group3D.ts:204](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L204)
 
 Gets or sets the Z-axis position coordinate of the group.
 
@@ -545,11 +632,13 @@ Gets or sets the Z-axis position coordinate of the group.
 
 `number`
 
+Z-axis position coordinate
+
 #### Set Signature
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:171](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L171)
+Defined in: [src/display/group/Group3D.ts:208](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L208)
 
 ##### Parameters
 
@@ -563,23 +652,29 @@ Defined in: [src/display/group/Group3D.ts:171](https://github.com/redcamel/RedGP
 
 ## Methods
 
+
+
+***
+
 ### render()
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/group/Group3D.ts:354](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L354)
+Defined in: [src/display/group/Group3D.ts:446](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L446)
 
-Executes transform matrix updates for this group node and its child nodes, updating processes required for rendering.
+Updates the group's transformation matrix and traverses child objects to render them.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | Rendering state view data |
+| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | Render state data of the current view |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -587,21 +682,28 @@ Executes transform matrix updates for this group node and its child nodes, updat
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/group/Group3D.ts:314](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L314)
+Defined in: [src/display/group/Group3D.ts:399](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L399)
 
-Sets the position of the group along the X, Y, and Z axes. If Y and Z are omitted, they default to the value of X.
+Sets the position of the group along the X, Y, and Z axes. If `y` and `z` are omitted, they are set to the same value as `x`.
+
+#### Example
+```typescript
+group.setPosition(0, 10, 0);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` | X coordinate of the position |
-| `y?` | `number` | Y coordinate of the position (optional, default: x) |
-| `z?` | `number` | Z coordinate of the position (optional, default: x) |
+| `x` | `number` | X-axis coordinate |
+| `y?` | `number` | Y-axis coordinate (optional, default: `x`) |
+| `z?` | `number` | Z-axis coordinate (optional, default: `x`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -609,21 +711,28 @@ Sets the position of the group along the X, Y, and Z axes. If Y and Z are omitte
 
 > **setRotation**(`rotationX`, `rotationY?`, `rotationZ?`): `void`
 
-Defined in: [src/display/group/Group3D.ts:337](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L337)
+Defined in: [src/display/group/Group3D.ts:428](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L428)
 
-Sets the rotation of the group around the X, Y, and Z axes in degrees. If Y and Z are omitted, they default to the value of X.
+Sets the rotation angle (unit: Degree) of the group around the X, Y, and Z axes. If `rotationY` and `rotationZ` are omitted, they are set to the same value as `rotationX`.
+
+#### Example
+```typescript
+group.setRotation(0, 45, 0);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `rotationX` | `number` | Rotation angle around the X-axis (in degrees) |
-| `rotationY?` | `number` | Rotation angle around the Y-axis (in degrees, optional, default: rotationX) |
-| `rotationZ?` | `number` | Rotation angle around the Z-axis (in degrees, optional, default: rotationX) |
+| `rotationX` | `number` | Rotation angle around the X-axis (unit: Degree) |
+| `rotationY?` | `number` | Rotation angle around the Y-axis (unit: Degree, optional, default: `rotationX`) |
+| `rotationZ?` | `number` | Rotation angle around the Z-axis (unit: Degree, optional, default: `rotationX`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -631,17 +740,22 @@ Sets the rotation of the group around the X, Y, and Z axes in degrees. If Y and 
 
 > **setScale**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/group/Group3D.ts:291](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L291)
+Defined in: [src/display/group/Group3D.ts:370](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L370)
 
-Sets the scale factor along the X, Y, and Z axes. If Y and Z are omitted, they default to the value of X (globalStruct scaling).
+Sets the scale of the group along the X, Y, and Z axes. If `y` and `z` are omitted, they are set to the same value as `x`.
+
+#### Example
+```typescript
+group.setScale(2, 2, 2);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `x` | `number` | Scale factor along the X-axis |
-| `y?` | `number` | Scale factor along the Y-axis (optional, default: x) |
-| `z?` | `number` | Scale factor along the Z-axis (optional, default: x) |
+| `y?` | `number` | Scale factor along the Y-axis (optional, default: `x`) |
+| `z?` | `number` | Scale factor along the Z-axis (optional, default: `x`) |
 
 #### Returns
 
@@ -649,61 +763,72 @@ Sets the scale factor along the X, Y, and Z axes. If Y and Z are omitted, they d
 
 ***
 
+***
+
+## Inherited Properties
+
+<details>
+<summary>View inherited properties (Click to expand)</summary>
+
+### modelMatrix
+
+> **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
+
+Defined in: [src/display/group/Group3D.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/group/Group3D.ts#L32)
+
+World transformation matrix (`mat4`) of the group
+
+#### Inherited from
+
+[`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md).[`modelMatrix`](../namespaces/CoreMesh/classes/Object3DContainer.md#modelmatrix)
 
 ***
 
-## Inherited Members
+### children
 
-<details>
-<summary>View inherited properties and methods (Click to expand)</summary>
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **children**(): [`Mesh`](Mesh.md)[]
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:46](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L46)
+
+Returns the array of child objects.
+
+##### Returns
+
+[`Mesh`](Mesh.md)[]
+
+Array of child Meshes (`Mesh[]`)
+
+#### Inherited from
+
+[`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md).[`children`](../namespaces/CoreMesh/classes/Object3DContainer.md#children)
+
+***
+
+***
 
 ### instanceId
 
-> `readonly` **instanceId**: `number`
+#### Get Signature
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Instance sequence ID per class
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
 
 #### Inherited from
 
 [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md).[`instanceId`](../namespaces/CoreMesh/classes/Object3DContainer.md#instanceid)
 
 ***
-
-### modelMatrix
-
-> **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
-
-Defined in: [src/display/group/Group3D.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/group/Group3D.ts#L33)
-
-Final global model transformation matrix of the group
-
-#### Inherited from
-
-[`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md).[`modelMatrix`](../namespaces/CoreMesh/classes/Object3DContainer.md#modelmatrix)
-
-## Accessors
-
-### children
-
-#### Get Signature
-
-> **get** **children**(): [`Mesh`](Mesh.md)[]
-
-Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L44)
-
-현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
-
-##### Returns
-
-[`Mesh`](Mesh.md)[]
-
-자식 객체 배열
-
-#### Inherited from
-
-[`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md).[`children`](../namespaces/CoreMesh/classes/Object3DContainer.md#children)
 
 ***
 
@@ -713,29 +838,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/r
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -747,21 +870,23 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### numChildren
 
 #### Get Signature
 
-> **get** **numChildren**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L52)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:58](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L58)
 
-자식 객체의 개수를 반환합니다.
+Returns the number of registered child objects.
 
 ##### Returns
 
 `number`
 
-자식 수
+Number of child objects
 
 #### Inherited from
 
@@ -769,13 +894,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/r
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -783,7 +910,7 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
@@ -791,25 +918,35 @@ UUID string
 
 ***
 
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
+
 ### addChild()
 
 > **addChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L71)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L89)
 
-자식 Mesh를 컨테이너에 추가합니다.
+Appends a child object to the end of the container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](Mesh.md) | 추가할 자식 객체 |
+| `child` | [`Mesh`](Mesh.md) | Child object to add |
 
 #### Returns
 
 [`Mesh`](Mesh.md)
 
-추가된 객체 또는 실패 시 null
+Added child object (`null` on failure)
 
 #### Inherited from
 
@@ -817,26 +954,28 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/r
 
 ***
 
+***
+
 ### addChildAt()
 
 > **addChildAt**(`child`, `index`): `Group3D`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L89)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:115](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L115)
 
-자식 Mesh를 특정 인덱스에 추가합니다.
+Inserts a child object at the specified index position.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](Mesh.md) | 추가할 자식 객체 |
-| `index` | `number` | 삽입 위치 |
+| `child` | [`Mesh`](Mesh.md) | Child object to add |
+| `index` | `number` | Index position to insert at |
 
 #### Returns
 
 `Group3D`
 
-현재 컨테이너
+Current container instance
 
 #### Inherited from
 
@@ -844,25 +983,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/r
 
 ***
 
+***
+
 ### contains()
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L61)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L73)
 
-특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
+Checks whether the specified object is a child of this container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](Mesh.md) | 확인할 자식 객체 |
+| `child` | [`Mesh`](Mesh.md) | Child object to check |
 
 #### Returns
 
 `boolean`
 
-포함 여부
+Whether the child is contained
 
 #### Inherited from
 
@@ -870,11 +1011,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/r
 
 ***
 
+***
+
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:243](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L243)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:322](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L322)
+
+Destroys all child objects in the container and removes them.
 
 #### Returns
 
@@ -886,25 +1031,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:243](https://github.com/
 
 ***
 
+***
+
 ### getChildAt()
 
 > **getChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L111)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L143)
 
-지정된 인덱스의 자식 Mesh를 반환합니다.
+Returns the child object at the specified index.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `index` | `number` | 조회할 위치 |
+| `index` | `number` | Index position to retrieve |
 
 #### Returns
 
 [`Mesh`](Mesh.md)
 
-해당 위치의 자식 객체 또는 undefined
+Child object at the index (`undefined` if out of bounds)
 
 #### Inherited from
 
@@ -912,25 +1059,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/
 
 ***
 
+***
+
 ### getChildIndex()
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L125)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L163)
 
-특정 자식 객체의 인덱스를 반환합니다.
+Returns the index of the specified child object.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](Mesh.md) | 조회할 자식 객체 |
+| `child` | [`Mesh`](Mesh.md) | Child object to find the index of |
 
 #### Returns
 
 `number`
 
-인덱스 또는 -1
+Index of the child object (`-1` if not found)
 
 #### Inherited from
 
@@ -938,19 +1087,21 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/
 
 ***
 
+***
+
 ### removeAllChildren()
 
 > **removeAllChildren**(): `Group3D`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L234)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:309](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L309)
 
-모든 자식 객체를 제거합니다.
+Removes all child objects from the container.
 
 #### Returns
 
 `Group3D`
 
-현재 컨테이너
+Current container instance
 
 #### Inherited from
 
@@ -958,25 +1109,27 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/
 
 ***
 
+***
+
 ### removeChild()
 
 > **removeChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L203)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:265](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L265)
 
-특정 자식 객체를 제거합니다.
+Removes the specified child object from the container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](Mesh.md) | 제거할 자식 객체 |
+| `child` | [`Mesh`](Mesh.md) | Child object to remove |
 
 #### Returns
 
 [`Mesh`](Mesh.md)
 
-제거된 객체
+Removed child object
 
 #### Inherited from
 
@@ -984,25 +1137,31 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/
 
 ***
 
+***
+
 ### removeChildAt()
 
 > **removeChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L219)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:290](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L290)
 
-지정된 인덱스의 자식 객체를 제거합니다.
+Removes the child object at the specified index from the container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `index` | `number` | 제거할 위치 |
+| `index` | `number` | Index of the child object to remove |
 
 #### Returns
 
 [`Mesh`](Mesh.md)
 
-제거된 객체
+Removed child object
+
+#### Throws
+
+Throws Error if no child exists at the provided index
 
 #### Inherited from
 
@@ -1010,20 +1169,22 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/
 
 ***
 
+***
+
 ### setChildIndex()
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L140)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L184)
 
-자식 객체의 위치를 변경합니다.
+Changes the index position of a child object.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child` | [`Mesh`](Mesh.md) | 대상 자식 객체 |
-| `index` | `number` | 새 인덱스 |
+| `child` | [`Mesh`](Mesh.md) | Child object to reposition |
+| `index` | `number` | New index to assign |
 
 #### Returns
 
@@ -1035,20 +1196,22 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/
 
 ***
 
+***
+
 ### swapChildren()
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L163)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:213](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L213)
 
-두 자식 객체의 위치를 서로 바꿉니다.
+Swaps the order (indices) of two child objects within the container.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `child1` | [`Mesh`](Mesh.md) | 첫 번째 객체 |
-| `child2` | [`Mesh`](Mesh.md) | 두 번째 객체 |
+| `child1` | [`Mesh`](Mesh.md) | First child object |
+| `child2` | [`Mesh`](Mesh.md) | Second child object |
 
 #### Returns
 
@@ -1060,20 +1223,22 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/
 
 ***
 
+***
+
 ### swapChildrenAt()
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/Object3DContainer.ts#L183)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/Object3DContainer.ts#L239)
 
-두 인덱스의 자식 객체 위치를 서로 바꿉니다.
+Swaps the child objects at the two specified indices.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `index1` | `number` | 첫 번째 인덱스 |
-| `index2` | `number` | 두 번째 인덱스 |
+| `index1` | `number` | First index |
+| `index2` | `number` | Second index |
 
 #### Returns
 
@@ -1082,6 +1247,5 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/
 #### Inherited from
 
 [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md).[`swapChildrenAt`](../namespaces/CoreMesh/classes/Object3DContainer.md#swapchildrenat)
-
 
 </details>

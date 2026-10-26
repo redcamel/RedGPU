@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,13 @@
 
 > **calculateMeshOBB**(`mesh`): [`OBB`](../classes/OBB.md)
 
-Defined in: [src/bound/math/calculateMeshOBB.ts:25](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/math/calculateMeshOBB.ts#L25)
+Defined in: [src/bound/math/calculateMeshOBB.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateMeshOBB.ts#L25)
 
-메시의 modelMatrix를 적용한 월드 공간 OBB를 계산합니다.
+메시의 `modelMatrix`를 적용하여 월드 공간 기준 OBB를 계산합니다.
 
-지오메트리 볼륨 정보를 기반으로 중심점, 반치수, 방향 행렬이 포함된 OBB를 반환합니다.
+지오메트리 볼륨 정보를 기반으로 변환된 중심점, 반치수, 방향 행렬을 포함하는 OBB를 반환합니다.
 
-* ### Example
+### Example
 ```typescript
 const meshOBB = RedGPU.Bound.calculateMeshOBB(mesh);
 ```
@@ -23,7 +23,7 @@ const meshOBB = RedGPU.Bound.calculateMeshOBB(mesh);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | OBB를 계산할 메시 객체
+| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | OBB를 계산할 메시 객체 |
 
 ## Returns
 

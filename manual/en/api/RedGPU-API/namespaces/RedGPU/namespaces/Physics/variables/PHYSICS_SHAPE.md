@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,11 +8,11 @@
 
 > `const` **PHYSICS\_SHAPE**: `object`
 
-Defined in: [src/physics/PhysicsShape.ts:13](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/PhysicsShape.ts#L13)
+Defined in: [src/physics/PhysicsShape.ts:13](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/PhysicsShape.ts#L13)
 
 **`Experimental`**
 
-Defines the types of collider shapes used in physics simulations.
+Collider shape constants used in physics simulations.
 
 ::: warning
 This feature is currently in the experimental stage. The API may change in the future.
@@ -22,9 +22,9 @@ This feature is currently in the experimental stage. The API may change in the f
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-box"></a> `BOX` | `"box"` | `'box'` | Box-shaped collider | [src/physics/PhysicsShape.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/PhysicsShape.ts#L18) |
-| <a id="property-capsule"></a> `CAPSULE` | `"capsule"` | `'capsule'` | Capsule-shaped collider | [src/physics/PhysicsShape.ts:28](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/PhysicsShape.ts#L28) |
-| <a id="property-cylinder"></a> `CYLINDER` | `"cylinder"` | `'cylinder'` | Cylinder-shaped collider | [src/physics/PhysicsShape.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/PhysicsShape.ts#L33) |
-| <a id="property-heightfield"></a> `HEIGHTFIELD` | `"heightfield"` | `'heightfield'` | Heightfield-shaped collider (Used for terrain, etc.) | [src/physics/PhysicsShape.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/PhysicsShape.ts#L38) |
-| <a id="property-mesh"></a> `MESH` | `"mesh"` | `'mesh'` | Arbitrary mesh-shaped collider (Trimesh) | [src/physics/PhysicsShape.ts:43](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/PhysicsShape.ts#L43) |
-| <a id="property-sphere"></a> `SPHERE` | `"sphere"` | `'sphere'` | Sphere-shaped collider | [src/physics/PhysicsShape.ts:23](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/PhysicsShape.ts#L23) |
+| <a id="property-box"></a> `BOX` | `"box"` | `'box'` | Box-shaped collider | [src/physics/PhysicsShape.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/PhysicsShape.ts#L18) |
+| <a id="property-capsule"></a> `CAPSULE` | `"capsule"` | `'capsule'` | Capsule-shaped collider | [src/physics/PhysicsShape.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/PhysicsShape.ts#L28) |
+| <a id="property-cylinder"></a> `CYLINDER` | `"cylinder"` | `'cylinder'` | Cylinder-shaped collider | [src/physics/PhysicsShape.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/PhysicsShape.ts#L33) |
+| <a id="property-heightfield"></a> `HEIGHTFIELD` | `"heightfield"` | `'heightfield'` | Heightfield-shaped collider | [src/physics/PhysicsShape.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/PhysicsShape.ts#L38) |
+| <a id="property-mesh"></a> `MESH` | `"mesh"` | `'mesh'` | Triangle mesh (Trimesh) collider | [src/physics/PhysicsShape.ts:43](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/PhysicsShape.ts#L43) |
+| <a id="property-sphere"></a> `SPHERE` | `"sphere"` | `'sphere'` | Sphere-shaped collider | [src/physics/PhysicsShape.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/PhysicsShape.ts#L23) |

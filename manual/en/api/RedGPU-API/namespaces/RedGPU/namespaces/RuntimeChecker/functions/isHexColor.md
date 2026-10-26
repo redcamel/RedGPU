@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **isHexColor**(`hex`): `boolean`
 
-Defined in: [src/runtimeChecker/isFunc/isHexColor.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/runtimeChecker/isFunc/isHexColor.ts#L22)
+Defined in: [src/runtimeChecker/isFunc/isHexColor.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/runtimeChecker/isFunc/isHexColor.ts#L19)
 
-Checks if the given value is a valid hexadecimal (Hex) color format.
+Checks if the given value is a valid hexadecimal (Hex) color format. Supports 3/6-digit strings with '#' prefix or integers in the range 0 to 0xFFFFFF.
 
-Supports 3-digit or 6-digit hex color strings with '#' prefix or integers between 0 and 0xFFFFFF.
-
-* ### Example
+### Example
 ```typescript
 const isValidStr = RedGPU.RuntimeChecker.isHexColor('#FF0000');
 const isValidNum = RedGPU.RuntimeChecker.isHexColor(0xFF0000);

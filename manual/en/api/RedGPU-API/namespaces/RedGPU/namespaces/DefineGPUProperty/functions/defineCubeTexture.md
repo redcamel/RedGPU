@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,38 +8,31 @@
 
 > **defineCubeTexture**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/texture/defineCubeTexture.ts:74](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/texture/defineCubeTexture.ts#L74)
+Defined in: [src/defineProperty/funcs/texture/defineCubeTexture.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineCubeTexture.ts#L77)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 큐브 텍스처(CubeTexture) 속성을 정의합니다.
+Defines cube texture properties on the target's prototype that synchronize with GPU bind groups and uniform buffers.
 
-## Parameters
+Invokes `updateTexture(prevTexture, texture)` on the target when changed, and automatically updates the boolean state and uniform value (1 or 0) if a corresponding `use{Key}` property exists.
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `target` | `any` | Class constructor to define properties on |
-| `defineInfo` | [`DefineCubeTextureInfo`](../interfaces/DefineCubeTextureInfo.md) \| [`DefineCubeTextureInfo`](../interfaces/DefineCubeTextureInfo.md)[] | A single [DefineCubeTextureInfo](../interfaces/DefineCubeTextureInfo.md) configuration or an array of configurations |
-
-## Returns
-
-`void`
-
-## Remarks
-
-
-***
-- Handles [CubeTexture](../../Resource/classes/CubeTexture.md) or [DirectCubeTexture](../../Resource/classes/DirectCubeTexture.md) instances.
-- When a texture is set, it invokes `updateTexture(prevTexture, texture)` on the target instance to update bind groups.
-- If a corresponding `use{Key}` property (e.g. `useEnvMap`) exists on the target, it automatically synchronizes its boolean state and GPU globalStruct value (1 or 0) based on texture presence.
-
-## Example
-
+### Example
 ```typescript
-// 단일 설정
+// Define a single cube texture property
 RedGPU.DefineGPUProperty.defineCubeTexture(MyMaterial, { key: 'envTexture' });
 
-// 여러 속성 일괄 정의
+// Define multiple cube texture properties at once
 RedGPU.DefineGPUProperty.defineCubeTexture(MyMaterial, [
   { key: 'skyboxTexture' },
   { key: 'reflectionTexture' }
 ]);
 ```
+
+## Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `any` | Target class or prototype to define properties on |
+| `defineInfo` | [`DefineCubeTextureInfo`](../interfaces/DefineCubeTextureInfo.md) \| [`DefineCubeTextureInfo`](../interfaces/DefineCubeTextureInfo.md)[] | Single `DefineCubeTextureInfo` configuration or an array of configurations |
+
+## Returns
+
+`void`

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -13,6 +13,8 @@ Defined in: node\_modules/gl-matrix/index.d.ts:2542
 Calculates the length of a quat
 
 ## Param
+
+**a**
 
 vector to calculate length of
 

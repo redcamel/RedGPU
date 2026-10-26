@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,37 +8,31 @@
 
 > **defineSampler**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:59](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/texture/defineSampler.ts#L59)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:64](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/texture/defineSampler.ts#L64)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 텍스처 샘플러(Sampler) 속성을 정의합니다.
+Defines texture sampler properties on the target's prototype that synchronize with GPU bind groups.
 
-## Parameters
+Invokes `updateSampler(prevSampler, sampler)` on the target when changed to automatically update the bind group.
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `target` | `any` | Class constructor to define properties on |
-| `defineInfo` | [`DefineSamplerInfo`](../interfaces/DefineSamplerInfo.md) \| [`DefineSamplerInfo`](../interfaces/DefineSamplerInfo.md)[] | A single [DefineSamplerInfo](../interfaces/DefineSamplerInfo.md) configuration or an array of configurations |
-
-## Returns
-
-`void`
-
-## Remarks
-
-
-***
-- Handles [Sampler](../../Resource/classes/Sampler.md) instances.
-- When a sampler is set, it invokes `updateSampler(prevSampler, sampler)` on the target instance to update bind groups.
-
-## Example
-
+### Example
 ```typescript
-// 단일 설정
+// Define a single sampler property
 RedGPU.DefineGPUProperty.defineSampler(MyMaterial, { key: 'diffuseSampler' });
 
-// 여러 속성 일괄 정의
+// Define multiple sampler properties at once
 RedGPU.DefineGPUProperty.defineSampler(MyMaterial, [
   { key: 'diffuseSampler' },
   { key: 'normalSampler' }
 ]);
 ```
+
+## Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `any` | Target class or prototype to define properties on |
+| `defineInfo` | [`DefineSamplerInfo`](../interfaces/DefineSamplerInfo.md) \| [`DefineSamplerInfo`](../interfaces/DefineSamplerInfo.md)[] | Single `DefineSamplerInfo` configuration or an array of configurations |
+
+## Returns
+
+`void`

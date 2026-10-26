@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,20 @@
 
 # Class: instancingMeshObject3D
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L31)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L35)
 
-인스턴싱된 메시의 개별 인스턴스를 제어하기 위한 클래스입니다.
+인스턴싱된 메시의 개별 인스턴스 트랜스폼 및 불투명도를 제어하는 클래스입니다.
 
-InstancingMesh 내에서 특정 단일 인스턴스의 위치, 회전, 스케일 및 불투명도(Opacity)와 같은 개별적인 트랜스폼 상태를 관리하고, 인스턴스의 모델 행렬을 업데이트하여 GPU Storage Buffer에 동적으로 반영합니다.
+::: warning
+이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+:::
+
+### Example
+```typescript
+// 올바른 접근 방법
+const instance = instancingMesh.instanceChildren[0];
+instance.setPosition(10, 0, 0);
+```
 
 ## Constructors
 
@@ -18,7 +27,7 @@ InstancingMesh 내에서 특정 단일 인스턴스의 위치, 회전, 스케일
 
 > **new instancingMeshObject3D**(`redGPUContext`, `location`, `instancingMesh`): `InstancingMeshObject3D`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L81)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L86)
 
 InstancingMeshObject3D 인스턴스를 생성합니다.
 
@@ -26,9 +35,9 @@ InstancingMeshObject3D 인스턴스를 생성합니다.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스
-| `location` | `number` | 인스턴싱 메시 내에서의 인덱스 위치
-| `instancingMesh` | [`InstancingMesh`](../../../classes/InstancingMesh.md) | 부모 InstancingMesh 객체
+| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스 |
+| `location` | `number` | 인스턴싱 메시 내의 인덱스 위치 |
+| `instancingMesh` | [`InstancingMesh`](../../../classes/InstancingMesh.md) | 부모 InstancingMesh 객체 |
 
 #### Returns
 
@@ -40,9 +49,9 @@ InstancingMeshObject3D 인스턴스를 생성합니다.
 
 > **localMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:41](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L41)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L45)
 
-인스턴스의 로컬 행렬 (Local Matrix)
+인스턴스의 로컬 행렬
 
 ***
 
@@ -50,9 +59,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:41](https
 
 > **modelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:36](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L36)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L40)
 
-인스턴스의 모델 행렬 (Model Matrix)
+인스턴스의 모델 행렬
 
 ***
 
@@ -60,9 +69,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:36](https
 
 > **normalModelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L46)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:50](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L50)
 
-인스턴스의 노말 모델 행렬 (Normal Model Matrix)
+인스턴스의 노말 모델 행렬
 
 ## Accessors
 
@@ -72,19 +81,21 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:46](https
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:93](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L93)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:102](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L102)
 
-인스턴스의 불투명도(Opacity) 값을 가져오거나 설정합니다. 허용 범위는 0.0에서 1.0 사이입니다.
+인스턴스의 불투명도(0.0 ~ 1.0)를 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
+불투명도 값
+
 #### Set Signature
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:97](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L97)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:106](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L106)
 
 ##### Parameters
 
@@ -104,19 +115,21 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:97](https
 
 > **get** **position**(): `number`[]
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:146](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L146)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:171](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L171)
 
-인스턴스의 X, Y, Z 위치 배열 [x, y, z]을 가져오거나, 모든 축의 위치를 단일 값으로 동일하게 설정합니다.
+인스턴스의 위치 배열(`[x, y, z]`)을 가져오거나 모든 축의 위치를 단일 값으로 설정합니다.
 
 ##### Returns
 
 `number`[]
 
+위치 배열 (`[x, y, z]`)
+
 #### Set Signature
 
 > **set** **position**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:150](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L150)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:175](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L175)
 
 ##### Parameters
 
@@ -136,19 +149,21 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:150](http
 
 > **get** **rotation**(): `number`[]
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:254](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L254)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:311](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L311)
 
-인스턴스의 회전각 [rotationX, rotationY, rotationZ] 배열을 가져오거나, 모든 축의 회전각을 단일 값으로 일괄 설정합니다.
+인스턴스의 회전각 배열(`[rotationX, rotationY, rotationZ]`)을 가져오거나 모든 축의 회전각을 단일 값으로 설정합니다.
 
 ##### Returns
 
 `number`[]
 
+회전각 배열 (`[rotationX, rotationY, rotationZ]`)
+
 #### Set Signature
 
 > **set** **rotation**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:258](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L258)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:315](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L315)
 
 ##### Parameters
 
@@ -168,19 +183,21 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:258](http
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:215](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L215)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:260](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L260)
 
-인스턴스의 X축 회전각(Degree)을 가져오거나 설정합니다.
+인스턴스의 X축 회전각(도)을 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
+X축 회전각 (도)
+
 #### Set Signature
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:219](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L219)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:264](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L264)
 
 ##### Parameters
 
@@ -200,19 +217,21 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:219](http
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:228](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L228)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:277](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L277)
 
-인스턴스의 Y축 회전각(Degree)을 가져오거나 설정합니다.
+인스턴스의 Y축 회전각(도)을 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
+Y축 회전각 (도)
+
 #### Set Signature
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:232](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L232)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:281](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L281)
 
 ##### Parameters
 
@@ -232,19 +251,21 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:232](http
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:241](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L241)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:294](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L294)
 
-인스턴스의 Z축 회전각(Degree)을 가져오거나 설정합니다.
+인스턴스의 Z축 회전각(도)을 가져오거나 설정합니다.
 
 ##### Returns
 
 `number`
 
+Z축 회전각 (도)
+
 #### Set Signature
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:245](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L245)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:298](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L298)
 
 ##### Parameters
 
@@ -264,19 +285,21 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:245](http
 
 > **get** **scale**(): `number`[]
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:200](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L200)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L241)
 
-인스턴스의 스케일 [scaleX, scaleY, scaleZ] 배열을 가져오거나, 모든 축의 스케일을 단일 값으로 일괄 설정합니다.
+인스턴스의 스케일 배열(`[scaleX, scaleY, scaleZ]`)을 가져오거나 모든 축의 스케일을 단일 값으로 설정합니다.
 
 ##### Returns
 
 `number`[]
 
+스케일 배열 (`[scaleX, scaleY, scaleZ]`)
+
 #### Set Signature
 
 > **set** **scale**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:204](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L204)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:245](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L245)
 
 ##### Parameters
 
@@ -296,7 +319,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:204](http
 
 > **get** **scaleX**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:161](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L161)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:190](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L190)
 
 인스턴스의 X축 스케일을 가져오거나 설정합니다.
 
@@ -304,11 +327,13 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:161](http
 
 `number`
 
+X축 스케일
+
 #### Set Signature
 
 > **set** **scaleX**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:165](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L165)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:194](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L194)
 
 ##### Parameters
 
@@ -328,7 +353,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:165](http
 
 > **get** **scaleY**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:174](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L174)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:207](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L207)
 
 인스턴스의 Y축 스케일을 가져오거나 설정합니다.
 
@@ -336,11 +361,13 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:174](http
 
 `number`
 
+Y축 스케일
+
 #### Set Signature
 
 > **set** **scaleY**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:178](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L178)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:211](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L211)
 
 ##### Parameters
 
@@ -360,7 +387,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:178](http
 
 > **get** **scaleZ**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:187](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L187)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:224](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L224)
 
 인스턴스의 Z축 스케일을 가져오거나 설정합니다.
 
@@ -368,11 +395,13 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:187](http
 
 `number`
 
+Z축 스케일
+
 #### Set Signature
 
 > **set** **scaleZ**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:191](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L191)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:228](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L228)
 
 ##### Parameters
 
@@ -392,7 +421,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:191](http
 
 > **get** **x**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:107](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L107)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L120)
 
 인스턴스의 X축 위치를 가져오거나 설정합니다.
 
@@ -400,11 +429,13 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:107](http
 
 `number`
 
+X축 좌표
+
 #### Set Signature
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L111)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:124](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L124)
 
 ##### Parameters
 
@@ -424,7 +455,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:111](http
 
 > **get** **y**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:120](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L120)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:137](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L137)
 
 인스턴스의 Y축 위치를 가져오거나 설정합니다.
 
@@ -432,11 +463,13 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:120](http
 
 `number`
 
+Y축 좌표
+
 #### Set Signature
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:124](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L124)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:141](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L141)
 
 ##### Parameters
 
@@ -456,7 +489,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:124](http
 
 > **get** **z**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:133](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L133)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:154](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L154)
 
 인스턴스의 Z축 위치를 가져오거나 설정합니다.
 
@@ -464,11 +497,13 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:133](http
 
 `number`
 
+Z축 좌표
+
 #### Set Signature
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:137](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L137)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:158](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L158)
 
 ##### Parameters
 
@@ -486,7 +521,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:137](http
 
 > **destroy**(): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:334](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L334)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:413](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L413)
+
+인스턴스 내부 참조를 해제합니다.
 
 #### Returns
 
@@ -498,17 +535,22 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:334](http
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:301](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L301)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:370](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L370)
 
-인스턴스의 X, Y, Z축 위치를 설정합니다. Y와 Z를 입력하지 않은 경우, X값과 동일하게 설정됩니다.
+인스턴스의 X, Y, Z축 위치를 설정합니다. `y`, `z` 생략 시 `x`와 동일한 값으로 설정됩니다.
+
+#### Example
+```typescript
+instance.setPosition(10, 20, 30);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` | X축 위치 좌표
-| `y?` | `number` | Y축 위치 좌표 (선택, 기본값: x)
-| `z?` | `number` | Z축 위치 좌표 (선택, 기본값: x)
+| `x` | `number` | X축 좌표 |
+| `y?` | `number` | Y축 좌표 (선택, 기본값: `x`) |
+| `z?` | `number` | Z축 좌표 (선택, 기본값: `x`) |
 
 #### Returns
 
@@ -520,17 +562,22 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:301](http
 
 > **setRotation**(`rotationX`, `rotationY?`, `rotationZ?`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:324](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L324)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:399](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L399)
 
-인스턴스의 X, Y, Z축 회전각(Degree)을 설정합니다. Y와 Z를 입력하지 않은 경우, X값과 동일하게 설정됩니다.
+인스턴스의 X, Y, Z축 회전각(도)을 설정합니다. `rotationY`, `rotationZ` 생략 시 `rotationX`와 동일한 값으로 설정됩니다.
+
+#### Example
+```typescript
+instance.setRotation(45, 90, 0);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `rotationX` | `number` | X축 회전각 (Degree)
-| `rotationY?` | `number` | Y축 회전각 (Degree, 선택, 기본값: rotationX)
-| `rotationZ?` | `number` | Z축 회전각 (Degree, 선택, 기본값: rotationX)
+| `rotationX` | `number` | X축 회전각 (도) |
+| `rotationY?` | `number` | Y축 회전각 (도, 선택, 기본값: `rotationX`) |
+| `rotationZ?` | `number` | Z축 회전각 (도, 선택, 기본값: `rotationX`) |
 
 #### Returns
 
@@ -542,17 +589,22 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:324](http
 
 > **setScale**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:278](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L278)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:341](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L341)
 
-인스턴스의 X, Y, Z축 스케일을 설정합니다. Y와 Z를 입력하지 않은 경우, X값과 동일하게 통일되어 적용됩니다.
+인스턴스의 X, Y, Z축 스케일을 설정합니다. `y`, `z` 생략 시 `x`와 동일한 값으로 설정됩니다.
+
+#### Example
+```typescript
+instance.setScale(2, 2, 2);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` | X축 스케일 값
-| `y?` | `number` | Y축 스케일 값 (선택, 기본값: x)
-| `z?` | `number` | Z축 스케일 값 (선택, 기본값: x)
+| `x` | `number` | X축 스케일 |
+| `y?` | `number` | Y축 스케일 (선택, 기본값: `x`) |
+| `z?` | `number` | Z축 스케일 (선택, 기본값: `x`) |
 
 #### Returns
 

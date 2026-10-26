@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,15 @@
 
 > `const` **srgbToLinearVec4**: `string` = `srgbToLinearVec4_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1136](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L1136)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1765](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L1765)
 
 Converts vec4 color from sRGB color space to Linear color space. (Preserves Alpha)
 
 //
 
 ## Param
+
+**srgbColor**
 
 Input sRGB color
 //

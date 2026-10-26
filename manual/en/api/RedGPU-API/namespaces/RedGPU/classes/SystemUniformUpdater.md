@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Class: SystemUniformUpdater
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/helperFunc/SystemUniformUpdater.ts#L22)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L21)
 
-A utility class for updating system globalStruct data.
-
-Maps WGSL structure data commonly used globally in the system, such as cameras, lights, and shadows, to Float32Array/Uint32Array buffers.
+Utility class that updates system-wide WGSL uniform structure data such as camera, lights, shadows, sky atmosphere, and wind to `Float32Array`/`Uint32Array` buffers.
 
 ## Constructors
 
@@ -28,18 +26,18 @@ Maps WGSL structure data commonly used globally in the system, such as cameras, 
 
 > `static` **updateAmbientLight**(`ambientLight`, `ambientLightMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:392](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/helperFunc/SystemUniformUpdater.ts#L392)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:431](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L431)
 
-Updates AmbientLight information to globalStruct data.
+Updates `AmbientLight` information to the system uniform buffer.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `ambientLight` | [`AmbientLight`](../namespaces/Light/classes/AmbientLight.md) | AmbientLight instance to update |
-| `ambientLightMembers` | `any` | WGSL AmbientLight structure member information |
-| `uniformDataF32` | `Float32Array` | Target Float32Array buffer |
-| `uniformDataU32` | `Uint32Array` | Target Uint32Array buffer |
+| `ambientLight` | [`AmbientLight`](../namespaces/Light/classes/AmbientLight.md) | `AmbientLight` instance to update |
+| `ambientLightMembers` | `any` | WGSL `AmbientLight` structure member information |
+| `uniformDataF32` | `Float32Array` | Target `Float32Array` buffer |
+| `uniformDataU32` | `Uint32Array` | Target `Uint32Array` buffer |
 
 #### Returns
 
@@ -51,9 +49,9 @@ Updates AmbientLight information to globalStruct data.
 
 > `static` **updateCamera**(`camera`, `cameraMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/helperFunc/SystemUniformUpdater.ts#L40)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L39)
 
-Updates camera information to globalStruct data.
+Updates camera information to the system uniform buffer.
 
 #### Parameters
 
@@ -61,8 +59,8 @@ Updates camera information to globalStruct data.
 | ------ | ------ | ------ |
 | `camera` | [`Camera2D`](../namespaces/Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../namespaces/Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../namespaces/Camera/classes/OrthographicCamera.md) | Camera instance to update |
 | `cameraMembers` | `any` | WGSL camera structure member information |
-| `uniformDataF32` | `Float32Array` | Target Float32Array buffer |
-| `uniformDataU32` | `Uint32Array` | Target Uint32Array buffer |
+| `uniformDataF32` | `Float32Array` | Target `Float32Array` buffer |
+| `uniformDataU32` | `Uint32Array` | Target `Uint32Array` buffer |
 
 #### Returns
 
@@ -74,18 +72,18 @@ Updates camera information to globalStruct data.
 
 > `static` **updateDirectionalLights**(`directionalLights`, `directionalLightsMemberList`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:347](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/helperFunc/SystemUniformUpdater.ts#L347)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:386](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L386)
 
-Updates DirectionalLight array information to globalStruct data.
+Updates `DirectionalLight` array information to the system uniform buffer.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `directionalLights` | [`DirectionalLight`](../namespaces/Light/classes/DirectionalLight.md)[] | Array of DirectionalLight to update |
-| `directionalLightsMemberList` | `any` | Member list of WGSL DirectionalLight structure array |
-| `uniformDataF32` | `Float32Array` | Target Float32Array buffer |
-| `uniformDataU32` | `Uint32Array` | Target Uint32Array buffer |
+| `directionalLights` | [`DirectionalLight`](../namespaces/Light/classes/DirectionalLight.md)[] | Array of directional lights to update (`DirectionalLight[]`) |
+| `directionalLightsMemberList` | `any` | Member list of WGSL `DirectionalLight` structure array |
+| `uniformDataF32` | `Float32Array` | Target `Float32Array` buffer |
+| `uniformDataU32` | `Uint32Array` | Target `Uint32Array` buffer |
 
 #### Returns
 
@@ -97,9 +95,9 @@ Updates DirectionalLight array information to globalStruct data.
 
 > `static` **updateProjection**(`projectionInfo`, `projectionMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:281](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/helperFunc/SystemUniformUpdater.ts#L281)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:320](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L320)
 
-Updates projection-related matrix information to globalStruct data.
+Updates projection and view-projection matrix information to the system uniform buffer.
 
 #### Parameters
 
@@ -114,8 +112,8 @@ Updates projection-related matrix information to globalStruct data.
 | `projectionInfo.projectionMatrix` | [`mat4`](../namespaces/Math/type-aliases/mat4.md) | - |
 | `projectionInfo.projectionViewMatrix` | [`mat4`](../namespaces/Math/type-aliases/mat4.md) | - |
 | `projectionMembers` | `any` | WGSL projection structure member information |
-| `uniformDataF32` | `Float32Array` | Target Float32Array buffer |
-| `uniformDataU32` | `Uint32Array` | Target Uint32Array buffer |
+| `uniformDataF32` | `Float32Array` | Target `Float32Array` buffer |
+| `uniformDataU32` | `Uint32Array` | Target `Uint32Array` buffer |
 
 #### Returns
 
@@ -127,9 +125,9 @@ Updates projection-related matrix information to globalStruct data.
 
 > `static` **updateShadow**(`shadowManager`, `shadowMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:117](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/helperFunc/SystemUniformUpdater.ts#L117)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L116)
 
-Updates shadow configuration information to globalStruct data.
+Updates shadow configuration and cascade matrix information to the system uniform buffer.
 
 #### Parameters
 
@@ -137,8 +135,8 @@ Updates shadow configuration information to globalStruct data.
 | ------ | ------ | ------ |
 | `shadowManager` | `any` | Shadow manager instance |
 | `shadowMembers` | `any` | WGSL shadow structure member information |
-| `uniformDataF32` | `Float32Array` | Target Float32Array buffer |
-| `uniformDataU32` | `Uint32Array` | Target Uint32Array buffer |
+| `uniformDataF32` | `Float32Array` | Target `Float32Array` buffer |
+| `uniformDataU32` | `Uint32Array` | Target `Uint32Array` buffer |
 
 #### Returns
 
@@ -150,18 +148,18 @@ Updates shadow configuration information to globalStruct data.
 
 > `static` **updateSkyAtmosphere**(`skyAtmosphere`, `systemMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:163](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/helperFunc/SystemUniformUpdater.ts#L163)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:206](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L206)
 
-Updates SkyAtmosphere information to globalStruct data.
+Updates `SkyAtmosphere` information to the system uniform buffer.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `skyAtmosphere` | [`SkyAtmosphere`](../namespaces/Display/classes/SkyAtmosphere.md) | SkyAtmosphere instance |
-| `systemMembers` | `any` | - |
-| `uniformDataF32` | `Float32Array` | Target Float32Array buffer |
-| `uniformDataU32` | `Uint32Array` | Target Uint32Array buffer |
+| `skyAtmosphere` | [`SkyAtmosphere`](../namespaces/Display/classes/SkyAtmosphere.md) | `SkyAtmosphere` instance |
+| `systemMembers` | `any` | WGSL system uniform structure member information |
+| `uniformDataF32` | `Float32Array` | Target `Float32Array` buffer |
+| `uniformDataU32` | `Uint32Array` | Target `Uint32Array` buffer |
 
 #### Returns
 
@@ -173,18 +171,41 @@ Updates SkyAtmosphere information to globalStruct data.
 
 > `static` **updateTime**(`timeInfo`, `timeMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:230](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/helperFunc/SystemUniformUpdater.ts#L230)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:269](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L269)
 
-Updates time-related information to globalStruct data.
+Updates time and frame-related information to the system uniform buffer.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `timeInfo` | [`RenderViewStateData`](../namespaces/Display/namespaces/CoreView/classes/RenderViewStateData.md) \| \{ `deltaTime`: `number`; `frameIndex`: `number`; `sinTime`: `number`; `time`: `number`; \} | Time information object |
+| `timeInfo` | [`RenderViewStateData`](../namespaces/Display/namespaces/CoreView/classes/RenderViewStateData.md) \| \{ `deltaTime`: `number`; `frameIndex`: `number`; `sinTime`: `number`; `time`: `number`; \} | Time information object or `RenderViewStateData` instance |
 | `timeMembers` | `any` | WGSL time structure member information |
-| `uniformDataF32` | `Float32Array` | Target Float32Array buffer |
-| `uniformDataU32` | `Uint32Array` | Target Uint32Array buffer |
+| `uniformDataF32` | `Float32Array` | Target `Float32Array` buffer |
+| `uniformDataU32` | `Uint32Array` | Target `Uint32Array` buffer |
+
+#### Returns
+
+`void`
+
+***
+
+### updateWind()
+
+> `static` **updateWind**(`windManager`, `windMembersInfo`, `uniformDataF32`, `uniformDataU32`): `void`
+
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:469](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/helperFunc/SystemUniformUpdater.ts#L469)
+
+Updates `WindManager` environmental information by directly copying it into the system uniform buffer.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `windManager` | [`WindManager`](../namespaces/Wind/classes/WindManager.md) | `WindManager` instance to update |
+| `windMembersInfo` | `any` | WGSL wind structure member information |
+| `uniformDataF32` | `Float32Array` | Target `Float32Array` buffer |
+| `uniformDataU32` | `Uint32Array` | Target `Uint32Array` buffer |
 
 #### Returns
 

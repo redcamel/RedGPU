@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,12 +6,9 @@
 
 # Class: CommandEncoderManager
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:99](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L99)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:100](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L100)
 
-GPU 커맨드 인코더 및 패스의 생명주기를 지능적으로 관리하는 클래스입니다.
-
-기본적으로 단계별로 하나의 인코더를 공유하여 효율을 높이지만,
-     패스가 열려있는 상태에서 중첩 호출이 발생하면 자동으로 새로운 인코더를 생성하여 안전성을 보장합니다.
+GPU 커맨드 인코더 및 렌더/컴퓨트 패스의 생명주기를 단계별로 관리하는 클래스입니다. 단계별로 단일 인코더를 공유하며 중첩 패스 호출 시 자동으로 새 인코더를 분리 생성합니다.
 
 ::: warning
 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -23,11 +20,15 @@ GPU 커맨드 인코더 및 패스의 생명주기를 지능적으로 관리하�
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new CommandEncoderManager**(`redGPUContext`): `CommandEncoderManager`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:132](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L132)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L119)
 
 CommandEncoderManager 인스턴스를 생성합니다.
 
@@ -35,7 +36,7 @@ CommandEncoderManager 인스턴스를 생성합니다.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU 컨텍스트
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스 |
 
 #### Returns
 
@@ -45,19 +46,26 @@ CommandEncoderManager 인스턴스를 생성합니다.
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../BaseObject/classes/RedGPUObject.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+## Methods
+
+
+
+***
 
 ### addDeferredDestroy()
 
 > **addDeferredDestroy**(`resource`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:151](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L151)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L136)
 
-모든 커맨드 제출 후 안전한 시점에 파괴할 리소스를 등록합니다.
+커맨드 제출 완료 후 안전한 시점에 파괴할 리소스를 지연 파괴 목록에 등록합니다.
 
-* ### Example
+#### Example
 ```typescript
-// 더 이상 사용하지 않는 임시 버퍼를 프레임 제출 완료 후 자동 파괴하도록 지연 목록에 등록
 context.commandEncoderManager.addDeferredDestroy(tempBuffer);
 ```
 
@@ -65,8 +73,8 @@ context.commandEncoderManager.addDeferredDestroy(tempBuffer);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `resource` | \{ `destroy`: `void`; \} | 파괴할 리소스 객체 (destroy 메서드를 구현해야 함)
-| `resource.destroy` | - |
+| `resource` | \{ `destroy`(): `void`; \} | 파괴할 리소스 객체 (`destroy` 메서드를 구현해야 함) |
+| `resource.destroy` | () => `void` | - |
 
 #### Returns
 
@@ -74,17 +82,18 @@ context.commandEncoderManager.addDeferredDestroy(tempBuffer);
 
 ***
 
+***
+
 ### addMainComputePass()
 
 > **addMainComputePass**(`labelOrDescriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:303](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L303)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:276](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L276)
 
-MAIN 단계의 Compute 패스를 추가합니다.
+`MAIN` 단계의 컴퓨트 패스를 추가하고 실행합니다.
 
-* ### Example
+#### Example
 ```typescript
-// MAIN 단계에서 렌더링과 동시에 메인 뷰포트 영역에 대한 컴퓨트 연산 처리
 context.commandEncoderManager.addMainComputePass('MainCullingCompute', (pass) => {
     pass.setPipeline(cullingPipeline);
     pass.dispatchWorkgroups(16, 1, 1);
@@ -95,8 +104,8 @@ context.commandEncoderManager.addMainComputePass('MainCullingCompute', (pass) =>
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | Compute 패스의 레이블 또는 디스크립터 객체
-| `executor` | (`pass`) => `void` | Compute 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
+| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | 컴퓨트 패스의 레이블 또는 디스크립터 객체 |
+| `executor` | (`pass`) => `void` | 컴퓨트 패스 인코더(`GPUComputePassEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
@@ -104,17 +113,18 @@ context.commandEncoderManager.addMainComputePass('MainCullingCompute', (pass) =>
 
 ***
 
+***
+
 ### addMainRenderPass()
 
 > **addMainRenderPass**(`descriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:278](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L278)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:253](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L253)
 
-MAIN 단계의 Render 패스를 추가합니다.
+`MAIN` 단계의 렌더 패스를 추가하고 실행합니다.
 
-* ### Example
+#### Example
 ```typescript
-// MAIN 단계에서 메인 화면 프레임버퍼에 메쉬 오브젝트들을 렌더링
 context.commandEncoderManager.addMainRenderPass(mainRenderPassDescriptor, (pass) => {
     pass.setPipeline(mainPipeline);
     pass.drawIndexed(indexCount);
@@ -125,8 +135,8 @@ context.commandEncoderManager.addMainRenderPass(mainRenderPassDescriptor, (pass)
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `descriptor` | `GPURenderPassDescriptor` | Render 패스 디스크립터
-| `executor` | (`pass`) => `void` | Render 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
+| `descriptor` | `GPURenderPassDescriptor` | 렌더 패스 디스크립터 |
+| `executor` | (`pass`) => `void` | 렌더 패스 인코더(`GPURenderPassEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
@@ -134,17 +144,18 @@ context.commandEncoderManager.addMainRenderPass(mainRenderPassDescriptor, (pass)
 
 ***
 
+***
+
 ### addPostProcessComputePass()
 
 > **addPostProcessComputePass**(`labelOrDescriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:353](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L353)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:322](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L322)
 
-POST_PROCESS 단계의 Compute 패스를 추가합니다.
+`POST_PROCESS` 단계의 컴퓨트 패스를 추가하고 실행합니다.
 
-* ### Example
+#### Example
 ```typescript
-// POST_PROCESS 단계에서 Bloom이나 DOF 등의 포스트 프로세스 효과 계산을 Compute 쉐이더로 수행
 context.commandEncoderManager.addPostProcessComputePass('BloomCompute', (pass) => {
     pass.setPipeline(bloomComputePipeline);
     pass.dispatchWorkgroups(width / 16, height / 16, 1);
@@ -155,8 +166,8 @@ context.commandEncoderManager.addPostProcessComputePass('BloomCompute', (pass) =
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | Compute 패스의 레이블 또는 디스크립터 객체
-| `executor` | (`pass`) => `void` | Compute 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
+| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | 컴퓨트 패스의 레이블 또는 디스크립터 객체 |
+| `executor` | (`pass`) => `void` | 컴퓨트 패스 인코더(`GPUComputePassEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
@@ -164,17 +175,18 @@ context.commandEncoderManager.addPostProcessComputePass('BloomCompute', (pass) =
 
 ***
 
+***
+
 ### addPostProcessRenderPass()
 
 > **addPostProcessRenderPass**(`descriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:328](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L328)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:299](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L299)
 
-POST_PROCESS 단계의 Render 패스를 추가합니다.
+`POST_PROCESS` 단계의 렌더 패스를 추가하고 실행합니다.
 
-* ### Example
+#### Example
 ```typescript
-// POST_PROCESS 단계에서 블러(Blur), 포스트 프로세싱 쿼드 효과 적용
 context.commandEncoderManager.addPostProcessRenderPass(postRenderPassDescriptor, (pass) => {
     pass.setPipeline(postProcessPipeline);
     pass.draw(6);
@@ -185,8 +197,8 @@ context.commandEncoderManager.addPostProcessRenderPass(postRenderPassDescriptor,
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `descriptor` | `GPURenderPassDescriptor` | Render 패스 디스크립터
-| `executor` | (`pass`) => `void` | Render 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
+| `descriptor` | `GPURenderPassDescriptor` | 렌더 패스 디스크립터 |
+| `executor` | (`pass`) => `void` | 렌더 패스 인코더(`GPURenderPassEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
@@ -194,17 +206,18 @@ context.commandEncoderManager.addPostProcessRenderPass(postRenderPassDescriptor,
 
 ***
 
+***
+
 ### addPreProcessComputePass()
 
 > **addPreProcessComputePass**(`labelOrDescriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:253](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L253)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:230](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L230)
 
-PRE_PROCESS 단계의 Compute 패스를 추가합니다.
+`PRE_PROCESS` 단계의 컴퓨트 패스를 추가하고 실행합니다.
 
-* ### Example
+#### Example
 ```typescript
-// PRE_PROCESS 단계에서 스킨 애니메이션, 파티클 시뮬레이션 물리 연산 수행
 context.commandEncoderManager.addPreProcessComputePass('ParticleSimulation', (pass) => {
     pass.setPipeline(particleComputePipeline);
     pass.dispatchWorkgroups(32, 1, 1);
@@ -215,8 +228,8 @@ context.commandEncoderManager.addPreProcessComputePass('ParticleSimulation', (pa
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | Compute 패스의 레이블 또는 디스크립터 객체
-| `executor` | (`pass`) => `void` | Compute 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
+| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | 컴퓨트 패스의 레이블 또는 디스크립터 객체 |
+| `executor` | (`pass`) => `void` | 컴퓨트 패스 인코더(`GPUComputePassEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
@@ -224,17 +237,18 @@ context.commandEncoderManager.addPreProcessComputePass('ParticleSimulation', (pa
 
 ***
 
+***
+
 ### addPreProcessRenderPass()
 
 > **addPreProcessRenderPass**(`descriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:228](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L228)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:207](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L207)
 
-PRE_PROCESS 단계의 Render 패스를 추가합니다.
+`PRE_PROCESS` 단계의 렌더 패스를 추가하고 실행합니다.
 
-* ### Example
+#### Example
 ```typescript
-// PRE_PROCESS 단계에서 메인 렌더링에 앞서 섀도우맵이나 G-Buffer 등을 렌더링
 context.commandEncoderManager.addPreProcessRenderPass(shadowPassDescriptor, (pass) => {
     pass.setPipeline(shadowPipeline);
     pass.drawIndexed(indexCount);
@@ -245,8 +259,8 @@ context.commandEncoderManager.addPreProcessRenderPass(shadowPassDescriptor, (pas
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `descriptor` | `GPURenderPassDescriptor` | Render 패스 디스크립터
-| `executor` | (`pass`) => `void` | Render 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
+| `descriptor` | `GPURenderPassDescriptor` | 렌더 패스 디스크립터 |
+| `executor` | (`pass`) => `void` | 렌더 패스 인코더(`GPURenderPassEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
@@ -254,17 +268,18 @@ context.commandEncoderManager.addPreProcessRenderPass(shadowPassDescriptor, (pas
 
 ***
 
+***
+
 ### addResourceComputePass()
 
 > **addResourceComputePass**(`labelOrDescriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:203](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L203)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L184)
 
-RESOURCE 단계의 Compute 패스를 추가합니다.
+`RESOURCE` 단계의 컴퓨트 패스를 추가하고 실행합니다.
 
-* ### Example
+#### Example
 ```typescript
-// RESOURCE 단계에서 파이프라인 설정 및 Compute 연산 디스패치 수행
 context.commandEncoderManager.addResourceComputePass('MyResourceComputePass', (pass) => {
     pass.setPipeline(myComputePipeline);
     pass.setBindGroup(0, myBindGroup);
@@ -276,8 +291,8 @@ context.commandEncoderManager.addResourceComputePass('MyResourceComputePass', (p
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | Compute 패스의 레이블 또는 디스크립터 객체
-| `executor` | (`pass`) => `void` | Compute 패스 인코더(GPUComputePassEncoder)를 인자로 받아, 패스 안에서 수행할 파이프라인 설정 및 디스패치 명령 등을 기재하는 콜백 함수
+| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | 컴퓨트 패스의 레이블 또는 디스크립터 객체 |
+| `executor` | (`pass`) => `void` | 컴퓨트 패스 인코더(`GPUComputePassEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
@@ -285,17 +300,18 @@ context.commandEncoderManager.addResourceComputePass('MyResourceComputePass', (p
 
 ***
 
+***
+
 ### addResourceRenderPass()
 
 > **addResourceRenderPass**(`descriptor`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:177](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L177)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:160](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L160)
 
-RESOURCE 단계의 Render 패스를 추가합니다.
+`RESOURCE` 단계의 렌더 패스를 추가하고 실행합니다.
 
-* ### Example
+#### Example
 ```typescript
-// RESOURCE 단계에서 텍스처나 임시 리소스를 렌더링/복제하기 위한 패스 실행
 context.commandEncoderManager.addResourceRenderPass(renderPassDescriptor, (pass) => {
     pass.setPipeline(myRenderPipeline);
     pass.setVertexBuffer(0, myVertexBuffer);
@@ -307,12 +323,14 @@ context.commandEncoderManager.addResourceRenderPass(renderPassDescriptor, (pass)
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `descriptor` | `GPURenderPassDescriptor` | Render 패스 디스크립터
-| `executor` | (`pass`) => `void` | Render 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
+| `descriptor` | `GPURenderPassDescriptor` | 렌더 패스 디스크립터 |
+| `executor` | (`pass`) => `void` | 렌더 패스 인코더(`GPURenderPassEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -320,9 +338,9 @@ context.commandEncoderManager.addResourceRenderPass(renderPassDescriptor, (pass)
 
 > **destroy**(): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:600](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L600)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:550](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L550)
 
-CommandEncoderManager 인스턴스를 파기하고 모든 커맨드 인코더 및 지연 리소스 참조를 정리합니다.
+CommandEncoderManager 인스턴스를 파기하고 모든 커맨드 인코더 및 지연 파괴 리소스 참조를 정리합니다.
 
 #### Returns
 
@@ -330,17 +348,18 @@ CommandEncoderManager 인스턴스를 파기하고 모든 커맨드 인코더 �
 
 ***
 
+***
+
 ### immediateComputePass()
 
 > **immediateComputePass**(`labelOrDescriptor`, `executor`, `afterExecutor?`): `Promise`\<`void`\>
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:446](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L446)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:407](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L407)
 
-즉시 실행 Compute 패스를 사용합니다. 호출 즉시 패스가 종료되고 서밋됩니다.
+독립된 커맨드 인코더로 컴퓨트 패스를 즉시 실행하고 GPU 제출 완료까지 대기합니다.
 
-* ### Example
+#### Example
 ```typescript
-// 밉맵 생성이나 데이터 처리 등 즉시 수행되어야 하는 컴퓨트 명령을 기록하고 대기
 await context.commandEncoderManager.immediateComputePass('ImmediateMipmapGen', (pass) => {
     pass.setPipeline(mipmapPipeline);
     pass.dispatchWorkgroups(1, 1, 1);
@@ -351,9 +370,9 @@ await context.commandEncoderManager.immediateComputePass('ImmediateMipmapGen', (
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | Compute 패스의 레이블 또는 디스크립터 객체
-| `executor` | (`pass`) => `void` | Compute 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
-| `afterExecutor?` | (`encoder`) => `void` | 패스 종료 후 커맨드 버퍼 제출 전에 인코더를 직접 제어할 선택적 콜백 함수
+| `labelOrDescriptor` | [`ComputePassDescriptorInput`](../type-aliases/ComputePassDescriptorInput.md) | 컴퓨트 패스의 레이블 또는 디스크립터 객체 |
+| `executor` | (`pass`) => `void` | 컴퓨트 패스 인코더(`GPUComputePassEncoder`)를 받아 명령을 기록할 콜백 함수 |
+| `afterExecutor?` | (`encoder`) => `void` | 패스 종료 후 제출 전에 커맨드 인코더를 제어할 선택적 콜백 함수 |
 
 #### Returns
 
@@ -361,19 +380,19 @@ await context.commandEncoderManager.immediateComputePass('ImmediateMipmapGen', (
 
 ***
 
+***
+
 ### immediateRenderPass()
 
 > **immediateRenderPass**(`descriptor`, `executor`, `afterExecutor?`): `Promise`\<`void`\>
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:408](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L408)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:371](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L371)
 
-즉시 실행 Render 패스를 사용합니다. 호출 즉시 패스가 종료되고 서밋됩니다.
+독립된 커맨드 인코더로 렌더 패스를 즉시 실행하고 GPU 제출 완료까지 대기합니다.
 
-* ### Example
+#### Example
 ```typescript
-// 즉시 화면의 특정 텍스처를 클리어하거나 일회성 렌더 작업을 수행하고 GPU 제출 대기
 await context.commandEncoderManager.immediateRenderPass(descriptor, (pass) => {
-    // 드로우 콜 기록
     pass.draw(3);
 });
 ```
@@ -382,9 +401,9 @@ await context.commandEncoderManager.immediateRenderPass(descriptor, (pass) => {
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `descriptor` | `GPURenderPassDescriptor` | Render 패스 디스크립터
-| `executor` | (`pass`) => `void` | Render 패스 인코더를 인자로 받아 명령을 실행할 콜백 함수
-| `afterExecutor?` | (`encoder`) => `void` | 패스 종료 후 커맨드 버퍼 제출 전에 인코더를 직접 제어할 선택적 콜백 함수
+| `descriptor` | `GPURenderPassDescriptor` | 렌더 패스 디스크립터 |
+| `executor` | (`pass`) => `void` | 렌더 패스 인코더(`GPURenderPassEncoder`)를 받아 명령을 기록할 콜백 함수 |
+| `afterExecutor?` | (`encoder`) => `void` | 패스 종료 후 제출 전에 커맨드 인코더를 제어할 선택적 콜백 함수 |
 
 #### Returns
 
@@ -392,17 +411,18 @@ await context.commandEncoderManager.immediateRenderPass(descriptor, (pass) => {
 
 ***
 
+***
+
 ### immediateSubmit()
 
 > **immediateSubmit**(`label`, `executor`): `Promise`\<`void`\>
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:481](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L481)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:440](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L440)
 
-즉시 실행 인코더를 사용합니다. 호출 즉시 서밋되고 완료를 기다립니다.
+독립된 커맨드 인코더로 명령을 즉시 제출하고 GPU 작업 완료까지 대기합니다.
 
-* ### Example
+#### Example
 ```typescript
-// 버퍼 초기화나 이미지 데이터 로드 등 복사 명령을 즉시 제출 후 대기
 await context.commandEncoderManager.immediateSubmit('InitializeBuffer', (encoder) => {
     encoder.copyTextureToBuffer(srcTexture, srcLayout, dstBuffer, dstLayout, copySize);
 });
@@ -412,8 +432,8 @@ await context.commandEncoderManager.immediateSubmit('InitializeBuffer', (encoder
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `label` | `string` | 제출할 커맨드 인코더의 레이블
-| `executor` | (`encoder`) => `void` | 커맨드 인코더를 받아 즉각적인 연산을 실행할 콜백 함수
+| `label` | `string` | 생성할 커맨드 인코더의 레이블 |
+| `executor` | (`encoder`) => `void` | 커맨드 인코더(`GPUCommandEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
@@ -421,17 +441,18 @@ await context.commandEncoderManager.immediateSubmit('InitializeBuffer', (encoder
 
 ***
 
+***
+
 ### resetAll()
 
 > **resetAll**(): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:587](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L587)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:537](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L537)
 
-모든 인코더 초기화
+모든 인코더 상태와 통계를 초기화하고 등록된 지연 파괴 리소스를 정리합니다.
 
-* ### Example
+#### Example
 ```typescript
-// 렌더러가 재설정되거나 파괴될 때 인코더 및 상태 초기화
 context.commandEncoderManager.resetAll();
 ```
 
@@ -441,32 +462,34 @@ context.commandEncoderManager.resetAll();
 
 ***
 
+***
+
 ### submit()
 
 > **submit**(`type`): [`CommandPhaseStats`](../interfaces/CommandPhaseStats.md)
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:507](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L507)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:463](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L463)
 
-특정 타입의 모든 인코더를 종료하고 즉시 서밋합니다.
+특정 단계의 모든 인코더를 종료하고 큐에 즉시 제출합니다.
 
-* ### Example
+#### Example
 ```typescript
-// RESOURCE 단계에 쌓인 모든 커맨드 버퍼를 제출
 const stats = context.commandEncoderManager.submit(COMMAND_ENCODER_TYPE.RESOURCE);
-console.log('Submitted RESOURCE stats:', stats);
 ```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `type` | [`CommandEncoderType`](../type-aliases/CommandEncoderType.md) | 제출할 커맨드 인코더 타입
+| `type` | [`CommandEncoderType`](../type-aliases/CommandEncoderType.md) | 제출할 커맨드 인코더 단계 타입 |
 
 #### Returns
 
 [`CommandPhaseStats`](../interfaces/CommandPhaseStats.md)
 
-제출 결과 통계 정보 (없을 경우 null)
+제출된 단계의 통계 정보 (제출된 버퍼가 없으면 `null`)
+
+***
 
 ***
 
@@ -474,13 +497,12 @@ console.log('Submitted RESOURCE stats:', stats);
 
 > **submitAll**(): [`CommandBatchStats`](../interfaces/CommandBatchStats.md)
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:539](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L539)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:493](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L493)
 
-모든 타입의 인코더를 한꺼번에 종료하고 단 한 번의 호출로 서밋합니다. (성능 최적화용)
+모든 단계(`RESOURCE` -> `PRE_PROCESS` -> `MAIN` -> `POST_PROCESS`)의 인코더를 순서대로 종료하고 일괄 제출합니다.
 
-* ### Example
+#### Example
 ```typescript
-// 루프 마지막에서 RESOURCE, PRE_PROCESS, MAIN, POST_PROCESS 전체 단계를 일괄 제출
 const batchStats = context.commandEncoderManager.submitAll();
 ```
 
@@ -488,7 +510,9 @@ const batchStats = context.commandEncoderManager.submitAll();
 
 [`CommandBatchStats`](../interfaces/CommandBatchStats.md)
 
-전체 일괄 제출 통계 정보 (제출할 버퍼나 파괴 대상이 없으면 null)
+전체 일괄 제출 통계 정보 (제출된 버퍼나 지연 파괴 리소스가 없으면 `null`)
+
+***
 
 ***
 
@@ -496,13 +520,12 @@ const batchStats = context.commandEncoderManager.submitAll();
 
 > **useEncoder**(`type`, `executor`): `void`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:377](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L377)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:344](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L344)
 
-특정 타입의 인코더를 직접 사용합니다 (복사 명령 등).
+특정 단계의 커맨드 인코더를 직접 참조하여 복사 등의 명령을 기록합니다.
 
-* ### Example
+#### Example
 ```typescript
-// RESOURCE 단계의 커맨드 인코더를 직접 꺼내어 버퍼 복사 명령 기록
 context.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
     encoder.copyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, bufferSize);
 });
@@ -512,50 +535,35 @@ context.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `type` | [`CommandEncoderType`](../type-aliases/CommandEncoderType.md) | 사용할 커맨드 인코더 타입
-| `executor` | (`encoder`) => `void` | 커맨드 인코더를 인자로 받아 명령을 실행할 콜백 함수
+| `type` | [`CommandEncoderType`](../type-aliases/CommandEncoderType.md) | 사용할 커맨드 인코더 단계 타입 |
+| `executor` | (`encoder`) => `void` | 커맨드 인코더(`GPUCommandEncoder`)를 받아 명령을 기록할 콜백 함수 |
 
 #### Returns
 
 `void`
 
-
 ***
 
-## 상속받은 멤버
+## 상속받은 속성
 
 <details>
-<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-클래스별 인스턴스 순번 ID
-
-#### Inherited from
-
-[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
-
-## Accessors
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager 인스턴스
+`AntialiasingManager` 인스턴스
 
 #### Inherited from
 
@@ -563,21 +571,23 @@ AntialiasingManager 인스턴스
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): `CommandEncoderManager`
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): `CommandEncoderManager`
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 `CommandEncoderManager`
 
-CommandEncoderManager 인스턴스
+`CommandEncoderManager` 인스턴스
 
 #### Inherited from
 
@@ -585,25 +595,53 @@ CommandEncoderManager 인스턴스
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-WebGPU 디바이스 객체를 반환합니다. (단축 경로)
+컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice 인스턴스
+`GPUDevice` 인스턴스
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+
+##### Returns
+
+`number`
+
+클래스별 고유 인스턴스 번호
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
 
 ***
 
@@ -613,29 +651,27 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
+객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
 ##### Returns
 
 `string`
 
-객체 이름
+객체 이름 문자열
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-객체의 이름을 설정합니다.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | 설정할 객체 이름
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -647,21 +683,23 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-RedGPUContext 인스턴스를 반환합니다.
+바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext 인스턴스
+`RedGPUContext` 인스턴스
 
 #### Inherited from
 
@@ -669,21 +707,23 @@ RedGPUContext 인스턴스
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager 인스턴스
+`ResourceManager` 인스턴스
 
 #### Inherited from
 
@@ -691,13 +731,15 @@ ResourceManager 인스턴스
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -705,13 +747,10 @@ Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/
 
 `string`
 
-UUID 문자열
+객체의 UUID 문자열
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../BaseObject/classes/RedGPUObject.md#uuid)
-
-## Methods
-
 
 </details>

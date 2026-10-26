@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getViewNormalFromGNormalBuffer**: `string` = `getViewNormalFromGNormalBuffer_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:765](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L765)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:786](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L786)
 
 G-Buffer 데이터와 카메라 행렬을 사용하여 뷰 공간 법선 벡터를 복구합니다.
 
@@ -16,10 +16,14 @@ G-Buffer 데이터와 카메라 행렬을 사용하여 뷰 공간 법선 벡터�
 
 ## Param
 
+**gBufferNormal**
+
 G-Buffer에서 샘플링된 노멀 데이터
 //
 
 ## Param
+
+**viewMatrix**
 
 카메라 행렬 (View Matrix)
 //

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,19 +6,7 @@
 
 # RapierPhysics
 
-**`Experimental`**
-
-Provides the RedGPU physics plugin implementation using the Rapier physics engine.
-
-This module supports high-performance WASM-based physics simulation and provides features for easy integration with RedGPU mesh objects. Users can build physics systems by initializing the physics world and creating `RapierBody` instances through the `RapierPhysics` class.
-
-::: warning
-The features in this package are currently in the experimental stage. The API may change in the future.
-:::
-
-## See
-
- -[Physics Plugin Manual](https://redcamel.github.io/RedGPU/manual/en/plugins/physics)
+Provides the RedGPU physics plugin module integrating the WASM-based Rapier physics engine.
 
 ## RapierPhysics
 

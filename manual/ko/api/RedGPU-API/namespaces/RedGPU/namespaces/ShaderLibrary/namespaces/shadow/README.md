@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -9,5 +9,7 @@
 ## Variables
 
 - [getDirectionalShadowVisibility](variables/getDirectionalShadowVisibility.md)
+- [getDirectionalShadowVisibilityFoliage](variables/getDirectionalShadowVisibilityFoliage.md)
+- [getDirectionalShadowVisibilityLandscape](variables/getDirectionalShadowVisibilityLandscape.md)
 - [getShadowClipPosition](variables/getShadowClipPosition.md)
 - [getShadowCoord](variables/getShadowCoord.md)

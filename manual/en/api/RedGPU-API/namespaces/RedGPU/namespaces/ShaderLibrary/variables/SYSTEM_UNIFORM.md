@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **SYSTEM\_UNIFORM**: `string` = `SYSTEM_UNIFORM_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2963](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L2963)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:3068](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L3068)
 
 Definitions of the engine's standard system uniforms and global binding structures.
 
@@ -21,6 +21,7 @@ Definitions of the engine's standard system uniforms and global binding structur
 #redgpu_include systemStruct.Time
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
+#redgpu_include systemStruct.Wind
 
 struct SystemUniform {
 	  projection: Projection,
@@ -39,17 +40,16 @@ struct SystemUniform {
       //
       directionalLightCount:u32,
       directionalLightProjectionViewMatrix:mat4x4<f32>,
-      directionalLightProjectionMatrix:mat4x4<f32>,
-      directionalLightViewMatrix:mat4x4<f32>,
       directionalLights:array<DirectionalLight,3>,
 	  //
 	  ambientLight:AmbientLight,
-
+	  //
+	  wind:Wind,
 };
 
 @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
 @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
-@group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
+@group(0) @binding(2) var directionalShadowMap: texture_depth_2d_array;
 @group(0) @binding(3) var prefilterTextureSampler: sampler;
 
 @group(0) @binding(7) var renderPath1ResultTextureSampler: sampler;
@@ -73,6 +73,8 @@ struct SystemUniform {
 
 #redgpu_include systemStruct.globalFragmentStructBuiltIn;
 @group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
+
+@group(0) @binding(20) var renderPath1DepthTexture: texture_depth_2d;
 
 #redgpu_include depth.getLinearizeDepth
 

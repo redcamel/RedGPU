@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,21 +8,26 @@
 
 > **calculateTangents**(`vertices`, `normals`, `uvs`, `indices`): `Float32Array`
 
-Defined in: [src/math/calculateTangents.ts:131](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/calculateTangents.ts#L131)
+Defined in: [src/math/calculateTangents.ts:166](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/calculateTangents.ts#L166)
 
-Calculates vertex tangent vectors and returns them as a new array. (Pure math utility)
+Calculates and returns vertex tangent vectors (`Float32Array`) based on the MikkTSpace algorithm from vertex position, normal, UV, and index arrays.
+
+### Example
+```typescript
+const tangents = RedGPU.Math.calculateTangents(vertices, normals, uvs, indices);
+```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `vertices` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | Vertex position array |
-| `normals` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | Normal vector array |
-| `uvs` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | UV coordinate array |
-| `indices` | `number`[] \| `Uint32Array`\<`ArrayBufferLike`\> | Index data |
+| `vertices` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | Vertex position array (`[x, y, z, ...]`) |
+| `normals` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | Vertex normal vector array (`[nx, ny, nz, ...]`) |
+| `uvs` | `number`[] \| `Float32Array`\<`ArrayBufferLike`\> | UV texture coordinate array (`[u, v, ...]`) |
+| `indices` | `number`[] \| `Uint32Array`\<`ArrayBufferLike`\> | Triangle vertex index array |
 
 ## Returns
 
 `Float32Array`
 
-Calculated tangent array [x, y, z, w, ...]
+Calculated vertex tangent array (`Float32Array`, `[tx, ty, tz, w, ...]`)

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,15 +8,13 @@
 
 > `const` **GPU\_LOAD\_OP**: `object`
 
-Defined in: [src/gpuConst/GPU\_LOAD\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_LOAD_OP.ts#L10)
+Defined in: [src/gpuConst/GPU\_LOAD\_OP.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_LOAD_OP.ts#L7)
 
-렌더 패스 시작 시 어태치먼트를 로드하는 방식을 정의하는 상수군입니다.
-
-새로운 렌더링 작업을 시작하기 전 기존 데이터를 어떻게 처리할지 결정합니다.
+렌더 패스(Render Pass) 시작 시 컬러 또는 깊이/스텐실 어태치먼트의 초기 데이터를 처리하는 로드 연산 상수입니다.
 
 ## Type Declaration
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-clear"></a> `CLEAR` | `"clear"` | `'clear'` | 어태치먼트를 지정된 색상 혹은 값으로 초기화(지움)합니다.
-| <a id="property-load"></a> `LOAD` | `"load"` | `'load'` | 기존 어태치먼트의 내용을 로드하여 유지합니다.
+| <a id="property-clear"></a> `CLEAR` | `"clear"` | `'clear'` | 렌더 패스 시작 시 어태치먼트를 지정된 초기화 값(`clearValue` 또는 ` depthClearValue`)으로 지웁니다. | [src/gpuConst/GPU\_LOAD\_OP.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_LOAD_OP.ts#L17) |
+| <a id="property-load"></a> `LOAD` | `"load"` | `'load'` | 어태치먼트에 기록되어 있던 이전 프레임 또는 이전 패스의 기존 내용을 그대로 유지하여 로드합니다. | [src/gpuConst/GPU\_LOAD\_OP.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_LOAD_OP.ts#L12) |

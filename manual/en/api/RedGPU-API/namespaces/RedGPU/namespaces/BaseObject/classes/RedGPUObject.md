@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,13 @@
 
 # Abstract Class: RedGPUObject
 
-Defined in: [src/base/RedGPUObject.ts:15](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L15)
+Defined in: [src/base/RedGPUObject.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L19)
 
-Base class for all engine objects using GPU context.
+Abstract base class for all engine objects operating on `RedGPUContext`, providing common getters for the GPU device and core managers.
 
-Provides common access paths to RedGPUContext and related managers (ResourceManager, AntialiasingManager, etc.).
+::: warning
+This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+:::
 
 ## Extends
 
@@ -23,16 +25,23 @@ Provides common access paths to RedGPUContext and related managers (ResourceMana
 - [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 - [`SkyBox`](../../Display/classes/SkyBox.md)
 - [`SkyAtmosphere`](../../Display/classes/SkyAtmosphere.md)
+- [`SpriteSheetInfo`](../../Display/classes/SpriteSheetInfo.md)
 - [`GlobalStorageBufferManager`](../../Resource/classes/GlobalStorageBufferManager.md)
 - [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 - [`DownSampleCubeMapGenerator`](../../Resource/classes/DownSampleCubeMapGenerator.md)
 - [`MipmapGenerator`](../../Resource/classes/MipmapGenerator.md)
 - [`IBL`](../../Resource/classes/IBL.md)
+- [`PostEffectManager`](../../PostEffect/classes/PostEffectManager.md)
 - [`PickingManager`](../../Picking/classes/PickingManager.md)
+- [`ToneMappingManager`](../../ToneMapping/classes/ToneMappingManager.md)
+- [`Landscape`](../../Landscape/classes/Landscape.md)
 - [`AController`](../../Camera/namespaces/Core/classes/AController.md)
 - [`AutoExposure`](../../Camera/namespaces/Core/classes/AutoExposure.md)
+- [`RedGPUContextDetector`](../../Context/namespaces/Core/classes/RedGPUContextDetector.md)
 - [`RedGPUContextSizeManager`](../../Context/namespaces/Core/classes/RedGPUContextSizeManager.md)
 - [`RedGPUContextObserver`](../../Context/namespaces/Core/classes/RedGPUContextObserver.md)
+- [`DrawDebuggerMesh`](../../Display/namespaces/DrawDebugger/classes/DrawDebuggerMesh.md)
+- [`ADrawDebuggerLight`](../../Display/namespaces/DrawDebugger/classes/ADrawDebuggerLight.md)
 - [`SkyAtmosphereBackground`](../../Display/namespaces/CoreSkyAtmosphere/classes/SkyAtmosphereBackground.md)
 - [`SkyLight`](../../Display/namespaces/CoreSkyAtmosphere/classes/SkyLight.md)
 - [`ASkyAtmosphereLUTGenerator`](../../Display/namespaces/CoreSkyAtmosphere/classes/ASkyAtmosphereLUTGenerator.md)
@@ -47,22 +56,41 @@ Provides common access paths to RedGPUContext and related managers (ResourceMana
 - [`EquirectangularToCubeGenerator`](../../Resource/namespaces/CoreIBL/classes/EquirectangularToCubeGenerator.md)
 - [`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md)
 - [`PostEffectTexturePool`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md)
+- [`PassClusterLightBound`](../../Light/namespaces/Core/namespaces/ClusterLight/classes/PassClusterLightBound.md)
+- [`PassClustersLight`](../../Light/namespaces/Core/namespaces/ClusterLight/classes/PassClustersLight.md)
+- [`ClusterLightManager`](../../Light/namespaces/Core/namespaces/ClusterLight/classes/ClusterLightManager.md)
+- [`AScatterManager`](../../Landscape/namespaces/Core/namespaces/Scatter/classes/AScatterManager.md)
+- [`AScatterCuller`](../../Landscape/namespaces/Core/namespaces/Scatter/classes/AScatterCuller.md)
+- [`AScatterType`](../../Landscape/namespaces/Core/namespaces/Scatter/classes/AScatterType.md)
+- [`AScatterSlotPooler`](../../Landscape/namespaces/Core/namespaces/Scatter/classes/AScatterSlotPooler.md)
+- [`AScatterRenderer`](../../Landscape/namespaces/Core/namespaces/Scatter/classes/AScatterRenderer.md)
+- [`AScatterMegaBuffer`](../../Landscape/namespaces/Core/namespaces/Scatter/classes/AScatterMegaBuffer.md)
+- [`AScatterInstanceBaker`](../../Landscape/namespaces/Core/namespaces/Scatter/classes/AScatterInstanceBaker.md)
+- [`LandscapeRenderer`](../../Landscape/namespaces/Core/namespaces/Renderer/classes/LandscapeRenderer.md)
+- [`FoliagePipelineRegistry`](../../Landscape/namespaces/Foliage/namespaces/Core/classes/FoliagePipelineRegistry.md)
+- [`LakeInteractionManager`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeInteractionManager.md)
+- [`LakeCapturePass`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeCapturePass.md)
+- [`LakeWaveSimulator`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeWaveSimulator.md)
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
-> `protected` **new RedGPUObject**(`redGPUContext`): `RedGPUObject`
+> **new RedGPUObject**(`redGPUContext`): `RedGPUObject`
 
-Defined in: [src/base/RedGPUObject.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L26)
+Defined in: [src/base/RedGPUObject.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L30)
 
-RedGPUObject constructor. (Abstract class, cannot be instantiated directly)
+Initializes a new RedGPUObject instance and validates the provided `RedGPUContext`.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance to use |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `RedGPUContext` instance to bind |
 
 #### Returns
 
@@ -72,23 +100,29 @@ RedGPUObject constructor. (Abstract class, cannot be instantiated directly)
 
 [`BaseObject`](BaseObject.md).[`constructor`](BaseObject.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
+
+***
 
 ***
 
@@ -96,17 +130,19 @@ AntialiasingManager instance
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
+
+***
 
 ***
 
@@ -114,17 +150,19 @@ CommandEncoderManager instance
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-Returns the WebGPU device object. (Short-cut path)
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice instance
+`GPUDevice` instance
+
+***
 
 ***
 
@@ -132,17 +170,19 @@ GPUDevice instance
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
+
+***
 
 ***
 
@@ -150,41 +190,50 @@ RedGPUContext instance
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 ***
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
+<summary>View inherited properties (Click to expand)</summary>
 
 ### instanceId
 
-> `readonly` **instanceId**: `number`
+#### Get Signature
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
 
-Instance sequence ID per class
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
 
 #### Inherited from
 
 [`BaseObject`](BaseObject.md).[`instanceId`](BaseObject.md#instanceid)
 
-## Accessors
+***
+
+***
 
 ### name
 
@@ -192,29 +241,27 @@ Instance sequence ID per class
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -226,13 +273,15 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -240,11 +289,10 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
 [`BaseObject`](BaseObject.md).[`uuid`](BaseObject.md#uuid)
-
 
 </details>

@@ -1,0 +1,855 @@
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../README.md) / [RedGPU](../../../../../README.md) / [Landscape](../../../README.md) / [Grass](../README.md) / GrassManager
+
+# Class: GrassManager
+
+Defined in: [src/landscape/grass/GrassManager.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L37)
+
+Class that manages large-scale grass scattering, camera-centered GPU instance baking, GPU frustum culling, and rendering on a `Landscape`.
+
+::: warning
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+:::
+
+***
+
+### Example
+```typescript
+// Register a new grass type via the landscape grass manager
+const grass = landscape.grassManager.addType({
+    name: 'MeadowGrass',
+    mesh: grassMesh,
+    densityPerHectare: 50000,
+    cullingDistance: 80
+});
+```
+
+## See
+
+[Foliage and Impostors example](https://redcamel.github.io/RedGPU/examples/3d/landscape/foliageAndImpostors/)
+
+## Extends
+
+- [`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md)\<[`Grass`](Grass.md), [`GrassOptions`](../interfaces/GrassOptions.md)\>
+
+## Constructors
+
+
+
+***
+
+### Constructor
+
+> **new GrassManager**(`landscape`): `GrassManager`
+
+Defined in: [src/landscape/grass/GrassManager.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L65)
+
+Creates a `GrassManager` instance.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `landscape` | [`Landscape`](../../../classes/Landscape.md) | Target `Landscape` instance that owns this manager |
+
+#### Returns
+
+`GrassManager`
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`constructor`](../../Core/namespaces/Scatter/classes/AScatterManager.md#constructor)
+
+## Accessors
+
+
+
+***
+
+### instanceCapacity
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceCapacity**(): `number`
+
+Defined in: [src/landscape/grass/GrassManager.ts:110](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L110)
+
+Returns the maximum grass instance capacity of the mega buffer (`GrassMegaBuffer`).
+
+##### Returns
+
+`number`
+
+Maximum grass instance capacity
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`instanceCapacity`](../../Core/namespaces/Scatter/classes/AScatterManager.md#instancecapacity)
+
+***
+
+***
+
+### totalInstanceCount
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **totalInstanceCount**(): `number`
+
+Defined in: [src/landscape/grass/GrassManager.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L90)
+
+Returns the total number of currently baked instances across all registered grass types.
+
+##### Returns
+
+`number`
+
+Total baked instance count
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`totalInstanceCount`](../../Core/namespaces/Scatter/classes/AScatterManager.md#totalinstancecount)
+
+***
+
+## Methods
+
+
+
+***
+
+### addType()
+
+> **addType**(`options`): [`Grass`](Grass.md)
+
+Defined in: [src/landscape/grass/GrassManager.ts:240](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L240)
+
+Creates a new `Grass` type, registers it with the manager, and allocates mega buffer and slot pool resources.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | [`GrassOptions`](../interfaces/GrassOptions.md) | Grass type initialization options |
+
+#### Returns
+
+[`Grass`](Grass.md)
+
+Created and registered `Grass` instance
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`addType`](../../Core/namespaces/Scatter/classes/AScatterManager.md#addtype)
+
+***
+
+***
+
+### clearTypes()
+
+> **clearTypes**(): `void`
+
+Defined in: [src/landscape/grass/GrassManager.ts:392](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L392)
+
+Removes all registered grass types and resets the mega buffer and slot pool to their initial state.
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`clearTypes`](../../Core/namespaces/Scatter/classes/AScatterManager.md#cleartypes)
+
+***
+
+***
+
+### computeTypeDrawCalls()
+
+> **computeTypeDrawCalls**(`grass`): `number`
+
+Defined in: [src/landscape/grass/GrassManager.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L125)
+
+Computes the number of indirect draw calls generated by a specific grass type in the main render pass.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `grass` | [`Grass`](Grass.md) | Target `Grass` instance to compute |
+
+#### Returns
+
+`number`
+
+Number of main pass draw calls (Near slots + Far slots)
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`computeTypeDrawCalls`](../../Core/namespaces/Scatter/classes/AScatterManager.md#computetypedrawcalls)
+
+***
+
+***
+
+### computeTypeShadowDrawCalls()
+
+> **computeTypeShadowDrawCalls**(`grass`): `number`
+
+Defined in: [src/landscape/grass/GrassManager.ts:307](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L307)
+
+Computes the number of indirect draw calls generated by a specific grass type in the shadow render pass.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `grass` | [`Grass`](Grass.md) | Target `Grass` instance to compute |
+
+#### Returns
+
+`number`
+
+Number of shadow pass draw calls (number of Near slots)
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`computeTypeShadowDrawCalls`](../../Core/namespaces/Scatter/classes/AScatterManager.md#computetypeshadowdrawcalls)
+
+***
+
+***
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/landscape/grass/GrassManager.ts:419](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L419)
+
+Destroys all GPU buffers, pipelines, renderer, and registered grass type resources held by the manager.
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`destroy`](../../Core/namespaces/Scatter/classes/AScatterManager.md#destroy)
+
+***
+
+***
+
+### dispatchCullingPass()
+
+> **dispatchCullingPass**(`computePass`, `renderViewStateData?`): `void`
+
+Defined in: [src/landscape/grass/GrassManager.ts:343](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L343)
+
+Records the grass GPU frustum culling dispatch into the compute pass encoder.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `computePass` | `GPUComputePassEncoder` | `GPUComputePassEncoder` to record the culling dispatch into |
+| `renderViewStateData?` | [`RenderViewStateData`](../../../../Display/namespaces/CoreView/classes/RenderViewStateData.md) | Render view state data (uses the state from the last `update` if omitted) |
+
+#### Returns
+
+`void`
+
+***
+
+***
+
+### rebakeAll()
+
+> **rebakeAll**(): `void`
+
+Defined in: [src/landscape/grass/GrassManager.ts:485](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L485)
+
+Flags all grass types to force rebaking of instances on the next frame update.
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`rebakeAll`](../../Core/namespaces/Scatter/classes/AScatterManager.md#rebakeall)
+
+***
+
+***
+
+### recordResetCommands()
+
+> **recordResetCommands**(`encoder`): `void`
+
+Defined in: [src/landscape/grass/GrassManager.ts:328](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L328)
+
+Records commands to reset indirect draw buffer instance counts prior to the culling pass.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `encoder` | `GPUCommandEncoder` | `GPUCommandEncoder` to record commands into |
+
+#### Returns
+
+`void`
+
+***
+
+***
+
+### removeType()
+
+> **removeType**(`target`): `boolean`
+
+Defined in: [src/landscape/grass/GrassManager.ts:364](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L364)
+
+Removes the specified grass type (or name) from the manager and frees its allocated GPU buffer and slot resources.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `string` \| [`Grass`](Grass.md) | `Grass` instance or type name string to remove |
+
+#### Returns
+
+`boolean`
+
+Whether the removal succeeded
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`removeType`](../../Core/namespaces/Scatter/classes/AScatterManager.md#removetype)
+
+***
+
+***
+
+### render()
+
+> **render**(`view`, `passEncoder`): `void`
+
+Defined in: [src/landscape/grass/GrassManager.ts:458](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L458)
+
+Renders all active grass types in the main render pass.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](../../../../Display/classes/View3D.md) | Target `View3D` instance to render |
+| `passEncoder` | `GPURenderPassEncoder` | Main render pass encoder |
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`render`](../../Core/namespaces/Scatter/classes/AScatterManager.md#render)
+
+***
+
+***
+
+### renderShadow()
+
+> **renderShadow**(`view`, `passEncoder`): `void`
+
+Defined in: [src/landscape/grass/GrassManager.ts:475](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L475)
+
+Renders grass instances in the directional shadow pass.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](../../../../Display/classes/View3D.md) | Target `View3D` instance to render |
+| `passEncoder` | `GPURenderPassEncoder` | Shadow render pass encoder |
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`renderShadow`](../../Core/namespaces/Scatter/classes/AScatterManager.md#rendershadow)
+
+***
+
+***
+
+### update()
+
+> **update**(`renderViewStateData`, `standalone?`): `void`
+
+Defined in: [src/landscape/grass/GrassManager.ts:148](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/grass/GrassManager.ts#L148)
+
+Performs per-frame grass instance rebaking based on camera movement and UBO slot synchronization.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `renderViewStateData` | [`RenderViewStateData`](../../../../Display/namespaces/CoreView/classes/RenderViewStateData.md) | `undefined` | Render view state data for the current frame |
+| `standalone?` | `boolean` | `false` | Whether to run standalone (registers its own compute pass when `true`) |
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`update`](../../Core/namespaces/Scatter/classes/AScatterManager.md#update)
+
+***
+
+## Inherited Properties
+
+<details>
+<summary>View inherited properties (Click to expand)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
+
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
+
+##### Returns
+
+[`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+`AntialiasingManager` instance
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`antialiasingManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md#antialiasingmanager)
+
+***
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
+
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
+
+##### Returns
+
+[`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+`CommandEncoderManager` instance
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`commandEncoderManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md#commandencodermanager)
+
+***
+
+***
+
+### enabled
+
+#### Get Signature
+
+> **get** **enabled**(): `boolean`
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:69](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L69)
+
+Gets or sets whether the scatter manager is enabled.
+
+##### Returns
+
+`boolean`
+
+Whether enabled
+
+#### Set Signature
+
+> **set** **enabled**(`val`): `void`
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L73)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `val` | `boolean` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`enabled`](../../Core/namespaces/Scatter/classes/AScatterManager.md#enabled)
+
+***
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
+
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
+
+##### Returns
+
+`GPUDevice`
+
+`GPUDevice` instance
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`gpuDevice`](../../Core/namespaces/Scatter/classes/AScatterManager.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`instanceId`](../../Core/namespaces/Scatter/classes/AScatterManager.md#instanceid)
+
+***
+
+***
+
+### landscape
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **landscape**(): [`Landscape`](../../../classes/Landscape.md)
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L57)
+
+Returns the `Landscape` instance to which this scatter manager belongs.
+
+##### Returns
+
+[`Landscape`](../../../classes/Landscape.md)
+
+Owner `Landscape` instance
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`landscape`](../../Core/namespaces/Scatter/classes/AScatterManager.md#landscape)
+
+***
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
+
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
+
+##### Returns
+
+`string`
+
+Object name string
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`name`](../../Core/namespaces/Scatter/classes/AScatterManager.md#name)
+
+***
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
+
+Returns the bound `RedGPUContext` instance.
+
+##### Returns
+
+[`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+`RedGPUContext` instance
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`redGPUContext`](../../Core/namespaces/Scatter/classes/AScatterManager.md#redgpucontext)
+
+***
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
+
+Returns the `ResourceManager` instance managing global GPU resources.
+
+##### Returns
+
+[`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+`ResourceManager` instance
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`resourceManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md#resourcemanager)
+
+***
+
+***
+
+### shadowDrawCalls
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **shadowDrawCalls**(): `number`
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L136)
+
+Returns the total number of shadow pass draw calls across all scatter types with `castShadow` enabled.
+
+##### Returns
+
+`number`
+
+Total shadow pass draw call count
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`shadowDrawCalls`](../../Core/namespaces/Scatter/classes/AScatterManager.md#shadowdrawcalls)
+
+***
+
+***
+
+### totalDrawCalls
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **totalDrawCalls**(): `number`
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L117)
+
+Returns the total number of main pass draw calls across all registered scatter types when enabled.
+
+##### Returns
+
+`number`
+
+Total main pass draw call count
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`totalDrawCalls`](../../Core/namespaces/Scatter/classes/AScatterManager.md#totaldrawcalls)
+
+***
+
+***
+
+### types
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **types**(): `TType`[]
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L85)
+
+Returns the list of all currently registered scatter types (`TType[]`).
+
+##### Returns
+
+`TType`[]
+
+Array of registered scatter types (`TType[]`)
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`types`](../../Core/namespaces/Scatter/classes/AScatterManager.md#types)
+
+***
+
+***
+
+### uuid
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
+
+Returns the universally unique identifier (UUID) of the object.
+
+##### Returns
+
+`string`
+
+UUID string of the object
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`uuid`](../../Core/namespaces/Scatter/classes/AScatterManager.md#uuid)
+
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
+
+### getTypeByName()
+
+> **getTypeByName**(`name`): [`Grass`](Grass.md)
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L187)
+
+Looks up a registered scatter type instance by its unique name.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `name` | `string` | Name of the scatter type to look up |
+
+#### Returns
+
+[`Grass`](Grass.md)
+
+Matching scatter type instance, or `undefined` if not found
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`getTypeByName`](../../Core/namespaces/Scatter/classes/AScatterManager.md#gettypebyname)
+
+***
+
+***
+
+### registerTypeInternal()
+
+> **registerTypeInternal**(`type`): `void`
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L285)
+
+Registers a scatter type instance into the internal array and name map (`Map<string, TType>`).
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `type` | [`Grass`](Grass.md) | Scatter type instance to register |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`registerTypeInternal`](../../Core/namespaces/Scatter/classes/AScatterManager.md#registertypeinternal)
+
+***
+
+***
+
+### unregisterTypeInternal()
+
+> **unregisterTypeInternal**(`target`): [`Grass`](Grass.md)
+
+Defined in: [src/landscape/core/scatter/AScatterManager.ts:302](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/landscape/core/scatter/AScatterManager.ts#L302)
+
+Unregisters and returns the target scatter type from the internal array and name map (`Map<string, TType>`).
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `string` \| [`Grass`](Grass.md) | Scatter type instance or type name string to unregister |
+
+#### Returns
+
+[`Grass`](Grass.md)
+
+Unregistered scatter type instance, or `null` if not found
+
+#### Inherited from
+
+[`AScatterManager`](../../Core/namespaces/Scatter/classes/AScatterManager.md).[`unregisterTypeInternal`](../../Core/namespaces/Scatter/classes/AScatterManager.md#unregistertypeinternal)
+
+***
+
+</details>

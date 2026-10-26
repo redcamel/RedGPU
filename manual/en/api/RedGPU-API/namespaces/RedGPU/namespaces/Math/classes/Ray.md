@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,16 +6,18 @@
 
 # Class: Ray
 
-Defined in: [src/math/Ray.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L17)
+Defined in: [src/math/Ray.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L16)
 
-Class representing a ray with an origin and direction in 3D space.
-
-This class provides mathematical operations (box, triangle, etc.) for intersection tests.
+Ray class with a 3D `origin` and `direction` vector that performs intersection tests against AABBs and triangles.
 
 ### Example
 ```typescript
-const ray = new RedGPU.math.Ray([0, 0, 0], [0, 0, -1]);
+const ray = new RedGPU.Math.Ray([0, 0, 0], [0, 0, -1]);
 ```
+
+## See
+
+[Mouse Event Raycasting example](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 
 ## Constructors
 
@@ -23,21 +25,21 @@ const ray = new RedGPU.math.Ray([0, 0, 0], [0, 0, -1]);
 
 > **new Ray**(`origin?`, `direction?`): `Ray`
 
-Defined in: [src/math/Ray.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L45)
+Defined in: [src/math/Ray.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L44)
 
-Creates a Ray instance.
+Creates a `Ray` instance with the specified origin and direction vector.
 
-### Example
+#### Example
 ```typescript
-const ray = new RedGPU.math.Ray([0, 0, 0], [0, 0, 1]);
+const ray = new RedGPU.Math.Ray([0, 0, 0], [0, 0, -1]);
 ```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `origin` | [`vec3`](../type-aliases/vec3.md) | Origin |
-| `direction` | [`vec3`](../type-aliases/vec3.md) | Direction |
+| `origin?` | [`vec3`](../type-aliases/vec3.md) | Origin of the ray (default: `[0, 0, 0]`) |
+| `direction?` | [`vec3`](../type-aliases/vec3.md) | Direction vector of the ray (default: `[0, 0, -1]`) |
 
 #### Returns
 
@@ -49,9 +51,9 @@ const ray = new RedGPU.math.Ray([0, 0, 0], [0, 0, 1]);
 
 > **direction**: [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:27](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L27)
+Defined in: [src/math/Ray.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L26)
 
-Direction vector of the ray (normalization recommended)
+Normalized direction vector of the ray (`vec3`)
 
 ***
 
@@ -59,9 +61,9 @@ Direction vector of the ray (normalization recommended)
 
 > **origin**: [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L22)
+Defined in: [src/math/Ray.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L21)
 
-Origin of the ray
+Origin coordinates of the ray (`vec3`)
 
 ## Methods
 
@@ -69,20 +71,20 @@ Origin of the ray
 
 > **applyMatrix4**(`matrix`): `Ray`
 
-Defined in: [src/math/Ray.ts:92](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L92)
+Defined in: [src/math/Ray.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L93)
 
-Transforms the ray using a matrix.
+Applies a 4x4 transformation matrix to the ray's origin and direction vector in-place and normalizes the direction vector.
 
 ::: warning
-This method modifies the instance directly (in-place). If you need to preserve the original ray state, use it with `.clone()`.
+This method modifies the instance in-place. Use with `clone()` if the original ray must be preserved.
 :::
 
-### Example
+#### Example
 ```typescript
-// 원본 수정 (In-place)
+// Transform original ray in-place
 ray.applyMatrix4(matrix);
 
-// 원본 보존 (Preserve original)
+// Preserve original and transform clone
 const transformedRay = ray.clone().applyMatrix4(matrix);
 ```
 
@@ -90,13 +92,13 @@ const transformedRay = ray.clone().applyMatrix4(matrix);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `matrix` | [`mat4`](../type-aliases/mat4.md) | 4x4 transformation matrix |
+| `matrix` | [`mat4`](../type-aliases/mat4.md) | 4x4 transformation matrix to apply (`mat4`) |
 
 #### Returns
 
 `Ray`
 
-The transformed self
+The transformed current `Ray` instance (`this`)
 
 ***
 
@@ -104,11 +106,11 @@ The transformed self
 
 > **clone**(): `Ray`
 
-Defined in: [src/math/Ray.ts:63](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L63)
+Defined in: [src/math/Ray.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L62)
 
-Clones the current Ray instance.
+Returns a new `Ray` instance with copied origin and direction.
 
-### Example
+#### Example
 ```typescript
 const clonedRay = ray.clone();
 ```
@@ -117,7 +119,7 @@ const clonedRay = ray.clone();
 
 `Ray`
 
-Cloned Ray instance
+Cloned `Ray` instance
 
 ***
 
@@ -125,26 +127,26 @@ Cloned Ray instance
 
 > **intersectBox**(`aabb`): `boolean`
 
-Defined in: [src/math/Ray.ts:120](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L120)
+Defined in: [src/math/Ray.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L120)
 
-Determines intersection with an AABB box (Slabs algorithm).
+Determines whether the ray intersects an `AABB` bounding box using the Slabs algorithm.
 
-### Example
+#### Example
 ```typescript
-const intersects = ray.intersectBox(aabb);
+const isHit = ray.intersectBox(aabb);
 ```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `aabb` | [`AABB`](../../Bound/classes/AABB.md) | Target AABB box |
+| `aabb` | [`AABB`](../../Bound/classes/AABB.md) | Target `AABB` instance to test for intersection |
 
 #### Returns
 
 `boolean`
 
-Whether it intersects
+Whether the ray intersects the box (`boolean`)
 
 ***
 
@@ -152,29 +154,29 @@ Whether it intersects
 
 > **intersectTriangle**(`v0`, `v1`, `v2`, `backfaceCulling?`): [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:170](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L170)
+Defined in: [src/math/Ray.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L170)
 
-Calculates the intersection point with a triangle (Möller-Trumbore algorithm).
+Calculates the intersection point between the ray and a triangle using the Möller-Trumbore algorithm.
 
-### Example
+#### Example
 ```typescript
-const point = ray.intersectTriangle(v0, v1, v2);
+const hitPoint = ray.intersectTriangle(v0, v1, v2, true);
 ```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `v0` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Vertex 0 |
-| `v1` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Vertex 1 |
-| `v2` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Vertex 2 |
-| `backfaceCulling` | `boolean` | `true` | Whether to use backface culling |
+| `v0` | [`vec3`](../type-aliases/vec3.md) | `undefined` | First vertex of the triangle (`vec3`) |
+| `v1` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Second vertex of the triangle (`vec3`) |
+| `v2` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Third vertex of the triangle (`vec3`) |
+| `backfaceCulling?` | `boolean` | `true` | Whether to apply backface culling (default: `true`) |
 
 #### Returns
 
 [`vec3`](../type-aliases/vec3.md)
 
-Intersection point (vec3) or null
+Intersection point coordinates (`vec3`) or `null` if no intersection
 
 ***
 
@@ -182,15 +184,15 @@ Intersection point (vec3) or null
 
 > **intersectTriangleBarycentric**(`v0`, `v1`, `v2`, `backfaceCulling?`): `object`
 
-Defined in: [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L238)
+Defined in: [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L238)
 
-Calculates the intersection point and barycentric coordinates with a triangle.
+Calculates the intersection point, distance (`t`), and barycentric coordinates (`u`, `v`) between the ray and a triangle.
 
-### Example
+#### Example
 ```typescript
-const result = ray.intersectTriangleBarycentric(v0, v1, v2);
-if (result) {
-    console.log(result.point, result.u, result.v);
+const hit = ray.intersectTriangleBarycentric(v0, v1, v2);
+if (hit) {
+    console.log(hit.point, hit.t, hit.u, hit.v);
 }
 ```
 
@@ -198,20 +200,20 @@ if (result) {
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `v0` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Vertex 0 |
-| `v1` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Vertex 1 |
-| `v2` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Vertex 2 |
-| `backfaceCulling` | `boolean` | `true` | Whether to use backface culling |
+| `v0` | [`vec3`](../type-aliases/vec3.md) | `undefined` | First vertex of the triangle (`vec3`) |
+| `v1` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Second vertex of the triangle (`vec3`) |
+| `v2` | [`vec3`](../type-aliases/vec3.md) | `undefined` | Third vertex of the triangle (`vec3`) |
+| `backfaceCulling?` | `boolean` | `true` | Whether to apply backface culling (default: `true`) |
 
 #### Returns
 
 `object`
 
-Intersection info ({point, t, u, v}) or null
+Intersection info object (`{ point: vec3, t: number, u: number, v: number }`) or `null` if no intersection
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `point` | [`vec3`](../type-aliases/vec3.md) | [src/math/Ray.ts:239](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L239) |
-| `t` | `number` | [src/math/Ray.ts:240](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L240) |
-| `u` | `number` | [src/math/Ray.ts:241](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L241) |
-| `v` | `number` | [src/math/Ray.ts:242](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/Ray.ts#L242) |
+| `point` | [`vec3`](../type-aliases/vec3.md) | [src/math/Ray.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L239) |
+| `t` | `number` | [src/math/Ray.ts:240](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L240) |
+| `u` | `number` | [src/math/Ray.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L241) |
+| `v` | `number` | [src/math/Ray.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/Ray.ts#L242) |

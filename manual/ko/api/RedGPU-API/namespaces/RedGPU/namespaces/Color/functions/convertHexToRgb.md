@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -10,13 +10,13 @@
 
 > **convertHexToRgb**(`hex`, `returnArrayYn`): \[`number`, `number`, `number`\]
 
-Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/color/convertHexToRgb.ts#L30)
+Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/color/convertHexToRgb.ts#L30)
 
 16진수(Hex) 색상 값을 RGB 색상으로 변환합니다.
 
 문자열 또는 숫자 형태의 16진수 데이터를 받아 각 색상 채널(R, G, B)을 추출합니다.
 
-* ### Example
+### Example
 ```typescript
 const rgb = RedGPU.Color.convertHexToRgb('#ff0000'); // { r: 255, g: 0, b: 0 }
 const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
@@ -26,8 +26,8 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `hex` | `string` \| `number` | 변환할 16진수 색상 데이터 (예: '#ff0000', 'ff0', 0xff0000)
-| `returnArrayYn` | `true` | RGB 값을 배열 형태로 반환할지 여부 (기본값: false)
+| `hex` | `string` \| `number` | 변환할 16진수 색상 데이터 (예: '#ff0000', '#ff0', 0xff0000) |
+| `returnArrayYn` | `true` | RGB 값을 배열 형태로 반환할지 여부 (기본값: false) |
 
 ### Returns
 
@@ -43,13 +43,13 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 > **convertHexToRgb**(`hex`, `returnArrayYn?`): `object`
 
-Defined in: [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/color/convertHexToRgb.ts#L31)
+Defined in: [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/color/convertHexToRgb.ts#L31)
 
 16진수(Hex) 색상 값을 RGB 색상으로 변환합니다.
 
 문자열 또는 숫자 형태의 16진수 데이터를 받아 각 색상 채널(R, G, B)을 추출합니다.
 
-* ### Example
+### Example
 ```typescript
 const rgb = RedGPU.Color.convertHexToRgb('#ff0000'); // { r: 255, g: 0, b: 0 }
 const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
@@ -59,8 +59,8 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `hex` | `string` \| `number` | 변환할 16진수 색상 데이터 (예: '#ff0000', 'ff0', 0xff0000)
-| `returnArrayYn?` | `false` | RGB 값을 배열 형태로 반환할지 여부 (기본값: false)
+| `hex` | `string` \| `number` | 변환할 16진수 색상 데이터 (예: '#ff0000', '#ff0', 0xff0000) |
+| `returnArrayYn?` | `false` | RGB 값을 배열 형태로 반환할지 여부 (기본값: false) |
 
 ### Returns
 
@@ -70,9 +70,9 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `b` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/color/convertHexToRgb.ts#L31) |
-| `g` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/color/convertHexToRgb.ts#L31) |
-| `r` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/color/convertHexToRgb.ts#L31) |
+| `b` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/color/convertHexToRgb.ts#L31) |
+| `g` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/color/convertHexToRgb.ts#L31) |
+| `r` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/color/convertHexToRgb.ts#L31) |
 
 ### Throws
 
@@ -82,13 +82,13 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 > **convertHexToRgb**(`hex`, `returnArrayYn?`): \[`number`, `number`, `number`\] \| \{ `b`: `number`; `g`: `number`; `r`: `number`; \}
 
-Defined in: [src/color/convertHexToRgb.ts:32](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/color/convertHexToRgb.ts#L32)
+Defined in: [src/color/convertHexToRgb.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/color/convertHexToRgb.ts#L32)
 
 16진수(Hex) 색상 값을 RGB 색상으로 변환합니다.
 
 문자열 또는 숫자 형태의 16진수 데이터를 받아 각 색상 채널(R, G, B)을 추출합니다.
 
-* ### Example
+### Example
 ```typescript
 const rgb = RedGPU.Color.convertHexToRgb('#ff0000'); // { r: 255, g: 0, b: 0 }
 const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
@@ -98,8 +98,8 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `hex` | `string` \| `number` | 변환할 16진수 색상 데이터 (예: '#ff0000', 'ff0', 0xff0000)
-| `returnArrayYn?` | `boolean` | RGB 값을 배열 형태로 반환할지 여부 (기본값: false)
+| `hex` | `string` \| `number` | 변환할 16진수 색상 데이터 (예: '#ff0000', '#ff0', 0xff0000) |
+| `returnArrayYn?` | `boolean` | RGB 값을 배열 형태로 반환할지 여부 (기본값: false) |
 
 ### Returns
 

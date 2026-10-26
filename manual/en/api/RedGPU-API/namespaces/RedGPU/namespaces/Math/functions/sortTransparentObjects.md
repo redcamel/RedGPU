@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,27 +8,27 @@
 
 > **sortTransparentObjects**(`cameraPos`, `objects`): `GPURenderBundle`[]
 
-Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/sortTransparentObjects.ts#L21)
+Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/sortTransparentObjects.ts#L21)
 
-Sorts transparent objects by distance from camera (descending).
+Sorts an array of transparent render bundles (`GPURenderBundle`) in descending order (back-to-front) by squared distance from the camera position.
 
 ### Example
 ```typescript
-const sorted = RedGPU.math.sortTransparentObjects(camera.position, transparentObjects);
+const sortedBundles = RedGPU.Math.sortTransparentObjects(camera, transparentBundles);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `cameraPos` | \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | Camera position {x, y, z} |
+| `cameraPos` | \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | 3D world coordinates of the camera (`{ x: number, y: number, z: number }`) |
 | `cameraPos.x` | `number` | - |
 | `cameraPos.y` | `number` | - |
 | `cameraPos.z` | `number` | - |
-| `objects` | `GPURenderBundle`[] | Array of `GPURenderBundle` objects |
+| `objects` | `GPURenderBundle`[] | `Array<GPURenderBundle>` to sort |
 
 ## Returns
 
 `GPURenderBundle`[]
 
-Sorted `GPURenderBundle` array
+`Array<GPURenderBundle>` sorted in descending order of camera distance

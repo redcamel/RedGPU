@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,11 @@
 
 # Class: VertexInterleavedStruct
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L18)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L18)
 
-정점 속성을 인터리브 방식으로 배치하기 위한 구조를 정의하는 클래스입니다.
+정점 속성을 인터리브(Interleaved) 방식으로 배치하기 위한 구조를 정의하는 클래스입니다.
 
-* ### Example
+### Example
 ```typescript
 const struct = new RedGPU.Resource.VertexInterleavedStruct({
   position: RedGPU.Resource.VertexInterleaveType.float32x3,
@@ -24,7 +24,7 @@ const struct = new RedGPU.Resource.VertexInterleavedStruct({
 
 > **new VertexInterleavedStruct**(`attributes`, `name?`): `VertexInterleavedStruct`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:34](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L34)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L35)
 
 VertexInterleavedStruct 인스턴스를 생성합니다.
 
@@ -32,8 +32,8 @@ VertexInterleavedStruct 인스턴스를 생성합니다.
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `attributes` | `Record`\<`string`, [`TypeInterleave`](../type-aliases/TypeInterleave.md)\> | `undefined` | 속성 정의 맵
-| `name` | `string` | `''` | 구조 이름 (선택)
+| `attributes` | `Record`\<`string`, [`TypeInterleave`](../type-aliases/TypeInterleave.md)\> | `undefined` | 속성 정의 맵 (`Record<string, TypeInterleave>`) |
+| `name?` | `string` | `''` | 구조 이름 (선택) |
 
 #### Returns
 
@@ -45,9 +45,9 @@ VertexInterleavedStruct 인스턴스를 생성합니다.
 
 #### Get Signature
 
-> **get** **arrayStride**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **arrayStride**(): `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:63](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L63)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L73)
 
 전체 stride(바이트 크기)를 반환합니다.
 
@@ -55,7 +55,7 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:63](ht
 
 `number`
 
-- 전체 stride 크기
+전체 stride 바이트 크기
 
 ***
 
@@ -63,9 +63,9 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:63](ht
 
 #### Get Signature
 
-> **get** **attributes**(): `any`[]
+> <span class="readonly-badge">readonly</span> **get** **attributes**(): `any`[]
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:54](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L54)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L61)
 
 GPU 정점 속성 배열을 반환합니다.
 
@@ -73,7 +73,7 @@ GPU 정점 속성 배열을 반환합니다.
 
 `any`[]
 
-- 정점 속성 배열
+정점 속성 배열
 
 ***
 
@@ -81,17 +81,17 @@ GPU 정점 속성 배열을 반환합니다.
 
 #### Get Signature
 
-> **get** **define**(): `Record`\<`string`, [`VertexInterleavedStructElement`](../namespaces/CoreVertexBuffer/classes/VertexInterleavedStructElement.md)\>
+> <span class="readonly-badge">readonly</span> **get** **define**(): `Record`\<`string`, [`VertexInterleavedStructElement`](../namespaces/CoreVertexBuffer/classes/VertexInterleavedStructElement.md)\>
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:72](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L72)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L85)
 
-내부 속성 정의 맵을 반환합니다.
+내부 속성 정의 맵 복사본을 반환합니다.
 
 ##### Returns
 
 `Record`\<`string`, [`VertexInterleavedStructElement`](../namespaces/CoreVertexBuffer/classes/VertexInterleavedStructElement.md)\>
 
-- 속성 정의 맵 복사본
+속성 정의 맵 (`Record<string, VertexInterleavedStructElement>`)
 
 ***
 
@@ -99,9 +99,9 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:72](ht
 
 #### Get Signature
 
-> **get** **label**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **label**(): `string`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L45)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L49)
 
 구조의 레이블(이름)을 반환합니다.
 
@@ -109,7 +109,7 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:45](ht
 
 `string`
 
-- 구조 레이블
+구조 레이블
 
 ## Methods
 
@@ -117,15 +117,15 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:45](ht
 
 > **getAttributeOffset**(`attributeName`): `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:82](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L82)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:100](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L100)
 
-특정 속성의 오프셋(float 단위 인덱스)을 반환합니다.
+특정 속성의 float 단위 오프셋 인덱스를 반환합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `attributeName` | `string` | 속성 이름
+| `attributeName` | `string` | 속성 이름 |
 
 #### Returns
 

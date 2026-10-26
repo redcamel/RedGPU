@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: IPhysicsEngine
 
-Defined in: [src/physics/IPhysicsEngine.ts:96](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L96)
+Defined in: [src/physics/IPhysicsEngine.ts:98](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L98)
 
 **`Experimental`**
 
@@ -20,13 +20,13 @@ Defined in: [src/physics/IPhysicsEngine.ts:96](https://github.com/redcamel/RedGP
 
 ### bodies
 
-> `readonly` **bodies**: [`IPhysicsBody`](IPhysicsBody.md)[]
+> <span class="readonly-badge">readonly</span> **bodies**: [`IPhysicsBody`](IPhysicsBody.md)[]
 
-Defined in: [src/physics/IPhysicsEngine.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L111)
+Defined in: [src/physics/IPhysicsEngine.ts:113](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L113)
 
 **`Experimental`**
 
-엔진에서 관리 중인 모든 물리 바디 리스트
+엔진에서 관리 중인 모든 물리 바디 목록
 
 ***
 
@@ -34,16 +34,11 @@ Defined in: [src/physics/IPhysicsEngine.ts:111](https://github.com/redcamel/RedG
 
 > **gravity**: `object`
 
-Defined in: [src/physics/IPhysicsEngine.ts:133](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L133)
+Defined in: [src/physics/IPhysicsEngine.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L131)
 
 **`Experimental`**
 
-중력을 설정하거나 가져옵니다.
-
-### Example
-```typescript
-physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
-```
+물리 월드의 중력 가속도 벡터
 
 #### x
 
@@ -61,13 +56,13 @@ physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 
 ### nativeWorld
 
-> `readonly` **nativeWorld**: `any`
+> <span class="readonly-badge">readonly</span> **nativeWorld**: `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:101](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L101)
+Defined in: [src/physics/IPhysicsEngine.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L103)
 
 **`Experimental`**
 
-물리 엔진의 원본 월드 인스턴스 (Escape Hatch)
+물리 엔진의 원본 월드 인스턴스
 
 ***
 
@@ -75,18 +70,18 @@ Defined in: [src/physics/IPhysicsEngine.ts:101](https://github.com/redcamel/RedG
 
 > **onCollisionStarted**: (`handle1`, `handle2`) => `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:123](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L123)
+Defined in: [src/physics/IPhysicsEngine.ts:126](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L126)
 
 **`Experimental`**
 
-물리 엔진에서 충돌이 시작될 때 호출되는 콜백입니다.
+충돌이 시작될 때 호출되는 콜백 함수입니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `handle1` | `number` | 첫 번째 충돌체의 핸들
-| `handle2` | `number` | 두 번째 충돌체의 핸들
+| `handle1` | `number` | 첫 번째 충돌체의 핸들 |
+| `handle2` | `number` | 두 번째 충돌체의 핸들 |
 
 #### Returns
 
@@ -96,13 +91,13 @@ Defined in: [src/physics/IPhysicsEngine.ts:123](https://github.com/redcamel/RedG
 
 ### RAPIER
 
-> `readonly` **RAPIER**: `any`
+> <span class="readonly-badge">readonly</span> **RAPIER**: `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:106](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L106)
+Defined in: [src/physics/IPhysicsEngine.ts:108](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L108)
 
 **`Experimental`**
 
-물리 엔진 라이브러리 네임스페이스 (Escape Hatch)
+물리 엔진 라이브러리 네임스페이스
 
 ## Methods
 
@@ -110,24 +105,24 @@ Defined in: [src/physics/IPhysicsEngine.ts:106](https://github.com/redcamel/RedG
 
 > **createBody**(`mesh`, `params`): [`IPhysicsBody`](IPhysicsBody.md)
 
-Defined in: [src/physics/IPhysicsEngine.ts:167](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L167)
+Defined in: [src/physics/IPhysicsEngine.ts:167](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L167)
 
 **`Experimental`**
 
-메쉬에 물리 바디를 생성하고 연결합니다.
+메시에 물리 바디를 생성하여 연결합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | 대상 메쉬
-| `params` | [`BodyParams`](BodyParams.md) | 바디 생성 파라미터
+| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | 대상 메시 객체 |
+| `params` | [`BodyParams`](BodyParams.md) | 바디 생성 설정 파라미터 |
 
 #### Returns
 
 [`IPhysicsBody`](IPhysicsBody.md)
 
-생성된 물리 바디
+생성된 `IPhysicsBody` 인스턴스
 
 ***
 
@@ -135,7 +130,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:167](https://github.com/redcamel/RedG
 
 > **createCharacterController**(`offset`): `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:189](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L189)
+Defined in: [src/physics/IPhysicsEngine.ts:190](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L190)
 
 **`Experimental`**
 
@@ -145,13 +140,13 @@ Defined in: [src/physics/IPhysicsEngine.ts:189](https://github.com/redcamel/RedG
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `offset` | `number` | 지면과의 간격
+| `offset` | `number` | 지면과의 오프셋 간격 |
 
 #### Returns
 
 `any`
 
-캐릭터 컨트롤러 인스턴스
+생성된 캐릭터 컨트롤러 인스턴스
 
 ***
 
@@ -159,17 +154,17 @@ Defined in: [src/physics/IPhysicsEngine.ts:189](https://github.com/redcamel/RedG
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [src/physics/IPhysicsEngine.ts:143](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L143)
+Defined in: [src/physics/IPhysicsEngine.ts:141](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L141)
 
 **`Experimental`**
 
-물리 엔진을 초기화합니다. (WASM 로딩 등)
+물리 엔진을 비동기로 초기화합니다.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-초기화 완료를 보장하는 Promise
+초기화 완료 `Promise<void>`
 
 ***
 
@@ -177,17 +172,17 @@ Defined in: [src/physics/IPhysicsEngine.ts:143](https://github.com/redcamel/RedG
 
 > **removeBody**(`body`): `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:176](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L176)
+Defined in: [src/physics/IPhysicsEngine.ts:177](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L177)
 
 **`Experimental`**
 
-물리 바디를 제거합니다.
+물리 월드에서 물리 바디를 제거합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `body` | [`IPhysicsBody`](IPhysicsBody.md) | 제거할 바디
+| `body` | [`IPhysicsBody`](IPhysicsBody.md) | 제거할 물리 바디 |
 
 #### Returns
 
@@ -199,7 +194,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:176](https://github.com/redcamel/RedG
 
 > **step**(`deltaTime`): `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:152](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsEngine.ts#L152)
+Defined in: [src/physics/IPhysicsEngine.ts:151](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsEngine.ts#L151)
 
 **`Experimental`**
 
@@ -209,7 +204,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:152](https://github.com/redcamel/RedG
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `deltaTime` | `number` | 프레임 간 시간 간격
+| `deltaTime` | `number` | 프레임 간 경과 시간(초) |
 
 #### Returns
 

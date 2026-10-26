@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,12 +8,13 @@
 
 > **getMipLevelCount**(`width`, `height`): `number`
 
-Defined in: [src/utils/texture/getMipLevelCount.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/texture/getMipLevelCount.ts#L17)
+Defined in: [src/utils/texture/getMipLevelCount.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/texture/getMipLevelCount.ts#L25)
 
 Calculates the maximum number of Mipmap levels for a given resolution.
 
-* ### Example
+### Example
 ```typescript
+// Calculate Mipmap level count for 1024x1024 resolution
 const levels = RedGPU.Util.getMipLevelCount(1024, 1024); // 11
 ```
 
@@ -21,11 +22,11 @@ const levels = RedGPU.Util.getMipLevelCount(1024, 1024); // 11
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `width` | `number` | Width |
-| `height` | `number` | Height |
+| `width` | `number` | Texture width in pixels |
+| `height` | `number` | Texture height in pixels |
 
 ## Returns
 
 `number`
 
-Number of Mipmap levels
+Calculated number of Mipmap levels

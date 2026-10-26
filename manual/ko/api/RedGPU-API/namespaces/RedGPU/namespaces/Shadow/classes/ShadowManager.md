@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ShadowManager
 
-Defined in: [src/shadow/ShadowManager.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L24)
+Defined in: [src/shadow/ShadowManager.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L24)
 
 씬의 전체적인 그림자 렌더링을 총괄하는 관리자 클래스입니다.
 
@@ -20,7 +20,7 @@ Defined in: [src/shadow/ShadowManager.ts:24](https://github.com/redcamel/RedGPU/
 
 > **new ShadowManager**(): `ShadowManager`
 
-Defined in: [src/shadow/ShadowManager.ts:28](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L28)
+Defined in: [src/shadow/ShadowManager.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L30)
 
 #### Returns
 
@@ -32,9 +32,9 @@ Defined in: [src/shadow/ShadowManager.ts:28](https://github.com/redcamel/RedGPU/
 
 #### Get Signature
 
-> **get** **directionalShadowManager**(): [`DirectionalShadowManager`](DirectionalShadowManager.md)
+> <span class="readonly-badge">readonly</span> **get** **directionalShadowManager**(): [`DirectionalShadowManager`](DirectionalShadowManager.md)
 
-Defined in: [src/shadow/ShadowManager.ts:39](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L39)
+Defined in: [src/shadow/ShadowManager.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L41)
 
 직사광(Directional Light) 섀도우 매니저를 반환합니다.
 
@@ -44,31 +44,13 @@ Defined in: [src/shadow/ShadowManager.ts:39](https://github.com/redcamel/RedGPU/
 
 DirectionalShadowManager 인스턴스
 
-***
-
-### shadowPassDescriptor
-
-#### Get Signature
-
-> **get** **shadowPassDescriptor**(): `GPURenderPassDescriptor`
-
-Defined in: [src/shadow/ShadowManager.ts:51](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L51)
-
-섀도우 렌더 패스 디스크립터를 반환합니다.
-
-##### Returns
-
-`GPURenderPassDescriptor`
-
-GPURenderPassDescriptor 객체
-
 ## Methods
 
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:114](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L114)
+Defined in: [src/shadow/ShadowManager.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L116)
 
 사용 중인 그림자 GPU 리소스를 해제합니다.
 
@@ -82,7 +64,7 @@ Defined in: [src/shadow/ShadowManager.ts:114](https://github.com/redcamel/RedGPU
 
 > **render**(`view`): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:63](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L63)
+Defined in: [src/shadow/ShadowManager.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L53)
 
 그림자 렌더링을 수행합니다.
 
@@ -90,7 +72,7 @@ Defined in: [src/shadow/ShadowManager.ts:63](https://github.com/redcamel/RedGPU/
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | 대상 View3D
+| `view` | [`View3D`](../../Display/classes/View3D.md) | 대상 View3D |
 
 #### Returns
 
@@ -102,7 +84,7 @@ Defined in: [src/shadow/ShadowManager.ts:63](https://github.com/redcamel/RedGPU/
 
 > **update**(`redGPUContext`): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:106](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L106)
+Defined in: [src/shadow/ShadowManager.ts:208](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/shadow/ShadowManager.ts#L208)
 
 매니저의 상태를 업데이트합니다.
 
@@ -110,7 +92,7 @@ Defined in: [src/shadow/ShadowManager.ts:106](https://github.com/redcamel/RedGPU
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스 |
 
 #### Returns
 

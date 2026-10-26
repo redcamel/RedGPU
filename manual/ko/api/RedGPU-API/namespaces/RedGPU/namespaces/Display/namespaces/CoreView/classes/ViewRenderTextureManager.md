@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,21 @@
 
 # Class: ViewRenderTextureManager
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L88)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L101)
 
-View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하는 매니저 클래스입니다.
+View3D/View2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하는 매니저 클래스입니다.
 
 ::: warning
 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
 :::
+
+***
+
+### Example
+```typescript
+// View3D 인스턴스를 통해 접근
+const viewRenderTextureManager = view.viewRenderTextureManager;
+```
 
 ## Extends
 
@@ -20,11 +28,15 @@ View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new ViewRenderTextureManager**(`view`): `ViewRenderTextureManager`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:119](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L119)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L130)
 
 ViewRenderTextureManager 인스턴스를 생성합니다.
 
@@ -32,7 +44,7 @@ ViewRenderTextureManager 인스턴스를 생성합니다.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../../classes/View3D.md) | 이 매니저가 관리할 View3D 인스턴스
+| `view` | [`View3D`](../../../classes/View3D.md) | 이 매니저가 관리할 View3D 인스턴스 |
 
 #### Returns
 
@@ -42,21 +54,29 @@ ViewRenderTextureManager 인스턴스를 생성합니다.
 
 [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../../../BaseObject/classes/RedGPUObject.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### depthTexture
 
 #### Get Signature
 
-> **get** **depthTexture**(): `GPUTexture`
+> <span class="readonly-badge">readonly</span> **get** **depthTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:152](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L152)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L179)
 
-깊이(depth) 텍스처를 반환합니다. (스왑 버퍼링 반영)
+현재 프레임의 깊이(Depth) 텍스처를 반환합니다.
 
 ##### Returns
 
 `GPUTexture`
+
+현재 깊이 텍스처
+
+***
 
 ***
 
@@ -64,15 +84,19 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 #### Get Signature
 
-> **get** **depthTexture0View**(): `GPUTextureView`
+> <span class="readonly-badge">readonly</span> **get** **depthTexture0View**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:179](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L179)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:218](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L218)
 
-첫 번째 깊이(depth) 텍스처 뷰를 반환합니다.
+첫 번째 깊이 텍스처(`depthTexture0`)의 뷰를 반환합니다.
 
 ##### Returns
 
 `GPUTextureView`
+
+첫 번째 깊이 텍스처 뷰
+
+***
 
 ***
 
@@ -80,15 +104,19 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 #### Get Signature
 
-> **get** **depthTexture1View**(): `GPUTextureView`
+> <span class="readonly-badge">readonly</span> **get** **depthTexture1View**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:188](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L188)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:231](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L231)
 
-두 번째 깊이(depth) 텍스처 뷰를 반환합니다.
+두 번째 깊이 텍스처(`depthTexture1`)의 뷰를 반환합니다.
 
 ##### Returns
 
 `GPUTextureView`
+
+두 번째 깊이 텍스처 뷰
+
+***
 
 ***
 
@@ -96,15 +124,19 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 #### Get Signature
 
-> **get** **depthTextureView**(): `GPUTextureView`
+> <span class="readonly-badge">readonly</span> **get** **depthTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:161](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L161)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:192](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L192)
 
-깊이(depth) 텍스처 뷰를 반환합니다. (스왑 버퍼링 반영)
+현재 프레임의 깊이(Depth) 텍스처 뷰를 반환합니다.
 
 ##### Returns
 
 `GPUTextureView`
+
+현재 깊이 텍스처 뷰
+
+***
 
 ***
 
@@ -112,15 +144,19 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 #### Get Signature
 
-> **get** **gBuffers**(): `Map`\<`string`, `GBufferInfo`\>
+> <span class="readonly-badge">readonly</span> **get** **gBuffers**(): `Map`\<`string`, `GBufferInfo`\>
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:128](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L128)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L143)
 
-G-Buffer 맵을 반환합니다.
+G-Buffer 맵(`Map<string, GBufferInfo>`)을 반환합니다.
 
 ##### Returns
 
 `Map`\<`string`, `GBufferInfo`\>
+
+G-Buffer 정보 맵
+
+***
 
 ***
 
@@ -128,15 +164,59 @@ G-Buffer 맵을 반환합니다.
 
 #### Get Signature
 
-> **get** **prevDepthTextureView**(): `GPUTextureView`
+> <span class="readonly-badge">readonly</span> **get** **prevDepthTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:170](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L170)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L205)
 
-이전 프레임의 깊이(depth) 텍스처 뷰를 반환합니다. (스왑 버퍼링 반영)
+이전 프레임의 깊이(Depth) 텍스처 뷰를 반환합니다.
 
 ##### Returns
 
 `GPUTextureView`
+
+이전 프레임 깊이 텍스처 뷰
+
+***
+
+***
+
+### renderPath1DepthResultTexture
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **renderPath1DepthResultTexture**(): `GPUTexture`
+
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:280](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L280)
+
+1차 렌더 패스 깊이 결과 텍스처를 반환합니다.
+
+##### Returns
+
+`GPUTexture`
+
+1차 렌더 패스 깊이 결과 텍스처
+
+***
+
+***
+
+### renderPath1DepthResultTextureView
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **renderPath1DepthResultTextureView**(): `GPUTextureView`
+
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:268](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L268)
+
+1차 렌더 패스 깊이 결과 텍스처 뷰를 반환합니다.
+
+##### Returns
+
+`GPUTextureView`
+
+1차 렌더 패스 깊이 결과 텍스처 뷰
+
+***
 
 ***
 
@@ -144,15 +224,19 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 #### Get Signature
 
-> **get** **renderPath1ResultTexture**(): `GPUTexture`
+> <span class="readonly-badge">readonly</span> **get** **renderPath1ResultTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:205](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L205)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:256](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L256)
 
-렌더 패스 1단계 결과 텍스처를 반환합니다.
+1차 렌더 패스 컬러 결과 텍스처를 반환합니다.
 
 ##### Returns
 
 `GPUTexture`
+
+1차 렌더 패스 결과 텍스처
+
+***
 
 ***
 
@@ -160,15 +244,19 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 #### Get Signature
 
-> **get** **renderPath1ResultTextureDescriptor**(): `GPUTextureDescriptor`
+> <span class="readonly-badge">readonly</span> **get** **renderPath1ResultTextureDescriptor**(): `GPUTextureDescriptor`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:144](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L144)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:167](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L167)
 
-렌더 패스 1단계 결과 텍스처 생성에 사용된 디스크립터를 반환합니다.
+1차 렌더 패스 결과 텍스처의 디스크립터를 반환합니다.
 
 ##### Returns
 
 `GPUTextureDescriptor`
+
+1차 렌더 패스 결과 텍스처 디스크립터
+
+***
 
 ***
 
@@ -176,15 +264,19 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 #### Get Signature
 
-> **get** **renderPath1ResultTextureView**(): `GPUTextureView`
+> <span class="readonly-badge">readonly</span> **get** **renderPath1ResultTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:197](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L197)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:244](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L244)
 
-렌더 패스 1단계 결과 텍스처 뷰를 반환합니다.
+1차 렌더 패스 컬러 결과 텍스처 뷰를 반환합니다.
 
 ##### Returns
 
 `GPUTextureView`
+
+1차 렌더 패스 결과 텍스처 뷰
+
+***
 
 ***
 
@@ -192,25 +284,37 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 #### Get Signature
 
-> **get** **videoMemorySize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:136](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L136)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L155)
 
-현재 계산된 비디오 메모리 사용량 (바이트 단위)을 반환합니다.
+현재 관리 중인 렌더 텍스처들의 총 비디오 메모리 사용량(바이트)을 반환합니다.
 
 ##### Returns
 
 `number`
 
+비디오 메모리 사용량 (바이트)
+
 ## Methods
 
-### destroy()
 
-> **destroy**(): `void`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:264](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L264)
+***
 
-ViewRenderTextureManager 인스턴스를 파기하고 내부에 보관 중이던 G-Buffer 및 Depth 텍스처들을 물리적으로 해제합니다.
+### copyDepthToRenderPath1()
+
+> **copyDepthToRenderPath1**(`encoder`): `void`
+
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:292](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L292)
+
+1차 렌더 패스의 깊이 버퍼를 2차 패스 참조용 `renderPath1DepthResultTexture`에 복사 또는 MSAA 리졸브합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `encoder` | `GPUCommandEncoder` | GPUCommandEncoder 인스턴스 |
 
 #### Returns
 
@@ -218,23 +322,45 @@ ViewRenderTextureManager 인스턴스를 파기하고 내부에 보관 중이던
 
 ***
 
+***
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:377](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L377)
+
+관리 중인 모든 G-Buffer 및 깊이 텍스처 리소스를 해제하고 매니저를 파기합니다.
+
+#### Returns
+
+`void`
+
+***
+
+***
+
 ### getGBufferResolveTexture()
 
 > **getGBufferResolveTexture**(`type`): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:231](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L231)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:336](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L336)
 
-지정된 타입의 G-Buffer Resolve 텍스처를 반환합니다. (MSAA 해제 시 대상)
+지정된 타입의 MSAA Resolve G-Buffer 텍스처를 반환합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `type` | `GBUFFER_TYPE` | G-Buffer 타입 상수
+| `type` | `GBUFFER_TYPE` | G-Buffer 타입 상수 |
 
 #### Returns
 
 `GPUTexture`
+
+Resolve 대상 GPU 텍스처
+
+***
 
 ***
 
@@ -242,19 +368,23 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 > **getGBufferResolveTextureView**(`type`): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:255](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L255)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:368](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L368)
 
-지정된 타입의 G-Buffer Resolve 텍스처 뷰를 반환합니다. (MSAA 해제 시 대상 뷰)
+지정된 타입의 MSAA Resolve G-Buffer 텍스처 뷰를 반환합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `type` | `GBUFFER_TYPE` | G-Buffer 타입 상수
+| `type` | `GBUFFER_TYPE` | G-Buffer 타입 상수 |
 
 #### Returns
 
 `GPUTextureView`
+
+Resolve 대상 GPU 텍스처 뷰
+
+***
 
 ***
 
@@ -262,7 +392,7 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 > **getGBufferTexture**(`type`): `GPUTexture`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:219](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L219)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:320](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L320)
 
 지정된 타입의 G-Buffer 텍스처를 반환합니다.
 
@@ -270,11 +400,15 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `type` | `GBUFFER_TYPE` | G-Buffer 타입 상수
+| `type` | `GBUFFER_TYPE` | G-Buffer 타입 상수 |
 
 #### Returns
 
 `GPUTexture`
+
+G-Buffer GPU 텍스처
+
+***
 
 ***
 
@@ -282,7 +416,7 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 > **getGBufferTextureView**(`type`): `GPUTextureView`
 
-Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:243](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L243)
+Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts:352](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/view/core/viewRenderTextureManager/ViewRenderTextureManager.ts#L352)
 
 지정된 타입의 G-Buffer 텍스처 뷰를 반환합니다.
 
@@ -290,49 +424,36 @@ Defined in: [src/display/view/core/viewRenderTextureManager/ViewRenderTextureMan
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `type` | `GBUFFER_TYPE` | G-Buffer 타입 상수
+| `type` | `GBUFFER_TYPE` | G-Buffer 타입 상수 |
 
 #### Returns
 
 `GPUTextureView`
 
+G-Buffer GPU 텍스처 뷰
 
 ***
 
-## 상속받은 멤버
+## 상속받은 속성
 
 <details>
-<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-클래스별 인스턴스 순번 ID
-
-#### Inherited from
-
-[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../../../BaseObject/classes/RedGPUObject.md#instanceid)
-
-## Accessors
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager 인스턴스
+`AntialiasingManager` 인스턴스
 
 #### Inherited from
 
@@ -340,21 +461,23 @@ AntialiasingManager 인스턴스
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager 인스턴스
+`CommandEncoderManager` 인스턴스
 
 #### Inherited from
 
@@ -362,25 +485,53 @@ CommandEncoderManager 인스턴스
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-WebGPU 디바이스 객체를 반환합니다. (단축 경로)
+컨텍스트에 할당된 논리적 WebGPU 디바이스(`GPUDevice`)를 반환합니다.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice 인스턴스
+`GPUDevice` 인스턴스
 
 #### Inherited from
 
 [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+
+##### Returns
+
+`number`
+
+클래스별 고유 인스턴스 번호
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
 
 ***
 
@@ -390,29 +541,27 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
+객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
 
 ##### Returns
 
 `string`
 
-객체 이름
+객체 이름 문자열
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-객체의 이름을 설정합니다.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | 설정할 객체 이름
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -424,21 +573,23 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-RedGPUContext 인스턴스를 반환합니다.
+바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-RedGPUContext 인스턴스
+`RedGPUContext` 인스턴스
 
 #### Inherited from
 
@@ -446,21 +597,23 @@ RedGPUContext 인스턴스
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager 인스턴스
+`ResourceManager` 인스턴스
 
 #### Inherited from
 
@@ -468,13 +621,15 @@ ResourceManager 인스턴스
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -482,13 +637,12 @@ Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/
 
 `string`
 
-UUID 문자열
+객체의 UUID 문자열
 
 #### Inherited from
 
 [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../../../BaseObject/classes/RedGPUObject.md#uuid)
 
 ***
-
 
 </details>

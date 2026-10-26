@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,21 +6,11 @@
 
 # Class: RapierBody
 
-Defined in: [src/plugins/rapier/RapierBody.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L24)
+Defined in: [src/plugins/rapier/RapierBody.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L14)
 
 **`Experimental`**
 
-`IPhysicsBody` implementation for the Rapier physics engine.
-
-It synchronizes and controls transform information between Rapier's RigidBody and RedGPU's Mesh. Simulation results are automatically reflected in the connected mesh's position and rotation every frame.
-
-::: warning
-This feature is currently in the experimental stage. The API may change in the future.
-:::
-
-## See
-
- -[Physics Plugin Manual](https://redcamel.github.io/RedGPU/manual/en/plugins/physics)
+`IPhysicsBody` implementation class that synchronizes and controls transforms between a Rapier `RigidBody` and a RedGPU `Mesh`.
 
 ## Implements
 
@@ -32,7 +22,7 @@ This feature is currently in the experimental stage. The API may change in the f
 
 > **new RapierBody**(`mesh`, `body`, `collider`): `RapierBody`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:43](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L43)
+Defined in: [src/plugins/rapier/RapierBody.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L33)
 
 **`Experimental`**
 
@@ -42,9 +32,9 @@ Creates a RapierBody instance.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../../../Display/classes/Mesh.md) | RedGPU mesh to connect |
-| `body` | `RigidBody` | Rapier rigid body object |
-| `collider` | `Collider` | Rapier collider object |
+| `mesh` | [`Mesh`](../../../../Display/classes/Mesh.md) | RedGPU `Mesh` instance to bind |
+| `body` | `RigidBody` | Rapier `RigidBody` instance |
+| `collider` | `Collider` | Rapier `Collider` instance |
 
 #### Returns
 
@@ -56,17 +46,19 @@ Creates a RapierBody instance.
 
 #### Get Signature
 
-> **get** **mesh**(): [`Mesh`](../../../../Display/classes/Mesh.md)
+> <span class="readonly-badge">readonly</span> **get** **mesh**(): [`Mesh`](../../../../Display/classes/Mesh.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:54](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L54)
+Defined in: [src/plugins/rapier/RapierBody.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L47)
 
 **`Experimental`**
 
-Returns the connected RedGPU mesh.
+Returns the bound RedGPU `Mesh` instance.
 
 ##### Returns
 
 [`Mesh`](../../../../Display/classes/Mesh.md)
+
+Bound `Mesh` instance
 
 ***
 
@@ -74,17 +66,19 @@ Returns the connected RedGPU mesh.
 
 #### Get Signature
 
-> **get** **nativeBody**(): `RigidBody`
+> <span class="readonly-badge">readonly</span> **get** **nativeBody**(): `RigidBody`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:63](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L63)
+Defined in: [src/plugins/rapier/RapierBody.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L59)
 
 **`Experimental`**
 
-Returns the native Rapier rigid body object.
+Returns the native Rapier `RigidBody` object.
 
 ##### Returns
 
 `RigidBody`
+
+Rapier `RigidBody` object
 
 #### Implementation of
 
@@ -96,17 +90,19 @@ Returns the native Rapier rigid body object.
 
 #### Get Signature
 
-> **get** **nativeCollider**(): `Collider`
+> <span class="readonly-badge">readonly</span> **get** **nativeCollider**(): `Collider`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:72](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L72)
+Defined in: [src/plugins/rapier/RapierBody.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L71)
 
 **`Experimental`**
 
-Returns the native Rapier collider object.
+Returns the native Rapier `Collider` object.
 
 ##### Returns
 
 `Collider`
+
+Rapier `Collider` object
 
 ***
 
@@ -116,30 +112,27 @@ Returns the native Rapier collider object.
 
 > **get** **position**(): [`vec3`](../../../../Math/type-aliases/vec3.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:80](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L80)
+Defined in: [src/plugins/rapier/RapierBody.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L83)
 
 **`Experimental`**
 
-Gets or sets the current position of the physics body.
+Gets or sets the world position of the physics body.
 
 ##### Returns
 
 [`vec3`](../../../../Math/type-aliases/vec3.md)
 
+World position vector (`vec3`)
+
 #### Set Signature
 
 > **set** **position**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:85](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L85)
+Defined in: [src/plugins/rapier/RapierBody.ts:88](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L88)
 
 **`Experimental`**
 
 Current position of the physics body
-
-### Example
-```typescript
-body.position = [0, 10, 0];
-```
 
 ##### Parameters
 
@@ -163,30 +156,27 @@ body.position = [0, 10, 0];
 
 > **get** **rotation**(): [`quat`](../../../../Math/type-aliases/quat.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:97](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L97)
+Defined in: [src/plugins/rapier/RapierBody.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L104)
 
 **`Experimental`**
 
-Gets or sets the current rotation (quaternion) of the physics body.
+Gets or sets the rotation quaternion (`quat`) of the physics body.
 
 ##### Returns
 
 [`quat`](../../../../Math/type-aliases/quat.md)
 
+Rotation quaternion (`quat`)
+
 #### Set Signature
 
 > **set** **rotation**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:102](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L102)
+Defined in: [src/plugins/rapier/RapierBody.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L109)
 
 **`Experimental`**
 
-Current rotation of the physics body (Quaternion)
-
-### Example
-```typescript
-body.rotation = [0, 0, 0, 1];
-```
+Current rotation (quaternion) of the physics body
 
 ##### Parameters
 
@@ -210,30 +200,27 @@ body.rotation = [0, 0, 0, 1];
 
 > **get** **velocity**(): [`vec3`](../../../../Math/type-aliases/vec3.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:114](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L114)
+Defined in: [src/plugins/rapier/RapierBody.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L125)
 
 **`Experimental`**
 
-Gets or sets the current linear velocity of the physics body.
+Gets or sets the linear velocity (`vec3`) of the physics body.
 
 ##### Returns
 
 [`vec3`](../../../../Math/type-aliases/vec3.md)
 
+Linear velocity vector (`vec3`)
+
 #### Set Signature
 
 > **set** **velocity**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:119](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L119)
+Defined in: [src/plugins/rapier/RapierBody.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L130)
 
 **`Experimental`**
 
 Current linear velocity of the physics body
-
-### Example
-```typescript
-const velocity = body.velocity;
-```
 
 ##### Parameters
 
@@ -255,13 +242,13 @@ const velocity = body.velocity;
 
 > **applyImpulse**(`force`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:140](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L140)
+Defined in: [src/plugins/rapier/RapierBody.ts:151](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L151)
 
 **`Experimental`**
 
-Applies an impulse to the physics body.
+Applies an instantaneous impulse to the physics body.
 
-* ### Example
+#### Example
 ```typescript
 body.applyImpulse([0, 10, 0]);
 ```
@@ -270,7 +257,7 @@ body.applyImpulse([0, 10, 0]);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `force` | [`vec3`](../../../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | Vector of the force to apply |
+| `force` | [`vec3`](../../../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | Impulse vector to apply (`vec3` or `{ x, y, z }`) |
 
 #### Returns
 
@@ -286,11 +273,11 @@ body.applyImpulse([0, 10, 0]);
 
 > **syncToMesh**(): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:152](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L152)
+Defined in: [src/plugins/rapier/RapierBody.ts:163](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L163)
 
 **`Experimental`**
 
-Synchronizes the physics simulation's position and rotation information to the connected RedGPU mesh.
+Synchronizes the position and rotation results of the physics simulation to the bound `Mesh`.
 
 #### Returns
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getDisplacementPosition**: `string` = `getDisplacementPosition_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2727](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L2727)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2824](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2824)
 
 Calculates the modified vertex position by sampling the displacement texture with bicubic filtering.
 
@@ -16,35 +16,49 @@ Calculates the modified vertex position by sampling the displacement texture wit
 
 ## Param
 
+**input\_position**
+
 Input vertex position
 //
 
 ## Param
+
+**input\_vertexNormal**
 
 Input vertex normal
 //
 
 ## Param
 
+**displacementTexture**
+
 Displacement texture
 //
 
 ## Param
+
+**displacementTextureSampler**
 
 Sampler
 //
 
 ## Param
 
+**displacementScale**
+
 Displacement scale
 //
 
 ## Param
 
+**input\_uv**
+
 Input UV coordinates
 //
 
 ## Param
+
+**mipLevel**
 
 Mipmap level
 //

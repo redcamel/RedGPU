@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Camera
 
-렌더링 시점과 시야를 제어하기 위한 카메라 시스템과 다양한 조작 컨트롤러를 제공합니다.
-
-원근(Perspective), 직교(Orthographic), 2D 투영 방식과 함께 사용자 입력 기반의 유연한 카메라 조작 기능을 포함합니다.
+원근(Perspective), 직교(Orthographic), 2D 카메라 및 사용자 입력 기반 카메라 컨트롤러를 제공합니다.
 
 ## Camera
 

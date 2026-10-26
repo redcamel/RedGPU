@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,22 +8,24 @@
 
 > **getFileName**(`url`, `withExtension?`): `string`
 
-Defined in: [src/utils/file/getFileName.ts:16](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/file/getFileName.ts#L16)
+Defined in: [src/utils/file/getFileName.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/file/getFileName.ts#L26)
 
-URL 또는 경로에서 파일 이름을 추출합니다.
+URL 또는 경로의 마지막 `/` 이후 부분을 파일 이름으로 반환합니다.
 
-* ### Example
+### Example
 ```typescript
-const nameWithExt = RedGPU.Util.getFileName('path/to/image.png'); // 'image.png'
-const nameOnly = RedGPU.Util.getFileName('path/to/image.png', false); // 'image'
+// 'image.png' 반환
+const nameWithExtension = RedGPU.Util.getFileName('path/to/image.png');
+// 'image' 반환
+const nameOnly = RedGPU.Util.getFileName('path/to/image.png', false);
 ```
 
 ## Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `url` | `string` | `undefined` | 대상 URL 또는 경로
-| `withExtension` | `boolean` | `true` | 확장자 포함 여부 (기본값: true)
+| `url` | `string` | `undefined` | 대상 URL 또는 경로 |
+| `withExtension?` | `boolean` | `true` | 확장자 포함 여부 (기본값: `true`) |
 
 ## Returns
 

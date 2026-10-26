@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Interface: IPhysicsBody
 
-Defined in: [src/physics/IPhysicsBody.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L18)
+Defined in: [src/physics/IPhysicsBody.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L15)
 
 **`Experimental`**
 
 Interface that connects a physics engine's rigid body with a RedGPU mesh.
-
-Through this interface, physics simulation results (position, rotation, etc.) can be reflected in the mesh, or the physics object can be controlled externally.
 
 ::: warning
 This feature is currently in the experimental stage. The API may change in the future.
@@ -24,13 +22,11 @@ This feature is currently in the experimental stage. The API may change in the f
 
 > **nativeBody**: `any`
 
-Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L26)
+Defined in: [src/physics/IPhysicsBody.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L20)
 
 **`Experimental`**
 
-The native body object of the physics engine (Escape Hatch)
-
-Used when direct access to unique features of a specific physics engine (e.g., Rapier) is required.
+Native body object of the physics engine
 
 ***
 
@@ -38,16 +34,11 @@ Used when direct access to unique features of a specific physics engine (e.g., R
 
 > **position**: [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:37](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L37)
+Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L26)
 
 **`Experimental`**
 
 Current position of the physics body
-
-### Example
-```typescript
-body.position = [0, 10, 0];
-```
 
 ***
 
@@ -55,16 +46,11 @@ body.position = [0, 10, 0];
 
 > **rotation**: [`quat`](../../Math/type-aliases/quat.md) \| \{ `w`: `number`; `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:48](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L48)
+Defined in: [src/physics/IPhysicsBody.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L32)
 
 **`Experimental`**
 
-Current rotation of the physics body (Quaternion)
-
-### Example
-```typescript
-body.rotation = [0, 0, 0, 1];
-```
+Current rotation (quaternion) of the physics body
 
 ***
 
@@ -72,16 +58,11 @@ body.rotation = [0, 0, 0, 1];
 
 > **velocity**: [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:59](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L59)
+Defined in: [src/physics/IPhysicsBody.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L38)
 
 **`Experimental`**
 
 Current linear velocity of the physics body
-
-### Example
-```typescript
-const velocity = body.velocity;
-```
 
 ## Methods
 
@@ -89,7 +70,7 @@ const velocity = body.velocity;
 
 > **applyImpulse**(`force`): `void`
 
-Defined in: [src/physics/IPhysicsBody.ts:74](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L74)
+Defined in: [src/physics/IPhysicsBody.ts:55](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L55)
 
 **`Experimental`**
 
@@ -97,6 +78,7 @@ Applies an impulse to the physics body.
 
 ### Example
 ```typescript
+// Apply impulse along the Y-axis
 body.applyImpulse([0, 5, 0]);
 ```
 
@@ -104,7 +86,7 @@ body.applyImpulse([0, 5, 0]);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `force` | [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | Vector of the force to apply |
+| `force` | [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | Force vector to apply |
 
 #### Returns
 
@@ -116,13 +98,11 @@ body.applyImpulse([0, 5, 0]);
 
 > **syncToMesh**(): `void`
 
-Defined in: [src/physics/IPhysicsBody.ts:83](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L83)
+Defined in: [src/physics/IPhysicsBody.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L61)
 
 **`Experimental`**
 
-Synchronizes the physics engine's simulation results to the transform of the connected mesh.
-
-Normally called automatically in the rendering loop.
+Synchronizes the physics simulation results to the transform of the connected mesh.
 
 #### Returns
 

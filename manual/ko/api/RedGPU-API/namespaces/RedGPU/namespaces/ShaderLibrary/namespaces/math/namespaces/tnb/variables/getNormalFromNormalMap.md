@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getNormalFromNormalMap**: `string` = `getNormalFromNormalMap_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:884](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L884)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:905](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L905)
 
 노멀 맵 데이터를 탄젠트 공간의 법선 벡터로 변환하고 TBN 행렬을 적용합니다.
 
@@ -16,15 +16,21 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:884](https://github.com/redc
 
 ## Param
 
+**sampledNormalColor**
+
 노멀 맵에서 샘플링된 데이터 (RG 또는 RGB)
 //
 
 ## Param
 
+**tbn**
+
 3x3 TBN 행렬
 //
 
 ## Param
+
+**strength**
 
 노멀 강도
 //

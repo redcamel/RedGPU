@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,25 @@
 
 # Class: IBL
 
-Defined in: [src/resources/texture/ibl/IBL.ts:13](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L13)
+Defined in: [src/resources/texture/ibl/IBL.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L25)
 
-Class that manages Image-Based Lighting (IBL).
+Class that provides IBL (Image-Based Lighting) by generating environment, irradiance, and prefilter cube maps from an environment map source.
+
+HDR sources are converted to a cube map internally, and all maps are regenerated asynchronously when the source changes.
+
+***
+
+### Example
+```typescript
+const ibl = new RedGPU.Resource.IBL(redGPUContext, '/assets/hdr/environment.hdr');
+view.ibl = ibl;
+```
+
+## See
+
+- [SkyBox IBL example](https://redcamel.github.io/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)
+ - [IBL test example](https://redcamel.github.io/RedGPU/examples/3d/skybox/ibl/iblTest/)
+ - [IBL texture size example](https://redcamel.github.io/RedGPU/examples/3d/skybox/ibl/iblTextureSize/)
 
 ## Extends
 
@@ -16,24 +32,39 @@ Class that manages Image-Based Lighting (IBL).
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new IBL**(`redGPUContext`, `srcInfo`, `luminance?`, `environmentSize?`, `prefilterSize?`, `irradianceSize?`): `IBL`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L38)
+Defined in: [src/resources/texture/ibl/IBL.ts:75](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L75)
 
-Creates an IBL instance.
+Creates an IBL instance and starts loading the environment map source.
+
+#### Example
+```typescript
+// Using an HDR file
+const ibl = new RedGPU.Resource.IBL(redGPUContext, '/assets/hdr/environment.hdr');
+
+// Using 6 face images (px, nx, py, ny, pz, nz)
+const iblCube = new RedGPU.Resource.IBL(redGPUContext, [
+    'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'
+]);
+```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPU context |
-| `srcInfo` | `string` \| \[`string`, `string`, `string`, `string`, `string`, `string`\] | `undefined` | Environment map source |
-| `luminance` | `number` | `25000` | Physical luminance (Nit, default: 20000) |
-| `environmentSize` | `number` | `1024` | Environment map size |
-| `prefilterSize` | `number` | `512` | Prefilter size |
-| `irradianceSize` | `number` | `64` | Irradiance size |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
+| `srcInfo` | `string` \| \[`string`, `string`, `string`, `string`, `string`, `string`\] | `undefined` | Environment map source (HDR URL string or array of 6 image URLs) |
+| `luminance?` | `number` | `25000` | Physical luminance (unit: cd/m², default: 25000) |
+| `environmentSize?` | `number` | `1024` | Face size of the environment cube map (pixels, default: 1024) |
+| `prefilterSize?` | `number` | `512` | Face size of the prefilter cube map (pixels, default: 512) |
+| `irradianceSize?` | `number` | `64` | Face size of the irradiance cube map (pixels, default: 64) |
 
 #### Returns
 
@@ -43,19 +74,29 @@ Creates an IBL instance.
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../BaseObject/classes/RedGPUObject.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### environmentSize
 
 #### Get Signature
 
-> **get** **environmentSize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **environmentSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:69](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L69)
+Defined in: [src/resources/texture/ibl/IBL.ts:114](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L114)
+
+Returns the face size of the environment cube map in pixels.
 
 ##### Returns
 
 `number`
+
+Environment map size
+
+***
 
 ***
 
@@ -63,13 +104,19 @@ Defined in: [src/resources/texture/ibl/IBL.ts:69](https://github.com/redcamel/Re
 
 #### Get Signature
 
-> **get** **environmentTexture**(): [`DirectCubeTexture`](DirectCubeTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **environmentTexture**(): [`DirectCubeTexture`](DirectCubeTexture.md)
 
-Defined in: [src/resources/texture/ibl/IBL.ts:85](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L85)
+Defined in: [src/resources/texture/ibl/IBL.ts:162](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L162)
+
+Returns the environment cube texture converted from the source environment map.
 
 ##### Returns
 
 [`DirectCubeTexture`](DirectCubeTexture.md)
+
+Environment cube texture
+
+***
 
 ***
 
@@ -79,19 +126,21 @@ Defined in: [src/resources/texture/ibl/IBL.ts:85](https://github.com/redcamel/Re
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:94](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L94)
+Defined in: [src/resources/texture/ibl/IBL.ts:186](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L186)
 
-Intensity multiplier for artist control
+Gets or sets the IBL intensity multiplier for artist control. (default: 1.0)
 
 ##### Returns
 
 `number`
 
+Intensity multiplier
+
 #### Set Signature
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:98](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L98)
+Defined in: [src/resources/texture/ibl/IBL.ts:190](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L190)
 
 ##### Parameters
 
@@ -105,17 +154,25 @@ Defined in: [src/resources/texture/ibl/IBL.ts:98](https://github.com/redcamel/Re
 
 ***
 
+***
+
 ### irradianceSize
 
 #### Get Signature
 
-> **get** **irradianceSize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **irradianceSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L77)
+Defined in: [src/resources/texture/ibl/IBL.ts:138](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L138)
+
+Returns the face size of the irradiance cube map in pixels.
 
 ##### Returns
 
 `number`
+
+Irradiance map size
+
+***
 
 ***
 
@@ -123,13 +180,19 @@ Defined in: [src/resources/texture/ibl/IBL.ts:77](https://github.com/redcamel/Re
 
 #### Get Signature
 
-> **get** **irradianceTexture**(): [`DirectCubeTexture`](DirectCubeTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **irradianceTexture**(): [`DirectCubeTexture`](DirectCubeTexture.md)
 
-Defined in: [src/resources/texture/ibl/IBL.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L81)
+Defined in: [src/resources/texture/ibl/IBL.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L150)
+
+Returns the irradiance cube texture used for diffuse lighting.
 
 ##### Returns
 
 [`DirectCubeTexture`](DirectCubeTexture.md)
+
+Irradiance cube texture
+
+***
 
 ***
 
@@ -139,19 +202,21 @@ Defined in: [src/resources/texture/ibl/IBL.ts:81](https://github.com/redcamel/Re
 
 > **get** **luminance**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:103](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L103)
+Defined in: [src/resources/texture/ibl/IBL.ts:202](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L202)
 
-Physical luminance (Unit: cd/m²)
+Gets or sets the physical luminance of the environment light. (unit: cd/m²)
 
 ##### Returns
 
 `number`
 
+Physical luminance
+
 #### Set Signature
 
 > **set** **luminance**(`value`): `void`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:107](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L107)
+Defined in: [src/resources/texture/ibl/IBL.ts:206](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L206)
 
 ##### Parameters
 
@@ -165,17 +230,25 @@ Defined in: [src/resources/texture/ibl/IBL.ts:107](https://github.com/redcamel/R
 
 ***
 
+***
+
 ### prefilterSize
 
 #### Get Signature
 
-> **get** **prefilterSize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **prefilterSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L73)
+Defined in: [src/resources/texture/ibl/IBL.ts:126](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L126)
+
+Returns the face size of the prefilter cube map in pixels.
 
 ##### Returns
 
 `number`
+
+Prefilter map size
+
+***
 
 ***
 
@@ -183,53 +256,42 @@ Defined in: [src/resources/texture/ibl/IBL.ts:73](https://github.com/redcamel/Re
 
 #### Get Signature
 
-> **get** **prefilterTexture**(): [`DirectCubeTexture`](DirectCubeTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **prefilterTexture**(): [`DirectCubeTexture`](DirectCubeTexture.md)
 
-Defined in: [src/resources/texture/ibl/IBL.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/ibl/IBL.ts#L89)
+Defined in: [src/resources/texture/ibl/IBL.ts:174](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/ibl/IBL.ts#L174)
+
+Returns the roughness-based prefilter cube texture used for specular lighting.
 
 ##### Returns
 
 [`DirectCubeTexture`](DirectCubeTexture.md)
 
+Prefilter cube texture
+
 ***
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
-
-## Accessors
+<summary>View inherited properties (Click to expand)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
 
 #### Inherited from
 
@@ -237,21 +299,23 @@ AntialiasingManager instance
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
 
 #### Inherited from
 
@@ -259,25 +323,53 @@ CommandEncoderManager instance
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-Returns the WebGPU device object. (Short-cut path)
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice instance
+`GPUDevice` instance
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
 
 ***
 
@@ -287,29 +379,27 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -321,21 +411,23 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
 
 #### Inherited from
 
@@ -343,21 +435,23 @@ RedGPUContext instance
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 #### Inherited from
 
@@ -365,13 +459,15 @@ ResourceManager instance
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -379,11 +475,10 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../BaseObject/classes/RedGPUObject.md#uuid)
-
 
 </details>

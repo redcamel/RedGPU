@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,6 +8,6 @@
 
 > **ComputePassDescriptorInput** = `string` \| `GPUComputePassDescriptor`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L81)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L87)
 
-Compute 패스 디스크립터 입력을 위한 타입 (레이블 문자열 또는 전체 디스크립터 객체)
+컴퓨트 패스 생성 시 전달할 수 있는 입력 타입(레이블 문자열 또는 `GPUComputePassDescriptor` 객체)입니다.

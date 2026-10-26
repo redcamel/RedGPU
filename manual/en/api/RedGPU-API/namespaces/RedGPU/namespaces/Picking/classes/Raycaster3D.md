@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,18 +6,21 @@
 
 # Class: Raycaster3D
 
-Defined in: [src/picking/Raycaster3D.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/picking/Raycaster3D.ts#L22)
+Defined in: [src/picking/Raycaster3D.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L23)
 
-Class that casts a ray in 3D space to check for intersections with objects.
-
-Generates a ray based on mouse coordinates and camera information, and performs precise triangle-level collision tests on meshes.
+Class that casts a `Ray` in 3D space based on camera and screen coordinates to perform precise triangle-level intersection tests with meshes.
 
 ### Example
 ```typescript
 const raycaster = new RedGPU.Picking.Raycaster3D();
+// Set ray based on screen coordinates and view, then perform intersection test
 raycaster.setFromCamera(mouseX, mouseY, view);
 const intersects = raycaster.intersectObjects(scene.children);
 ```
+
+## See
+
+[MouseEvent (Raycasting) example](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 
 ## Constructors
 
@@ -25,9 +28,9 @@ const intersects = raycaster.intersectObjects(scene.children);
 
 > **new Raycaster3D**(): `Raycaster3D`
 
-Defined in: [src/picking/Raycaster3D.ts:54](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/picking/Raycaster3D.ts#L54)
+Defined in: [src/picking/Raycaster3D.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L53)
 
-Creates a Raycaster3D instance.
+Creates a `Raycaster3D` instance.
 
 #### Returns
 
@@ -39,15 +42,9 @@ Creates a Raycaster3D instance.
 
 > **far**: `number` = `Infinity`
 
-Defined in: [src/picking/Raycaster3D.ts:41](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/picking/Raycaster3D.ts#L41)
+Defined in: [src/picking/Raycaster3D.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L40)
 
-Maximum distance to consider for intersection (from camera)
-
-#### Default Value
-
-```ts
-Infinity
-```
+Maximum distance from the camera to consider for intersection (default: `Infinity`)
 
 ***
 
@@ -55,25 +52,19 @@ Infinity
 
 > **near**: `number` = `0`
 
-Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/picking/Raycaster3D.ts#L34)
+Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L34)
 
-Minimum distance to consider for intersection (from camera)
-
-#### Default Value
-
-```ts
-0
-```
+Minimum distance from the camera to consider for intersection (default: `0`)
 
 ***
 
 ### ray
 
-> `readonly` **ray**: [`Ray`](../../Math/classes/Ray.md)
+> <span class="readonly-badge">readonly</span> **ray**: [`Ray`](../../Math/classes/Ray.md)
 
-Defined in: [src/picking/Raycaster3D.ts:27](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/picking/Raycaster3D.ts#L27)
+Defined in: [src/picking/Raycaster3D.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L28)
 
-Internally managed ray object
+Internally managed `Ray` object
 
 ## Methods
 
@@ -81,11 +72,11 @@ Internally managed ray object
 
 > **intersectObject**(`mesh`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster3D.ts:125](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/picking/Raycaster3D.ts#L125)
+Defined in: [src/picking/Raycaster3D.ts:122](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L122)
 
-Checks for intersection with a single object.
+Checks for intersection with a single mesh object.
 
-### Example
+#### Example
 ```typescript
 const result = raycaster.intersectObject(mesh);
 ```
@@ -95,13 +86,13 @@ const result = raycaster.intersectObject(mesh);
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | `undefined` | Mesh object to check |
-| `recursive` | `boolean` | `true` | Whether to include child objects (default: true) |
+| `recursive?` | `boolean` | `true` | Whether to include child objects (default: `true`) |
 
 #### Returns
 
 `RayIntersectResult`[]
 
-Array of intersection information (`RayIntersectResult[]`)
+Array of intersection results sorted by distance (`RayIntersectResult[]`)
 
 ***
 
@@ -109,11 +100,11 @@ Array of intersection information (`RayIntersectResult[]`)
 
 > **intersectObjects**(`meshes`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster3D.ts:150](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/picking/Raycaster3D.ts#L150)
+Defined in: [src/picking/Raycaster3D.ts:147](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L147)
 
-Checks for intersections with multiple objects.
+Checks for intersections with multiple mesh objects.
 
-### Example
+#### Example
 ```typescript
 const results = raycaster.intersectObjects(scene.children);
 ```
@@ -123,13 +114,13 @@ const results = raycaster.intersectObjects(scene.children);
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `meshes` | [`Mesh`](../../Display/classes/Mesh.md)[] | `undefined` | Array of mesh objects to check |
-| `recursive` | `boolean` | `true` | Whether to include child objects (default: true) |
+| `recursive?` | `boolean` | `true` | Whether to include child objects (default: `true`) |
 
 #### Returns
 
 `RayIntersectResult`[]
 
-Array of intersection information (`RayIntersectResult[]`)
+Array of intersection results sorted by distance (`RayIntersectResult[]`)
 
 ***
 
@@ -137,11 +128,11 @@ Array of intersection information (`RayIntersectResult[]`)
 
 > **setFromCamera**(`screenX`, `screenY`, `view`): `void`
 
-Defined in: [src/picking/Raycaster3D.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/picking/Raycaster3D.ts#L77)
+Defined in: [src/picking/Raycaster3D.ts:76](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/picking/Raycaster3D.ts#L76)
 
-Sets the ray based on screen coordinates and camera information.
+Sets the ray based on screen coordinates and camera information of `View3D`.
 
-### Example
+#### Example
 ```typescript
 raycaster.setFromCamera(mouseX, mouseY, view);
 ```
@@ -152,7 +143,7 @@ raycaster.setFromCamera(mouseX, mouseY, view);
 | ------ | ------ | ------ |
 | `screenX` | `number` | Screen X coordinate |
 | `screenY` | `number` | Screen Y coordinate |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | Target View3D instance |
+| `view` | [`View3D`](../../Display/classes/View3D.md) | Target `View3D` instance |
 
 #### Returns
 

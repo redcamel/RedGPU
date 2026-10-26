@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,21 +6,11 @@
 
 # Class: RapierBody
 
-Defined in: [src/plugins/rapier/RapierBody.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L24)
+Defined in: [src/plugins/rapier/RapierBody.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L14)
 
 **`Experimental`**
 
-Rapier 물리 엔진을 위한 `IPhysicsBody` 구현체입니다.
-
-Rapier의 RigidBody와 RedGPU의 Mesh 사이에서 트랜스폼 정보를 동기화하고 제어하는 역할을 합니다. 물리 시뮬레이션의 결과가 매 프레임마다 연결된 메쉬의 위치와 회전에 자동으로 반영됩니다.
-
-::: warning
-이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
-:::
-
-## See
-
- -[물리 플러그인 매뉴얼](https://redcamel.github.io/RedGPU/manual/ko/plugins/physics)
+Rapier 강체(`RigidBody`)와 RedGPU `Mesh` 간의 트랜스폼을 동기화하고 제어하는 `IPhysicsBody` 구현 클래스입니다.
 
 ## Implements
 
@@ -32,7 +22,7 @@ Rapier의 RigidBody와 RedGPU의 Mesh 사이에서 트랜스폼 정보를 동기
 
 > **new RapierBody**(`mesh`, `body`, `collider`): `RapierBody`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:43](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L43)
+Defined in: [src/plugins/rapier/RapierBody.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L33)
 
 **`Experimental`**
 
@@ -42,9 +32,9 @@ RapierBody 인스턴스를 생성합니다.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../../../Display/classes/Mesh.md) | 연결할 RedGPU 메쉬
-| `body` | `RigidBody` | Rapier 강체 객체
-| `collider` | `Collider` | Rapier 충돌체 객체
+| `mesh` | [`Mesh`](../../../../Display/classes/Mesh.md) | 연동할 RedGPU `Mesh` 인스턴스 |
+| `body` | `RigidBody` | Rapier 강체(`RigidBody`) 인스턴스 |
+| `collider` | `Collider` | Rapier 충돌체(`Collider`) 인스턴스 |
 
 #### Returns
 
@@ -56,17 +46,19 @@ RapierBody 인스턴스를 생성합니다.
 
 #### Get Signature
 
-> **get** **mesh**(): [`Mesh`](../../../../Display/classes/Mesh.md)
+> <span class="readonly-badge">readonly</span> **get** **mesh**(): [`Mesh`](../../../../Display/classes/Mesh.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:54](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L54)
+Defined in: [src/plugins/rapier/RapierBody.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L47)
 
 **`Experimental`**
 
-연결된 RedGPU 메쉬를 반환합니다.
+연동된 RedGPU `Mesh` 인스턴스를 반환합니다.
 
 ##### Returns
 
 [`Mesh`](../../../../Display/classes/Mesh.md)
+
+연동된 `Mesh` 인스턴스
 
 ***
 
@@ -74,17 +66,19 @@ Defined in: [src/plugins/rapier/RapierBody.ts:54](https://github.com/redcamel/Re
 
 #### Get Signature
 
-> **get** **nativeBody**(): `RigidBody`
+> <span class="readonly-badge">readonly</span> **get** **nativeBody**(): `RigidBody`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:63](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L63)
+Defined in: [src/plugins/rapier/RapierBody.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L59)
 
 **`Experimental`**
 
-Rapier의 원본 강체(RigidBody) 객체를 반환합니다.
+원본 Rapier 강체(`RigidBody`) 객체를 반환합니다.
 
 ##### Returns
 
 `RigidBody`
+
+Rapier `RigidBody` 객체
 
 #### Implementation of
 
@@ -96,17 +90,19 @@ Rapier의 원본 강체(RigidBody) 객체를 반환합니다.
 
 #### Get Signature
 
-> **get** **nativeCollider**(): `Collider`
+> <span class="readonly-badge">readonly</span> **get** **nativeCollider**(): `Collider`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:72](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L72)
+Defined in: [src/plugins/rapier/RapierBody.ts:71](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L71)
 
 **`Experimental`**
 
-Rapier의 원본 충돌체(Collider) 객체를 반환합니다.
+원본 Rapier 충돌체(`Collider`) 객체를 반환합니다.
 
 ##### Returns
 
 `Collider`
+
+Rapier `Collider` 객체
 
 ***
 
@@ -116,30 +112,27 @@ Rapier의 원본 충돌체(Collider) 객체를 반환합니다.
 
 > **get** **position**(): [`vec3`](../../../../Math/type-aliases/vec3.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:80](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L80)
+Defined in: [src/plugins/rapier/RapierBody.ts:83](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L83)
 
 **`Experimental`**
 
-물리 바디의 현재 위치를 반환하거나 설정합니다.
+물리 바디의 월드 위치를 가져오거나 설정합니다.
 
 ##### Returns
 
 [`vec3`](../../../../Math/type-aliases/vec3.md)
 
+월드 위치 벡터 (`vec3`)
+
 #### Set Signature
 
 > **set** **position**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:85](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L85)
+Defined in: [src/plugins/rapier/RapierBody.ts:88](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L88)
 
 **`Experimental`**
 
 물리 바디의 현재 위치
-
-### Example
-```typescript
-body.position = [0, 10, 0];
-```
 
 ##### Parameters
 
@@ -163,30 +156,27 @@ body.position = [0, 10, 0];
 
 > **get** **rotation**(): [`quat`](../../../../Math/type-aliases/quat.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:97](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L97)
+Defined in: [src/plugins/rapier/RapierBody.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L104)
 
 **`Experimental`**
 
-물리 바디의 현재 회전(쿼터니언)을 반환하거나 설정합니다.
+물리 바디의 회전 쿼터니언(`quat`)을 가져오거나 설정합니다.
 
 ##### Returns
 
 [`quat`](../../../../Math/type-aliases/quat.md)
 
+회전 쿼터니언 (`quat`)
+
 #### Set Signature
 
 > **set** **rotation**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:102](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L102)
+Defined in: [src/plugins/rapier/RapierBody.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L109)
 
 **`Experimental`**
 
-물리 바디의 현재 회전 (쿼터니언)
-
-### Example
-```typescript
-body.rotation = [0, 0, 0, 1];
-```
+물리 바디의 현재 회전(쿼터니언)
 
 ##### Parameters
 
@@ -210,30 +200,27 @@ body.rotation = [0, 0, 0, 1];
 
 > **get** **velocity**(): [`vec3`](../../../../Math/type-aliases/vec3.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:114](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L114)
+Defined in: [src/plugins/rapier/RapierBody.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L125)
 
 **`Experimental`**
 
-물리 바디의 현재 선속도를 반환하거나 설정합니다.
+물리 바디의 선속도(`vec3`)를 가져오거나 설정합니다.
 
 ##### Returns
 
 [`vec3`](../../../../Math/type-aliases/vec3.md)
 
+선속도 벡터 (`vec3`)
+
 #### Set Signature
 
 > **set** **velocity**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:119](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L119)
+Defined in: [src/plugins/rapier/RapierBody.ts:130](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L130)
 
 **`Experimental`**
 
 물리 바디의 현재 선속도
-
-### Example
-```typescript
-const velocity = body.velocity;
-```
 
 ##### Parameters
 
@@ -255,13 +242,13 @@ const velocity = body.velocity;
 
 > **applyImpulse**(`force`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:140](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L140)
+Defined in: [src/plugins/rapier/RapierBody.ts:151](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L151)
 
 **`Experimental`**
 
-물리 바디에 충격량(Impulse)을 적용합니다.
+물리 바디에 순간 충격량(Impulse)을 가합니다.
 
-* ### Example
+#### Example
 ```typescript
 body.applyImpulse([0, 10, 0]);
 ```
@@ -270,7 +257,7 @@ body.applyImpulse([0, 10, 0]);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `force` | [`vec3`](../../../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | 적용할 힘의 벡터
+| `force` | [`vec3`](../../../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | 적용할 충격량 벡터 (`vec3` 또는 `{ x, y, z }`) |
 
 #### Returns
 
@@ -286,11 +273,11 @@ body.applyImpulse([0, 10, 0]);
 
 > **syncToMesh**(): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:152](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/plugins/rapier/RapierBody.ts#L152)
+Defined in: [src/plugins/rapier/RapierBody.ts:163](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/plugins/rapier/RapierBody.ts#L163)
 
 **`Experimental`**
 
-물리 시뮬레이션의 위치와 회전 정보를 연결된 RedGPU 메쉬에 동기화합니다.
+물리 시뮬레이션의 위치 및 회전 결과를 연동된 `Mesh`에 동기화합니다.
 
 #### Returns
 

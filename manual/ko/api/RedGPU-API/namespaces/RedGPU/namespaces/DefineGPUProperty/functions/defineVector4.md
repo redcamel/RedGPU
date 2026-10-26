@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,37 +8,29 @@
 
 > **defineVector4**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:51](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/vector/defineVector4.ts#L51)
+Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector4.ts#L53)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 4차원 벡터(Vector4) 속성을 정의합니다.
+지정된 대상의 프로토타입에 GPU 유니폼 버퍼와 연동되는 4차원 벡터(`[number, number, number, number]`) 속성을 정의합니다.
 
-## Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `target` | `any` | 속성을 정의할 클래스 생성자
-| `defineInfo` | [`DefineVector4Info`](../interfaces/DefineVector4Info.md) \| [`DefineVector4Info`](../interfaces/DefineVector4Info.md)[] | 단일 [DefineVector4Info](../interfaces/DefineVector4Info.md) 설정 또는 그 배열
-
-## Returns
-
-`void`
-
-## Remarks
-
-***
-- 해당 속성의 getter/setter는 숫자 4개를 가진 튜플 배열(`[number, number, number, number]`)을 다룹니다.
-- 값이 바뀌면 감지하여 자동으로 GPU의 유니폼 버퍼를 업데이트합니다.
-
-
-## Example
-
+### Example
 ```typescript
-// 단일 설정
+// 단일 4차원 벡터 속성 정의
 RedGPU.DefineGPUProperty.defineVector4(MyMaterial, { key: 'lightColor', value: [1, 1, 1, 1] });
 
-// 여러 속성 일괄 정의
+// 다중 4차원 벡터 속성 일괄 정의
 RedGPU.DefineGPUProperty.defineVector4(MyMaterial, [
   { key: 'tilingAndOffset', value: [1, 1, 0, 0] },
   { key: 'viewport', value: [0, 0, 1920, 1080] }
 ]);
 ```
+
+## Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `any` | 속성을 정의할 대상 클래스 또는 프로토타입 |
+| `defineInfo` | [`DefineVector4Info`](../interfaces/DefineVector4Info.md) \| [`DefineVector4Info`](../interfaces/DefineVector4Info.md)[] | 단일 `DefineVector4Info` 설정 또는 설정 배열 |
+
+## Returns
+
+`void`

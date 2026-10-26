@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,13 @@
 
 # Class: ResourceStateStorageBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:3](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L3)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L14)
+
+`StorageBuffer`의 리소스 관리 상태를 나타내는 클래스입니다.
+
+::: warning
+이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+:::
 
 ## Constructors
 
@@ -14,13 +20,15 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **new ResourceStateStorageBuffer**(`buffer`): `ResourceStateStorageBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:8](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L8)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L35)
+
+ResourceStateStorageBuffer 인스턴스를 생성합니다.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `buffer` | [`StorageBuffer`](../../../classes/StorageBuffer.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `buffer` | [`StorageBuffer`](../../../classes/StorageBuffer.md) | 관리할 대상 `StorageBuffer` 인스턴스 |
 
 #### Returns
 
@@ -32,7 +40,9 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **buffer**: [`StorageBuffer`](../../../classes/StorageBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:4](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L4)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L19)
+
+관리 대상 스토리지 버퍼 인스턴스
 
 ***
 
@@ -40,7 +50,9 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:5](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L24)
+
+고유 식별자(UUID)
 
 ## Accessors
 
@@ -50,17 +62,21 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:13](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L13)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L48)
+
+리소스 참조 횟수를 반환하거나 설정합니다.
 
 ##### Returns
 
 `number`
 
+현재 참조 횟수
+
 #### Set Signature
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L17)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L52)
 
 ##### Parameters
 

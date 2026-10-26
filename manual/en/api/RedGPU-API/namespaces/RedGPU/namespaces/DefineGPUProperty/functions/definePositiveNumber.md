@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,38 +8,31 @@
 
 > **definePositiveNumber**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/number/definePositiveNumber.ts:98](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/number/definePositiveNumber.ts#L98)
+Defined in: [src/defineProperty/funcs/number/definePositiveNumber.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/definePositiveNumber.ts#L101)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 양수(Positive Number) 범위 속성을 정의합니다.
+Defines positive numeric properties on the target's prototype that synchronize with GPU uniform buffers.
 
-## Parameters
+Validates that the assigned value is a non-negative number (`>= 0`), clamping out-of-bounds values to `min` (default: 0) or `max` with a warning before updating the uniform buffer.
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `target` | `any` | Class constructor to define properties on |
-| `defineInfo` | [`DefinePositiveNumberInfo`](../interfaces/DefinePositiveNumberInfo.md) \| [`DefinePositiveNumberInfo`](../interfaces/DefinePositiveNumberInfo.md)[] | A single [DefinePositiveNumberInfo](../interfaces/DefinePositiveNumberInfo.md) configuration or an array of configurations |
-
-## Returns
-
-`void`
-
-## Remarks
-
-
-***
-- Validates that the input is a positive number (>= 0) via [validatePositiveNumberRange](../../RuntimeChecker/functions/validatePositiveNumberRange.md).
-- The minimum value `min` defaults to 0. Clamps the value if it exceeds `max` (if provided).
-- Values outside the range print a `console.warn` and are clamped before writing to the GPU buffer.
-
-## Example
-
+### Example
 ```typescript
-// 단일 설정
+// Define a single positive numeric property
 RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, { key: 'shininess', value: 30, min: 0, max: 100 });
 
-// 여러 속성 일괄 정의
+// Define multiple positive numeric properties at once
 RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, [
   { key: 'fogDensity', value: 0.01, min: 0 },
   { key: 'roughness', value: 0.5, min: 0, max: 1 }
 ]);
 ```
+
+## Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `any` | Target class or prototype to define properties on |
+| `defineInfo` | [`DefinePositiveNumberInfo`](../interfaces/DefinePositiveNumberInfo.md) \| [`DefinePositiveNumberInfo`](../interfaces/DefinePositiveNumberInfo.md)[] | Single `DefinePositiveNumberInfo` configuration or an array of configurations |
+
+## Returns
+
+`void`

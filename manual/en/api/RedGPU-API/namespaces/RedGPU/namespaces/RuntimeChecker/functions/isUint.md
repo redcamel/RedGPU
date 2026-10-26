@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,25 +8,24 @@
 
 > **isUint**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/isFunc/isUint.ts:21](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/runtimeChecker/isFunc/isUint.ts#L21)
+Defined in: [src/runtimeChecker/isFunc/isUint.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/runtimeChecker/isFunc/isUint.ts#L19)
 
-Checks if the given value is an unsigned integer.
+Checks whether the value is an integer greater than or equal to 0 (unsigned integer).
 
-Returns true if the value is an integer greater than or equal to 0.
-
-* ### Example
+### Example
 ```typescript
-const isValid = RedGPU.RuntimeChecker.isUint(10);
+RedGPU.RuntimeChecker.isUint(10); // true
+RedGPU.RuntimeChecker.isUint(-1); // false
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `number` | Value to check |
+| `value` | `number` | Numeric value to check |
 
 ## Returns
 
 `boolean`
 
-True if it is an unsigned integer, otherwise false
+True if the value is an unsigned integer, otherwise false

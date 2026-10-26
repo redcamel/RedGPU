@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,13 @@
 
 # Class: GeometryGPURenderInfo
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:7](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/primitive/core/GeometryGPURenderInfo.ts#L7)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L12)
 
-지오메트리의 GPU 렌더링 레이아웃 정보를 저장하는 클래스입니다.
+지오메트리의 GPU 정점 버퍼 레이아웃 정보를 보관하는 클래스입니다.
+
+::: warning
+이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+:::
 
 ## Constructors
 
@@ -16,7 +20,7 @@ Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:7](https://github.com/r
 
 > **new GeometryGPURenderInfo**(`buffers`): `GeometryGPURenderInfo`
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/primitive/core/GeometryGPURenderInfo.ts#L22)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L27)
 
 GeometryGPURenderInfo 인스턴스를 생성합니다.
 
@@ -24,7 +28,7 @@ GeometryGPURenderInfo 인스턴스를 생성합니다.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | 설정할 버퍼 레이아웃 배열
+| `buffers` | `GPUVertexBufferLayout`[] | 설정할 정점 버퍼 레이아웃 배열 |
 
 #### Returns
 
@@ -36,6 +40,6 @@ GeometryGPURenderInfo 인스턴스를 생성합니다.
 
 > **buffers**: `GPUVertexBufferLayout`[]
 
-Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:12](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/primitive/core/GeometryGPURenderInfo.ts#L12)
+Defined in: [src/primitive/core/GeometryGPURenderInfo.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/primitive/core/GeometryGPURenderInfo.ts#L17)
 
-정점 버퍼 레이아웃 배열
+GPU 정점 버퍼 레이아웃(`GPUVertexBufferLayout`) 배열입니다.

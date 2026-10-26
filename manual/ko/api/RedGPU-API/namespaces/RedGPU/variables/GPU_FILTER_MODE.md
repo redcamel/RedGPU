@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,15 +8,13 @@
 
 > `const` **GPU\_FILTER\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_FILTER_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_FILTER_MODE.ts#L7)
 
-텍스처 샘플링 시의 필터링 모드 옵션을 정의하는 상수군입니다.
-
-텍스처 확대 및 축소 시 픽셀 간 보간 방식을 결정합니다.
+텍스처 확대(Magnification) 및 축소(Minification) 샘플링 시 픽셀 간 보간 방식을 정의하는 필터 모드 상수입니다.
 
 ## Type Declaration
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-linear"></a> `LINEAR` | `"linear"` | `'linear'` | 주변 텍셀 값들을 선형 보간하여 사용합니다.
-| <a id="property-nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | 가장 가까운 텍셀의 값을 사용합니다.
+| <a id="property-linear"></a> `LINEAR` | `"linear"` | `'linear'` | 샘플링 좌표 주변의 인접 텍셀 값들을 선형 보간(Bilinear Interpolation)하여 반환합니다. | [src/gpuConst/GPU\_FILTER\_MODE.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_FILTER_MODE.ts#L17) |
+| <a id="property-nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | 샘플링 좌표에서 가장 가까운 단일 텍셀(Texel)의 값을 그대로 반환합니다. | [src/gpuConst/GPU\_FILTER\_MODE.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_FILTER_MODE.ts#L12) |

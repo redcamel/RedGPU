@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -6,13 +6,13 @@
 
 # Class: Renderer
 
-Defined in: [src/renderer/Renderer.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L33)
+Defined in: [src/renderer/Renderer.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/Renderer.ts#L33)
 
 The core renderer class of RedGPU.
 
 Manages the rendering loop, executes rendering passes for each View3D, and finally displays the result on the screen. It also handles debug rendering and animation updates.
 
-* ### Example
+### Example
 ```typescript
 const renderer = new RedGPU.Renderer();
 renderer.start(redGPUContext, (time) => {
@@ -26,7 +26,7 @@ renderer.start(redGPUContext, (time) => {
 
 > **new Renderer**(): `Renderer`
 
-Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L38)
+Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/Renderer.ts#L38)
 
 #### Returns
 
@@ -38,13 +38,15 @@ Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blo
 
 > **destroy**(`redGPUContext?`): `void`
 
-Defined in: [src/renderer/Renderer.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L73)
+Defined in: [src/renderer/Renderer.ts:81](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/Renderer.ts#L81)
+
+Cleans up renderer resources and stops the rendering loop.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `redGPUContext?` | [`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext?` | [`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md) | RedGPUContext instance (optional) |
 
 #### Returns
 
@@ -56,7 +58,7 @@ Defined in: [src/renderer/Renderer.ts:73](https://github.com/redcamel/RedGPU/blo
 
 > **renderFrame**(`redGPUContext`, `time`): `void`
 
-Defined in: [src/renderer/Renderer.ts:112](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L112)
+Defined in: [src/renderer/Renderer.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/Renderer.ts#L120)
 
 Renders a single frame. (Called internally)
 
@@ -77,7 +79,7 @@ Renders a single frame. (Called internally)
 
 > **renderView**(`view`): `object`
 
-Defined in: [src/renderer/Renderer.ts:157](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L157)
+Defined in: [src/renderer/Renderer.ts:160](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/Renderer.ts#L160)
 
 Renders a specific View3D.
 
@@ -95,7 +97,7 @@ Generated render pass descriptor
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `renderPassDescriptor` | `GPURenderPassDescriptor` | [src/renderer/Renderer.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L158) |
+| `renderPassDescriptor` | `GPURenderPassDescriptor` | [src/renderer/Renderer.ts:161](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/Renderer.ts#L161) |
 
 ***
 
@@ -103,11 +105,11 @@ Generated render pass descriptor
 
 > **start**(`redGPUContext`, `render`): `void`
 
-Defined in: [src/renderer/Renderer.ts:59](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L59)
+Defined in: [src/renderer/Renderer.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/Renderer.ts#L59)
 
 Starts the rendering loop.
 
-* ### Example
+#### Example
 ```typescript
 renderer.start(redGPUContext, (time) => {
     // 매 프레임 호출되는 콜백 (Callback called every frame)
@@ -131,11 +133,11 @@ renderer.start(redGPUContext, (time) => {
 
 > **stop**(`redGPUContext`): `void`
 
-Defined in: [src/renderer/Renderer.ts:96](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L96)
+Defined in: [src/renderer/Renderer.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderer/Renderer.ts#L104)
 
 Stops the rendering loop.
 
-* ### Example
+#### Example
 ```typescript
 renderer.stop(redGPUContext);
 ```

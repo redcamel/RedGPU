@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getLightAngleAttenuation**: `string` = `getLightAngleAttenuation_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1490](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L1490)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2119)
 
 Calculates the attenuation factor according to the angle (cone) of the spotlight.
 
@@ -18,20 +18,28 @@ Creates a smooth fade effect in the area between the inner cone and the outer co
 
 ## Param
 
+**lightToVertexDirection**
+
 Normalized direction vector from the light source to the pixel (vertex)
 //
 
 ## Param
+
+**lightDirection**
 
 Normalized center direction vector that the spotlight shines in
 //
 
 ## Param
 
+**innerCutoff**
+
 Inner cone cutoff angle (Degree)
 //
 
 ## Param
+
+**outerCutoff**
 
 Outer cone cutoff angle (Degree)
 //

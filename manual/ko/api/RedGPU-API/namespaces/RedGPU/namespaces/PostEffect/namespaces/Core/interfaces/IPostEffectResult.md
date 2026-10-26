@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Interface: IPostEffectResult
 
-Defined in: [src/postEffect/core/types.ts:5](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L5)
+Defined in: [src/postEffect/core/types.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L7)
 
-단일 패스 후처리 이펙트 결과 인터페이스입니다.
+후처리 이펙트 렌더링 결과 텍스처 정보 인터페이스입니다.
 
 ## Properties
 
@@ -16,9 +16,9 @@ Defined in: [src/postEffect/core/types.ts:5](https://github.com/redcamel/RedGPU/
 
 > **texture**: `GPUTexture`
 
-Defined in: [src/postEffect/core/types.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L10)
+Defined in: [src/postEffect/core/types.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L12)
 
-결과 텍스처
+결과 `GPUTexture` 인스턴스
 
 ***
 
@@ -26,6 +26,6 @@ Defined in: [src/postEffect/core/types.ts:10](https://github.com/redcamel/RedGPU
 
 > **textureView**: `GPUTextureView`
 
-Defined in: [src/postEffect/core/types.ts:15](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/types.ts#L15)
+Defined in: [src/postEffect/core/types.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/types.ts#L17)
 
-결과 텍스처 뷰
+결과 `GPUTextureView` 인스턴스

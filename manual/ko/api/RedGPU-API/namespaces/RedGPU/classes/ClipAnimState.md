@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Class: ClipAnimState
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:27](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/loader/gltf/animationLooper/AnimStateMachine.ts#L27)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:75](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L75)
 
-단일 glTF 클립을 래핑하는 애니메이션 상태 클래스입니다.
+단일 glTF 애니메이션 클립을 래핑하는 애니메이션 상태 클래스입니다.
 
 ## Extends
 
@@ -16,18 +16,24 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:27](https://git
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new ClipAnimState**(`name`, `clip`): `ClipAnimState`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:30](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/loader/gltf/animationLooper/AnimStateMachine.ts#L30)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L93)
+
+ClipAnimState 인스턴스를 생성합니다.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `name` | `string` |
-| `clip` | `GLTFParsedSingleClip` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `name` | `string` | 상태 이름 |
+| `clip` | `GLTFParsedSingleClip` | 파싱된 단일 glTF 애니메이션 클립 |
 
 #### Returns
 
@@ -39,11 +45,23 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:30](https://git
 
 ## Properties
 
+
+
+***
+
 ### clip
 
 > **clip**: `GLTFParsedSingleClip`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:28](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/loader/gltf/animationLooper/AnimStateMachine.ts#L28)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L80)
+
+파싱된 단일 glTF 애니메이션 클립
+
+***
+
+## Methods
+
+
 
 ***
 
@@ -51,13 +69,15 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:28](https://git
 
 > **enter**(`timestamp`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:35](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/loader/gltf/animationLooper/AnimStateMachine.ts#L35)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:106](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L106)
+
+상태 진입 시 시작 타임스탬프를 기록합니다.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `timestamp` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `timestamp` | `number` | 진입 시점 타임스탬프 (ms) |
 
 #### Returns
 
@@ -69,11 +89,15 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:35](https://git
 
 ***
 
+***
+
 ### exit()
 
 > **exit**(): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:44](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/loader/gltf/animationLooper/AnimStateMachine.ts#L44)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:128](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L128)
+
+상태가 해제될 때 호출됩니다.
 
 #### Returns
 
@@ -85,18 +109,22 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:44](https://git
 
 ***
 
+***
+
 ### update()
 
 > **update**(`deltaTime`, `timestamp`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:39](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/loader/gltf/animationLooper/AnimStateMachine.ts#L39)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:121](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L121)
+
+단일 애니메이션 상태를 프레임 단위로 갱신합니다.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `deltaTime` | `number` |
-| `timestamp` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `deltaTime` | `number` | 프레임 간 경과 시간 (ms) |
+| `timestamp` | `number` | 현재 프레임 타임스탬프 (ms) |
 
 #### Returns
 
@@ -106,19 +134,20 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:39](https://git
 
 [`AnimState`](AnimState.md).[`update`](AnimState.md#update)
 
-
 ***
 
-## 상속받은 멤버
+## 상속받은 속성
 
 <details>
-<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
 
 ### name
 
 > **name**: `string`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:9](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/loader/gltf/animationLooper/AnimStateMachine.ts#L9)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L20)
+
+애니메이션 상태 이름
 
 #### Inherited from
 
@@ -126,17 +155,18 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:9](https://gith
 
 ***
 
+***
+
 ### startTime
 
 > **startTime**: `number` = `0`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/loader/gltf/animationLooper/AnimStateMachine.ts#L10)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/loader/gltf/animationLooper/AnimStateMachine.ts#L25)
+
+상태 진입 시작 시간 (ms)
 
 #### Inherited from
 
 [`AnimState`](AnimState.md).[`startTime`](AnimState.md#starttime)
-
-## Methods
-
 
 </details>

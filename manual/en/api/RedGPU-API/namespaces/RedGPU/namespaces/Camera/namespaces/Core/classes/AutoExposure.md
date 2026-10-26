@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,23 @@
 
 # Class: AutoExposure
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L26)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L36)
 
-Class that performs auto-exposure and eye adaptation.
+Class that performs auto-exposure and eye adaptation via compute-shader-based 256-bin log-luminance histogram analysis. Automatically created inside `PostEffectManager`.
 
 ::: warning
 This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
 :::
+
+***
+
+### Example
+```typescript
+// Access via postEffectManager of View3D
+const autoExposure = view.postEffectManager.autoExposure;
+autoExposure.exposureCompensation = 0.5;
+autoExposure.meteringMode = RedGPU.Camera.Core.METERING_MODE.CENTER_WEIGHTED;
+```
 
 ## Extends
 
@@ -20,17 +30,23 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new AutoExposure**(`view`): `AutoExposure`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:65](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L65)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L84)
+
+Initializes an `AutoExposure` instance.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `view` | [`View3D`](../../../../Display/classes/View3D.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](../../../../Display/classes/View3D.md) | Target `View3D` instance |
 
 #### Returns
 
@@ -40,7 +56,11 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:65](https://github.com
 
 [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../../../BaseObject/classes/RedGPUObject.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### adaptationSpeedDown
 
@@ -48,33 +68,33 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:65](https://github.com
 
 > **get** **adaptationSpeedDown**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:200](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L200)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L184)
 
-Returns the eye adaptation speed (darkening).
+Gets or sets the eye adaptation speed when transitioning from bright to dark environments. (Min `0`, Default: `1.0`)
 
 ##### Returns
 
 `number`
 
-Eye adaptation speed (downward)
+Darkening adaptation speed
 
 #### Set Signature
 
 > **set** **adaptationSpeedDown**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:212](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L212)
-
-Sets the eye adaptation speed (darkening).
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:188](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L188)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Eye adaptation speed (downward) to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -84,29 +104,27 @@ Sets the eye adaptation speed (darkening).
 
 > **get** **adaptationSpeedUp**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:176](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L176)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:167](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L167)
 
-Returns the eye adaptation speed (brightening).
+Gets or sets the eye adaptation speed when transitioning from dark to bright environments. (Min `0`, Default: `3.0`)
 
 ##### Returns
 
 `number`
 
-Eye adaptation speed (upward)
+Brightening adaptation speed
 
 #### Set Signature
 
 > **set** **adaptationSpeedUp**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:188](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L188)
-
-Sets the eye adaptation speed (brightening).
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:171](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L171)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Eye adaptation speed (upward) to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -114,21 +132,25 @@ Sets the eye adaptation speed (brightening).
 
 ***
 
+***
+
 ### adaptedLuminanceBuffer
 
 #### Get Signature
 
-> **get** **adaptedLuminanceBuffer**(): [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md)
+> <span class="readonly-badge">readonly</span> **get** **adaptedLuminanceBuffer**(): [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md)
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:359](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L359)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:301](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L301)
 
-Returns the GPU storage buffer where adapted EV100 data is stored.
+Returns the GPU `StorageBuffer` instance storing the adapted EV100 value.
 
 ##### Returns
 
 [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md)
 
-Storage buffer instance
+Adapted EV100 `StorageBuffer`
+
+***
 
 ***
 
@@ -138,33 +160,33 @@ Storage buffer instance
 
 > **get** **currentAdaptedEV100**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:333](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L333)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:281](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L281)
 
-Returns the currently adapted EV100 value.
+Gets or sets the currently adapted EV100 value. Setting this value immediately updates the internal GPU storage buffer.
 
 ##### Returns
 
 `number`
 
-Adapted EV100 value
+Currently adapted EV100 value
 
 #### Set Signature
 
 > **set** **currentAdaptedEV100**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:345](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L345)
-
-Sets the currently adapted EV100 value. (Also updates the GPU buffer)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:285](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L285)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | EV100 value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -174,33 +196,33 @@ Sets the currently adapted EV100 value. (Also updates the GPU buffer)
 
 > **get** **exposureCompensation**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:80](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L80)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:99](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L99)
 
-Returns the exposure compensation value.
+Gets or sets the exposure compensation value in EV stops. (Default: `0.0`)
 
 ##### Returns
 
 `number`
 
-Exposure compensation value
+Exposure compensation value in EV
 
 #### Set Signature
 
 > **set** **exposureCompensation**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:92](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L92)
-
-Sets the exposure compensation value.
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:103](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L103)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Exposure compensation value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -210,33 +232,33 @@ Sets the exposure compensation value.
 
 > **get** **highPercentile**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:248](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L248)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:218](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L218)
 
-Returns the histogram analysis range (exclude top percentile).
+Gets or sets the upper percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.95`)
 
 ##### Returns
 
 `number`
 
-High percentile value (0 - 1)
+High percentile value (`0` to `1`)
 
 #### Set Signature
 
 > **set** **highPercentile**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:260](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L260)
-
-Sets the histogram analysis range (exclude top percentile).
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:222](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L222)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | High percentile value to set (0 - 1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -246,33 +268,33 @@ Sets the histogram analysis range (exclude top percentile).
 
 > **get** **lowPercentile**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:224](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L224)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:201](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L201)
 
-Returns the histogram analysis range (exclude bottom percentile).
+Gets or sets the lower percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.8`)
 
 ##### Returns
 
 `number`
 
-Low percentile value (0 - 1)
+Low percentile value (`0` to `1`)
 
 #### Set Signature
 
 > **set** **lowPercentile**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:236](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L236)
-
-Sets the histogram analysis range (exclude bottom percentile).
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:205](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L205)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Low percentile value to set (0 - 1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -282,9 +304,9 @@ Sets the histogram analysis range (exclude bottom percentile).
 
 > **get** **maxEV100**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:152](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L152)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L150)
 
-Returns the maximum EV100 for auto-exposure.
+Gets or sets the maximum EV100 upper bound allowed by auto-exposure. (Default: `16.0`)
 
 ##### Returns
 
@@ -296,19 +318,19 @@ Maximum EV100 value
 
 > **set** **maxEV100**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:164](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L164)
-
-Sets the maximum EV100 for auto-exposure.
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:154](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L154)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Maximum EV100 value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -318,29 +340,27 @@ Sets the maximum EV100 for auto-exposure.
 
 > **get** **maxExposureMultiplier**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:272](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L272)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:235](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L235)
 
-Returns the maximum exposure multiplier for auto-exposure.
+Gets or sets the maximum exposure amplification multiplier allowed in dark scenes. (Min `1.0`, Default: `64.0`)
 
 ##### Returns
 
 `number`
 
-Maximum exposure multiplier
+Maximum exposure amplification multiplier
 
 #### Set Signature
 
 > **set** **maxExposureMultiplier**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:284](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L284)
-
-Sets the maximum exposure multiplier for auto-exposure. (Default: 16.0)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:239](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L239)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Maximum exposure multiplier to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -348,39 +368,41 @@ Sets the maximum exposure multiplier for auto-exposure. (Default: 16.0)
 
 ***
 
+***
+
 ### meteringMode
 
 #### Get Signature
 
-> **get** **meteringMode**(): [`METERING_MODE`](../enumerations/METERING_MODE.md)
+> **get** **meteringMode**(): [`METERING_MODE`](../type-aliases/METERING_MODE.md)
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:296](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L296)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:252](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L252)
 
-Returns the metering mode for auto-exposure.
+Gets or sets the metering mode (`METERING_MODE`) used when measuring screen luminance. (Default: `METERING_MODE.AVERAGE`)
 
 ##### Returns
 
-[`METERING_MODE`](../enumerations/METERING_MODE.md)
+[`METERING_MODE`](../type-aliases/METERING_MODE.md)
 
-Metering mode
+Current metering mode
 
 #### Set Signature
 
 > **set** **meteringMode**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:308](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L308)
-
-Sets the metering mode for auto-exposure.
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:256](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L256)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | [`METERING_MODE`](../enumerations/METERING_MODE.md) | Metering mode to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`METERING_MODE`](../type-aliases/METERING_MODE.md) |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -390,9 +412,9 @@ Sets the metering mode for auto-exposure.
 
 > **get** **minEV100**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:128](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L128)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:133](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L133)
 
-Returns the minimum EV100 for auto-exposure.
+Gets or sets the minimum EV100 lower bound allowed by auto-exposure. (Default: `-2.0`)
 
 ##### Returns
 
@@ -404,15 +426,13 @@ Minimum EV100 value
 
 > **set** **minEV100**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:140](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L140)
-
-Sets the minimum EV100 for auto-exposure.
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:137](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L137)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Minimum EV100 value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -420,21 +440,25 @@ Sets the minimum EV100 for auto-exposure.
 
 ***
 
+***
+
 ### preExposure
 
 #### Get Signature
 
-> **get** **preExposure**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **preExposure**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:320](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L320)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:268](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L268)
 
-Returns the currently adapted exposure multiplier (preExposure).
+Returns the pre-exposure multiplier (`preExposure`) calculated from the camera's current `ev100` and `exposureCompensation`.
 
 ##### Returns
 
 `number`
 
-Current exposure multiplier
+Pre-exposure multiplier
+
+***
 
 ***
 
@@ -444,9 +468,9 @@ Current exposure multiplier
 
 > **get** **targetLuminance**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:104](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L104)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:116](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L116)
 
-Returns the target luminance.
+Gets or sets the target average luminance (based on 18% middle gray) toward which auto-exposure converges. (Min `0`, Default: `0.18`)
 
 ##### Returns
 
@@ -458,19 +482,23 @@ Target luminance value
 
 > **set** **targetLuminance**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:116](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L116)
-
-Sets the target luminance.
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:120](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L120)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Target luminance value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
+
+## Methods
+
+
 
 ***
 
@@ -478,13 +506,15 @@ Sets the target luminance.
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:497](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L497)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:428](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L428)
 
-Destroys the AutoExposure instance and releases all allocated physical GPU buffers.
+Releases all allocated GPU buffers and compute pipeline resources.
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -492,19 +522,21 @@ Destroys the AutoExposure instance and releases all allocated physical GPU buffe
 
 > **render**(`sourceTextureInfo`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:371](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L371)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:313](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L313)
 
-Performs auto exposure processing. (Record commands)
+Records the log-luminance histogram generation and eye adaptation compute passes for the source color texture.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `sourceTextureInfo` | [`IPostEffectResult`](../../../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) | Source texture information |
+| `sourceTextureInfo` | [`IPostEffectResult`](../../../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) | Post-processing input texture information (`IPostEffectResult`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -512,51 +544,36 @@ Performs auto exposure processing. (Record commands)
 
 > **resolveReadback**(): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:479](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/autoExposure/AutoExposure.ts#L479)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:406](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/autoExposure/AutoExposure.ts#L406)
 
-Asynchronously reads back data after GPU work completion. (Called by Renderer)
+Asynchronously maps the readback buffer to synchronize the GPU-computed adapted EV100 value to CPU state.
 
 #### Returns
 
 `void`
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../../../BaseObject/classes/RedGPUObject.md#instanceid)
-
-## Accessors
+<summary>View inherited properties (Click to expand)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
 
 #### Inherited from
 
@@ -564,21 +581,23 @@ AntialiasingManager instance
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
 
 #### Inherited from
 
@@ -586,25 +605,53 @@ CommandEncoderManager instance
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-Returns the WebGPU device object. (Short-cut path)
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice instance
+`GPUDevice` instance
 
 #### Inherited from
 
 [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
 
 ***
 
@@ -614,29 +661,27 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -648,21 +693,23 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
 
 #### Inherited from
 
@@ -670,21 +717,23 @@ RedGPUContext instance
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 #### Inherited from
 
@@ -692,13 +741,15 @@ ResourceManager instance
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -706,13 +757,10 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
 [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../../../BaseObject/classes/RedGPUObject.md#uuid)
-
-## Methods
-
 
 </details>

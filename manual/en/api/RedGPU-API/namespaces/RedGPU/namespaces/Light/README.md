@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,16 +6,13 @@
 
 # Light
 
-RedGPU Light module.
-
-Provides various light sources (AmbientLight, DirectionalLight, PointLight, SpotLight) and LightManager to manage them.
-
-You can create lighting effects and atmosphere in the scene by finely controlling the properties of each light source.
+Provides 3D scene light classes (`AmbientLight`, `DirectionalLight`, `PointLight`, `SpotLight`) and the light manager (`LightManager`).
 
 ## Light
 
 - [AmbientLight](classes/AmbientLight.md)
 - [DirectionalLight](classes/DirectionalLight.md)
+- [LightManager](classes/LightManager.md)
 - [PointLight](classes/PointLight.md)
 - [SpotLight](classes/SpotLight.md)
 

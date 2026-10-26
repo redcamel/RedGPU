@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,30 +8,28 @@
 
 > **getScreenPoint**(`view`, `targetMatrix`): \[`number`, `number`\]
 
-Defined in: [src/math/coordinates/getScreenPoint.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/coordinates/getScreenPoint.ts#L33)
+Defined in: [src/math/coordinates/getScreenPoint.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/getScreenPoint.ts#L30)
 
-Calculates 2D screen pixel coordinates from a 3D model matrix.
-
-Converts to screen coordinates based on View3D's camera and projection.
+Calculates 2D screen coordinates (`[x, y]`) in CSS pixels using the target's 4x4 world model matrix and `View3D`'s camera and projection matrices.
 
 ### Example
 ```typescript
-const [px, py] = RedGPU.math.getScreenPoint(view, mesh.modelMatrix);
+const [screenX, screenY] = RedGPU.Math.getScreenPoint(view, mesh.modelMatrix);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | View3D instance to use for conversion |
-| `targetMatrix` | [`mat4`](../type-aliases/mat4.md) | Model matrix of the target to convert |
+| `view` | [`View3D`](../../Display/classes/View3D.md) | `View3D` instance providing projection and viewport information |
+| `targetMatrix` | [`mat4`](../type-aliases/mat4.md) | 4x4 model matrix of the target to transform (`mat4`, column-major) |
 
 ## Returns
 
 \[`number`, `number`\]
 
-Converted screen pixel coordinates [x, y]
+Transformed 2D screen coordinate tuple (`[x, y]`, in CSS pixels)
 
 ## Throws
 
-Throws Error if view is not a View3D instance
+Throws an error if `view` is not a `View3D` instance

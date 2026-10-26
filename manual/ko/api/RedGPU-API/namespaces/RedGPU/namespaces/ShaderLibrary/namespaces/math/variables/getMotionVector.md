@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getMotionVector**: `string` = `getMotionVector_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:442](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L442)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:449](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L449)
 
 현재 프레임과 이전 프레임의 클립 공간 좌표를 비교하여 모션 벡터(UV 단위)를 계산합니다.
 
@@ -16,10 +16,14 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:442](https://github.com/redc
 
 ## Param
 
+**currentClipPos**
+
 현재 프레임의 Clip Space 위치
 //
 
 ## Param
+
+**prevClipPos**
 
 이전 프레임의 Clip Space 위치
 //

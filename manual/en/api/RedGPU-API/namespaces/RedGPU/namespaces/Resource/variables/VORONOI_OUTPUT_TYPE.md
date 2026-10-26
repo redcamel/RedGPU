@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,17 +8,24 @@
 
 > `const` **VORONOI\_OUTPUT\_TYPE**: `object`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:5](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L5)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:13](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L13)
 
 **`Experimental`**
 
+Constants defining how the Voronoi noise output value is computed.
+
+### Example
+```typescript
+texture.outputType = RedGPU.Resource.VORONOI_OUTPUT_TYPE.F2_MINUS_F1;
+```
+
 ## Type Declaration
 
-| Name | Type | Default value | Defined in |
-| ------ | ------ | ------ | ------ |
-| <a id="property-cell_id"></a> `CELL_ID` | `4` | `4` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L10) |
-| <a id="property-cell_id_color"></a> `CELL_ID_COLOR` | `5` | `5` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:11](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L11) |
-| <a id="property-f1"></a> `F1` | `0` | `0` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L6) |
-| <a id="property-f1_plus_f2"></a> `F1_PLUS_F2` | `3` | `3` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:9](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L9) |
-| <a id="property-f2"></a> `F2` | `1` | `1` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:7](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L7) |
-| <a id="property-f2_minus_f1"></a> `F2_MINUS_F1` | `2` | `2` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:8](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L8) |
+| Name | Type | Default value | Description | Defined in |
+| ------ | ------ | ------ | ------ | ------ |
+| <a id="property-cell_id"></a> `CELL_ID` | `4` | `4` | Unique grayscale ID value per cell | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L38) |
+| <a id="property-cell_id_color"></a> `CELL_ID_COLOR` | `5` | `5` | Unique RGB color per cell | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:43](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L43) |
+| <a id="property-f1"></a> `F1` | `0` | `0` | Distance to the closest point | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:18](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L18) |
+| <a id="property-f1_plus_f2"></a> `F1_PLUS_F2` | `3` | `3` | F1 + F2 (smooth blend) | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L33) |
+| <a id="property-f2"></a> `F2` | `1` | `1` | Distance to the second closest point | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L23) |
+| <a id="property-f2_minus_f1"></a> `F2_MINUS_F1` | `2` | `2` | F2 - F1 (cell edge emphasis) | [src/resources/texture/noiseTexture/voronoi/VORONOI\_OUTPUT\_TYPE.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VORONOI_OUTPUT_TYPE.ts#L28) |

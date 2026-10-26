@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Util
 
-Provides various utility functions and classes commonly used in RedGPU.
-
-Includes tools that support core systems such as file processing, mathematical operations, texture management, and unique ID generation.
+Provides common utility functions such as file path handling, texture utilities, UUID generation, GPU buffer copying, and byte formatting.
 
 ## File
 
@@ -23,19 +21,18 @@ Includes tools that support core systems such as file processing, mathematical o
 
 ## Texture
 
+- [TextureParser](variables/TextureParser.md)
 - [calculateTextureByteSize](functions/calculateTextureByteSize.md)
 - [copyToTextureArray](functions/copyToTextureArray.md)
 - [getMipLevelCount](functions/getMipLevelCount.md)
-- [imageBitmapToGPUTexture](functions/imageBitmapToGPUTexture.md)
-- [loadAndCreateBitmapImage](functions/loadAndCreateBitmapImage.md)
+
+## Utility
+
+- [copyGPUBuffer](functions/copyGPUBuffer.md)
+- [formatBytes](functions/formatBytes.md)
 
 ## UUID
 
 - [InstanceIdGenerator](classes/InstanceIdGenerator.md)
 - [createUUID](functions/createUUID.md)
 - [uuidToUint](functions/uuidToUint.md)
-
-## Utility
-
-- [copyGPUBuffer](functions/copyGPUBuffer.md)
-- [formatBytes](functions/formatBytes.md)

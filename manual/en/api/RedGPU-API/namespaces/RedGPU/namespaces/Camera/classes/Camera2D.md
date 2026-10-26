@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,19 +6,27 @@
 
 # Class: Camera2D
 
-Defined in: [src/camera/camera/Camera2D.ts:20](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L20)
+Defined in: [src/camera/camera/Camera2D.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L26)
 
-Camera for observing objects in a 2D environment.
+Camera class that renders objects based on a 2D planar coordinate system. Automatically created internally when `View2D` is instantiated.
 
-Controls position based on a flat 2D coordinate system, primarily used for rendering UI or 2D game elements.
+::: warning
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+:::
+
+***
 
 ### Example
 ```typescript
-const camera = new RedGPU.Camera2D();
-camera.x = 100;
-camera.y = 50;
-camera.setPosition(200, 100);
+// Correct access method
+const view = new RedGPU.Display.View2D(redGPUContext, scene);
+const camera = view.camera;
+camera.setPosition(100, 50);
 ```
+
+## See
+
+[MultiView with 2D/3D example](https://redcamel.github.io/RedGPU/examples/2d/view/multiViewWith3D/)
 
 ## Extends
 
@@ -26,18 +34,17 @@ camera.setPosition(200, 100);
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new Camera2D**(): `Camera2D`
 
-Defined in: [src/camera/camera/Camera2D.ts:54](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L54)
+Defined in: [src/camera/camera/Camera2D.ts:37](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L37)
 
-Creates an instance of Camera2D.
-
-### Example
-```typescript
-const camera = new RedGPU.Camera2D();
-```
+Creates a Camera2D instance.
 
 #### Returns
 
@@ -47,23 +54,29 @@ const camera = new RedGPU.Camera2D();
 
 [`ACamera`](../namespaces/Core/classes/ACamera.md).[`constructor`](../namespaces/Core/classes/ACamera.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### position
 
 #### Get Signature
 
-> **get** **position**(): \[`number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **position**(): \[`number`, `number`\]
 
-Defined in: [src/camera/camera/Camera2D.ts:140](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L140)
+Defined in: [src/camera/camera/Camera2D.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L109)
 
-Returns the camera position (x, y).
+Returns the camera's 2D position coordinates.
 
 ##### Returns
 
 \[`number`, `number`\]
 
-[x, y] coordinate array
+`[x, y]` coordinate tuple
+
+***
 
 ***
 
@@ -71,17 +84,19 @@ Returns the camera position (x, y).
 
 #### Get Signature
 
-> **get** **viewMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
+> <span class="readonly-badge">readonly</span> **get** **viewMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/camera/camera/Camera2D.ts:66](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L66)
+Defined in: [src/camera/camera/Camera2D.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L49)
 
-Returns the model matrix.
+Returns the view matrix.
 
 ##### Returns
 
 [`mat4`](../../Math/type-aliases/mat4.md)
 
-Model matrix
+View matrix (`mat4`)
+
+***
 
 ***
 
@@ -91,33 +106,33 @@ Model matrix
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:90](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L90)
+Defined in: [src/camera/camera/Camera2D.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L73)
 
-Returns the X coordinate.
+Gets or sets the camera's X-axis coordinate.
 
 ##### Returns
 
 `number`
 
-X coordinate
+X-axis coordinate (default: `0`)
 
 #### Set Signature
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:102](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L102)
-
-Sets the X coordinate.
+Defined in: [src/camera/camera/Camera2D.ts:77](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L77)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | X coordinate to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -127,29 +142,27 @@ Sets the X coordinate.
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:115](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L115)
+Defined in: [src/camera/camera/Camera2D.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L91)
 
-Returns the Y coordinate.
+Gets or sets the camera's Y-axis coordinate.
 
 ##### Returns
 
 `number`
 
-Y coordinate
+Y-axis coordinate (default: `0`)
 
 #### Set Signature
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:127](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L127)
-
-Sets the Y coordinate.
+Defined in: [src/camera/camera/Camera2D.ts:95](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L95)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Y coordinate to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -157,33 +170,39 @@ Sets the Y coordinate.
 
 ***
 
+***
+
 ### z
 
 #### Get Signature
 
-> **get** **z**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **z**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:78](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L78)
+Defined in: [src/camera/camera/Camera2D.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L61)
 
-Returns the Z coordinate. (Unused)
+Returns the camera's Z-axis coordinate. (Always maintained at `0` in a 2D environment)
 
 ##### Returns
 
 `number`
 
-Z coordinate
+Z-axis coordinate (`0`)
 
 ## Methods
+
+
+
+***
 
 ### setPosition()
 
 > **setPosition**(`x`, `y?`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:161](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/Camera2D.ts#L161)
+Defined in: [src/camera/camera/Camera2D.ts:132](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/Camera2D.ts#L132)
 
-Sets the camera position.
+Sets the camera's 2D position.
 
-### Example
+#### Example
 ```typescript
 camera.setPosition(100, 200);
 camera.setPosition([100, 200, 0]);
@@ -193,8 +212,8 @@ camera.setPosition([100, 200, 0]);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` \| \[`number`, `number`, `number`\] | X coordinate or [x, y, z] array |
-| `y?` | `number` | Y coordinate (ignored if x is an array) |
+| `x` | `number` \| \[`number`, `number`, `number`\] | X-axis coordinate or `[x, y, z]` array |
+| `y?` | `number` | Y-axis coordinate (ignored if `x` is an array) |
 
 #### Returns
 
@@ -202,45 +221,12 @@ camera.setPosition([100, 200, 0]);
 
 ***
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`ACamera`](../namespaces/Core/classes/ACamera.md).[`instanceId`](../namespaces/Core/classes/ACamera.md#instanceid)
-
-***
-
-### CALIBRATION\_CONSTANT
-
-> `readonly` `static` **CALIBRATION\_CONSTANT**: `number` = `12.5`
-
-Defined in: [src/camera/core/ACamera.ts:19](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L19)
-
-Calibration constant (K)
-
-#### Description
-
-Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
-
-#### Inherited from
-
-[`ACamera`](../namespaces/Core/classes/ACamera.md).[`CALIBRATION_CONSTANT`](../namespaces/Core/classes/ACamera.md#calibration_constant)
-
-## Accessors
+<summary>View inherited properties (Click to expand)</summary>
 
 ### aperture
 
@@ -248,29 +234,27 @@ Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
 
 > **get** **aperture**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:123](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L123)
+Defined in: [src/camera/core/ACamera.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L86)
 
-Returns the aperture (f-stop) value.
+Gets or sets the aperture (f-stop) value. (Positive number, Default: `16.0`)
 
 ##### Returns
 
 `number`
 
-Aperture value
+Aperture (f-stop) value
 
 #### Set Signature
 
 > **set** **aperture**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:135](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L135)
-
-Sets the aperture (f-stop) value.
+Defined in: [src/camera/core/ACamera.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L90)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Aperture value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -282,15 +266,17 @@ Sets the aperture (f-stop) value.
 
 ***
 
+***
+
 ### ev100
 
 #### Get Signature
 
-> **get** **ev100**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **ev100**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:110](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L110)
+Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L73)
 
-Returns the physical exposure value (EV100).
+Returns the physical exposure value at ISO 100 (EV100).
 
 ##### Returns
 
@@ -304,35 +290,59 @@ EV100 value
 
 ***
 
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`ACamera`](../namespaces/Core/classes/ACamera.md).[`instanceId`](../namespaces/Core/classes/ACamera.md#instanceid)
+
+***
+
+***
+
 ### iso
 
 #### Get Signature
 
 > **get** **iso**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:177](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L177)
+Defined in: [src/camera/core/ACamera.ts:124](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L124)
 
-Returns the sensor sensitivity (ISO).
+Gets or sets the sensor sensitivity (ISO). (Positive number, Default: `100`)
 
 ##### Returns
 
 `number`
 
-ISO sensitivity
+ISO sensitivity value
 
 #### Set Signature
 
 > **set** **iso**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:189](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L189)
-
-Sets the sensor sensitivity (ISO).
+Defined in: [src/camera/core/ACamera.ts:128](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L128)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | ISO sensitivity to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -344,35 +354,35 @@ Sets the sensor sensitivity (ISO).
 
 ***
 
+***
+
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -380,7 +390,9 @@ Sets the name of the object.
 
 #### Inherited from
 
-[`PostEffectTexturePool`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md).[`name`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md#name)
+[`LakeWaveSimulator`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeWaveSimulator.md).[`name`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeWaveSimulator.md#name)
+
+***
 
 ***
 
@@ -390,29 +402,27 @@ Sets the name of the object.
 
 > **get** **shutterSpeed**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:150](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L150)
+Defined in: [src/camera/core/ACamera.ts:105](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L105)
 
-Returns the shutter speed (in seconds).
+Gets or sets the shutter speed in seconds. (Positive number, Default: `1 / 3200`)
 
 ##### Returns
 
 `number`
 
-Shutter speed
+Shutter speed in seconds
 
 #### Set Signature
 
 > **set** **shutterSpeed**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:162](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L162)
-
-Sets the shutter speed (in seconds).
+Defined in: [src/camera/core/ACamera.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L109)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Shutter speed to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -424,15 +434,17 @@ Sets the shutter speed (in seconds).
 
 ***
 
+***
+
 ### useAutoExposure
 
 #### Get Signature
 
 > **get** **useAutoExposure**(): `boolean`
 
-Defined in: [src/camera/core/ACamera.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L61)
+Defined in: [src/camera/core/ACamera.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L36)
 
-Returns whether to use auto exposure.
+Gets or sets whether auto exposure is enabled. When switched to `false`, fixes ISO to 100 and snaps shutter speed to the nearest standard stop to preserve the current EV100. (Default: `true`)
 
 ##### Returns
 
@@ -444,15 +456,13 @@ Whether auto exposure is enabled
 
 > **set** **useAutoExposure**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L73)
-
-Sets whether to use auto exposure.
+Defined in: [src/camera/core/ACamera.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L40)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | Whether to enable auto exposure to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
 
 ##### Returns
 
@@ -464,13 +474,15 @@ Sets whether to use auto exposure.
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -478,7 +490,7 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
@@ -486,19 +498,29 @@ UUID string
 
 ***
 
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
+
 ### updateExposure()
 
 > **updateExposure**(`view?`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:204](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L204)
+Defined in: [src/camera/core/ACamera.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L143)
 
-Updates the exposure value.
+Updates the `ev100` value based on auto exposure results or manual physical parameters (`aperture`, `shutterSpeed`, `iso`).
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view?` | [`View3D`](../../Display/classes/View3D.md) | View3D instance (optional) |
+| `view?` | [`View3D`](../../Display/classes/View3D.md) | Optional `View3D` instance from which to read adapted auto exposure |
 
 #### Returns
 
@@ -507,6 +529,5 @@ Updates the exposure value.
 #### Inherited from
 
 [`ACamera`](../namespaces/Core/classes/ACamera.md).[`updateExposure`](../namespaces/Core/classes/ACamera.md#updateexposure)
-
 
 </details>

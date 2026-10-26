@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,22 +6,23 @@
 
 # Class: TAA
 
-Defined in: [src/antialiasing/taa/TAA.ts:36](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L36)
+Defined in: [src/antialiasing/taa/TAA.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L34)
 
-TAA (Temporal Anti-Aliasing) post-processing effect.
+TAA (Temporal Anti-Aliasing) class that delivers high-quality anti-aliasing by combining previous frame history with pixel motion vectors.
 
-A high-quality anti-aliasing technique that removes aliasing by accumulating information from previous frames into the current frame. It maintains smooth edges even when the screen is static and provides superior quality at a lower cost than MSAA.
-
-This effect utilizes jittered projection matrices and motion vectors to track pixel correspondences between frames.
+Smooths out not only jagged object edges, but also flickering specular highlights and broken thin lines, while preserving image sharpness through built-in Contrast Adaptive Sharpening (CAS).
 
 ::: warning
-This class is managed by AntialiasingManager.<br/>Do not create an instance directly.
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
 :::
 
-* ### Example
+***
+
+### Example
 ```typescript
-// Enable TAA via AntialiasingManager.
+// Enable TAA and configure per-view TAA sharpening strength
 redGPUContext.antialiasingManager.useTAA = true;
+view.taa.sharpness = 0.5;
 ```
 
 ## Extends
@@ -30,19 +31,23 @@ redGPUContext.antialiasingManager.useTAA = true;
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new TAA**(`redGPUContext`): `TAA`
 
-Defined in: [src/antialiasing/taa/TAA.ts:54](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L54)
+Defined in: [src/antialiasing/taa/TAA.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L74)
 
-Creates a TAA instance.
+Initializes the `TAA` instance and its internal `TAACASPass`.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU Context |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 
 #### Returns
 
@@ -54,57 +59,51 @@ Creates a TAA instance.
 
 ## Properties
 
+
+
+## Accessors
+
+
+
+***
+
+### casPass
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **casPass**(): `TAACASPass`
+
+Defined in: [src/antialiasing/taa/TAA.ts:159](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L159)
+
+Returns the built-in `TAACASPass` instance that compensates for TAA temporal blending blur.
+
+##### Returns
+
+`TAACASPass`
+
+Built-in `TAACASPass` instance
+
+***
+
+***
+
 ### frameIndex
 
 #### Get Signature
 
-> **get** **frameIndex**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **frameIndex**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:93](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L93)
+Defined in: [src/antialiasing/taa/TAA.ts:183](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L183)
 
-Returns the frame index.
+Returns the accumulated TAA rendering frame index.
 
 ##### Returns
 
 `number`
 
-Frame index
+Accumulated frame index
 
 ***
-
-### jitterStrength
-
-#### Get Signature
-
-> **get** **jitterStrength**(): `number`
-
-Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L117)
-
-Returns the jitter strength.
-
-##### Returns
-
-`number`
-
-Jitter strength (default: 0.5)
-
-#### Set Signature
-
-> **set** **jitterStrength**(`value`): `void`
-
-Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L129)
-
-Sets the jitter strength.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Jitter strength to set |
-
-##### Returns
-
-`void`
 
 ***
 
@@ -112,17 +111,61 @@ Sets the jitter strength.
 
 #### Get Signature
 
-> **get** **prevNoneJitterProjectionViewMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
+> <span class="readonly-badge">readonly</span> **get** **prevNoneJitterProjectionViewMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/antialiasing/taa/TAA.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L81)
+Defined in: [src/antialiasing/taa/TAA.ts:171](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L171)
 
-Returns the non-jittered projection-view matrix of the previous frame.
+Returns the unjittered projection-view matrix (`mat4`) from the previous frame.
 
 ##### Returns
 
 [`mat4`](../../Math/type-aliases/mat4.md)
 
-Non-jittered projection-view matrix of the previous frame
+Previous frame's projection-view matrix (`mat4`)
+
+***
+
+***
+
+### sharpness
+
+#### Get Signature
+
+> **get** **sharpness**(): `number`
+
+Defined in: [src/antialiasing/taa/TAA.ts:62](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L62)
+
+Gets or sets the sharpening strength of the post-TAA CAS (Contrast Adaptive Sharpening) pass. Valid range is `0.0` to `1.0`, and the default value is `0.5`.
+
+#### Example
+```typescript
+// Adjust TAA sharpening strength
+view.taa.sharpness = 0.6;
+```
+
+##### Returns
+
+`number`
+
+CAS sharpening strength (`0.0` to `1.0`)
+
+#### Set Signature
+
+> **set** **sharpness**(`value`): `void`
+
+Defined in: [src/antialiasing/taa/TAA.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L93)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
 
 ***
 
@@ -130,17 +173,17 @@ Non-jittered projection-view matrix of the previous frame
 
 #### Get Signature
 
-> **get** **videoMemorySize**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L105)
+Defined in: [src/antialiasing/taa/TAA.ts:195](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L195)
 
-Returns the video memory usage.
+Returns the total video memory size (in bytes) occupied by the TAA history textures, uniform buffer, and CAS pass.
 
 ##### Returns
 
 `number`
 
-Video memory size in bytes
+Total occupied video memory size in bytes
 
 #### Overrides
 
@@ -148,13 +191,19 @@ Video memory size in bytes
 
 ***
 
+## Methods
+
+
+
+***
+
 ### clear()
 
 > **clear**(): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:197](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L197)
+Defined in: [src/antialiasing/taa/TAA.ts:218](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L218)
 
-Clears TAA resources.
+Clears all allocated ping-pong history textures and CAS pass cache resources, restoring the initial state.
 
 #### Returns
 
@@ -166,28 +215,50 @@ Clears TAA resources.
 
 ***
 
+***
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/antialiasing/taa/TAA.ts:241](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L241)
+
+Permanently destroys the TAA instance, internal CAS pass, and all associated GPU resources.
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+[`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`destroy`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#destroy)
+
+***
+
+***
+
 ### render()
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/antialiasing/taa/TAA.ts:153](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/antialiasing/taa/TAA.ts#L153)
+Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L117)
 
-Renders the TAA effect.
+Renders the TAA pass by combining the current frame's source texture with the previous frame's history.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | View3D instance |
-| `width` | `number` | Rendering width |
-| `height` | `number` | Rendering height |
-| `sourceTextureInfo` | [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) | Source texture information to be used as input |
+| `view` | [`View3D`](../../Display/classes/View3D.md) | Target `View3D` instance for rendering |
+| `width` | `number` | Render target width in pixels |
+| `height` | `number` | Render target height in pixels |
+| `sourceTextureInfo` | [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) | Input source texture and view information |
 
 #### Returns
 
 [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
 
-Rendering result (texture and view)
+Output texture result (`IPostEffectResult`) with TAA applied
 
 #### Overrides
 
@@ -195,33 +266,42 @@ Rendering result (texture and view)
 
 ***
 
+***
+
+### reset()
+
+> **reset**(): `void`
+
+Defined in: [src/antialiasing/taa/TAA.ts:210](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/antialiasing/taa/TAA.ts#L210)
+
+Resets the accumulated frame index to `0` so that the next frame starts fresh convergence without blending previous history.
+
+#### Example
+```typescript
+// Reset accumulated TAA history
+view.taa.reset();
+```
+
+#### Returns
+
+`void`
 
 ***
 
-## Inherited Members
+***
+
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`instanceId`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#instanceid)
-
-***
+<summary>View inherited properties (Click to expand)</summary>
 
 ### isInstanceofPostEffect
 
-> **isInstanceofPostEffect**: `boolean`
+> **isInstanceofPostEffect**: `boolean` = `true`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:12](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L12)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L19)
+
+Whether the instance is a post-processing effect
 
 #### Inherited from
 
@@ -229,35 +309,21 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:12](https://github.com
 
 ***
 
-### isLdr
-
-> **isLdr**: `boolean` = `false`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L29)
-
-Whether the effect operates in LDR (Low Dynamic Range) space
-
-#### Inherited from
-
-[`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`isLdr`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#isldr)
-
-## Accessors
-
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
 
 #### Inherited from
 
@@ -265,21 +331,23 @@ AntialiasingManager instance
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
 
 #### Inherited from
 
@@ -287,25 +355,77 @@ CommandEncoderManager instance
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-Returns the WebGPU device object. (Short-cut path)
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice instance
+`GPUDevice` instance
 
 #### Inherited from
 
 [`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`gpuDevice`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`instanceId`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#instanceid)
+
+***
+
+***
+
+### isLdr
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **isLdr**(): `boolean` = `false`
+
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L112)
+
+Returns whether the effect operates in LDR (Low Dynamic Range) space after tone mapping.
+
+##### Returns
+
+`boolean`
+
+Whether the effect operates in LDR space
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`isLdr`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#isldr)
+
+***
 
 ***
 
@@ -315,29 +435,27 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -349,21 +467,23 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### outputTextureView
 
 #### Get Signature
 
-> **get** **outputTextureView**(): `GPUTextureView`
+> <span class="readonly-badge">readonly</span> **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L208)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:235](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L235)
 
-Returns the currently allocated output texture view.
+Returns the output texture view allocated to the current pass.
 
 ##### Returns
 
 `GPUTextureView`
 
-Output GPUTextureView
+Output `GPUTextureView`
 
 #### Inherited from
 
@@ -371,21 +491,23 @@ Output GPUTextureView
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
 
 #### Inherited from
 
@@ -393,21 +515,23 @@ RedGPUContext instance
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 #### Inherited from
 
@@ -415,21 +539,23 @@ ResourceManager instance
 
 ***
 
+***
+
 ### shaderInfo
 
 #### Get Signature
 
-> **get** **shaderInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L124)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L148)
 
-Returns shader information based on the current MSAA state.
+Returns the WGSL shader parsing information corresponding to the current MSAA state.
 
 ##### Returns
 
 `any`
 
-WGSL shader analysis info
+WGSL shader parsing information
 
 #### Inherited from
 
@@ -437,21 +563,23 @@ WGSL shader analysis info
 
 ***
 
+***
+
 ### storageInfo
 
 #### Get Signature
 
-> **get** **storageInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L112)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L136)
 
-Returns storage info from the shader.
+Returns the parsed shader's storage binding structure information.
 
 ##### Returns
 
 `any`
 
-Storage structure information
+Storage binding structure information
 
 #### Inherited from
 
@@ -459,21 +587,23 @@ Storage structure information
 
 ***
 
+***
+
 ### systemUniformsInfo
 
 #### Get Signature
 
-> **get** **systemUniformsInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **systemUniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L160)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L184)
 
-Returns the system common globalStruct struct information.
+Returns the system common uniform struct information.
 
 ##### Returns
 
 `any`
 
-System globalStruct structure info
+System uniform struct information
 
 #### Inherited from
 
@@ -481,21 +611,23 @@ System globalStruct structure info
 
 ***
 
+***
+
 ### uniformBuffer
 
 #### Get Signature
 
-> **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
+> <span class="readonly-badge">readonly</span> **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L136)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L160)
 
-Returns the effect-specific globalStruct buffer.
+Returns the effect-specific uniform buffer.
 
 ##### Returns
 
 [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Uniform buffer instance
+`UniformBuffer` instance
 
 #### Inherited from
 
@@ -503,21 +635,23 @@ Uniform buffer instance
 
 ***
 
+***
+
 ### uniformsInfo
 
 #### Get Signature
 
-> **get** **uniformsInfo**(): `any`
+> <span class="readonly-badge">readonly</span> **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L148)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L172)
 
-Returns the effect-specific globalStruct struct information.
+Returns the effect-specific uniform struct information.
 
 ##### Returns
 
 `any`
 
-Uniform structure info
+Uniform struct information
 
 #### Inherited from
 
@@ -525,13 +659,15 @@ Uniform structure info
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -539,7 +675,7 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
@@ -547,21 +683,23 @@ UUID string
 
 ***
 
+***
+
 ### WORK\_SIZE\_X
 
 #### Get Signature
 
-> **get** **WORK\_SIZE\_X**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **WORK\_SIZE\_X**(): `number` = `16`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L172)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:197](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L197)
 
-Returns the workgroup size X.
+Returns the compute workgroup X-axis size.
 
 ##### Returns
 
 `number`
 
-Workgroup size X
+Workgroup X size
 
 #### Inherited from
 
@@ -569,21 +707,23 @@ Workgroup size X
 
 ***
 
+***
+
 ### WORK\_SIZE\_Y
 
 #### Get Signature
 
-> **get** **WORK\_SIZE\_Y**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **WORK\_SIZE\_Y**(): `number` = `16`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L184)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:210](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L210)
 
-Returns the workgroup size Y.
+Returns the compute workgroup Y-axis size.
 
 ##### Returns
 
 `number`
 
-Workgroup size Y
+Workgroup Y size
 
 #### Inherited from
 
@@ -591,59 +731,53 @@ Workgroup size Y
 
 ***
 
+***
+
 ### WORK\_SIZE\_Z
 
 #### Get Signature
 
-> **get** **WORK\_SIZE\_Z**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **WORK\_SIZE\_Z**(): `number` = `1`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L196)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:223](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L223)
 
-Returns the workgroup size Z.
+Returns the compute workgroup Z-axis size.
 
 ##### Returns
 
 `number`
 
-Workgroup size Z
+Workgroup Z size
 
 #### Inherited from
 
 [`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`WORK_SIZE_Z`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#work_size_z)
 
-## Methods
+</details>
 
-### destroy()
-
-> **destroy**(): `void`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:224](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L224)
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`destroy`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#destroy)
 
 ***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
 
 ### init()
 
 > **init**(`redGPUContext`, `name`, `computeCodes`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:252](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L252)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:283](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L283)
 
-Initializes the effect. Creates compute shaders and globalStruct buffers.
+Initializes the effect by creating MSAA/Non-MSAA compute shader modules and the uniform buffer.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU Context |
-| `name` | `string` | Effect name |
-| `computeCodes` | \{ `msaa`: `string`; `nonMsaa`: `string`; \} | Compute shader source codes for MSAA and Non-MSAA |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
+| `name` | `string` | Effect identifier name |
+| `computeCodes` | \{ `msaa`: `string`; `nonMsaa`: `string`; \} | Compute shader code object for MSAA and Non-MSAA |
 | `computeCodes.msaa` | `string` | - |
 | `computeCodes.nonMsaa` | `string` | - |
 
@@ -657,20 +791,22 @@ Initializes the effect. Creates compute shaders and globalStruct buffers.
 
 ***
 
+***
+
 ### updateUniform()
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:363](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L363)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:387](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/postEffect/core/ASinglePassPostEffect.ts#L387)
 
-Updates a specific globalStruct value.
+Writes the value of the specified uniform member to the uniform buffer.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `key` | `string` | Uniform key name |
-| `value` | `number` \| `boolean` \| `number`[] | Value to set |
+| `key` | `string` | Uniform member key name |
+| `value` | `number` \| `boolean` \| `number`[] | Value to write |
 
 #### Returns
 
@@ -679,6 +815,5 @@ Updates a specific globalStruct value.
 #### Inherited from
 
 [`ASinglePassPostEffect`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md).[`updateUniform`](../../PostEffect/namespaces/Core/classes/ASinglePassPostEffect.md#updateuniform)
-
 
 </details>

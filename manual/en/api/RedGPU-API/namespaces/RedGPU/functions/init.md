@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,22 +8,21 @@
 
 > **init**(`canvas`, `onWebGPUInitialized`, `onFailInitialized?`, `onDestroy?`, `alphaMode?`, `requestAdapterOptions?`): `Promise`\<`void`\>
 
-Defined in: [src/init.ts:56](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/init.ts#L56)
+Defined in: [src/init.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/init.ts#L56)
 
-Asynchronously initializes WebGPU and creates a RedGPUContext.
+Asynchronously initializes the WebGPU adapter and device, and creates a `RedGPUContext` instance.
 
-Checks for WebGPU support in the browser, requests a GPU adapter and device, and finally creates a RedGPUContext instance, passing it through a callback.
-
-* ### Example
+### Example
 ```typescript
 await RedGPU.init(
   canvas,
   (redGPUContext) => {
-    console.log('WebGPU 초기화 성공!', redGPUContext);
-    // 렌더링 루프 시작 (Start rendering loop)
+    // Start rendering after successful initialization
+    console.log(redGPUContext);
   },
   (errorMessage) => {
-    console.error('초기화 실패:', errorMessage);
+    // Handle initialization failure
+    console.error(errorMessage);
   }
 );
 ```
@@ -32,15 +31,15 @@ await RedGPU.init(
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `canvas` | `HTMLCanvasElement` | `undefined` | HTML canvas element to initialize WebGPU |
-| `onWebGPUInitialized` | (`redGPUContext`) => `void` | `undefined` | Callback function to be called on success (RedGPUContext instance is passed as an argument) |
-| `onFailInitialized?` | (`message?`) => `void` | `undefined` | Optional callback function to be called on failure (error message is passed as an argument) |
-| `onDestroy?` | (`info`) => `void` | `undefined` | Optional callback function to be called when the device is lost |
-| `alphaMode?` | `GPUCanvasAlphaMode` | `'premultiplied'` | Canvas alpha mode (Default: 'premultiplied') |
-| `requestAdapterOptions?` | `GPURequestAdapterOptions` | `DEFAULT_REQUEST_ADAPTER_OPTIONS` | Adapter request options (Default: high-performance setup) |
+| `canvas` | `HTMLCanvasElement` | `undefined` | `HTMLCanvasElement` to bind the WebGPU context |
+| `onWebGPUInitialized` | (`redGPUContext`) => `void` | `undefined` | Callback function receiving the created `RedGPUContext` upon successful initialization |
+| `onFailInitialized?` | (`message?`) => `void` | `undefined` | Optional callback function receiving an error message upon initialization failure |
+| `onDestroy?` | (`info`) => `void` | `undefined` | Optional callback function invoked when the GPU device is lost (`GPUDeviceLostInfo`) |
+| `alphaMode?` | `GPUCanvasAlphaMode` | `'premultiplied'` | Canvas alpha compositing mode (default: `'premultiplied'`) |
+| `requestAdapterOptions?` | `GPURequestAdapterOptions` | `DEFAULT_REQUEST_ADAPTER_OPTIONS` | WebGPU adapter request options (default: `DEFAULT_REQUEST_ADAPTER_OPTIONS`) |
 
 ## Returns
 
 `Promise`\<`void`\>
 
-Promise representing the completion of the initialization process
+`Promise<void>` representing the completion of initialization

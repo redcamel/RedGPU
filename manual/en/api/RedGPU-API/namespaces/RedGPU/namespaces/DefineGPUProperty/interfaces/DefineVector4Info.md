@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Interface: DefineVector4Info
 
-Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:7](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/vector/defineVector4.ts#L7)
+Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:10](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector4.ts#L10)
 
-`defineVector4` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+Interface for property definition options passed to the `defineVector4` function.
 
 ## Properties
 
@@ -16,9 +16,9 @@ Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:7](https://github.
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:12](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/vector/defineVector4.ts#L12)
+Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector4.ts#L15)
 
-Key name of the property. Defined on the target object's prototype under this name.
+Property key name to define on the target object's prototype
 
 ***
 
@@ -26,6 +26,6 @@ Key name of the property. Defined on the target object's prototype under this na
 
 > `optional` **value?**: \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/vector/defineVector4.ts#L17)
+Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector4.ts#L20)
 
-Initial 4-dimensional numeric array value (tuple). Defaults to `[0, 0, 0, 0]`.
+Initial 4D vector tuple value of the property (default: `[0, 0, 0, 0]`)

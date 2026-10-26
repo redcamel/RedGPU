@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,38 +8,31 @@
 
 > **defineBoolean**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/defineBoolean.ts#L88)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/defineBoolean.ts#L85)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 사용자 정의 불리언(Boolean) 속성을 정의합니다.
+대상 클래스의 프로토타입에 GPU 유니폼 버퍼와 연동되는 불리언(`boolean`) 프로퍼티를 동적으로 정의합니다.
+
+값 변경 시 GPU 유니폼 버퍼에는 `1`(`true`) 또는 `0`(`false`)으로 변환되어 기록되며, `dirtyPipeline` 플래그를 `true`로 갱신합니다.
+
+### Example
+```typescript
+// 단일 불리언 프로퍼티 정의
+RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
+
+// 다중 불리언 프로퍼티 일괄 정의
+RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, [
+    { key: 'useAlphaTest', value: true },
+    { key: 'useNormalMap', value: false }
+]);
+```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `target` | `any` | 속성을 정의할 클래스 생성자
-| `defineInfo` | [`DefineBooleanInfo`](../interfaces/DefineBooleanInfo.md) \| [`DefineBooleanInfo`](../interfaces/DefineBooleanInfo.md)[] | 단일 [DefineBooleanInfo](../interfaces/DefineBooleanInfo.md) 설정 또는 그 배열
+| `target` | `any` | 프로퍼티를 정의할 대상 클래스 생성자 |
+| `defineInfo` | [`DefineBooleanInfo`](../interfaces/DefineBooleanInfo.md) \| [`DefineBooleanInfo`](../interfaces/DefineBooleanInfo.md)[] | 단일 `DefineBooleanInfo` 설정 객체 또는 설정 배열 |
 
 ## Returns
 
 `void`
-
-## Remarks
-
-***
-- GPU 버퍼는 불리언을 지원하지 않으므로, setter는 `true` → `1`, `false` → `0`으로 변환하여 updateTargetUniform에 전달합니다.
-- 속성에 `boolean`이 아닌 값을 할당하면 `console.warn`으로 경고합니다.
-- 값 변경 시 `dirtyPipeline = true`로 설정하여 렌더 파이프라인 재빌드를 트리거합니다.
-
-
-## Example
-
-```typescript
-// 단일 설정
-RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
-
-// 여러 속성 일괄 정의
-RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, [
-  { key: 'useAlphaTest', value: true },
-  { key: 'useNormalMap', value: false },
-]);
-```

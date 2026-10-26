@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,38 +8,31 @@
 
 > **defineBoolean**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/defineBoolean.ts#L88)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/defineBoolean.ts#L85)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 사용자 정의 불리언(Boolean) 속성을 정의합니다.
+Dynamically defines boolean (`boolean`) properties linked to the GPU uniform buffer on the target class prototype.
+
+On value change, writes `1` (`true`) or `0` (`false`) to the GPU uniform buffer and sets the `dirtyPipeline` flag to `true`.
+
+### Example
+```typescript
+// Define a single boolean property
+RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
+
+// Define multiple boolean properties at once
+RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, [
+    { key: 'useAlphaTest', value: true },
+    { key: 'useNormalMap', value: false }
+]);
+```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `target` | `any` | Class constructor to define properties on |
-| `defineInfo` | [`DefineBooleanInfo`](../interfaces/DefineBooleanInfo.md) \| [`DefineBooleanInfo`](../interfaces/DefineBooleanInfo.md)[] | A single [DefineBooleanInfo](../interfaces/DefineBooleanInfo.md) configuration or an array of configurations |
+| `target` | `any` | Target class constructor to define properties on |
+| `defineInfo` | [`DefineBooleanInfo`](../interfaces/DefineBooleanInfo.md) \| [`DefineBooleanInfo`](../interfaces/DefineBooleanInfo.md)[] | Single `DefineBooleanInfo` configuration object or array of configurations |
 
 ## Returns
 
 `void`
-
-## Remarks
-
-
-***
-- Since GPU buffers do not support booleans, the setter converts `true` → `1` and `false` → `0` before calling updateTargetUniform.
-- Assigning a non-boolean value emits a `console.warn`.
-- Sets `dirtyPipeline = true` on change to trigger render pipeline rebuild.
-
-## Example
-
-```typescript
-// 단일 설정
-RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
-
-// 여러 속성 일괄 정의
-RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, [
-  { key: 'useAlphaTest', value: true },
-  { key: 'useNormalMap', value: false },
-]);
-```

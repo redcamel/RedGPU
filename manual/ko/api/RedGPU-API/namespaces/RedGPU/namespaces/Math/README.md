@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,25 +6,25 @@
 
 # Math
 
-3D 연산에 필요한 다양한 수학 함수, 기하학적 유틸리티 및 좌표 변환 기능을 제공합니다.
-
-## Coordinates
-
-- [getScreenPoint](functions/getScreenPoint.md)
-- [localToWorld](functions/localToWorld.md)
-- [screenToWorld](functions/screenToWorld.md)
-- [worldToLocal](functions/worldToLocal.md)
+3D 공간 연산, 프러스텀 평면 추출, 광선 교차 판정 및 좌표계 변환 유틸리티를 제공합니다.
 
 ## Math
 
 - [Ray](classes/Ray.md)
 - [calculateNormals](functions/calculateNormals.md)
 - [calculateTangents](functions/calculateTangents.md)
-- [computeViewFrustumPlanes](functions/computeViewFrustumPlanes.md)
+- [computeFrustumPlanes](functions/computeFrustumPlanes.md)
+- [computeFrustumPlanesFlat](functions/computeFrustumPlanesFlat.md)
+- [computeFrustumPlanesFromPVMatrix](functions/computeFrustumPlanesFromPVMatrix.md)
+- [computeFrustumPlanesFromPVMatrixFlat](functions/computeFrustumPlanesFromPVMatrixFlat.md)
+- [getScreenPoint](functions/getScreenPoint.md)
+- [localToWorld](functions/localToWorld.md)
 - [matToEuler](functions/matToEuler.md)
 - [quaternionToRotationMat4](functions/quaternionToRotationMat4.md)
+- [screenToWorld](functions/screenToWorld.md)
 - [sortTransparentObjects](functions/sortTransparentObjects.md)
 - [updateObject3DMatrix](functions/updateObject3DMatrix.md)
+- [worldToLocal](functions/worldToLocal.md)
 
 ## Other
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,25 +6,25 @@
 
 # Math
 
-Provides various mathematical functions, geometric utilities, and coordinate transformation features required for 3D operations.
-
-## Coordinates
-
-- [getScreenPoint](functions/getScreenPoint.md)
-- [localToWorld](functions/localToWorld.md)
-- [screenToWorld](functions/screenToWorld.md)
-- [worldToLocal](functions/worldToLocal.md)
+Provides utilities for 3D spatial operations, frustum plane extraction, ray intersection testing, and coordinate system transformations.
 
 ## Math
 
 - [Ray](classes/Ray.md)
 - [calculateNormals](functions/calculateNormals.md)
 - [calculateTangents](functions/calculateTangents.md)
-- [computeViewFrustumPlanes](functions/computeViewFrustumPlanes.md)
+- [computeFrustumPlanes](functions/computeFrustumPlanes.md)
+- [computeFrustumPlanesFlat](functions/computeFrustumPlanesFlat.md)
+- [computeFrustumPlanesFromPVMatrix](functions/computeFrustumPlanesFromPVMatrix.md)
+- [computeFrustumPlanesFromPVMatrixFlat](functions/computeFrustumPlanesFromPVMatrixFlat.md)
+- [getScreenPoint](functions/getScreenPoint.md)
+- [localToWorld](functions/localToWorld.md)
 - [matToEuler](functions/matToEuler.md)
 - [quaternionToRotationMat4](functions/quaternionToRotationMat4.md)
+- [screenToWorld](functions/screenToWorld.md)
 - [sortTransparentObjects](functions/sortTransparentObjects.md)
 - [updateObject3DMatrix](functions/updateObject3DMatrix.md)
+- [worldToLocal](functions/worldToLocal.md)
 
 ## Other
 

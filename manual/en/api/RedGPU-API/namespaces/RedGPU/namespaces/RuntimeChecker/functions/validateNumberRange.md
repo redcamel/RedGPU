@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **validateNumberRange**(`value`, `minRange?`, `maxRange?`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/runtimeChecker/validateFunc/validateNumberRange.ts#L32)
+Defined in: [src/runtimeChecker/validateFunc/validateNumberRange.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/runtimeChecker/validateFunc/validateNumberRange.ts#L29)
 
-Validates if the given value is a number within the specified range.
+Validates that the value is a number within [minRange, maxRange] and throws an exception on failure.
 
-Throws an exception if the value is out of range or not a number.
-
-* ### Example
+### Example
 ```typescript
 RedGPU.RuntimeChecker.validateNumberRange(50, 0, 100);
 ```
@@ -23,16 +21,16 @@ RedGPU.RuntimeChecker.validateNumberRange(50, 0, 100);
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `value` | `number` | `undefined` | Value to validate |
-| `minRange` | `number` | `-Number.MAX_VALUE` | Minimum allowed value (default: -Number.MAX_VALUE) |
-| `maxRange` | `number` | `Number.MAX_VALUE` | Maximum allowed value (default: Number.MAX_VALUE) |
+| `value` | `number` | `undefined` | Numeric value to validate |
+| `minRange?` | `number` | `-Number.MAX_VALUE` | Minimum allowed value (default: -Number.MAX_VALUE) |
+| `maxRange?` | `number` | `Number.MAX_VALUE` | Maximum allowed value (default: Number.MAX_VALUE) |
 
 ## Returns
 
 `boolean`
 
-True if the value is a number within range
+True if the value is within range
 
 ## Throws
 
-Throws Error if inputs are not numbers or the value is out of range
+Throws Error if any argument is not a number or NaN, or the value is out of range

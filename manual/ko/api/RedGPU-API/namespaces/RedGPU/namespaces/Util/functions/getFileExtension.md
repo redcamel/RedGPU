@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,25 +8,28 @@
 
 > **getFileExtension**(`url`): `string`
 
-Defined in: [src/utils/file/getFileExtension.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/file/getFileExtension.ts#L17)
+Defined in: [src/utils/file/getFileExtension.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/file/getFileExtension.ts#L23)
 
-URL 또는 경로에서 파일 확장자를 추출합니다.
+URL 또는 경로의 마지막 세그먼트에서 파일 확장자를 소문자로 추출합니다. 확장자가 없으면 빈 문자열을 반환합니다.
 
-확장자를 소문자로 반환하며, 없는 경우 빈 문자열을 반환합니다.
-
-* ### Example
+### Example
 ```typescript
-const ext = RedGPU.Util.getFileExtension('assets/model.gltf'); // 'gltf'
+// 'gltf' 반환
+const extension = RedGPU.Util.getFileExtension('assets/model.GLTF');
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `url` | `string` | 대상 URL 또는 경로
+| `url` | `string` | 대상 URL 또는 경로 |
 
 ## Returns
 
 `string`
 
-파일 확장자
+소문자 파일 확장자 (점 제외)
+
+## Throws
+
+`url`이 비어 있거나 공백뿐인 경우

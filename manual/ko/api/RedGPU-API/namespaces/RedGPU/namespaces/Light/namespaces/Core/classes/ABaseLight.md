@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,13 @@
 
 # Abstract Class: ABaseLight
 
-Defined in: [src/light/core/ABaseLight.ts:14](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L14)
+Defined in: [src/light/core/ABaseLight.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L16)
 
-모든 광원 클래스의 기본이 되는 추상 클래스입니다.
+모든 조명(Light)의 공통 속성(`color`, `intensityMultiplier`, `enableDebugger`)을 정의하는 추상 클래스입니다.
 
-색상, 세기(intensity), 디버깅 시각화 기능 등을 포함하며, DirectionalLight, PointLight 등 다양한 조명 클래스의 기반으로 사용됩니다.
+::: warning
+이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+:::
 
 ## Extended by
 
@@ -23,34 +25,22 @@ Defined in: [src/light/core/ABaseLight.ts:14](https://github.com/redcamel/RedGPU
 
 ### Constructor
 
-> `protected` **new ABaseLight**(`color`, `intensityMultiplier?`): `ABaseLight`
+> **new ABaseLight**(`color`, `intensityMultiplier?`): `ABaseLight`
 
-Defined in: [src/light/core/ABaseLight.ts:50](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L50)
+Defined in: [src/light/core/ABaseLight.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L32)
 
-새로운 ABaseLight 인스턴스를 생성합니다.
+ABaseLight 인스턴스를 초기화합니다.
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `color` | [`ColorRGB`](../../../../Color/classes/ColorRGB.md) | `undefined` | 광원의 색상 (ColorRGB 객체)
-| `intensityMultiplier` | `number` | `1` | 광원의 세기 배율 (기본값: 1)
+| `color` | [`ColorRGB`](../../../../Color/classes/ColorRGB.md) | `undefined` | 조명의 기본 색상 (`ColorRGB` 인스턴스) |
+| `intensityMultiplier?` | `number` | `1` | 조명 강도 배율 (기본값: `1`) |
 
 #### Returns
 
 `ABaseLight`
-
-## Properties
-
-### drawDebugger
-
-> **drawDebugger**: [`ADrawDebuggerLight`](../../../../Display/namespaces/drawDebugger/classes/ADrawDebuggerLight.md)\<`ABaseLight`\>
-
-Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L22)
-
-광원의 디버깅 시각화를 위한 도우미 객체입니다.
-
-외부에서 설정되며, 광원의 위치나 방향을 시각적으로 표시할 수 있습니다.
 
 ## Accessors
 
@@ -60,29 +50,27 @@ Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU
 
 > **get** **color**(): [`ColorRGB`](../../../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L61)
 
-광원의 색상을 반환합니다.
+조명의 색상(`ColorRGB`) 인스턴스를 반환하거나 설정합니다.
 
 ##### Returns
 
 [`ColorRGB`](../../../../Color/classes/ColorRGB.md)
 
-ColorRGB 객체
+조명의 `ColorRGB` 인스턴스
 
 #### Set Signature
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L95)
-
-광원의 색상을 설정합니다.
+Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L65)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | [`ColorRGB`](../../../../Color/classes/ColorRGB.md) | ColorRGB 객체
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`ColorRGB`](../../../../Color/classes/ColorRGB.md) |
 
 ##### Returns
 
@@ -96,29 +84,27 @@ Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L62)
+Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L45)
 
-디버깅 시각화 기능의 활성화 여부를 반환합니다.
+조명 시각적 디버거 활성화 여부를 반환하거나 설정합니다.
 
 ##### Returns
 
 `boolean`
 
-활성화 여부
+디버거 활성화 여부
 
 #### Set Signature
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L73)
-
-디버깅 시각화 기능을 활성화하거나 비활성화합니다.
+Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L49)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | true면 디버깅 기능 활성화
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
 
 ##### Returns
 
@@ -132,29 +118,27 @@ Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L109)
+Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L80)
 
-광원의 세기 배율을 반환합니다.
+조명 강도 배율(`0` 이상의 실수)을 반환하거나 설정합니다.
 
 ##### Returns
 
 `number`
 
-배율 값
+조명 강도 배율
 
 #### Set Signature
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L120)
-
-광원의 세기 배율을 설정합니다.
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L84)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 숫자 값 (예: 1.0)
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 

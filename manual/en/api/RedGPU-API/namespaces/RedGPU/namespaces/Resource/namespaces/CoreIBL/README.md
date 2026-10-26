@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # CoreIBL
 
-Provides core classes and generators for IBL generation.
+Provides core modules for building IBL, such as BRDF LUT, irradiance, and prefilter map generators.
 
 ## IBL
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,38 +8,31 @@
 
 > **definePositiveNumber**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/number/definePositiveNumber.ts:98](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/number/definePositiveNumber.ts#L98)
+Defined in: [src/defineProperty/funcs/number/definePositiveNumber.ts:101](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/number/definePositiveNumber.ts#L101)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 양수(Positive Number) 범위 속성을 정의합니다.
+지정된 대상의 프로토타입에 GPU 유니폼 버퍼와 연동되는 양수(Positive Number) 범위 속성을 정의합니다.
 
-## Parameters
+값 할당 시 0 이상의 양수 여부를 검사하며, `min`(기본값: 0) 및 `max` 범위를 벗어나면 경고 출력 후 경계값으로 클램핑하여 유니폼 버퍼를 갱신합니다.
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `target` | `any` | 속성을 정의할 클래스 생성자
-| `defineInfo` | [`DefinePositiveNumberInfo`](../interfaces/DefinePositiveNumberInfo.md) \| [`DefinePositiveNumberInfo`](../interfaces/DefinePositiveNumberInfo.md)[] | 단일 [DefinePositiveNumberInfo](../interfaces/DefinePositiveNumberInfo.md) 설정 또는 그 배열
-
-## Returns
-
-`void`
-
-## Remarks
-
-***
-- 값 설정 시 [validatePositiveNumberRange](../../RuntimeChecker/functions/validatePositiveNumberRange.md)를 통해 0 이상의 양수인지 검사합니다.
-- 최소값 `min`은 0 이상이어야 하며 기본값은 0입니다. `max`가 제공된 경우 최대값을 넘지 못하도록 클램핑(Clamping)합니다.
-- 범위 외의 값이 할당되면 `console.warn` 경고를 출력한 후 최소/최대값 한계치로 조정하여 저장하고 GPU 버퍼에 반영합니다.
-
-
-## Example
-
+### Example
 ```typescript
-// 단일 설정
+// 단일 양수 속성 정의
 RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, { key: 'shininess', value: 30, min: 0, max: 100 });
 
-// 여러 속성 일괄 정의
+// 다중 양수 속성 일괄 정의
 RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, [
   { key: 'fogDensity', value: 0.01, min: 0 },
   { key: 'roughness', value: 0.5, min: 0, max: 1 }
 ]);
 ```
+
+## Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `any` | 속성을 정의할 대상 클래스 또는 프로토타입 |
+| `defineInfo` | [`DefinePositiveNumberInfo`](../interfaces/DefinePositiveNumberInfo.md) \| [`DefinePositiveNumberInfo`](../interfaces/DefinePositiveNumberInfo.md)[] | 단일 `DefinePositiveNumberInfo` 설정 또는 설정 배열 |
+
+## Returns
+
+`void`

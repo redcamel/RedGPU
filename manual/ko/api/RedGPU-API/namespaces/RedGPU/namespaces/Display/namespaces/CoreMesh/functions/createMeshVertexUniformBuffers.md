@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,22 +8,21 @@
 
 > **createMeshVertexUniformBuffers**(`mesh`, `skin?`): `void`
 
-Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:13](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L13)
+Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L22)
 
-createMeshVertexUniformBuffers
+메시의 버텍스 유니폼 버퍼와 바인드 그룹 레이아웃을 생성합니다.
+
+::: warning
+이 함수는 시스템에 의해 내부적으로 호출됩니다.<br/>직접 호출하지 마십시오.
+:::
 
 ## Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../../classes/Mesh.md) | `undefined` | - |
-| `skin` | `boolean` | `false` | - |
+| `mesh` | [`Mesh`](../../../classes/Mesh.md) | `undefined` | 대상 Mesh 인스턴스 |
+| `skin?` | `boolean` | `false` | 스키닝 사용 여부 (기본값: false) |
 
 ## Returns
 
 `void`
-
-## Remarks
-
-`시스템 전용 클래스입니다.`\
-이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.

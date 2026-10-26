@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getLightAngleAttenuation**: `string` = `getLightAngleAttenuation_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1490](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L1490)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2119](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2119)
 
 스폿라이트의 각도(원뿔)에 따른 감쇄 계수를 계산합니다.
 
@@ -18,20 +18,28 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:1490](https://github.com/red
 
 ## Param
 
+**lightToVertexDirection**
+
 광원에서 픽셀(버텍스)을 향하는 정규화된 방향 벡터
 //
 
 ## Param
+
+**lightDirection**
 
 스폿라이트가 비추는 정규화된 중심 방향 벡터
 //
 
 ## Param
 
+**innerCutoff**
+
 내부 원뿔 컷오프 각도 (Degree)
 //
 
 ## Param
+
+**outerCutoff**
 
 외부 원뿔 컷오프 각도 (Degree)
 //

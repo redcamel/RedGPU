@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,25 +8,22 @@
 
 > **calculateTextureByteSize**(`texture`): `number`
 
-Defined in: [src/utils/texture/calculateTextureByteSize.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/texture/calculateTextureByteSize.ts#L17)
+Defined in: [src/utils/texture/calculateTextureByteSize.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/texture/calculateTextureByteSize.ts#L16)
 
-GPUTexture의 전체 바이트 크기를 계산합니다.
-
-가로, 세로, 레이어(또는 깊이) 수와 샘플 수를 기반으로 텍스처가 사용하는 실제 메모리 크기를 계산합니다.
-
-* ### Example
-```typescript
-const byteSize = RedGPU.Util.calculateTextureByteSize(gpuTexture);
-```
+`GPUTexture`의 포맷, 해상도, 레이어 수, 샘플 수를 기반으로 총 바이트 크기를 계산합니다.
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `texture` | `GPUTexture` | 대상 GPUTexture 객체
+| `texture` | `GPUTexture` | 바이트 크기를 계산할 대상 `GPUTexture` 객체 |
 
 ## Returns
 
 `number`
 
-계산된 전체 바이트 크기
+계산된 텍스처의 총 바이트 크기
+
+## Throws
+
+지원하지 않거나 인식할 수 없는 텍스처 포맷인 경우 `Error`가 발생합니다.

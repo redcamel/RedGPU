@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getTBN**: `string` = `getTBN_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:813](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L813)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:834](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L834)
 
 Constructs a perfectly orthonormal TBN (Tangent, Bitangent, Normal) matrix using a normal and an arbitrary tangent vector.
 
@@ -16,10 +16,14 @@ Constructs a perfectly orthonormal TBN (Tangent, Bitangent, Normal) matrix using
 
 ## Param
 
+**inputNormal**
+
 Normalized normal vector
 //
 
 ## Param
+
+**inputTangent**
 
 Tangent vector (does not need to be perpendicular to normal)
 //

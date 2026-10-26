@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -14,9 +14,13 @@ Returns whether or not the quaternions have exactly the same elements in the sam
 
 ## Param
 
+**a**
+
 The first quaternion.
 
 ## Param
+
+**b**
 
 The second quaternion.
 

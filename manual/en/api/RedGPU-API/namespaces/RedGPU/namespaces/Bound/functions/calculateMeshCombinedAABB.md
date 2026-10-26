@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **calculateMeshCombinedAABB**(`mesh`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/math/calculateMeshCombinedAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateMeshCombinedAABB.ts#L21)
 
-Calculates a combined AABB encompassing the mesh and all its children.
+Calculates a combined AABB encompassing the mesh and all its child meshes.
 
-Traverses the mesh hierarchy and returns a new AABB combining all bounding volumes.
-
-* ### Example
+### Example
 ```typescript
 const combinedAABB = RedGPU.Bound.calculateMeshCombinedAABB(rootMesh);
 ```

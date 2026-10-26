@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Interface: IPhysicsBody
 
-Defined in: [src/physics/IPhysicsBody.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L18)
+Defined in: [src/physics/IPhysicsBody.ts:15](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L15)
 
 **`Experimental`**
 
-물리 엔진의 강체(Rigid Body)와 RedGPU 메쉬를 연결하는 인터페이스입니다.
-
-이 인터페이스를 통해 물리 시뮬레이션 결과(위치, 회전 등)를 메쉬에 반영하거나, 외부에서 물리 객체를 제어할 수 있습니다.
+물리 엔진의 강체(Rigid Body)와 RedGPU 메시를 연결하는 인터페이스입니다.
 
 ::: warning
 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
@@ -24,13 +22,11 @@ Defined in: [src/physics/IPhysicsBody.ts:18](https://github.com/redcamel/RedGPU/
 
 > **nativeBody**: `any`
 
-Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L26)
+Defined in: [src/physics/IPhysicsBody.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L20)
 
 **`Experimental`**
 
-물리 엔진의 원본 Body 객체 (Escape Hatch)
-
-특정 물리 엔진(예: Rapier)의 고유 기능에 직접 접근해야 할 때 사용합니다.
+물리 엔진의 원본 Body 객체
 
 ***
 
@@ -38,16 +34,11 @@ Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/
 
 > **position**: [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:37](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L37)
+Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L26)
 
 **`Experimental`**
 
 물리 바디의 현재 위치
-
-### Example
-```typescript
-body.position = [0, 10, 0];
-```
 
 ***
 
@@ -55,16 +46,11 @@ body.position = [0, 10, 0];
 
 > **rotation**: [`quat`](../../Math/type-aliases/quat.md) \| \{ `w`: `number`; `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:48](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L48)
+Defined in: [src/physics/IPhysicsBody.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L32)
 
 **`Experimental`**
 
-물리 바디의 현재 회전 (쿼터니언)
-
-### Example
-```typescript
-body.rotation = [0, 0, 0, 1];
-```
+물리 바디의 현재 회전(쿼터니언)
 
 ***
 
@@ -72,16 +58,11 @@ body.rotation = [0, 0, 0, 1];
 
 > **velocity**: [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:59](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L59)
+Defined in: [src/physics/IPhysicsBody.ts:38](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L38)
 
 **`Experimental`**
 
 물리 바디의 현재 선속도
-
-### Example
-```typescript
-const velocity = body.velocity;
-```
 
 ## Methods
 
@@ -89,7 +70,7 @@ const velocity = body.velocity;
 
 > **applyImpulse**(`force`): `void`
 
-Defined in: [src/physics/IPhysicsBody.ts:74](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L74)
+Defined in: [src/physics/IPhysicsBody.ts:55](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L55)
 
 **`Experimental`**
 
@@ -97,6 +78,7 @@ Defined in: [src/physics/IPhysicsBody.ts:74](https://github.com/redcamel/RedGPU/
 
 ### Example
 ```typescript
+// Y축 방향으로 충격량 적용
 body.applyImpulse([0, 5, 0]);
 ```
 
@@ -104,7 +86,7 @@ body.applyImpulse([0, 5, 0]);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `force` | [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | 적용할 힘의 벡터
+| `force` | [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \} | 적용할 힘의 벡터 |
 
 #### Returns
 
@@ -116,13 +98,11 @@ body.applyImpulse([0, 5, 0]);
 
 > **syncToMesh**(): `void`
 
-Defined in: [src/physics/IPhysicsBody.ts:83](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/physics/IPhysicsBody.ts#L83)
+Defined in: [src/physics/IPhysicsBody.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/physics/IPhysicsBody.ts#L61)
 
 **`Experimental`**
 
-물리 엔진의 시뮬레이션 결과를 연결된 메쉬의 트랜스폼에 동기화합니다.
-
-일반적으로 렌더링 루프에서 자동으로 호출됩니다.
+물리 시뮬레이션 결과를 연결된 메시의 트랜스폼에 동기화합니다.
 
 #### Returns
 

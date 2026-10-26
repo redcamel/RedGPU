@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **calculateGeometryAABB**(`vertexBuffer`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateGeometryAABB.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/math/calculateGeometryAABB.ts#L24)
+Defined in: [src/bound/math/calculateGeometryAABB.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateGeometryAABB.ts#L21)
 
-VertexBuffer 정보를 기반으로 AABB를 계산합니다.
+`VertexBuffer`의 정점 위치 데이터를 순회하여 로컬 축 정렬 경계 상자(`AABB`)를 계산합니다.
 
-버텍스 버퍼의 각 정점 위치를 순회하며 최소/최대값을 찾아 AABB를 생성합니다.
-
-* ### Example
+### Example
 ```typescript
 const geometryAABB = RedGPU.Bound.calculateGeometryAABB(vertexBuffer);
 ```
@@ -23,10 +21,10 @@ const geometryAABB = RedGPU.Bound.calculateGeometryAABB(vertexBuffer);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `vertexBuffer` | [`VertexBuffer`](../../Resource/classes/VertexBuffer.md) | AABB를 계산할 버텍스 버퍼 객체
+| `vertexBuffer` | [`VertexBuffer`](../../Resource/classes/VertexBuffer.md) | `AABB`를 계산할 대상 `VertexBuffer` 인스턴스 |
 
 ## Returns
 
 [`AABB`](../classes/AABB.md)
 
-계산된 AABB 인스턴스
+계산된 로컬 `AABB` 인스턴스

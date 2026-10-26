@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # PostEffect
 
-Provides various post-processing effects (color correction, blur, lens effects, environmental effects, etc.), PostEffectManager, and single/multi-pass effect core classes.
-
-You can apply various visual effects to rendering results and flexibly configure post-processing pipelines through each effect and manager.
+Provides post-processing effects (color adjustments, blur, lens effects, environmental effects, etc.), `PostEffectManager`, and single/multi-pass core classes.
 
 ## Adjustments
 
@@ -31,10 +29,6 @@ You can apply various visual effects to rendering results and flexibly configure
 - [RadialBlur](classes/RadialBlur.md)
 - [ZoomBlur](classes/ZoomBlur.md)
 
-## Core
-
-- [PostEffectManager](classes/PostEffectManager.md)
-
 ## Fog
 
 - [Fog](classes/Fog.md)
@@ -54,6 +48,7 @@ You can apply various visual effects to rendering results and flexibly configure
 ## PostEffect
 
 - [Convolution](classes/Convolution.md)
+- [PostEffectManager](classes/PostEffectManager.md)
 - [Sharpen](classes/Sharpen.md)
 
 ## Visual Effects

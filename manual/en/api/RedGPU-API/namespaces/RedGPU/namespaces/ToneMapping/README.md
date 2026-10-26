@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,13 +6,10 @@
 
 # ToneMapping
 
-Provides various tone mapping techniques and a manager to handle them.
-
-## Other
-
-- [TONE\_MAPPING\_MODE](type-aliases/TONE_MAPPING_MODE.md)
+Provides tone mapping mode constants and the manager that handles tone mapping.
 
 ## ToneMapping
 
 - [ToneMappingManager](classes/ToneMappingManager.md)
+- [TONE\_MAPPING\_MODE](type-aliases/TONE_MAPPING_MODE.md)
 - [TONE\_MAPPING\_MODE](variables/TONE_MAPPING_MODE.md)

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,14 +6,11 @@
 
 # Core
 
-RedGPUContext의 핵심 구성 요소들을 제공합니다.
+`RedGPUContext`를 구성하는 환경 감지, 캔버스 관찰자, 크기 관리 및 뷰 컨테이너 코어 모듈을 제공합니다.
 
 ## Context
 
-- [RedGPUContextSizeManager](classes/RedGPUContextSizeManager.md)
-- [RedGPUContextViewContainer](classes/RedGPUContextViewContainer.md)
-
-## Other
-
 - [RedGPUContextDetector](classes/RedGPUContextDetector.md)
 - [RedGPUContextObserver](classes/RedGPUContextObserver.md)
+- [RedGPUContextSizeManager](classes/RedGPUContextSizeManager.md)
+- [RedGPUContextViewContainer](classes/RedGPUContextViewContainer.md)

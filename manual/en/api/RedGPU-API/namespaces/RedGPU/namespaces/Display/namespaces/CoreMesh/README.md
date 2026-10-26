@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # CoreMesh
 
-Provides core base classes and common interfaces for the mesh system.
+Provides core base classes and common utilities for the mesh system.
 
 ## Core
 
@@ -14,8 +14,5 @@ Provides core base classes and common interfaces for the mesh system.
 - [MeshBase](classes/MeshBase.md)
 - [Object3DContainer](classes/Object3DContainer.md)
 - [VertexGPURenderInfo](classes/VertexGPURenderInfo.md)
-
-## Other
-
 - [createMeshVertexUniformBuffers](functions/createMeshVertexUniformBuffers.md)
 - [mixInMesh2D](functions/mixInMesh2D.md)

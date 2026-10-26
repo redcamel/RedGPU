@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **validateNumber**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateNumber.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/runtimeChecker/validateFunc/validateNumber.ts#L26)
+Defined in: [src/runtimeChecker/validateFunc/validateNumber.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/runtimeChecker/validateFunc/validateNumber.ts#L23)
 
-주어진 값이 숫자(Number) 타입인지 검증합니다.
+값이 NaN이 아닌 number 타입인지 검증하며, 실패 시 예외를 발생시킵니다.
 
-값이 number 타입이 아니면 예외를 발생시킵니다.
-
-* ### Example
+### Example
 ```typescript
 RedGPU.RuntimeChecker.validateNumber(123);
 ```
@@ -23,14 +21,14 @@ RedGPU.RuntimeChecker.validateNumber(123);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `number` | 검증할 값
+| `value` | `number` | 검증할 값 |
 
 ## Returns
 
 `boolean`
 
-값이 숫자이면 true
+유효한 숫자이면 true
 
 ## Throws
 
-값이 숫자가 아닐 경우 Error 발생
+number 타입이 아니거나 NaN인 경우 Error 발생

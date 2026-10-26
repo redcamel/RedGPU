@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -20,3 +20,4 @@
 - [Shadow](variables/Shadow.md)
 - [SkyAtmosphere](variables/SkyAtmosphere.md)
 - [Time](variables/Time.md)
+- [Wind](variables/Wind.md)

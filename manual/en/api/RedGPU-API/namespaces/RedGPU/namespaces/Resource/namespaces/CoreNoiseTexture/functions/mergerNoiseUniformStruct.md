@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,15 +8,24 @@
 
 > **mergerNoiseUniformStruct**(`baseStruct`, `addStruct`): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:1](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L1)
+Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:20](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L20)
+
+Merges the base uniform struct definition string with an additional definition string using line breaks.
+
+### Example
+```typescript
+const struct = RedGPU.Resource.CoreNoiseTexture.mergerNoiseUniformStruct('frequency: f32,', 'seed: f32,');
+```
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `baseStruct` | `string` |
-| `addStruct` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `baseStruct` | `string` | Base uniform struct member definitions (WGSL) |
+| `addStruct` | `string` | Additional uniform struct member definitions to append (WGSL, ignored if empty) |
 
 ## Returns
 
 `string`
+
+Merged uniform struct definition string

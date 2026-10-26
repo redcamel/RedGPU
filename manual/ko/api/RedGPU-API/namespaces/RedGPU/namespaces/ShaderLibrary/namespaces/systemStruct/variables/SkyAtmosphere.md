@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **SkyAtmosphere**: `string` = `SkyAtmosphere_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2444](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L2444)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2517](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2517)
 
 대기 산란(SkyAtmosphere) 파라미터 구조체 정의입니다.
 
@@ -27,7 +27,6 @@ struct SkyAtmosphere {
 	skyLuminanceFactor: vec3<f32>,
 	multiScatteringFactor: f32,
 	sunDirection: vec3<f32>,
-	transmittanceMinLightElevationAngle: f32,
 	groundRadius: f32,
 	atmosphereHeight: f32,
 	aerialPerspectiveDistanceScale: f32,
@@ -37,7 +36,6 @@ struct SkyAtmosphere {
 	sunLimbDarkening: f32,
 	cameraHeight: f32,
 	cloudTime: f32,
-	cloudTimeMultiplier: f32,
 	cloudCoverage: f32,
 	cloudDensity: f32,
 	cloudHeight: f32

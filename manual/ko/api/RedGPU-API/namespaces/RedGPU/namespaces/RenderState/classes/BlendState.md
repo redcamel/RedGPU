@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,15 +6,17 @@
 
 # Class: BlendState
 
-Defined in: [src/renderState/BlendState.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L24)
+Defined in: [src/renderState/BlendState.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L27)
 
-머티리얼의 색상 및 알파 블렌딩 동작을 제어하는 상태 클래스입니다.
+머티리얼의 색상 및 알파 블렌딩 동작을 제어하는 렌더 상태 클래스입니다.
 
-렌더 파이프라인에서 소스와 대상 색상을 어떻게 혼합할지 정의하며, 투명도나 합성 효과를 구현하는 데 사용됩니다.
+::: warning
+이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+:::
 
-* ### Example
+### Example
 ```typescript
-const blendState = material.blendState;
+const blendState = material.blendStateColor;
 blendState.operation = RedGPU.GPU_BLEND_OPERATION.ADD;
 blendState.srcFactor = RedGPU.GPU_BLEND_FACTOR.SRC_ALPHA;
 blendState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
@@ -26,7 +28,7 @@ blendState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
 
 > **new BlendState**(`targetMaterial`, `srcFactor?`, `dstFactor?`, `operation?`): `BlendState`
 
-Defined in: [src/renderState/BlendState.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L52)
+Defined in: [src/renderState/BlendState.ts:55](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L55)
 
 BlendState 인스턴스를 생성합니다.
 
@@ -34,10 +36,10 @@ BlendState 인스턴스를 생성합니다.
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `targetMaterial` | `any` | `undefined` | 블렌드 상태가 적용될 머티리얼
-| `srcFactor` | `GPUBlendFactor` | `GPU_BLEND_FACTOR.SRC_ALPHA` | 소스 블렌드 팩터
-| `dstFactor` | `GPUBlendFactor` | `GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA` | 대상 블렌드 팩터
-| `operation` | `GPUBlendOperation` | `GPU_BLEND_OPERATION.ADD` | 블렌드 연산
+| `targetMaterial` | `any` | `undefined` | 블렌드 상태가 적용될 대상 머티리얼 |
+| `srcFactor?` | `GPUBlendFactor` | `GPU_BLEND_FACTOR.SRC_ALPHA` | 소스 블렌드 팩터 (기본값: `GPU_BLEND_FACTOR.SRC_ALPHA`) |
+| `dstFactor?` | `GPUBlendFactor` | `GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA` | 대상 블렌드 팩터 (기본값: `GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA`) |
+| `operation?` | `GPUBlendOperation` | `GPU_BLEND_OPERATION.ADD` | 블렌드 연산 방식 (기본값: `GPU_BLEND_OPERATION.ADD`) |
 
 #### Returns
 
@@ -49,9 +51,9 @@ BlendState 인스턴스를 생성합니다.
 
 > **state**: `GPUBlendComponent`
 
-Defined in: [src/renderState/BlendState.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L29)
+Defined in: [src/renderState/BlendState.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L32)
 
-최종 GPUBlendComponent 상태 객체
+최종 생성된 `GPUBlendComponent` 상태 객체
 
 ## Accessors
 
@@ -61,21 +63,21 @@ Defined in: [src/renderState/BlendState.ts:29](https://github.com/redcamel/RedGP
 
 > **get** **dstFactor**(): `GPUBlendFactor`
 
-Defined in: [src/renderState/BlendState.ts:107](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L107)
+Defined in: [src/renderState/BlendState.ts:110](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L110)
 
-대상(Destination) 블렌드 팩터를 가져오거나 설정합니다.
+대상(Destination) 블렌드 팩터를 반환하거나 설정합니다.
 
 ##### Returns
 
 `GPUBlendFactor`
 
-현재 설정된 GPUBlendFactor
+현재 설정된 대상 `GPUBlendFactor` 값
 
 #### Set Signature
 
 > **set** **dstFactor**(`newDstFactor`): `void`
 
-Defined in: [src/renderState/BlendState.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L111)
+Defined in: [src/renderState/BlendState.ts:114](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L114)
 
 ##### Parameters
 
@@ -95,21 +97,21 @@ Defined in: [src/renderState/BlendState.ts:111](https://github.com/redcamel/RedG
 
 > **get** **operation**(): `GPUBlendOperation`
 
-Defined in: [src/renderState/BlendState.ts:67](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L67)
+Defined in: [src/renderState/BlendState.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L70)
 
-블렌드 연산 방식을 가져오거나 설정합니다.
+블렌드 연산 방식을 반환하거나 설정합니다.
 
 ##### Returns
 
 `GPUBlendOperation`
 
-현재 설정된 GPUBlendOperation
+현재 설정된 `GPUBlendOperation` 값
 
 #### Set Signature
 
 > **set** **operation**(`newOperation`): `void`
 
-Defined in: [src/renderState/BlendState.ts:71](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L71)
+Defined in: [src/renderState/BlendState.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L74)
 
 ##### Parameters
 
@@ -129,21 +131,21 @@ Defined in: [src/renderState/BlendState.ts:71](https://github.com/redcamel/RedGP
 
 > **get** **srcFactor**(): `GPUBlendFactor`
 
-Defined in: [src/renderState/BlendState.ts:87](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L87)
+Defined in: [src/renderState/BlendState.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L90)
 
-소스(Source) 블렌드 팩터를 가져오거나 설정합니다.
+소스(Source) 블렌드 팩터를 반환하거나 설정합니다.
 
 ##### Returns
 
 `GPUBlendFactor`
 
-현재 설정된 GPUBlendFactor
+현재 설정된 소스 `GPUBlendFactor` 값
 
 #### Set Signature
 
 > **set** **srcFactor**(`newSrcFactor`): `void`
 
-Defined in: [src/renderState/BlendState.ts:91](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderState/BlendState.ts#L91)
+Defined in: [src/renderState/BlendState.ts:94](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/renderState/BlendState.ts#L94)
 
 ##### Parameters
 

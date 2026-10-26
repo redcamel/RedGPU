@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,30 +8,28 @@
 
 > **getScreenPoint**(`view`, `targetMatrix`): \[`number`, `number`\]
 
-Defined in: [src/math/coordinates/getScreenPoint.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/coordinates/getScreenPoint.ts#L33)
+Defined in: [src/math/coordinates/getScreenPoint.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/getScreenPoint.ts#L30)
 
-3D 모델 행렬을 이용해 화면 상의 2D 픽셀 좌표를 계산합니다.
-
-View3D의 카메라 및 프로젝션 정보를 바탕으로 화면 좌표로 변환합니다.
+대상의 4x4 월드 모델 행렬과 `View3D`의 카메라·투영 행렬을 사용하여 CSS 픽셀 단위의 2D 화면 좌표(`[x, y]`)를 계산합니다.
 
 ### Example
 ```typescript
-const [px, py] = RedGPU.math.getScreenPoint(view, mesh.modelMatrix);
+const [screenX, screenY] = RedGPU.Math.getScreenPoint(view, mesh.modelMatrix);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | 변환에 사용할 View3D 인스턴스
-| `targetMatrix` | [`mat4`](../type-aliases/mat4.md) | 변환할 대상의 모델 행렬
+| `view` | [`View3D`](../../Display/classes/View3D.md) | 투영 및 뷰포트 정보를 제공하는 `View3D` 인스턴스 |
+| `targetMatrix` | [`mat4`](../type-aliases/mat4.md) | 변환할 대상의 4x4 모델 행렬 (`mat4`, 열 우선) |
 
 ## Returns
 
 \[`number`, `number`\]
 
-변환된 화면 픽셀 좌표 [x, y]
+변환된 2D 화면 좌표 튜플 (`[x, y]`, CSS 픽셀 단위)
 
 ## Throws
 
-view가 View3D 인스턴스가 아니면 Error 발생
+`view`가 `View3D` 인스턴스가 아닐 경우 에러 발생

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,15 @@
 
 > `const` **entryPointPickingVertex**: `string` = `billboardEntryPointPickingVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2239](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L2239)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2309](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2309)
 
 Vertex shader entry point for billboard picking.
 
 //
 
 ## Param
+
+**inputData**
 
 Vertex input data
 //
@@ -28,7 +30,7 @@ Vertex output data
 fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
     let u_resolution = systemUniforms.resolution;
-     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     #redgpu_if disableJitter
         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
     #redgpu_else
@@ -40,8 +42,8 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
     let u_pixelSize = vertexUniforms.pixelSize;
-    let u_renderRatioX = vertexUniforms._renderRatioX;
-    let u_renderRatioY = vertexUniforms._renderRatioY;
+    let u_renderRatioX = vertexUniforms.renderRatioX;
+    let u_renderRatioY = vertexUniforms.renderRatioY;
 
     var ratioScaleMatrix: mat4x4<f32> = mat4x4<f32>(
         u_renderRatioX, 0, 0, 0,
@@ -67,7 +69,20 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
             output.position = u_projectionMatrix * billboardMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
         }
     } else {
-        output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+        if (u_usePixelSize == 1) {
+            let viewPositionCenter = u_viewMatrix * u_modelMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            let clipCenter = u_projectionMatrix * viewPositionCenter;
+            let pixelWorldScale = (u_pixelSize / u_resolution.y) * (2.0 * clipCenter.w / abs(u_projectionMatrix[1][1]));
+            let pixelRatioScaleMatrix = mat4x4<f32>(
+                u_renderRatioX * pixelWorldScale, 0, 0, 0,
+                0, u_renderRatioY * pixelWorldScale, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            );
+            output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * pixelRatioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+        } else {
+            output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+        }
     }
 
     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);

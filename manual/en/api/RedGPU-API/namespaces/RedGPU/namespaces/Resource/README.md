@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Resource
 
-Provides various resource objects and utilities (buffers, textures, samplers, resource manager, WGSL parser, etc.).
-
-Through each resource and utility, you can easily use various resource management functions required for rendering, such as GPU memory management, data buffering, texture processing, sampling, and WGSL parsing.
+Provides GPU resource modules such as buffers, textures, samplers, resource manager core, and the WGSL parser.
 
 ## Buffer
 
@@ -18,6 +16,8 @@ Through each resource and utility, you can easily use various resource managemen
 - [VertexBuffer](classes/VertexBuffer.md)
 - [VertexInterleavedStruct](classes/VertexInterleavedStruct.md)
 - [VertexInterleaveType](classes/VertexInterleaveType.md)
+- [NumberArray](type-aliases/NumberArray.md)
+- [TypeInterleave](type-aliases/TypeInterleave.md)
 
 ## IBL
 
@@ -27,6 +27,7 @@ Through each resource and utility, you can easily use various resource managemen
 
 - [SimplexTexture](classes/SimplexTexture.md)
 - [VoronoiTexture](classes/VoronoiTexture.md)
+- [VoronoiSettings](interfaces/VoronoiSettings.md)
 - [NOISE\_DIMENSION](variables/NOISE_DIMENSION.md)
 - [VORONOI\_DISTANCE\_TYPE](variables/VORONOI_DISTANCE_TYPE.md)
 - [VORONOI\_OUTPUT\_TYPE](variables/VORONOI_OUTPUT_TYPE.md)
@@ -39,16 +40,8 @@ Through each resource and utility, you can easily use various resource managemen
 - [CoreNoiseTexture](namespaces/CoreNoiseTexture/README.md)
 - [CoreVertexBuffer](namespaces/CoreVertexBuffer/README.md)
 - [CoreWGSLParser](namespaces/CoreWGSLParser/README.md)
-- [DownSampleCubeMapGenerator](classes/DownSampleCubeMapGenerator.md)
-- [MipmapGenerator](classes/MipmapGenerator.md)
 - [BufferSlot](interfaces/BufferSlot.md)
-- [VoronoiSettings](interfaces/VoronoiSettings.md)
-- [BitmapSrcInfo](type-aliases/BitmapSrcInfo.md)
-- [ComponentMapping](type-aliases/ComponentMapping.md)
-- [CubeSrcInfo](type-aliases/CubeSrcInfo.md)
 - [HDRSrcInfo](type-aliases/HDRSrcInfo.md)
-- [NumberArray](type-aliases/NumberArray.md)
-- [TypeInterleave](type-aliases/TypeInterleave.md)
 
 ## Resource
 
@@ -64,5 +57,11 @@ Through each resource and utility, you can easily use various resource managemen
 - [CubeTexture](classes/CubeTexture.md)
 - [DirectCubeTexture](classes/DirectCubeTexture.md)
 - [DirectTexture](classes/DirectTexture.md)
+- [DownSampleCubeMapGenerator](classes/DownSampleCubeMapGenerator.md)
 - [HDRTexture](classes/HDRTexture.md)
+- [MipmapGenerator](classes/MipmapGenerator.md)
 - [PackedTexture](classes/PackedTexture.md)
+- [TextureArray](classes/TextureArray.md)
+- [BitmapSrcInfo](type-aliases/BitmapSrcInfo.md)
+- [ComponentMapping](type-aliases/ComponentMapping.md)
+- [CubeSrcInfo](type-aliases/CubeSrcInfo.md)

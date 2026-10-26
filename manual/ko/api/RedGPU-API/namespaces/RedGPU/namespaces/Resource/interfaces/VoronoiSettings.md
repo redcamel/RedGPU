@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Interface: VoronoiSettings
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:19](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L19)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L24)
 
-Voronoi 설정을 위한 타입 인터페이스
+VoronoiTexture의 전체 설정 값을 담는 인터페이스입니다.
 
 ## Properties
 
@@ -16,7 +16,7 @@ Voronoi 설정을 위한 타입 인터페이스
 
 > **cellIdColorIntensity**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L29)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L34)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:29](ht
 
 > **distanceScale**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:21](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L21)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:26](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L26)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:21](ht
 
 > **distanceType**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L26)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:31](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L31)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:26](ht
 
 > **frequency**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:20](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L20)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:25](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L25)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:20](ht
 
 > **jitter**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:28](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L28)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:33](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L33)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:28](ht
 
 > **lacunarity**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L24)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:29](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L29)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:24](ht
 
 > **octaves**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L22)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L27)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:22](ht
 
 > **outputType**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:27](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L27)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L32)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:27](ht
 
 > **persistence**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:23](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L23)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L28)
 
 ***
 
@@ -88,4 +88,4 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:23](ht
 
 > **seed**: `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:25](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L25)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:30](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L30)

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,13 @@
 
 # Class: SkyBox
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L52)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:47](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L47)
 
-Skybox class used as the distant view and environment map information for 3D scenes.
+Skybox class that renders an infinite distant background for a 3D scene using a cubemap texture.
 
-Renders an infinite background space using a cube map texture. It supports physical luminance configuration suitable for PBR, artistic intensity multipliers, real-time transition effects, and control over blur and opacity.
+Supports physical luminance (Nit), intensity multiplier, blur, opacity control, and real-time texture transition effects using a noise mask.
+
+***
 
 ### Example
 ```typescript
@@ -18,15 +20,14 @@ const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 view.skybox = skybox;
 ```
 
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" ></iframe>
-
-Below is a list of additional sample examples to help understand the structure and operation of SkyBox.
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" style="width:100%; height:500px;"></iframe>
 
 ## See
 
- - [SkyBox basic example](https://redcamel.github.io/RedGPU/examples/3d/skybox/skybox/)
+- [SkyBox basic example](https://redcamel.github.io/RedGPU/examples/3d/skybox/skybox/)
+ - [SkyBox IBL example](https://redcamel.github.io/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)
  - [SkyBox transition example](https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/)
- - [SkyBox transition example2](https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/)
+ - [SkyBox transition with noise texture](https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/)
 
 ## Extends
 
@@ -34,21 +35,30 @@ Below is a list of additional sample examples to help understand the structure a
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new SkyBox**(`redGPUContext`, `texture`, `luminance?`): `SkyBox`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:93](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L93)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:94](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L94)
 
-Creates an instance of SkyBox.
+Creates a SkyBox instance.
+
+#### Example
+```typescript
+const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture, 25000);
+```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPU context instance |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
 | `texture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md) | `undefined` | Cube texture object to use as the background |
-| `luminance` | `number` | `25000` | Physical luminance (unit: cd/m² or Nit, default: 25000 Nit) |
+| `luminance?` | `number` | `25000` | Physical luminance (unit: Nit, default: 25000) |
 
 #### Returns
 
@@ -60,13 +70,19 @@ Creates an instance of SkyBox.
 
 ## Properties
 
+
+
+***
+
 ### gpuRenderInfo
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:62](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L62)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L57)
 
-GPU rendering and globalStruct information object
+Vertex GPU render info object
+
+***
 
 ***
 
@@ -74,11 +90,15 @@ GPU rendering and globalStruct information object
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:57](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L57)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:52](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L52)
 
-Skybox mesh model transformation matrix
+Skybox model transformation matrix
 
 ## Accessors
+
+
+
+***
 
 ### blur
 
@@ -86,7 +106,7 @@ Skybox mesh model transformation matrix
 
 > **get** **blur**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:148](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L148)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:165](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L165)
 
 Gets or sets the blur strength (0.0 to 1.0) of the background texture.
 
@@ -94,11 +114,13 @@ Gets or sets the blur strength (0.0 to 1.0) of the background texture.
 
 `number`
 
+Blur strength (0.0 to 1.0)
+
 #### Set Signature
 
 > **set** **blur**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:152](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L152)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:169](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L169)
 
 ##### Parameters
 
@@ -109,6 +131,8 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:152](https://github.com/redcam
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -118,19 +142,21 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:152](https://github.com/redcam
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:136](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L136)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:149](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L149)
 
-Gets or sets the intensity multiplier to adjust visual lighting strength.
+Gets or sets the intensity multiplier for visual brightness adjustment.
 
 ##### Returns
 
 `number`
 
+Intensity multiplier
+
 #### Set Signature
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:140](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L140)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:153](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L153)
 
 ##### Parameters
 
@@ -141,6 +167,8 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:140](https://github.com/redcam
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -150,7 +178,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:140](https://github.com/redcam
 
 > **get** **luminance**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:123](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L123)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:132](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L132)
 
 Gets or sets the luminance value (Nit) for physical optics simulation.
 
@@ -158,11 +186,13 @@ Gets or sets the luminance value (Nit) for physical optics simulation.
 
 `number`
 
+Luminance value (unit: Nit)
+
 #### Set Signature
 
 > **set** **luminance**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:127](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L127)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:136](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L136)
 
 ##### Parameters
 
@@ -173,6 +203,8 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:127](https://github.com/redcam
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -182,19 +214,21 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:127](https://github.com/redcam
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:161](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L161)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:182](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L182)
 
-Gets or sets the final opacity (0.0 to 1.0) of the skybox background.
+Gets or sets the opacity (0.0 to 1.0) of the skybox background.
 
 ##### Returns
 
 `number`
 
+Opacity (0.0 to 1.0)
+
 #### Set Signature
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:165](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L165)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:186](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L186)
 
 ##### Parameters
 
@@ -208,13 +242,15 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:165](https://github.com/redcam
 
 ***
 
+***
+
 ### texture
 
 #### Get Signature
 
 > **get** **texture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:109](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L109)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:114](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L114)
 
 Gets or sets the current cube texture applied as the skybox background.
 
@@ -222,11 +258,13 @@ Gets or sets the current cube texture applied as the skybox background.
 
 [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
+Current cube texture instance
+
 #### Set Signature
 
 > **set** **texture**(`texture`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:113](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L113)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:118](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L118)
 
 ##### Parameters
 
@@ -240,19 +278,29 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:113](https://github.com/redcam
 
 ***
 
+***
+
 ### transitionTexture
 
 #### Get Signature
 
-> **get** **transitionTexture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+> <span class="readonly-badge">readonly</span> **get** **transitionTexture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:174](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L174)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:199](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L199)
 
-Gets the target texture during a texture transition animation.
+Returns the target cube texture of the texture transition animation.
 
 ##### Returns
 
 [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
+
+Target cube texture for transition
+
+***
+
+## Methods
+
+
 
 ***
 
@@ -260,13 +308,15 @@ Gets the target texture during a texture transition animation.
 
 > **destroy**(): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:265](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L265)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:297](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L297)
 
-Destroys the SkyBox instance and immediately releases the allocated resources.
+Destroys the SkyBox instance and releases allocated GPU resources.
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -274,19 +324,21 @@ Destroys the SkyBox instance and immediately releases the allocated resources.
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:206](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L206)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L238)
 
-Draws the skybox on the screen background. If a texture transition is in progress, computes and uploads progress based on elapsed time.
+Renders the skybox and updates any active texture transition state.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | Current view and render state data |
+| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | Render state data of the current view |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -294,59 +346,49 @@ Draws the skybox on the screen background. If a texture transition is in progres
 
 > **transition**(`targetTexture`, `duration?`, `mask`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:191](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/skyboxs/skyBox/SkyBox.ts#L191)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:222](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/display/skyboxs/skyBox/SkyBox.ts#L222)
 
-Starts a masking animation to smoothly transition the background to the specified target cube texture.
+Starts an animation that transitions the background to the specified target cube texture.
+
+#### Example
+```typescript
+skybox.transition(nextCubeTexture, 500, noiseTexture);
+```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `targetTexture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md) | `undefined` | The new target cube texture to transition to |
-| `duration` | `number` | `300` | The duration of the transition (in ms, default: 300) |
-| `mask` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) | `undefined` | Noise mask texture to apply to the transition effect |
+| `targetTexture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md) | `undefined` | Target cube texture to transition to |
+| `duration?` | `number` | `300` | Transition duration (unit: ms, default: 300) |
+| `mask` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) | `undefined` | Noise mask texture to use for the transition effect |
 
 #### Returns
 
 `void`
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
-
-***
+<summary>View inherited properties (Click to expand)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
 
 #### Inherited from
 
@@ -354,21 +396,23 @@ AntialiasingManager instance
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
 
 #### Inherited from
 
@@ -376,25 +420,53 @@ CommandEncoderManager instance
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-Returns the WebGPU device object. (Short-cut path)
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice instance
+`GPUDevice` instance
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+***
 
 ***
 
@@ -404,29 +476,27 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -438,21 +508,23 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
 
 #### Inherited from
 
@@ -460,21 +532,23 @@ RedGPUContext instance
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 #### Inherited from
 
@@ -482,13 +556,15 @@ ResourceManager instance
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -496,13 +572,10 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
 [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../BaseObject/classes/RedGPUObject.md#uuid)
-
-## Methods
-
 
 </details>

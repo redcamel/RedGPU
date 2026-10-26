@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **calculateGeometryAABB**(`vertexBuffer`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateGeometryAABB.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/math/calculateGeometryAABB.ts#L24)
+Defined in: [src/bound/math/calculateGeometryAABB.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateGeometryAABB.ts#L21)
 
-Calculates AABB based on VertexBuffer information.
+Calculates a local Axis-Aligned Bounding Box (`AABB`) by iterating over the vertex position data of a `VertexBuffer`.
 
-Iterates through vertex positions to find min/max values and create an AABB.
-
-* ### Example
+### Example
 ```typescript
 const geometryAABB = RedGPU.Bound.calculateGeometryAABB(vertexBuffer);
 ```
@@ -23,10 +21,10 @@ const geometryAABB = RedGPU.Bound.calculateGeometryAABB(vertexBuffer);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `vertexBuffer` | [`VertexBuffer`](../../Resource/classes/VertexBuffer.md) | Vertex buffer object to calculate AABB from |
+| `vertexBuffer` | [`VertexBuffer`](../../Resource/classes/VertexBuffer.md) | Target `VertexBuffer` instance to calculate the `AABB` from |
 
 ## Returns
 
 [`AABB`](../classes/AABB.md)
 
-Calculated AABB instance
+Calculated local `AABB` instance

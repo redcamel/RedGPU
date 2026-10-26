@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,24 +8,29 @@
 
 > **formatBytes**(`bytes`, `decimals?`): `string`
 
-Defined in: [src/utils/formatBytes.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/formatBytes.ts#L17)
+Defined in: [src/utils/formatBytes.ts:28](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/formatBytes.ts#L28)
 
-Converts bytes to a human-readable string (KB, MB, GB, etc.).
+Converts a byte value into a human-readable string (Bytes, KB, MB, GB) based on 1024 units.
 
-* ### Example
+### Example
 ```typescript
-const readable = RedGPU.Util.formatBytes(1048576); // '1.00 MB'
+// Returns '1 MB'
+const readable = RedGPU.Util.formatBytes(1048576);
 ```
 
 ## Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `bytes` | `number` | `undefined` | Byte value to convert |
-| `decimals` | `number` | `2` | Number of decimal places (Default: 2) |
+| `bytes` | `number` | `undefined` | Byte value to convert (non-negative integer) |
+| `decimals?` | `number` | `2` | Number of decimal places (Default: 2, negative values are treated as 0) |
 
 ## Returns
 
 `string`
 
-Converted string
+Converted string including the unit
+
+## Throws
+
+If `bytes` is not a non-negative integer

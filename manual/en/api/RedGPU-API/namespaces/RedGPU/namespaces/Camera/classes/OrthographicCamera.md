@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,20 +6,24 @@
 
 # Class: OrthographicCamera
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L22)
+Defined in: [src/camera/camera/OrthographicCamera.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L21)
 
-Camera that uses orthographic projection.
+Orthographic projection camera class that renders objects at a constant size without distance-based perspective distortion.
 
-In this projection mode, an object's size stays constant regardless of its distance from the camera. It is primarily used for implementing orthographic views such as 2D viewports or blueprints.
+***
 
 ### Example
 ```typescript
-const camera = new RedGPU.OrthographicCamera();
+const camera = new RedGPU.Camera.OrthographicCamera();
 camera.top = 10;
 camera.bottom = -10;
 camera.left = -20;
 camera.right = 20;
 ```
+
+## See
+
+[IsometricController example](https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/)
 
 ## Extends
 
@@ -27,17 +31,21 @@ camera.right = 20;
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new OrthographicCamera**(): `OrthographicCamera`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:74](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L74)
+Defined in: [src/camera/camera/OrthographicCamera.ts:39](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L39)
 
-Creates an instance of OrthographicCamera.
+Creates an OrthographicCamera instance.
 
-### Example
+#### Example
 ```typescript
-const camera = new RedGPU.OrthographicCamera();
+const camera = new RedGPU.Camera.OrthographicCamera();
 ```
 
 #### Returns
@@ -48,7 +56,11 @@ const camera = new RedGPU.OrthographicCamera();
 
 [`PerspectiveCamera`](PerspectiveCamera.md).[`constructor`](PerspectiveCamera.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### bottom
 
@@ -56,33 +68,33 @@ const camera = new RedGPU.OrthographicCamera();
 
 > **get** **bottom**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:113](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L113)
+Defined in: [src/camera/camera/OrthographicCamera.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L70)
 
-Returns the projection bottom value.
+Gets or sets the bottom boundary value of the orthographic projection volume.
 
 ##### Returns
 
 `number`
 
-Projection bottom value
+Bottom boundary value (default: `-1`)
 
 #### Set Signature
 
 > **set** **bottom**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:125](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L125)
-
-Sets the projection bottom value.
+Defined in: [src/camera/camera/OrthographicCamera.ts:74](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L74)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Bottom value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -92,33 +104,33 @@ Sets the projection bottom value.
 
 > **get** **left**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:138](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L138)
+Defined in: [src/camera/camera/OrthographicCamera.ts:87](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L87)
 
-Returns the projection left value.
+Gets or sets the left boundary value of the orthographic projection volume.
 
 ##### Returns
 
 `number`
 
-Projection left value
+Left boundary value (default: `-1`)
 
 #### Set Signature
 
 > **set** **left**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:150](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L150)
-
-Sets the projection left value.
+Defined in: [src/camera/camera/OrthographicCamera.ts:91](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L91)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Left value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -128,33 +140,33 @@ Sets the projection left value.
 
 > **get** **maxZoom**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:238](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L238)
+Defined in: [src/camera/camera/OrthographicCamera.ts:155](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L155)
 
-Returns the maximum zoom level.
+Gets or sets the maximum zoom scale. (`0.01` or greater)
 
 ##### Returns
 
 `number`
 
-Maximum zoom level
+Maximum zoom scale (default: `10`)
 
 #### Set Signature
 
 > **set** **maxZoom**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:250](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L250)
-
-Sets the maximum zoom level.
+Defined in: [src/camera/camera/OrthographicCamera.ts:159](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L159)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Maximum zoom to set (min 0.01) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -164,33 +176,33 @@ Sets the maximum zoom level.
 
 > **get** **minZoom**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:213](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L213)
+Defined in: [src/camera/camera/OrthographicCamera.ts:138](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L138)
 
-Returns the minimum zoom level.
+Gets or sets the minimum zoom scale. (`0.01` or greater)
 
 ##### Returns
 
 `number`
 
-Minimum zoom level
+Minimum zoom scale (default: `0.1`)
 
 #### Set Signature
 
 > **set** **minZoom**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:225](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L225)
-
-Sets the minimum zoom level.
+Defined in: [src/camera/camera/OrthographicCamera.ts:142](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L142)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Minimum zoom to set (min 0.01) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -200,33 +212,33 @@ Sets the minimum zoom level.
 
 > **get** **right**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:163](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L163)
+Defined in: [src/camera/camera/OrthographicCamera.ts:104](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L104)
 
-Returns the projection right value.
+Gets or sets the right boundary value of the orthographic projection volume.
 
 ##### Returns
 
 `number`
 
-Projection right value
+Right boundary value (default: `1`)
 
 #### Set Signature
 
 > **set** **right**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:175](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L175)
-
-Sets the projection right value.
+Defined in: [src/camera/camera/OrthographicCamera.ts:108](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L108)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Right value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -236,33 +248,33 @@ Sets the projection right value.
 
 > **get** **top**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L88)
+Defined in: [src/camera/camera/OrthographicCamera.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L53)
 
-Returns the projection top value.
+Gets or sets the top boundary value of the orthographic projection volume.
 
 ##### Returns
 
 `number`
 
-Projection top value
+Top boundary value (default: `1`)
 
 #### Set Signature
 
 > **set** **top**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:100](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L100)
-
-Sets the projection top value.
+Defined in: [src/camera/camera/OrthographicCamera.ts:57](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L57)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Top value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -272,29 +284,27 @@ Sets the projection top value.
 
 > **get** **zoom**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:188](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L188)
+Defined in: [src/camera/camera/OrthographicCamera.ts:121](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L121)
 
-Returns the zoom level.
+Gets or sets the zoom scale. (`minZoom` ~ `maxZoom`)
 
 ##### Returns
 
 `number`
 
-Zoom level
+Zoom scale (default: `1`)
 
 #### Set Signature
 
 > **set** **zoom**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:200](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L200)
-
-Sets the zoom level.
+Defined in: [src/camera/camera/OrthographicCamera.ts:125](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L125)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Zoom level to set (minZoom ~ maxZoom) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -302,31 +312,19 @@ Sets the zoom level.
 
 ## Methods
 
-### lookAt()
 
-> **lookAt**(`x`, `y`, `z`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:399](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L399)
-
-Rotates the camera to look at a specific coordinate.
-
-### setPosition()
-
-> **setPosition**(`x`, `y?`, `z?`): `void`
-
-Defined in: [src/camera/camera/PerspectiveCamera.ts:369](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L369)
-
-Sets the camera position.
+***
 
 ### setZoom()
 
 > **setZoom**(`zoom`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:268](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/OrthographicCamera.ts#L268)
+Defined in: [src/camera/camera/OrthographicCamera.ts:177](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/OrthographicCamera.ts#L177)
 
-Sets the zoom level.
+Sets the camera's zoom scale.
 
-### Example
+#### Example
 ```typescript
 camera.setZoom(2.0);
 ```
@@ -335,7 +333,7 @@ camera.setZoom(2.0);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `zoom` | `number` | Zoom level (0.1 ~ 10) |
+| `zoom` | `number` | Zoom scale to set (`minZoom` ~ `maxZoom`) |
 
 #### Returns
 
@@ -343,45 +341,12 @@ camera.setZoom(2.0);
 
 ***
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`PerspectiveCamera`](PerspectiveCamera.md).[`instanceId`](PerspectiveCamera.md#instanceid)
-
-***
-
-### CALIBRATION\_CONSTANT
-
-> `readonly` `static` **CALIBRATION\_CONSTANT**: `number` = `12.5`
-
-Defined in: [src/camera/core/ACamera.ts:19](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L19)
-
-Calibration constant (K)
-
-#### Description
-
-Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
-
-#### Inherited from
-
-[`PerspectiveCamera`](PerspectiveCamera.md).[`CALIBRATION_CONSTANT`](PerspectiveCamera.md#calibration_constant)
-
-## Accessors
+<summary>View inherited properties (Click to expand)</summary>
 
 ### aperture
 
@@ -389,29 +354,27 @@ Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
 
 > **get** **aperture**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:123](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L123)
+Defined in: [src/camera/core/ACamera.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L86)
 
-Returns the aperture (f-stop) value.
+Gets or sets the aperture (f-stop) value. (Positive number, Default: `16.0`)
 
 ##### Returns
 
 `number`
 
-Aperture value
+Aperture (f-stop) value
 
 #### Set Signature
 
 > **set** **aperture**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:135](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L135)
-
-Sets the aperture (f-stop) value.
+Defined in: [src/camera/core/ACamera.ts:90](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L90)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Aperture value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -423,15 +386,17 @@ Sets the aperture (f-stop) value.
 
 ***
 
+***
+
 ### ev100
 
 #### Get Signature
 
-> **get** **ev100**(): `number`
+> <span class="readonly-badge">readonly</span> **get** **ev100**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:110](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L110)
+Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L73)
 
-Returns the physical exposure value (EV100).
+Returns the physical exposure value at ISO 100 (EV100).
 
 ##### Returns
 
@@ -445,35 +410,35 @@ EV100 value
 
 ***
 
+***
+
 ### farClipping
 
 #### Get Signature
 
 > **get** **farClipping**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:233](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L233)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:144](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L144)
 
-Returns the far clipping distance.
+Gets or sets the far clipping plane distance.
 
 ##### Returns
 
 `number`
 
-Far clipping distance
+Far clipping plane distance (default: `50000`)
 
 #### Set Signature
 
 > **set** **farClipping**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:245](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L245)
-
-Sets the far clipping distance.
+Defined in: [src/camera/camera/PerspectiveCamera.ts:148](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L148)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Far clipping distance to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -485,35 +450,35 @@ Sets the far clipping distance.
 
 ***
 
+***
+
 ### fieldOfView
 
 #### Get Signature
 
 > **get** **fieldOfView**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:183](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L183)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:110](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L110)
 
-Returns the field of view. (degrees)
+Gets or sets the vertical field of view (FOV). (Unit: degrees)
 
 ##### Returns
 
 `number`
 
-Field of view
+Field of view (default: `60`)
 
 #### Set Signature
 
 > **set** **fieldOfView**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:195](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L195)
-
-Sets the field of view. (degrees)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:114](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L114)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Field of view to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -525,35 +490,59 @@ Sets the field of view. (degrees)
 
 ***
 
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`PerspectiveCamera`](PerspectiveCamera.md).[`instanceId`](PerspectiveCamera.md#instanceid)
+
+***
+
+***
+
 ### iso
 
 #### Get Signature
 
 > **get** **iso**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:177](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L177)
+Defined in: [src/camera/core/ACamera.ts:124](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L124)
 
-Returns the sensor sensitivity (ISO).
+Gets or sets the sensor sensitivity (ISO). (Positive number, Default: `100`)
 
 ##### Returns
 
 `number`
 
-ISO sensitivity
+ISO sensitivity value
 
 #### Set Signature
 
 > **set** **iso**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:189](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L189)
-
-Sets the sensor sensitivity (ISO).
+Defined in: [src/camera/core/ACamera.ts:128](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L128)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | ISO sensitivity to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -565,35 +554,35 @@ Sets the sensor sensitivity (ISO).
 
 ***
 
+***
+
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -601,7 +590,9 @@ Sets the name of the object.
 
 #### Inherited from
 
-[`PostEffectTexturePool`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md).[`name`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md#name)
+[`LakeWaveSimulator`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeWaveSimulator.md).[`name`](../../Water/namespaces/LakeCore/namespaces/Interaction/classes/LakeWaveSimulator.md#name)
+
+***
 
 ***
 
@@ -611,29 +602,27 @@ Sets the name of the object.
 
 > **get** **nearClipping**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:208](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L208)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:127](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L127)
 
-Returns the near clipping distance.
+Gets or sets the near clipping plane distance.
 
 ##### Returns
 
 `number`
 
-Near clipping distance
+Near clipping plane distance (default: `0.1`)
 
 #### Set Signature
 
 > **set** **nearClipping**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:220](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L220)
-
-Sets the near clipping distance.
+Defined in: [src/camera/camera/PerspectiveCamera.ts:131](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L131)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Near clipping distance to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -645,25 +634,29 @@ Sets the near clipping distance.
 
 ***
 
+***
+
 ### position
 
 #### Get Signature
 
-> **get** **position**(): \[`number`, `number`, `number`\]
+> <span class="readonly-badge">readonly</span> **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:345](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L345)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:227](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L227)
 
-Returns the camera position (x, y, z).
+Returns the camera's 3D position coordinates.
 
 ##### Returns
 
 \[`number`, `number`, `number`\]
 
-[x, y, z] coordinate array
+`[x, y, z]` coordinate tuple
 
 #### Inherited from
 
 [`PerspectiveCamera`](PerspectiveCamera.md).[`position`](PerspectiveCamera.md#position)
+
+***
 
 ***
 
@@ -673,29 +666,27 @@ Returns the camera position (x, y, z).
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:111](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L111)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:59](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L59)
 
-Returns the X rotation value. (radians)
+Gets or sets the camera's X-axis rotation angle. (Unit: degrees)
 
 ##### Returns
 
 `number`
 
-X rotation value
+X-axis rotation angle (default: `0`)
 
 #### Set Signature
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:123](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L123)
-
-Sets the X rotation value. (radians)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L63)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Rotation value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -707,35 +698,35 @@ Sets the X rotation value. (radians)
 
 ***
 
+***
+
 ### rotationY
 
 #### Get Signature
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:135](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L135)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:76](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L76)
 
-Returns the Y rotation value. (radians)
+Gets or sets the camera's Y-axis rotation angle. (Unit: degrees)
 
 ##### Returns
 
 `number`
 
-Y rotation value
+Y-axis rotation angle (default: `0`)
 
 #### Set Signature
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:147](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L147)
-
-Sets the X rotation value. (radians)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L80)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Rotation value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -747,35 +738,35 @@ Sets the X rotation value. (radians)
 
 ***
 
+***
+
 ### rotationZ
 
 #### Get Signature
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:159](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L159)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:93](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L93)
 
-Returns the Z rotation value. (radians)
+Gets or sets the camera's Z-axis rotation angle. (Unit: degrees)
 
 ##### Returns
 
 `number`
 
-Z rotation value
+Z-axis rotation angle (default: `0`)
 
 #### Set Signature
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:171](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L171)
-
-Sets the X rotation value. (radians)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:97](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L97)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Rotation value to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -787,35 +778,35 @@ Sets the X rotation value. (radians)
 
 ***
 
+***
+
 ### shutterSpeed
 
 #### Get Signature
 
 > **get** **shutterSpeed**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:150](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L150)
+Defined in: [src/camera/core/ACamera.ts:105](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L105)
 
-Returns the shutter speed (in seconds).
+Gets or sets the shutter speed in seconds. (Positive number, Default: `1 / 3200`)
 
 ##### Returns
 
 `number`
 
-Shutter speed
+Shutter speed in seconds
 
 #### Set Signature
 
 > **set** **shutterSpeed**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:162](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L162)
-
-Sets the shutter speed (in seconds).
+Defined in: [src/camera/core/ACamera.ts:109](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L109)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Shutter speed to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -827,15 +818,17 @@ Sets the shutter speed (in seconds).
 
 ***
 
+***
+
 ### useAutoExposure
 
 #### Get Signature
 
 > **get** **useAutoExposure**(): `boolean`
 
-Defined in: [src/camera/core/ACamera.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L61)
+Defined in: [src/camera/core/ACamera.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L36)
 
-Returns whether to use auto exposure.
+Gets or sets whether auto exposure is enabled. When switched to `false`, fixes ISO to 100 and snaps shutter speed to the nearest standard stop to preserve the current EV100. (Default: `true`)
 
 ##### Returns
 
@@ -847,15 +840,13 @@ Whether auto exposure is enabled
 
 > **set** **useAutoExposure**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L73)
-
-Sets whether to use auto exposure.
+Defined in: [src/camera/core/ACamera.ts:40](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L40)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | Whether to enable auto exposure to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
 
 ##### Returns
 
@@ -867,13 +858,15 @@ Sets whether to use auto exposure.
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -881,7 +874,7 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
@@ -889,25 +882,29 @@ UUID string
 
 ***
 
+***
+
 ### viewMatrix
 
 #### Get Signature
 
-> **get** **viewMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
+> <span class="readonly-badge">readonly</span> **get** **viewMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:258](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L258)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:161](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L161)
 
-Returns the model matrix.
+Returns the view matrix.
 
 ##### Returns
 
 [`mat4`](../../Math/type-aliases/mat4.md)
 
-Model matrix
+View matrix (`mat4`)
 
 #### Inherited from
 
 [`PerspectiveCamera`](PerspectiveCamera.md).[`viewMatrix`](PerspectiveCamera.md#viewmatrix)
+
+***
 
 ***
 
@@ -917,29 +914,27 @@ Model matrix
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:270](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L270)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:173](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L173)
 
-Returns the X coordinate.
+Gets or sets the camera's X-axis coordinate.
 
 ##### Returns
 
 `number`
 
-X coordinate
+X-axis coordinate (default: `0`)
 
 #### Set Signature
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:282](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L282)
-
-Sets the X coordinate.
+Defined in: [src/camera/camera/PerspectiveCamera.ts:177](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L177)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | X coordinate to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -951,35 +946,35 @@ Sets the X coordinate.
 
 ***
 
+***
+
 ### y
 
 #### Get Signature
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:295](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L295)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L191)
 
-Returns the Y coordinate.
+Gets or sets the camera's Y-axis coordinate.
 
 ##### Returns
 
 `number`
 
-Y coordinate
+Y-axis coordinate (default: `0`)
 
 #### Set Signature
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:307](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L307)
-
-Sets the Y coordinate.
+Defined in: [src/camera/camera/PerspectiveCamera.ts:195](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L195)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Y coordinate to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -991,35 +986,35 @@ Sets the Y coordinate.
 
 ***
 
+***
+
 ### z
 
 #### Get Signature
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:320](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L320)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:209](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L209)
 
-Returns the Z coordinate.
+Gets or sets the camera's Z-axis coordinate.
 
 ##### Returns
 
 `number`
 
-Z coordinate
+Z-axis coordinate (default: `0`)
 
 #### Set Signature
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:332](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/camera/PerspectiveCamera.ts#L332)
-
-Sets the Z coordinate.
+Defined in: [src/camera/camera/PerspectiveCamera.ts:213](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L213)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Z coordinate to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -1031,7 +1026,25 @@ Sets the Z coordinate.
 
 ***
 
-### Example
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
+
+### lookAt()
+
+> **lookAt**(`x`, `y`, `z`): `void`
+
+Defined in: [src/camera/camera/PerspectiveCamera.ts:294](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L294)
+
+Updates the view matrix so the camera looks at the specified world coordinates.
+
+#### Example
 ```typescript
 camera.lookAt(0, 0, 0);
 ```
@@ -1040,9 +1053,9 @@ camera.lookAt(0, 0, 0);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` | Target X coordinate to look at |
-| `y` | `number` | Target Y coordinate to look at |
-| `z` | `number` | Target Z coordinate to look at |
+| `x` | `number` | Target X-axis coordinate to look at |
+| `y` | `number` | Target Y-axis coordinate to look at |
+| `z` | `number` | Target Z-axis coordinate to look at |
 
 #### Returns
 
@@ -1054,7 +1067,17 @@ camera.lookAt(0, 0, 0);
 
 ***
 
-### Example
+***
+
+### setPosition()
+
+> **setPosition**(`x`, `y?`, `z?`): `void`
+
+Defined in: [src/camera/camera/PerspectiveCamera.ts:254](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/camera/PerspectiveCamera.ts#L254)
+
+Sets the camera's 3D position.
+
+#### Example
 ```typescript
 camera.setPosition(10, 5, 20);
 camera.setPosition([10, 5, 20]);
@@ -1064,9 +1087,9 @@ camera.setPosition([10, 5, 20]);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` \| \[`number`, `number`, `number`\] | X coordinate or [x, y, z] array |
-| `y?` | `number` | Y coordinate (ignored if x is an array) |
-| `z?` | `number` | Z coordinate (ignored if x is an array) |
+| `x` | `number` \| \[`number`, `number`, `number`\] | X-axis coordinate or `[x, y, z]` array |
+| `y?` | `number` | Y-axis coordinate (ignored if `x` is an array) |
+| `z?` | `number` | Z-axis coordinate (ignored if `x` is an array) |
 
 #### Returns
 
@@ -1078,19 +1101,21 @@ camera.setPosition([10, 5, 20]);
 
 ***
 
+***
+
 ### updateExposure()
 
 > **updateExposure**(`view?`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:204](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/ACamera.ts#L204)
+Defined in: [src/camera/core/ACamera.ts:143](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/ACamera.ts#L143)
 
-Updates the exposure value.
+Updates the `ev100` value based on auto exposure results or manual physical parameters (`aperture`, `shutterSpeed`, `iso`).
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view?` | [`View3D`](../../Display/classes/View3D.md) | View3D instance (optional) |
+| `view?` | [`View3D`](../../Display/classes/View3D.md) | Optional `View3D` instance from which to read adapted auto exposure |
 
 #### Returns
 
@@ -1099,6 +1124,5 @@ Updates the exposure value.
 #### Inherited from
 
 [`PerspectiveCamera`](PerspectiveCamera.md).[`updateExposure`](PerspectiveCamera.md#updateexposure)
-
 
 </details>

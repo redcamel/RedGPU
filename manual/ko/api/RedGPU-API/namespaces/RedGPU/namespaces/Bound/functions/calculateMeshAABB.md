@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,15 +6,13 @@
 
 # Function: calculateMeshAABB()
 
-> **calculateMeshAABB**(`mesh`): [`AABB`](../classes/AABB.md)
+> **calculateMeshAABB**(`mesh`, `targetAABB?`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshAABB.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/math/calculateMeshAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshAABB.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/bound/math/calculateMeshAABB.ts#L24)
 
-메시의 로컬 AABB를 월드 공간 AABB로 변환하여 계산합니다.
+메시의 로컬 지오메트리 볼륨에 `modelMatrix`를 적용하여 월드 공간 축 정렬 경계 상자(`AABB`)를 계산합니다.
 
-메시의 지오메트리 볼륨을 modelMatrix로 변환하여 월드 기준 AABB를 반환합니다.
-
-* ### Example
+### Example
 ```typescript
 const meshAABB = RedGPU.Bound.calculateMeshAABB(mesh);
 ```
@@ -23,10 +21,11 @@ const meshAABB = RedGPU.Bound.calculateMeshAABB(mesh);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | AABB를 계산할 메시 객체
+| `mesh` | [`Mesh`](../../Display/classes/Mesh.md) | 월드 `AABB`를 계산할 대상 `Mesh` 인스턴스 |
+| `targetAABB?` | [`AABB`](../classes/AABB.md) | 결과를 제자리(In-place)에 저장할 대상 `AABB` 인스턴스 (생략 시 새 인스턴스 생성) |
 
 ## Returns
 
 [`AABB`](../classes/AABB.md)
 
-계산된 월드 기준 AABB 인스턴스
+계산된 월드 공간 `AABB` 인스턴스

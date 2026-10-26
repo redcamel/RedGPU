@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getLightDistanceAttenuation**: `string` = `getLightDistanceAttenuation_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1453](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L1453)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2082](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L2082)
 
 물리적인 역제곱 법칙(Inverse Square Law)에 따른 광원 감쇄 계수를 계산합니다.
 
@@ -19,10 +19,14 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:1453](https://github.com/red
 
 ## Param
 
+**distance**
+
 광원으로부터의 거리
 //
 
 ## Param
+
+**radius**
 
 광원의 최대 도달 반경 (윈도잉 기준)
 //

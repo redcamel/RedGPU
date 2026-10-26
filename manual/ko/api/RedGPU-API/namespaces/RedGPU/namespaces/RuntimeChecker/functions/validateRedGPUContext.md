@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **validateRedGPUContext**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
+Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:23](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L23)
 
-주어진 값이 RedGPUContext 인스턴스인지 검증합니다.
+값이 RedGPUContext 인스턴스인지 생성자 이름으로 검증하며, 실패 시 예외를 발생시킵니다.
 
-값의 생성자 이름이 'RedGPUContext'가 아니면 예외를 발생시킵니다.
-
-* ### Example
+### Example
 ```typescript
 RedGPU.RuntimeChecker.validateRedGPUContext(redGPUContext);
 ```
@@ -23,7 +21,7 @@ RedGPU.RuntimeChecker.validateRedGPUContext(redGPUContext);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `any` | 검증할 객체
+| `value` | `any` | 검증할 객체 |
 
 ## Returns
 
@@ -33,4 +31,4 @@ RedGPUContext 인스턴스이면 true
 
 ## Throws
 
-RedGPUContext 인스턴스가 아닐 경우 Error 발생
+생성자 이름이 'RedGPUContext'가 아닌 경우 Error 발생

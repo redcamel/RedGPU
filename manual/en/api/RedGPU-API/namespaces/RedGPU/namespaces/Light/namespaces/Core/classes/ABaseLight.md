@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,13 @@
 
 # Abstract Class: ABaseLight
 
-Defined in: [src/light/core/ABaseLight.ts:14](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L14)
+Defined in: [src/light/core/ABaseLight.ts:16](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L16)
 
-Abstract class serving as the base for all light classes.
+Abstract class that defines common properties (`color`, `intensityMultiplier`, `enableDebugger`) for all lights.
 
-Includes color, intensity, and debugging visualization features, serving as a base for various light classes like DirectionalLight and PointLight.
+::: warning
+This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+:::
 
 ## Extended by
 
@@ -23,34 +25,22 @@ Includes color, intensity, and debugging visualization features, serving as a ba
 
 ### Constructor
 
-> `protected` **new ABaseLight**(`color`, `intensityMultiplier?`): `ABaseLight`
+> **new ABaseLight**(`color`, `intensityMultiplier?`): `ABaseLight`
 
-Defined in: [src/light/core/ABaseLight.ts:50](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L50)
+Defined in: [src/light/core/ABaseLight.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L32)
 
-Creates a new ABaseLight instance.
+Initializes the ABaseLight instance.
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `color` | [`ColorRGB`](../../../../Color/classes/ColorRGB.md) | `undefined` | Color of the light (ColorRGB object) |
-| `intensityMultiplier` | `number` | `1` | Intensity multiplier of the light (default: 1) |
+| `color` | [`ColorRGB`](../../../../Color/classes/ColorRGB.md) | `undefined` | Base color of the light (`ColorRGB` instance) |
+| `intensityMultiplier?` | `number` | `1` | Light intensity multiplier (default: `1`) |
 
 #### Returns
 
 `ABaseLight`
-
-## Properties
-
-### drawDebugger
-
-> **drawDebugger**: [`ADrawDebuggerLight`](../../../../Display/namespaces/drawDebugger/classes/ADrawDebuggerLight.md)\<`ABaseLight`\>
-
-Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L22)
-
-Helper object for debugging visualization of the light.
-
-Set externally, it can visually display the position or direction of the light.
 
 ## Accessors
 
@@ -60,29 +50,27 @@ Set externally, it can visually display the position or direction of the light.
 
 > **get** **color**(): [`ColorRGB`](../../../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:61](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L61)
 
-Returns the color of the light.
+Gets or sets the color (`ColorRGB`) instance of the light.
 
 ##### Returns
 
 [`ColorRGB`](../../../../Color/classes/ColorRGB.md)
 
-ColorRGB object
+`ColorRGB` instance of the light
 
 #### Set Signature
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L95)
-
-Sets the color of the light.
+Defined in: [src/light/core/ABaseLight.ts:65](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L65)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | [`ColorRGB`](../../../../Color/classes/ColorRGB.md) | ColorRGB object |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`ColorRGB`](../../../../Color/classes/ColorRGB.md) |
 
 ##### Returns
 
@@ -96,29 +84,27 @@ Sets the color of the light.
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L62)
+Defined in: [src/light/core/ABaseLight.ts:45](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L45)
 
-Returns whether the debugging visualization feature is enabled.
+Gets or sets whether the visual light debugger is enabled.
 
 ##### Returns
 
 `boolean`
 
-Whether enabled
+Whether the debugger is enabled
 
 #### Set Signature
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L73)
-
-Enables or disables the debugging visualization feature.
+Defined in: [src/light/core/ABaseLight.ts:49](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L49)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | If true, enables debugging feature |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
 
 ##### Returns
 
@@ -132,29 +118,27 @@ Enables or disables the debugging visualization feature.
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L109)
+Defined in: [src/light/core/ABaseLight.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L80)
 
-Returns the intensity multiplier of the light.
+Gets or sets the light intensity multiplier (real number `0` or greater).
 
 ##### Returns
 
 `number`
 
-Multiplier value
+Light intensity multiplier
 
 #### Set Signature
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/light/core/ABaseLight.ts#L120)
-
-Sets the intensity multiplier of the light.
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/light/core/ABaseLight.ts#L84)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Number value (e.g., 1.0) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,25 +8,29 @@
 
 > **copyGPUBuffer**(`commandEncoder`, `srcBuffer`, `dstBuffer`): `void`
 
-Defined in: [src/utils/copyGPUBuffer.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/copyGPUBuffer.ts#L18)
+Defined in: [src/utils/copyGPUBuffer.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/utils/copyGPUBuffer.ts#L27)
 
-Copies data between GPUBuffers.
+Records a command on the command encoder that copies data from a source `GPUBuffer` to a destination `GPUBuffer`.
 
-Copies data from the source buffer to the destination buffer, using the smaller of the two buffer sizes.
+The copy size is the smaller of the two buffer sizes and must be a multiple of 4 bytes. Both buffers must be different instances.
 
-* ### Example
+### Example
 ```typescript
-RedGPU.Util.copyGPUBuffer(commandEncoder, sourceBuffer, destinationBuffer);
+RedGPU.Util.copyGPUBuffer(commandEncoder, srcBuffer, dstBuffer);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `commandEncoder` | `GPUCommandEncoder` | Command Encoder |
-| `srcBuffer` | `GPUBuffer` | Source GPUBuffer |
-| `dstBuffer` | `GPUBuffer` | Destination GPUBuffer |
+| `commandEncoder` | `GPUCommandEncoder` | Command encoder to record the copy command |
+| `srcBuffer` | `GPUBuffer` | Source `GPUBuffer` |
+| `dstBuffer` | `GPUBuffer` | Destination `GPUBuffer` |
 
 ## Returns
 
 `void`
+
+## Throws
+
+If argument types are invalid, both buffers are identical, or the copy size is not a multiple of 4

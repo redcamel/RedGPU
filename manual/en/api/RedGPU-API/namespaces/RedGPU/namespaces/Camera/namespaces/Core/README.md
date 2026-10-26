@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,12 @@
 
 # Core
 
-Provides core base classes and common interfaces for the camera system.
+Provides abstract base classes for cameras and controllers, along with the core AutoExposure module.
 
 ## Core
 
-- [METERING\_MODE](enumerations/METERING_MODE.md)
 - [ACamera](classes/ACamera.md)
 - [AController](classes/AController.md)
 - [AutoExposure](classes/AutoExposure.md)
+- [METERING\_MODE](type-aliases/METERING_MODE.md)
+- [METERING\_MODE](variables/METERING_MODE.md)

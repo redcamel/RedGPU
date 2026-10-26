@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,14 +6,11 @@
 
 # Core
 
-Provides core classes and utilities for primitive generation.
+Provides core classes and utilities for primitive geometry generation and vertex layout management.
 
 ## Core
 
 - [GeometryGPURenderInfo](classes/GeometryGPURenderInfo.md)
+- [Primitive](classes/Primitive.md)
 - [PrimitiveUtils](classes/PrimitiveUtils.md)
 - [createPrimitiveGeometry](functions/createPrimitiveGeometry.md)
-
-## Other
-
-- [Primitive](classes/Primitive.md)

@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,18 +8,16 @@
 
 > `const` **GPU\_BLEND\_OPERATION**: `object`
 
-Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_BLEND_OPERATION.ts#L10)
+Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:7](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L7)
 
-블렌딩 시 사용되는 수학적 연산 옵션을 정의하는 상수군입니다.
-
-소스와 대상 색상 결과물을 어떻게 결합할지 결정합니다.
+가중치가 적용된 소스(Source)와 대상(Destination) 색상/알파 값을 결합하는 블렌딩 산술 연산자 상수입니다.
 
 ## Type Declaration
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-add"></a> `ADD` | `"add"` | `"add"` | 소스와 대상 결과를 더합니다.
-| <a id="property-max"></a> `MAX` | `"max"` | `"max"` | 두 결과 중 큰 값을 선택합니다.
-| <a id="property-min"></a> `MIN` | `"min"` | `"min"` | 두 결과 중 작은 값을 선택합니다.
-| <a id="property-reverse_subtract"></a> `REVERSE_SUBTRACT` | `"reverse-subtract"` | `"reverse-subtract"` | 소스 결과에서 대상 결과를 뺍니다.
-| <a id="property-subtract"></a> `SUBTRACT` | `"subtract"` | `"subtract"` | 대상 결과에서 소스 결과를 뺍니다.
+| <a id="property-add"></a> `ADD` | `"add"` | `"add"` | 가중치가 곱해진 소스 값과 대상 값을 더합니다. (`Src * SrcFactor + Dst * DstFactor`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:12](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L12) |
+| <a id="property-max"></a> `MAX` | `"max"` | `"max"` | 소스와 대상의 각 채널 중 더 큰 값을 선택합니다. (`max(Src, Dst)`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:32](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L32) |
+| <a id="property-min"></a> `MIN` | `"min"` | `"min"` | 소스와 대상의 각 채널 중 더 작은 값을 선택합니다. (`min(Src, Dst)`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:27](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L27) |
+| <a id="property-reverse_subtract"></a> `REVERSE_SUBTRACT` | `"reverse-subtract"` | `"reverse-subtract"` | 가중치가 곱해진 대상 값에서 소스 값을 뺍니다. (`Dst * DstFactor - Src * SrcFactor`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:22](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L22) |
+| <a id="property-subtract"></a> `SUBTRACT` | `"subtract"` | `"subtract"` | 가중치가 곱해진 소스 값에서 대상 값을 뺍니다. (`Src * SrcFactor - Dst * DstFactor`) | [src/gpuConst/GPU\_BLEND\_OPERATION.ts:17](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/gpuConst/GPU_BLEND_OPERATION.ts#L17) |

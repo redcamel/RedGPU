@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Interface: CommandBatchStats
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L64)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L68)
 
-일괄 제출 통계 정보 인터페이스
+전체 단계 일괄 제출(`submitAll`) 결과 통계 정보를 정의하는 인터페이스입니다.
 
 ## Properties
 
@@ -16,9 +16,9 @@ Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:64](https://gith
 
 > **deferredDestroyCount**: `number`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:74](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L74)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:78](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L78)
 
-이번 제출 완료 후 지연 파괴(Deferred Destroy)된 리소스의 개수
+제출 완료 후 지연 파괴(Deferred Destroy)된 리소스의 개수
 
 ***
 
@@ -26,6 +26,6 @@ Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:74](https://gith
 
 > **phases**: `Record`\<`string`, [`CommandPhaseStats`](CommandPhaseStats.md)\>
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:69](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L69)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:73](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/CommandEncoderManager.ts#L73)
 
-각 단계(Phase)별 상세 통계 정보 레코드
+각 단계(Phase)별 상세 통계 정보 레코드 (`Record<string, CommandPhaseStats>`)

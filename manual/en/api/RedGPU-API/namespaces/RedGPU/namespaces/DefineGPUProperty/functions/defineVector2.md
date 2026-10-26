@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,37 +8,29 @@
 
 > **defineVector2**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector2.ts:51](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/vector/defineVector2.ts#L51)
+Defined in: [src/defineProperty/funcs/vector/defineVector2.ts:53](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/defineProperty/funcs/vector/defineVector2.ts#L53)
 
-지정된 클래스의 프로토타입에 GPU와 연동되는 2차원 벡터(Vector2) 속성을 정의합니다.
+Defines 2D vector (`[number, number]`) properties on the target's prototype that synchronize with the GPU uniform buffer.
 
-## Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `target` | `any` | Class constructor to define properties on |
-| `defineInfo` | [`DefineVector2Info`](../interfaces/DefineVector2Info.md) \| [`DefineVector2Info`](../interfaces/DefineVector2Info.md)[] | A single [DefineVector2Info](../interfaces/DefineVector2Info.md) configuration or an array of configurations |
-
-## Returns
-
-`void`
-
-## Remarks
-
-
-***
-- Handles a 2-tuple array (`[number, number]`).
-- Automatically updates the GPU globalStruct buffer on value change.
-
-## Example
-
+### Example
 ```typescript
-// 단일 설정
+// Define a single 2D vector property
 RedGPU.DefineGPUProperty.defineVector2(MyMaterial, { key: 'uvScale', value: [1, 1] });
 
-// 여러 속성 일괄 정의
+// Define multiple 2D vector properties at once
 RedGPU.DefineGPUProperty.defineVector2(MyMaterial, [
   { key: 'uvOffset', value: [0, 0] },
   { key: 'tiling', value: [2, 2] }
 ]);
 ```
+
+## Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `target` | `any` | Target class or prototype to define properties on |
+| `defineInfo` | [`DefineVector2Info`](../interfaces/DefineVector2Info.md) \| [`DefineVector2Info`](../interfaces/DefineVector2Info.md)[] | Single `DefineVector2Info` configuration or an array of configurations |
+
+## Returns
+
+`void`

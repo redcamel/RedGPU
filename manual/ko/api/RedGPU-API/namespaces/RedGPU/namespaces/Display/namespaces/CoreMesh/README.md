@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # CoreMesh
 
-메시 시스템의 핵심 기반 클래스 및 공통 인터페이스를 제공합니다.
+메시 시스템의 핵심 기반 클래스 및 공통 유틸리티를 제공합니다.
 
 ## Core
 
@@ -14,8 +14,5 @@
 - [MeshBase](classes/MeshBase.md)
 - [Object3DContainer](classes/Object3DContainer.md)
 - [VertexGPURenderInfo](classes/VertexGPURenderInfo.md)
-
-## Other
-
 - [createMeshVertexUniformBuffers](functions/createMeshVertexUniformBuffers.md)
 - [mixInMesh2D](functions/mixInMesh2D.md)

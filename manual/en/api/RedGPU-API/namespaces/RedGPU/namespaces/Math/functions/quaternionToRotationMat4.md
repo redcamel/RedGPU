@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,24 +8,24 @@
 
 > **quaternionToRotationMat4**(`q`, `m`): `any`
 
-Defined in: [src/math/quaternionToRotationMat4.ts:21](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/quaternionToRotationMat4.ts#L21)
+Defined in: [src/math/quaternionToRotationMat4.ts:21](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/quaternionToRotationMat4.ts#L21)
 
-Converts a quaternion to a rotation matrix.
+Converts a quaternion (`[x, y, z, w]`) into a column-major 4x4 rotation matrix.
 
 ### Example
 ```typescript
-RedGPU.math.quaternionToRotationMat4([0, 0, 0, 1], outMatrix);
+RedGPU.Math.quaternionToRotationMat4([0, 0, 0, 1], outMatrix);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `q` | `any` | Quaternion [x, y, z, w] |
-| `m` | `any` | Destination 4x4 matrix |
+| `q` | `any` | Quaternion array (`[x, y, z, w]`) |
+| `m` | `any` | Target 4x4 matrix buffer to store the result |
 
 ## Returns
 
 `any`
 
-Converted rotation matrix
+Converted 4x4 rotation matrix (`m`)

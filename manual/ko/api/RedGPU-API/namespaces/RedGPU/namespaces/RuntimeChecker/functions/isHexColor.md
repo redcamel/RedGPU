@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **isHexColor**(`hex`): `boolean`
 
-Defined in: [src/runtimeChecker/isFunc/isHexColor.ts:22](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/runtimeChecker/isFunc/isHexColor.ts#L22)
+Defined in: [src/runtimeChecker/isFunc/isHexColor.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/runtimeChecker/isFunc/isHexColor.ts#L19)
 
-주어진 값이 유효한 16진수(Hex) 색상 형식인지 검사합니다.
+주어진 값이 유효한 16진수(Hex) 색상 형식인지 검사합니다. '#' 접두사가 포함된 3자리/6자리 문자열 또는 0~0xFFFFFF 범위의 정수를 지원합니다.
 
-'#' 접두사가 붙은 3자리 또는 6자리 16진수 색상 문자열 또는 0에서 0xFFFFFF 사이의 정수를 지원합니다.
-
-* ### Example
+### Example
 ```typescript
 const isValidStr = RedGPU.RuntimeChecker.isHexColor('#FF0000');
 const isValidNum = RedGPU.RuntimeChecker.isHexColor(0xFF0000);
@@ -24,7 +22,7 @@ const isValidNum = RedGPU.RuntimeChecker.isHexColor(0xFF0000);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `hex` | `any` | 검사할 값 (문자열 또는 숫자)
+| `hex` | `any` | 검사할 값 (문자열 또는 숫자) |
 
 ## Returns
 

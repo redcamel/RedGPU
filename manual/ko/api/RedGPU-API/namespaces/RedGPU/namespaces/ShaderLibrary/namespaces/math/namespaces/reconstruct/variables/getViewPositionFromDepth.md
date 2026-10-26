@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getViewPositionFromDepth**: `string` = `getViewPositionFromDepth_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:731](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L731)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:752](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L752)
 
 깊이 정보를 바탕으로 뷰(카메라) 공간의 좌표를 복구합니다.
 
@@ -16,15 +16,21 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:731](https://github.com/redc
 
 ## Param
 
+**uv**
+
 스크린 UV (0~1)
 //
 
 ## Param
 
+**depth**
+
 깊이 값 (0~1)
 //
 
 ## Param
+
+**inverseProjectionMatrix**
 
 역투영 행렬
 //

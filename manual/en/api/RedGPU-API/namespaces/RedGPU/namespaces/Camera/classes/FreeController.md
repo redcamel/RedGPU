@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,19 +6,27 @@
 
 # Class: FreeController
 
-Defined in: [src/camera/controller/FreeController.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L46)
+Defined in: [src/camera/controller/FreeController.ts:85](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L85)
 
-First-person camera controller that allows free movement.
+First-person camera controller class that freely navigates 3D space using keyboard and mouse inputs.
 
-Allows for free-flight exploration of the space using keyboard and mouse, similar to FPS games or 3D editor viewports.
+***
 
-* ### Example
+### Example
 ```typescript
-const controller = new RedGPU.FreeController(redGPUContext);
-controller.pan = 30;
-controller.tilt = 10;
+const controller = new RedGPU.Camera.FreeController(redGPUContext);
+controller.x = 0;
+controller.y = 5;
+controller.z = 20;
+controller.pan = 0;
+controller.tilt = -15;
 ```
+
 <iframe src="https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/" style="width:100%; height:500px;"></iframe>
+
+## See
+
+[FreeController example](https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/)
 
 ## Extends
 
@@ -26,19 +34,28 @@ controller.tilt = 10;
 
 ## Constructors
 
+
+
+***
+
 ### Constructor
 
 > **new FreeController**(`redGPUContext`): `FreeController`
 
-Defined in: [src/camera/controller/FreeController.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L88)
+Defined in: [src/camera/controller/FreeController.ts:133](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L133)
 
-Creates an instance of FreeController.
+Creates a FreeController instance.
+
+#### Example
+```typescript
+const controller = new RedGPU.Camera.FreeController(redGPUContext);
+```
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU Context object |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 
 #### Returns
 
@@ -48,21 +65,29 @@ Creates an instance of FreeController.
 
 [`AController`](../namespaces/Core/classes/AController.md).[`constructor`](../namespaces/Core/classes/AController.md#constructor)
 
-## Properties
+## Accessors
+
+
+
+***
 
 ### keyNameMapper
 
 #### Get Signature
 
-> **get** **keyNameMapper**(): `KeyNameMapper`
+> <span class="readonly-badge">readonly</span> **get** **keyNameMapper**(): `KeyNameMapper`
 
-Defined in: [src/camera/controller/FreeController.ts:218](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L218)
+Defined in: [src/camera/controller/FreeController.ts:339](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L339)
 
-Key mapping configuration object
+Returns a copy of the currently configured keyboard key mapping object.
 
 ##### Returns
 
 `KeyNameMapper`
+
+Key mapping configuration object (`KeyNameMapper`)
+
+***
 
 ***
 
@@ -72,19 +97,21 @@ Key mapping configuration object
 
 > **get** **maxAcceleration**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:209](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L209)
+Defined in: [src/camera/controller/FreeController.ts:323](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L323)
 
-Maximum acceleration scale
+Gets or sets the maximum movement acceleration scale.
 
 ##### Returns
 
 `number`
 
+Maximum acceleration scale (default: `1`)
+
 #### Set Signature
 
 > **set** **maxAcceleration**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:213](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L213)
+Defined in: [src/camera/controller/FreeController.ts:327](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L327)
 
 ##### Parameters
 
@@ -95,6 +122,8 @@ Defined in: [src/camera/controller/FreeController.ts:213](https://github.com/red
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -104,19 +133,21 @@ Defined in: [src/camera/controller/FreeController.ts:213](https://github.com/red
 
 > **get** **mouseSensitivity**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L158)
+Defined in: [src/camera/controller/FreeController.ts:238](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L238)
 
-Mouse rotation sensitivity
+Gets or sets the mouse drag rotation sensitivity. (`0.01` or greater)
 
 ##### Returns
 
 `number`
 
+Mouse rotation sensitivity (default: `0.15`)
+
 #### Set Signature
 
 > **set** **mouseSensitivity**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:162](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L162)
+Defined in: [src/camera/controller/FreeController.ts:242](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L242)
 
 ##### Parameters
 
@@ -127,6 +158,8 @@ Defined in: [src/camera/controller/FreeController.ts:162](https://github.com/red
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -136,19 +169,21 @@ Defined in: [src/camera/controller/FreeController.ts:162](https://github.com/red
 
 > **get** **moveSpeed**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:169](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L169)
+Defined in: [src/camera/controller/FreeController.ts:255](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L255)
 
-Movement speed
+Gets or sets the keyboard movement speed. (`0.01` or greater)
 
 ##### Returns
 
 `number`
 
+Movement speed (default: `20`)
+
 #### Set Signature
 
 > **set** **moveSpeed**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:173](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L173)
+Defined in: [src/camera/controller/FreeController.ts:259](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L259)
 
 ##### Parameters
 
@@ -159,6 +194,8 @@ Defined in: [src/camera/controller/FreeController.ts:173](https://github.com/red
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -168,19 +205,21 @@ Defined in: [src/camera/controller/FreeController.ts:173](https://github.com/red
 
 > **get** **moveSpeedInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:179](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L179)
+Defined in: [src/camera/controller/FreeController.ts:272](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L272)
 
-Movement interpolation factor
+Gets or sets the damping interpolation factor for movement position changes. (`0.0001` ~ `1`)
 
 ##### Returns
 
 `number`
 
+Movement interpolation factor (default: `0.01`)
+
 #### Set Signature
 
 > **set** **moveSpeedInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:183](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L183)
+Defined in: [src/camera/controller/FreeController.ts:276](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L276)
 
 ##### Parameters
 
@@ -191,6 +230,8 @@ Defined in: [src/camera/controller/FreeController.ts:183](https://github.com/red
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -200,19 +241,21 @@ Defined in: [src/camera/controller/FreeController.ts:183](https://github.com/red
 
 > **get** **pan**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:138](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L138)
+Defined in: [src/camera/controller/FreeController.ts:204](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L204)
 
-Horizontal rotation angle (Pan) in degrees
+Gets or sets the camera's target horizontal rotation (Pan) angle. (Unit: degrees)
 
 ##### Returns
 
 `number`
 
+Pan angle (default: `0`)
+
 #### Set Signature
 
 > **set** **pan**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:142](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L142)
+Defined in: [src/camera/controller/FreeController.ts:208](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L208)
 
 ##### Parameters
 
@@ -223,6 +266,8 @@ Defined in: [src/camera/controller/FreeController.ts:142](https://github.com/red
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -232,19 +277,21 @@ Defined in: [src/camera/controller/FreeController.ts:142](https://github.com/red
 
 > **get** **rotationSpeed**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:189](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L189)
+Defined in: [src/camera/controller/FreeController.ts:289](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L289)
 
-Rotation speed
+Gets or sets the keyboard rotation speed. (`0.01` or greater)
 
 ##### Returns
 
 `number`
 
+Rotation speed (default: `100`)
+
 #### Set Signature
 
 > **set** **rotationSpeed**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:193](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L193)
+Defined in: [src/camera/controller/FreeController.ts:293](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L293)
 
 ##### Parameters
 
@@ -255,6 +302,8 @@ Defined in: [src/camera/controller/FreeController.ts:193](https://github.com/red
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -264,19 +313,21 @@ Defined in: [src/camera/controller/FreeController.ts:193](https://github.com/red
 
 > **get** **rotationSpeedInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:199](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L199)
+Defined in: [src/camera/controller/FreeController.ts:306](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L306)
 
-Rotation interpolation factor
+Gets or sets the damping interpolation factor for rotation changes. (`0.0001` ~ `1`)
 
 ##### Returns
 
 `number`
 
+Rotation interpolation factor (default: `0.01`)
+
 #### Set Signature
 
 > **set** **rotationSpeedInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:203](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L203)
+Defined in: [src/camera/controller/FreeController.ts:310](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L310)
 
 ##### Parameters
 
@@ -287,6 +338,8 @@ Defined in: [src/camera/controller/FreeController.ts:203](https://github.com/red
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -296,19 +349,21 @@ Defined in: [src/camera/controller/FreeController.ts:203](https://github.com/red
 
 > **get** **tilt**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:148](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L148)
+Defined in: [src/camera/controller/FreeController.ts:221](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L221)
 
-Vertical rotation angle (Tilt) in degrees
+Gets or sets the camera's target vertical rotation (Tilt) angle. (Unit: degrees, Range: `-89.9` ~ `89.9`)
 
 ##### Returns
 
 `number`
 
+Tilt angle (default: `0`)
+
 #### Set Signature
 
 > **set** **tilt**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:152](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L152)
+Defined in: [src/camera/controller/FreeController.ts:225](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L225)
 
 ##### Parameters
 
@@ -319,6 +374,8 @@ Defined in: [src/camera/controller/FreeController.ts:152](https://github.com/red
 ##### Returns
 
 `void`
+
+***
 
 ***
 
@@ -328,21 +385,23 @@ Defined in: [src/camera/controller/FreeController.ts:152](https://github.com/red
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:103](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L103)
+Defined in: [src/camera/controller/FreeController.ts:153](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L153)
 
-X-axis position
+Gets or sets the camera's target X-axis position.
 
 ##### Returns
 
 `number`
 
+X-axis position (default: `0`)
+
 #### Set Signature
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:107](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L107)
+Defined in: [src/camera/controller/FreeController.ts:157](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L157)
 
-Gets the camera's current world X coordinate.
+Returns the world X coordinate of the controlled camera.
 
 ##### Parameters
 
@@ -354,11 +413,13 @@ Gets the camera's current world X coordinate.
 
 `void`
 
-X coordinate
+Camera world X coordinate
 
 #### Overrides
 
 [`AController`](../namespaces/Core/classes/AController.md).[`x`](../namespaces/Core/classes/AController.md#x)
+
+***
 
 ***
 
@@ -368,21 +429,23 @@ X coordinate
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:114](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L114)
+Defined in: [src/camera/controller/FreeController.ts:170](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L170)
 
-Y-axis position
+Gets or sets the camera's target Y-axis position.
 
 ##### Returns
 
 `number`
 
+Y-axis position (default: `0`)
+
 #### Set Signature
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:118](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L118)
+Defined in: [src/camera/controller/FreeController.ts:174](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L174)
 
-Gets the camera's current world Y coordinate.
+Returns the world Y coordinate of the controlled camera.
 
 ##### Parameters
 
@@ -394,11 +457,13 @@ Gets the camera's current world Y coordinate.
 
 `void`
 
-Y coordinate
+Camera world Y coordinate
 
 #### Overrides
 
 [`AController`](../namespaces/Core/classes/AController.md).[`y`](../namespaces/Core/classes/AController.md#y)
+
+***
 
 ***
 
@@ -408,21 +473,23 @@ Y coordinate
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:125](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L125)
+Defined in: [src/camera/controller/FreeController.ts:187](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L187)
 
-Z-axis position
+Gets or sets the camera's target Z-axis position.
 
 ##### Returns
 
 `number`
 
+Z-axis position (default: `0`)
+
 #### Set Signature
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:129](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L129)
+Defined in: [src/camera/controller/FreeController.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L191)
 
-Gets the camera's current world Z coordinate.
+Returns the world Z coordinate of the controlled camera.
 
 ##### Parameters
 
@@ -434,7 +501,7 @@ Gets the camera's current world Z coordinate.
 
 `void`
 
-Z coordinate
+Camera world Z coordinate
 
 #### Overrides
 
@@ -442,23 +509,29 @@ Z coordinate
 
 ## Methods
 
+
+
+***
+
 ### setMoveBackKey()
 
 > **setMoveBackKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:229](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L229)
+Defined in: [src/camera/controller/FreeController.ts:363](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L363)
 
-Sets the move backward key
+Sets the move backward key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'s'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -466,19 +539,21 @@ Sets the move backward key
 
 > **setMoveDownKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:249](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L249)
+Defined in: [src/camera/controller/FreeController.ts:411](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L411)
 
-Sets the move down key
+Sets the move down key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'q'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -486,19 +561,21 @@ Sets the move down key
 
 > **setMoveForwardKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:224](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L224)
+Defined in: [src/camera/controller/FreeController.ts:351](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L351)
 
-Sets the move forward key
+Sets the move forward key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'w'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -506,19 +583,21 @@ Sets the move forward key
 
 > **setMoveLeftKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:234](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L234)
+Defined in: [src/camera/controller/FreeController.ts:375](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L375)
 
-Sets the move left key
+Sets the move left key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'a'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -526,19 +605,21 @@ Sets the move left key
 
 > **setMoveRightKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:239](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L239)
+Defined in: [src/camera/controller/FreeController.ts:387](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L387)
 
-Sets the move right key
+Sets the move right key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'d'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -546,19 +627,21 @@ Sets the move right key
 
 > **setMoveUpKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:244](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L244)
+Defined in: [src/camera/controller/FreeController.ts:399](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L399)
 
-Sets the move up key
+Sets the move up key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'e'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -566,19 +649,21 @@ Sets the move up key
 
 > **setTurnDownKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:269](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L269)
+Defined in: [src/camera/controller/FreeController.ts:459](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L459)
 
-Sets the turn down key
+Sets the turn down key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'f'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -586,19 +671,21 @@ Sets the turn down key
 
 > **setTurnLeftKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:254](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L254)
+Defined in: [src/camera/controller/FreeController.ts:423](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L423)
 
-Sets the turn left key
+Sets the turn left key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'z'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -606,19 +693,21 @@ Sets the turn left key
 
 > **setTurnRightKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:259](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L259)
+Defined in: [src/camera/controller/FreeController.ts:435](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L435)
 
-Sets the turn right key
+Sets the turn right key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'c'`) |
 
 #### Returns
 
 `void`
+
+***
 
 ***
 
@@ -626,15 +715,15 @@ Sets the turn right key
 
 > **setTurnUpKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:264](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L264)
+Defined in: [src/camera/controller/FreeController.ts:447](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L447)
 
-Sets the turn up key
+Sets the turn up key.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Key name to assign (e.g., `'r'`) |
 
 #### Returns
 
@@ -642,20 +731,22 @@ Sets the turn up key
 
 ***
 
+***
+
 ### update()
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:280](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/controller/FreeController.ts#L280)
+Defined in: [src/camera/controller/FreeController.ts:474](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/controller/FreeController.ts#L474)
 
-Updates the controller every frame.
+Updates the free-view camera state every frame.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | 3D View |
-| `time` | `number` | Current time |
+| `view` | [`View3D`](../../Display/classes/View3D.md) | `View3D` instance connected to the controller |
+| `time` | `number` | Current elapsed time (ms) |
 
 #### Returns
 
@@ -665,43 +756,28 @@ Updates the controller every frame.
 
 [`AController`](../namespaces/Core/classes/AController.md).[`update`](../namespaces/Core/classes/AController.md#update)
 
-
 ***
 
-## Inherited Members
+## Inherited Properties
 
 <details>
-<summary>View inherited properties and methods (Click to expand)</summary>
-
-### instanceId
-
-> `readonly` **instanceId**: `number`
-
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
-
-Instance sequence ID per class
-
-#### Inherited from
-
-[`AController`](../namespaces/Core/classes/AController.md).[`instanceId`](../namespaces/Core/classes/AController.md#instanceid)
-
-## Accessors
+<summary>View inherited properties (Click to expand)</summary>
 
 ### antialiasingManager
 
 #### Get Signature
 
-> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L80)
 
-Returns the AntialiasingManager instance. (Short-cut path)
+Returns the `AntialiasingManager` instance managing anti-aliasing settings.
 
 ##### Returns
 
 [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-AntialiasingManager instance
+`AntialiasingManager` instance
 
 #### Inherited from
 
@@ -709,21 +785,23 @@ AntialiasingManager instance
 
 ***
 
+***
+
 ### camera
 
 #### Get Signature
 
-> **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
+> <span class="readonly-badge">readonly</span> **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:100](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L100)
+Defined in: [src/camera/core/AController.ts:86](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L86)
 
-Returns the camera controlled by this controller.
+Returns the camera instance controlled by this controller.
 
 ##### Returns
 
 [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Controlled camera (PerspectiveCamera or OrthographicCamera)
+Controlled `PerspectiveCamera` or `OrthographicCamera` instance
 
 #### Inherited from
 
@@ -731,21 +809,23 @@ Controlled camera (PerspectiveCamera or OrthographicCamera)
 
 ***
 
+***
+
 ### commandEncoderManager
 
 #### Get Signature
 
-> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L92)
 
-Returns the CommandEncoderManager instance. (Short-cut path)
+Returns the `CommandEncoderManager` instance managing WebGPU command encoding.
 
 ##### Returns
 
 [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-CommandEncoderManager instance
+`CommandEncoderManager` instance
 
 #### Inherited from
 
@@ -753,21 +833,23 @@ CommandEncoderManager instance
 
 ***
 
+***
+
 ### gpuDevice
 
 #### Get Signature
 
-> **get** **gpuDevice**(): `GPUDevice`
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:56](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L56)
 
-Returns the WebGPU device object. (Short-cut path)
+Returns the logical WebGPU device (`GPUDevice`) assigned to the context.
 
 ##### Returns
 
 `GPUDevice`
 
-GPUDevice instance
+`GPUDevice` instance
 
 #### Inherited from
 
@@ -775,23 +857,23 @@ GPUDevice instance
 
 ***
 
+***
+
 ### hoveredView
 
 #### Get Signature
 
-> **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
+> <span class="readonly-badge">readonly</span> **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L150)
+Defined in: [src/camera/core/AController.ts:134](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L134)
 
-**`Internal`**
-
-Returns the View currently being hovered by the mouse.
+Returns the `View3D` instance currently hovered by the pointer.
 
 ##### Returns
 
 [`View3D`](../../Display/classes/View3D.md)
 
-Hovered View or null
+Hovered `View3D` or `null`
 
 #### Inherited from
 
@@ -799,27 +881,53 @@ Hovered View or null
 
 ***
 
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L36)
+
+Returns the unique sequential instance ID assigned per class.
+
+##### Returns
+
+`number`
+
+Per-class unique instance ID
+
+#### Inherited from
+
+[`AController`](../namespaces/Core/classes/AController.md).[`instanceId`](../namespaces/Core/classes/AController.md#instanceid)
+
+***
+
+***
+
 ### isKeyboardActiveController
 
 #### Get Signature
 
-> **get** **isKeyboardActiveController**(): `boolean`
+> <span class="readonly-badge">readonly</span> **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:196](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L196)
+Defined in: [src/camera/core/AController.ts:167](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L167)
 
-**`Internal`**
-
-Returns whether the current controller is processing keyboard input.
+Returns whether this controller is currently the global keyboard-active controller.
 
 ##### Returns
 
 `boolean`
 
-Whether it is the keyboard active controller
+Whether this controller is keyboard-active
 
 #### Inherited from
 
 [`AController`](../namespaces/Core/classes/AController.md).[`isKeyboardActiveController`](../namespaces/Core/classes/AController.md#iskeyboardactivecontroller)
+
+***
 
 ***
 
@@ -829,33 +937,27 @@ Whether it is the keyboard active controller
 
 > **get** **keyboardActiveView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:163](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L163)
+Defined in: [src/camera/core/AController.ts:146](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L146)
 
-**`Internal`**
-
-Returns the View with active keyboard input.
+Gets or sets the global active `View3D` holding keyboard input focus.
 
 ##### Returns
 
 [`View3D`](../../Display/classes/View3D.md)
 
-Keyboard active View or null
+Keyboard-active `View3D` or `null`
 
 #### Set Signature
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:176](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L176)
-
-**`Internal`**
-
-Sets the View with active keyboard input.
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L150)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | [`View3D`](../../Display/classes/View3D.md) | View to set or null |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`View3D`](../../Display/classes/View3D.md) |
 
 ##### Returns
 
@@ -867,39 +969,35 @@ Sets the View with active keyboard input.
 
 ***
 
+***
+
 ### keyboardProcessedThisFrame
 
 #### Get Signature
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:209](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L209)
+Defined in: [src/camera/core/AController.ts:179](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L179)
 
-**`Internal`**
-
-Returns whether keyboard input has already been processed in this frame.
+Gets or sets whether keyboard input has already been processed in the current frame.
 
 ##### Returns
 
 `boolean`
 
-Processing status
+Whether keyboard input has been processed this frame
 
 #### Set Signature
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:222](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L222)
-
-**`Internal`**
-
-Sets whether keyboard input has been processed in this frame.
+Defined in: [src/camera/core/AController.ts:183](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L183)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | Processing status to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
 
 ##### Returns
 
@@ -911,35 +1009,35 @@ Sets whether keyboard input has been processed in this frame.
 
 ***
 
+***
+
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L63)
 
-Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+Gets or sets the object name. Returns a default name (`ClassName Instance N`) if not explicitly set.
 
 ##### Returns
 
 `string`
 
-Name of the object
+Object name string
 
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
-
-Sets the name of the object.
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L70)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name of the object to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 ##### Returns
 
@@ -951,21 +1049,23 @@ Sets the name of the object.
 
 ***
 
+***
+
 ### redGPUContext
 
 #### Get Signature
 
-> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L44)
 
-Returns the RedGPUContext instance.
+Returns the bound `RedGPUContext` instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-RedGPUContext instance
+`RedGPUContext` instance
 
 #### Inherited from
 
@@ -973,21 +1073,23 @@ RedGPUContext instance
 
 ***
 
+***
+
 ### resourceManager
 
 #### Get Signature
 
-> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/RedGPUObject.ts#L68)
 
-Returns the ResourceManager instance. (Short-cut path)
+Returns the `ResourceManager` instance managing global GPU resources.
 
 ##### Returns
 
 [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-ResourceManager instance
+`ResourceManager` instance
 
 #### Inherited from
 
@@ -995,13 +1097,15 @@ ResourceManager instance
 
 ***
 
+***
+
 ### uuid
 
 #### Get Signature
 
-> **get** **uuid**(): `string`
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/base/BaseObject.ts#L48)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -1009,7 +1113,7 @@ Returns the universally unique identifier (UUID) of the object.
 
 `string`
 
-UUID string
+UUID string of the object
 
 #### Inherited from
 
@@ -1017,32 +1121,42 @@ UUID string
 
 ***
 
+</details>
+
+
+***
+
+## Inherited Methods
+
+<details>
+<summary>View inherited methods (Click to expand)</summary>
+
 ### checkKeyboardInput()
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:301](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L301)
+Defined in: [src/camera/core/AController.ts:258](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L258)
 
-Checks for keyboard input and sets the active View.
+Checks whether any key in the key mapping table is pressed and acquires keyboard processing focus for the current `View3D`.
 
 #### Type Parameters
 
 | Type Parameter |
 | ------ |
-| `T` *extends* `Record`\<`string`, `string`\> |
+| <a id="type-parameter-t"></a> `T` *extends* `Record`\<`string`, `string`\> |
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | Current View |
-| `keyNameMapper` | `T` | Key mapping object |
+| `view` | [`View3D`](../../Display/classes/View3D.md) | `View3D` instance to check keyboard input for |
+| `keyNameMapper` | `T` | Object mapping action names to key names (`Record<string, string>`) |
 
 #### Returns
 
 `boolean`
 
-True if keyboard input processing is possible, otherwise false
+`true` if keyboard input can be processed in the current view, otherwise `false`
 
 #### Inherited from
 
@@ -1050,13 +1164,15 @@ True if keyboard input processing is possible, otherwise false
 
 ***
 
+***
+
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:230](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L230)
+Defined in: [src/camera/core/AController.ts:191](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L191)
 
-Destroys the controller and removes event listeners.
+Removes all canvas and window event listeners registered to the controller and clears internal references.
 
 #### Returns
 
@@ -1068,27 +1184,27 @@ Destroys the controller and removes event listeners.
 
 ***
 
+***
+
 ### findTargetViewByInputEvent()
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:384](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L384)
+Defined in: [src/camera/core/AController.ts:332](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L332)
 
-**`Internal`**
-
-Finds the View where the input event occurred.
+Finds and returns the `View3D` instance containing the pixel coordinates of the input event.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `e` | `MouseEvent` \| `TouchEvent` | Mouse or touch event |
+| `e` | `MouseEvent` \| `TouchEvent` | Mouse or touch event (`MouseEvent` \| `TouchEvent`) |
 
 #### Returns
 
 [`View3D`](../../Display/classes/View3D.md)
 
-Corresponding View or null
+`View3D` instance where the event occurred, or `null`
 
 #### Inherited from
 
@@ -1096,39 +1212,38 @@ Corresponding View or null
 
 ***
 
+***
+
 ### getCanvasEventPoint()
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:348](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L348)
+Defined in: [src/camera/core/AController.ts:302](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L302)
 
-**`Internal`**
-
-Gets the event coordinates on the canvas.
+Calculates canvas-local `{ x, y }` coordinates from a mouse, touch, or wheel event.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `e` | `MouseEvent` \| `TouchEvent` \| `WheelEvent` | Mouse, touch, or wheel event |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU context |
+| `e` | `MouseEvent` \| `TouchEvent` \| `WheelEvent` | Input event (`MouseEvent` \| `TouchEvent` \| `WheelEvent`) |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `RedGPUContext` instance |
 
 #### Returns
 
 `object`
 
-{x, y} coordinate object
+Canvas-local `{ x, y }` coordinate object
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:367](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L367) |
-| `y` | `number` | [src/camera/core/AController.ts:368](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/camera/core/AController.ts#L368) |
+| `x` | `number` | [src/camera/core/AController.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L48) |
+| `y` | `number` | [src/camera/core/AController.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/camera/core/AController.ts#L48) |
 
 #### Inherited from
 
 [`AController`](../namespaces/Core/classes/AController.md).[`getCanvasEventPoint`](../namespaces/Core/classes/AController.md#getcanvaseventpoint)
 
 ***
-
 
 </details>

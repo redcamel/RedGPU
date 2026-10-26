@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,27 +8,29 @@
 
 > **screenToWorld**(`screenX`, `screenY`, `view`): `number`[]
 
-Defined in: [src/math/coordinates/screenToWorld.ts:36](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/coordinates/screenToWorld.ts#L36)
+Defined in: [src/math/coordinates/screenToWorld.ts:34](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/math/coordinates/screenToWorld.ts#L34)
 
-화면 상의 2D 픽셀 좌표를 3D 월드 좌표로 변환합니다.
-
-View3D의 카메라 및 프로젝션 정보를 바탕으로 3D 공간의 위치를 계산합니다.
+화면의 2D 픽셀 좌표(`screenX`, `screenY`)를 뷰(`AView`)의 역 투영-뷰 행렬을 통해 3D 월드 좌표(`[x, y, z]`)로 변환합니다.
 
 ### Example
 ```typescript
-const worldPos = RedGPU.math.screenToWorld(mouseX, mouseY, view);
+const [worldX, worldY, worldZ] = RedGPU.Math.screenToWorld(mouseX, mouseY, view);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `screenX` | `number` | 화면 X 좌표 (픽셀)
-| `screenY` | `number` | 화면 Y 좌표 (픽셀)
-| `view` | [`AView`](../../Display/namespaces/CoreView/classes/AView.md) | 변환에 사용할 AView 인스턴스
+| `screenX` | `number` | 화면 X 좌표 (CSS 픽셀 단위) |
+| `screenY` | `number` | 화면 Y 좌표 (CSS 픽셀 단위) |
+| `view` | [`AView`](../../Display/namespaces/CoreView/classes/AView.md) | 변환 기준이 되는 `AView` 인스턴스 |
 
 ## Returns
 
 `number`[]
 
-변환된 3D 월드 좌표 [x, y, z]
+변환된 3D 월드 좌표 배열 (`[x, y, z]`)
+
+## See
+
+[Screen to World example](https://redcamel.github.io/RedGPU/examples/3d/coordinateTransformation/screenToWorld/)

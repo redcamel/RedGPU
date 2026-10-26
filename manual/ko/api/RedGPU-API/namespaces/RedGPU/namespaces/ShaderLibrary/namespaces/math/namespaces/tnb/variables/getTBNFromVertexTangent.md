@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getTBNFromVertexTangent**: `string` = `getTBNFromVertexTangent_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:792](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L792)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:813](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/systemCodeManager/ShaderLibrary.ts#L813)
 
 법선(Normal)과 버텍스 탄젠트(vec4)를 사용하여 TBN(Tangent, Bitangent, Normal) 행렬을 구축합니다.
 
@@ -16,10 +16,14 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:792](https://github.com/redc
 
 ## Param
 
+**inputNormal**
+
 정규화된 법선 벡터
 //
 
 ## Param
+
+**inputVertexTangent**
 
 버텍스 탄젠트 데이터 (xyz: 방향, w: 방향성)
 //

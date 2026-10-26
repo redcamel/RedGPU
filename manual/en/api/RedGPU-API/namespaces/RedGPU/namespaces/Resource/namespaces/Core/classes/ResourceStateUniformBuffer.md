@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,13 @@
 
 # Class: ResourceStateUniformBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:3](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L3)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L14)
+
+Class that represents the resource management state of `UniformBuffer`.
+
+::: warning
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+:::
 
 ## Constructors
 
@@ -14,13 +20,15 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUnifo
 
 > **new ResourceStateUniformBuffer**(`buffer`): `ResourceStateUniformBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:8](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L8)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:35](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L35)
+
+Creates a ResourceStateUniformBuffer instance.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `buffer` | [`UniformBuffer`](../../../classes/UniformBuffer.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `buffer` | [`UniformBuffer`](../../../classes/UniformBuffer.md) | Target `UniformBuffer` instance to manage |
 
 #### Returns
 
@@ -32,7 +40,9 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUnifo
 
 > **buffer**: [`UniformBuffer`](../../../classes/UniformBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:4](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L4)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:19](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L19)
+
+Managed uniform buffer instance
 
 ***
 
@@ -40,7 +50,9 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUnifo
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:5](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L24)
+
+Unique identifier (UUID)
 
 ## Accessors
 
@@ -50,17 +62,21 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUnifo
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:13](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L13)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:48](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L48)
+
+Gets or sets the resource reference count.
 
 ##### Returns
 
 `number`
 
+Current reference count
+
 #### Set Signature
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L17)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer.ts#L52)
 
 ##### Parameters
 

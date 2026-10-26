@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Primitive
 
-Provides various 3D primitive geometries for scene composition.
+Provides various 3D primitive geometry classes such as Box, Sphere, Plane, and Torus for scene composition.
 
-Easily create standard geometric shapes like Box, Sphere, Plane, and Torus to use as Mesh geometry.
-
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/"></iframe>
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/" style="width:100%; height:500px;"></iframe>
 
 ## Other
 

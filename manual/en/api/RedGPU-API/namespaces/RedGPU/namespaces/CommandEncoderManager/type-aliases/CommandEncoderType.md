@@ -1,4 +1,4 @@
-[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.4.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,6 +8,6 @@
 
 > **CommandEncoderType** = *typeof* [`COMMAND_ENCODER_TYPE`](../variables/COMMAND_ENCODER_TYPE.md)\[keyof *typeof* [`COMMAND_ENCODER_TYPE`](../variables/COMMAND_ENCODER_TYPE.md)\]
 
-Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:34](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L34)
+Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:41](https://github.com/redcamel/RedGPU/blob/1e59941e5b6c61327f4eb8821e5e6784da4a52cb/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L41)
 
-Type definition for GPU command encoders.
+Union type representing the execution phases of GPU command encoders.
