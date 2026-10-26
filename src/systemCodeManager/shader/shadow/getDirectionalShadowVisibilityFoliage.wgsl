@@ -3,7 +3,7 @@
 /**
  * 🌟 [식생(Foliage) 초근경(Cascade 0) 전용 비회전 6-Tap 등방성 원형 가우시안 디스크]
  * - 기존 9-Tap 5x5 Tent PCF 대비 텍스처 샘플링을 33.3%(9-Tap -> 6-Tap) 절감하고 부동소수점 나눗셈(fdiv) 6회를 100% 제거합니다.
- * - 중심(1탭, w=4.0) + 5각 비격자 링(5탭, r=1.05 texels, w=2.4)의 하드웨어 2x2 Bilinear 중첩(실효 24텍셀)으로
+ * - 중심(1탭, w=4.0) + 5각 비격자 링(5탭, r=0.90 texels, w=2.4)의 하드웨어 2x2 Bilinear 중첩(실효 24텍셀)으로
  *   직교 격자 대각선 계단 현상 없이 매끄러운 원형 반음영을 생성합니다.
  */
 fn sampleShadowIsotropic6Foliage(
@@ -19,12 +19,12 @@ fn sampleShadowIsotropic6Foliage(
     // 1. 중심 코어 (Weight: 4.0)
     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
 
-    // 2. 5각 비격자 등방성 링 (Radius: 1.05 * s, Weight: 2.4 each -> 12.0)
-    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.9986,  0.3245) * s, cascadeIndex, compareDepth);
-    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.3245,  0.9986) * s, cascadeIndex, compareDepth);
-    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.9986, -0.3245) * s, cascadeIndex, compareDepth);
-    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.3245, -0.9986) * s, cascadeIndex, compareDepth);
-    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.6850, -0.7975) * s, cascadeIndex, compareDepth);
+    // 2. 5각 비격자 등방성 링 (Radius: 0.90 * s, Weight: 2.4 each -> 12.0, < 1.0 텍셀 유지로 Bilinear 중첩 100% 보존)
+    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.8559,  0.2781) * s, cascadeIndex, compareDepth);
+    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.2781,  0.8559) * s, cascadeIndex, compareDepth);
+    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.8559, -0.2781) * s, cascadeIndex, compareDepth);
+    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.2781, -0.8559) * s, cascadeIndex, compareDepth);
+    sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5871, -0.6836) * s, cascadeIndex, compareDepth);
 
     // 총 가중치 합: 4.0 + 12.0 = 16.0 (1.0 / 16.0 = 0.0625, 2의 거듭제곱 무오차 상수)
     return sum * 0.0625;
@@ -59,13 +59,12 @@ fn getDirectionalShadowVisibilityFoliage(
     let shadowInfo = systemUniforms.shadow;
     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
 
-    // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+    // 2. 구형 뷰 거리 산출 (구형 절두체 경계 구와 100% 일치시켜 가장자리 텍셀 낭비 제거 및 viewMatrix 행렬 곱 생략)
     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
-    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-    let viewDepth = -viewPos.z;
+    let viewDepth = length(relPos);
 
     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
-    if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+    if (viewDepth >= maxShadowDist) {
         return 1.0;
     }
 
@@ -91,10 +90,12 @@ fn getDirectionalShadowVisibilityFoliage(
     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
-    // 4. 식생 맞춤형 서브텍셀 슬로프 바이어스 및 노멀 오프셋
+    // 4. 하드웨어 Slope-Scaled Depth Bias와 결합된 정밀 서브텍셀 리시버 바이어스
     let slopeBias = saturate(1.0 - nDotL);
-    let normalBiasScale = 0.25 + slopeBias * 0.65;
-    let baseBiasFactor = bias * (1.0 + slopeBias * 1.5);
+    let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
+    let rawNormalBiasScale = 0.20 + slopeBias * 0.55;
+    let normalBiasScale = rawNormalBiasScale * cascadeAtten;
+    let rawBaseBiasFactor = bias * (1.0 + slopeBias * 1.5);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
     let normalOffset = N * normalBiasScale * worldTexelSize;
@@ -111,9 +112,9 @@ fn getDirectionalShadowVisibilityFoliage(
 
     let absPos = abs(worldPosition);
     let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
-    let driftBias = max(maxCoord * 0.00000035, 0.0001);
+    let driftBias = maxCoord * 0.00000025;
     let shadowDepth = saturate(shadowCoord.z);
-    let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0002 + driftBias);
+    let cascadeBias = rawBaseBiasFactor * cascadeAtten + driftBias;
 
     var finalVis: f32 = 1.0;
 
@@ -146,28 +147,32 @@ fn getDirectionalShadowVisibilityFoliage(
         let blendMargin = cascadeRange * 0.20;
         let blendStart = splitFar - blendMargin;
 
-        if (viewDepth > blendStart && finalVis < 0.9999) {
+        if (viewDepth > blendStart) {
             let nextIndex = cascadeIndex + 1u;
+            let nextAtten = 1.0 / (1.0 + f32(nextIndex) * 0.35);
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
-            let nextNormalOffset = N * normalBiasScale * nextWorldTexelSize;
+            let nextNormalOffset = N * (rawNormalBiasScale * nextAtten) * nextWorldTexelSize;
             let nextBiasedPos = worldPosition + nextNormalOffset;
             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
 
             let nextTUV = nextShadowCoord.xy;
-            let nextShadowDepth = saturate(nextShadowCoord.z);
-            let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0002 + driftBias);
+            let nextOutOfBounds = nextTUV.x < 0.0 || nextTUV.x > 1.0 || nextTUV.y < 0.0 || nextTUV.y > 1.0 || nextShadowCoord.z < 0.0 || nextShadowCoord.z > 1.0;
+            if (!nextOutOfBounds) {
+                let nextShadowDepth = saturate(nextShadowCoord.z);
+                let nextCascadeBias = rawBaseBiasFactor * nextAtten + driftBias;
 
-            let nextVis = textureSampleCompareLevel(
-                directionalShadowMap,
-                directionalShadowMapSampler,
-                nextTUV,
-                nextIndex,
-                nextShadowDepth - nextCascadeBias
-            );
+                let nextVis = textureSampleCompareLevel(
+                    directionalShadowMap,
+                    directionalShadowMapSampler,
+                    nextTUV,
+                    nextIndex,
+                    nextShadowDepth - nextCascadeBias
+                );
 
-            let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
-            finalVis = mix(finalVis, nextVis, blendFactor);
+                let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
+                finalVis = mix(finalVis, nextVis, blendFactor);
+            }
         }
     } else {
         // 7. 최외곽 캐스케이드 부드러운 페이드아웃

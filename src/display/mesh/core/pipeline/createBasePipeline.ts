@@ -80,6 +80,9 @@ const createBasePipeline = (
                 depthWriteEnabled: true,
                 depthCompare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
                 format: 'depth32float',
+                depthBias: 1,
+                depthBiasSlopeScale: 1.25,
+                depthBiasClamp: 0.005,
             }
             break
         case PIPELINE_TYPE.PICKING :

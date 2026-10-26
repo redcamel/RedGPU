@@ -184,7 +184,7 @@ fn main(input: InputData) -> OutputData {
     output.instanceColor = computed.instanceColor;
     output.lodLevel = f32(computed.lodLevel);
 
-    let viewDepth = -viewPos.z;
+    let viewDepth = length(relPos);
     var receiveShadow = 0.0;
     if (landscapeUniforms.receiveShadow > 0.5) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));

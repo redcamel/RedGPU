@@ -377,6 +377,8 @@ class DirectionalShadowManager {
         const tanHalfFov = Math.tan(fov * 0.5);
         const k = tanHalfFov * Math.sqrt(1.0 + aspect * aspect);
         const kSq = k * k;
+        const cosTheta = 1.0 / Math.sqrt(1.0 + kSq);
+        const sinTheta = k * cosTheta;
 
         if (cascadeCount === 1) {
             g_cascadeSplits[1] = shadowFar;
@@ -385,7 +387,7 @@ class DirectionalShadowManager {
                 splitDepths[i] = shadowFar * 2.0;
             }
         } else {
-            const lambda = 0.82;
+            const lambda = 0.75;
             const effectiveNear = Math.min(Math.max(near, 1.0), shadowFar * 0.25);
             const ratio = shadowFar / effectiveNear;
             const range = shadowFar - near;
@@ -407,10 +409,13 @@ class DirectionalShadowManager {
         for (let c = 0; c < cascadeCount; c++) {
             const subNear = g_cascadeSplits[c];
             const subFar = g_cascadeSplits[c + 1];
+            const prevSpan = c > 0 ? (subNear - g_cascadeSplits[c - 1]) : 0.0;
+            const effNear = Math.max(near, subNear - prevSpan * 0.20);
 
-            const cz = Math.min((subNear + subFar) * 0.5 * (1.0 + kSq), subFar);
-            const farDz = subFar - cz;
-            const farDiag = subFar * k;
+            const farCornerZ = subFar * cosTheta;
+            const farDiag = subFar * sinTheta;
+            const cz = Math.min((effNear + subFar) * 0.5 / cosTheta, farCornerZ);
+            const farDz = farCornerZ - cz;
             let sphereRadius = Math.sqrt(farDz * farDz + farDiag * farDiag);
 
             const rawWorldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
@@ -446,7 +451,7 @@ class DirectionalShadowManager {
             const bottom = -sphereRadius;
             const top = sphereRadius;
             const nearPlane = 0.1;
-            const farPlane = lightDistance + sphereRadius * 2.0;
+            const farPlane = lightDistance + sphereRadius;
 
             mat4.orthoZO(g_tempLightP, left, right, bottom, top, nearPlane, farPlane);
 
