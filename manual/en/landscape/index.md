@@ -25,7 +25,7 @@ const landscapeGraph = `
 
 # Landscape & Ecosystem
 
-<img src="/RedGPU/manual/landscape/landscape.jpg" alt="Landscape" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
+<img src="/landscape/landscape.jpg" alt="Landscape" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
 
 RedGPU provides a GPU-driven **Landscape** (`Landscape`) and **Ecosystem** (`GrassManager`, `FoliageManager`) pipeline
 designed to render expansive open-world environments at 60 FPS.

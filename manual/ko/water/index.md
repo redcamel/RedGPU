@@ -5,7 +5,7 @@ order: 13
 
 # 수체 시스템
 
-<img src="/RedGPU/manual/water/lake.jpg" alt="Water" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
+<img src="/water/lake.jpg" alt="Water" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
 
 RedGPU는 지형 (`Landscape`) 및 일반 3D 씬과 자연스럽게 어우러지는 물리 기반 수체 (`Water`) 시스템을 제공합니다.
 
