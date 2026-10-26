@@ -6,6 +6,7 @@ import DirectionalLight from "../../light/lights/DirectionalLight";
 import AmbientLight from "../../light/lights/AmbientLight";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import SkyAtmosphere from "../../display/skyAtmosphere/SkyAtmosphere";
+import WindManager from "../../wind/WindManager";
 /**
  * [KO] 시스템 유니폼 데이터를 업데이트하는 유틸리티 클래스입니다.
  * [EN] A utility class for updating system globalStruct data.
@@ -156,5 +157,23 @@ declare class SystemUniformUpdater {
      * [EN] Target Uint32Array buffer
      */
     static updateAmbientLight(ambientLight: AmbientLight, ambientLightMembers: any, uniformDataF32: Float32Array, uniformDataU32: Uint32Array): void;
+    /**
+     * [KO] 바람(Wind) 환경 정보를 시스템 유니폼 데이터에 업데이트합니다. (Zero-GC 메모리 직접 복사)
+     * [EN] Updates Wind environmental information to system uniform data. (Zero-GC direct memory copy)
+     *
+     * @param windManager -
+     * [KO] 업데이트할 바람 매니저 인스턴스
+     * [EN] WindManager instance to update
+     * @param windMembers -
+     * [KO] WGSL 바람 구조체 멤버 정보
+     * [EN] WGSL Wind structure member information
+     * @param uniformDataF32 -
+     * [KO] 대상 Float32Array 버퍼
+     * [EN] Target Float32Array buffer
+     * @param uniformDataU32 -
+     * [KO] 대상 Uint32Array 버퍼
+     * [EN] Target Uint32Array buffer
+     */
+    static updateWind(windManager: WindManager, windMembersInfo: any, uniformDataF32: Float32Array, uniformDataU32: Uint32Array): void;
 }
 export default SystemUniformUpdater;

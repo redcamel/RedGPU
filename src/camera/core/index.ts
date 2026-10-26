@@ -1,6 +1,6 @@
 /**
- * [KO] 카메라 시스템의 핵심 기반 클래스 및 공통 인터페이스를 제공합니다.
- * [EN] Provides core base classes and common interfaces for the camera system.
+ * [KO] 카메라와 컨트롤러의 추상 기반 클래스 및 자동 노출(AutoExposure) 코어 모듈을 제공합니다.
+ * [EN] Provides abstract base classes for cameras and controllers, along with the core AutoExposure module.
  * @packageDocumentation
  */
 import ACamera from "./ACamera";

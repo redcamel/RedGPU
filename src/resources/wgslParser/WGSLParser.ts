@@ -1,11 +1,11 @@
 import {WgslReflect} from "wgsl_reflect";
 import WGSLUniformTypes from "./core/WGSLUniformTypes";
 import ShaderVariantGenerator from "./core/ShaderVariantGenerator";
-import PassClustersLightHelper from "../../light/clusterLight/core/PassClustersLightHelper";
+import PassClustersLightHelper from "../../light/core/clusterLight/core/PassClustersLightHelper";
 import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 
-// 매크로 및 전처리용 정규식/상수 정의 (순수 함수 영역)
-const includePattern = /#redgpu_include\s+([\w.]+)/g;
+const includePattern = /#redgpu_include\s+([\w.]+)\s*;?/g;
+const extensionLibraries: Map<string, any> = new Map();
 const definePattern = /REDGPU_DEFINE_(?:TILE_COUNT_[XYZ]|TOTAL_TILES|WORKGROUP_SIZE_[XYZ]|MAX_LIGHTS_PER_CLUSTER)/g;
 const defineValues = {
     REDGPU_DEFINE_TILE_COUNT_X: PassClustersLightHelper.TILE_COUNT_X.toString(),
@@ -18,25 +18,74 @@ const defineValues = {
     REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTER: PassClustersLightHelper.MAX_LIGHTS_PER_CLUSTER.toString(),
 } as const;
 
+/**
+ * [KO] WGSL 셰이더의 조건부 블록(`#redgpu_if`) 파싱 정보를 담는 인터페이스입니다.
+ * [EN] Interface representing parsed conditional block (`#redgpu_if`) information in a WGSL shader.
+ *
+ * @category WGSL
+ */
 export interface ConditionalBlock {
+    /**
+     * [KO] 조건부 활성화 기준 유니폼 이름
+     * [EN] Uniform name used as the conditional activation key
+     */
     uniformName: string;
+    /**
+     * [KO] 조건이 참일 때 포함될 코드 블록
+     * [EN] Code block included when the condition is true
+     */
     ifBlock: string;
+    /**
+     * [KO] 조건이 거짓일 때 포함될 코드 블록
+     * [EN] Code block included when the condition is false
+     */
     elseBlock?: string;
+    /**
+     * [KO] 원본 코드에서 매칭된 전체 조건부 구문 문자열
+     * [EN] Full matched conditional statement string from the original code
+     */
     fullMatch: string;
+    /**
+     * [KO] 조건부 블록의 순번 인덱스
+     * [EN] Sequential index of the conditional block
+     */
     blockIndex: number;
 }
 
+/**
+ * [KO] WGSL 전처리 결과 데이터를 담는 인터페이스입니다.
+ * [EN] Interface representing preprocessed WGSL result data.
+ *
+ * @category WGSL
+ */
 export interface PreprocessedWGSLResult {
+    /**
+     * [KO] 전처리 캐시 식별 키
+     * [EN] Preprocessing cache identification key
+     */
     cacheKey: string;
+    /**
+     * [KO] 기본 조건('none')으로 생성된 WGSL 셰이더 소스 코드
+     * [EN] WGSL shader source code generated with the default condition ('none')
+     */
     defaultSource: string;
+    /**
+     * [KO] 셰이더 변형(Variant) 생성기 인스턴스
+     * [EN] Shader variant generator instance
+     */
     shaderSourceVariant: ShaderVariantGenerator;
+    /**
+     * [KO] 추출된 고유 조건부 키 배열
+     * [EN] Array of extracted unique conditional keys
+     */
     conditionalBlocks: string[];
+    /**
+     * [KO] 파싱된 조건부 블록 상세 정보 배열
+     * [EN] Array of parsed conditional block details
+     */
     conditionalBlockInfos: ConditionalBlock[];
 }
 
-/**
- * [KO] 개별 유니폼 멤버 정보를 생성합니다.
- */
 const createUniformMember = (curr: any, start: number, typeName: string) => {
     const UniformTypeInfo = WGSLUniformTypes[typeName];
     return {
@@ -49,9 +98,6 @@ const createUniformMember = (curr: any, start: number, typeName: string) => {
     };
 };
 
-/**
- * [KO] 구조체 멤버들을 재귀적으로 처리합니다.
- */
 const processMembers = (members: any[], start: number = 0, end: number = 0): any => {
     let startOffset = 0;
     let endOffset = end;
@@ -89,9 +135,6 @@ const processMembers = (members: any[], start: number = 0, end: number = 0): any
     };
 };
 
-/**
- * [KO] 유니폼 정보 배열을 처리하여 맵으로 반환합니다.
- */
 const processUniforms = (uniforms: any[]) => {
     return uniforms.reduce((prev, curr) => {
         prev[curr.name] = {
@@ -120,9 +163,6 @@ const convertMembersToKeyValue = (typeInfo: any) => {
     return newType;
 };
 
-/**
- * [KO] 스토리지 정보 배열을 처리하여 맵으로 반환합니다.
- */
 const processStorages = (storage: any[]) => {
     return storage.reduce((prev, curr) => {
         const typeInfo = convertMembersToKeyValue(curr.type);
@@ -131,6 +171,7 @@ const processStorages = (storage: any[]) => {
             ...processMembers(curr.members),
             arrayBufferByteLength: curr.size,
             stride: curr.stride,
+            access: curr.access,
             acccess: curr.access,
             type: typeInfo,
         };
@@ -139,9 +180,6 @@ const processStorages = (storage: any[]) => {
     }, {});
 };
 
-/**
- * [KO] 구조체 정보 배열을 처리하여 맵으로 반환합니다.
- */
 const processStructs = (structs: any[]) => {
     return structs.reduce((prev, curr) => {
         prev[curr.name] = {
@@ -154,9 +192,6 @@ const processStructs = (structs: any[]) => {
     }, {});
 };
 
-/**
- * [KO] 코드 해시를 생성합니다.
- */
 const generateCodeHash = (code: string): string => {
     let hash = 0;
     for (let i = 0; i < code.length; i++) {
@@ -167,10 +202,7 @@ const generateCodeHash = (code: string): string => {
     return hash.toString(36);
 };
 
-/**
- * [KO] 인클루드(#redgpu_include)를 처리합니다.
- */
-const processIncludes = (code: string, sourceName: string = 'Unknown Shader', injectLibrary?: Record<string, string>): string => {
+const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): string => {
     let result = code;
     let iterations = 0;
     const MAX_ITERATIONS = 10;
@@ -181,19 +213,18 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader', in
             return '';
         }
 
-        if (injectLibrary && path in injectLibrary) {
-            includedPaths.add(path);
-            return injectLibrary[path];
-        }
-
         const parts = path.split('.');
         let current: any = ShaderLibrary;
+        if (parts.length > 0 && extensionLibraries.has(parts[0])) {
+            current = extensionLibraries.get(parts[0]);
+            parts.shift();
+        }
         for (const part of parts) {
             if (current && typeof current === 'object' && part in current) {
                 current = current[part];
             } else {
                 const lineNumber = currentSource.substring(0, offset).split('\n').length;
-                throw new Error(`[preprocessWGSL] Invalid include path in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Path not found in injected library or ShaderLibrary.`);
+                throw new Error(`[preprocessWGSL] Invalid include path in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Path not found in extension libraries or ShaderLibrary.`);
             }
         }
 
@@ -218,18 +249,12 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader', in
     return result;
 };
 
-/**
- * [KO] 정의(REDGPU_DEFINE_*)를 처리합니다.
- */
 const processDefines = (code: string): string => {
     return code.replace(definePattern, (match) =>
         defineValues[match as keyof typeof defineValues] || match
     );
 };
 
-/**
- * [KO] 조건부 블록(#redgpu_if)을 찾아 파싱합니다.
- */
 const findConditionalBlocks = (code: string): ConditionalBlock[] => {
     const conditionalBlocks: ConditionalBlock[] = [];
     const tokenRegex = /#redgpu_if\s+(\w+)\b|#redgpu_else|#redgpu_endIf/g;
@@ -295,8 +320,15 @@ const findConditionalBlocks = (code: string): ConditionalBlock[] => {
 };
 
 /**
- * [KO] WGSL 셰이더 코드 전처리 및 AST 분석 리플렉션 캐시 관리 클래스
- * [EN] WGSL shader code preprocessing and AST analysis reflection cache management class
+ * [KO] WGSL 셰이더 코드를 전처리하고 리플렉션 데이터를 파싱 및 캐싱하는 클래스입니다.
+ * [EN] Class that preprocesses WGSL shader code and parses and caches reflection data.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category WGSL
  */
 class WGSLParser {
     #preprocessCache = new Map<string, PreprocessedWGSLResult>();
@@ -305,9 +337,103 @@ class WGSLParser {
     #activeParseResults: any[] = [];
 
     /**
-     * [KO] WGSL 코드를 전처리하고 리플렉션 정보를 반환합니다.
+     * [KO] 특정 네임스페이스에 서브시스템 또는 확장 WGSL 셰이더 라이브러리를 등록합니다.
+     * [EN] Registers a subsystem or extension WGSL shader library under a specific namespace.
+     *
+     * @param namespace -
+     * [KO] 네임스페이스 키 (예: 'landscape')
+     * [EN] Namespace key (e.g., 'landscape')
+     * @param library -
+     * [KO] WGSL 셰이더 조각 컬렉션 객체
+     * [EN] WGSL shader snippet collection object
      */
-    public parse(sourceName: string, code: string, injectLibrary?: Record<string, string>): {
+    static registerLibrary(namespace: string, library: any): void {
+        if (!namespace || !library) return;
+        extensionLibraries.set(namespace, library);
+    }
+
+    /**
+     * [KO] 파서 내부 캐시 맵의 모든 자원을 명시적으로 해제합니다.
+     * [EN] Explicitly releases all resources in the parser's internal cache maps.
+     */
+    public destroy(): void {
+        for (const [key, value] of this.#reflectCache.entries()) {
+            if (value.shaderSourceVariant) {
+                try {
+                    value.shaderSourceVariant.destroy();
+                } catch (e) {
+                }
+                value.shaderSourceVariant = null;
+            }
+            value.uniforms = null;
+            value.storage = null;
+            value.structs = null;
+            value.samplers = null;
+            value.textures = null;
+            value.vertexEntries = null;
+            value.computeEntries = null;
+            value.fragmentEntries = null;
+        }
+        this.#reflectCache.clear();
+
+        for (const result of this.#activeParseResults) {
+            result.uniforms = null;
+            result.storage = null;
+            result.structs = null;
+            result.samplers = null;
+            result.textures = null;
+            result.vertexEntries = null;
+            result.computeEntries = null;
+            result.fragmentEntries = null;
+            result.defaultSource = null;
+            if (result.shaderSourceVariant) {
+                try {
+                    result.shaderSourceVariant.destroy();
+                } catch (e) {
+                }
+                result.shaderSourceVariant = null;
+            }
+            result.conditionalBlocks = null;
+        }
+        this.#activeParseResults.length = 0;
+
+        for (const [key, value] of this.#preprocessCache.entries()) {
+            if (value.shaderSourceVariant) {
+                try {
+                    value.shaderSourceVariant.destroy();
+                } catch (e) {
+                }
+            }
+            value.cacheKey = null;
+            value.conditionalBlockInfos = null;
+            value.conditionalBlocks = null;
+            value.defaultSource = null;
+            value.shaderSourceVariant = null;
+        }
+        this.#preprocessCache.clear();
+        this.#sourceNameRegistry.clear();
+
+        console.log('✨ WGSLParser 격리 캐시 메모리 완벽 해소 완료');
+    }
+
+    /**
+     * [KO] WGSL 코드를 전처리하고 유니폼, 스토리지, 구조체, 텍스처 및 엔트리 포인트 리플렉션 정보를 반환합니다.
+     * [EN] Preprocesses WGSL code and returns reflection information for uniforms, storages, structs, textures, and entry points.
+     *
+     * @param sourceName -
+     * [KO] 셰이더 소스 식별 이름
+     * [EN] Shader source identification name
+     * @param code -
+     * [KO] 원본 WGSL 셰이더 코드 문자열
+     * [EN] Raw WGSL shader code string
+     * @returns
+     * [KO] 파싱된 리플렉션 데이터 및 변형 생성기 객체
+     * [EN] Parsed reflection data and variant generator object
+     * @throws
+     * [KO] `sourceName`이 누락되었거나 전처리 구문이 잘못된 경우 Error 발생
+     * [EN] Throws Error if `sourceName` is missing or preprocessing syntax is invalid
+     */
+    public parse(sourceName: string, code: string): {
         uniforms: any;
         storage: any;
         structs: any;
@@ -329,7 +455,7 @@ class WGSLParser {
             shaderSourceVariant,
             conditionalBlocks: uniqueKeys,
             cacheKey
-        } = this.#preprocess(sourceName, code, injectLibrary);
+        } = this.#preprocess(sourceName, code);
 
         const cachedReflect = this.#reflectCache.get(cacheKey);
         let reflectResult;
@@ -382,76 +508,7 @@ class WGSLParser {
         return finalResult;
     }
 
-    /**
-     * [KO] 파서 내부 캐시 맵의 모든 자원을 명시적으로 비우고 해제합니다.
-     */
-    public destroy(): void {
-        // 리플렉션 캐시 자원 해소
-        for (const [key, value] of this.#reflectCache.entries()) {
-            if (value.shaderSourceVariant) {
-                try {
-                    value.shaderSourceVariant.destroy();
-                } catch (e) {
-                }
-                value.shaderSourceVariant = null;
-            }
-            value.uniforms = null;
-            value.storage = null;
-            value.structs = null;
-            value.samplers = null;
-            value.textures = null;
-            value.vertexEntries = null;
-            value.computeEntries = null;
-            value.fragmentEntries = null;
-        }
-        this.#reflectCache.clear();
-
-        // 활성 파싱 결과의 참조 고리 끊기
-        for (const result of this.#activeParseResults) {
-            result.uniforms = null;
-            result.storage = null;
-            result.structs = null;
-            result.samplers = null;
-            result.textures = null;
-            result.vertexEntries = null;
-            result.computeEntries = null;
-            result.fragmentEntries = null;
-            result.defaultSource = null;
-            if (result.shaderSourceVariant) {
-                try {
-                    result.shaderSourceVariant.destroy();
-                } catch (e) {
-                }
-                result.shaderSourceVariant = null;
-            }
-            result.conditionalBlocks = null;
-        }
-        this.#activeParseResults.length = 0;
-
-        // 전처리 캐시 자원 해소
-        for (const [key, value] of this.#preprocessCache.entries()) {
-            if (value.shaderSourceVariant) {
-                try {
-                    value.shaderSourceVariant.destroy();
-                } catch (e) {
-                }
-            }
-            value.cacheKey = null;
-            value.conditionalBlockInfos = null;
-            value.conditionalBlocks = null;
-            value.defaultSource = null;
-            value.shaderSourceVariant = null;
-        }
-        this.#preprocessCache.clear();
-        this.#sourceNameRegistry.clear();
-
-        console.log('✨ WGSLParser 격리 캐시 메모리 완벽 해소 완료');
-    }
-
-    /**
-     * [KO] WGSL 코드를 전처리합니다. (인스턴스 캐시 사용)
-     */
-    #preprocess(sourceName: string, code: string, injectLibrary?: Record<string, string>): PreprocessedWGSLResult {
+    #preprocess(sourceName: string, code: string): PreprocessedWGSLResult {
         const codeHash = generateCodeHash(code);
         const existingHash = this.#sourceNameRegistry.get(sourceName);
         if (existingHash && existingHash !== codeHash) {
@@ -469,7 +526,7 @@ class WGSLParser {
             return cachedResult;
         }
 
-        const withIncludes = processIncludes(code, sourceName, injectLibrary);
+        const withIncludes = processIncludes(code, sourceName);
         const defines = processDefines(withIncludes);
         const conditionalBlocks = findConditionalBlocks(defines);
 

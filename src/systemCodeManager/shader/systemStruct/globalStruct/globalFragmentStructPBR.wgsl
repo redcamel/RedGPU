@@ -5,6 +5,7 @@ struct GlobalFragmentStructPBR {
     alphaBlend: u32,
     doubleSided: u32,
     useVertexTangent: u32,
+    isFoliage: u32,
     opacity: f32,
     useTint: u32,
     tint: vec4<f32>,

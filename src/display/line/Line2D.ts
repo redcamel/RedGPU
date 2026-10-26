@@ -11,35 +11,42 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_2D'
 
 
 /**
- * [KO] 2D 공간에서 선(라인)을 표현하는 클래스입니다.
- * [EN] Class representing a line in 2D space.
+ * [KO] 2D 평면에서 점들을 연결하여 직선 또는 곡선(Bezier, Catmull-Rom)을 렌더링하는 클래스입니다.
+ * [EN] Class that renders straight lines or curves (Bezier, Catmull-Rom) by connecting points on a 2D plane.
  *
- * [KO] 2D 평면상에서 여러 점을 연결하여 선을 그릴 수 있습니다. geometry와 material은 생성 시 자동으로 할당되며, 이후 변경이 불가능합니다.
- * [EN] You can draw lines by connecting multiple points on a 2D plane. Geometry and material are automatically assigned during creation and cannot be changed thereafter.
+ * [KO] `geometry`와 `material`은 인스턴스 생성 시 내부적으로 자동 할당되며 임의로 변경할 수 없습니다.
+ * [EN] `geometry` and `material` are automatically assigned internally upon instantiation and cannot be changed.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const line = new RedGPU.Display.Line2D(redGPUContext);
  * line.addPoint(0, 0);
  * line.addPoint(100, 100);
  * scene.addChild(line);
  * ```
- * @experimental
+ *
+ * @see [Line2D Linear example](/RedGPU/examples/2d/line2D/linear/)
  * @category Line
  */
 class Line2D extends Line3D {
     /**
-     * [KO] Line2D 인스턴스를 생성합니다.
-     * [EN] Creates an instance of Line2D.
+     * [KO] `Line2D` 인스턴스를 생성합니다.
+     * [EN] Creates a `Line2D` instance.
+     *
+     * ### Example
+     * ```typescript
+     * const line = new RedGPU.Display.Line2D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, '#ffffff');
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param type -
-     * [KO] 라인 타입 (기본값: LINE_TYPE.LINEAR)
-     * [EN] Line type (default: LINE_TYPE.LINEAR)
+     * [KO] 라인 보간 타입 (기본값: `LINE_TYPE.LINEAR`)
+     * [EN] Line interpolation type (default: `LINE_TYPE.LINEAR`)
      * @param baseColor -
-     * [KO] 기본 색상 (기본값: #fff)
-     * [EN] Base color (default: #fff)
+     * [KO] 기본 선 색상 (HEX 문자열, 기본값: `'#fff'`)
+     * [EN] Base line color (HEX string, default: `'#fff'`)
      */
     constructor(redGPUContext: RedGPUContext, type: LINE_TYPE = LINE_TYPE.LINEAR, baseColor: string = '#fff') {
         super(redGPUContext, type, baseColor)
@@ -47,36 +54,44 @@ class Line2D extends Line3D {
     }
 
     /**
-     * geometry를 반환합니다. (생성 시 자동 할당, 변경 불가)
+     * [KO] 라인에 자동 할당된 지오메트리를 반환합니다. 외부에서 변경할 수 없습니다.
+     * [EN] Returns the geometry automatically assigned to the line. Cannot be modified externally.
+     *
+     * @returns
+     * [KO] 라인 지오메트리 객체
+     * [EN] Line geometry object
      */
     get geometry(): Geometry | Primitive {
         return this._geometry;
     }
 
-    /**
-     * geometry를 변경할 수 없습니다.
-     */
     set geometry(value: Geometry | Primitive) {
         consoleAndThrowError('Line2D can not change geometry')
     }
 
     /**
-     * material을 반환합니다. (생성 시 자동 할당, 변경 불가)
+     * [KO] 라인에 자동 할당된 전용 재질(`LineMaterial`)을 반환합니다. 외부에서 변경할 수 없습니다.
+     * [EN] Returns the dedicated material (`LineMaterial`) automatically assigned to the line. Cannot be modified externally.
+     *
+     * @returns
+     * [KO] 라인 재질 객체
+     * [EN] Line material object
      */
     get material() {
         return this._material
     }
 
-    /**
-     * material을 변경할 수 없습니다.
-     */
     set material(value) {
         consoleAndThrowError('Line2D can not change material')
     }
 
     /**
-     * 커스텀 버텍스 셰이더 모듈을 생성합니다.
-     * @returns 생성된 셰이더 모듈
+     * [KO] `Line2D` 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [EN] Creates a custom vertex shader module dedicated to `Line2D`.
+     *
+     * @returns
+     * [KO] 생성된 `GPUShaderModule` 인스턴스
+     * [EN] Created `GPUShaderModule` instance
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('LINE2D_VERTEX', vertexModuleSource);
@@ -85,15 +100,38 @@ class Line2D extends Line3D {
     }
 
     /**
-     * 2D 평면상에 점을 추가합니다.
-     * @param x X 좌표
-     * @param y Y 좌표
-     * @param color 점 색상 (기본값: baseColor)
-     * @param colorAlpha 알파값 (기본값: 1)
-     * @param inX in tangent X (기본값: 0)
-     * @param inY in tangent Y (기본값: 0)
-     * @param outX out tangent X (기본값: 0)
-     * @param outY out tangent Y (기본값: 0)
+     * [KO] 2D 평면 경로의 끝에 새로운 정점(Point)을 추가합니다.
+     * [EN] Appends a new point to the end of the 2D plane path.
+     *
+     * ### Example
+     * ```typescript
+     * line.addPoint(100, 50, '#ff0000', 1.0);
+     * ```
+     *
+     * @param x -
+     * [KO] X 좌표 (기본값: `0`)
+     * [EN] X coordinate (default: `0`)
+     * @param y -
+     * [KO] Y 좌표 (기본값: `0`)
+     * [EN] Y coordinate (default: `0`)
+     * @param color -
+     * [KO] 정점 색상 HEX 문자열 (기본값: `this.baseColor`)
+     * [EN] Point color HEX string (default: `this.baseColor`)
+     * @param colorAlpha -
+     * [KO] 색상 불투명도 (`0` ~ `1`, 기본값: `1`)
+     * [EN] Color opacity (`0` to `1`, default: `1`)
+     * @param inX -
+     * [KO] 진입 제어점(In Tangent) X 좌표 (기본값: `0`)
+     * [EN] In-tangent control point X coordinate (default: `0`)
+     * @param inY -
+     * [KO] 진입 제어점(In Tangent) Y 좌표 (기본값: `0`)
+     * [EN] In-tangent control point Y coordinate (default: `0`)
+     * @param outX -
+     * [KO] 진출 제어점(Out Tangent) X 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point X coordinate (default: `0`)
+     * @param outY -
+     * [KO] 진출 제어점(Out Tangent) Y 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point Y coordinate (default: `0`)
      */
     // @ts-ignore
     addPoint(
@@ -106,16 +144,41 @@ class Line2D extends Line3D {
     }
 
     /**
-     * 2D 평면상에 지정한 위치에 점을 추가합니다.
-     * @param index 추가할 위치 인덱스
-     * @param x X 좌표
-     * @param y Y 좌표
-     * @param color 점 색상 (기본값: baseColor)
-     * @param colorAlpha 알파값 (기본값: 1)
-     * @param inX in tangent X (기본값: 0)
-     * @param inY in tangent Y (기본값: 0)
-     * @param outX out tangent X (기본값: 0)
-     * @param outY out tangent Y (기본값: 0)
+     * [KO] 2D 평면 경로의 지정된 인덱스에 정점(Point)을 삽입합니다.
+     * [EN] Inserts a point at the specified index in the 2D plane path.
+     *
+     * ### Example
+     * ```typescript
+     * line.addPointAt(1, 50, 50, '#00ff00', 1.0);
+     * ```
+     *
+     * @param index -
+     * [KO] 정점을 삽입할 인덱스
+     * [EN] Index at which to insert the point
+     * @param x -
+     * [KO] X 좌표 (기본값: `0`)
+     * [EN] X coordinate (default: `0`)
+     * @param y -
+     * [KO] Y 좌표 (기본값: `0`)
+     * [EN] Y coordinate (default: `0`)
+     * @param color -
+     * [KO] 정점 색상 HEX 문자열 (기본값: `this.baseColor`)
+     * [EN] Point color HEX string (default: `this.baseColor`)
+     * @param colorAlpha -
+     * [KO] 색상 불투명도 (`0` ~ `1`, 기본값: `1`)
+     * [EN] Color opacity (`0` to `1`, default: `1`)
+     * @param inX -
+     * [KO] 진입 제어점(In Tangent) X 좌표 (기본값: `0`)
+     * [EN] In-tangent control point X coordinate (default: `0`)
+     * @param inY -
+     * [KO] 진입 제어점(In Tangent) Y 좌표 (기본값: `0`)
+     * [EN] In-tangent control point Y coordinate (default: `0`)
+     * @param outX -
+     * [KO] 진출 제어점(Out Tangent) X 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point X coordinate (default: `0`)
+     * @param outY -
+     * [KO] 진출 제어점(Out Tangent) Y 좌표 (기본값: `0`)
+     * [EN] Out-tangent control point Y coordinate (default: `0`)
      */
     // @ts-ignore
     addPointAt(

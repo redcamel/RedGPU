@@ -6,38 +6,73 @@ import shaderSource from "./shader.wgsl";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RedGPUObject from "../../../../base/RedGPUObject";
 
+/**
+ * [KO] 2D 텍스처의 밉맵(Mipmap)을 GPU 렌더 패스를 통해 자동 생성하는 유틸리티 클래스입니다.
+ * [EN] Utility class that automatically generates mipmaps for 2D textures via GPU render passes.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Texture
+ */
 class MipmapGenerator extends RedGPUObject {
 
-    readonly #sampler: GPUSampler
-    #pipelineLayout: GPUPipelineLayout
-    readonly #pipelines: { [key: string]: GPURenderPipeline }
-    #bindGroupLayout: GPUBindGroupLayout
-    #mipmapShaderModule: GPUShaderModule
+    readonly #sampler: GPUSampler;
+    #pipelineLayout: GPUPipelineLayout;
+    readonly #pipelines: { [key: string]: GPURenderPipeline };
+    #bindGroupLayout: GPUBindGroupLayout;
+    #mipmapShaderModule: GPUShaderModule;
     #tempViewCache: Map<string, GPUTextureView> = new Map();
     #tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
-    // WeakMap을 사용한 바인드 그룹 캐시 (GPUTexture를 키로 사용하고, textureView별 바인드 그룹 맵을 값으로 사용)
     #persistentBindGroupCache: WeakMap<GPUTexture, Map<string, GPUBindGroup>> = new WeakMap();
-    // 텍스처 뷰용 persistent 캐시
     #persistentViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
 
+    /**
+     * [KO] MipmapGenerator 인스턴스를 생성합니다.
+     * [EN] Creates an instance of MipmapGenerator.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext)
-        this.#sampler = new Sampler(redGPUContext, {minFilter: 'linear'}).gpuSampler
+        super(redGPUContext);
+        this.#sampler = new Sampler(redGPUContext, {minFilter: 'linear'}).gpuSampler;
         this.#pipelines = {};
     }
 
+    /**
+     * [KO] 지정된 밉 레벨 및 레이어의 텍스처 뷰를 생성하거나 캐시에서 반환합니다.
+     * [EN] Creates or retrieves from cache the texture view for the specified mip level and layer.
+     *
+     * @param texture -
+     * [KO] 대상 GPUTexture
+     * [EN] Target GPUTexture
+     * @param baseMipLevel -
+     * [KO] 기본 밉 레벨
+     * [EN] Base mip level
+     * @param baseArrayLayer -
+     * [KO] 기본 배열 레이어
+     * [EN] Base array layer
+     * @param useCache -
+     * [KO] 영속 캐시 사용 여부 (기본값: false)
+     * [EN] Whether to use persistent cache (default: false)
+     * @returns
+     * [KO] 생성되거나 캐시된 GPUTextureView
+     * [EN] Created or cached GPUTextureView
+     */
     createTextureView(texture: GPUTexture, baseMipLevel: number, baseArrayLayer: number, useCache: boolean = false): GPUTextureView {
         const key = `${baseMipLevel}_${baseArrayLayer}`;
         if (useCache) {
-            // WeakMap에서 해당 텍스처의 뷰 캐시 맵 가져오기
             let textureViewMap = this.#persistentViewCache.get(texture);
             if (!textureViewMap) {
                 textureViewMap = new Map();
                 this.#persistentViewCache.set(texture, textureViewMap);
             }
-            // 캐시된 뷰가 있는지 확인
             if (textureViewMap.has(key)) {
-                return textureViewMap.get(key)!;
+                return textureViewMap.get(key);
             }
             const view = texture.createView({
                 baseMipLevel,
@@ -47,11 +82,9 @@ class MipmapGenerator extends RedGPUObject {
                 arrayLayerCount: 1,
                 label: `MIPMAP_GENERATOR_CACHED_${texture.label}_${key}`
             });
-            // 캐시에 저장
             textureViewMap.set(key, view);
             return view;
         } else {
-            // 기존 temp 캐시 로직
             const tempKey = `MIPMAP_GENERATOR_${texture.label}_${baseMipLevel}_${baseArrayLayer}`;
             if (!this.#tempViewCache.has(tempKey)) {
                 const view = texture.createView({
@@ -64,24 +97,38 @@ class MipmapGenerator extends RedGPUObject {
                 });
                 this.#tempViewCache.set(tempKey, view);
             }
-            return this.#tempViewCache.get(tempKey)!;
+            return this.#tempViewCache.get(tempKey);
         }
     }
 
+    /**
+     * [KO] 밉맵 렌더 패스에 사용할 바인드 그룹을 생성하거나 캐시에서 반환합니다.
+     * [EN] Creates or retrieves from cache the bind group to be used for the mipmap render pass.
+     *
+     * @param texture -
+     * [KO] 대상 GPUTexture
+     * [EN] Target GPUTexture
+     * @param textureView -
+     * [KO] 대상 GPUTextureView
+     * [EN] Target GPUTextureView
+     * @param useCache -
+     * [KO] 영속 캐시 사용 여부 (기본값: false)
+     * [EN] Whether to use persistent cache (default: false)
+     * @returns
+     * [KO] 생성되거나 캐시된 GPUBindGroup
+     * [EN] Created or cached GPUBindGroup
+     */
     createBindGroup(texture: GPUTexture, textureView: GPUTextureView, useCache: boolean = false): GPUBindGroup {
         const {gpuDevice} = this;
         if (useCache) {
-            // GPUTexture를 키로 바인드 그룹 캐시 맵 가져오기
             let bindGroupMap = this.#persistentBindGroupCache.get(texture);
             if (!bindGroupMap) {
                 bindGroupMap = new Map();
                 this.#persistentBindGroupCache.set(texture, bindGroupMap);
             }
-            // textureView의 label을 키로 사용
             const viewKey = textureView.label || 'unlabeled';
-            // 캐시된 바인드 그룹이 있는지 확인
             if (bindGroupMap.has(viewKey)) {
-                return bindGroupMap.get(viewKey)!;
+                return bindGroupMap.get(viewKey);
             }
             const bindGroup = gpuDevice.createBindGroup({
                 label: `MIPMAP_GENERATOR_BIND_GROUP_CACHED_${texture.label}_${viewKey}`,
@@ -94,14 +141,12 @@ class MipmapGenerator extends RedGPUObject {
                     resource: textureView,
                 }],
             });
-            // 캐시에 저장
             bindGroupMap.set(viewKey, bindGroup);
             return bindGroup;
         } else {
-            // temp 캐시 사용 시에도 textureView 기반으로 키 생성
             const tempKey = `${texture.label}_${textureView.label}`;
             if (this.#tempBindGroupCache.has(tempKey)) {
-                return this.#tempBindGroupCache.get(tempKey)!;
+                return this.#tempBindGroupCache.get(tempKey);
             }
             const bindGroup = gpuDevice.createBindGroup({
                 label: `MIPMAP_GENERATOR_BIND_GROUP_TEMP_${tempKey}`,
@@ -119,6 +164,17 @@ class MipmapGenerator extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] 지정된 텍스처 포맷에 대응하는 밉맵 렌더 파이프라인을 반환합니다.
+     * [EN] Returns the mipmap render pipeline corresponding to the specified texture format.
+     *
+     * @param format -
+     * [KO] 대상 GPUTextureFormat
+     * [EN] Target GPUTextureFormat
+     * @returns
+     * [KO] 밉맵 GPURenderPipeline
+     * [EN] Mipmap GPURenderPipeline
+     */
     getMipmapPipeline(format: GPUTextureFormat): GPURenderPipeline {
         const {gpuDevice, resourceManager} = this;
         let pipeline = this.#pipelines[format];
@@ -163,7 +219,24 @@ class MipmapGenerator extends RedGPUObject {
     }
 
     /**
-     * 밉맵 생성 메서드
+     * [KO] 입력 텍스처에 대한 밉맵 체인을 생성합니다.
+     * [EN] Generates a mipmap chain for the input texture.
+     *
+     * @param texture -
+     * [KO] 원본 GPUTexture
+     * [EN] Source GPUTexture
+     * @param textureDescriptor -
+     * [KO] 텍스처 디스크립터
+     * [EN] Texture descriptor
+     * @param useCache -
+     * [KO] 영속 캐시 사용 여부 (기본값: false)
+     * [EN] Whether to use persistent cache (default: false)
+     * @param encoderType -
+     * [KO] 사용할 명령 인코더 유형 (기본값: COMMAND_ENCODER_TYPE.RESOURCE)
+     * [EN] Command encoder type to use (default: COMMAND_ENCODER_TYPE.RESOURCE)
+     * @returns
+     * [KO] 밉맵이 생성된 GPUTexture
+     * [EN] GPUTexture with generated mipmaps
      */
     generateMipmap(
         texture: GPUTexture,
@@ -171,7 +244,6 @@ class MipmapGenerator extends RedGPUObject {
         useCache: boolean = false,
         encoderType: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): GPUTexture {
-        // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {
             this.#clearTempCaches();
         }
@@ -200,12 +272,14 @@ class MipmapGenerator extends RedGPUObject {
             mipTexture = resourceManager.createManagedTexture(mipTextureDescriptor);
         }
 
+        const isImmediate = encoderType === COMMAND_ENCODER_TYPE.IMMEDIATE;
+        const immediateEncoder = isImmediate ? this.gpuDevice.createCommandEncoder({label: 'MipmapGenerator_ImmediateEncoder'}) : null;
+
         for (let arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer) {
             let srcView: GPUTextureView = this.createTextureView(texture, 0, arrayLayer, useCache);
             let dstMipLevel = renderToSource ? 1 : 0;
             for (let i = 1; i < textureDescriptor.mipLevelCount; ++i) {
                 const dstView: GPUTextureView = this.createTextureView(mipTexture, dstMipLevel++, arrayLayer, useCache);
-                // 현재 srcView에 맞는 바인드 그룹 생성 (textureView가 변경되므로 매번 새로운 바인드 그룹이 필요)
                 const bindGroup: GPUBindGroup = this.createBindGroup(texture, srcView, useCache);
 
                 const passDescriptor: GPURenderPassDescriptor = {
@@ -218,7 +292,13 @@ class MipmapGenerator extends RedGPUObject {
                     }],
                 }
 
-                if (encoderType === COMMAND_ENCODER_TYPE.RESOURCE) {
+                if (isImmediate) {
+                    const passEncoder = immediateEncoder.beginRenderPass(passDescriptor);
+                    passEncoder.setPipeline(pipeline);
+                    passEncoder.setBindGroup(0, bindGroup);
+                    passEncoder.draw(3, 1, 0, 0);
+                    passEncoder.end();
+                } else if (encoderType === COMMAND_ENCODER_TYPE.RESOURCE) {
                     commandEncoderManager.addResourceRenderPass(passDescriptor, (passEncoder) => {
                         passEncoder.setPipeline(pipeline);
                         passEncoder.setBindGroup(0, bindGroup);
@@ -248,7 +328,8 @@ class MipmapGenerator extends RedGPUObject {
             }
         }
         if (!renderToSource) {
-            commandEncoderManager.useEncoder(encoderType, encoder => {
+            const copyTargetEncoder = isImmediate ? immediateEncoder : null;
+            const recordCopy = (encoder: GPUCommandEncoder) => {
                 const mipLevelSize = {
                     width: Math.max(1, W >>> 1),
                     height: Math.max(1, H >>> 1),
@@ -265,23 +346,34 @@ class MipmapGenerator extends RedGPUObject {
                     mipLevelSize.width = Math.max(1, mipLevelSize.width >>> 1);
                     mipLevelSize.height = Math.max(1, mipLevelSize.height >>> 1);
                 }
-            });
+            };
+
+            if (isImmediate) {
+                recordCopy(copyTargetEncoder);
+            } else {
+                commandEncoderManager.useEncoder(encoderType, recordCopy);
+            }
+        }
+
+        if (isImmediate) {
+            this.gpuDevice.queue.submit([immediateEncoder.finish()]);
         }
 
         if (!renderToSource) {
             commandEncoderManager.addDeferredDestroy(mipTexture);
         }
 
-        // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {
             this.#clearTempCaches();
         }
         return texture;
     }
 
+    /**
+     * [KO] 모든 캐시 및 밉맵 생성용 파이프라인 리소스를 해제합니다.
+     * [EN] Releases all caches and mipmap generation pipeline resources.
+     */
     destroy() {
-        // WeakMap은 자동으로 정리되므로 별도 처리 불필요
-        // temp 캐시만 명시적으로 정리
         this.#clearTempCaches();
         for (const key in this.#pipelines) {
             delete this.#pipelines[key];

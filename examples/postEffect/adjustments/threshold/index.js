@@ -1,39 +1,37 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Threshold 예제
  * [EN] Threshold example
  *
- * [KO] 포스트 이펙트를 사용하여 화면의 임계값(Threshold) 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply a threshold effect to the screen using post effects.
+ * [KO] 포스트 이펙트를 사용하여 화면의 임계값(Threshold) 이진화 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply a binary threshold effect to the screen using post effects.
  */
 
-// 1. Create and append a container and canvas
 const container = document.createElement('div');
 document.body.appendChild(container);
 
 const canvas = document.createElement('canvas');
 container.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 3;
         controller.speedDistance = 0.1;
-        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
+        // [KO] Threshold 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create Threshold post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -44,7 +42,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -64,52 +68,42 @@ RedGPU.init(
         window.addEventListener('resize', updateLayout);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, viewEffect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => scene.addChild(v['resultMesh']));
-}
-
-const renderTestPane = async (redGPUContext, targetView, container) => {
-
+const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
-        gui:pane=>{
-            const effect = targetView.postEffectManager.getEffectAt(0);
+        gui: (pane) => {
+            const config = {Threshold: true};
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            const TEST_STATE = {
-                Threshold: true,
-                threshold: effect.threshold,
-            }
-            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-
-            folder.addBinding(TEST_STATE, 'Threshold').on('change', (v) => {
+            folder.addBinding(config, 'Threshold').on('change', (v) => {
                 if (v.value) {
-                    const newEffect = new RedGPU.PostEffect.Threshold(redGPUContext);
-                    newEffect.threshold = TEST_STATE.threshold;
-                    targetView.postEffectManager.addEffect(newEffect);
+                    targetView.postEffectManager.addEffect(effect);
                 } else {
                     targetView.postEffectManager.removeAllEffect();
                 }
-                thresholdControl.disabled = !v.value;
+                controls.forEach((c) => c.disabled = !v.value);
             });
 
-            const thresholdControl = folder.addBinding(TEST_STATE, 'threshold', {min: 1, max: 255}).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.threshold = v.value
-            })
+            const controls = [
+                folder.addBinding(effect, 'threshold', {min: 1, max: 255, step: 1})
+            ];
         }
     });
-
 };

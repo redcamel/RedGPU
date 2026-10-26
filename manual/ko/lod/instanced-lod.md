@@ -38,7 +38,7 @@ scene.addChild(instancedMesh);
 
 ## 3. 실습 예제: 2,000개의 LOD 큐브
 
-2,000개의 객체가 카메라 와의 거리에 따라 모양이 변하는 것을 확인해 보세요. 카메라를 줌인/줌아웃 하면 멀리 있는 객체들은 박스(Box) 로, 가까운 객체들은 구(Sphere) 로 표시됩니다.
+2,000개의 객체가 카메라 와의 거리에 따라 모양이 변하는 것을 확인해 보세요. 카메라를 줌인/줌아웃 하면 멀리 있는 객체들은 박스 (Box) 로, 가까운 객체들은 구 (Sphere) 로 표시됩니다.
 
 <ClientOnly>
 <CodePen title="RedGPU - Instancing LOD Example" slugHash="lod-instancing">
@@ -61,8 +61,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const light = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(light);
     
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.5;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. InstancingMesh 생성
@@ -121,7 +120,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
 
-- **GPU 가속**: CPU 연산 없이 GPU 에서 거리를 판단하므로 대량의 객체에도 성능 저하가 거의 없습니다.
-- **메모리 절약**: 멀리 있는 객체에 저해상도 모델을 사용하여 정점 처리 비용을 획기적으로 줄입니다.
+## 관련 예제
+
+- [InstancingMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+- [InstancingMesh GPU LOD (레벨별 재질 변경)](/RedGPU/examples/3d/lod/InstanceMeshGPULOD_material/)

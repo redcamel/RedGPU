@@ -1,91 +1,91 @@
 import ColorRGBA from "../../color/ColorRGBA";
-import LightManager from "../../light/core/LightManager";
+import LightManager from "../../light/LightManager";
 import ShadowManager from "../../shadow/ShadowManager";
+import WindManager from "../../wind/WindManager";
 import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
+import Landscape from "../../landscape/Landscape";
+import type Lake from "../../water/Lake";
 
 /**
  * [KO] View에서 렌더링할 장면(Scene) 공간을 정의하는 루트 컨테이너 클래스입니다.
- * [EN] Root container class that defines the space of a scene to be rendered in a View.
+ * [EN] Root container class that defines the scene space to be rendered in a View.
  *
- * [KO] 조명(LightManager), 그림자(ShadowManager), 물리 엔진(physicsEngine) 및 배경색 설정을 관리하며, 씬 그래프 내의 모든 시각적 3D/2D 오브젝트들을 계층적으로 포함하고 렌더링 흐름의 루트 역할을 수행합니다. View3D 또는 View2D에 장착되어 사용됩니다.
- * [EN] Manages light configurations (LightManager), shadows (ShadowManager), physics engine (physicsEngine), and background color settings. It hierarchically contains all visual 3D/2D objects in the scene graph and serves as the root of the rendering process, mounted inside View3D or View2D.
+ * [KO] 조명(LightManager), 그림자(ShadowManager), 바람(WindManager), 물리 엔진(IPhysicsEngine), 지형(Landscape), 수체(Lake) 및 3D 디스플레이 객체 계층을 통합 관리합니다.
+ * [EN] Integrates and manages lighting (LightManager), shadows (ShadowManager), wind (WindManager), physics engine (IPhysicsEngine), terrain (Landscape), water bodies (Lake), and the 3D display object hierarchy.
  *
  * ### Example
  * ```typescript
  * const scene = new RedGPU.Display.Scene();
  * scene.useBackgroundColor = true;
- * scene.backgroundColor.setColorByRGBA(25, 25, 25, 1);
+ * scene.backgroundColor.setColorByHEX('#111111');
  * ```
- *
- * <iframe src="/RedGPU/examples/3d/scene/" ></iframe>
- *
  * @category Scene
  */
 class Scene extends Object3DContainer {
-    /**
-     * [KO] 씬의 배경 지우기(Clear) 시 채워질 배경색
-     * [EN] Background color filled when clearing the scene background
-     */
     #backgroundColor: ColorRGBA = new ColorRGBA()
-    /**
-     * [KO] 배경색 사용 활성화 여부
-     * [EN] Whether background color usage is enabled
-     */
     #useBackgroundColor: boolean = false
-    /**
-     * [KO] 씬 내부의 광원 관리자
-     * [EN] Light manager inside the scene
-     */
     #lightManager: LightManager = new LightManager()
-    /**
-     * [KO] 씬 내부의 그림자 연산 관리자
-     * [EN] Shadow manager inside the scene
-     */
     #shadowManager: ShadowManager = new ShadowManager()
-    /**
-     * [KO] 씬에 바인딩된 물리 시뮬레이션 엔진
-     * [EN] Physics simulation engine bound to the scene
-     */
+    #windManager: WindManager = new WindManager(this)
     #physicsEngine: IPhysicsEngine
     #destroyed: boolean = false
 
+    #landscape: Landscape | null = null;
+    #waterChildren: Lake[] = []
+
     /**
      * [KO] Scene 인스턴스를 생성합니다.
-     * [EN] Creates an instance of Scene.
-     * @example
-     * ```typescript
-     * const scene = new RedGPU.Display.Scene('MainScene');
-     * ```
-     * @param name -
-     * [KO] Scene의 이름 (선택적)
-     * [EN] Name of the scene (optional)
+     * [EN] Creates a Scene instance.
      */
-    constructor(name?: string) {
-        super()
-        if (name) this.name = name
+    constructor() {
+        super();
     }
 
     /**
-     * [KO] 씬 내의 모든 조명을 통합 관리하는 LightManager 인스턴스를 가져옵니다.
-     * [EN] Gets the LightManager instance that manages all lights within the scene.
+     * [KO] 씬의 조명을 관리하는 LightManager 인스턴스를 반환합니다.
+     * [EN] Returns the LightManager instance that manages the lights of the scene.
+     *
+     * @returns
+     * [KO] LightManager 인스턴스
+     * [EN] LightManager instance
      */
     get lightManager(): LightManager {
         return this.#lightManager;
     }
 
     /**
-     * [KO] 씬 내의 모든 그림자 연산을 통합 제어하는 ShadowManager 인스턴스를 가져옵니다.
-     * [EN] Gets the ShadowManager instance that controls all shadow computations within the scene.
+     * [KO] 씬의 그림자를 관리하는 ShadowManager 인스턴스를 반환합니다.
+     * [EN] Returns the ShadowManager instance that manages the shadows of the scene.
+     *
+     * @returns
+     * [KO] ShadowManager 인스턴스
+     * [EN] ShadowManager instance
      */
     get shadowManager(): ShadowManager {
         return this.#shadowManager;
     }
 
     /**
-     * [KO] 씬에 바인딩되어 실행 중인 물리 시뮬레이션 엔진 플러그인을 가져오거나 설정합니다.
-     * [EN] Gets or sets the physics simulation engine plugin running and bound to the scene.
+     * [KO] 씬의 바람 물리 환경을 총괄하는 WindManager 인스턴스를 반환합니다.
+     * [EN] Returns the WindManager instance governing the scene's atmospheric wind physics.
+     *
+     * @returns
+     * [KO] WindManager 인스턴스
+     * [EN] WindManager instance
+     */
+    get windManager(): WindManager {
+        return this.#windManager;
+    }
+
+    /**
+     * [KO] 씬에 적용된 물리 엔진 인스턴스를 가져오거나 설정합니다.
+     * [EN] Gets or sets the physics engine instance applied to the scene.
+     *
+     * @returns
+     * [KO] 물리 엔진(IPhysicsEngine) 인스턴스
+     * [EN] Physics engine (IPhysicsEngine) instance
      */
     get physicsEngine(): IPhysicsEngine {
         return this.#physicsEngine;
@@ -96,8 +96,12 @@ class Scene extends Object3DContainer {
     }
 
     /**
-     * [KO] 씬 배경색(ColorRGBA) 인스턴스를 가져오거나 설정합니다. 반드시 ColorRGBA 인스턴스를 대입해야 합니다.
-     * [EN] Gets or sets the background color (ColorRGBA) instance of the scene. Must be assigned a valid ColorRGBA instance.
+     * [KO] 씬의 배경 색상을 나타내는 ColorRGBA 인스턴스를 가져오거나 설정합니다.
+     * [EN] Gets or sets the ColorRGBA instance representing the background color of the scene.
+     *
+     * @returns
+     * [KO] 배경 색상(ColorRGBA) 인스턴스
+     * [EN] Background color (ColorRGBA) instance
      */
     get backgroundColor(): ColorRGBA {
         return this.#backgroundColor;
@@ -109,8 +113,12 @@ class Scene extends Object3DContainer {
     }
 
     /**
-     * [KO] 씬 배경색 사용 여부를 가져오거나 설정합니다. true일 때 지정된 backgroundColor 수치로 지우기가 수행됩니다.
-     * [EN] Gets or sets whether to apply the scene background color. When true, clearing is performed with the specified backgroundColor value.
+     * [KO] 씬의 배경 색상 사용 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether to use the background color of the scene.
+     *
+     * @returns
+     * [KO] 배경 색상 사용 여부
+     * [EN] Whether background color is used
      */
     get useBackgroundColor(): boolean {
         return this.#useBackgroundColor;
@@ -120,39 +128,89 @@ class Scene extends Object3DContainer {
         this.#useBackgroundColor = value;
     }
 
-    destroy() {
-        if (this.#destroyed) return;
-        this.#destroyed = true;
+    /**
+     * [KO] 씬에 바인딩된 지형(Landscape) 객체를 가져오거나 설정합니다. `null` 전달 시 지형이 해제됩니다.
+     * [EN] Gets or sets the Landscape terrain object bound to the scene. Passing `null` unbinds the terrain.
+     *
+     * @returns
+     * [KO] 바인딩된 Landscape 인스턴스 또는 `null`
+     * [EN] Bound Landscape instance or `null`
+     */
+    get landscape(): Landscape | null {
+        return this.#landscape;
+    }
 
-        if (this.#shadowManager) {
-            this.#shadowManager.destroy();
+    set landscape(val: Landscape | null) {
+        if (val !== null && !(val instanceof Landscape)) {
+            consoleAndThrowError('allow only Landscape instance or null.');
         }
+        this.#landscape = val;
+    }
 
-        if (this.#physicsEngine) {
-            try {
-                // @ts-ignore
-                if (typeof this.#physicsEngine.destroy === 'function') {
-                    // @ts-ignore
-                    this.#physicsEngine.destroy();
-                    // @ts-ignore
-                } else if (typeof this.#physicsEngine.free === 'function') {
-                    // @ts-ignore
-                    this.#physicsEngine.free();
-                }
-            } catch (e) {
-                // 예외 처리
+    /**
+     * [KO] 씬에 바인딩된 수체(Lake) 객체 리스트를 반환합니다.
+     * [EN] Returns the list of Lake objects bound to the scene.
+     *
+     * @returns
+     * [KO] 등록된 Lake 인스턴스 배열
+     * [EN] Array of registered Lake instances
+     */
+    get waterChildren(): Lake[] {
+        return this.#waterChildren;
+    }
+
+    /**
+     * [KO] 수체 객체(Lake)를 씬 수체 리스트에 등록하고 자식 노드로 추가합니다.
+     * [EN] Registers a Lake object to the scene water list and adds it as a child node.
+     *
+     * @param water -
+     * [KO] 등록할 Lake 인스턴스
+     * [EN] Lake instance to register
+     */
+    addWater(water: Lake): void {
+        this.#checkWaterInstance(water);
+        if (!this.#waterChildren.includes(water)) {
+            this.#waterChildren.push(water);
+            if (!this.children.includes(water as any)) {
+                this.addChild(water as any);
             }
-            this.#physicsEngine = null;
         }
+    }
 
-        if (this.#lightManager) {
-            this.#lightManager.destroy();
-            this.#lightManager = null;
+    /**
+     * [KO] 씬에서 수체 객체(Lake)를 제거합니다.
+     * [EN] Removes a Lake object from the scene.
+     *
+     * @param water -
+     * [KO] 제거할 Lake 인스턴스
+     * [EN] Lake instance to remove
+     */
+    removeWater(water: Lake): void {
+        this.#checkWaterInstance(water);
+        const index = this.#waterChildren.indexOf(water);
+        if (index > -1) {
+            this.#waterChildren.splice(index, 1);
+            this.removeChild(water as any);
         }
-        this.#backgroundColor = null;
+    }
 
+    #checkWaterInstance(target: Lake) {
+        if (!target || !(target as any).isWater) {
+            consoleAndThrowError('allow only Lake instance.');
+        }
+    }
+
+    /**
+     * [KO] 씬과 내부 관리 리소스를 해제하고 파괴합니다.
+     * [EN] Releases and destroys the scene and its internal managed resources.
+     */
+    override destroy(): void {
         super.destroy();
+        this.#landscape = null;
+        this.#waterChildren.length = 0;
+        this.#windManager = null as any;
+        this.#destroyed = true;
     }
 }
 
-export default Scene
+export default Scene;

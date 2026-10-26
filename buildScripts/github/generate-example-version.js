@@ -2,8 +2,8 @@
  * [KO] 예제 파일들의 버전 관리를 위한 스크립트입니다.
  * [EN] Script for version management of example files.
  *
- * [KO] examples 폴더 내의 HTML 파일에 SEO, 소셜 메타 태그, JSON-LD, H1 태그를 삽입하고 자산 경로에 타임스탬프를 추가합니다.
- * [EN] Inserts SEO, social meta tags, JSON-LD, H1 tags into HTML files within the examples folder, and adds timestamps to asset paths.
+ * [KO] examples 폴더 내의 HTML 파일에 SEO, 소셜 메타 태그, JSON-LD를 삽입하고 자산 경로에 타임스탬프를 추가합니다.
+ * [EN] Inserts SEO, social meta tags, and JSON-LD into HTML files within the examples folder, and adds timestamps to asset paths.
  *
  * @category Utility
  */
@@ -121,6 +121,10 @@ try {
 
                 const cssPath = path.join(targetFolder, 'assets/css/example.css');
                 const cssRelPath = path.relative(dirPath, cssPath).replace(/\\/g, '/');
+                const distPath = path.join(process.cwd(), 'dist/index.js');
+                const distRelPath = path.relative(dirPath, distPath).replace(/\\/g, '/');
+                const helperPath = path.join(targetFolder, 'exampleHelper/dist/index.js');
+                const helperRelPath = path.relative(dirPath, helperPath).replace(/\\/g, '/');
                 const canonicalUrl = (baseUrl + fileRelPath).replace(/\/index\.html$/, '/');
 
                 // Cleanup existing SEO elements
@@ -150,9 +154,9 @@ try {
                 };
 
                 const standardTags = [
-                    `    <title>${title}</title>`,
                     '    <meta charset="UTF-8">',
                     '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+                    `    <title>${title}</title>`,
                     `    <meta name="description" content="${cleanDescription}">`,
                     `    <meta name="keywords" content="${keywords}">`,
                     `    <link rel="canonical" href="${canonicalUrl}">`,
@@ -174,9 +178,9 @@ try {
                     '    <!-- Structured Data -->',
                     `    <script type="application/ld+json">${JSON.stringify(jsonLd, null, 2)}</script>`,
                     '',
-                    '    <!-- Assets Preload -->',
-                    `    <link rel="preload" href="${cssRelPath}?t=${timestamp}" as="style">`,
-                    `    <link rel="modulepreload" href="index.js?t=${timestamp}">`,
+                    '    <!-- Module Preload -->',
+                    `    <link rel="modulepreload" href="${distRelPath}?t=${timestamp}">`,
+                    `    <link rel="modulepreload" href="${helperRelPath}?t=${timestamp}">`,
                     '',
                     '    <!-- Assets -->',
                     `    <link rel="stylesheet" href="${cssRelPath}?t=${timestamp}">`,
@@ -184,15 +188,7 @@ try {
                 ].join('\n');
 
                 // Update Head
-                content = content.replace(/<head>/i, `<head>\n${standardTags}`);
-                content = content.replace(/(<head>[\s\S]*?<\/head>)/i, (match, head) => {
-                    return head.replace(/\n\s*\n\s*\n/g, '\n\n').replace(/\n\s*\n$/g, '\n');
-                });
-
-                // 2. Update Body (Add H1)
-                // Remove redundant spaces and hidden H1
-                const h1Tag = `<h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">${title}</h1>`;
-                content = content.replace(/<body[^>]*>/i, (match) => `${match}\n${h1Tag}`);
+                content = content.replace(/<head>[\s\S]*?<\/head>/i, `<head>\n${standardTags}\n</head>`);
             }
         }
 
@@ -209,7 +205,7 @@ try {
         }
     });
 
-    console.log(`\n✨ Success! All meta tags, JSON-LD, H1, and references updated with t=${timestamp}`);
+    console.log(`\n✨ Success! All meta tags, JSON-LD, and references updated with t=${timestamp}`);
 } catch (error) {
     console.error('❌ Error:', error.message);
 }

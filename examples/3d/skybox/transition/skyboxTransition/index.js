@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Skybox Transition 예제
@@ -12,8 +12,6 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=17842
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// [KO] 테스트를 위한 다양한 텍스처 옵션 정의
-// [EN] Define various texture options for testing
 const textureOptions = [
     {
         name: 'Cube Texture',
@@ -51,36 +49,21 @@ const textureOptions = [
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. [KO] 카메라 컨트롤러 설정
-        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.tilt = 0;
-
-        // 2. [KO] 씬 및 뷰 구성
-        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // 3. [KO] 초기 스카이박스 생성 및 적용
-        // [EN] Create and Apply Initial Skybox
+        // [KO] 초기 스카이박스 생성 및 적용
+        // [EN] Create and apply initial skybox
         const initialOption = textureOptions[0];
         const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, initialOption.paths);
-        const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
-        skybox.luminance = initialOption.luminance;
-        view.skybox = skybox;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture, initialOption.luminance);
 
-        // 4. [KO] 렌더러 생성 및 루프 시작
-        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        const render = (time) => {
-            // [KO] 매 프레임 로직
-            // [EN] Logic per frame
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        // 5. [KO] 테스트용 GUI 렌더링
-        // [EN] Render Test GUI
         renderTestPane(redGPUContext, view);
     },
     (failReason) => {
@@ -91,120 +74,73 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 텍스처 옵션에 따라 적절한 텍스처 리소스를 생성합니다.
- * [EN] Creates appropriate texture resources based on texture options.
- */
 const createTexture = (redGPUContext, option) => {
     if (option.type === 'cube') {
         return new RedGPU.Resource.CubeTexture(redGPUContext, option.paths);
-    } else {
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, option.path);
-        return ibl.environmentTexture;
     }
+    const ibl = new RedGPU.Resource.IBL(redGPUContext, option.path);
+    return ibl.environmentTexture;
 };
 
-/**
- * [KO] 실시간 전환 제어를 위한 GUI를 구성합니다.
- * [EN] Configures GUI for real-time transition control.
- */
 const renderTestPane = (redGPUContext, view) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
             const skybox = view.skybox;
             if (!skybox) return;
 
-            // [KO] 트랜지션 설정 폴더
-            // [EN] Transition Settings Folder
-            const transitionFolder = pane.addFolder({
-                title: 'Skybox Transition',
-                expanded: true
-            });
-
-            const currentTextureData = {
+            const transitionFolder = pane.addFolder({title: 'Skybox Transition', expanded: true});
+            const transitionState = {
                 current: textureOptions[0].name,
-                transitionDuration: 300
+                duration: 300
             };
 
-            // [KO] 전환 지속 시간 조절
-            // [EN] Transition Duration Control
-            transitionFolder.addBinding(currentTextureData, 'transitionDuration', {
-                min: 100,
-                max: 3000,
-                step: 100,
-                label: 'Duration (ms)'
-            });
+            transitionFolder.addBinding(transitionState, 'duration', {min: 100, max: 3000, step: 100});
+            transitionFolder.addBinding(transitionState, 'current', {readonly: true});
 
-            transitionFolder.addBinding(currentTextureData, 'current', {
-                readonly: true,
-                label: 'Current Asset'
-            });
-
-            // [KO] 각 텍스처별 트랜지션 버튼 생성
-            // [EN] Create transition buttons for each texture
             const transitionButtons = [];
+            const updateButtonStates = (currentName) => {
+                transitionButtons.forEach(({button, option}) => {
+                    button.disabled = option.name === currentName;
+                });
+                pane.refresh();
+            };
 
             textureOptions.forEach((option) => {
                 const button = transitionFolder.addButton({
                     title: `→ ${option.name}`,
-                    disabled: currentTextureData.current === option.name
+                    disabled: transitionState.current === option.name
                 }).on('click', () => {
                     const newTexture = createTexture(redGPUContext, option);
-                    const duration = currentTextureData.transitionDuration;
+                    const duration = transitionState.duration;
 
-                    // [KO] 🎬 스카이박스 전환 실행
-                    // [EN] 🎬 Execute Skybox Transition
-                    view.skybox.transition(newTexture, duration);
+                    // [KO] 스카이박스 전환 애니메이션 실행
+                    // [EN] Execute skybox transition animation
+                    skybox.transition(newTexture, duration);
 
-                    // [KO] 💡 휘도(Luminance) 애니메이션 (전환 시간에 맞춰 보간)
-                    // [EN] 💡 Luminance Animation (Interpolate according to transition time)
-                    const startLuminance = view.skybox.luminance;
+                    const startLuminance = skybox.luminance;
                     const targetLuminance = option.luminance;
                     const startTime = performance.now();
 
                     const animateLuminance = (currentTime) => {
-                        const elapsed = currentTime - startTime;
-                        const progress = Math.min(elapsed / duration, 1);
-
-                        // [KO] 선형 보간 적용
-                        // [EN] Apply linear interpolation
-                        view.skybox.luminance = startLuminance + (targetLuminance - startLuminance) * progress;
-                        
-                        // [KO] GUI 수치 실시간 갱신
-                        // [EN] Refresh GUI values in real-time
+                        const progress = Math.min((currentTime - startTime) / duration, 1);
+                        skybox.luminance = startLuminance + (targetLuminance - startLuminance) * progress;
                         pane.refresh();
-
-                        if (progress < 1) {
-                            requestAnimationFrame(animateLuminance);
-                        }
+                        if (progress < 1) requestAnimationFrame(animateLuminance);
                     };
                     requestAnimationFrame(animateLuminance);
 
-                    currentTextureData.current = option.name;
-                    updateTransitionButtonStates(option.name);
+                    transitionState.current = option.name;
+                    updateButtonStates(option.name);
                 });
 
-                transitionButtons.push({ button, option });
+                transitionButtons.push({button, option});
             });
 
-            /**
-             * [KO] 현재 선택된 옵션에 따라 버튼 활성화 상태를 업데이트합니다.
-             * [EN] Updates button enabled states based on the currently selected option.
-             */
-            function updateTransitionButtonStates(currentTextureName) {
-                transitionButtons.forEach(({button, option}) => {
-                    button.disabled = (option.name === currentTextureName);
-                });
-                pane.refresh();
-            }
-
-            // [KO] 기본 스카이박스 속성 제어 폴더
-            // [EN] Basic SkyBox Properties Control Folder
-            const folder = pane.addFolder({title: 'SkyBox Control', expanded: true});
-            folder.addBinding(skybox, 'blur', {min: 0, max: 1, step: 0.01});
-            folder.addBinding(skybox, 'intensityMultiplier', {min: 0, max: 5, step: 0.1});
-            folder.addBinding(skybox, 'opacity', {min: 0, max: 1, step: 0.01});
-            folder.addBinding(skybox, 'luminance', {min: 0, max: 100000, step: 100});
+            const skyboxFolder = pane.addFolder({title: 'SkyBox', expanded: true});
+            skyboxFolder.addBinding(skybox, 'blur', {min: 0, max: 1, step: 0.01});
+            skyboxFolder.addBinding(skybox, 'intensityMultiplier', {min: 0, max: 5, step: 0.1});
+            skyboxFolder.addBinding(skybox, 'opacity', {min: 0, max: 1, step: 0.01});
+            skyboxFolder.addBinding(skybox, 'luminance', {min: 0, max: 100000, step: 100});
         }
     });
 };

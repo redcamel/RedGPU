@@ -34,7 +34,6 @@ struct InputData {
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
@@ -71,7 +70,7 @@ fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
     let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
 
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+    return albedo * lightScatter * viewScatter * energyFactor;
 }
 
 fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
@@ -158,9 +157,6 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_opacity = globalFragmentData.opacity;
     let V = getViewDirection(input_vertexPosition, u_cameraPosition);
 
-    // Shadow
-    let receiveShadowYn = inputData.receiveShadow != .0;
-
     // Vertex Normal
     var N = normalize(input_vertexNormal) ;
     #redgpu_if displacementTexture
@@ -228,19 +224,31 @@ fn main(inputData:InputData) -> OutputFragment {
     let albedo = baseColor * (1.0 - metallicParameter);
 
     // Shadow Visibility
-    var visibility:f32 = 1.0;
-    visibility = getDirectionalShadowVisibility(
-        directionalShadowMap,
-        directionalShadowMapSampler,
-        u_directionalShadowDepthTextureSize,
-        u_directionalShadowBias,
-        systemUniforms.shadow.directionalShadowFilterScale,
-        inputData.shadowCoord
-    );
-    if(!receiveShadowYn){ 
-        visibility = 1.0; 
-    } else {
-        visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
+    let receiveShadowYn = inputData.receiveShadow != 0.0 && u_directionalLightCount > 0u;
+    var visibility: f32 = 1.0;
+    var L0 = vec3<f32>(0.0, 1.0, 0.0);
+    if (u_directionalLightCount > 0u) {
+        L0 = -normalize(u_directionalLights[0].direction);
+    }
+    let NdotL0 = dot(N, L0);
+
+    // 🚀 [최적화] 그림자 수신 활성화 + 표면이 빛을 향할 때(NdotL0 > 0.001) + CSM 유효 거리 이내일 때만 섀도우 연산 실행
+    if (receiveShadowYn && NdotL0 > 0.001) {
+        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+        let rawViewDist = distance(systemUniforms.camera.cameraPosition, input_vertexPosition);
+
+        if (rawViewDist < maxCSMDist) {
+            let rawVis = getDirectionalShadowVisibility(
+                directionalShadowMap,
+                directionalShadowMapSampler,
+                input_vertexPosition,
+                N,
+                L0,
+                inputData.position.xy
+            );
+            visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
+        }
     }
 
     var totalDirectLighting = vec3<f32>(0.0);
@@ -284,14 +292,14 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [KO] 간접 조명 (Ambient) [EN] Indirect lighting (Ambient)
-    var ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * INV_PI;
+    var ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity;
 
     if (systemUniforms.useSkyAtmosphere == 1u) {
         let u_atmo = systemUniforms.skyAtmosphere;
         let skyIntensity = u_atmo.sunIntensity;
         let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, N.y, u_atmo.atmosphereHeight);
         let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity;
-        ambientContribution = (ambientContribution * diffTrans) + (albedo * skyIrradiance * INV_PI);
+        ambientContribution = (ambientContribution * diffTrans) + (albedo * skyIrradiance);
     }
     
     // [KO] 조명 합산 [EN] Lighting summation

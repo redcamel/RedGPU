@@ -158,6 +158,15 @@ declare class ResourceManager extends RedGPUObject {
      */
     get emptyBitmapTextureView(): GPUTextureView;
     /**
+     * [KO] 빈 2D 텍스처 배열 뷰를 반환합니다.
+     * [EN] Returns the empty 2D texture array view.
+     *
+     * @returns
+     * [KO] 빈 2D Array GPUTextureView
+     * [EN] Empty 2D Array GPUTextureView
+     */
+    get emptyTexture2DArrayView(): GPUTextureView;
+    /**
      * [KO] 빈 큐브 텍스처 뷰를 반환합니다.
      * [EN] Returns the empty cube texture view.
      *
@@ -185,6 +194,21 @@ declare class ResourceManager extends RedGPUObject {
      */
     get emptyDepthTextureView(): GPUTextureView;
     /**
+     * [KO] 빈 1x1 R32Float 텍스처 뷰(HZB 폴백 등)를 반환합니다.
+     * [EN] Returns an empty 1x1 R32Float texture view (e.g. for HZB fallback).
+     */
+    get emptyR32FloatTextureView(): GPUTextureView;
+    /**
+     * [KO] WebGPU 전역 공용 빈 바인드그룹 레이아웃 (entries: [])을 반환합니다. 파이프라인 레이아웃 구성 시 미사용 바인딩 슬롯 정합성 유지에 사용됩니다.
+     * [EN] Returns the WebGPU global empty bind group layout (entries: []). Used to satisfy binding slot requirements when configuring pipeline layouts.
+     */
+    get emptyBindGroupLayout(): GPUBindGroupLayout;
+    /**
+     * [KO] WebGPU 전역 공용 빈 바인드그룹 (entries: [])을 반환합니다. 섀도우 패스, 뎁스 프리패스 등 바인딩 슬롯 정합성 유지를 위한 더미 바인드그룹으로 공용 사용됩니다.
+     * [EN] Returns the WebGPU global empty bind group (entries: []). Used as a dummy bind group across shadow passes, depth prepasses, etc.
+     */
+    get emptyBindGroup(): GPUBindGroup;
+    /**
      * [KO] 비트맵 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed bitmap texture state.
      *
@@ -193,6 +217,15 @@ declare class ResourceManager extends RedGPUObject {
      * [EN] Managed bitmap texture status info object
      */
     get managedBitmapTextureState(): ResourceStatusInfo;
+    /**
+     * [KO] 텍스처 어레이 관리 상태를 반환합니다.
+     * [EN] Returns the managed texture array state.
+     *
+     * @returns
+     * [KO] 텍스처 어레이 관리 상태 정보 객체
+     * [EN] Managed texture array status info object
+     */
+    get managedTextureArrayState(): ResourceStatusInfo;
     /**
      * [KO] 큐브 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed cube texture state.

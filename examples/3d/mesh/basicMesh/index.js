@@ -1,12 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Basic Mesh 예제
- * [EN] Basic Mesh Example
+ * [EN] Basic Mesh example
  *
- * [KO] 기본적인 3D 메시 생성 및 속성(위치, 크기, 회전) 제어 방법을 시연합니다.
- * [EN] Demonstrates basic 3D mesh creation and property control (position, scale, rotation).
+ * [KO] 지오메트리와 재질로 Mesh를 생성하고 위치·크기·회전 및 재질 교체를 실시간으로 제어합니다.
+ * [EN] Creates a Mesh from geometry and material, and controls its position, scale, rotation, and material in real-time.
  */
 
 const canvas = document.createElement('canvas');
@@ -15,34 +15,29 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. [KO] 카메라 컨트롤러 설정
-        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 0.3;
 
-        // 2. [KO] 씬 및 뷰 구성
-        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.axis = true;
         view.grid = true;
         redGPUContext.addView(view);
 
-        // 3. [KO] 샘플 메시 생성
-        // [EN] Create Sample Mesh
-        const mesh = createSampleMesh(redGPUContext, scene);
+        // [KO] 지오메트리 + 재질 조합으로 Mesh 생성 후 씬에 추가
+        // [EN] Create a Mesh from geometry + material and add it to the scene
+        const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
+        const material = new RedGPU.Material.BitmapMaterial(
+            redGPUContext,
+            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
+        );
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+        scene.addChild(mesh);
 
-        // 4. [KO] 렌더러 생성 및 루프 시작
-        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        const render = (time) => {
-            // [KO] 매 프레임 실행될 로직
-            // [EN] Logic per frame
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        // 5. [KO] 테스트용 GUI 렌더링
-        // [EN] Render Test GUI
         renderTestPane(redGPUContext, mesh);
     },
     (failReason) => {
@@ -53,105 +48,37 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 샘플 메시를 생성하여 씬에 추가합니다.
- * [EN] Creates a sample mesh and adds it to the scene.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Display.Mesh}
- */
-const createSampleMesh = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.BitmapMaterial(
-        redGPUContext,
-        new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
-    );
-
-    const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
-    const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-    scene.addChild(mesh);
-
-    return mesh;
-};
-
-/**
- * [KO] 실시간 속성 제어를 위한 GUI를 구성합니다.
- * [EN] Configures GUI for real-time property control.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Mesh} mesh
- */
 const renderTestPane = (redGPUContext, mesh) => {
-    const config = {
-        material: 'Bitmap',
-        x: mesh.x,
-        y: mesh.y,
-        z: mesh.z,
-        scaleX: mesh.scaleX,
-        scaleY: mesh.scaleY,
-        scaleZ: mesh.scaleZ,
-        rotationX: mesh.rotationX,
-        rotationY: mesh.rotationY,
-        rotationZ: mesh.rotationZ,
-        opacity: 1
+    // [KO] 재질은 런타임에 교체 가능 (미리 생성한 인스턴스를 재사용)
+    // [EN] Materials can be swapped at runtime (reuse pre-created instances)
+    const materials = {
+        Bitmap: mesh.material,
+        Color: new RedGPU.Material.ColorMaterial(redGPUContext),
     };
+    const config = {material: 'Bitmap'};
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // [KO] 재질 변경
-            // [EN] Material Change
             pane.addBinding(config, 'material', {
-                options: {
-                    Color: 'Color',
-                    Bitmap: 'Bitmap'
-                }
+                options: {Bitmap: 'Bitmap', Color: 'Color'}
             }).on('change', (evt) => {
-                if (evt.value === 'Color') {
-                    mesh.material = new RedGPU.Material.ColorMaterial(redGPUContext);
-                } else {
-                    mesh.material = new RedGPU.Material.BitmapMaterial(
-                        redGPUContext,
-                        new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
-                    );
-                }
+                mesh.material = materials[evt.value];
             });
 
-            // [KO] 위치 제어
-            // [EN] Position Controls
             const positionFolder = pane.addFolder({title: 'Position', expanded: true});
-            positionFolder.addBinding(config, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-                mesh.setPosition(evt.value, config.y, config.z);
-            });
-            positionFolder.addBinding(config, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-                mesh.setPosition(config.x, evt.value, config.z);
-            });
-            positionFolder.addBinding(config, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-                mesh.setPosition(config.x, config.y, evt.value);
-            });
+            positionFolder.addBinding(mesh, 'x', {min: -10, max: 10, step: 0.1});
+            positionFolder.addBinding(mesh, 'y', {min: -10, max: 10, step: 0.1});
+            positionFolder.addBinding(mesh, 'z', {min: -10, max: 10, step: 0.1});
 
-            // [KO] 크기 제어
-            // [EN] Scale Controls
             const scaleFolder = pane.addFolder({title: 'Scale', expanded: true});
-            scaleFolder.addBinding(config, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-                mesh.setScale(evt.value, config.scaleY, config.scaleZ);
-            });
-            scaleFolder.addBinding(config, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-                mesh.setScale(config.scaleX, evt.value, config.scaleZ);
-            });
-            scaleFolder.addBinding(config, 'scaleZ', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-                mesh.setScale(config.scaleX, config.scaleY, evt.value);
-            });
+            scaleFolder.addBinding(mesh, 'scaleX', {min: 0.1, max: 5, step: 0.1});
+            scaleFolder.addBinding(mesh, 'scaleY', {min: 0.1, max: 5, step: 0.1});
+            scaleFolder.addBinding(mesh, 'scaleZ', {min: 0.1, max: 5, step: 0.1});
 
-            // [KO] 회전 제어
-            // [EN] Rotation Controls
             const rotationFolder = pane.addFolder({title: 'Rotation', expanded: true});
-            rotationFolder.addBinding(config, 'rotationX', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
-                mesh.setRotation(evt.value, config.rotationY, config.rotationZ);
-            });
-            rotationFolder.addBinding(config, 'rotationY', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
-                mesh.setRotation(config.rotationX, evt.value, config.rotationZ);
-            });
-            rotationFolder.addBinding(config, 'rotationZ', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
-                mesh.setRotation(config.rotationX, config.rotationY, evt.value);
-            });
+            rotationFolder.addBinding(mesh, 'rotationX', {min: 0, max: 360, step: 0.01});
+            rotationFolder.addBinding(mesh, 'rotationY', {min: 0, max: 360, step: 0.01});
+            rotationFolder.addBinding(mesh, 'rotationZ', {min: 0, max: 360, step: 0.01});
         }
     });
 };

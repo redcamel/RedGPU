@@ -3,10 +3,10 @@ import VertexInterleavedStructElement from "./core/VertexInterleavedStructElemen
 import {TypeInterleave} from "./VertexInterleaveType";
 
 /**
- * [KO] 정점 속성을 인터리브 방식으로 배치하기 위한 구조를 정의하는 클래스입니다.
- * [EN] Class that defines a structure for interleaving vertex attributes.
+ * [KO] 정점 속성을 인터리브(Interleaved) 방식으로 배치하기 위한 구조를 정의하는 클래스입니다.
+ * [EN] Class that defines a structure for arranging vertex attributes in an interleaved manner.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const struct = new RedGPU.Resource.VertexInterleavedStruct({
  *   position: RedGPU.Resource.VertexInterleaveType.float32x3,
@@ -24,9 +24,10 @@ export default class VertexInterleavedStruct {
     /**
      * [KO] VertexInterleavedStruct 인스턴스를 생성합니다.
      * [EN] Creates a VertexInterleavedStruct instance.
+     *
      * @param attributes -
-     * [KO] 속성 정의 맵
-     * [EN] Attribute definition map
+     * [KO] 속성 정의 맵 (`Record<string, TypeInterleave>`)
+     * [EN] Attribute definition map (`Record<string, TypeInterleave>`)
      * @param name -
      * [KO] 구조 이름 (선택)
      * [EN] Structure name (optional)
@@ -40,7 +41,10 @@ export default class VertexInterleavedStruct {
     /**
      * [KO] 구조의 레이블(이름)을 반환합니다.
      * [EN] Returns the label (name) of the structure.
-     * @returns - [KO] 구조 레이블 [EN] Structure label
+     *
+     * @returns
+     * [KO] 구조 레이블
+     * [EN] Structure label
      */
     get label(): string {
         return this.#name;
@@ -49,7 +53,10 @@ export default class VertexInterleavedStruct {
     /**
      * [KO] GPU 정점 속성 배열을 반환합니다.
      * [EN] Returns the array of GPU vertex attributes.
-     * @returns - [KO] 정점 속성 배열 [EN] Vertex attributes array
+     *
+     * @returns
+     * [KO] 정점 속성 배열
+     * [EN] Vertex attributes array
      */
     get attributes() {
         return this.#attributes;
@@ -58,26 +65,37 @@ export default class VertexInterleavedStruct {
     /**
      * [KO] 전체 stride(바이트 크기)를 반환합니다.
      * [EN] Returns the total stride (byte size).
-     * @returns - [KO] 전체 stride 크기 [EN] Total stride size
+     *
+     * @returns
+     * [KO] 전체 stride 바이트 크기
+     * [EN] Total stride byte size
      */
     get arrayStride(): number {
         return this.#arrayStride;
     }
 
     /**
-     * [KO] 내부 속성 정의 맵을 반환합니다.
-     * [EN] Returns the internal attribute definition map.
-     * @returns - [KO] 속성 정의 맵 복사본 [EN] Copy of attribute definition map
+     * [KO] 내부 속성 정의 맵 복사본을 반환합니다.
+     * [EN] Returns a copy of the internal attribute definition map.
+     *
+     * @returns
+     * [KO] 속성 정의 맵 (`Record<string, VertexInterleavedStructElement>`)
+     * [EN] Attribute definition map (`Record<string, VertexInterleavedStructElement>`)
      */
     get define(): Record<string, VertexInterleavedStructElement> {
         return {...this.#define};
     }
 
     /**
-     * [KO] 특정 속성의 오프셋(float 단위 인덱스)을 반환합니다.
-     * [EN] Returns the offset (float unit index) of a specific attribute.
-     * @param attributeName - [KO] 속성 이름 [EN] Attribute name
-     * @returns [KO] float 단위 오프셋 [EN] Offset in float units
+     * [KO] 특정 속성의 float 단위 오프셋 인덱스를 반환합니다.
+     * [EN] Returns the offset index in float units of a specific attribute.
+     *
+     * @param attributeName -
+     * [KO] 속성 이름
+     * [EN] Attribute name
+     * @returns
+     * [KO] float 단위 오프셋
+     * [EN] Offset in float units
      */
     getAttributeOffset(attributeName: string): number {
         const attribute = this.#attributes.find(attr => attr.attributeName === attributeName);
@@ -87,13 +105,6 @@ export default class VertexInterleavedStruct {
         return attribute.offset / 4;
     }
 
-    /**
-     * [KO] 속성 정의를 기반으로 #define을 초기화합니다.
-     * [EN] Initializes #define based on attribute definitions.
-     * @param attributes -
-     * [KO] 속성 정의 맵
-     * [EN] Attribute definition map
-     */
     #initializeDefine(attributes: Record<string, TypeInterleave>) {
         let temp = {};
         for (const attributeName in attributes) {
@@ -107,10 +118,6 @@ export default class VertexInterleavedStruct {
         this.#define = temp;
     }
 
-    /**
-     * [KO] 내부 속성 리스트를 초기화합니다.
-     * [EN] Initializes the internal attribute list.
-     */
     #initializeAttributes() {
         this.#arrayStride = 0;
         this.#attributes = [];

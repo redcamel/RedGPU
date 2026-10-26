@@ -1,50 +1,88 @@
 import {mat4, vec3} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
-import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
-import updateObject3DMatrix from "../../math/updateObject3DMatrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
 
-// ==================== 모듈 레벨 상수 ====================
 const PER_PI = Math.PI / 180;
 
 /**
- * [KO] 키보드 입력 키 매핑 설정을 정의합니다.
- * [EN] Defines keyboard input key mapping configuration.
+ * [KO] FreeController의 키보드 입력 키 매핑 구성을 정의하는 타입입니다.
+ * [EN] Type defining the keyboard input key mapping configuration for FreeController.
  */
 type KeyNameMapper = {
-    /** [KO] 전진 이동 [EN] Move forward */ moveForward: string;
-    /** [KO] 후진 이동 [EN] Move backward */ moveBack: string;
-    /** [KO] 좌측 이동 [EN] Move left */ moveLeft: string;
-    /** [KO] 우측 이동 [EN] Move right */ moveRight: string;
-    /** [KO] 상향 이동 [EN] Move up */ moveUp: string;
-    /** [KO] 하향 이동 [EN] Move down */ moveDown: string;
-    /** [KO] 좌회전 [EN] Turn left */ turnLeft: string;
-    /** [KO] 우회전 [EN] Turn right */ turnRight: string;
-    /** [KO] 상향 회전 [EN] Turn up */ turnUp: string;
-    /** [KO] 하향 회전 [EN] Turn down */ turnDown: string;
+    /**
+     * [KO] 전진 이동 키
+     * [EN] Move forward key
+     */
+    moveForward: string;
+    /**
+     * [KO] 후진 이동 키
+     * [EN] Move backward key
+     */
+    moveBack: string;
+    /**
+     * [KO] 좌측 이동 키
+     * [EN] Move left key
+     */
+    moveLeft: string;
+    /**
+     * [KO] 우측 이동 키
+     * [EN] Move right key
+     */
+    moveRight: string;
+    /**
+     * [KO] 상향 이동 키
+     * [EN] Move up key
+     */
+    moveUp: string;
+    /**
+     * [KO] 하향 이동 키
+     * [EN] Move down key
+     */
+    moveDown: string;
+    /**
+     * [KO] 좌회전 키
+     * [EN] Turn left key
+     */
+    turnLeft: string;
+    /**
+     * [KO] 우회전 키
+     * [EN] Turn right key
+     */
+    turnRight: string;
+    /**
+     * [KO] 상향 회전 키
+     * [EN] Turn up key
+     */
+    turnUp: string;
+    /**
+     * [KO] 하향 회전 키
+     * [EN] Turn down key
+     */
+    turnDown: string;
 };
 
 /**
- * [KO] 자유롭게 이동 가능한 1인칭 시점의 카메라 컨트롤러입니다.
- * [EN] First-person camera controller that allows free movement.
+ * [KO] 키보드와 마우스 입력을 사용하여 3D 공간을 자유롭게 탐색하는 1인칭 시점 카메라 컨트롤러 클래스입니다.
+ * [EN] First-person camera controller class that freely navigates 3D space using keyboard and mouse inputs.
  *
- * [KO] FPS 게임이나 3D 에디터의 뷰포트처럼 키보드와 마우스를 사용하여 공간을 자유롭게 비행하듯 탐색할 수 있습니다.
- * [EN] Allows for free-flight exploration of the space using keyboard and mouse, similar to FPS games or 3D editor viewports.
- *
- * * ### Example
+ * ### Example
  * ```typescript
- * const controller = new RedGPU.FreeController(redGPUContext);
- * controller.pan = 30;
- * controller.tilt = 10;
+ * const controller = new RedGPU.Camera.FreeController(redGPUContext);
+ * controller.x = 0;
+ * controller.y = 5;
+ * controller.z = 20;
+ * controller.pan = 0;
+ * controller.tilt = -15;
  * ```
+ *
  * <iframe src="/RedGPU/examples/3d/controller/freeController/" style="width:100%; height:500px;"></iframe>
+ * @see [FreeController example](/RedGPU/examples/3d/controller/freeController/)
  * @category Controller
  */
 class FreeController extends AController {
-    // ==================== 키 매핑 (Unreal Engine Standard) ====================
     #keyNameMapper: KeyNameMapper = {
         moveForward: 'w',
         moveBack: 's',
@@ -57,33 +95,40 @@ class FreeController extends AController {
         turnUp: 'r',
         turnDown: 'f'
     };
-    // ==================== 이동 관련 설정 ====================
-    #moveSpeed: number = 600;
-    #moveDelayInterpolation: number = 0.001;
+    #moveSpeed: number = 20;
+    #moveDelayInterpolation: number = 0.01;
     #maxAcceleration: number = 1;
     #currentAcceleration: number = 0;
-    // ==================== 회전 관련 설정 ====================
-    #rotationSpeed: number = 360;
-    #rotationInterpolation: number = 0.001;
+    #rotationSpeed: number = 100;
+    #rotationInterpolation: number = 0.01;
     #mouseSensitivity: number = 0.15;
-    // ==================== 위치 및 회전 상태 ====================
     #desirePosition: [number, number, number] = [0, 0, 0];
     #pan: number = 0;
     #tilt: number = 0;
-    #targetMesh: Mesh;
+    #currentX: number = 0;
+    #currentY: number = 0;
+    #currentZ: number = 0;
+    #currentPan: number = 0;
+    #currentTilt: number = 0;
 
-    // ==================== 내부 계산용 속성 (인스턴스 안전성 확보) ====================
-    #tMTX0 = mat4.create();
-    #displacementMTX = mat4.create();
+    #tempMatrix = mat4.create();
+    #displacementMatrix = mat4.create();
     #displacementVec3 = vec3.create();
+    #currentPositionVec3 = vec3.create();
+    #forwardVec3 = vec3.create();
 
     /**
      * [KO] FreeController 인스턴스를 생성합니다.
-     * [EN] Creates an instance of FreeController.
+     * [EN] Creates a FreeController instance.
+     *
+     * ### Example
+     * ```typescript
+     * const controller = new RedGPU.Camera.FreeController(redGPUContext);
+     * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 객체
-     * [EN] RedGPU Context object
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
@@ -95,46 +140,67 @@ class FreeController extends AController {
                 },
                 useKeyboard: true
             });
-        this.#initListener();
     }
 
-    // ==================== 위치(Position) Getter/Setter ====================
-    /** [KO] X축 위치 [EN] X-axis position */
+    /**
+     * [KO] 카메라의 목표 X축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's target X-axis position.
+     *
+     * @returns
+     * [KO] X축 위치 (기본값: `0`)
+     * [EN] X-axis position (default: `0`)
+     */
     get x(): number {
-        return this.#targetMesh.x;
+        return this.#desirePosition[0];
     }
 
     set x(value: number) {
         validateNumber(value);
-        this.#targetMesh.x = value;
         this.#desirePosition[0] = value;
     }
 
-    /** [KO] Y축 위치 [EN] Y-axis position */
+    /**
+     * [KO] 카메라의 목표 Y축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's target Y-axis position.
+     *
+     * @returns
+     * [KO] Y축 위치 (기본값: `0`)
+     * [EN] Y-axis position (default: `0`)
+     */
     get y(): number {
-        return this.#targetMesh.y;
+        return this.#desirePosition[1];
     }
 
     set y(value: number) {
         validateNumber(value);
-        this.#targetMesh.y = value;
         this.#desirePosition[1] = value;
     }
 
-    /** [KO] Z축 위치 [EN] Z-axis position */
+    /**
+     * [KO] 카메라의 목표 Z축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's target Z-axis position.
+     *
+     * @returns
+     * [KO] Z축 위치 (기본값: `0`)
+     * [EN] Z-axis position (default: `0`)
+     */
     get z(): number {
-        return this.#targetMesh.z;
+        return this.#desirePosition[2];
     }
 
     set z(value: number) {
         validateNumber(value);
-        this.#targetMesh.z = value;
         this.#desirePosition[2] = value;
     }
 
-
-    // ==================== 회전(Rotation) Getter/Setter ====================
-    /** [KO] 좌우 회전 각도 (도) [EN] Horizontal rotation angle (Pan) in degrees */
+    /**
+     * [KO] 카메라의 수평 회전(Pan) 목표 각도를 가져오거나 설정합니다. (단위: 도)
+     * [EN] Gets or sets the camera's target horizontal rotation (Pan) angle. (Unit: degrees)
+     *
+     * @returns
+     * [KO] 팬 각도 (기본값: `0`)
+     * [EN] Pan angle (default: `0`)
+     */
     get pan(): number {
         return this.#pan;
     }
@@ -144,7 +210,14 @@ class FreeController extends AController {
         this.#pan = value;
     }
 
-    /** [KO] 상하 회전 각도 (도) [EN] Vertical rotation angle (Tilt) in degrees */
+    /**
+     * [KO] 카메라의 수직 회전(Tilt) 목표 각도를 가져오거나 설정합니다. (단위: 도, 범위: `-89.9` ~ `89.9`)
+     * [EN] Gets or sets the camera's target vertical rotation (Tilt) angle. (Unit: degrees, Range: `-89.9` ~ `89.9`)
+     *
+     * @returns
+     * [KO] 틸트 각도 (기본값: `0`)
+     * [EN] Tilt angle (default: `0`)
+     */
     get tilt(): number {
         return this.#tilt;
     }
@@ -154,7 +227,14 @@ class FreeController extends AController {
         this.#tilt = Math.max(-89.9, Math.min(89.9, value));
     }
 
-    /** [KO] 마우스 감도 [EN] Mouse rotation sensitivity */
+    /**
+     * [KO] 마우스 드래그 회전 감도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the mouse drag rotation sensitivity. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 마우스 회전 감도 (기본값: `0.15`)
+     * [EN] Mouse rotation sensitivity (default: `0.15`)
+     */
     get mouseSensitivity(): number {
         return this.#mouseSensitivity;
     }
@@ -164,8 +244,14 @@ class FreeController extends AController {
         this.#mouseSensitivity = value;
     }
 
-    // ==================== 이동 속도 및 보간 설정 ====================
-    /** [KO] 이동 속도 [EN] Movement speed */
+    /**
+     * [KO] 키보드 이동 속도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the keyboard movement speed. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 이동 속도 (기본값: `20`)
+     * [EN] Movement speed (default: `20`)
+     */
     get moveSpeed(): number {
         return this.#moveSpeed;
     }
@@ -175,7 +261,14 @@ class FreeController extends AController {
         this.#moveSpeed = value;
     }
 
-    /** [KO] 이동 보간 계수 [EN] Movement interpolation factor */
+    /**
+     * [KO] 이동 위치 변화의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.0001` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for movement position changes. (`0.0001` ~ `1`)
+     *
+     * @returns
+     * [KO] 이동 보간 계수 (기본값: `0.01`)
+     * [EN] Movement interpolation factor (default: `0.01`)
+     */
     get moveSpeedInterpolation(): number {
         return this.#moveDelayInterpolation;
     }
@@ -185,7 +278,14 @@ class FreeController extends AController {
         this.#moveDelayInterpolation = value;
     }
 
-    /** [KO] 회전 속도 [EN] Rotation speed */
+    /**
+     * [KO] 키보드 회전 속도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the keyboard rotation speed. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 회전 속도 (기본값: `100`)
+     * [EN] Rotation speed (default: `100`)
+     */
     get rotationSpeed(): number {
         return this.#rotationSpeed;
     }
@@ -195,7 +295,14 @@ class FreeController extends AController {
         this.#rotationSpeed = value;
     }
 
-    /** [KO] 회전 보간 계수 [EN] Rotation interpolation factor */
+    /**
+     * [KO] 회전 변화의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.0001` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for rotation changes. (`0.0001` ~ `1`)
+     *
+     * @returns
+     * [KO] 회전 보간 계수 (기본값: `0.01`)
+     * [EN] Rotation interpolation factor (default: `0.01`)
+     */
     get rotationSpeedInterpolation(): number {
         return this.#rotationInterpolation;
     }
@@ -205,7 +312,14 @@ class FreeController extends AController {
         this.#rotationInterpolation = value;
     }
 
-    /** [KO] 최대 가속도 배율 [EN] Maximum acceleration scale */
+    /**
+     * [KO] 최대 이동 가속도 배율을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum movement acceleration scale.
+     *
+     * @returns
+     * [KO] 최대 가속도 배율 (기본값: `1`)
+     * [EN] Maximum acceleration scale (default: `1`)
+     */
     get maxAcceleration(): number {
         return this.#maxAcceleration;
     }
@@ -214,196 +328,270 @@ class FreeController extends AController {
         this.#maxAcceleration = value;
     }
 
-    /** [KO] 키 매핑 설정 객체 [EN] Key mapping configuration object */
+    /**
+     * [KO] 현재 설정된 키보드 키 매핑 객체의 복사본을 반환합니다.
+     * [EN] Returns a copy of the currently configured keyboard key mapping object.
+     *
+     * @returns
+     * [KO] 키 매핑 설정 객체 (`KeyNameMapper`)
+     * [EN] Key mapping configuration object (`KeyNameMapper`)
+     */
     get keyNameMapper(): KeyNameMapper {
         return {...this.#keyNameMapper};
     }
 
-    // ==================== 키 매핑 설정 메서드 ====================
-    /** [KO] 전진 키 설정 [EN] Sets the move forward key */
+    /**
+     * [KO] 전진 이동 키를 설정합니다.
+     * [EN] Sets the move forward key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'w'`)
+     * [EN] Key name to assign (e.g., `'w'`)
+     */
     setMoveForwardKey(value: string) {
         this.#keyNameMapper.moveForward = value;
     }
 
-    /** [KO] 후진 키 설정 [EN] Sets the move backward key */
+    /**
+     * [KO] 후진 이동 키를 설정합니다.
+     * [EN] Sets the move backward key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'s'`)
+     * [EN] Key name to assign (e.g., `'s'`)
+     */
     setMoveBackKey(value: string) {
         this.#keyNameMapper.moveBack = value;
     }
 
-    /** [KO] 좌측 이동 키 설정 [EN] Sets the move left key */
+    /**
+     * [KO] 좌측 이동 키를 설정합니다.
+     * [EN] Sets the move left key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'a'`)
+     * [EN] Key name to assign (e.g., `'a'`)
+     */
     setMoveLeftKey(value: string) {
         this.#keyNameMapper.moveLeft = value;
     }
 
-    /** [KO] 우측 이동 키 설정 [EN] Sets the move right key */
+    /**
+     * [KO] 우측 이동 키를 설정합니다.
+     * [EN] Sets the move right key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'d'`)
+     * [EN] Key name to assign (e.g., `'d'`)
+     */
     setMoveRightKey(value: string) {
         this.#keyNameMapper.moveRight = value;
     }
 
-    /** [KO] 상향 이동 키 설정 [EN] Sets the move up key */
+    /**
+     * [KO] 상향 이동 키를 설정합니다.
+     * [EN] Sets the move up key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'e'`)
+     * [EN] Key name to assign (e.g., `'e'`)
+     */
     setMoveUpKey(value: string) {
         this.#keyNameMapper.moveUp = value;
     }
 
-    /** [KO] 하향 이동 키 설정 [EN] Sets the move down key */
+    /**
+     * [KO] 하향 이동 키를 설정합니다.
+     * [EN] Sets the move down key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'q'`)
+     * [EN] Key name to assign (e.g., `'q'`)
+     */
     setMoveDownKey(value: string) {
         this.#keyNameMapper.moveDown = value;
     }
 
-    /** [KO] 좌회전 키 설정 [EN] Sets the turn left key */
+    /**
+     * [KO] 좌회전 키를 설정합니다.
+     * [EN] Sets the turn left key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'z'`)
+     * [EN] Key name to assign (e.g., `'z'`)
+     */
     setTurnLeftKey(value: string) {
         this.#keyNameMapper.turnLeft = value;
     }
 
-    /** [KO] 우회전 키 설정 [EN] Sets the turn right key */
+    /**
+     * [KO] 우회전 키를 설정합니다.
+     * [EN] Sets the turn right key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'c'`)
+     * [EN] Key name to assign (e.g., `'c'`)
+     */
     setTurnRightKey(value: string) {
         this.#keyNameMapper.turnRight = value;
     }
 
-    /** [KO] 상향 회전 키 설정 [EN] Sets the turn up key */
+    /**
+     * [KO] 상향 회전 키를 설정합니다.
+     * [EN] Sets the turn up key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'r'`)
+     * [EN] Key name to assign (e.g., `'r'`)
+     */
     setTurnUpKey(value: string) {
         this.#keyNameMapper.turnUp = value;
     }
 
-    /** [KO] 하향 회전 키 설정 [EN] Sets the turn down key */
+    /**
+     * [KO] 하향 회전 키를 설정합니다.
+     * [EN] Sets the turn down key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'f'`)
+     * [EN] Key name to assign (e.g., `'f'`)
+     */
     setTurnDownKey(value: string) {
         this.#keyNameMapper.turnDown = value;
     }
 
     /**
-     * [KO] 매 프레임 컨트롤러를 업데이트합니다.
-     * [EN] Updates the controller every frame.
+     * [KO] 매 프레임 자유 시점 카메라의 상태를 갱신합니다.
+     * [EN] Updates the free-view camera state every frame.
      *
-     * @param view - [KO] 3D 뷰 [EN] 3D View
-     * @param time - [KO] 현재 시간 [EN] Current time
+     * @param view -
+     * [KO] 컨트롤러가 연결된 `View3D` 인스턴스
+     * [EN] `View3D` instance connected to the controller
+     * @param time -
+     * [KO] 현재 경과 시간 (ms)
+     * [EN] Current elapsed time (ms)
      */
     update(view: View3D, time: number): void {
-        super.update(view, time, (deltaTime: number) => {
-            this.#updateAnimation(view, deltaTime);
-        });
+        super.update(view, time, this.#updateAnimation);
     }
 
-    #initListener() {
-        this.#targetMesh = new Mesh(this.redGPUContext);
-    }
+    #updateAnimation = (view: View3D, deltaTime: number): void => {
+        const moveDelay = Math.pow(this.#moveDelayInterpolation, deltaTime);
+        const rotationDelay = Math.pow(this.#rotationInterpolation, deltaTime);
 
-    #updateAnimation(view: View3D, deltaTime: number) {
-        const targetMesh = this.#targetMesh;
-        const tDelay = Math.pow(this.#moveDelayInterpolation, deltaTime);
-        const tDelayRotation = Math.pow(this.#rotationInterpolation, deltaTime);
-
-        let panDelta = (this.#pan - targetMesh.rotationY) % 360;
+        let panDelta = (this.#pan - this.#currentPan) % 360;
         if (panDelta > 180) panDelta -= 360;
         if (panDelta < -180) panDelta += 360;
-        targetMesh.rotationY += panDelta * (1 - tDelayRotation);
+        this.#currentPan += panDelta * (1 - rotationDelay);
 
-        const tiltDelta = (this.#tilt - targetMesh.rotationX);
-        targetMesh.rotationX += tiltDelta * (1 - tDelayRotation);
+        const tiltDelta = (this.#tilt - this.#currentTilt);
+        this.#currentTilt += tiltDelta * (1 - rotationDelay);
 
         if (this.#checkKeyboardKeyBuffer(view, deltaTime)) {
-            updateObject3DMatrix(targetMesh, view);
-            mat4.identity(this.#displacementMTX);
-            mat4.rotateY(this.#displacementMTX, this.#displacementMTX, targetMesh.rotationY * PER_PI);
-            mat4.rotateX(this.#displacementMTX, this.#displacementMTX, targetMesh.rotationX * PER_PI);
-            mat4.translate(this.#displacementMTX, this.#displacementMTX, this.#displacementVec3);
+            mat4.identity(this.#displacementMatrix);
+            mat4.rotateY(this.#displacementMatrix, this.#displacementMatrix, this.#currentPan * PER_PI);
+            mat4.rotateX(this.#displacementMatrix, this.#displacementMatrix, this.#currentTilt * PER_PI);
+            mat4.translate(this.#displacementMatrix, this.#displacementMatrix, this.#displacementVec3);
 
-            mat4.identity(this.#tMTX0);
-            mat4.translate(this.#tMTX0, this.#tMTX0, targetMesh.position);
-            mat4.multiply(this.#tMTX0, this.#tMTX0, this.#displacementMTX);
-            this.#desirePosition[0] = this.#tMTX0[12];
-            this.#desirePosition[1] = this.#tMTX0[13];
-            this.#desirePosition[2] = this.#tMTX0[14];
+            mat4.identity(this.#tempMatrix);
+            mat4.translate(this.#tempMatrix, this.#tempMatrix, this.#desirePosition);
+            mat4.multiply(this.#tempMatrix, this.#tempMatrix, this.#displacementMatrix);
+            this.#desirePosition[0] = this.#tempMatrix[12];
+            this.#desirePosition[1] = this.#tempMatrix[13];
+            this.#desirePosition[2] = this.#tempMatrix[14];
         }
 
-        targetMesh.x += (this.#desirePosition[0] - targetMesh.x) * (1 - tDelay);
-        targetMesh.y += (this.#desirePosition[1] - targetMesh.y) * (1 - tDelay);
-        targetMesh.z += (this.#desirePosition[2] - targetMesh.z) * (1 - tDelay);
+        this.#currentX += (this.#desirePosition[0] - this.#currentX) * (1 - moveDelay);
+        this.#currentY += (this.#desirePosition[1] - this.#currentY) * (1 - moveDelay);
+        this.#currentZ += (this.#desirePosition[2] - this.#currentZ) * (1 - moveDelay);
 
-        mat4.identity(this.#tMTX0);
-        mat4.translate(this.#tMTX0, this.#tMTX0, targetMesh.position);
-        mat4.rotateY(this.#tMTX0, this.#tMTX0, targetMesh.rotationY * PER_PI);
-        mat4.rotateX(this.#tMTX0, this.#tMTX0, targetMesh.rotationX * PER_PI);
+        vec3.set(this.#currentPositionVec3, this.#currentX, this.#currentY, this.#currentZ);
+        mat4.identity(this.#tempMatrix);
+        mat4.translate(this.#tempMatrix, this.#tempMatrix, this.#currentPositionVec3);
+        mat4.rotateY(this.#tempMatrix, this.#tempMatrix, this.#currentPan * PER_PI);
+        mat4.rotateX(this.#tempMatrix, this.#tempMatrix, this.#currentTilt * PER_PI);
 
-        this.camera.setPosition(targetMesh.x, targetMesh.y, targetMesh.z);
+        this.camera.setPosition(this.#currentX, this.#currentY, this.#currentZ);
 
-        const forward = vec3.fromValues(0, 0, -10);
-        vec3.transformMat4(forward, forward, this.#tMTX0);
-        this.camera.lookAt(forward[0], forward[1], forward[2]);
-        this.camera.rotationX = targetMesh.rotationX;
-        this.camera.rotationY = targetMesh.rotationY;
-    }
+        vec3.set(this.#forwardVec3, 0, 0, -10);
+        vec3.transformMat4(this.#forwardVec3, this.#forwardVec3, this.#tempMatrix);
+        this.camera.lookAt(this.#forwardVec3[0], this.#forwardVec3[1], this.#forwardVec3[2]);
+        this.camera.rotationX = this.#currentTilt;
+        this.camera.rotationY = this.#currentPan;
+    };
 
     #checkKeyboardKeyBuffer(view: View3D, deltaTime: number): boolean {
         if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
         const {keyboardKeyBuffer} = view.redGPUContext;
-        const tSpeed = this.#moveSpeed * deltaTime;
-        const tSpeedRotation = this.#rotationSpeed * deltaTime;
-        const tKeyNameMapper = this.#keyNameMapper;
-        let move = false;
-        let rotate = false;
+        const moveSpeed = this.#moveSpeed * deltaTime;
+        const rotationSpeed = this.#rotationSpeed * deltaTime;
+        const keyNameMapper = this.#keyNameMapper;
+        let isMoving = false;
+        let isRotating = false;
         let pan = 0;
         let tilt = 0;
         this.#displacementVec3[0] = 0;
         this.#displacementVec3[1] = 0;
         this.#displacementVec3[2] = 0;
 
-        const tempAccelerationValue = this.#currentAcceleration * tSpeed;
+        const tempAccelerationValue = this.#currentAcceleration * moveSpeed;
 
-        if (keyboardKeyBuffer[tKeyNameMapper.turnLeft]) {
-            rotate = true;
-            pan = tSpeedRotation;
+        if (keyboardKeyBuffer[keyNameMapper.turnLeft]) {
+            isRotating = true;
+            pan = rotationSpeed;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnRight]) {
-            rotate = true;
-            pan = -tSpeedRotation;
+        if (keyboardKeyBuffer[keyNameMapper.turnRight]) {
+            isRotating = true;
+            pan = -rotationSpeed;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnUp]) {
-            rotate = true;
-            tilt = tSpeedRotation;
+        if (keyboardKeyBuffer[keyNameMapper.turnUp]) {
+            isRotating = true;
+            tilt = rotationSpeed;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnDown]) {
-            rotate = true;
-            tilt = -tSpeedRotation;
+        if (keyboardKeyBuffer[keyNameMapper.turnDown]) {
+            isRotating = true;
+            tilt = -rotationSpeed;
         }
 
-        if (keyboardKeyBuffer[tKeyNameMapper.moveForward]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveForward]) {
+            isMoving = true;
             this.#displacementVec3[2] = -tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveBack]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveBack]) {
+            isMoving = true;
             this.#displacementVec3[2] = tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveLeft]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveLeft]) {
+            isMoving = true;
             this.#displacementVec3[0] = -tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveRight]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveRight]) {
+            isMoving = true;
             this.#displacementVec3[0] = tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveUp]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveUp]) {
+            isMoving = true;
             this.#displacementVec3[1] = tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveDown]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveDown]) {
+            isMoving = true;
             this.#displacementVec3[1] = -tempAccelerationValue;
         }
 
         const accelerationDelta = 3 * deltaTime;
-        if (rotate || move) {
+        if (isRotating || isMoving) {
             this.#currentAcceleration = Math.min(this.#maxAcceleration, this.#currentAcceleration + accelerationDelta);
         } else {
             this.#currentAcceleration = Math.max(0, this.#currentAcceleration - accelerationDelta);
         }
 
-        if (rotate) {
+        if (isRotating) {
             this.#pan += pan;
             this.#tilt = Math.max(-89.9, Math.min(89.9, this.#tilt + tilt));
         }
-        return move || rotate;
+        return isMoving || isRotating;
     }
 }
 
+Object.freeze(FreeController);
 export default FreeController;

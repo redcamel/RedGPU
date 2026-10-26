@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import OrthographicCamera from "../camera/OrthographicCamera";
@@ -8,42 +7,37 @@ import AController from "../core/AController";
 const PER_PI = Math.PI / 180;
 
 /**
- * [KO] 등각 투영(Isometric) 시점을 제공하는 카메라 컨트롤러입니다.
- * [EN] Camera controller providing an isometric view.
+ * [KO] 직교 투영(OrthographicCamera)을 사용하여 고정된 각도의 등각 투영(쿼터뷰) 시점을 제공하는 카메라 컨트롤러 클래스입니다.
+ * [EN] Camera controller class that provides a fixed-angle isometric (quarter-view) perspective using orthographic projection (`OrthographicCamera`).
  *
- * [KO] 거리감 없는 직교 투영을 사용하여 전략 시뮬레이션이나 타일 기반 게임에서 주로 사용되는 고정된 각도의 쿼터뷰(Quarter View)를 구현합니다.
- * [EN] Implements a fixed-angle quarter view, commonly used in strategy simulations or tile-based games, using orthographic projection without perspective distortion.
- *
- * * ### Example
+ * ### Example
  * ```typescript
- * const controller = new RedGPU.IsometricController(redGPUContext);
+ * const controller = new RedGPU.Camera.IsometricController(redGPUContext);
  * controller.viewHeight = 15;
  * controller.zoom = 1;
  * ```
+ *
  * <iframe src="/RedGPU/examples/3d/controller/isometricController/" style="width:100%; height:500px;"></iframe>
+ * @see [IsometricController example](/RedGPU/examples/3d/controller/isometricController/)
  * @category Controller
  */
 class IsometricController extends AController {
-    // ==================== 카메라 위치 및 각도 ====================
     #cameraAngle: number = 45;
-    // ==================== 줌 관련 ====================
     #currentZoom: number = 1;
     #targetZoom: number = 1;
-    #zoomInterpolation: number = 0.1;
+    #zoomInterpolation: number = 0.02;
     #speedZoom: number = 0.1;
     #minZoom: number = 0.5;
     #maxZoom: number = 3;
-    // ==================== 카메라 뷰 (OrthographicCamera) ====================
     #currentViewHeight: number = 15;
     #targetViewHeight: number = 15;
-    #viewHeightInterpolation: number = 0.1;
-    // ==================== 타겟 추적 ====================
-    #targetMesh: Mesh | null = null;
+    #viewHeightInterpolation: number = 0.02;
+    #currentX: number = 0;
+    #currentZ: number = 0;
     #targetX: number = 0;
     #targetZ: number = 0;
-    // ==================== 이동 관련 ====================
-    #moveSpeed: number = 50;
-    #moveSpeedInterpolation: number = 0.1;
+    #moveSpeed: number = 20;
+    #moveSpeedInterpolation: number = 0.02;
     #keyNameMapper = {
         moveUp: 'w',
         moveDown: 's',
@@ -51,11 +45,17 @@ class IsometricController extends AController {
         moveRight: 'd'
     };
     #mouseMoveSpeed: number = 1;
-    #mouseMoveSpeedInterpolation: number = 0.1;
+    #mouseMoveSpeedInterpolation: number = 0.02;
+    #isMouseMoving: boolean = false;
 
     /**
      * [KO] IsometricController 인스턴스를 생성합니다.
-     * [EN] Creates an instance of IsometricController.
+     * [EN] Creates an IsometricController instance.
+     *
+     * ### Example
+     * ```typescript
+     * const controller = new RedGPU.Camera.IsometricController(redGPUContext);
+     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -69,7 +69,6 @@ class IsometricController extends AController {
                 this.#targetZoom = Math.max(this.#minZoom, Math.min(this.#maxZoom, this.#targetZoom));
             },
             HD_Move: (deltaX: number, deltaY: number) => {
-                if (!this.#targetMesh) return;
                 const angleRad = this.#cameraAngle * PER_PI;
                 const cos = Math.cos(angleRad);
                 const sin = Math.sin(angleRad);
@@ -77,14 +76,15 @@ class IsometricController extends AController {
                 const effectiveHeight = this.#currentViewHeight / this.#currentZoom;
                 const worldPerPixel = effectiveHeight / redGPUContext.boundingClientRect.height;
 
-                const mouseDeltaX = deltaX * worldPerPixel;
-                const mouseDeltaY = deltaY * worldPerPixel;
+                const mouseDeltaX = deltaX * worldPerPixel * this.#mouseMoveSpeed;
+                const mouseDeltaY = deltaY * worldPerPixel * this.#mouseMoveSpeed;
 
                 const worldDeltaX = -(mouseDeltaX * cos) - (mouseDeltaY * sin);
                 const worldDeltaZ = -(mouseDeltaX * (-sin)) - (mouseDeltaY * cos);
 
                 this.#targetX += worldDeltaX;
                 this.#targetZ += worldDeltaZ;
+                this.#isMouseMoving = true;
             },
             HD_TouchPinch: (deltaScale: number) => {
                 this.#targetZoom /= deltaScale;
@@ -92,30 +92,33 @@ class IsometricController extends AController {
             },
             useKeyboard: true
         });
-        this.#targetMesh = new Mesh(redGPUContext);
-        this.#targetMesh.setIgnoreFrustumCullingRecursively(true);
     }
 
     /**
-     * [KO] 줌 레벨을 가져옵니다.
-     * [EN] Gets the zoom level.
-     * @returns [KO] 줌 레벨 [EN] Zoom level
+     * [KO] 목표 줌 배율을 가져오거나 설정합니다. (`minZoom` ~ `maxZoom`)
+     * [EN] Gets or sets the target zoom scale. (`minZoom` ~ `maxZoom`)
+     *
+     * @returns
+     * [KO] 목표 줌 배율 (기본값: `1`)
+     * [EN] Target zoom scale (default: `1`)
      */
     get zoom(): number {
         return this.#targetZoom;
     }
 
-    /**
-     * [KO] 줌 레벨을 설정합니다.
-     * [EN] Sets the zoom level.
-     * @param value - [KO] 줌 레벨 [EN] Zoom level
-     */
     set zoom(value: number) {
         validateNumberRange(value);
         this.#targetZoom = Math.max(this.#minZoom, Math.min(this.#maxZoom, value));
     }
 
-    /** [KO] 줌 보간 계수 [EN] Zoom interpolation factor */
+    /**
+     * [KO] 줌 변화의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.0001` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for zoom changes. (`0.0001` ~ `1`)
+     *
+     * @returns
+     * [KO] 줌 보간 계수 (기본값: `0.02`)
+     * [EN] Zoom interpolation factor (default: `0.02`)
+     */
     get zoomInterpolation(): number {
         return this.#zoomInterpolation;
     }
@@ -125,7 +128,14 @@ class IsometricController extends AController {
         this.#zoomInterpolation = value;
     }
 
-    /** [KO] 줌 속도 [EN] Zoom speed */
+    /**
+     * [KO] 마우스 휠 줌 속도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the mouse wheel zoom speed. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 줌 속도 (기본값: `0.1`)
+     * [EN] Zoom speed (default: `0.1`)
+     */
     get speedZoom(): number {
         return this.#speedZoom;
     }
@@ -135,7 +145,14 @@ class IsometricController extends AController {
         this.#speedZoom = value;
     }
 
-    /** [KO] 최소 줌 [EN] Minimum zoom */
+    /**
+     * [KO] 최소 줌 배율을 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the minimum zoom scale. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 최소 줌 배율 (기본값: `0.5`)
+     * [EN] Minimum zoom scale (default: `0.5`)
+     */
     get minZoom(): number {
         return this.#minZoom;
     }
@@ -146,7 +163,14 @@ class IsometricController extends AController {
         this.zoom = this.#targetZoom;
     }
 
-    /** [KO] 최대 줌 [EN] Maximum zoom */
+    /**
+     * [KO] 최대 줌 배율을 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the maximum zoom scale. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 최대 줌 배율 (기본값: `3`)
+     * [EN] Maximum zoom scale (default: `3`)
+     */
     get maxZoom(): number {
         return this.#maxZoom;
     }
@@ -157,7 +181,14 @@ class IsometricController extends AController {
         this.zoom = this.#targetZoom;
     }
 
-    /** [KO] 뷰 높이 [EN] View height */
+    /**
+     * [KO] 직교 투영 뷰의 기준 높이를 가져오거나 설정합니다. (`0.1` 이상)
+     * [EN] Gets or sets the base height of the orthographic projection view. (`0.1` or greater)
+     *
+     * @returns
+     * [KO] 뷰 높이 (기본값: `15`)
+     * [EN] View height (default: `15`)
+     */
     get viewHeight(): number {
         return this.#targetViewHeight;
     }
@@ -167,7 +198,14 @@ class IsometricController extends AController {
         this.#targetViewHeight = value;
     }
 
-    /** [KO] 뷰 높이 보간 계수 [EN] View height interpolation factor */
+    /**
+     * [KO] 뷰 높이 변화의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.0001` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for view height changes. (`0.0001` ~ `1`)
+     *
+     * @returns
+     * [KO] 뷰 높이 보간 계수 (기본값: `0.02`)
+     * [EN] View height interpolation factor (default: `0.02`)
+     */
     get viewHeightInterpolation(): number {
         return this.#viewHeightInterpolation;
     }
@@ -177,7 +215,14 @@ class IsometricController extends AController {
         this.#viewHeightInterpolation = value;
     }
 
-    /** [KO] 이동 속도 [EN] Movement speed */
+    /**
+     * [KO] 키보드 이동 속도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the keyboard movement speed. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 이동 속도 (기본값: `20`)
+     * [EN] Movement speed (default: `20`)
+     */
     get moveSpeed(): number {
         return this.#moveSpeed;
     }
@@ -187,7 +232,14 @@ class IsometricController extends AController {
         this.#moveSpeed = value;
     }
 
-    /** [KO] 이동 보간 계수 [EN] Movement interpolation factor */
+    /**
+     * [KO] 위치 이동의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.0001` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for position movement. (`0.0001` ~ `1`)
+     *
+     * @returns
+     * [KO] 이동 보간 계수 (기본값: `0.02`)
+     * [EN] Movement interpolation factor (default: `0.02`)
+     */
     get moveSpeedInterpolation(): number {
         return this.#moveSpeedInterpolation;
     }
@@ -197,7 +249,14 @@ class IsometricController extends AController {
         this.#moveSpeedInterpolation = value;
     }
 
-    /** [KO] 마우스 이동 속도 [EN] Mouse movement speed */
+    /**
+     * [KO] 마우스 이동 속도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the mouse movement speed. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 마우스 이동 속도 (기본값: `1`)
+     * [EN] Mouse movement speed (default: `1`)
+     */
     get mouseMoveSpeed(): number {
         return this.#mouseMoveSpeed;
     }
@@ -207,7 +266,14 @@ class IsometricController extends AController {
         this.#mouseMoveSpeed = value;
     }
 
-    /** [KO] 마우스 이동 보간 계수 [EN] Mouse movement interpolation factor */
+    /**
+     * [KO] 마우스 이동의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.0001` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for mouse movement. (`0.0001` ~ `1`)
+     *
+     * @returns
+     * [KO] 마우스 이동 보간 계수 (기본값: `0.02`)
+     * [EN] Mouse movement interpolation factor (default: `0.02`)
+     */
     get mouseMoveSpeedInterpolation(): number {
         return this.#mouseMoveSpeedInterpolation;
     }
@@ -217,79 +283,128 @@ class IsometricController extends AController {
         this.#mouseMoveSpeedInterpolation = value;
     }
 
-    /** [KO] 키 매핑 설정 [EN] Key mapping configuration */
+    /**
+     * [KO] 현재 설정된 키보드 키 매핑 객체의 복사본을 반환합니다.
+     * [EN] Returns a copy of the currently configured keyboard key mapping object.
+     *
+     * @returns
+     * [KO] 키 매핑 설정 객체
+     * [EN] Key mapping configuration object
+     */
     get keyNameMapper() {
         return {...this.#keyNameMapper};
     }
 
-    /** [KO] 타겟 X 위치 [EN] Target X position */
+    /**
+     * [KO] 카메라가 바라보는 기준점의 현재 X축 좌표를 반환합니다.
+     * [EN] Returns the current X-axis coordinate of the target point the camera looks at.
+     *
+     * @returns
+     * [KO] 타겟 X축 좌표
+     * [EN] Target X-axis coordinate
+     */
     get targetX(): number {
-        return this.#targetMesh.x;
+        return this.#currentX;
     }
 
-    /** [KO] 타겟 Y 위치 [EN] Target Y position */
+    /**
+     * [KO] 카메라가 바라보는 기준점의 현재 Y축 좌표를 반환합니다. (항상 `0`)
+     * [EN] Returns the current Y-axis coordinate of the target point the camera looks at. (Always `0`)
+     *
+     * @returns
+     * [KO] 타겟 Y축 좌표 (`0`)
+     * [EN] Target Y-axis coordinate (`0`)
+     */
     get targetY(): number {
-        return this.#targetMesh.y;
+        return 0;
     }
 
-    /** [KO] 타겟 Z 위치 [EN] Target Z position */
+    /**
+     * [KO] 카메라가 바라보는 기준점의 현재 Z축 좌표를 반환합니다.
+     * [EN] Returns the current Z-axis coordinate of the target point the camera looks at.
+     *
+     * @returns
+     * [KO] 타겟 Z축 좌표
+     * [EN] Target Z-axis coordinate
+     */
     get targetZ(): number {
-        return this.#targetMesh.z;
+        return this.#currentZ;
     }
 
-    /** [KO] 상향 이동 키 설정 [EN] Sets the move up key */
+    /**
+     * [KO] 상향 이동 키를 설정합니다.
+     * [EN] Sets the move up key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'w'`)
+     * [EN] Key name to assign (e.g., `'w'`)
+     */
     setMoveUpKey(value: string) {
         this.#keyNameMapper.moveUp = value;
     }
 
-    /** [KO] 하향 이동 키 설정 [EN] Sets the move down key */
+    /**
+     * [KO] 하향 이동 키를 설정합니다.
+     * [EN] Sets the move down key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'s'`)
+     * [EN] Key name to assign (e.g., `'s'`)
+     */
     setMoveDownKey(value: string) {
         this.#keyNameMapper.moveDown = value;
     }
 
-    /** [KO] 좌측 이동 키 설정 [EN] Sets the move left key */
+    /**
+     * [KO] 좌측 이동 키를 설정합니다.
+     * [EN] Sets the move left key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'a'`)
+     * [EN] Key name to assign (e.g., `'a'`)
+     */
     setMoveLeftKey(value: string) {
         this.#keyNameMapper.moveLeft = value;
     }
 
-    /** [KO] 우측 이동 키 설정 [EN] Sets the move right key */
+    /**
+     * [KO] 우측 이동 키를 설정합니다.
+     * [EN] Sets the move right key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'d'`)
+     * [EN] Key name to assign (e.g., `'d'`)
+     */
     setMoveRightKey(value: string) {
         this.#keyNameMapper.moveRight = value;
     }
 
     /**
-     * [KO] 매 프레임마다 카메라를 업데이트합니다.
-     * [EN] Updates the camera every frame.
-     * @param view - [KO] 3D 뷰 [EN] 3D view
-     * @param time - [KO] 현재 시간 [EN] Current time
+     * [KO] 매 프레임 등각 투영 카메라의 상태를 갱신합니다.
+     * [EN] Updates the isometric camera state every frame.
+     *
+     * @param view -
+     * [KO] 컨트롤러가 연결된 `View3D` 인스턴스
+     * [EN] `View3D` instance connected to the controller
+     * @param time -
+     * [KO] 현재 경과 시간 (ms)
+     * [EN] Current elapsed time (ms)
      */
     update(view: View3D, time: number): void {
-        super.update(view, time, (deltaTime) => {
-            this.#updateAnimation(view, deltaTime);
-        });
+        super.update(view, time, this.#updateAnimation);
     }
 
-    /**
-     * [KO] 카메라 애니메이션을 업데이트합니다.
-     * [EN] Updates camera animation.
-     * @param view - [KO] 3D 뷰 객체 [EN] 3D View object
-     * @param deltaTime - [KO] 경과 시간 [EN] Delta time
-     * @internal
-     */
-    #updateAnimation(view: View3D, deltaTime: number): void {
+    #updateAnimation = (view: View3D, deltaTime: number): void => {
         this.#handleKeyboardInput(view, deltaTime);
 
-        // 지수적 감쇄 보간
         this.#currentZoom = this.#targetZoom + (this.#currentZoom - this.#targetZoom) * Math.pow(this.#zoomInterpolation, deltaTime);
         this.#currentViewHeight = this.#targetViewHeight + (this.#currentViewHeight - this.#targetViewHeight) * Math.pow(this.#viewHeightInterpolation, deltaTime);
 
-        if (!this.#targetMesh) return;
+        const moveInterpolation = this.#isMouseMoving ? this.#mouseMoveSpeedInterpolation : this.#moveSpeedInterpolation;
+        const positionSmoothing = Math.pow(moveInterpolation, deltaTime);
+        this.#currentX = this.#targetX + (this.#currentX - this.#targetX) * positionSmoothing;
+        this.#currentZ = this.#targetZ + (this.#currentZ - this.#targetZ) * positionSmoothing;
 
-        const posSmoothing = Math.pow(this.#moveSpeedInterpolation, deltaTime);
-        this.#targetMesh.x = this.#targetX + (this.#targetMesh.x - this.#targetX) * posSmoothing;
-        this.#targetMesh.z = this.#targetZ + (this.#targetMesh.z - this.#targetZ) * posSmoothing;
-
-        const targetPos = this.#targetMesh.position;
         const angleRad = this.#cameraAngle * PER_PI;
 
         const {width, height} = view.pixelRectObject;
@@ -304,38 +419,32 @@ class IsometricController extends AController {
         const cameraDistance = (baseDistance * scaleFactor) / this.#currentZoom;
         const cameraHeight = (baseHeight * scaleFactor) / this.#currentZoom;
 
-        const cameraX = targetPos[0] + Math.cos(angleRad) * cameraDistance;
-        const cameraY = targetPos[1] + cameraHeight;
-        const cameraZ = targetPos[2] + Math.sin(angleRad) * cameraDistance;
+        const cameraX = this.#currentX + Math.cos(angleRad) * cameraDistance;
+        const cameraY = cameraHeight;
+        const cameraZ = this.#currentZ + Math.sin(angleRad) * cameraDistance;
 
         this.camera.setPosition(cameraX, cameraY, cameraZ);
-        this.camera.lookAt(targetPos[0], targetPos[1], targetPos[2]);
+        this.camera.lookAt(this.#currentX, 0, this.#currentZ);
 
         const orthoCamera = this.camera as OrthographicCamera;
         orthoCamera.left = -effectiveWidth / 2;
         orthoCamera.right = effectiveWidth / 2;
         orthoCamera.top = effectiveHeight / 2;
         orthoCamera.bottom = -effectiveHeight / 2;
-    }
+    };
 
-    /**
-     * [KO] 키보드 입력을 처리합니다.
-     * [EN] Handles keyboard input.
-     * @private
-     */
     #handleKeyboardInput(view: View3D, deltaTime: number): boolean {
         if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
-        if (!this.#targetMesh) return false;
 
         const {keyboardKeyBuffer} = view.redGPUContext;
-        const tKeyNameMapper = this.#keyNameMapper;
+        const keyNameMapper = this.#keyNameMapper;
         const speed = this.#moveSpeed * deltaTime;
 
         let inputUp = 0, inputDown = 0, inputLeft = 0, inputRight = 0;
-        if (keyboardKeyBuffer[tKeyNameMapper.moveUp]) inputUp = speed;
-        if (keyboardKeyBuffer[tKeyNameMapper.moveDown]) inputDown = speed;
-        if (keyboardKeyBuffer[tKeyNameMapper.moveLeft]) inputLeft = speed;
-        if (keyboardKeyBuffer[tKeyNameMapper.moveRight]) inputRight = speed;
+        if (keyboardKeyBuffer[keyNameMapper.moveUp]) inputUp = speed;
+        if (keyboardKeyBuffer[keyNameMapper.moveDown]) inputDown = speed;
+        if (keyboardKeyBuffer[keyNameMapper.moveLeft]) inputLeft = speed;
+        if (keyboardKeyBuffer[keyNameMapper.moveRight]) inputRight = speed;
 
         const angleRad = this.#cameraAngle * PER_PI;
         const cos = Math.cos(angleRad);
@@ -346,9 +455,10 @@ class IsometricController extends AController {
 
         this.#targetX += worldDeltaX;
         this.#targetZ += worldDeltaZ;
+        this.#isMouseMoving = false;
         return true;
     }
 }
 
-Object.freeze(IsometricController)
+Object.freeze(IsometricController);
 export default IsometricController;

@@ -10,13 +10,15 @@ import TextFieldMaterial from "./textFieldMaterial/TextFieldMaterial";
 const TEXT_CONTAINER_STYLE = ';box-sizing:content-box;white-space:nowrap;'
 
 /**
- * [KO] 텍스트 필드의 스타일링 속성을 정의하는 인터페이스
- * [EN] Interface defining the styling properties of a text field
+ * [KO] 텍스트 필드의 CSS 스타일링 속성을 정의하는 인터페이스입니다.
+ * [EN] Interface defining CSS styling properties of a text field.
+ *
+ * @category Core
  */
 interface ATextField {
     /**
-     * [KO] 글자 크기 (픽셀 단위 또는 CSS 단위)
-     * [EN] Font size (in pixels or CSS units)
+     * [KO] 글자 크기 (픽셀 단위)
+     * [EN] Font size (in pixels)
      */
     fontSize: number;
     /**
@@ -25,13 +27,13 @@ interface ATextField {
      */
     fontFamily: string;
     /**
-     * [KO] 글자 굵기 (예: 'bold', 'normal', '100'~'900')
-     * [EN] Font weight (e.g., 'bold', 'normal', '100'~'900')
+     * [KO] 글자 굵기 (예: `'normal'`, `'bold'`, `'100'`~`'900'`)
+     * [EN] Font weight (e.g., `'normal'`, `'bold'`, `'100'`~`'900'`)
      */
     fontWeight: string;
     /**
-     * [KO] 글자 스타일 (예: 'italic', 'normal')
-     * [EN] Font style (e.g., 'italic', 'normal')
+     * [KO] 글자 스타일 (예: `'normal'`, `'italic'`)
+     * [EN] Font style (e.g., `'normal'`, `'italic'`)
      */
     fontStyle: string;
     /**
@@ -40,63 +42,63 @@ interface ATextField {
      */
     color: string;
     /**
-     * [KO] 배경 스타일 (CSS background 값)
-     * [EN] Background style (CSS background value)
+     * [KO] 배경 스타일 (CSS `background` 값)
+     * [EN] Background style (CSS `background` value)
      */
     background: string;
     /**
-     * [KO] 패딩 크기 (픽셀 단위)
+     * [KO] 내부 여백 크기 (픽셀 단위)
      * [EN] Padding size (in pixels)
      */
     padding: number;
     /**
-     * [KO] 자간 설정 (픽셀 단위)
+     * [KO] 자간 크기 (픽셀 단위)
      * [EN] Letter spacing (in pixels)
      */
     letterSpacing: number;
     /**
-     * [KO] 줄바꿈 방식 (예: 'break-all', 'keep-all')
-     * [EN] Word break style (e.g., 'break-all', 'keep-all')
+     * [KO] 줄바꿈 기준 (예: `'keep-all'`, `'break-all'`)
+     * [EN] Word break behavior (e.g., `'keep-all'`, `'break-all'`)
      */
     wordBreak: string;
     /**
-     * [KO] 수직 정렬 방식 (예: 'middle', 'top', 'bottom')
-     * [EN] Vertical alignment (e.g., 'middle', 'top', 'bottom')
+     * [KO] 수직 정렬 방식 (예: `'middle'`, `'top'`, `'bottom'`)
+     * [EN] Vertical alignment (e.g., `'middle'`, `'top'`, `'bottom'`)
      */
     verticalAlign: string;
     /**
-     * [KO] 텍스트 정렬 방식 (예: 'center', 'left', 'right')
-     * [EN] Text alignment (e.g., 'center', 'left', 'right')
+     * [KO] 수평 텍스트 정렬 방식 (예: `'center'`, `'left'`, `'right'`)
+     * [EN] Horizontal text alignment (e.g., `'center'`, `'left'`, `'right'`)
      */
     textAlign: string;
     /**
-     * [KO] 줄 높이 배수 또는 크기
-     * [EN] Line height multiplier or size
+     * [KO] 줄 높이 배수
+     * [EN] Line height multiplier
      */
     lineHeight: number;
     /**
-     * [KO] 테두리 설정 (CSS border 값)
-     * [EN] Border setting (CSS border value)
+     * [KO] 테두리 스타일 (CSS `border` 값)
+     * [EN] Border style (CSS `border` value)
      */
     border: string;
     /**
-     * [KO] 테두리 둥글기 크기 (픽셀 단위 또는 CSS 값)
+     * [KO] 테두리 모서리 반경 (픽셀 단위 또는 CSS 값)
      * [EN] Border radius (in pixels or CSS value)
      */
     borderRadius: number | string;
     /**
-     * [KO] 그림자 설정 (CSS box-shadow 값)
-     * [EN] Box shadow setting (CSS box-shadow value)
+     * [KO] 박스 그림자 스타일 (CSS `box-shadow` 값)
+     * [EN] Box shadow style (CSS `box-shadow` value)
      */
     boxShadow: string;
     /**
-     * [KO] 박스 크기 기준 설정 (예: 'border-box', 'content-box')
-     * [EN] Box sizing method (e.g., 'border-box', 'content-box')
+     * [KO] 박스 크기 산정 기준 (예: `'border-box'`, `'content-box'`)
+     * [EN] Box sizing model (e.g., `'border-box'`, `'content-box'`)
      */
     boxSizing: string;
     /**
-     * [KO] 필터 효과 (CSS filter 값)
-     * [EN] Filter effect (CSS filter value)
+     * [KO] 그래픽 필터 효과 (CSS `filter` 값)
+     * [EN] Graphical filter effect (CSS `filter` value)
      */
     filter: string;
 }
@@ -124,11 +126,8 @@ const isValidNumber = (value: any) => typeof value == 'number';
 const isPixelNeeded = (key: string) => !['lineHeight', 'fontWeight'].includes(key);
 
 /**
- * [KO] 텍스트 필드 객체의 추상 베이스 클래스입니다.
- * [EN] Abstract base class for text field objects.
- *
- * [KO] HTML/SVG를 이용하여 텍스트를 비트맵 텍스처로 변환하고, 이를 메시의 디퓨즈 텍스처로 사용하는 공통 로직을 포함합니다.
- * [EN] Includes common logic for converting text to bitmap textures using HTML/SVG and using them as diffuse textures for meshes.
+ * [KO] HTML/SVG를 이용해 텍스트를 비트맵 텍스처로 변환하고 렌더링하는 텍스트 필드 추상 클래스입니다.
+ * [EN] Abstract text field class that converts text into a bitmap texture using HTML/SVG and renders it.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -140,7 +139,6 @@ const isPixelNeeded = (key: string) => !['lineHeight', 'fontWeight'].includes(ke
  * @see [TextField3D Basic Example](/RedGPU/examples/3d/textField/textField3D/)
  * @see [TextField3D Compare (World vs Pixel)](/RedGPU/examples/3d/textField/textField3DCompare/)
  * @see [TextField3D MouseEvent Example](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
- *
  * @category Core
  */
 class ATextField extends Mesh {
@@ -154,23 +152,24 @@ class ATextField extends Mesh {
     #mode3dYn: boolean = true;
     #redGPUContext: RedGPUContext
     #currentRequestAnimationFrame: number;
-    #needsUpdate: boolean = false; // 업데이트 플래그
+    #needsUpdate: boolean = false;
+    #updateVersion: number = 0;
     #renderWidth: number = 1
     #renderHeight: number = 1
 
     /**
-     * [KO] ATextField 인스턴스를 생성합니다.
-     * [EN] Creates a new ATextField instance.
+     * [KO] ATextField 인스턴스를 초기화합니다.
+     * [EN] Initializes an ATextField instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 렌더링 컨텍스트
-     * [EN] RedGPU rendering context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param imgOnload -
-     * [KO] 이미지 생성 완료 후 가로/세로 해상도 동기화를 위한 콜백 함수
-     * [EN] Callback function for syncing width/height resolution after image creation is complete
+     * [KO] 텍스트 텍스처 생성 완료 후 가로/세로 크기 동기화 콜백 함수
+     * [EN] Callback function to synchronize width and height after text texture creation
      * @param mode3dYn -
-     * [KO] 3D 공간용 텍스처(선형 필터 적용)로 생성할지 여부
-     * [EN] Whether to generate as a texture for 3D space (linear filter applied)
+     * [KO] 3D 모드 여부 (`true`일 경우 선형 필터링 적용, 기본값: `true`)
+     * [EN] Whether in 3D mode (applies linear filtering if `true`, default: `true`)
      */
     constructor(redGPUContext: RedGPUContext, imgOnload: Function, mode3dYn: boolean = true) {
         super(redGPUContext);
@@ -193,9 +192,7 @@ class ATextField extends Mesh {
             })
         }
         this.depthStencilState.depthWriteEnabled = false
-        //
         this.#createCanvasAndContext();
-        //
         this.#setHtmlElement()
         this.#setSvgElement()
         this.#setImgElement()
@@ -203,20 +200,17 @@ class ATextField extends Mesh {
     }
 
     /**
-     * [KO] 표시할 텍스트를 반환합니다.
-     * [EN] Returns the text to display.
+     * [KO] 표시할 텍스트 문자열을 반환하거나 설정합니다. `<br/>` 태그를 줄바꿈으로 처리합니다.
+     * [EN] Returns or sets the text string to display. Processes `<br/>` tags as line breaks.
+     *
+     * @returns
+     * [KO] 현재 설정된 텍스트 문자열
+     * [EN] Currently set text string
      */
     get text() {
         return this.#text;
     }
 
-    /**
-     * [KO] 표시할 텍스트를 설정합니다. 줄바꿈(`\n` 또는 `<br/>`)을 인식하여 처리합니다.
-     * [EN] Sets the text to display. Recognizes and handles line breaks (`\n` or `<br/>`).
-     * @param text -
-     * [KO] 표시할 텍스트 문자열
-     * [EN] Text string to display
-     */
     set text(text: string) {
         if (this.#text === text) return
         this.#text = text
@@ -225,27 +219,27 @@ class ATextField extends Mesh {
         const processedText = this.#processText(text)
         this.#htmlElement.innerHTML = processedText;
         htmlContainer.innerHTML = processedText;
-        this.#needsUpdate = true
+        this.#needsUpdate = true;
+        this.#updateVersion++;
     }
 
     /**
-     * [KO] 매 프레임마다 텍스트 필드를 렌더링하고, 필요 시 비트맵 텍스처를 갱신합니다.
-     * [EN] Renders the text field every frame, updating the bitmap texture if needed.
+     * [KO] 텍스트 텍스처 상태를 갱신하고 텍스트 필드를 렌더링합니다.
+     * [EN] Updates the text texture state and renders the text field.
+     *
      * @param renderViewStateData -
-     * [KO] 현재 렌더링 상태 데이터
-     * [EN] Current render view state data
+     * [KO] 뷰 렌더링 상태 데이터
+     * [EN] View rendering state data
      */
     render(renderViewStateData: RenderViewStateData) {
-        // if (this.#renderWidth && this.#renderHeight) {
         this.#textureImgOnload(this.#renderWidth, this.#renderHeight)
-        // }
         this.#updateTexture()
         super.render(renderViewStateData);
     }
 
     /**
-     * [KO] ATextField 인스턴스를 파괴하고 사용 중인 DOM 엘리먼트와 Object URL 등의 리소스를 해제합니다.
-     * [EN] Destroys the ATextField instance and releases resources such as the DOM elements and Object URLs in use.
+     * [KO] 텍스트 필드 인스턴스를 파기하고 내부 DOM 엘리먼트, 텍스처 및 Object URL 리소스를 해제합니다.
+     * [EN] Destroys the text field instance and releases internal DOM elements, textures, and Object URL resources.
      */
     destroy() {
         if (this.#currentRequestAnimationFrame) {
@@ -286,14 +280,10 @@ class ATextField extends Mesh {
     }
 
     #getRenderHtmlSize() {
-        // 요소의 현재 크기 가져오기
         const rect = this.#htmlElement.getBoundingClientRect();
-        // 확장 영역 초기화
         let extraLeft = 3, extraRight = 3, extraTop = 3, extraBottom = 3;
-        // Box-Shadow와 패딩을 고려한 전체 크기
-        const renderedWidth = rect.width + extraLeft + extraRight; // 좌우 확장값 합산
-        const renderedHeight = rect.height + extraTop + extraBottom; // 상하 확장값 합산
-        // 디버깅용 로그 (패딩 및 최종 크기 확인)
+        const renderedWidth = rect.width + extraLeft + extraRight;
+        const renderedHeight = rect.height + extraTop + extraBottom;
         console.log("Calculated Render Size (Fully Including Box-Shadow):", {
             rectWidth: rect.width,
             rectHeight: rect.height,
@@ -304,7 +294,6 @@ class ATextField extends Mesh {
             extraTop,
             extraBottom,
         });
-        // 최종 값 반환
         return {
             width: Math.ceil(renderedWidth) & ~1,
             height: Math.ceil(renderedHeight) & ~1,
@@ -315,36 +304,32 @@ class ATextField extends Mesh {
         };
     }
 
-    #setSvgToImg() {
-        // SVG 업데이트 작업
+    #setSvgToImg(requestVersion: number) {
         const svg = this.#svg;
         const foreignObject = svg.querySelector('foreignObject');
-        // 크기 및 Box-Shadow 확장값 계산
         const {width, height, extraTop, extraRight, extraBottom, extraLeft} = this.#getRenderHtmlSize();
-        // ForeignObject 크기 설정
         foreignObject.setAttribute('width', width.toString());
         foreignObject.setAttribute('height', height.toString());
-        // Box-Shadow 확장을 포함한 패딩 설정
         foreignObject.style.padding = `${extraTop}px ${extraRight}px ${extraBottom}px ${extraLeft}px`;
-        // SVG 크기 설정
         svg.setAttribute('width', width.toString());
         svg.setAttribute('height', height.toString());
-        // 데이터를 이미지로 변환
         this.#textureImg.src =
             "data:image/svg+xml;charset=utf-8," +
             encodeURIComponent(svg.outerHTML);
-        // 디버깅 정보 출력
-        console.log("Final SVG and ForeignObject Sizes:", {
-            svgWidth: svg.getAttribute('width'),
-            svgHeight: svg.getAttribute('height'),
-            padding: foreignObject.style.padding,
-        });
+
+        (this.#textureImg as any)._requestVersion = requestVersion;
     }
 
     #setImgElement() {
         this.#textureImg = new Image();
         this.#textureImg.style.cssText = 'position:absolute;bottom:0px;left:0;'
         this.#textureImg.onload = _ => {
+            const requestVersion = (this.#textureImg as any)._requestVersion;
+            if (requestVersion !== this.#updateVersion) {
+                if (this.#needsUpdate) this.#updateTexture();
+                return;
+            }
+
             let tW: number, tH: number;
             const {width, height} = this.#getRenderHtmlSize();
             const multiple = window.devicePixelRatio === 1 ? 2 : window.devicePixelRatio;
@@ -353,10 +338,8 @@ class ATextField extends Mesh {
             this.#textureImg.width = width;
             this.#textureImg.height = height;
 
-            // 렌더링 크기 설정
             this.#textureCvs.width = tW;
             this.#textureCvs.height = tH;
-            // 스타일 크기 동기화
             if (!(this.#textureCvs instanceof OffscreenCanvas)) {
                 this.#textureCvs.style.width = `${width}px`;
                 this.#textureCvs.style.height = `${height}px`;
@@ -364,13 +347,15 @@ class ATextField extends Mesh {
             this.#textureCtx.imageSmoothingEnabled = true;
             this.#textureCtx.imageSmoothingQuality = 'high';
             this.#textureCtx.clearRect(0, 0, tW, tH);
-            this.#textureCtx.fillStyle = 'rgba(0, 0, 0, 0)'; // 투명 배경으로 초기화
+            this.#textureCtx.fillStyle = 'rgba(0, 0, 0, 0)';
             this.#textureCtx.fillRect(0, 0, tW, tH);
-            // 이미지 캔버스에 그리기
             this.#textureCtx.drawImage(this.#textureImg, 0, 0, tW, tH);
             this.dirtyTransform = true;
-            // Blob으로 변환하여 처리
             const callback = (blob: Blob | MediaSource) => {
+                if (requestVersion !== this.#updateVersion) {
+                    if (this.#needsUpdate) this.#updateTexture();
+                    return;
+                }
                 if (this.material.diffuseTexture) {
                     const prevSrc = this.material.diffuseTexture.src
                     const isObjectURL = typeof prevSrc === 'string' && prevSrc?.startsWith?.('blob:');
@@ -381,8 +366,15 @@ class ATextField extends Mesh {
                     }
                 }
                 this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, () => {
-                    this.#renderWidth = width
-                    this.#renderHeight = height
+                    if (requestVersion !== this.#updateVersion) {
+                        if (this.#needsUpdate) this.#updateTexture();
+                        return;
+                    }
+                    this.#renderWidth = width;
+                    this.#renderHeight = height;
+                    if (this.#needsUpdate) {
+                        this.#updateTexture();
+                    }
                 }, null, null, true);
             };
             if (this.#textureCvs instanceof OffscreenCanvas) {
@@ -395,12 +387,13 @@ class ATextField extends Mesh {
 
     #updateTexture() {
         if (this.#needsUpdate) {
-            if (this.#currentRequestAnimationFrame) cancelAnimationFrame(this.#currentRequestAnimationFrame)
+            this.#needsUpdate = false;
+            const currentVersion = this.#updateVersion;
+            if (this.#currentRequestAnimationFrame) cancelAnimationFrame(this.#currentRequestAnimationFrame);
             this.#currentRequestAnimationFrame = requestAnimationFrame(() => {
-                this.#setSvgToImg();
-            })
+                this.#setSvgToImg(currentVersion);
+            });
         }
-        this.#needsUpdate = false
     }
 
     #setStyle = (key: string, baseValue: number | string) => {
@@ -414,28 +407,26 @@ class ATextField extends Mesh {
                 return this[internalKey];
             },
             set: (value: number | string) => {
-                // 값이 실제로 변경되었는지 확인
                 const oldValue = this[internalKey];
                 this[internalKey] = value;
-                // 픽셀 단위 처리
                 const processedValue = (isValidNumber(value) && isPixelNeeded(key))
                     ? `${value}px`
                     : value;
                 tStyle[key] = processedValue;
                 tStyle2[key] = processedValue;
-                // 값이 변경된 경우에만 텍스처 업데이트
-                if (oldValue !== value) this.#needsUpdate = true
+                if (oldValue !== value) {
+                    this.#needsUpdate = true;
+                    this.#updateVersion++;
+                }
             },
             configurable: true
         });
-        // 초기값 설정 (이때는 업데이트 호출하지 않음)
         this[key] = baseValue;
     };
 
     #setHtmlElement() {
         this.#htmlElement = document.createElement('div')
         this.#htmlElement.style.cssText = TEXT_CONTAINER_STYLE + ';position:absolute;top:200px;left:0;visibility:hidden;text-rendering:optimizeLegibility'
-        // this.#htmlElement.style.cssText = TEXT_CONTAINER_STYLE + ';position:absolute;top:250px;left:0px;'
         document.body.appendChild(this.#htmlElement)
     }
 
@@ -449,7 +440,6 @@ class ATextField extends Mesh {
             <foreignObject  width="100%" height="100%" style="margin:0;padding:0;" overflow="visible">
 			    <div xmlns="http://www.w3.org/1999/xhtml" style="${TEXT_CONTAINER_STYLE}"></div>
 			</foreignObject>`;
-        // document.body.appendChild(this.#svg)
     }
 
     #setBasicStyle() {

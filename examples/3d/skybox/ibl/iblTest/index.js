@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] IBL Test 예제
@@ -9,8 +9,6 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=17842
  * [EN] Tests Image-Based Lighting (IBL) effects using HDR images across various complex models.
  */
 
-// [KO] 로드할 모델 리스트 정의
-// [EN] List of models to load
 const MODEL_LIST = [
     {
         url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf'
@@ -47,28 +45,19 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. [KO] 카메라 컨트롤러 설정
-        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.tilt = 0;
-
-        // 2. [KO] 씬 및 뷰 구성
-        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // 3. [KO] 렌더러 생성 및 루프 시작
-        // [EN] Create Renderer and Start Loop
-        const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
-
-        // 4. [KO] 정의된 모델 리스트 로드 시작
-        // [EN] Start loading defined model list
+        // [KO] PBR 재질 특성 확인을 위한 다중 glTF 모델 로드
+        // [EN] Load multiple glTF models to verify PBR material characteristics under IBL
         MODEL_LIST.forEach(config => loadModel(view, config));
 
-        // 5. [KO] 테스트용 GUI 렌더링
-        // [EN] Render Test GUI
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, (time) => {
+        });
+
         renderTestPane(redGPUContext);
     },
     (failReason) => {
@@ -79,11 +68,7 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] GLTF/GLB 모델을 로드하고 설정을 적용합니다.
- * [EN] Loads a GLTF/GLB model and applies its settings.
- */
-function loadModel(view, config) {
+const loadModel = (view, config) => {
     const {redGPUContext, scene} = view;
 
     new RedGPU.GLTFLoader(
@@ -91,9 +76,6 @@ function loadModel(view, config) {
         config.url,
         (loaderResult) => {
             const mesh = scene.addChild(loaderResult.resultMesh);
-
-            // [KO] 설정된 스케일 및 위치 적용
-            // [EN] Apply scale and position settings
             if (config.scale) mesh.setScale(config.scale);
             if (config.position) {
                 const [x, y, z] = config.position;
@@ -101,21 +83,15 @@ function loadModel(view, config) {
             }
         },
         (progressInfo) => {
-            // [KO] 로딩 진행 상태 헬퍼 호출
-            // [EN] Call loading progress helper
             RedGPUExampleHelper.loadingProgressInfoHandler(progressInfo);
         }
     );
-}
+};
 
-/**
- * [KO] 실시간 IBL 및 스카이박스 제어를 위한 GUI를 구성합니다.
- * [EN] Configures GUI for real-time IBL and SkyBox control.
- */
-function renderTestPane(redGPUContext) {
+const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        RedGPU: RedGPU,
+        RedGPU,
         ibl: true,
         skybox: true
     });
-}
+};

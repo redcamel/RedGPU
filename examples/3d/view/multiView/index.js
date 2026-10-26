@@ -1,123 +1,106 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] Multi View 예제
- * [EN] Multi View example
+ * [KO] Multi View3D 예제
+ * [EN] Multi View3D example
  *
- * [KO] 하나의 캔버스에 여러 개의 뷰를 배치하고 관리하는 방법을 보여줍니다.
- * [EN] Demonstrates how to arrange and manage multiple views on a single canvas.
+ * [KO] 하나의 캔버스에 여러 개의 View3D를 배치하고 독립적으로 제어하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to arrange and independently control multiple View3D instances on a single canvas.
  */
 
-// [KO] 캔버스 생성 및 문서에 추가
-// [EN] Create canvas and append to document
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// [KO] RedGPU 초기화
-// [EN] Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // [KO] 첫 번째 뷰 설정 (메인 뷰 - 왼쪽)
-        // [EN] Setup first view (Main view - Left)
+        // [KO] 3개의 독립된 View3D 생성 및 씬별 배경 색상 구분
+        // [EN] Create 3 independent View3D instances with distinct scene background colors
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         const scene = new RedGPU.Display.Scene();
+        scene.useBackgroundColor = true;
+        scene.backgroundColor.setColorByHEX('#1a1f2c');
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.axis = true;
         view.grid = true;
         redGPUContext.addView(view);
 
-        // [KO] 두 번째 뷰 설정 (메인 뷰 - 오른쪽)
-        // [EN] Setup second view (Main view - Right)
         const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);
         const scene2 = new RedGPU.Display.Scene();
+        scene2.useBackgroundColor = true;
+        scene2.backgroundColor.setColorByHEX('#2c1a24');
         const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, controller2);
         view2.axis = true;
         view2.grid = true;
         redGPUContext.addView(view2);
 
-        // [KO] 세 번째 뷰 설정 (중앙에서 움직이는 작은 뷰)
-        // [EN] Setup third view (Small moving view in center)
         const controller3 = new RedGPU.Camera.OrbitController(redGPUContext);
         const scene3 = new RedGPU.Display.Scene();
+        scene3.useBackgroundColor = true;
+        scene3.backgroundColor.setColorByHEX('#1a2c24');
         const view3 = new RedGPU.Display.View3D(redGPUContext, scene3, controller3);
         view3.axis = true;
         view3.grid = true;
         redGPUContext.addView(view3);
 
-        // [KO] 각 뷰의 레이아웃 설정 (비율 단위 사용 가능)
-        // [EN] Set layout for each view (Percentage units supported)
-        view.width = '50%';
+        // [KO] 방식 1: setSize / setPosition 메서드로 크기·위치 일괄 지정 ('%' 및 숫자 혼합 가능)
+        // [EN] Method 1: Batch-configure size and position via setSize / setPosition ('%' and numbers)
+        view.setSize('50%', '100%');
+        view.setPosition(0, 0);
+
+        // [KO] 방식 2: width, height, x, y 개별 프로퍼티로 퍼센트('%') 지정
+        // [EN] Method 2: Assign individual width, height, x, y properties using percentage ('%')
         view2.width = '50%';
-        view3.width = '10%';
-        view3.height = '10%';
-        view.x = '0%';
+        view2.height = '100%';
         view2.x = '50%';
+        view2.y = '0%';
 
-        /**
-         * [KO] 씬에 무작위 메시를 추가하는 헬퍼 함수입니다.
-         * [EN] Helper function to add random meshes to the scene.
-         * @param {RedGPU.Display.Scene} scene - [KO] 대상 씬 [EN] Target scene
-         * @param {number} count - [KO] 메시 개수 [EN] Mesh count
-         */
-        const addMeshesToScene = (scene, count = 200) => {
-            const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-            const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+        // [KO] 방식 3: 픽셀 문자열('px') 또는 숫자(px)로 고정 크기 지정
+        // [EN] Method 3: Specify fixed size using pixel string ('px') or number (px)
+        view3.setSize('200px', 200);
 
-            for (let i = 0; i < count; i++) {
-                const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+        addMeshesToScene(redGPUContext, scene);
+        addMeshesToScene(redGPUContext, scene2);
 
-                mesh.setScale(Math.random() * 3 + 1);
-                mesh.setPosition(
-                    Math.random() * 300 - 150,
-                    Math.random() * 300 - 150,
-                    Math.random() * 300 - 150
-                );
-
-                scene.addChild(mesh);
-            }
-        };
-
-        // [KO] 각 씬에 객체 추가
-        // [EN] Add objects to each scene
-        addMeshesToScene(scene);
-        addMeshesToScene(scene2);
-
-        // [KO] 렌더러 생성 및 루프 시작
-        // [EN] Create renderer and start loop
         const renderer = new RedGPU.Renderer();
-        const render = (time) => {
-            // [KO] 세 번째 뷰를 화면 중앙에서 회전시킴
-            // [EN] Rotate the third view around the center of the screen
-            view3.x = `${Math.sin(time / 1000) * 25 + 50}%`;
-            view3.y = `${Math.cos(time / 1000) * 25 + 50}%`;
-        };
+        renderer.start(redGPUContext, (time) => {
+            // [KO] 세 번째 뷰의 화면 위치를 퍼센트('%') 단위로 동적 회전 이동
+            // [EN] Dynamically move the third view's position in a circular path using percentage ('%')
+            view3.setPosition(
+                `${Math.sin(time / 1000) * 25 + 50}%`,
+                `${Math.cos(time / 1000) * 25 + 50}%`
+            );
+        });
 
-        renderer.start(redGPUContext, render);
-        
-        // [KO] 테스트용 GUI 렌더링
-        // [EN] Render GUI for testing
         renderTestPane(redGPUContext);
     },
     (failReason) => {
-        // [KO] 초기화 실패 시 에러 처리
-        // [EN] Error handling on initialization failure
-        console.error('초기화 실패:', failReason);
-
+        console.error('Initialization failed:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
- * [EN] Renders a GUI panel for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
-const renderTestPane = async (redGPUContext) => {
+const addMeshesToScene = (redGPUContext, scene, count = 200) => {
+    const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
+    const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+
+    for (let i = 0; i < count; i++) {
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+        mesh.setScale(Math.random() * 3 + 1);
+        mesh.setPosition(
+            Math.random() * 300 - 150,
+            Math.random() * 300 - 150,
+            Math.random() * 300 - 150
+        );
+        scene.addChild(mesh);
+    }
+};
+
+const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        viewList: true,
+        viewList: true
     });
 };

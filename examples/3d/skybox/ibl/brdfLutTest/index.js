@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] BRDF LUT 테스트 예제
@@ -15,23 +15,14 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. [KO] 카메라 컨트롤러 설정
-        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.tilt = 0;
-
-        // 2. [KO] 씬 및 뷰 구성
-        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // 3. [KO] BRDF LUT 전용 텍스처 생성
-        // [EN] Create a texture dedicated to BRDF LUT
+        // [KO] BRDF LUT 전용 텍스처 생성 및 확인용 평면 메시 배치
+        // [EN] Create BRDF LUT texture and place a plane mesh for visualization
         const texture = new RedGPU.Resource.CoreIBL.BRDFLUTTexture(redGPUContext);
-
-        // 4. [KO] 텍스처 확인용 메시 생성
-        // [EN] Create Mesh to display the texture
         const mesh = new RedGPU.Display.Mesh(
             redGPUContext,
             new RedGPU.Primitive.Plane(redGPUContext),
@@ -40,13 +31,10 @@ RedGPU.init(
         mesh.setScale(5);
         scene.addChild(mesh);
 
-        // 5. [KO] 렌더러 생성 및 루프 시작
-        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        // 6. [KO] 테스트용 GUI 렌더링
-        // [EN] Render Test GUI
         renderTestPane(redGPUContext);
     },
     (failReason) => {
@@ -57,10 +45,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 구성합니다.
- * [EN] Configures GUI for testing.
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };

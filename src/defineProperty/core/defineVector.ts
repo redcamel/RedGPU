@@ -1,13 +1,6 @@
 import defineProperty_SETTING from "./defineProperty_SETTING";
 import updateTargetUniform from "./updateTargetUniform";
 
-/**
- * [KO] 유니폼 버퍼에 데이터를 쓰는 세터(Setter) 함수를 생성합니다.
- * [EN] Creates a setter function that writes data to the globalStruct buffer.
- *
- * @param propertyKey - [KO] 속성 키 이름 [EN] Property key name
- * @param symbol - [KO] 내부 데이터를 저장할 심볼 [EN] Symbol to store internal data
- */
 function createSetter(propertyKey: string, symbol: symbol) {
     return function (newValue: any) {
         this[symbol] = newValue;
@@ -16,11 +9,19 @@ function createSetter(propertyKey: string, symbol: symbol) {
 }
 
 /**
- * [KO] 개별 벡터 속성에 대한 속성 기술자(Property Descriptor)를 생성하는 기본 함수입니다.
- * [EN] Base function that creates a property descriptor for an individual vector property.
+ * [KO] 벡터 프로퍼티를 위한 `PropertyDescriptor`를 생성합니다.
+ * [EN] Creates a `PropertyDescriptor` for a vector property.
  *
- * @param propertyKey - [KO] 속성 키 이름 [EN] Property key name
- * @param initValue - [KO] 초기값 [EN] Initial value
+ * @param propertyKey -
+ * [KO] 프로퍼티 키 이름
+ * [EN] Property key name
+ * @param initValue -
+ * [KO] 초기 벡터 배열 값
+ * [EN] Initial vector array value
+ * @returns
+ * [KO] 생성된 프로퍼티 디스크립터 객체
+ * [EN] Created property descriptor object
+ * @category DefineProperty
  */
 function defineVector(propertyKey: string, initValue: number[]) {
     const symbol = Symbol(propertyKey);

@@ -4,7 +4,7 @@ import strip from '@rollup/plugin-strip';
 import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import {createFilter} from '@rollup/pluginutils';
-import postcss from 'rollup-plugin-postcss'
+
 const terserOptions = {
 	format: {
 		comments: false,
@@ -30,11 +30,6 @@ export default [
 			stringWgsl(),
 			nodeResolve(),
 			json(),
-			postcss({
-				inject: true,
-				extensions: ['.css'],
-				minimize: true
-			}),
 			strip(
 				{
 					include: ['**/*.ts'],

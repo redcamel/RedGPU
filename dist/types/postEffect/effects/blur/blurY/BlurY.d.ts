@@ -2,7 +2,6 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 interface BlurY {
     size: number;
-    sampleCount: number;
 }
 /**
  * [KO] Y축 방향 고품질 가우시안 블러(Blur) 효과를 제공하는 클래스입니다.
@@ -14,8 +13,7 @@ interface BlurY {
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.BlurY(redGPUContext);
- * effect.size = 64;         // 블러 강도 조절
- * effect.sampleCount = 20;  // 샘플링 횟수 조절 (품질 향상)
+ * effect.size = 64; // 블러 강도 조절
  * view.postEffectManager.addEffect(effect);
  * ```
  *

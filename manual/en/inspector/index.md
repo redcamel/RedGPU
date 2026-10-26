@@ -1,6 +1,6 @@
 ---
 title: Inspector
-order: 12
+order: 99
 ---
 
 # Inspector
@@ -109,16 +109,16 @@ Displays GPU workload information for the current rendering frame.
 
 Displays the count and memory usage for each type of GPU-uploaded resource.
 
-| Resource          | Description                   |
-|:------------------|:------------------------------|
-| **BitmapTexture** | Standard bitmap (2D) textures |
-| **CubeTexture**   | Cubemap (skybox) textures     |
-| **HDRTexture**    | HDR textures (for IBL)        |
-| **UniformBuffer** | Uniform buffer objects        |
-| **VertexBuffer**  | Vertex buffers                |
-| **IndexBuffer**   | Index buffers                 |
-| **StorageBuffer** | Storage buffers               |
-| **GPUBuffer**     | Other GPU buffers             |
+| Resource            | Description                   |
+|:--------------------|:------------------------------|
+| **`BitmapTexture`** | Standard bitmap (2D) textures |
+| **`CubeTexture`**   | Cubemap (skybox) textures     |
+| **`HDRTexture`**    | HDR textures (for IBL)        |
+| **`UniformBuffer`** | Uniform buffer objects        |
+| **`VertexBuffer`**  | Vertex buffers                |
+| **`IndexBuffer`**   | Index buffers                 |
+| **`StorageBuffer`** | Storage buffers               |
+| **GPUBuffer**       | Other GPU buffers             |
 
 ### Scene Hierarchy
 
@@ -139,3 +139,11 @@ Useful for diagnosing and optimizing GPU rendering pass efficiency.
 > [!TIP]
 > **Memory Leak Detection**: In the Resources tab, if the `count` of resources keeps increasing after actions like scene
 > transitions, resources may not be getting properly disposed.
+
+---
+
+## Related Examples
+
+- [Draw Debugger](/RedGPU/examples/3d/drawDebugger/basic/)
+- [Mesh BoundBox Visualization](/RedGPU/examples/3d/mesh/boundBox/meshBoundBox/)
+- [Indirect Draw Test](/RedGPU/examples/3d/indirectDrawTest/)

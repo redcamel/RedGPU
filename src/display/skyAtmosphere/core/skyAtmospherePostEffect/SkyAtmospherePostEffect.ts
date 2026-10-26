@@ -4,40 +4,59 @@ import ASinglePassPostEffect from "../../../../postEffect/core/ASinglePassPostEf
 import {IPostEffectResult} from "../../../../postEffect/core/types";
 import SkyAtmosphere from "../../SkyAtmosphere";
 import ShaderLibrary from "../../../../systemCodeManager/ShaderLibrary";
-import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect_compute.wgsl";
+import skyAtmospherePostEffectComputeShaderCode_wgsl from "./wgsl/skyAtmospherePostEffectComputeShaderCode.wgsl";
 
 /**
- * [KO] SkyAtmospherePostEffect 클래스는 씬 내의 불투명 오브젝트들에 대기 효과를 적용합니다.
- * [EN] The SkyAtmospherePostEffect class applies atmospheric effects to opaque objects in the scene.
+ * [KO] Aerial Perspective 3D LUT를 참조하여 씬 내 오브젝트들에 깊이에 따른 대기 산란광과 투과율 감쇠를 적용하는 포스트 이펙트 클래스입니다.
+ * [EN] Post-effect class that applies depth-based atmospheric scattered light and transmittance attenuation to scene objects by referencing the Aerial Perspective 3D LUT.
  *
- * [KO] Aerial Perspective 3D LUT를 참조하여 물체의 깊이에 따른 대기 산란광과 투과율 감쇠를 적용함으로써, 멀리 있는 물체가 대기색에 묻히는 효과를 시뮬레이션합니다.
- * [EN] Simulates the effect of distant objects being obscured by atmospheric color by referencing the Aerial Perspective 3D LUT and applying scattered light and transmittance attenuation based on depth.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category SkyAtmosphere
  */
 class SkyAtmospherePostEffect extends ASinglePassPostEffect {
-    #skyAtmosphere: SkyAtmosphere;
+    #transmittanceTextureInfo: IPostEffectResult;
+    #skyViewTextureInfo: IPostEffectResult;
+    #aerialPerspectiveTextureInfo: IPostEffectResult;
 
+    /**
+     * [KO] SkyAtmospherePostEffect 인스턴스를 생성합니다.
+     * [EN] Creates a SkyAtmospherePostEffect instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param skyAtmosphere -
+     * [KO] 연결된 SkyAtmosphere 인스턴스
+     * [EN] Associated SkyAtmosphere instance
+     */
     constructor(redGPUContext: RedGPUContext, skyAtmosphere: SkyAtmosphere) {
-        super(redGPUContext);
-        this.#skyAtmosphere = skyAtmosphere;
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
+        const {transmittanceLUT, skyViewLUT, aerialPerspectiveLUT} = skyAtmosphere;
+        this.#transmittanceTextureInfo = {
+            texture: transmittanceLUT.gpuTexture,
+            textureView: transmittanceLUT.gpuTextureView
+        };
+        this.#skyViewTextureInfo = {texture: skyViewLUT.gpuTexture, textureView: skyViewLUT.gpuTextureView};
+        this.#aerialPerspectiveTextureInfo = {
+            texture: aerialPerspectiveLUT.gpuTexture,
+            textureView: aerialPerspectiveLUT.gpuTextureView
+        };
 
         const createCode = (useMSAA: boolean) => {
+            const postEffectSystemUniform = useMSAA ? ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM_MSAA : ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM;
             return [
                 '#redgpu_include depth.getLinearizeDepth',
                 '#redgpu_include skyAtmosphere.skyAtmosphereFn',
                 '@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float, read>;',
                 '@group(0) @binding(1) var transmittanceLUT : texture_2d<f32>;',
-                '@group(0) @binding(2) var multiScatLUT : texture_2d<f32>;',
-                '@group(0) @binding(3) var skyViewLUT : texture_2d<f32>;',
-                '@group(0) @binding(4) var aerialPerspectiveLUT : texture_3d<f32>;',
-                '@group(0) @binding(5) var skyAtmosphereIrradianceLUT : texture_cube<f32>;',
+                '@group(0) @binding(2) var skyViewLUT : texture_2d<f32>;',
+                '@group(0) @binding(3) var aerialPerspectiveLUT : texture_3d<f32>;',
                 '',
-                ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM,
-                '@group(2) @binding(5) var basicSampler : sampler;',
-                '',
-                `@group(2) @binding(0) var depthTexture : ${useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d'};`,
-                '@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;',
-                '@group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;',
-                `@group(2) @binding(3) var prevDepthTexture : ${useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d'};`,
+                postEffectSystemUniform,
                 '',
                 '@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 '',
@@ -47,11 +66,10 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 '    return textureLoad(depthTexture, clampedPos, 0);',
                 '}',
                 '',
-                '@compute @workgroup_size(16, 16)',
+                `@compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})`,
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
                 '    let uniforms = systemUniforms.skyAtmosphere;',
-                '    let viewHeight = uniforms.cameraHeight;',
-                skyAtmospherePostEffect_compute_wgsl,
+                skyAtmospherePostEffectComputeShaderCode_wgsl,
                 '}'
             ].join('\n');
         };
@@ -67,40 +85,47 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 스카이 대기 포스트 이펙트를 렌더링합니다.
-     * [EN] Renders the sky atmosphere post effect.
+     * [KO] 대기 원근(Aerial Perspective) 포스트 이펙트를 렌더링합니다.
+     * [EN] Renders the aerial perspective post-effect.
      *
-     * @param view - [KO] 현재 뷰 [EN] Current view
-     * @param width - [KO] 너비 [EN] Width
-     * @param height - [KO] 높이 [EN] Height
-     * @param sourceTextureInfo - [KO] 소스 컬러 텍스처 [EN] Source color texture
-     * @returns [KO] 렌더링 결과 [EN] Render result
+     * @param view -
+     * [KO] 렌더링 대상 View3D 인스턴스
+     * [EN] Target View3D instance for rendering
+     * @param width -
+     * [KO] 렌더 타겟 너비
+     * [EN] Render target width
+     * @param height -
+     * [KO] 렌더 타겟 높이
+     * [EN] Render target height
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 컬러 텍스처 정보
+     * [EN] Input source color texture information
+     * @returns
+     * [KO] 포스트 이펙트 렌더링 결과
+     * [EN] Post-effect render result
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
-        const skyAtmosphere = this.#skyAtmosphere;
-
-        return super.render(view, width, height,
-            sourceTextureInfo, // 0
-            {
-                texture: skyAtmosphere.transmittanceLUT.gpuTexture,
-                textureView: skyAtmosphere.transmittanceLUT.gpuTextureView
-            }, // 1
-            {texture: skyAtmosphere.multiScatLUT.gpuTexture, textureView: skyAtmosphere.multiScatLUT.gpuTextureView}, // 2
-            {texture: skyAtmosphere.skyViewLUT.gpuTexture, textureView: skyAtmosphere.skyViewLUT.gpuTextureView}, // 3
-            {
-                texture: skyAtmosphere.aerialPerspectiveLUT.gpuTexture,
-                textureView: skyAtmosphere.aerialPerspectiveLUT.gpuTextureView
-            }, // 4
-            {
-                texture: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTexture,
-                textureView: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTextureView
-            } // 5
+        return super.render(
+            view, width, height,
+            sourceTextureInfo,
+            this.#transmittanceTextureInfo,
+            this.#skyViewTextureInfo,
+            this.#aerialPerspectiveTextureInfo
         );
     }
 
+    /**
+     * [KO] 포스트 이펙트 인스턴스 및 내부 리소스를 해제합니다.
+     * [EN] Releases the post-effect instance and internal resources.
+     */
     destroy() {
         super.destroy();
-        this.#skyAtmosphere = null;
+        this.#transmittanceTextureInfo.texture = null;
+        this.#transmittanceTextureInfo.textureView = null;
+        this.#skyViewTextureInfo.texture = null;
+        this.#skyViewTextureInfo.textureView = null;
+        this.#aerialPerspectiveTextureInfo.texture = null;
+        this.#aerialPerspectiveTextureInfo.textureView = null;
     }
 }
 

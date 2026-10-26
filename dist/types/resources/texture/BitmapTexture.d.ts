@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import ManagementResourceBase from "../core/ManagementResourceBase";
+import { KTX2Container } from "ktx-parse";
 /**
  * [KO] 텍스처 소스 정보 타입입니다. 이미지 URL 문자열이거나 src와 cacheKey를 가진 객체일 수 있습니다.
  * [EN] Texture source information type. Can be an image URL string or an object with src and cacheKey.
@@ -23,30 +24,13 @@ declare class BitmapTexture extends ManagementResourceBase {
     /**
      * [KO] BitmapTexture 인스턴스를 생성합니다.
      * [EN] Creates a BitmapTexture instance.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param src -
-     * [KO] 텍스처 소스 정보 (URL 또는 객체)
-     * [EN] Texture source information (URL or object)
-     * @param useMipMap -
-     * [KO] 밉맵 사용 여부 (기본값: true)
-     * [EN] Whether to use mipmaps (default: true)
-     * @param onLoad -
-     * [KO] 로드 완료 콜백
-     * [EN] Load complete callback
-     * @param onError -
-     * [KO] 에러 콜백
-     * [EN] Error callback
-     * @param format -
-     * [KO] 텍스처 포맷 (선택)
-     * [EN] Texture format (optional)
-     * @param usePremultiplyAlpha -
-     * [KO] 프리멀티플 알파 사용 여부 (기본값: false)
-     * [EN] Whether to use premultiplied alpha (default: false)
      */
     constructor(redGPUContext: RedGPUContext, src?: BitmapSrcInfo, useMipMap?: boolean, onLoad?: (textureInstance?: BitmapTexture) => void, onError?: (error: Error) => void, format?: GPUTextureFormat, usePremultiplyAlpha?: boolean);
+    /**
+     * [KO] 로드 완료 및 에러 리스너를 추가합니다.
+     * [EN] Adds load complete and error listeners.
+     */
+    addLoadListeners(onLoad?: (textureInstance: BitmapTexture) => void, onError?: (error: Error) => void): void;
     /**
      * [KO] 텍스처 가로 크기를 반환합니다.
      * [EN] Returns the texture width.
@@ -140,4 +124,9 @@ declare class BitmapTexture extends ManagementResourceBase {
     /** [KO] 텍스처 리소스를 파괴합니다. [EN] Destroys the texture resource. */
     destroy(): void;
 }
+export interface KTX2ParseResult {
+    container: KTX2Container;
+    arrayBuffer: ArrayBuffer;
+}
+export declare function loadKtx2Container(src: string): Promise<KTX2ParseResult>;
 export default BitmapTexture;

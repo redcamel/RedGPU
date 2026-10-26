@@ -479,6 +479,11 @@ interface PBRMaterial {
      */
     doubleSided: boolean;
     /**
+     * [KO] 식생(Two-Sided Foliage) 셰이딩 모델 모드 여부
+     * [EN] Whether it uses Two-Sided Foliage shading mode
+     */
+    isFoliage: boolean;
+    /**
      * [KO] KHR_dispersion 확장 사용 여부
      * [EN] Whether to use KHR_dispersion extension
      */

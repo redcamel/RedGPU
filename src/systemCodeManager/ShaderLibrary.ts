@@ -15,9 +15,6 @@ import getBitHash2D_vec2_wgsl from './shader/math/hash/getBitHash2D_vec2.wgsl';
 import getBitHash3D_vec3_wgsl from './shader/math/hash/getBitHash3D_vec3.wgsl';
 import getRadicalInverseVanDerCorput_wgsl from './shader/math/hash/getRadicalInverseVanDerCorput.wgsl';
 import getHammersley_wgsl from './shader/math/hash/getHammersley.wgsl';
-import skyAtmosphereFn_wgsl from '../display/skyAtmosphere/core/skyAtmosphereFn.wgsl';
-import transmittanceShaderCode_wgsl
-    from '../display/skyAtmosphere/core/generator/transmittance/transmittanceShaderCode.wgsl';
 import meshEntryPointPickingVertex_wgsl from './shader/entryPoint/mesh/entryPointPickingVertex.wgsl';
 import meshEntryPointPickingFragment_wgsl from './shader/entryPoint/mesh/entryPointPickingFragment.wgsl';
 import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPointShadowVertex.wgsl';
@@ -33,10 +30,12 @@ import DirectionalLight_wgsl from './shader/systemStruct/DirectionalLight.wgsl';
 import AmbientLight_wgsl from './shader/systemStruct/AmbientLight.wgsl';
 import Shadow_wgsl from './shader/systemStruct/Shadow.wgsl';
 import SkyAtmosphere_wgsl from './shader/systemStruct/SkyAtmosphere.wgsl';
+import Wind_wgsl from './shader/systemStruct/systemStruct.Wind.wgsl';
 import globalVertexStruct_wgsl from './shader/systemStruct/globalStruct/globalVertexStruct.wgsl';
 import globalFragmentStructPBR_wgsl from './shader/systemStruct/globalStruct/globalFragmentStructPBR.wgsl';
 import globalFragmentStructBuiltIn_wgsl from './shader/systemStruct/globalStruct/globalFragmentStructBuiltIn.wgsl';
 import POST_EFFECT_SYSTEM_UNIFORM_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM.wgsl';
+import POST_EFFECT_SYSTEM_UNIFORM_MSAA_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM_MSAA.wgsl';
 import SYSTEM_UNIFORM_wgsl from './shader/systemStruct/SYSTEM_UNIFORM.wgsl';
 import getReflectionVectorFromViewDirection_wgsl
     from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
@@ -50,6 +49,8 @@ import getViewNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getVi
 import getShadowCoord_wgsl from './shader/shadow/getShadowCoord.wgsl';
 import getShadowClipPosition_wgsl from './shader/shadow/getShadowClipPosition.wgsl';
 import getDirectionalShadowVisibility_wgsl from './shader/shadow/getDirectionalShadowVisibility.wgsl';
+import getDirectionalShadowVisibilityLandscape_wgsl from './shader/shadow/getDirectionalShadowVisibilityLandscape.wgsl';
+import getDirectionalShadowVisibilityFoliage_wgsl from './shader/shadow/getDirectionalShadowVisibilityFoliage.wgsl';
 import getMotionVector_wgsl from './shader/math/getMotionVector.wgsl';
 import getBillboardMatrix_wgsl from './shader/math/billboard/getBillboardMatrix.wgsl';
 import getBillboardResult_wgsl from './shader/math/billboard/getBillboardResult.wgsl';
@@ -70,6 +71,12 @@ import getTintBlendMode_wgsl from './shader/color/getTintBlendMode.wgsl';
 import getLinearizeDepth_wgsl from './shader/depth/getLinearizeDepth.wgsl';
 import getIsFinite_wgsl from './shader/math/getIsFinite.wgsl';
 
+/**
+ * [KO] 셰이더 수학 연산 함수 라이브러리입니다.
+ * [EN] Shader math calculation functions library.
+ *
+ * @category Shader
+ */
 export namespace MathLibrary {
 
     export namespace hash {
@@ -171,11 +178,11 @@ export namespace MathLibrary {
          *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
          *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
          *     x = (x >> 16u) ^ x;
-         *
+         *     
          *     let r = f32(x) / 4294967296.0;
          *     x = (x * 1103515245u + 12345u);
          *     let g = f32(x) / 4294967296.0;
-         *
+         *     
          *     return vec2<f32>(r, g);
          * }
          * ```
@@ -197,13 +204,13 @@ export namespace MathLibrary {
          *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
          *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
          *     x = (x >> 16u) ^ x;
-         *
+         *     
          *     let r = f32(x) / 4294967296.0;
          *     x = (x * 1103515245u + 12345u);
          *     let g = f32(x) / 4294967296.0;
          *     x = (x * 1103515245u + 12345u);
          *     let b = f32(x) / 4294967296.0;
-         *
+         *     
          *     return vec3<f32>(r, g, b);
          * }
          * ```
@@ -307,11 +314,11 @@ export namespace MathLibrary {
          *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
          *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
          *     x = (x >> 16u) ^ x;
-         *
+         *     
          *     let r = f32(x) / 4294967296.0;
          *     x = (x * 1103515245u + 12345u);
          *     let g = f32(x) / 4294967296.0;
-         *
+         *     
          *     return vec2<f32>(r, g);
          * }
          * ```
@@ -333,13 +340,13 @@ export namespace MathLibrary {
          *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
          *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
          *     x = (x >> 16u) ^ x;
-         *
+         *     
          *     let r = f32(x) / 4294967296.0;
          *     x = (x * 1103515245u + 12345u);
          *     let g = f32(x) / 4294967296.0;
          *     x = (x * 1103515245u + 12345u);
          *     let b = f32(x) / 4294967296.0;
-         *
+         *     
          *     return vec3<f32>(r, g, b);
          * }
          * ```
@@ -377,7 +384,7 @@ export namespace MathLibrary {
          *
          * ```wgsl
          * #redgpu_include math.hash.getRadicalInverseVanDerCorput
-         *
+         * 
          * fn getHammersley(i: u32, N: u32) -> vec2<f32> {
          *     return vec2<f32>(f32(i) / f32(N), getRadicalInverseVanDerCorput(i));
          * }
@@ -412,7 +419,7 @@ export namespace MathLibrary {
      *
      * ```wgsl
      * #redgpu_include math.EPSILON
-     *
+     * 
      * fn getMotionVector(
      *     currentClipPos: vec4<f32>,
      *     prevClipPos: vec4<f32>,
@@ -421,20 +428,20 @@ export namespace MathLibrary {
      *     // 0으로 나누기 방지를 위해 매우 작은 값(epsilon) 사용
      *     let currentNDC = currentClipPos.xy / max(currentClipPos.w, EPSILON);
      *     let prevNDC = prevClipPos.xy / max(prevClipPos.w, EPSILON);
-     *
+     * 
      *     // 2. 모션 벡터 계산 (NDC 공간: -1 ~ 1 범위)
      *     // 현재 위치에서 이전 위치를 뺍니다.
      *     var motionVector = currentNDC - prevNDC;
-     *
+     * 
      *     // 3. Y축 반전 보정 (중요)
      *     // WebGPU NDC의 Y축은 위가 +, 아래가 -이지만,
      *     // UV 좌표계(0~1)는 위가 0, 아래가 1이므로 방향을 맞춰줘야 합니다.
      *     motionVector.y = -motionVector.y;
-     *
+     * 
      *     // 4. NDC(-2 ~ 2 범위의 차이)를 UV 단위(0 ~ 1 범위의 차이)로 변환
      *     // NDC 전체 너비가 2이므로 0.5를 곱해줍니다.
      *     let uvMotionVector = motionVector * 0.5;
-     *
+     * 
      *     return uvMotionVector;
      * }
      * ```
@@ -453,14 +460,14 @@ export namespace MathLibrary {
      *     // NaN은 자기 자신과 같지 않고, Inf는 매우 큰 값
      *     return x == x && abs(x) < 1e30;
      * }
-     *
+     * 
      * /**
      *  * [KO] vec3 벡터의 모든 채널이 유한(Finite)한지 체크합니다.
      *  * [EN] Checks if all channels of a vec3 vector are finite.
-     *  *
+     *  * 
      *  * @param v [KO] 입력 vec3 벡터 [EN] Input vec3 vector
      *  * @returns [KO] 채널별 유한 여부 (vec3<bool>) [EN] Whether each channel is finite (vec3<bool>)
-     *  *
+     *  * 
      *  *\/
      * fn getIsFiniteVec3(v: vec3<f32>) -> vec3<bool> {
      *     return vec3<bool>(
@@ -487,13 +494,13 @@ export namespace MathLibrary {
          * ```wgsl
          * fn getBillboardMatrix(viewMatrix: mat4x4<f32>, modelMatrix: mat4x4<f32>, useStandardScale: u32) -> mat4x4<f32> {
          *     var resultMatrix = viewMatrix * modelMatrix;
-         *
+         *     
          *     if (useStandardScale == 1u) {
          *         // [표준 모드] 회전이 포함된 행렬에서도 정확한 스케일 추출 (length 연산 포함)
          *         let scaleX = length(modelMatrix[0].xyz);
          *         let scaleY = length(modelMatrix[1].xyz);
          *         let scaleZ = length(modelMatrix[2].xyz);
-         *
+         *         
          *         resultMatrix[0] = vec4<f32>(scaleX, 0.0, 0.0, resultMatrix[0].w);
          *         resultMatrix[1] = vec4<f32>(0.0, scaleY, 0.0, resultMatrix[1].w);
          *         resultMatrix[2] = vec4<f32>(0.0, 0.0, scaleZ, resultMatrix[2].w);
@@ -503,7 +510,7 @@ export namespace MathLibrary {
          *         resultMatrix[1] = vec4<f32>(0.0, modelMatrix[1][1], 0.0, resultMatrix[1].w);
          *         resultMatrix[2] = vec4<f32>(0.0, 0.0, modelMatrix[2][2], resultMatrix[2].w);
          *     }
-         *
+         *     
          *     return resultMatrix;
          * }
          * ```
@@ -520,11 +527,11 @@ export namespace MathLibrary {
          *     vertexPosition: vec3<f32>, // [KO] 뷰 공간 좌표 [EN] View space position
          *     vertexNormal: vec3<f32>,   // [KO] 뷰 공간 법선 [EN] View space normal
          * }
-         *
+         * 
          * /**
          *  * [KO] 빌보드 및 픽셀 크기 모드를 지원하는 공통 정점 변환 결과 데이터를 리턴합니다.
          *  * [EN] Returns common vertex transformation result data supporting billboard and pixel size modes.
-         *  *
+         *  * 
          *  * @param input_position [KO] 입력 정점 위치 [EN] Input vertex position
          *  * @param input_normal [KO] 입력 정점 법선 [EN] Input vertex normal
          *  * @param modelMatrix [KO] 모델 행렬 [EN] Model matrix
@@ -537,7 +544,7 @@ export namespace MathLibrary {
          *  * @param renderRatioX [KO] 렌더링 가로 비율 [EN] Rendering horizontal ratio
          *  * @param renderRatioY [KO] 렌더링 세로 비율 [EN] Rendering vertical ratio
          *  * @returns [KO] 빌보드 계산 결과 데이터 [EN] Billboard calculation result data
-         *  *
+         *  * 
          *  *\/
          * fn getBillboardResult(
          *     input_position: vec3<f32>,
@@ -553,28 +560,28 @@ export namespace MathLibrary {
          *     renderRatioY: f32
          * ) -> BillboardResult {
          *     var result: BillboardResult;
-         *
+         *     
          *     let ratioScaleMatrix = mat4x4<f32>(
          *         renderRatioX, 0, 0, 0,
          *         0, renderRatioY, 0, 0,
          *         0, 0, 1, 0,
          *         0, 0, 0, 1
          *     );
-         *
+         * 
          *     var viewPos: vec4<f32>;
          *     var viewNormal: vec4<f32>;
-         *
+         * 
          *     if (useBillboard == 1u) {
          *         let billboardMatrix = getBillboardMatrix(viewMatrix, modelMatrix, 1u);
-         *
+         *         
          *         if (usePixelSize == 1u) {
-         *             // [Pixel Size 모드] - 피벗 기반 확장 및 W-보정 적용
+         *             // [빌보드 + Pixel Size 모드] - 피벗 기반 클립 공간 확장 및 W-보정 적용
          *             let viewCenter = billboardMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
          *             let clipCenter = projectionMatrix * viewCenter;
-         *
+         * 
          *             let scaleX = (pixelSize / resolution.x) * 2.0 * renderRatioX;
          *             let scaleY = (pixelSize / resolution.y) * 2.0 * renderRatioY;
-         *
+         * 
          *             result.position = vec4<f32>(
          *                 clipCenter.xy + input_position.xy * vec2<f32>(scaleX, scaleY) * clipCenter.w,
          *                 clipCenter.zw
@@ -582,21 +589,35 @@ export namespace MathLibrary {
          *             viewPos = viewCenter;
          *             viewNormal = vec4<f32>(0.0, 0.0, 1.0, 0.0);
          *         } else {
-         *             // [월드 모드] - 일반 빌보드 변환
+         *             // [빌보드 + World Size 모드]
          *             viewPos = billboardMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
          *             viewNormal = vec4<f32>(0.0, 0.0, 1.0, 0.0); 
          *             result.position = projectionMatrix * viewPos;
          *         }
          *     } else {
-         *         // [일반 모드] - 빌보드 없는 평면 변환
-         *         viewPos = viewMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
+         *         if (usePixelSize == 1u) {
+         *             // [일반 3D 평면 + Pixel Size 모드] - 3D 회전 유지 및 거리(W) 비례 스케일 보정
+         *             let viewCenter = viewMatrix * modelMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
+         *             let clipCenter = projectionMatrix * viewCenter;
+         *             let pixelWorldScale = (pixelSize / resolution.y) * (2.0 * clipCenter.w / abs(projectionMatrix[1][1]));
+         *             let pixelRatioScaleMatrix = mat4x4<f32>(
+         *                 renderRatioX * pixelWorldScale, 0, 0, 0,
+         *                 0, renderRatioY * pixelWorldScale, 0, 0,
+         *                 0, 0, 1, 0,
+         *                 0, 0, 0, 1
+         *             );
+         *             viewPos = viewMatrix * modelMatrix * pixelRatioScaleMatrix * vec4<f32>(input_position, 1.0);
+         *         } else {
+         *             // [일반 3D 평면 + World Size 모드]
+         *             viewPos = viewMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
+         *         }
          *         viewNormal = viewMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_normal, 0.0);
          *         result.position = projectionMatrix * viewPos;
          *     }
-         *
+         * 
          *     result.vertexPosition = viewPos.xyz;
          *     result.vertexNormal = normalize(viewNormal.xyz);
-         *
+         *     
          *     return result;
          * }
          * ```
@@ -691,7 +712,7 @@ export namespace MathLibrary {
          *
          * ```wgsl
          * #redgpu_include math.reconstruct.getNDCFromDepth
-         *
+         * 
          * fn getWorldPositionFromDepth(
          *     uv: vec2<f32>,
          *     depth: f32,
@@ -716,7 +737,7 @@ export namespace MathLibrary {
          *
          * ```wgsl
          * #redgpu_include math.reconstruct.getNDCFromDepth
-         *
+         * 
          * fn getViewPositionFromDepth(
          *     uv: vec2<f32>,
          *     depth: f32,
@@ -755,7 +776,7 @@ export namespace MathLibrary {
          *
          * ```wgsl
          * #redgpu_include math.reconstruct.getWorldNormalFromGNormalBuffer
-         *
+         * 
          * fn getViewNormalFromGNormalBuffer(gBufferNormal: vec3<f32>, viewMatrix: mat4x4<f32>) -> vec3<f32> {
          *     let worldNormal = getWorldNormalFromGNormalBuffer(gBufferNormal);
          *     return normalize((viewMatrix * vec4<f32>(worldNormal, 0.0)).xyz);
@@ -780,11 +801,11 @@ export namespace MathLibrary {
          *     // [KO] Gram-Schmidt 직교화: 탄젠트가 법선과 정확히 수직이 되도록 보정
          *     // [EN] Gram-Schmidt orthonormalization: Corrects the tangent to be perfectly perpendicular to the normal
          *     let tangent = normalize(inputVertexTangent.xyz - inputNormal * dot(inputVertexTangent.xyz, inputNormal));
-         *
+         *     
          *     // [KO] glTF 표준 및 오른손 법칙 준수 (N x T = B)
          *     // [EN] Adheres to glTF standard and right-hand rule (N x T = B)
          *     let bitangent = cross(inputNormal, tangent) * inputVertexTangent.w;
-         *
+         *     
          *     return mat3x3<f32>(tangent, bitangent, inputNormal);
          * }
          * ```
@@ -829,19 +850,19 @@ export namespace MathLibrary {
          *     let dp2 = dpdy(inputWorldPos);
          *     let duv1 = dpdx(inputUV);
          *     let duv2 = dpdy(inputUV);
-         *
+         * 
          *     // [KO] 연립 방정식을 풀어 탄젠트와 비탄젠트 방향 도출 (Schüler's technique)
          *     // [EN] Derive tangent and bitangent directions by solving simultaneous equations (Schüler's technique)
          *     let dp2perp = cross(dp2, inputNormal);
          *     let dp1perp = cross(inputNormal, dp1);
-         *
+         *     
          *     let tangent = dp2perp * duv1.x + dp1perp * duv2.x;
          *     let bitangent = dp2perp * duv1.y + dp1perp * duv2.y;
-         *
+         * 
          *     // [KO] Gram-Schmidt 직교화 및 행렬 구성
          *     // [EN] Gram-Schmidt orthonormalization and matrix construction
          *     let invmax = inverseSqrt(max(dot(tangent, tangent), dot(bitangent, bitangent)));
-         *
+         * 
          *     // [KO] glTF 노멀 맵 G 채널은 Y+이며, 이는 V가 감소하는 방향(위쪽)을 의미합니다.
          *     // [KO] Schüler 공식으로 계산된 bitangent는 V가 증가하는 방향(아래쪽)을 향하므로 부호를 반전시킵니다.
          *     // [EN] glTF normal map G channel is Y+ (upwards), which corresponds to decreasing V.
@@ -865,17 +886,17 @@ export namespace MathLibrary {
          * fn getNormalFromNormalMap(sampledNormalColor: vec3<f32>, tbn: mat3x3<f32>, strength: f32) -> vec3<f32> {
          *     // 1. Unpack XY: [0, 1] -> [-1, 1]
          *     var n: vec2<f32> = sampledNormalColor.xy * 2.0 - 1.0;
-         *
+         * 
          *     // [KO] WebGPU의 Top-Left UV(V+가 아래로 향함)와 표준 노멀 맵(Y+가 위로 향함) 사이의 방향성 불일치 해결을 위해 Y 기여도 반전
          *     // [EN] Invert Y contribution to resolve the directional mismatch between WebGPU's Top-Left UV (V+ points down) and standard normal maps (Y+ points up)
          *     n.y = -n.y;
-         *
+         * 
          *     // 2. Apply Strength
          *     n *= strength;
-         *
+         * 
          *     // 3. Z-Reconstruction: z = sqrt(1.0 - x^2 - y^2)
          *     let z: f32 = sqrt(max(0.0, 1.0 - dot(n, n)));
-         *
+         * 
          *     // 4. Transform to World/View Space and Normalize
          *     return normalize(tbn * vec3<f32>(n, z));
          * }
@@ -908,11 +929,11 @@ export namespace ShadowLibrary {
      * fn getShadowCoord(worldPosition: vec3<f32>, lightViewProjectionMatrix: mat4x4<f32>) -> vec3<f32> {
      *     // 1. 빛의 공간으로 변환 (Convert to light space)
      *     let posFromLight = lightViewProjectionMatrix * vec4<f32>(worldPosition, 1.0);
-     *
+     *     
      *     // 2. 원근 분할 적용 (Apply perspective divide)
      *     // - 직교 투영(Directional)에서는 w가 1이지만, 원근 투영(Spot)을 위해 분할을 수행합니다.
      *     let shadowCoordNDC = posFromLight.xyz / posFromLight.w;
-     *
+     *     
      *     // 3. NDC [-1, 1] 범위를 UV [0, 1] 범위로 변환
      *     // - WebGPU 표준: (x * 0.5 + 0.5), (y * -0.5 + 0.5)
      *     return vec3<f32>(
@@ -942,87 +963,652 @@ export namespace ShadowLibrary {
      */
     export const getShadowClipPosition = getShadowClipPosition_wgsl;
     /**
-     * // [KO] 방향성 광원의 그림자 가시성(Visibility)을 계산합니다.
-     * // [EN] Calculates the shadow visibility for a directional light.
+     * // 🌟 [비회전 12-Tap 등방성 원형 가우시안 디스크 (Cascade 0 ~ 3 전 구간 공용)]
+     * // - 직교 격자(U/V 축)에 종속된 Tent PCF의 대각선 계단(Stair-stepping) 한계와 IGN 회전의 모래알 노이즈를 동시에 해결합니다.
+     * // - 중심(1탭, r=0) + 내측 링(5탭, r=1.05 texels) + 외측 링(6탭, r=2.05 texels)을 비격자 황금각으로 배치하여,
+     * //   하드웨어 2x2 Bilinear 비교 샘플러 패치들이 빈틈없이 중첩(Overlapping)되면서 노이즈 0%의 완벽한 원형 반음영을 생성합니다.
+     * // - 원거리 캐스케이드(Cascade 2~3)에서는 radiusScale을 점진적으로 확장(1.0x -> 1.36x)하여 거친 텍셀의 도트 모서리를 둥글게 뭉개줍니다.
      *
-     * // @param directionalShadowMap [KO] 방향성 광원용 깊이 텍스처 [EN] Depth texture for directional light
-     * // @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
-     * // @param shadowDepthTextureSize [KO] 그림자 텍스처의 크기 [EN] Size of the shadow texture
-     * // @param bias [KO] 그림자 바이어스 [EN] Shadow bias
-     * // @param shadowCoord [KO] [0, 1] 범위로 변환된 그림자 좌표 (shadow.getShadowCoord 결과값) [EN] Shadow coordinates transformed to [0, 1] range (result of shadow.getShadowCoord)
-     * // @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
-     *
-     * // 의사 난수(Pseudo-random) 회전 각도를 얻는 헬퍼 함수
      *
      * ```wgsl
-     * fn getShadowRandomAngle(co: vec2<f32>) -> f32 {
-     *     return fract(sin(dot(co, vec2<f32>(12.9898, 78.233))) * 43758.5453) * 6.28318530718;
-     * }
-     *
-     * fn getDirectionalShadowVisibility(
-     *    directionalShadowMap: texture_depth_2d,
-     *    directionalShadowMapSampler: sampler_comparison,
-     *    shadowDepthTextureSize: u32,
-     *    bias: f32,
-     *    filterScale: f32,
-     *    shadowCoord: vec3<f32>
+     * #redgpu_include shadow.getShadowCoord;
+     * 
+     * fn sampleShadowIsotropic12Mesh(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     tUV: vec2<f32>,
+     *     cascadeIndex: u32,
+     *     compareDepth: f32,
+     *     oneOverTextureSize: f32
      * ) -> f32 {
-     *     let oneOverShadowDepthTextureSize = 1.0 / f32(shadowDepthTextureSize);
-     *     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-     *
-     *     // 12-Sample Poisson Disk 패턴 선언
-     *     var poissonDisk = array<vec2<f32>, 12>(
-     *         vec2<f32>(-0.171104, -0.635832),
-     *         vec2<f32>(-0.580224, -0.171168),
-     *         vec2<f32>(-0.03816, -0.07152),
-     *         vec2<f32>(0.569424, -0.121344),
-     *         vec2<f32>(0.134016, 0.638592),
-     *         vec2<f32>(-0.320496, 0.490896),
-     *         vec2<f32>(-0.814272, 0.428544),
-     *         vec2<f32>(-0.18048, -0.960288),
-     *         vec2<f32>(0.395376, -0.612144),
-     *         vec2<f32>(0.741024, 0.421296),
-     *         vec2<f32>(0.320112, 0.175152),
-     *         vec2<f32>(-0.596064, -0.73032)
-     *     );
-     *
-     *     var visibility: f32 = 0.0;
-     *
-     *     // 픽셀 스크린 공간 좌표 기반으로 무작위 회전 각도 계산
-     *     let randomAngle = getShadowRandomAngle(shadowCoord.xy * 1000.0);
-     *     let cosAngle = cos(randomAngle);
-     *     let sinAngle = sin(randomAngle);
-     *     let rotationMatrix = mat2x2<f32>(cosAngle, -sinAngle, sinAngle, cosAngle);
-     *
-     *     // Poisson Disk 샘플링 루프 순회
-     *     for (var i = 0; i < 12; i++) {
-     *         // 포아송 오프셋을 랜덤 각도로 회전
-     *         let rotatedOffset = rotationMatrix * poissonDisk[i];
-     *         let offset = rotatedOffset * oneOverShadowDepthTextureSize * filterScale;
-     *         let tUV = shadowCoord.xy + offset;
-     *
-     *         // textureSampleCompare는 Uniform Control Flow 규격을 유지하기 위해 분기문 밖에서 실행
-     *         let sampleVisibility = textureSampleCompare(
-     *             directionalShadowMap,
-     *             directionalShadowMapSampler,
-     *             tUV,
-     *             shadowDepth - bias
-     *         );
-     *
-     *         // 범위 밖의 영역은 그림자 가시성을 1.0으로 고정 (select 함수 사용)
-     *         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
-     *         visibility += select(sampleVisibility, 1.0, outOfBounds);
+     *     let radiusScale = 1.0 + f32(cascadeIndex) * 0.12;
+     *     let s = oneOverTextureSize * radiusScale;
+     * 
+     *     // 1. 중심 코어 (Weight: 4.0)
+     *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
+     * 
+     *     // 2. 내측 5각 비격자 링 (Radius: 1.05 * s, Weight: 2.4 each -> 12.0)
+     *     // 각도: 18°, 90°, 162°, 234°, 306° (직교 X/Y 동시 정렬 회피)
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.9986,  0.3245) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.3245,  0.9986) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.9986, -0.3245) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.3245, -0.9986) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.6850, -0.7975) * s, cascadeIndex, compareDepth);
+     * 
+     *     // 3. 외측 6각 회전 링 (Radius: 2.05 * s, Weight: 1.0 each -> 6.0)
+     *     // 각도: 15°, 75°, 135°, 195°, 255°, 315° (사각형 텍셀의 대각선 계단 윤곽 완전 파괴)
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.9801,  0.5306) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5306,  1.9801) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.4496,  1.4496) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.9801, -0.5306) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.5306, -1.9801) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.4496, -1.4496) * s, cascadeIndex, compareDepth);
+     * 
+     *     // 총 가중치 합: 4.0 + 12.0 + 6.0 = 22.0
+     *     return sum * (1.0 / 22.0);
+     * }
+     * 
+     * /**
+     *  * 🌟 [비회전 4-Tap 26.6° Rotated-Grid PCF (캐스케이드 전환 블렌딩 전용)]
+     *  * - RGSS (Rotated Grid Super-Sampling, arctan(0.5) ≈ 26.6°) 배치로 4개의 하드웨어 2x2 Bilinear 탭이
+     *  *   가로·세로·대각선 좌표를 모두 다르게 샘플링하여 전환 구간 대역폭을 아끼면서 계단 방향성을 억제합니다.
+     *  * 
+     *  *\/
+     * fn sampleShadowRotatedGrid4Mesh(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     tUV: vec2<f32>,
+     *     cascadeIndex: u32,
+     *     compareDepth: f32,
+     *     oneOverTextureSize: f32
+     * ) -> f32 {
+     *     let radiusScale = 1.0 + f32(cascadeIndex) * 0.12;
+     *     let s = oneOverTextureSize * radiusScale;
+     * 
+     *     var sum: f32 = 0.0;
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.375,  0.875) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.875,  0.375) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.875, -0.375) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.375, -0.875) * s, cascadeIndex, compareDepth);
+     * 
+     *     return sum * 0.25;
+     * }
+     * 
+     * /**
+     *  * 🌟 [현대적인 Clean Soft CSM 메인 진입점 - 전 구간 무분기 12-Tap 비회전 등방성 원형 가우시안 PCF (12 / 12 / 12 / 12)]
+     *  * - Cascade 0 ~ 3 전 구간 (0.1m ~ 200.0m): 12-Tap 비회전 등방성 원형 가우시안 디스크 (워프 분기 0%, 계단 윤곽 및 회전 노이즈 동시 제거)
+     *  * - 캐스케이드 전환 구간 (20%): 4-Tap 26.6° Rotated-Grid PCF 크로스페이드
+     *  * 
+     *  * @param directionalShadowMap [KO] 방향성 광원용 2D 뎁스 텍스처 어레이 [EN] 2D depth texture array for directional light
+     *  * @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
+     *  * @param worldPosition [KO] 월드 공간 상의 정점/픽셀 좌표 [EN] World position of vertex/pixel
+     *  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
+     *  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
+     *  * @param screenPos [KO] 프래그먼트 스크린 픽셀 좌표 (@builtin(position).xy) [EN] Fragment screen pixel position
+     *  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
+     *  * 
+     *  *\/
+     * fn getDirectionalShadowVisibility(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     worldPosition: vec3<f32>,
+     *     N: vec3<f32>,
+     *     L: vec3<f32>,
+     *     screenPos: vec2<f32>
+     * ) -> f32 {
+     *     let nDotL = dot(N, L);
+     *     // 🚀 1. 완전 역광(-0.08 미만)은 샘플링 스킵 (GPU 부하 절감)
+     *     if (nDotL <= -0.08) {
+     *         return 0.0;
      *     }
-     *
-     *     visibility /= 12.0;
-     *
-     *     // 라이트 프러스트럼 범위 밖(Near/Far plane 너머)인 경우 가시성 1.0 반환
+     * 
+     *     let shadowInfo = systemUniforms.shadow;
+     *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
+     * 
+     *     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+     *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
+     *     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+     *     let viewDepth = -viewPos.z;
+     * 
+     *     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
+     *     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+     *         return 1.0;
+     *     }
+     * 
+     *     // 🌟 [Caster Bounding Volume 0-Tap 가드]
+     *     let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
+     *     if (casterRadiusSq == 0.0) {
+     *         return 1.0;
+     *     }
+     *     if (casterRadiusSq > 0.0) {
+     *         let diff = worldPosition - shadowInfo.casterBoundingCenter;
+     *         if (dot(diff, diff) > casterRadiusSq) {
+     *             return 1.0;
+     *         }
+     *     }
+     * 
+     *     let texSize = f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+     *     let oneOverTextureSize = 1.0 / texSize;
+     *     let bias = shadowInfo.directionalShadowBias;
+     * 
+     *     // 3. 캐스케이드 레벨 결정
+     *     var cascadeIndex: u32 = 0u;
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
+     * 
+     *     // 🚀 4. [언리얼 엔진 5 표준 서브텍셀 노멀 오프셋 바이어스]
+     *     let slopeBias = saturate(1.0 - nDotL);
+     *     let normalBiasScale = 0.5 + slopeBias * 1.5;
+     *     let baseBiasFactor = bias * (1.0 + slopeBias * 3.5);
+     *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+     *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
+     *     let normalOffset = N * normalBiasScale * worldTexelSize;
+     *     let biasedWorldPosition = worldPosition + normalOffset;
+     * 
+     *     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+     * 
      *     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
-     *     return select(visibility, 1.0, invalidDepth);
+     *     let tUV = shadowCoord.xy;
+     *     let outOfBounds = tUV.x < -0.02 || tUV.x > 1.02 || tUV.y < -0.02 || tUV.y > 1.02;
+     *     if (invalidDepth || outOfBounds) {
+     *         return 1.0;
+     *     }
+     * 
+     *     // 🌟 [대규모 오픈월드 부동소수점 오차 흡수 바이어스 계수 산출]
+     *     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
+     *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
+     *     let shadowDepth = saturate(shadowCoord.z);
+     *     let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     * 
+     *     // 5. 전 구간 무분기 12-Tap 등방성 원형 가우시안 디스크 샘플링 (Cascade 0 ~ 3 통일)
+     *     var finalVisibility: f32 = sampleShadowIsotropic12Mesh(
+     *         directionalShadowMap,
+     *         directionalShadowMapSampler,
+     *         tUV,
+     *         cascadeIndex,
+     *         shadowDepth - cascadeBias,
+     *         oneOverTextureSize
+     *     );
+     * 
+     *     // 🌟 6. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
+     *     if (cascadeIndex < cascadeCount - 1u) {
+     *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
+     *         let safePrevIndex = max(1u, cascadeIndex) - 1u;
+     *         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[safePrevIndex], cascadeIndex > 0u);
+     *         let cascadeRange = splitFar - splitNear;
+     *         let blendMargin = cascadeRange * 0.20;
+     *         let blendStart = splitFar - blendMargin;
+     * 
+     *         if (viewDepth > blendStart && finalVisibility < 0.9999) {
+     *             let nextIndex = cascadeIndex + 1u;
+     *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
+     *             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
+     *             let nextBiasedPos = worldPosition + N * normalBiasScale * nextWorldTexelSize;
+     * 
+     *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
+     *             let nextTUV = nextShadowCoord.xy;
+     *             let nextShadowDepth = saturate(nextShadowCoord.z);
+     *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     * 
+     *             let nextVis = sampleShadowRotatedGrid4Mesh(
+     *                 directionalShadowMap,
+     *                 directionalShadowMapSampler,
+     *                 nextTUV,
+     *                 nextIndex,
+     *                 nextShadowDepth - nextCascadeBias,
+     *                 oneOverTextureSize
+     *             );
+     * 
+     *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
+     *             finalVisibility = mix(finalVisibility, nextVis, blendFactor);
+     *         }
+     *     } else {
+     *         // 7. 최외곽 15% 부드러운 페이드아웃 (하드 컷오프 방지)
+     *         let fadeStart = maxShadowDist * 0.85;
+     *         if (viewDepth > fadeStart) {
+     *             let fadeFactor = smoothstep(0.0, 1.0, saturate((viewDepth - fadeStart) / (maxShadowDist - fadeStart)));
+     *             finalVisibility = mix(finalVisibility, 1.0, fadeFactor);
+     *         }
+     *     }
+     * 
+     *     // 🌟 8. [언리얼 엔진 표준 Soft Horizon Terminator Fade]
+     *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
+     *     return finalVisibility * horizonFade;
      * }
      * ```
      */
     export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
+    /**
+     * // 🌟 [지형(Landscape) 초근경(Cascade 0) 전용 비회전 12-Tap 등방성 원형 가우시안 디스크]
+     * // - 일반 메쉬(sampleShadowIsotropic12Mesh)의 Cascade 0과 100% 동일한 오프셋 및 가중치를 공유하여
+     * //   메쉬-지형 접점의 반음영 두께와 농도를 완벽히 일치시킵니다.
+     *
+     *
+     * ```wgsl
+     * #redgpu_include shadow.getShadowCoord;
+     * 
+     * fn sampleShadowIsotropic12Landscape(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     tUV: vec2<f32>,
+     *     cascadeIndex: u32,
+     *     compareDepth: f32,
+     *     oneOverTextureSize: f32
+     * ) -> f32 {
+     *     let s = oneOverTextureSize;
+     * 
+     *     // 1. 중심 코어 (Weight: 4.0)
+     *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
+     * 
+     *     // 2. 내측 5각 비격자 링 (Radius: 1.05 * s, Weight: 2.4 each -> 12.0)
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.9986,  0.3245) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.3245,  0.9986) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.9986, -0.3245) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.3245, -0.9986) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.6850, -0.7975) * s, cascadeIndex, compareDepth);
+     * 
+     *     // 3. 외측 6각 회전 링 (Radius: 2.05 * s, Weight: 1.0 each -> 6.0)
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.9801,  0.5306) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5306,  1.9801) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.4496,  1.4496) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.9801, -0.5306) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.5306, -1.9801) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.4496, -1.4496) * s, cascadeIndex, compareDepth);
+     * 
+     *     // 총 가중치 합: 4.0 + 12.0 + 6.0 = 22.0
+     *     return sum * (1.0 / 22.0);
+     * }
+     * 
+     * /**
+     *  * 🌟 [지형(Landscape) 중경(Cascade 1 & C0->C1 전환) 전용 4-Tap 26.6° Rotated-Grid PCF]
+     *  * - RGSS (arctan(0.5) ≈ 26.6°) 배치로 4개의 하드웨어 2x2 Bilinear 탭이 서로 다른 가로·세로 축을 샘플링하여
+     *  *   기존 9-Tap 5x5 Tent 대비 텍스처 대역폭을 55.6% 절감하고 나눗셈(fdiv)을 100% 제거합니다.
+     *  * 
+     *  *\/
+     * fn sampleShadowRotatedGrid4Landscape(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     tUV: vec2<f32>,
+     *     cascadeIndex: u32,
+     *     compareDepth: f32,
+     *     oneOverTextureSize: f32
+     * ) -> f32 {
+     *     let s = oneOverTextureSize * 1.12;
+     * 
+     *     var sum: f32 = 0.0;
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.375,  0.875) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.875,  0.375) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.875, -0.375) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.375, -0.875) * s, cascadeIndex, compareDepth);
+     * 
+     *     return sum * 0.25;
+     * }
+     * 
+     * /**
+     *  * 🏔️ [지형(Landscape) 전용 적응형 CSM 메인 진입점 (12 / 4 / 1 / 1)]
+     *  * - Cascade 0 (0.1m ~ 12.1m): 12-Tap 비회전 등방성 원형 가우시안 디스크 (일반 메쉬와 100% 일치)
+     *  * - Cascade 1 (12.1m ~ 29.6m): 4-Tap 26.6° Rotated-Grid PCF (0 fdiv, 텍스처 대역폭 66.7% 절감)
+     *  * - Cascade 2 ~ 3 (29.6m ~ 200.0m): 1-Tap 하드웨어 2x2 Bilinear PCF (원경 지형 대역폭 91.7% 절감)
+     *  * - 정점 셰이더(landscapeVertex.wgsl)에서 계산된 viewDepth를 전달받아 픽셀당 viewMatrix 행렬 곱셈 생략
+     *  * 
+     *  * @param directionalShadowMap [KO] 방향성 광원용 2D 뎁스 텍스처 어레이 [EN] 2D depth texture array for directional light
+     *  * @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
+     *  * @param worldPosition [KO] 월드 공간 상의 픽셀 좌표 [EN] World position of pixel
+     *  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
+     *  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
+     *  * @param viewDepth [KO] 정점 셰이더에서 보간된 뷰 공간 깊이 (-viewPos.z) [EN] Interpolated view-space depth
+     *  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
+     *  * 
+     *  *\/
+     * fn getDirectionalShadowVisibilityLandscape(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     worldPosition: vec3<f32>,
+     *     N: vec3<f32>,
+     *     L: vec3<f32>,
+     *     viewDepth: f32
+     * ) -> f32 {
+     *     let nDotL = dot(N, L);
+     *     // 1. 완전 역광(-0.08 미만)은 샘플링 스킵
+     *     if (nDotL <= -0.08) {
+     *         return 0.0;
+     *     }
+     * 
+     *     let shadowInfo = systemUniforms.shadow;
+     *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
+     * 
+     *     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
+     *     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+     *         return 1.0;
+     *     }
+     * 
+     *     // 2. [Caster Bounding Volume 0-Tap 가드]
+     *     let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
+     *     if (casterRadiusSq == 0.0) {
+     *         return 1.0;
+     *     }
+     *     if (casterRadiusSq > 0.0) {
+     *         let diff = worldPosition - shadowInfo.casterBoundingCenter;
+     *         if (dot(diff, diff) > casterRadiusSq) {
+     *             return 1.0;
+     *         }
+     *     }
+     * 
+     *     let texSize = f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+     *     let oneOverTextureSize = 1.0 / texSize;
+     *     let bias = shadowInfo.directionalShadowBias;
+     * 
+     *     // 3. 캐스케이드 레벨 결정
+     *     var cascadeIndex: u32 = 0u;
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
+     * 
+     *     // 4. 일반 메쉬(getDirectionalShadowVisibility)와 100% 동일한 서브텍셀 노멀 오프셋 및 깊이 바이어스
+     *     let slopeBias = saturate(1.0 - nDotL);
+     *     let normalBiasScale = 0.5 + slopeBias * 1.5;
+     *     let baseBiasFactor = bias * (1.0 + slopeBias * 3.5);
+     *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+     *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
+     *     let normalOffset = N * normalBiasScale * worldTexelSize;
+     *     let biasedWorldPosition = worldPosition + normalOffset;
+     * 
+     *     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+     * 
+     *     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+     *     let tUV = shadowCoord.xy;
+     *     let outOfBounds = tUV.x < -0.02 || tUV.x > 1.02 || tUV.y < -0.02 || tUV.y > 1.02;
+     *     if (invalidDepth || outOfBounds) {
+     *         return 1.0;
+     *     }
+     * 
+     *     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
+     *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
+     *     let shadowDepth = saturate(shadowCoord.z);
+     *     let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *     let compareDepth = shadowDepth - cascadeBias;
+     * 
+     *     // 5. 캐스케이드 거리별 차등 탭 샘플링 (12 / 4 / 1 / 1)
+     *     var finalVisibility: f32 = 1.0;
+     *     if (cascadeIndex == 0u) {
+     *         finalVisibility = sampleShadowIsotropic12Landscape(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             0u,
+     *             compareDepth,
+     *             oneOverTextureSize
+     *         );
+     *     } else if (cascadeIndex == 1u) {
+     *         finalVisibility = sampleShadowRotatedGrid4Landscape(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             1u,
+     *             compareDepth,
+     *             oneOverTextureSize
+     *         );
+     *     } else {
+     *         finalVisibility = textureSampleCompareLevel(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             cascadeIndex,
+     *             compareDepth
+     *         );
+     *     }
+     * 
+     *     // 6. 캐스케이드 전환 블렌딩 (하위 20% 구간: C0->C1은 4-Tap, C1->C2->C3은 1-Tap)
+     *     if (cascadeIndex < cascadeCount - 1u) {
+     *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
+     *         let safePrevIndex = max(1u, cascadeIndex) - 1u;
+     *         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[safePrevIndex], cascadeIndex > 0u);
+     *         let cascadeRange = splitFar - splitNear;
+     *         let blendMargin = cascadeRange * 0.20;
+     *         let blendStart = splitFar - blendMargin;
+     * 
+     *         if (viewDepth > blendStart && finalVisibility < 0.9999) {
+     *             let nextIndex = cascadeIndex + 1u;
+     *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
+     *             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
+     *             let nextBiasedPos = worldPosition + N * normalBiasScale * nextWorldTexelSize;
+     * 
+     *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
+     *             let nextTUV = nextShadowCoord.xy;
+     *             let nextShadowDepth = saturate(nextShadowCoord.z);
+     *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *             let nextCompareDepth = nextShadowDepth - nextCascadeBias;
+     * 
+     *             var nextVis: f32 = 1.0;
+     *             if (nextIndex == 1u) {
+     *                 nextVis = sampleShadowRotatedGrid4Landscape(
+     *                     directionalShadowMap,
+     *                     directionalShadowMapSampler,
+     *                     nextTUV,
+     *                     1u,
+     *                     nextCompareDepth,
+     *                     oneOverTextureSize
+     *                 );
+     *             } else {
+     *                 nextVis = textureSampleCompareLevel(
+     *                     directionalShadowMap,
+     *                     directionalShadowMapSampler,
+     *                     nextTUV,
+     *                     nextIndex,
+     *                     nextCompareDepth
+     *                 );
+     *             }
+     * 
+     *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
+     *             finalVisibility = mix(finalVisibility, nextVis, blendFactor);
+     *         }
+     *     } else {
+     *         // 7. 최외곽 15% 부드러운 페이드아웃
+     *         let fadeStart = maxShadowDist * 0.85;
+     *         if (viewDepth > fadeStart) {
+     *             let fadeFactor = smoothstep(0.0, 1.0, saturate((viewDepth - fadeStart) / (maxShadowDist - fadeStart)));
+     *             finalVisibility = mix(finalVisibility, 1.0, fadeFactor);
+     *         }
+     *     }
+     * 
+     *     // 8. Soft Horizon Terminator Fade
+     *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
+     *     return finalVisibility * horizonFade;
+     * }
+     * ```
+     */
+    export const getDirectionalShadowVisibilityLandscape = getDirectionalShadowVisibilityLandscape_wgsl;
+    /**
+     * // 🌟 [식생(Foliage) 초근경(Cascade 0) 전용 비회전 6-Tap 등방성 원형 가우시안 디스크]
+     * // - 기존 9-Tap 5x5 Tent PCF 대비 텍스처 샘플링을 33.3%(9-Tap -> 6-Tap) 절감하고 부동소수점 나눗셈(fdiv) 6회를 100% 제거합니다.
+     * // - 중심(1탭, w=4.0) + 5각 비격자 링(5탭, r=1.05 texels, w=2.4)의 하드웨어 2x2 Bilinear 중첩(실효 24텍셀)으로
+     * //   직교 격자 대각선 계단 현상 없이 매끄러운 원형 반음영을 생성합니다.
+     *
+     *
+     * ```wgsl
+     * #redgpu_include shadow.getShadowCoord;
+     * 
+     * fn sampleShadowIsotropic6Foliage(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     tUV: vec2<f32>,
+     *     cascadeIndex: u32,
+     *     compareDepth: f32,
+     *     oneOverTextureSize: f32
+     * ) -> f32 {
+     *     let s = oneOverTextureSize;
+     * 
+     *     // 1. 중심 코어 (Weight: 4.0)
+     *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
+     * 
+     *     // 2. 5각 비격자 등방성 링 (Radius: 1.05 * s, Weight: 2.4 each -> 12.0)
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.9986,  0.3245) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.3245,  0.9986) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.9986, -0.3245) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.3245, -0.9986) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.6850, -0.7975) * s, cascadeIndex, compareDepth);
+     * 
+     *     // 총 가중치 합: 4.0 + 12.0 = 16.0 (1.0 / 16.0 = 0.0625, 2의 거듭제곱 무오차 상수)
+     *     return sum * 0.0625;
+     * }
+     * 
+     * /**
+     *  * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수 (6 / 1 / 1 / 1)]
+     *  * - Cascade 0 (초근경): 비회전 6-Tap 등방성 원형 디스크로 기존 9-Tap Tent 대비 텍스처 대역폭 33% 절감 및 나눗셈(fdiv) 100% 제거
+     *  * - Cascade 1+ (중원경): 초고속 1-Tap 하드웨어 Bilinear PCF로 대규모 숲 오버드로우 대역폭 절감
+     *  * - Caster Bounding Volume 0-Tap 가드 및 캐스케이드 전환 크로스페이드 적용
+     *  * 
+     *  * @param directionalShadowMap 방향성 광원용 2D 뎁스 텍스처 어레이
+     *  * @param directionalShadowMapSampler 비교 샘플러
+     *  * @param worldPosition 월드 공간 상의 정점/픽셀 좌표
+     *  * @param N 단위 법선 벡터
+     *  * @param L 광원 방향 단위 벡터
+     *  * @returns 가시성 계수 (0.0 ~ 1.0)
+     *  * 
+     *  *\/
+     * fn getDirectionalShadowVisibilityFoliage(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     worldPosition: vec3<f32>,
+     *     N: vec3<f32>,
+     *     L: vec3<f32>
+     * ) -> f32 {
+     *     let nDotL = dot(N, L);
+     *     // 1. 완전 역광은 샘플링 스킵
+     *     if (nDotL <= -0.08) {
+     *         return 0.0;
+     *     }
+     * 
+     *     let shadowInfo = systemUniforms.shadow;
+     *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
+     * 
+     *     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+     *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
+     *     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+     *     let viewDepth = -viewPos.z;
+     * 
+     *     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
+     *     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+     *         return 1.0;
+     *     }
+     * 
+     *     // 🌟 [Caster Bounding Volume 0-Tap 가드]
+     *     let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
+     *     if (casterRadiusSq == 0.0) {
+     *         return 1.0;
+     *     }
+     *     if (casterRadiusSq > 0.0) {
+     *         let diff = worldPosition - shadowInfo.casterBoundingCenter;
+     *         if (dot(diff, diff) > casterRadiusSq) {
+     *             return 1.0;
+     *         }
+     *     }
+     * 
+     *     let texSize = f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+     *     let oneOverTextureSize = 1.0 / texSize;
+     *     let bias = shadowInfo.directionalShadowBias;
+     * 
+     *     // 3. 캐스케이드 레벨 결정 (단일 캐스케이드만 선택)
+     *     var cascadeIndex: u32 = 0u;
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
+     * 
+     *     // 4. 식생 맞춤형 서브텍셀 슬로프 바이어스 및 노멀 오프셋
+     *     let slopeBias = saturate(1.0 - nDotL);
+     *     let normalBiasScale = 0.25 + slopeBias * 0.65;
+     *     let baseBiasFactor = bias * (1.0 + slopeBias * 1.5);
+     *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+     *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
+     *     let normalOffset = N * normalBiasScale * worldTexelSize;
+     *     let biasedWorldPosition = worldPosition + normalOffset;
+     * 
+     *     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+     * 
+     *     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+     *     let tUV = shadowCoord.xy;
+     *     let outOfBounds = tUV.x < -0.02 || tUV.x > 1.02 || tUV.y < -0.02 || tUV.y > 1.02;
+     *     if (invalidDepth || outOfBounds) {
+     *         return 1.0;
+     *     }
+     * 
+     *     let absPos = abs(worldPosition);
+     *     let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
+     *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
+     *     let shadowDepth = saturate(shadowCoord.z);
+     *     let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0002 + driftBias);
+     * 
+     *     var finalVis: f32 = 1.0;
+     * 
+     *     // 5. 적응형 샘플링: 초근경(Cascade 0)은 비회전 6-Tap 등방성 원형 디스크, 중원경(Cascade 1+)은 1-Tap 하드웨어 Bilinear PCF
+     *     if (cascadeIndex == 0u) {
+     *         finalVis = sampleShadowIsotropic6Foliage(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             0u,
+     *             shadowDepth - cascadeBias,
+     *             oneOverTextureSize
+     *         );
+     *     } else {
+     *         finalVis = textureSampleCompareLevel(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             cascadeIndex,
+     *             shadowDepth - cascadeBias
+     *         );
+     *     }
+     * 
+     *     // 6. 캐스케이드 전환 블렌딩 (Cascade Transition Blending)
+     *     if (cascadeIndex < cascadeCount - 1u) {
+     *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
+     *         let safePrevIndex = max(1u, cascadeIndex) - 1u;
+     *         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[safePrevIndex], cascadeIndex > 0u);
+     *         let cascadeRange = splitFar - splitNear;
+     *         let blendMargin = cascadeRange * 0.20;
+     *         let blendStart = splitFar - blendMargin;
+     * 
+     *         if (viewDepth > blendStart && finalVis < 0.9999) {
+     *             let nextIndex = cascadeIndex + 1u;
+     *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
+     *             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
+     *             let nextNormalOffset = N * normalBiasScale * nextWorldTexelSize;
+     *             let nextBiasedPos = worldPosition + nextNormalOffset;
+     *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
+     * 
+     *             let nextTUV = nextShadowCoord.xy;
+     *             let nextShadowDepth = saturate(nextShadowCoord.z);
+     *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0002 + driftBias);
+     * 
+     *             let nextVis = textureSampleCompareLevel(
+     *                 directionalShadowMap,
+     *                 directionalShadowMapSampler,
+     *                 nextTUV,
+     *                 nextIndex,
+     *                 nextShadowDepth - nextCascadeBias
+     *             );
+     * 
+     *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
+     *             finalVis = mix(finalVis, nextVis, blendFactor);
+     *         }
+     *     } else {
+     *         // 7. 최외곽 캐스케이드 부드러운 페이드아웃
+     *         let fadeStart = maxShadowDist * 0.85;
+     *         if (viewDepth > fadeStart) {
+     *             let fadeFactor = smoothstep(0.0, 1.0, saturate((viewDepth - fadeStart) / (maxShadowDist - fadeStart)));
+     *             finalVis = mix(finalVis, 1.0, fadeFactor);
+     *         }
+     *     }
+     * 
+     *     // 8. Soft Horizon Terminator Fade
+     *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
+     *     return finalVis * horizonFade;
+     * }
+     * ```
+     */
+    export const getDirectionalShadowVisibilityFoliage = getDirectionalShadowVisibilityFoliage_wgsl;
 }
 
 export namespace ColorLibrary {
@@ -1091,7 +1677,7 @@ export namespace ColorLibrary {
      *
      * ```wgsl
      * #redgpu_include color.linearToSrgbVec3
-     *
+     * 
      * fn linearToSrgbVec4(linearColor: vec4<f32>) -> vec4<f32> {
      *     return vec4<f32>(linearToSrgbVec3(linearColor.rgb), linearColor.a);
      * }
@@ -1127,7 +1713,7 @@ export namespace ColorLibrary {
      *
      * ```wgsl
      * #redgpu_include color.srgbToLinearVec3
-     *
+     * 
      * fn srgbToLinearVec4(srgbColor: vec4<f32>) -> vec4<f32> {
      *     return vec4<f32>(srgbToLinearVec3(srgbColor.rgb), srgbColor.a);
      * }
@@ -1159,18 +1745,18 @@ export namespace ColorLibrary {
      *
      * ```wgsl
      * #redgpu_include math.EPSILON
-     *
+     * 
      * fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
      *     let maxVal: f32 = max(max(rgb.r, rgb.g), rgb.b);
      *     let minVal: f32 = min(min(rgb.r, rgb.g), rgb.b);
      *     let delta: f32 = maxVal - minVal;
-     *
+     * 
      *     let lightness: f32 = (maxVal + minVal) * 0.5;
-     *
+     * 
      *     if (delta < EPSILON) {
      *         return vec3<f32>(0.0, 0.0, lightness);
      *     }
-     *
+     * 
      *     // Saturation 계산
      *     var saturation: f32;
      *     if (lightness < 0.5) {
@@ -1178,7 +1764,7 @@ export namespace ColorLibrary {
      *     } else {
      *         saturation = delta / (2.0 - maxVal - minVal + EPSILON);
      *     }
-     *
+     * 
      *     // Hue 계산 (부동소수점 비교 개선)
      *     var hue: f32 = 0.0;
      *     if (abs(rgb.r - maxVal) < EPSILON) {
@@ -1191,30 +1777,30 @@ export namespace ColorLibrary {
      *     } else {
      *         hue = (rgb.r - rgb.g) / delta + 4.0;
      *     }
-     *
+     * 
      *     hue = hue / 6.0;
-     *
+     * 
      *     return vec3<f32>(hue, saturation, lightness);
      * }
-     *
+     * 
      * /**
      *  * [KO] HSL 색상을 RGB 색상 공간으로 변환합니다.
      *  * [EN] Converts HSL color to RGB color space.
-     *  *
+     *  * 
      *  * @param hsl [KO] 입력 HSL 색상 [EN] Input HSL color
      *  * @returns [KO] 변환된 RGB 색상 [EN] Converted RGB color
-     *  *
+     *  * 
      *  *\/
      * fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
      *     let h = hsl.x; // Hue: 0.0 ~ 1.0
      *     let s = hsl.y; // Saturation: 0.0 ~ 1.0
      *     let l = hsl.z; // Lightness: 0.0 ~ 1.0
-     *
+     * 
      *     if (s == 0.0) {
      *         // 무채색(회색)인 경우
      *         return vec3<f32>(l, l, l);
      *     }
-     *
+     * 
      *     // q와 p 계산
      *     var q: f32;
      *     if (l < 0.5) {
@@ -1222,14 +1808,14 @@ export namespace ColorLibrary {
      *     } else {
      *         q = l + s - l * s;
      *     }
-     *
+     * 
      *     let p = 2.0 * l - q;
-     *
+     * 
      *     // R, G, B 계산
      *     var r: f32;
      *     var g: f32;
      *     var b: f32;
-     *
+     * 
      *     for (var i: i32 = 0; i < 3; i = i + 1) {
      *         var t: f32;
      *         if (i == 0) {
@@ -1239,14 +1825,14 @@ export namespace ColorLibrary {
      *         } else {
      *             t = h - 1.0 / 3.0; // Blue
      *         }
-     *
+     * 
      *         if (t < 0.0) {
      *             t = t + 1.0;
      *         }
      *         if (t > 1.0) {
      *             t = t - 1.0;
      *         }
-     *
+     * 
      *         var color: f32;
      *         if (t < 1.0 / 6.0) {
      *             color = p + (q - p) * 6.0 * t;
@@ -1257,7 +1843,7 @@ export namespace ColorLibrary {
      *         } else {
      *             color = p;
      *         }
-     *
+     * 
      *         if (i == 0) {
      *             r = color;
      *         } else if (i == 1) {
@@ -1266,23 +1852,23 @@ export namespace ColorLibrary {
      *             b = color;
      *         }
      *     }
-     *
+     * 
      *     return vec3<f32>(r, g, b);
      * }
-     *
+     * 
      * /**
      *  * [KO] 베이스 색상에 틴트(Tint) 색상을 지정된 블렌딩 모드로 합성합니다.
      *  * [EN] Blends the base color with a tint color using the specified blending mode.
-     *  *
+     *  * 
      *  * @param baseColor [KO] 원본 색상 (RGBA) [EN] Base color (RGBA)
      *  * @param tintBlendMode [KO] 블렌딩 모드 인덱스 (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION) [EN] Blending mode index (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION)
      *  * @param tint [KO] 합성할 틴트 색상 (RGBA) [EN] Tint color to blend (RGBA)
      *  * @returns [KO] 합성된 최종 색상 (RGBA) [EN] Final blended color (RGBA)
-     *  *
+     *  * 
      *  *\/
      * fn getTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
      *     var tintedColor: vec3<f32>;
-     *
+     * 
      *     switch (tintBlendMode) {
      *         case 0u: { // NORMAL
      *             tintedColor = mix(baseColor.rgb, tint.rgb, tint.a);
@@ -1385,7 +1971,7 @@ export namespace ColorLibrary {
      *             tintedColor = baseColor.rgb;
      *         }
      *     }
-     *
+     * 
      *     return vec4<f32>(tintedColor, baseColor.a * tint.a);
      * }
      * ```
@@ -1406,7 +1992,7 @@ export namespace DepthLibrary {
      *
      * ```wgsl
      * #redgpu_include math.EPSILON
-     *
+     * 
      * fn getLinearizeDepth(depthSample : f32, near : f32, far : f32) -> f32 {
      *     let d = clamp(depthSample, 0.0, 1.0);
      *     return (near * far) / max(EPSILON, far - d * (far - near));
@@ -1433,17 +2019,17 @@ export namespace LightingLibrary {
      *
      * ```wgsl
      * #redgpu_include math.EPSILON
-     *
+     * 
      * fn getLightDistanceAttenuation(distance: f32, radius: f32) -> f32 {
      *     let d2 = distance * distance;
-     *
+     *     
      *     // [KO] 현대적인 표준 윈도잉 함수 (Frostbite / Unreal 방식)
      *     // [EN] Modern standard windowing function (Frostbite / Unreal style)
      *     let factor = distance / radius;
      *     let factor2 = factor * factor;
      *     let factor4 = factor2 * factor2;
      *     let windowing = clamp(1.0 - factor4, 0.0, 1.0);
-     *
+     *     
      *     // [KO] 순수 역제곱 법칙 적용 (1 / d^2) + 윈도잉
      *     // [EN] Apply pure inverse square law (1 / d^2) + windowing
      *     return (windowing * windowing) / max(d2, 0.0001);
@@ -1467,7 +2053,7 @@ export namespace LightingLibrary {
      *
      * ```wgsl
      * #redgpu_include math.EPSILON
-     *
+     * 
      * fn getLightAngleAttenuation(
      *     lightToVertexDirection: vec3<f32>, 
      *     lightDirection: vec3<f32>, 
@@ -1477,10 +2063,10 @@ export namespace LightingLibrary {
      *     let cosTheta = dot(lightToVertexDirection, lightDirection);
      *     let cosOuter = cos(radians(outerCutoff));
      *     let cosInner = cos(radians(innerCutoff));
-     *
+     *     
      *     // [KO] 스폿라이트 감쇄 수식 (glTF 2.0 표준)
      *     // [EN] Spotlight attenuation formula (glTF 2.0 standard)
-     *
+     *     
      *     let epsilon = max(EPSILON, cosInner - cosOuter);
      *     let factor = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
      *     return factor * factor;
@@ -1488,580 +2074,6 @@ export namespace LightingLibrary {
      * ```
      */
     export const getLightAngleAttenuation = getLightAngleAttenuation_wgsl;
-}
-
-export namespace SkyAtmosphereLibrary {
-    /**
-     * // [KO] 특정 고도와 각도에서의 대기 투과율(Transmittance)을 조회합니다.
-     * // [EN] Retrieves atmospheric transmittance at a specific altitude and angle.
-     *
-     *
-     * ```wgsl
-     * #redgpu_include math.PI
-     * #redgpu_include math.PI2
-     * #redgpu_include math.HPI
-     * #redgpu_include math.INV_PI
-     * #redgpu_include math.DEG_TO_RAD
-     * #redgpu_include math.EPSILON
-     * #redgpu_include systemStruct.SkyAtmosphere
-     * #redgpu_include color.getLuminance
-     *
-     * const MAX_TAU: f32 = 100.0;
-     *
-     * const SUN_ANGULAR_RADIUS_RAD: f32 = 0.00465;
-     * const SUN_SOLID_ANGLE_BASE: f32 = 6.794e-5;
-     *
-     * const TRANSMITTANCE_STEPS: u32 = 40u;
-     * const MULTI_SCAT_STEPS: u32 = 40u;
-     * const SKY_VIEW_STEPS: u32 = 128u;
-     * const AP_STEPS: u32 = 64u;
-     * const MULTI_SCAT_SAMPLES: u32 = 128u;
-     * const IRRADIANCE_SAMPLES: u32 = 256u;
-     *
-     * const SUN_RADIANCE_BOOST: f32 = 1.0;
-     * const MIE_GLOW_SUPPRESS: f32 = 0.40;
-     * const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
-     *
-     * struct AtmosphereDensities {
-     *     rhoR: f32, rhoM: f32, rhoO: f32
-     * };
-     *
-     * struct AtmosphereCoefficients {
-     *     scatTotal: vec3<f32>,
-     *     extinction: vec3<f32>
-     * };
-     *
-     * fn getRaySphereIntersection(rayOrigin: vec3<f32>, rayDir: vec3<f32>, sphereRadius: f32) -> f32 {
-     *     let b = dot(rayOrigin, rayDir);
-     *     let c = dot(rayOrigin, rayOrigin) - sphereRadius * sphereRadius;
-     *     let delta = b * b - c;
-     *     if (delta < 0.0) { return -1.0; }
-     *     let s = sqrt(delta);
-     *     let t0 = -b - s;
-     *     let t1 = -b + s;
-     *     if (t0 > EPSILON) { return t0; }
-     *     if (t1 > EPSILON) { return t1; }
-     *     return -1.0;
-     * }
-     *
-     * fn getPlanetIntersection(origin: vec3<f32>, dir: vec3<f32>, r: f32) -> vec2<f32> {
-     *     let b = dot(origin, dir);
-     *     let c = dot(origin, origin) - r * r;
-     *     let delta = b * b - c;
-     *     if (delta < 0.0) { return vec2<f32>(-1.0); }
-     *     let s = sqrt(delta);
-     *     return vec2<f32>(-b - s, -b + s);
-     * }
-     *
-     * fn getTransmittanceUV(viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32> {
-     *     let mu = clamp(cosTheta, -1.0, 1.0);
-     *     let u = clamp(0.5 + 0.5 * sign(mu) * sqrt(abs(mu)), 0.001, 0.999);
-     *     let v = clamp(1.0 - viewHeight / atmosphereHeight, 0.001, 0.999);
-     *     return vec2<f32>(u, v);
-     * }
-     *
-     * fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, groundRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
-     *     var azimuth: f32;
-     *     if (abs(viewDir.z) < 1e-6 && abs(viewDir.x) < 1e-6) {
-     *         azimuth = 0.0;
-     *     } else {
-     *         azimuth = atan2(viewDir.z, viewDir.x);
-     *     }
-     *     let u = clamp((azimuth / PI2) + 0.5, 0.001, 0.999);
-     *     let r = groundRadius;
-     *     let h = max(0.0001, viewHeight);
-     *
-     *     let horizonCos = -sqrt(max(0.0, h * (2.0 * r + h))) / (r + h);
-     *     let horizonElevation = asin(clamp(horizonCos, -1.0, 1.0));
-     *     let viewElevation = asin(clamp(viewDir.y, -1.0, 1.0));
-     *
-     *     var v: f32;
-     *     if (viewElevation >= horizonElevation) {
-     *         let ratio = (viewElevation - horizonElevation) / (HPI - horizonElevation);
-     *         v = 0.5 * (1.0 - sqrt(max(0.0, ratio)));
-     *     } else {
-     *         let ratio = (horizonElevation - viewElevation) / (horizonElevation + HPI);
-     *         v = 0.5 * (1.0 + sqrt(max(0.0, ratio)));
-     *     }
-     *     return vec2<f32>(u, clamp(v, 0.001, 0.999));
-     * }
-     *
-     * fn getTransmittance(transmittanceLUT: texture_2d<f32>, skyAtmosphereSampler: sampler, viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> vec3<f32> {
-     *     let uv = getTransmittanceUV(viewHeight, cosTheta, atmosphereHeight);
-     *     // [KO] 하드웨어 선형 샘플링을 통해 LUT 사이의 값을 부드럽게 보간합니다.
-     *     // [EN] Smoothly interpolate between LUT entries via hardware linear sampling.
-     *     var transmittance = textureSampleLevel(transmittanceLUT, skyAtmosphereSampler, uv, 0.0).rgb;
-     *     let mu = clamp(cosTheta, -1.0, 1.0);
-     *     if (mu < 0.0) {
-     *         // [KO] 지평선 아래로 내려갈 때 지면에 의한 차폐를 부드럽게 적용합니다.
-     *         // [EN] Smoothly apply ground occlusion when below the horizon.
-     *         let groundMask = smoothstep(-0.015, 0.0, mu); 
-     *         transmittance *= groundMask;
-     *     }
-     *     return transmittance;
-     * }
-     *
-     * fn getPlanetShadowMask(p: vec3<f32>, sunDir: vec3<f32>, r: f32, params: SkyAtmosphere) -> f32 {
-     *     if (r > 0.0 && getRaySphereIntersection(p, sunDir, r) > 0.0) { return 0.0; }
-     *     return 1.0;
-     * }
-     *
-     * fn getAtmosphereDensities(viewHeight: f32, params: SkyAtmosphere) -> AtmosphereDensities {
-     *     var d: AtmosphereDensities;
-     *     if (viewHeight < 0.0) {
-     *         d.rhoR = 0.0; d.rhoM = 0.0; d.rhoO = 0.0;
-     *     } else {
-     *         d.rhoR = exp(-viewHeight / params.rayleighExponentialDistribution);
-     *         d.rhoM = exp(-viewHeight / params.mieExponentialDistribution);
-     *         let ozoneDist = abs(viewHeight - params.absorptionTipAltitude);
-     *         d.rhoO = max(0.0, 1.0 - ozoneDist / params.absorptionTentWidth);
-     *     }
-     *     return d;
-     * }
-     *
-     * fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
-     *     let r = params.groundRadius;
-     *     let tMax = getRaySphereIntersection(p, sunDir, r + params.atmosphereHeight);
-     *     if (tMax <= 0.0) { return vec3<f32>(1.0); }
-     *     let intersect = getPlanetIntersection(p, sunDir, r);
-     *
-     *     if (r > 0.0 && intersect.x > EPSILON) { return vec3<f32>(0.0); }
-     *
-     *     var optExt = vec3<f32>(0.0);
-     *     let halfSteps = TRANSMITTANCE_STEPS / 2u;
-     *
-     *     if (intersect.x > EPSILON && intersect.x < tMax) {
-     *         optExt += integrateOpticalDepth(p, sunDir, 0.0, intersect.x, halfSteps, params);
-     *         if (intersect.y > 0.0 && tMax > intersect.y) {
-     *             optExt += integrateOpticalDepth(p, sunDir, intersect.y, tMax, halfSteps, params);
-     *         }
-     *     } else {
-     *         optExt = integrateOpticalDepth(p, sunDir, 0.0, tMax, TRANSMITTANCE_STEPS, params);
-     *     }
-     *     return exp(-min(optExt, vec3<f32>(MAX_TAU)));
-     * }
-     *
-     * fn getPhysicalTransmittance(p: vec3<f32>, sunDir: vec3<f32>, r: f32, atmosphereHeight: f32, params: SkyAtmosphere) -> vec3<f32> {
-     *     let minElevationRad = params.transmittanceMinLightElevationAngle * DEG_TO_RAD;
-     *     var adjustedSunDir = sunDir;
-     *     if (sunDir.y < sin(minElevationRad)) {
-     *         let cosEl = cos(minElevationRad);
-     *         let sinEl = sin(minElevationRad);
-     *         let horizontalDir = normalize(vec3<f32>(sunDir.x, 0.0, sunDir.z));
-     *         adjustedSunDir = vec3<f32>(horizontalDir.x * cosEl, sinEl, horizontalDir.z * cosEl);
-     *     }
-     *
-     *     let intersect = getPlanetIntersection(p, adjustedSunDir, r);
-     *     if (r > 0.0 && intersect.x > EPSILON) { return vec3<f32>(0.0); }
-     *     return getSunTransmittanceManual(p, adjustedSunDir, params);
-     * }
-     *
-     * fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {
-     *     if (tMax <= tMin) { return vec3<f32>(0.0); }
-     *     let stepSize = (tMax - tMin) / f32(steps);
-     *     var optExt = vec3<f32>(0.0);
-     *     for (var i = 0u; i < steps; i = i + 1u) {
-     *         let t = tMin + (f32(i) + 0.5) * stepSize;
-     *         let viewHeight = length(origin + dir * t) - params.groundRadius;
-     *         if (viewHeight < 0.0) { continue; }
-     *         let d = getAtmosphereDensities(viewHeight, params);
-     *
-     *         let scatR_phys = params.rayleighScattering * d.rhoR;
-     *         let mieExt_phys = (params.mieScattering + params.mieAbsorption) * d.rhoM;
-     *         let absC_phys = params.absorptionCoefficient * d.rhoO;
-     *
-     *         optExt += (scatR_phys + mieExt_phys + absC_phys) * stepSize;
-     *     }
-     *     return optExt;
-     * }
-     *
-     * fn phaseRayleigh(cosTheta: f32) -> f32 {
-     *     return 3.0 / (16.0 * PI) * (1.0 + cosTheta * cosTheta);
-     * }
-     *
-     * fn phaseMie(cosTheta: f32, g: f32) -> f32 {
-     *     let g2 = g * g;
-     *     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
-     * }
-     *
-     * fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
-     *     return phaseMie(cosTheta, min(g, 0.80));
-     * }
-     *
-     * fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
-     *     let sunElevationParam = saturate(sunDir.y);
-     *     let squashFactor = mix(0.85, 1.0, sunElevationParam);
-     *     let verticalDist = viewDir.y - sunDir.y;
-     *     let correctionGuard = saturate(dot(viewDir, sunDir) * 10.0) * (1.0 - sunElevationParam * sunElevationParam);
-     *     let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) * correctionGuard;
-     *     return dot(viewDir, sunDir) - squashCorrection;
-     * }
-     *
-     * fn getSunDiskRadianceUnit(
-     *     viewSunCos: f32,
-     *     sunSize: f32,
-     *     sunLimbDarkening: f32,
-     *     skyTrans: vec3<f32>,
-     *     edgeSoftness: f32,
-     *     params: SkyAtmosphere
-     * ) -> vec3<f32> {
-     *     let sunRad = (sunSize * 0.5) * DEG_TO_RAD;
-     *     let cosSunRad = cos(sunRad);
-     *     let solidAngle = PI2 * (1.0 - cosSunRad);
-     *     let radianceScale = SUN_RADIANCE_BOOST / max(6.7e-5, solidAngle); 
-     *
-     *     let dist = (1.0 - viewSunCos) / max(1e-7, 1.0 - cosSunRad);
-     *     let sunMask = 1.0 - smoothstep(1.0 - edgeSoftness, 1.0, dist);
-     *     if (sunMask <= 0.0) { return vec3<f32>(0.0); }
-     *
-     *     let limbDarkening = pow(max(1e-7, 1.0 - saturate(dist)), sunLimbDarkening);
-     *     let energyNormalization = sunLimbDarkening + 1.0;
-     *
-     *     return (radianceScale * limbDarkening * energyNormalization * sunMask) * skyTrans;
-     * }
-     *
-     * fn getSunDiskRadianceIBL(
-     *     viewSunCos: f32,
-     *     sunLimbDarkening: f32,
-     *     skyTrans: vec3<f32>,
-     *     params: SkyAtmosphere
-     * ) -> vec3<f32> {
-     *     let sunRad = (params.sunSize * 0.5) * DEG_TO_RAD;
-     *     let iblAlpha = max(sunRad * 2.0, 0.175); 
-     *     let cosAlpha = cos(iblAlpha);
-     *
-     *     let radScale = 1.0 / (PI2 * (1.0 - cosAlpha));
-     *     let diff = saturate(1.0 - viewSunCos);
-     *     let sigma_sq = 1.0 - cosAlpha;
-     *     let falloff = exp(-diff / max(1e-7, sigma_sq));
-     *     if (falloff < 0.001) { return vec3<f32>(0.0); }
-     *
-     *     return (radScale * falloff) * skyTrans;
-     * }
-     *
-     * fn getMieGlowAmountUnit(
-     *     viewSunCos: f32,
-     *     viewHeight: f32, 
-     *     params: SkyAtmosphere, 
-     *     transmittanceLUT: texture_2d<f32>, 
-     *     skyAtmosphereSampler: sampler,
-     *     transToEdge: vec3<f32>,
-     *     overrideHalo: f32 
-     * ) -> vec3<f32> {
-     *     let actualAnisotropy = params.mieAnisotropy;
-     *     let halo = select(actualAnisotropy, overrideHalo, overrideHalo > 0.0);
-     *
-     *     let sharpG = min(max(halo, 0.88), 0.94); 
-     *     let stableG = min(actualAnisotropy, 0.80);
-     *
-     *     let sharpPhase = phaseMie(viewSunCos, sharpG);
-     *     let stablePhase = phaseMie(viewSunCos, stableG);
-     *     let diffPhase = max(0.0, sharpPhase - stablePhase);
-     *
-     *     let sunDirY = params.sunDirection.y;
-     *     let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
-     *     let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunCosTheta, params.atmosphereHeight);
-     *
-     *     return sunTransForGlow * (params.mieScattering / max(vec3<f32>(0.0001), params.mieScattering + params.mieAbsorption)) 
-     *                         * (diffPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS * params.skyLuminanceFactor;
-     * }
-     *
-     * /**
-     *  * [KO] 지정된 구간에 대해 대기 산란 적분을 수행합니다. (LUT 및 물리 파라미터 활용)
-     *  * [EN] Performs atmospheric scattering integration over a specified segment (Using LUTs and physical parameters).
-     *  *
-     *  *\/
-     * fn integrateScatSegment(
-     *     origin: vec3<f32>, dir: vec3<f32>, 
-     *     tMin: f32, tMax: f32, steps: u32, 
-     *     params: SkyAtmosphere,
-     *     transmittanceLUT: texture_2d<f32>, 
-     *     skyAtmosphereSampler: sampler,
-     *     multiScatLUT: texture_2d<f32>,
-     *     useLUT: bool,
-     *     radiance: ptr<function, vec3<f32>>, 
-     *     transmittance: ptr<function, vec3<f32>>
-     * ) {
-     *     if (tMax <= tMin) { return; }
-     *     let r = params.groundRadius;
-     *     let stepSize = (tMax - tMin) / f32(steps);
-     *     let sunDir = params.sunDirection;
-     *     let viewSunCos = dot(dir, sunDir);
-     *
-     *     // [KO] 위상 함수 계산 (레일리/미 산란 특성 반영)
-     *     // [EN] Calculate Phase Functions (Reflecting Rayleigh/Mie scattering characteristics)
-     *     let phaseR = phaseRayleigh(viewSunCos);
-     *     let phaseM = select(phaseMie(viewSunCos, params.mieAnisotropy), phaseMieStable(viewSunCos, params.mieAnisotropy), useLUT);
-     *
-     *     for (var i = 0u; i < steps; i = i + 1u) {
-     *         let t = tMin + (f32(i) + 0.5) * stepSize;
-     *         let p = origin + dir * t;
-     *         let pLen = length(p);
-     *         let viewHeight = pLen - r;
-     *
-     *         if (r > 0.0 && viewHeight < 0.0) { continue; }
-     *
-     *         let up = p / pLen;
-     *         let cosSun = dot(up, sunDir);
-     *
-     *         var sunTrans: vec3<f32>;
-     *         if (useLUT) {
-     *             // [KO] 미리 계산된 투과율 LUT 샘플링
-     *             // [EN] Sample precomputed transmittance LUT
-     *             sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, cosSun, params.atmosphereHeight);
-     *         } else {
-     *             // [KO] 실시간 수치 적분 수행 (LUT 생성 시 사용)
-     *             // [EN] Perform real-time numerical integration (Used during LUT generation)
-     *             sunTrans = getSunTransmittanceManual(p, sunDir, params);
-     *         }
-     *
-     *         let shadowMask = select(1.0, 0.0, r > 0.0 && getRaySphereIntersection(p, sunDir, r) > 0.0);
-     *         let d = getAtmosphereDensities(viewHeight, params);
-     *
-     *         let scatR_phys = params.rayleighScattering * d.rhoR;
-     *         let scatM_phys = params.mieScattering * d.rhoM;
-     *         let mieAbs_phys = params.mieAbsorption * d.rhoM;
-     *         let ozoneAbs_phys = params.absorptionCoefficient * d.rhoO;
-     *
-     *         let scatR_luminous = scatR_phys * params.skyLuminanceFactor;
-     *         let scatM_luminous = scatM_phys * params.skyLuminanceFactor;
-     *
-     *         let stepScat = (scatR_luminous * phaseR + scatM_luminous * phaseM) * sunTrans * shadowMask;
-     *
-     *         let scatTotal_luminous = scatR_luminous + scatM_luminous;
-     *         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight / params.atmosphereHeight, 0.001, 0.999));
-     *
-     *         // [KO] 다중 산란 기여분 합산 (하드웨어 선형 샘플링 필수)
-     *         // [EN] Add multi-scattering contribution (Hardware linear sampling mandatory)
-     *         let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal_luminous * shadowMask * params.multiScatteringFactor;
-     *
-     *         *radiance += *transmittance * (stepScat + msScat) * stepSize;
-     *
-     *         let extinction_phys = scatR_phys + scatM_phys + mieAbs_phys + ozoneAbs_phys;
-     *         *transmittance *= exp(-extinction_phys * stepSize);
-     *     }
-     * }
-     *
-     * fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
-     *     let tex = uv * 2.0 - 1.0;
-     *     var dir: vec3<f32>;
-     *     switch (face) {
-     *         case 0u: { dir = vec3<f32>(1.0, -tex.y, -tex.x); }
-     *         case 1u: { dir = vec3<f32>(-1.0, -tex.y, tex.x); }
-     *         case 2u: { dir = vec3<f32>(tex.x, 1.0, tex.y); }
-     *         case 3u: { dir = vec3<f32>(tex.x, -1.0, -tex.y); }
-     *         case 4u: { dir = vec3<f32>(tex.x, -tex.y, 1.0); }
-     *         case 5u: { dir = vec3<f32>(-tex.x, -tex.y, -1.0); }
-     *         default: { dir = vec3<f32>(0.0); }
-     *     }
-     *     return dir;
-     * }
-     *
-     * fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>) -> vec3<f32> {
-     *     let sunShadow = smoothstep(-0.01, 0.01, cosSun);
-     *     var groundRadiance = vec3<f32>(0.0);
-     *
-     *     if (sunShadow > 0.0) {
-     *         groundRadiance = (sunTrans * max(0.0, cosSun) * INV_PI + msEnergy) * groundAlbedo * sunShadow;
-     *     } else {
-     *         groundRadiance = msEnergy * groundAlbedo;
-     *     }
-     *
-     *     return groundRadiance;
-     * }
-     *
-     * fn evaluateIBLRadiance(
-     *     viewDir: vec3<f32>, 
-     *     params: SkyAtmosphere, 
-     *     transmittanceLUT: texture_2d<f32>, 
-     *     multiScatLUT: texture_2d<f32>, 
-     *     skyViewLUT: texture_2d<f32>, 
-     *     skyAtmosphereSampler: sampler
-     * ) -> vec3<f32> {
-     *     let r = params.groundRadius;
-     *     let viewHeight = max(0.0, params.cameraHeight);
-     *     let atmosphereHeight = params.atmosphereHeight;
-     *     let sunDir = normalize(params.sunDirection);
-     *
-     *     let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
-     *     let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
-     *
-     *     var radiance = skySample.rgb;
-     *
-     *     let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-     *
-     *     let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
-     *     let tEarth = getRaySphereIntersection(camPos, viewDir, r);
-     *     let isGround = r > 0.0 && tEarth > 0.0 && viewDir.y < -0.0001;
-     *
-     *     let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
-     *
-     *     let sunShadow = getPlanetShadowMask(camPos, sunDir, r, params);
-     *     if (!isGround && sunShadow > 0.0) {
-     *         let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
-     *         radiance += mieGlow * sunShadow;
-     *     }
-     *
-     *     return radiance;
-     * }
-     *
-     * fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
-     *     let cosHalf = cos(lobeHalfAngle);
-     *     let sunLobePower = clamp(log(0.5) / log(max(1e-4, cosHalf)), 2.0, 128.0);
-     *     let sunLobeNorm = (sunLobePower + 1.0) * (0.5 * INV_PI);
-     *     return sunLobeNorm * pow(max(0.0, viewSun), sunLobePower);
-     * }
-     *
-     * fn evaluateIBLRadianceCompensated(
-     *     viewDir: vec3<f32>,
-     *     params: SkyAtmosphere,
-     *     transmittanceLUT: texture_2d<f32>,
-     *     multiScatLUT: texture_2d<f32>,
-     *     skyViewLUT: texture_2d<f32>,
-     *     skyAtmosphereSampler: sampler
-     * ) -> vec3<f32> {
-     *     let r = params.groundRadius;
-     *     let viewHeight = max(0.0, params.cameraHeight);
-     *     let atmosphereHeight = params.atmosphereHeight;
-     *     let sunDir = normalize(params.sunDirection);
-     *
-     *     let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
-     *     let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
-     *
-     *     var radiance = skySample.rgb;
-     *
-     *     let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-     *
-     *     let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
-     *     let tEarth = getRaySphereIntersection(camPos, viewDir, r);
-     *     let isGround = r > 0.0 && tEarth > 0.0 && viewDir.y < -0.0001;
-     *
-     *     let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
-     *
-     *     let sunShadow = getPlanetShadowMask(camPos, sunDir, r, params);
-     *     if (!isGround && sunShadow > 0.0) {
-     *         let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
-     *         radiance += mieGlow * sunShadow;
-     *         radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, transToEdge, params) * sunShadow;
-     *     }
-     *
-     *     return radiance;
-     * }
-     * fn getFrustumRayDirection(uv: vec2<f32>, invP: mat4x4<f32>, invV: mat4x4<f32>) -> vec3<f32> {
-     *     let ndc = vec2<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0);
-     *     let viewSpaceDir = normalize(vec3<f32>(ndc.x * invP[0][0], ndc.y * invP[1][1], -1.0));
-     *     let worldRotation = mat3x3<f32>(invV[0].xyz, invV[1].xyz, invV[2].xyz);
-     *     return normalize(worldRotation * viewSpaceDir);
-     * }
-     *
-     * // [KO] 절차적 노이즈 함수들 [EN] Procedural noise functions
-     * fn cloud_hash(p: vec2<f32>) -> f32 {
-     *     return fract(sin(dot(p, vec2<f32>(127.1, 311.7))) * 43758.5453123);
-     * }
-     *
-     * fn cloud_noise(p: vec2<f32>) -> f32 {
-     *     let i = floor(p);
-     *     let f = fract(p);
-     *     let u = f * f * (3.0 - 2.0 * f);
-     *     return mix(mix(cloud_hash(i + vec2<f32>(0.0, 0.0)), cloud_hash(i + vec2<f32>(1.0, 0.0)), u.x),
-     *                mix(cloud_hash(i + vec2<f32>(0.0, 1.0)), cloud_hash(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
-     * }
-     *
-     * fn cloud_fbm(p: vec2<f32>) -> f32 {
-     *     var v = 0.0;
-     *     var a = 0.5;
-     *     var shift = vec2<f32>(100.0);
-     *     var p_mut = p;
-     *     for (var i = 0; i < 5; i = i + 1) {
-     *         v += a * cloud_noise(p_mut);
-     *         p_mut = p_mut * 2.0 + shift;
-     *         a *= 0.5;
-     *     }
-     *     return v;
-     * }
-     *
-     * fn getCloudWarpedUV(hitP: vec3<f32>, params: SkyAtmosphere) -> vec2<f32> {
-     *     let baseUV = hitP.xz * 0.05 + vec2<f32>(params.cloudTime * 0.02);
-     *     // [KO] 도메인 워핑: UV를 노이즈로 살짝 비틀어 유기적인 형태 생성
-     *     // [EN] Domain Warping: Distort UVs with noise to create organic shapes
-     *     let warp = vec2<f32>(
-     *         cloud_noise(baseUV * 1.2 + vec2<f32>(params.cloudTime * 0.01)),
-     *         cloud_noise(baseUV * 1.2 + vec2<f32>(5.7, 1.3) + vec2<f32>(params.cloudTime * 0.012))
-     *     );
-     *     return baseUV + warp * 0.2;
-     * }
-     *
-     * fn getCloudDensity(hitP: vec3<f32>, params: SkyAtmosphere) -> f32 {
-     *     let warpedUV = getCloudWarpedUV(hitP, params);
-     *     let density = cloud_fbm(warpedUV);
-     *     let coverage = params.cloudCoverage;
-     *     let softness = (1.0 - params.cloudDensity) * 0.5 + 0.01;
-     *     return smoothstep(1.0 - coverage, 1.0 - coverage + softness, density);
-     * }
-     *
-     * fn getCloudNormal(hitP: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
-     *     let warpedUV = getCloudWarpedUV(hitP, params);
-     *     let density = cloud_fbm(warpedUV);
-     *     let eps = 0.2;
-     *     let dIdx = (cloud_fbm(warpedUV + vec2<f32>(eps, 0.0)) - density) / eps;
-     *     let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, eps)) - density) / eps;
-     *     return normalize(vec3<f32>(-dIdx, 2.0, -dIdy));
-     * }
-     * ```
-     */
-    export const skyAtmosphereFn = skyAtmosphereFn_wgsl;
-    /**
-     * ```wgsl
-     * #redgpu_include skyAtmosphere.skyAtmosphereFn
-     *
-     * @group(0) @binding(0) var transmittanceLUT: texture_storage_2d<rgba16float, write>;
-     * @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
-     *
-     * @compute @workgroup_size(16, 16)
-     * fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-     *     // [KO] 1. 인덱스 계산 및 정규화된 UV 산출
-     *     // [EN] 1. Index calculation and normalized UV derivation
-     *     let size = textureDimensions(transmittanceLUT);
-     *     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
-     *
-     *     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
-     *
-     *     // [KO] 2. 파라미터 매핑 (UV -> 물리 수치)
-     *     // [EN] 2. Parameter mapping (UV -> Physical values)
-     *     // x축: 광학적 두께를 고려한 고도각 (Cos Theta)
-     *     // y축: 대기권 내의 높이 (View Height)
-     *     let x = uv.x * 2.0 - 1.0;
-     *     let cosTheta = sign(x) * x * x;
-     *     let viewHeight = clamp((1.0 - uv.y) * params.atmosphereHeight, 0.0, params.atmosphereHeight);
-     *
-     *     // [KO] 3. 광학 깊이(Optical Depth) 적분 및 투과율 산출
-     *     // [EN] 3. Integrate Optical Depth and calculate Transmittance
-     *     let T = exp(-min(getOpticalDepth(viewHeight, cosTheta), vec3<f32>(100.0)));
-     *
-     *     // [KO] 4. 결과 저장
-     *     // [EN] 4. Store result
-     *     textureStore(transmittanceLUT, global_id.xy, vec4<f32>(T, 1.0));
-     * }
-     *
-     * fn getOpticalDepth(viewHeight: f32, cosTheta: f32) -> vec3<f32> {
-     *     let groundRadius = params.groundRadius;
-     *     let rayOrigin = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);
-     *     let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
-     *     let rayDir = vec3<f32>(sinTheta, cosTheta, 0.0);
-     *
-     *     let tMax = getRaySphereIntersection(rayOrigin, rayDir, groundRadius + params.atmosphereHeight);
-     *     if (tMax <= 0.0) { return vec3<f32>(0.0); }
-     *
-     *     let tEarth = getRaySphereIntersection(rayOrigin, rayDir, groundRadius);
-     *     if (groundRadius > 0.0 && tEarth > 0.0) {
-     *         return vec3<f32>(MAX_TAU);
-     *     }
-     *
-     *     return integrateOpticalDepth(rayOrigin, rayDir, 0.0, tMax, TRANSMITTANCE_STEPS, params);
-     * }
-     * ```
-     */
-    export const transmittanceLUT = transmittanceShaderCode_wgsl;
 }
 
 export namespace EntryPointLibrary {
@@ -2086,8 +2098,10 @@ export namespace EntryPointLibrary {
          *     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
          *     let u_camera = systemUniforms.camera;
          *     let u_viewMatrix = u_camera.viewMatrix;
-         *     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
-         *     output.position = u_projectionViewMatrix * position;
+         *     let position = u_modelMatrix * vec4<f32>(input_position, 1.0);
+         *     let relPos = position.xyz - u_camera.cameraPosition;
+         *     let viewPos = (u_viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+         *     output.position = u_projectionMatrix * vec4<f32>(viewPos, 1.0);
          *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
@@ -2122,30 +2136,30 @@ export namespace EntryPointLibrary {
          * ```wgsl
          * #redgpu_include shadow.getShadowClipPosition
          * #redgpu_include systemStruct.OutputShadowData;
-         *
+         * 
          * @vertex
          * fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
          *     var output: OutputShadowData;
-         *
+         * 
          *     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
          *     // 시스템 Uniform 변수 가져오기
          *     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
          *     let u_camera = systemUniforms.camera;
          *     let u_viewMatrix = u_camera.viewMatrix;
          *     let u_cameraPosition = u_camera.cameraPosition;
-         *
+         * 
          *     // Vertex별 Uniform 변수 가져오기
          *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
-         *
+         * 
          *     // 입력 데이터
          *     let input_position = inputData.position;
          *     let input_vertexNormal = inputData.vertexNormal;
          *     let input_uv = inputData.uv;
-         *
+         * 
          *     // 위치 변환 처리
          *     var position: vec4<f32>;
          *     position = u_modelMatrix * vec4<f32>(input_position, 1.0);
-         *
+         * 
          *     // 디스플레이스먼트 텍스처 적용
          *     #redgpu_if useDisplacementTexture
          *     {
@@ -2164,10 +2178,10 @@ export namespace EntryPointLibrary {
          *         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
          *     }
          *     #redgpu_endIf
-         *
+         * 
          *     // 최종 위치 계산 (그림자 맵 좌표계로 변환)
          *     output.position = getShadowClipPosition(position.xyz, u_directionalLightProjectionViewMatrix);
-         *
+         * 
          *     return output;
          * }
          * ```
@@ -2189,37 +2203,37 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let u_resolution = systemUniforms.resolution;
-         *      let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+         *     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
          *     #redgpu_if disableJitter
          *         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
          *     #redgpu_else
          *         let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
          *     #redgpu_endIf
-         *
+         *     
          *     let u_viewMatrix = systemUniforms.camera.viewMatrix;
          *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
          *     let u_useBillboard = vertexUniforms.useBillboard;
          *     let u_usePixelSize = vertexUniforms.usePixelSize;
          *     let u_pixelSize = vertexUniforms.pixelSize;
-         *     let u_renderRatioX = vertexUniforms._renderRatioX;
-         *     let u_renderRatioY = vertexUniforms._renderRatioY;
-         *
+         *     let u_renderRatioX = vertexUniforms.renderRatioX;
+         *     let u_renderRatioY = vertexUniforms.renderRatioY;
+         * 
          *     var ratioScaleMatrix: mat4x4<f32> = mat4x4<f32>(
          *         u_renderRatioX, 0, 0, 0,
          *         0, u_renderRatioY, 0, 0,
          *         0, 0, 1, 0,
          *         0, 0, 0, 1
          *     );
-         *
+         * 
          *     if (u_useBillboard == 1) {
          *         let billboardMatrix = getBillboardMatrix(u_viewMatrix, u_modelMatrix, 1u);
-         *
+         *         
          *         if (u_usePixelSize == 1) {
          *             let viewPositionCenter = billboardMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
          *             let clipCenter = u_projectionMatrix * viewPositionCenter;
          *             let scaleX = (u_pixelSize / u_resolution.x) * 2.0 * u_renderRatioX;
          *             let scaleY = (u_pixelSize / u_resolution.y) * 2.0 * u_renderRatioY;
-         *
+         * 
          *             output.position = vec4<f32>(
          *                 clipCenter.xy + inputData.position.xy * vec2<f32>(scaleX, scaleY) * clipCenter.w,
          *                 clipCenter.zw
@@ -2228,9 +2242,22 @@ export namespace EntryPointLibrary {
          *             output.position = u_projectionMatrix * billboardMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
          *         }
          *     } else {
-         *         output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+         *         if (u_usePixelSize == 1) {
+         *             let viewPositionCenter = u_viewMatrix * u_modelMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
+         *             let clipCenter = u_projectionMatrix * viewPositionCenter;
+         *             let pixelWorldScale = (u_pixelSize / u_resolution.y) * (2.0 * clipCenter.w / abs(u_projectionMatrix[1][1]));
+         *             let pixelRatioScaleMatrix = mat4x4<f32>(
+         *                 u_renderRatioX * pixelWorldScale, 0, 0, 0,
+         *                 0, u_renderRatioY * pixelWorldScale, 0, 0,
+         *                 0, 0, 1, 0,
+         *                 0, 0, 0, 1
+         *             );
+         *             output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * pixelRatioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+         *         } else {
+         *             output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+         *         }
          *     }
-         *
+         * 
          *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
@@ -2267,7 +2294,7 @@ export namespace EntryPointLibrary {
          *
          * ```wgsl
          * #redgpu_include systemStruct.OutputShadowData;
-         *
+         * 
          * @vertex
          * fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
          *     var output: OutputShadowData;
@@ -2369,9 +2396,9 @@ export namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct DirectionalLight {
-     *      direction:vec3<f32>,
-     *      color:vec3<f32>,
-     *      intensity:f32,
+     * 	  direction:vec3<f32>,
+     * 	  color:vec3<f32>,
+     * 	  intensity:f32,
      * };
      * ```
      */
@@ -2383,23 +2410,28 @@ export namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct AmbientLight {
-     *      color:vec3<f32>,
-     *      intensity:f32
+     * 	  color:vec3<f32>,
+     * 	  intensity:f32
      * };
      * ```
      */
     export const AmbientLight = AmbientLight_wgsl;
     /**
-     * // [KO] 그림자(Shadow) 설정 구조체 정의입니다.
-     * // [EN] Definition of the Shadow configuration structure.
+     * // [KO] CSM(Cascaded Shadow Maps) 설정 구조체 정의입니다.
+     * // [EN] Definition of the Cascaded Shadow Maps (CSM) configuration structure.
      *
      *
      * ```wgsl
      * struct Shadow {
+     *     cascadeLightViewProjectionMatrices: array<mat4x4<f32>, 4>,
+     *     cascadeSplitDepths: vec4<f32>,
      *     directionalShadowDepthTextureSize: u32,
      *     directionalShadowBias: f32,
      *     directionalShadowStrength: f32,
-     *     directionalShadowFilterScale: f32
+     *     cascadeCount: u32,
+     *     cascadeTexelSizes: vec4<f32>,
+     *     casterBoundingCenter: vec3<f32>,
+     *     casterBoundingRadiusSq: f32,
      * };
      * ```
      */
@@ -2411,37 +2443,58 @@ export namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct SkyAtmosphere {
-     *    rayleighScattering: vec3<f32>,
-     *    rayleighExponentialDistribution: f32,
-     *    mieScattering: vec3<f32>,
-     *    mieAnisotropy: f32,
-     *    mieAbsorption: vec3<f32>,
-     *    mieExponentialDistribution: f32,
-     *    absorptionCoefficient: vec3<f32>,
-     *    absorptionTipAltitude: f32,
-     *    groundAlbedo: vec3<f32>,
-     *    absorptionTentWidth: f32,
-     *    skyLuminanceFactor: vec3<f32>,
-     *    multiScatteringFactor: f32,
-     *    sunDirection: vec3<f32>,
-     *    transmittanceMinLightElevationAngle: f32,
-     *    groundRadius: f32,
-     *    atmosphereHeight: f32,
-     *    aerialPerspectiveDistanceScale: f32,
-     *    aerialPerspectiveStartDepth: f32,
-     *    sunIntensity: f32,
-     *    sunSize: f32,
-     *    sunLimbDarkening: f32,
-     *    cameraHeight: f32,
-     *    cloudTime: f32,
-     *    cloudTimeMultiplier: f32,
-     *    cloudCoverage: f32,
-     *    cloudDensity: f32,
-     *    cloudHeight: f32
+     * 	rayleighScattering: vec3<f32>,
+     * 	rayleighExponentialDistribution: f32,
+     * 	mieScattering: vec3<f32>,
+     * 	mieAnisotropy: f32,
+     * 	mieAbsorption: vec3<f32>,
+     * 	mieExponentialDistribution: f32,
+     * 	absorptionCoefficient: vec3<f32>,
+     * 	absorptionTipAltitude: f32,
+     * 	groundAlbedo: vec3<f32>,
+     * 	absorptionTentWidth: f32,
+     * 	skyLuminanceFactor: vec3<f32>,
+     * 	multiScatteringFactor: f32,
+     * 	sunDirection: vec3<f32>,
+     * 	groundRadius: f32,
+     * 	atmosphereHeight: f32,
+     * 	aerialPerspectiveDistanceScale: f32,
+     * 	aerialPerspectiveStartDepth: f32,
+     * 	sunIntensity: f32,
+     * 	sunSize: f32,
+     * 	sunLimbDarkening: f32,
+     * 	cameraHeight: f32,
+     * 	cloudTime: f32,
+     * 	cloudCoverage: f32,
+     * 	cloudDensity: f32,
+     * 	cloudHeight: f32
      * };
      * ```
      */
     export const SkyAtmosphere = SkyAtmosphere_wgsl;
+    /**
+     * // [KO] 엔진 전역 바람 물리 파라미터 구조체 (32 Bytes, 16바이트 정렬)
+     * // [EN] Engine global wind physics parameter structure (32 Bytes, 16-byte aligned)
+     *
+     *
+     * ```wgsl
+     * struct Wind {
+     *     // Offset 0 (12B): 바람 진행 방향 단위 벡터 (정규화된 vec3, Y=0)
+     *     direction: vec3<f32>,
+     *     // Offset 12 (4B): 풍속 (대기 흐름의 시간 진행 속도 배율)
+     *     speed: f32,
+     *     // Offset 16 (4B): 풍압 / 바람의 기본 물리적 세기 (Wind Force / Intensity)
+     *     strength: f32,
+     *     // Offset 20 (4B): 바람 효과 활성화 플래그 (1 = ON, 0 = OFF)
+     *     enabled: u32,
+     *     // Offset 24 (4B): 16바이트 슬롯 완성을 위한 끝단 패딩 0
+     *     pad0: f32,
+     *     // Offset 28 (4B): 16바이트 슬롯 완성을 위한 끝단 패딩 1 (총 32B)
+     *     pad1: f32,
+     * };
+     * ```
+     */
+    export const Wind = Wind_wgsl;
     /**
      * ```wgsl
      * struct MatrixList{
@@ -2473,6 +2526,7 @@ export namespace SystemStructLibrary {
      *     alphaBlend: u32,
      *     doubleSided: u32,
      *     useVertexTangent: u32,
+     *     isFoliage: u32,
      *     opacity: f32,
      *     useTint: u32,
      *     tint: vec4<f32>,
@@ -2695,31 +2749,31 @@ export namespace DisplacementLibrary {
      *     // [EN] Texture dimensions based on base resolution (Mip 0) to maintain displacement continuity.
      *     let textureDimensions = vec2<f32>(textureDimensions(displacementTexture, 0));
      *     let invTexSize = 1.0 / textureDimensions;
-     *
+     * 
      *     let uv = input_uv * textureDimensions;
      *     let iuv = floor(uv - 0.5);
      *     let fuv = fract(uv - 0.5);
-     *
+     * 
      *     let w0 = (1.0 - fuv) * (1.0 - fuv) * (1.0 - fuv) / 6.0;
      *     let w1 = (4.0 - 6.0 * fuv * fuv + 3.0 * fuv * fuv * fuv) / 6.0;
      *     let w2 = (1.0 + 3.0 * fuv + 3.0 * fuv * fuv - 3.0 * fuv * fuv * fuv) / 6.0;
      *     let w3 = fuv * fuv * fuv / 6.0;
-     *
+     * 
      *     let g0 = w0 + w1;
      *     let g1 = w2 + w3;
      *     let h0 = (w1 / g0) - 1.0 + iuv;
      *     let h1 = (w3 / g1) + 1.0 + iuv;
-     *
+     * 
      *     let res0 = textureSampleLevel(displacementTexture, displacementTextureSampler, (vec2<f32>(h0.x, h0.y) + 0.5) * invTexSize, mipLevel).r * g0.x * g0.y;
      *     let res1 = textureSampleLevel(displacementTexture, displacementTextureSampler, (vec2<f32>(h1.x, h0.y) + 0.5) * invTexSize, mipLevel).r * g1.x * g0.y;
      *     let res2 = textureSampleLevel(displacementTexture, displacementTextureSampler, (vec2<f32>(h0.x, h1.y) + 0.5) * invTexSize, mipLevel).r * g0.x * g1.y;
      *     let res3 = textureSampleLevel(displacementTexture, displacementTextureSampler, (vec2<f32>(h1.x, h1.y) + 0.5) * invTexSize, mipLevel).r * g1.x * g1.y;
-     *
+     * 
      *     let h_bicubic = res0 + res1 + res2 + res3;
-     *
+     * 
      *     let scaledDisplacement = (h_bicubic - 0.5) * displacementScale;
      *     let displacedPosition = input_position + normalize(input_vertexNormal) * scaledDisplacement;
-     *
+     * 
      *     return displacedPosition;
      * }
      * ```
@@ -2743,36 +2797,36 @@ export namespace DisplacementLibrary {
      *     let res_uv = uv * dims;
      *     let i = floor(res_uv - 0.5);
      *     let f = fract(res_uv - 0.5);
-     *
+     * 
      *     let w0 = (1.0 - f) * (1.0 - f) * (1.0 - f) / 6.0;
      *     let w1 = (4.0 - 6.0 * f * f + 3.0 * f * f * f) / 6.0;
      *     let w2 = (1.0 + 3.0 * f + 3.0 * f * f - 3.0 * f * f * f) / 6.0;
      *     let w3 = f * f * f / 6.0;
-     *
+     * 
      *     let g0 = w0 + w1;
      *     let g1 = w2 + w3;
      *     let h0 = (w1 / g0) - 1.0 + i;
      *     let h1 = (w3 / g1) + 1.0 + i;
-     *
+     * 
      *     let r0 = textureSampleLevel(tex, smp, (vec2<f32>(h0.x, h0.y) + 0.5) * invSize, mip).r * g0.x * g0.y;
      *     let r1 = textureSampleLevel(tex, smp, (vec2<f32>(h1.x, h0.y) + 0.5) * invSize, mip).r * g1.x * g0.y;
      *     let r2 = textureSampleLevel(tex, smp, (vec2<f32>(h0.x, h1.y) + 0.5) * invSize, mip).r * g0.x * g1.y;
      *     let r3 = textureSampleLevel(tex, smp, (vec2<f32>(h1.x, h1.y) + 0.5) * invSize, mip).r * g1.x * g1.y;
-     *
+     * 
      *     return r0 + r1 + r2 + r3;
      * }
-     *
+     * 
      * /**
      *  * [KO] 디스플레이스먼트 텍스처를 바이큐빅 필터링으로 샘플링하여 변형된 법선 벡터를 계산합니다.
      *  * [EN] Calculates the modified normal vector by sampling the displacement texture with bicubic filtering.
-     *  *
+     *  * 
      *  * @param displacementTexture [KO] 디스플레이스먼트 텍스처 [EN] Displacement texture
      *  * @param displacementTextureSampler [KO] 샘플러 [EN] Sampler
      *  * @param displacementScale [KO] 변위 강도 [EN] Displacement scale
      *  * @param input_uv [KO] 입력 UV 좌표 [EN] Input UV coordinates
      *  * @param mipLevel [KO] 밉맵 레벨 [EN] Mipmap level
      *  * @returns [KO] 변형된 법선 벡터 [EN] Modified normal vector
-     *  *
+     *  * 
      *  *\/
      * fn getDisplacementNormal(
      *     displacementTexture: texture_2d<f32>,
@@ -2785,20 +2839,20 @@ export namespace DisplacementLibrary {
      *     // [EN] Texture dimensions based on base resolution (Mip 0) to maintain normal sharpness.
      *     let textureDimensions = vec2<f32>(textureDimensions(displacementTexture, 0));
      *     let invTexSize = 1.0 / textureDimensions;
-     *
+     *     
      *     // [KO] 노멀 계산을 위한 샘플링 간격 (밉레벨에 따라 조절)
      *     // [EN] Sampling interval for normal calculation (adjusted by mip level)
      *     let step = invTexSize * exp2(mipLevel);
-     *
+     * 
      *     let h_u0 = sampleBicubic(input_uv + vec2<f32>(-step.x, 0.0), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);
      *     let h_u1 = sampleBicubic(input_uv + vec2<f32>( step.x, 0.0), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);
      *     let h_v0 = sampleBicubic(input_uv + vec2<f32>(0.0, -step.y), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);
      *     let h_v1 = sampleBicubic(input_uv + vec2<f32>(0.0,  step.y), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);
-     *
+     * 
      *     // [KO] UV 단위당 높이 변화율(Derivative) 계산
      *     let ddu = (h_u1 - h_u0) * displacementScale / (step.x * 2.0);
      *     let ddv = (h_v1 - h_v0) * displacementScale / (step.y * 2.0);
-     *
+     * 
      *     return normalize(vec3<f32>(-ddu, -ddv, 1.0));
      * }
      * ```
@@ -2806,6 +2860,12 @@ export namespace DisplacementLibrary {
     export const getDisplacementNormal = getDisplacementNormal_wgsl;
 }
 
+/**
+ * [KO] RedGPU 엔진 내부 및 사용자 정의 셰이더에서 사용하는 표준 WGSL 셰이더 코드 라이브러리입니다.
+ * [EN] Standard WGSL shader code library used in RedGPU engine internals and custom shaders.
+ *
+ * @category Shader
+ */
 export namespace ShaderLibrary {
     /**
      * // [KO] 엔진의 표준 시스템 유니폼 및 전역 바인딩 구조체 정의입니다.
@@ -2815,95 +2875,97 @@ export namespace ShaderLibrary {
      * ```wgsl
      * #redgpu_include systemStruct.DirectionalLight
      * #redgpu_include systemStruct.AmbientLight
-     *
+     * 
      * #redgpu_include systemStruct.Camera
      * #redgpu_include systemStruct.Projection
      * #redgpu_include systemStruct.Time
      * #redgpu_include systemStruct.Shadow
      * #redgpu_include systemStruct.SkyAtmosphere
-     *
+     * #redgpu_include systemStruct.Wind
+     * 
      * struct SystemUniform {
-     *      projection: Projection,
-     *      time: Time,
-     *      resolution:vec2<f32>,
+     * 	  projection: Projection,
+     * 	  time: Time,
+     * 	  resolution:vec2<f32>,
      *       //
      *       camera:Camera,
-     *      usePrefilterTexture:u32,
-     *      isView3D:u32,
-     *      useSkyAtmosphere:u32,
-     *      preExposure:f32,
-     *      iblIntensity:f32,
-     *      //
-     *      skyAtmosphere:SkyAtmosphere,
-     *      shadow:Shadow,
+     * 	  usePrefilterTexture:u32,
+     * 	  isView3D:u32,
+     * 	  useSkyAtmosphere:u32,
+     * 	  preExposure:f32,
+     * 	  iblIntensity:f32,
+     * 	  //
+     * 	  skyAtmosphere:SkyAtmosphere,
+     * 	  shadow:Shadow,
      *       //
      *       directionalLightCount:u32,
      *       directionalLightProjectionViewMatrix:mat4x4<f32>,
-     *       directionalLightProjectionMatrix:mat4x4<f32>,
-     *       directionalLightViewMatrix:mat4x4<f32>,
      *       directionalLights:array<DirectionalLight,3>,
-     *      //
-     *      ambientLight:AmbientLight,
-     *
+     * 	  //
+     * 	  ambientLight:AmbientLight,
+     * 	  //
+     * 	  wind:Wind,
      * };
-     *
+     * 
      * @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
      * @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
-     * @group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
+     * @group(0) @binding(2) var directionalShadowMap: texture_depth_2d_array;
      * @group(0) @binding(3) var prefilterTextureSampler: sampler;
-     *
+     * 
      * @group(0) @binding(7) var renderPath1ResultTextureSampler: sampler;
      * @group(0) @binding(8) var renderPath1ResultTexture: texture_2d<f32>;
      * @group(0) @binding(9) var packedTextureSampler: sampler;
      * @group(0) @binding(10) var ibl_prefilterTexture: texture_cube<f32>;
      * @group(0) @binding(11) var ibl_irradianceTexture: texture_cube<f32>;
      * @group(0) @binding(12) var ibl_brdfLUTTexture: texture_2d<f32>;
-     *
+     * 
      * @group(0) @binding(13) var atmosphereSampler: sampler;
      * @group(0) @binding(14) var transmittanceTexture: texture_2d<f32>;
-     *
+     * 
      * @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
      * @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
-     *
+     * 
      * #redgpu_include systemStruct.globalVertexStruct;
      * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
-     *
+     * 
      * #redgpu_include systemStruct.globalFragmentStructPBR;
      * @group(0) @binding(18) var<storage> globalFragmentSSBO_PBR : array<GlobalFragmentStructPBR>;
-     *
+     * 
      * #redgpu_include systemStruct.globalFragmentStructBuiltIn;
      * @group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
-     *
+     * 
+     * @group(0) @binding(20) var renderPath1DepthTexture: texture_depth_2d;
+     * 
      * #redgpu_include depth.getLinearizeDepth
-     *
+     * 
      * const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
      * const clusterLight_tileCount = vec3<u32>(REDGPU_DEFINE_TILE_COUNT_Xu, REDGPU_DEFINE_TILE_COUNT_Yu, REDGPU_DEFINE_TILE_COUNT_Zu);
-     *
+     * 
      * /**
      *  * [KO] 클러스터 조명 격자의 한 칸(박스) 정보를 나타내는 구조체입니다.
      *  * [EN] Structure representing a single cell (box) in the cluster light grid.
-     *  *
+     *  * 
      *  *\/
      * struct ClusterLightCell {
      *     offset : u32,
      *     count : u32
      * };
-     *
+     * 
      * /**
      *  * [KO] 클러스터 조명 데이터를 통합 관리하는 격자(Grid) 구조체입니다.
      *  * [EN] Grid structure that integrally manages cluster light data.
-     *  *
+     *  * 
      *  *\/
      * struct ClusterLightGrid {
      *     offset : atomic<u32>,
      *     cells : array<ClusterLightCell , REDGPU_DEFINE_TOTAL_TILES>,
      *     indices : array<u32, clusterLight_indicesLength>
      * };
-     *
+     * 
      * /**
      *  * [KO] 클러스터 조명(포인트/스폿 라이트) 데이터 구조체입니다.
      *  * [EN] Cluster light (Point/Spot light) data structure.
-     *  *
+     *  * 
      *  *\/
      * struct ClusterLight {
      *     position : vec3<f32>, radius : f32,
@@ -2911,11 +2973,11 @@ export namespace ShaderLibrary {
      *     isSpotLight:f32,    directionX:f32,    directionY:f32,    directionZ:f32,
      *     outerCutoff:f32,    innerCutoff:f32,
      * };
-     *
+     * 
      * /**
      *  * [KO] 클러스터 조명 리스트 구조체입니다.
      *  * [EN] Cluster light list structure.
-     *  *
+     *  * 
      *  *\/
      * struct ClusterLightList {
      *     count:vec4<f32>,
@@ -2923,30 +2985,30 @@ export namespace ShaderLibrary {
      * };
      * @group(0) @binding(5) var<storage> clusterLightList : ClusterLightList;
      * @group(0) @binding(6) var<storage, read_write> clusterLightGrid : ClusterLightGrid;
-     *
+     * 
      * /**
      *  * [KO] 프래그먼트 좌표를 사용하여 해당 클러스터의 인덱스를 계산합니다.
      *  * [EN] Calculates the index of the cluster using fragment coordinates.
-     *  *
+     *  * 
      *  * @param fragCoord [KO] 프래그먼트 좌표 [EN] Fragment coordinates
      *  * @returns [KO] 클러스터 인덱스 [EN] Cluster index
-     *  *
+     *  * 
      *  *\/
      * fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
      *     let tile = getClusterLightTile(fragCoord);
      *     return tile.x +
      *            tile.y * clusterLight_tileCount.x +
      *            tile.z * clusterLight_tileCount.x * clusterLight_tileCount.y;
-     *
+     * 
      * }
-     *
+     * 
      * /**
      *  * [KO] 프래그먼트 좌표를 사용하여 해당 클러스터의 타일(XYZ) 좌표를 계산합니다.
      *  * [EN] Calculates the tile (XYZ) coordinates of the cluster using fragment coordinates.
-     *  *
+     *  * 
      *  * @param fragCoord [KO] 프래그먼트 좌표 [EN] Fragment coordinates
      *  * @returns [KO] 클러스터 타일 좌표 [EN] Cluster tile coordinates
-     *  *
+     *  * 
      *  *\/
      * fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
      *     let near = systemUniforms.camera.nearClipping;
@@ -2962,8 +3024,8 @@ export namespace ShaderLibrary {
      */
     export const SYSTEM_UNIFORM = SYSTEM_UNIFORM_wgsl;
     /**
-     * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다.
-     * // [EN] Post effect system uniform structure.
+     * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다. (Non-MSAA)
+     * // [EN] Post effect system uniform structure. (Non-MSAA)
      *
      *
      * ```wgsl
@@ -2971,21 +3033,56 @@ export namespace ShaderLibrary {
      * #redgpu_include systemStruct.Projection
      * #redgpu_include systemStruct.Time
      * #redgpu_include systemStruct.SkyAtmosphere
-     *
+     * 
      * struct SystemUniform {
      *     projection: Projection,
      *     time: Time,
-     *     camera:Camera,
+     *     camera: Camera,
      *     useSkyAtmosphere: u32,
      *     preExposure: f32,
      *     devicePixelRatio: f32,
-     *     skyAtmosphere:SkyAtmosphere,
+     *     skyAtmosphere: SkyAtmosphere,
      * };
-     *
+     * 
+     * @group(2) @binding(0) var depthTexture : texture_depth_2d;
+     * @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
+     * @group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;
+     * @group(2) @binding(3) var prevDepthTexture : texture_depth_2d;
      * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
+     * @group(2) @binding(5) var basicSampler : sampler;
      * ```
      */
     export const POST_EFFECT_SYSTEM_UNIFORM = POST_EFFECT_SYSTEM_UNIFORM_wgsl;
+    /**
+     * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다. (MSAA)
+     * // [EN] Post effect system uniform structure. (MSAA)
+     *
+     *
+     * ```wgsl
+     * #redgpu_include systemStruct.Camera
+     * #redgpu_include systemStruct.Projection
+     * #redgpu_include systemStruct.Time
+     * #redgpu_include systemStruct.SkyAtmosphere
+     * 
+     * struct SystemUniform {
+     *     projection: Projection,
+     *     time: Time,
+     *     camera: Camera,
+     *     useSkyAtmosphere: u32,
+     *     preExposure: f32,
+     *     devicePixelRatio: f32,
+     *     skyAtmosphere: SkyAtmosphere,
+     * };
+     * 
+     * @group(2) @binding(0) var depthTexture : texture_depth_multisampled_2d;
+     * @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
+     * @group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;
+     * @group(2) @binding(3) var prevDepthTexture : texture_depth_multisampled_2d;
+     * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
+     * @group(2) @binding(5) var basicSampler : sampler;
+     * ```
+     */
+    export const POST_EFFECT_SYSTEM_UNIFORM_MSAA = POST_EFFECT_SYSTEM_UNIFORM_MSAA_wgsl;
 
     export import math = MathLibrary;
 
@@ -2996,8 +3093,6 @@ export namespace ShaderLibrary {
     export import depth = DepthLibrary;
 
     export import lighting = LightingLibrary;
-
-    export import skyAtmosphere = SkyAtmosphereLibrary;
 
     export import entryPoint = EntryPointLibrary;
 

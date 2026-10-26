@@ -1,13 +1,10 @@
 /**
- * [KO] 타입(Constructor)별로 고유한 인스턴스 ID를 생성하는 유틸리티입니다.
- * [EN] Utility for generating unique instance IDs per type (Constructor).
+ * [KO] 클래스 타입(생성자)별로 0부터 순차 증가하는 고유 인스턴스 ID를 발급하는 유틸리티입니다.
+ * [EN] Utility that issues unique instance IDs, incrementing sequentially from 0 per class type (constructor).
  *
- * [KO] 각 클래스 타입마다 독립적인 카운터를 유지하여 0부터 순차적인 ID를 부여합니다.
- * [EN] Maintains an independent counter for each class type and assigns IDs sequentially starting from 0.
- *
- * * ### Example
+ * ### Example
  * ```typescript
- * const id = RedGPU.Util.InstanceIdGenerator.getNextId(RedMesh);
+ * const id = RedGPU.Util.InstanceIdGenerator.getNextId(RedGPU.Display.Mesh);
  * ```
  *
  * @category UUID
@@ -16,11 +13,20 @@ class InstanceIdGenerator {
     private static idMaps: Map<Function, number> = new Map();
 
     /**
-     * [KO] 해당 타입의 다음 고유 ID를 반환합니다.
-     * [EN] Returns the next unique ID for the given type.
+     * [KO] 지정한 타입의 다음 ID를 반환하고 내부 카운터를 1 증가시킵니다.
+     * [EN] Returns the next ID for the given type and increments its internal counter by 1.
      *
-     * @param type - [KO] 대상 타입 [EN] Target type
-     * @returns [KO] 고유 ID [EN] Unique ID
+     * ### Example
+     * ```typescript
+     * const id = RedGPU.Util.InstanceIdGenerator.getNextId(RedGPU.Display.Mesh);
+     * ```
+     *
+     * @param type -
+     * [KO] ID를 발급할 대상 클래스 생성자
+     * [EN] Target class constructor to issue the ID for
+     * @returns
+     * [KO] 발급된 인스턴스 ID
+     * [EN] Issued instance ID
      */
     static getNextId(type: Function): number {
         let currentId = this.idMaps.get(type) || 0;

@@ -25,15 +25,6 @@ declare class ShadowManager {
      */
     get directionalShadowManager(): DirectionalShadowManager;
     /**
-     * [KO] 섀도우 렌더 패스 디스크립터를 반환합니다.
-     * [EN] Returns the shadow render pass descriptor.
-     *
-     * @returns
-     * [KO] GPURenderPassDescriptor 객체
-     * [EN] GPURenderPassDescriptor object
-     */
-    get shadowPassDescriptor(): GPURenderPassDescriptor;
-    /**
      * [KO] 그림자 렌더링을 수행합니다.
      * [EN] Performs shadow rendering.
      *
@@ -42,6 +33,11 @@ declare class ShadowManager {
      * [EN] Target View3D
      */
     render(view: View3D): void;
+    /**
+     * [KO] 사용 중인 그림자 GPU 리소스를 해제합니다.
+     * [EN] Releases GPU resources in use for shadow rendering.
+     */
+    destroy(): void;
     /**
      * [KO] 매니저의 상태를 업데이트합니다.
      * [EN] Updates the state of the manager.

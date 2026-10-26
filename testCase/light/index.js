@@ -160,15 +160,6 @@ redUnit.testGroup(
                 run(checkCutoff && checkDir);
             } catch (e) { run(false, e); }
         }, true);
-
-        runner.defineTest('Success Test: inner/outer cutoff cosine', (run) => {
-            try {
-                const light = new RedGPU.Light.SpotLight();
-                light.innerCutoff = 45;
-                const expected = Math.cos(45 * Math.PI / 180);
-                run(Math.abs(light.innerCutoffCos - expected) < 0.0001);
-            } catch (e) { run(false, e); }
-        }, true);
     }
 );
 

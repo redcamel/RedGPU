@@ -21,14 +21,18 @@ const sceneGraph = `
 
 # Scene Graph
 
-**Scene Graph** refers to the hierarchical structure of objects placed in 3D space. In RedGPU, every **Mesh** can become a parent of another mesh, and the parent's transformation (position, rotation, scale) is inherited by its children.
+**Scene Graph** refers to the hierarchical structure of objects placed in 3D space. In RedGPU, every **Mesh** can become
+a parent of another mesh, and the parent's transformation (position, rotation, scale) is inherited by its children.
 
 ## 1. Mesh Hierarchy
 
-RedGPU's **Mesh** is an object with geometry and material, while simultaneously acting as a container that can hold other meshes.
+RedGPU's **Mesh** is an object with geometry and material, while simultaneously acting as a container that can hold
+other meshes.
 
-- **Parent Mesh**: A reference point containing child objects. If the parent moves, its children move with it, maintaining their relative distance from the parent.
-- **Child Mesh**: An object belonging to a parent. Its `x, y, z` coordinates are calculated as relative coordinates, with the parent's center point treated as `(0, 0, 0)`.
+- **Parent Mesh**: A reference point containing child objects. If the parent moves, its children move with it,
+  maintaining their relative distance from the parent.
+- **Child Mesh**: An object belonging to a parent. Its `x, y, z` coordinates are calculated as relative coordinates,
+  with the parent's center point treated as `(0, 0, 0)`.
 
 <ClientOnly>
   <MermaidResponsive :definition="sceneGraph" />
@@ -58,7 +62,8 @@ earth.x = 5;
 State changes of the parent mesh affect all of its children.
 
 1. **Position**: If the parent moves, the child moves with it as if attached to the parent.
-2. **Rotation**: If the parent rotates around its own axis, the child rotates around the parent's center, as if orbiting.
+2. **Rotation**: If the parent rotates around its own axis, the child rotates around the parent's center, as if
+   orbiting.
 3. **Scale**: If the parent's size doubles, both the child's size and its distance from the parent also double.
 
 ## 4. Practice: Orbit Model Using Hierarchy
@@ -174,11 +179,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
 
-- Every **Mesh** can act as a parent container and include child meshes.
-- Child coordinates are always **relative coordinates** based on the parent's position.
-- A parent's rotation and scale transformations are physically inherited by its children, making it easy to implement complex linked animations.
+## Related Examples
+
+- [Mesh Hierarchy](/RedGPU/examples/3d/mesh/hierarchy/)
+- [Child Node Control Methods](/RedGPU/examples/3d/mesh/childMethod/)
+- [Group3D Container](/RedGPU/examples/3d/group3D/basic/)
+
+---
 
 ## Next Steps
 

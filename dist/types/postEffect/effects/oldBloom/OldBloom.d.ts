@@ -107,9 +107,9 @@ declare class OldBloom extends AMultiPassPostEffect {
      * [KO] 올드 블룸 효과를 단계별로 렌더링합니다.
      * [EN] Renders the old bloom effect step by step.
      *
-     * [KO] 1단계: 밝은 영역 추출 (Threshold)
-     * [KO] 2단계: 추출된 영역 블러 처리 (GaussianBlur)
-     * [KO] 3단계: 원본과 블러된 이미지 합성 (OldBloomBlend)
+     * [KO] 1단계: 1/2 해상도로 밝은 영역 다운샘플링 추출 (Threshold)
+     * [KO] 2단계: 1/2 해상도에서 블러 처리 (GaussianBlur - 연산량 75% 절감)
+     * [KO] 3단계: Full-Res 원본과 1/2 블러 결과(Bilinear 보간)를 YCoCg 공간에서 가산 합성 (OldBloomBlend)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }

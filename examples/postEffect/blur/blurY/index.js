@@ -1,39 +1,37 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Blur Y 예제
  * [EN] Blur Y example
  *
  * [KO] 세로 방향 블러(Blur Y) 포스트 이펙트를 시연합니다.
- * [EN] Demonstrates vertical blur (Blur Y) post effect.
+ * [EN] Demonstrates the vertical blur (Blur Y) post effect.
  */
 
-// 1. Create and append a container and canvas
 const container = document.createElement('div');
 document.body.appendChild(container);
 
 const canvas = document.createElement('canvas');
 container.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 3;
         controller.speedDistance = 0.1;
-        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
+        // [KO] BlurY 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create BlurY post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -44,7 +42,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -64,62 +68,42 @@ RedGPU.init(
         window.addEventListener('resize', updateLayout);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, viewEffect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => scene.addChild(v['resultMesh']));
-}
-
-const renderTestPane = async (redGPUContext, targetView, container) => {
-
+const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
-        gui:pane=>{
-            const effect = targetView.postEffectManager.getEffectAt(0);
+        gui: (pane) => {
+            const config = {BlurY: true};
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            const TEST_STATE = {
-                BlurY: true,
-                size: effect.size,
-                sampleCount: effect.sampleCount,
-            }
-            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-
-            folder.addBinding(TEST_STATE, 'BlurY').on('change', (v) => {
+            folder.addBinding(config, 'BlurY').on('change', (v) => {
                 if (v.value) {
-                    const newEffect = new RedGPU.PostEffect.BlurY(redGPUContext);
-                    newEffect.size = TEST_STATE.size;
-                    targetView.postEffectManager.addEffect(newEffect);
+                    targetView.postEffectManager.addEffect(effect);
                 } else {
                     targetView.postEffectManager.removeAllEffect();
                 }
-                sizeControl.disabled = !v.value;
-                sampleCountControl.disabled = !v.value;
+                controls.forEach((c) => c.disabled = !v.value);
             });
 
-            const sizeControl = folder.addBinding(TEST_STATE, 'size', {min: 0, max: 100, step: 1}).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.size = v.value
-            })
-            const sampleCountControl = folder.addBinding(TEST_STATE, 'sampleCount', {
-                min: 1,
-                max: 100,
-                step: 1
-            }).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.sampleCount = v.value
-            })
+            const controls = [
+                folder.addBinding(effect, 'size', {min: 0, max: 100, step: 0.1})
+            ];
         }
     });
-
 };

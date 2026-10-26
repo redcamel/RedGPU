@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] SpotLight 예제 (Lighting Studio)
@@ -15,45 +15,41 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. [KO] 카메라 컨트롤러 설정
-        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 50;
         controller.tilt = -35;
         controller.speedDistance = 0.5;
 
-        // 2. [KO] 씬 및 뷰 구성
-        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
-        // 3. [KO] 라이트 및 환경 구성
-        // [EN] Configure Light and Environment
+        // [KO] 스포트라이트 및 스튜디오 구체 그리드 구성
+        // [EN] Configure SpotLight and studio sphere grid
         const light = createSpotLight(scene);
         createStudioEnvironment(redGPUContext, scene);
         createMaterialGrid(redGPUContext, scene);
 
-        // 4. [KO] 렌더러 생성 및 루프 시작
-        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        // 5. [KO] 테스트용 GUI 렌더링
-        // [EN] Render Test GUI
         renderTestPane(redGPUContext, light);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
 const createSpotLight = (scene) => {
-    const light = new RedGPU.Light.SpotLight('#ffffff', 15000); 
+    const light = new RedGPU.Light.SpotLight('#ffffff', 100000);
     light.setPosition(0, 20, 0);
     light.lookAt(0, 0, 0);
-    light.radius = 60;
+    light.radius = 35;
     light.innerCutoff = 15;
     light.outerCutoff = 45;
     light.enableDebugger = true;
@@ -77,6 +73,7 @@ const createMaterialGrid = (redGPUContext, scene) => {
     matNonMetal.baseColorFactor = [1.0, 0.2, 0.2, 1.0];
     matNonMetal.metallicFactor = 0.0;
     matNonMetal.roughnessFactor = 0.4;
+
     const matMetal = new RedGPU.Material.PBRMaterial(redGPUContext);
     matMetal.baseColorFactor = [1.0, 1.0, 1.0, 1.0];
     matMetal.metallicFactor = 1.0;
@@ -98,21 +95,19 @@ const createMaterialGrid = (redGPUContext, scene) => {
 const renderTestPane = (redGPUContext, light) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            const config = { 
+            const config = {
                 color: {r: light.color.r, g: light.color.g, b: light.color.b}
             };
 
             const folder = pane.addFolder({title: 'SpotLight Control', expanded: true});
 
-            // [KO] 스포트 라이트 설정
-            // [EN] Spot Light Settings
-            const propFolder = folder.addFolder({title: 'Properties', expanded: true});
-            propFolder.addBinding(config, 'color', {view: 'color', label: 'color'}).on('change', (evt) => {
-                const {r, g, b} = evt.value;
+            folder.addBinding(config, 'color', {picker: 'inline', view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
                 light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
-            propFolder.addBinding(light, 'lumen', {min: 0, max: 200000, step: 100});
-            propFolder.addBinding(light, 'radius', {min: 0, max: 200, step: 1});
+            folder.addBinding(light, 'lumen', {min: 0, max: 200000, step: 100});
+            folder.addBinding(light, 'radius', {min: 0, max: 200, step: 1});
+            folder.addBinding(light, 'enableDebugger');
 
             const coneFolder = folder.addFolder({title: 'Cone Settings', expanded: true});
             coneFolder.addBinding(light, 'innerCutoff', {min: 0, max: 90, step: 0.1}).on('change', () => {
@@ -128,13 +123,11 @@ const renderTestPane = (redGPUContext, light) => {
             transformFolder.addBinding(light, 'x', {min: -100, max: 100, step: 0.1}).on('change', () => pane.refresh());
             transformFolder.addBinding(light, 'y', {min: -20, max: 60, step: 0.1}).on('change', () => pane.refresh());
             transformFolder.addBinding(light, 'z', {min: -100, max: 100, step: 0.1}).on('change', () => pane.refresh());
-            
+
             const dirFolder = folder.addFolder({title: 'Direction Vector', expanded: false});
             dirFolder.addBinding(light, 'directionX', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
             dirFolder.addBinding(light, 'directionY', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
             dirFolder.addBinding(light, 'directionZ', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
-            
-            folder.addBinding(light, 'enableDebugger', {label: 'Show Light Debugger'});
         }
     });
 };

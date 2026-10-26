@@ -31,7 +31,7 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
 
             // 2. 씬 구성 (입체감을 위해 광원 1개와 PhongMaterial 추가)
             const scene = new RedGPU.Display.Scene();
-            scene.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+
 
             scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
             scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
@@ -43,6 +43,7 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
 
             // 3. 뷰 추가 및 렌더 가동
             const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+            view.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
             redGPUContext.addView(view);
 
             const renderer = new RedGPU.Renderer();

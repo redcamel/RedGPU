@@ -5,31 +5,50 @@ import RenderViewStateData from "../../view/core/RenderViewStateData";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
 /**
- * 점광원({@link PointLight})의 물리적 위치와 영향 범위를 입체적으로 나타내어 주는 디버거 클래스입니다.
+ * [KO] 점광원(`PointLight`)의 위치와 구형 반경(`radius`)을 3D 공간에 시각화하는 디버거 클래스입니다.
+ * [EN] Debugger class that visualizes the position and spherical radius (`radius`) of a `PointLight` in 3D space.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @remarks
- * **[KO]**
- * - 전구 모양('💡') 아이콘 텍스트와 청록색의 3축 교차 원형 와이어프레임(XY, XZ, YZ 평면 원형 루프) 및 십자선을 그려 구형 반경을 시뮬레이션합니다.
- * - 반경 크기는 실시간으로 타겟 조명의 `radius` 설정값을 추적하여 투영 범위를 업데이트합니다.
+ * ### Example
+ * ```typescript
+ * // [KO] PointLight의 enableDebugger 프로퍼티를 통해 활성화합니다.
+ * // [EN] Enable via the enableDebugger property of PointLight.
+ * pointLight.enableDebugger = true;
+ * ```
  *
- * **[EN]**
- * - Visualizes light bounds and origin point of a target {@link PointLight}.
- * - Draws cyan wireframe boundary circles in 3 orthogonal planes (XY, XZ, YZ) alongside a bulb emoji ('💡') icon label.
- * - Tracks change events of the target light's `radius` property to update geometric bounds dynamically.
- *
+ * @see [PointLight example](/RedGPU/examples/3d/light/pointLight/)
+ * @see [DrawDebugger basic example](/RedGPU/examples/3d/drawDebugger/basic/)
  * @category Debugger
  */
 class DrawDebuggerPointLight extends ADrawDebuggerLight<PointLight> {
 
+    /**
+     * [KO] `DrawDebuggerPointLight` 인스턴스를 생성합니다.
+     * [EN] Creates a `DrawDebuggerPointLight` instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param target -
+     * [KO] 디버깅할 대상 점광원 객체
+     * [EN] Target point light object to debug
+     */
     constructor(redGPUContext: RedGPUContext, target: PointLight) {
-        super(redGPUContext, target, '💡', [0, 255, 255], 51); // 청록색, 51개 라인 (16*3 + 3)
+        super(redGPUContext, target, '💡', [0, 255, 255], 51);
     }
 
+    /**
+     * [KO] 점광원 디버그 가이드와 아이콘 레이블을 렌더링합니다.
+     * [EN] Renders the point light debug guide and icon label.
+     *
+     * @param renderViewStateData -
+     * [KO] 현재 뷰의 렌더링 상태 데이터
+     * [EN] Render state data of the current view
+     */
     render(renderViewStateData: RenderViewStateData): void {
         const {lightDebugMesh, label, target} = this
         if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
@@ -45,7 +64,6 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight<PointLight> {
         const radius = light.radius || 1.0;
         const segments = 16;
         const lines: number[][][] = [];
-        // XY 평면 원
         for (let i = 0; i < segments; i++) {
             const angle1 = (i / segments) * Math.PI * 2;
             const angle2 = ((i + 1) / segments) * Math.PI * 2;
@@ -57,7 +75,6 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight<PointLight> {
             const z2 = position[2];
             lines.push([[x1, y1, z1], [x2, y2, z2]]);
         }
-        // XZ 평면 원
         for (let i = 0; i < segments; i++) {
             const angle1 = (i / segments) * Math.PI * 2;
             const angle2 = ((i + 1) / segments) * Math.PI * 2;
@@ -69,7 +86,6 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight<PointLight> {
             const z2 = position[2] + Math.sin(angle2) * radius;
             lines.push([[x1, y1, z1], [x2, y2, z2]]);
         }
-        // YZ 평면 원
         for (let i = 0; i < segments; i++) {
             const angle1 = (i / segments) * Math.PI * 2;
             const angle2 = ((i + 1) / segments) * Math.PI * 2;
@@ -81,7 +97,6 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight<PointLight> {
             const z2 = position[2] + Math.sin(angle2) * radius;
             lines.push([[x1, y1, z1], [x2, y2, z2]]);
         }
-        // 중심점 십자가
         const crossSize = radius * 0.2;
         lines.push([
             [position[0] - crossSize, position[1], position[2]],

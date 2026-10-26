@@ -1,6 +1,6 @@
 import DefaultTheme from 'vitepress/theme'
-import { h, watch, nextTick } from 'vue'
-import { useRouter } from 'vitepress'
+import {h, nextTick, onMounted, watch} from 'vue'
+import {useRouter} from 'vitepress'
 import './custom.css'
 import './mermaid.css'
 import HeroVideo from './components/HeroVideo.vue'
@@ -9,7 +9,8 @@ import ExampleFrame from './components/ExampleFrame.vue'
 import CodePen from './components/CodePen.vue'
 import MermaidResponsive from './components/MermaidResponsive.vue'
 import GlobalFooter from './components/GlobalFooter.vue'
-import pkg from '../../../package.json' with { type: 'json' }
+import {scheduleOutlineUpdate, setupOutlineToggle} from './outlineToggle.js'
+import pkg from '../../../package.json' with {type: 'json'}
 
 export default {
     extends: DefaultTheme,
@@ -26,6 +27,11 @@ export default {
     // setup 훅에서 경로 감시 로직 추가
     setup() {
         const { route } = useRouter();
+
+        onMounted(() => {
+            setupOutlineToggle();
+            fixExamplesLinks();
+        });
 
         const fixBreadcrumbs = () => {
             if (typeof window === 'undefined') return;
@@ -57,11 +63,28 @@ export default {
         };
 
         // 경로가 바뀔 때마다 실행
+        const fixExamplesLinks = () => {
+            if (typeof window === 'undefined') return;
+            nextTick(() => {
+                const links = document.querySelectorAll('a[href^="https://redcamel.github.io/RedGPU/examples/"]');
+                links.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href) {
+                        link.setAttribute('href', href.replace('https://redcamel.github.io/RedGPU/examples/', '/RedGPU/examples/'));
+                    }
+                });
+            });
+        };
+
         watch(() => route.path, () => {
+            fixExamplesLinks();
             // api 폴더 하위일 때만 작동하도록 조건부 실행 가능
             if (route.path.includes('/api/')) {
                 fixBreadcrumbs();
             }
+            nextTick(() => {
+                scheduleOutlineUpdate();
+            });
         }, { immediate: true });
     },
 

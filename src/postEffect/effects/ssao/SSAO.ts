@@ -7,43 +7,32 @@ import SSAO_AO from "./ssao_ao/SSAO_AO";
 import SSAOBlend from "./ssao_blend/SSAOBlend";
 
 /**
- * [KO] SSAO(Screen Space Ambient Occlusion) 후처리 이펙트입니다.
- * [EN] SSAO (Screen Space Ambient Occlusion) post-processing effect.
+ * [KO] 깊이(Depth)와 법선(Normal) 버퍼를 기반으로 주변광 차폐(Ambient Occlusion) 음영을 생성하는 SSAO 후처리 이펙트입니다.
+ * [EN] SSAO post-processing effect that generates ambient occlusion shadows based on depth and normal buffers.
  *
- * [KO] 깊이(Depth)와 법선(Normal) 정보를 분석하여 물체 간의 근접도를 계산하고, 구석진 곳이나 틈새에 부드러운 그림자를 생성하여 공간감을 극대화합니다.
- * [EN] Analyzes depth and normal information to calculate proximity between objects and generates soft shadows in corners or crevices to maximize the sense of space.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * [KO] AO 계산(SSAO_AO), 노이즈 제거(GaussianBlur), 원본 합성(SSAOBlend)의 3단계 패스로 구성되어 고품질의 폐쇄 음영을 제공합니다.
- * [EN] Consists of a three-pass process: AO calculation (SSAO_AO), denoising (GaussianBlur), and original composition (SSAOBlend) to provide high-quality ambient occlusion.
- *
- * * ### Example
+ * ### Example
  * ```typescript
- * // View3D의 postEffectManager를 통해 사용 여부를 제어합니다.
- * // Controlled through the useSSAO property of View3D's postEffectManager.
+ * // [KO] View3D의 postEffectManager를 통해 SSAO 활성화 및 설정 제어
+ * // [EN] Enable and configure SSAO through View3D's postEffectManager
  * view.postEffectManager.useSSAO = true;
- * const ssaoEffect = view.postEffectManager.ssao;
- * ssaoEffect.radius = 0.5;
- * ssaoEffect.intensity = 1.5;
+ * const ssao = view.postEffectManager.ssao;
+ * ssao.radius = 0.5;
+ * ssao.intensity = 1.5;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/ssao/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/ssao/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
  * @category PostEffect
  */
 class SSAO extends AMultiPassPostEffect {
-    /**
-     * [KO] 임계값 이펙트
-     * [EN] Threshold effect
-     */
     #effect_ao: SSAO_AO
-    /**
-     * [KO] 가우시안 블러 이펙트
-     * [EN] Gaussian blur effect
-     */
     #effect_blur: GaussianBlur
-    /**
-     * [KO] 블렌드 이펙트
-     * [EN] Blend effect
-     */
     #effect_blend: SSAOBlend
 
 
@@ -51,9 +40,9 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] SSAO 인스턴스를 생성합니다.
      * [EN] Creates an SSAO instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
@@ -66,14 +55,15 @@ class SSAO extends AMultiPassPostEffect {
         );
         this.#effect_ao = this.passList[0] as SSAO_AO
         this.#effect_blur = this.passList[1] as GaussianBlur
-        this.#effect_blur.size = 3.0
+        this.#effect_blur.size = 1.5
         this.#effect_blend = this.passList[2] as SSAOBlend
     }
 
     /**
-     * [KO] 블러 사용 여부를 반환합니다.
-     * [EN] Returns whether blur is used.
+     * [KO] AO 노이즈 억제를 위한 가우시안 블러 패스 사용 여부를 반환하거나 설정합니다.
+     * [EN] Returns or sets whether the Gaussian blur pass is used to suppress AO noise.
      *
+     * @defaultValue true
      * @returns
      * [KO] 블러 사용 여부
      * [EN] Whether blur is used
@@ -82,118 +72,83 @@ class SSAO extends AMultiPassPostEffect {
         return this.#effect_ao.useBlur;
     }
 
-    /**
-     * [KO] 블러 사용 여부를 설정합니다.
-     * [EN] Sets whether blur is used.
-     *
-     * @param value -
-     * [KO] 블러 사용 여부
-     * [EN] Whether blur is used
-     */
     set useBlur(value: boolean) {
         this.#effect_ao.useBlur = value;
     }
 
     /**
-     * [KO] 반경을 반환합니다.
-     * [EN] Returns the radius.
+     * [KO] 차폐를 계산할 월드 단위 샘플링 반경(0.01 ~ 5.0)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the sampling radius in world units (0.01 ~ 5.0) for occlusion calculation.
      *
+     * @defaultValue 0.25
      * @returns
-     * [KO] 반경 값
-     * [EN] Radius value
+     * [KO] 샘플링 반경
+     * [EN] Sampling radius
      */
     get radius(): number {
         return this.#effect_ao.radius;
     }
 
-    /**
-     * [KO] 반경을 설정합니다.
-     * [EN] Sets the radius.
-     *
-     * @param value -
-     * [KO] 설정할 반경
-     * [EN] Radius to set
-     */
     set radius(value: number) {
         this.#effect_ao.radius = value;
     }
 
     /**
-     * [KO] 강도를 반환합니다.
-     * [EN] Returns the intensity.
+     * [KO] AO 음영의 강도(0 ~ 10)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the intensity (0 ~ 10) of the AO shadow.
      *
+     * @defaultValue 1
      * @returns
-     * [KO] 강도 값
-     * [EN] Intensity value
+     * [KO] AO 강도
+     * [EN] AO intensity
      */
     get intensity(): number {
         return this.#effect_ao.intensity;
     }
 
-    /**
-     * [KO] 강도를 설정합니다.
-     * [EN] Sets the intensity.
-     *
-     * @param value -
-     * [KO] 설정할 강도
-     * [EN] Intensity to set
-     */
     set intensity(value: number) {
         this.#effect_ao.intensity = value;
     }
 
     /**
-     * [KO] 바이어스를 반환합니다.
-     * [EN] Returns the bias.
+     * [KO] 자기 차폐(Self-occlusion) 현상을 방지하기 위한 깊이 바이어스 값(0.0 ~ 0.1)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the depth bias value (0.0 ~ 0.1) to prevent self-occlusion artifacts.
      *
+     * @defaultValue 0.02
      * @returns
-     * [KO] 바이어스 값
-     * [EN] Bias value
+     * [KO] 깊이 바이어스
+     * [EN] Depth bias
      */
     get bias(): number {
         return this.#effect_ao.bias;
     }
 
-    /**
-     * [KO] 바이어스를 설정합니다.
-     * [EN] Sets the bias.
-     *
-     * @param value -
-     * [KO] 설정할 바이어스
-     * [EN] Bias to set
-     */
     set bias(value: number) {
         this.#effect_ao.bias = value;
     }
 
     /**
-     * [KO] 바이어스 거리 스케일을 반환합니다.
-     * [EN] Returns the bias distance scale.
+     * [KO] 카메라 거리에 비례하여 적용되는 바이어스 스케일 계수(0.0 ~ 0.5)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the bias scale factor (0.0 ~ 0.5) applied proportionally to camera distance.
      *
+     * @defaultValue 0.02
      * @returns
-     * [KO] 바이어스 거리 스케일
+     * [KO] 거리별 바이어스 스케일
      * [EN] Bias distance scale
      */
     get biasDistanceScale(): number {
         return this.#effect_ao.biasDistanceScale;
     }
 
-    /**
-     * [KO] 바이어스 거리 스케일을 설정합니다.
-     * [EN] Sets the bias distance scale.
-     *
-     * @param value -
-     * [KO] 설정할 바이어스 거리 스케일
-     * [EN] Bias distance scale to set
-     */
     set biasDistanceScale(value: number) {
         this.#effect_ao.biasDistanceScale = value;
     }
 
     /**
-     * [KO] 페이드 시작 거리를 반환합니다.
-     * [EN] Returns the fade start distance.
+     * [KO] AO 효과가 감쇠되기 시작하는 카메라 거리(1.0 ~ 200.0)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the camera distance (1.0 ~ 200.0) at which the AO effect starts to fade out.
      *
+     * @defaultValue 30.0
      * @returns
      * [KO] 페이드 시작 거리
      * [EN] Fade start distance
@@ -202,22 +157,15 @@ class SSAO extends AMultiPassPostEffect {
         return this.#effect_ao.fadeDistanceStart;
     }
 
-    /**
-     * [KO] 페이드 시작 거리를 설정합니다.
-     * [EN] Sets the fade start distance.
-     *
-     * @param value -
-     * [KO] 설정할 페이드 시작 거리
-     * [EN] Fade start distance to set
-     */
     set fadeDistanceStart(value: number) {
         this.#effect_ao.fadeDistanceStart = value;
     }
 
     /**
-     * [KO] 페이드 거리 범위를 반환합니다.
-     * [EN] Returns the fade distance range.
+     * [KO] AO 효과가 완전히 사라지기까지의 페이드 거리 구간 길이(1.0 ~ 100.0)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the fade distance range (1.0 ~ 100.0) over which the AO effect completely fades out.
      *
+     * @defaultValue 20.0
      * @returns
      * [KO] 페이드 거리 범위
      * [EN] Fade distance range
@@ -226,22 +174,15 @@ class SSAO extends AMultiPassPostEffect {
         return this.#effect_ao.fadeDistanceRange;
     }
 
-    /**
-     * [KO] 페이드 거리 범위를 설정합니다.
-     * [EN] Sets the fade distance range.
-     *
-     * @param value -
-     * [KO] 설정할 페이드 거리 범위
-     * [EN] Fade distance range to set
-     */
     set fadeDistanceRange(value: number) {
         this.#effect_ao.fadeDistanceRange = value;
     }
 
     /**
-     * [KO] 대비를 반환합니다.
-     * [EN] Returns the contrast.
+     * [KO] AO 음영의 대비(0.5 ~ 4.0)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the contrast (0.5 ~ 4.0) of the AO shadow.
      *
+     * @defaultValue 1.5
      * @returns
      * [KO] 대비 값
      * [EN] Contrast value
@@ -250,60 +191,59 @@ class SSAO extends AMultiPassPostEffect {
         return this.#effect_ao.contrast;
     }
 
-    /**
-     * [KO] 대비를 설정합니다.
-     * [EN] Sets the contrast.
-     *
-     * @param value -
-     * [KO] 설정할 대비
-     * [EN] Contrast to set
-     */
     set contrast(value: number) {
         this.#effect_ao.contrast = value;
     }
 
 
     /**
-     * [KO] SSAO 효과를 렌더링합니다.
-     * [EN] Renders the SSAO effect.
+     * [KO] SSAO 다중 패스 후처리 효과를 렌더링합니다.
+     * [EN] Renders the multi-pass SSAO post-processing effect.
      *
-     * @param view
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
-     * @param width
-     * [KO] 너비
-     * [EN] Width
-     * @param height
-     * [KO] 높이
-     * [EN] Height
-     * @param sourceTextureInfo
-     * [KO] 소스 텍스처 정보
-     * [EN] Source texture info
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 원본 소스 텍스처 정보
+     * [EN] Original source texture information
      * @returns
-     * [KO] 렌더링 결과
-     * [EN] Rendering result
+     * [KO] SSAO가 합성된 후처리 결과 (`IPostEffectResult`)
+     * [EN] Post-effect result with SSAO composited (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;
+        const downW = Math.max(1, (width * 0.5) | 0);
+        const downH = Math.max(1, (height * 0.5) | 0);
+
         const aoResult = this.#effect_ao.render(
-            view, width, height, sourceTextureInfo
-        )
+            view, downW, downH, sourceTextureInfo
+        );
+
         if (this.useBlur) {
             const blurResult = this.#effect_blur.render(
-                view, width, height, aoResult
-            )
-            // aoResult는 blur에서 사용된 후 더 이상 필요 없음
+                view, downW, downH, aoResult
+            );
             pool.release(aoResult.texture);
 
             const blendResult = this.#effect_blend.render(
                 view, width, height, sourceTextureInfo, blurResult
-            )
-            // blurResult는 blend에서 사용된 후 더 이상 필요 없음
+            );
             pool.release(blurResult.texture);
 
             return blendResult;
         } else {
-            return aoResult
+            const blendResult = this.#effect_blend.render(
+                view, width, height, sourceTextureInfo, aoResult
+            );
+            pool.release(aoResult.texture);
+
+            return blendResult;
         }
     }
 }

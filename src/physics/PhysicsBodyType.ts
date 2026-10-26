@@ -1,6 +1,6 @@
 /**
- * [KO] 물리 바디의 시뮬레이션 타입을 정의합니다.
- * [EN] Defines the simulation types of physics bodies.
+ * [KO] 물리 바디의 시뮬레이션 타입 상수입니다.
+ * [EN] Simulation type constants for physics bodies.
  *
  * ::: warning
  * [KO] 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
@@ -22,17 +22,17 @@ export const PHYSICS_BODY_TYPE = {
      */
     STATIC: 'static',
     /**
-     * [KO] 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디 (위치 기반)
-     * [EN] Kinematic body not affected by physics laws but controlled directly by code (Position based)
+     * [KO] 위치 기반으로 직접 제어하는 키네마틱 바디
+     * [EN] Kinematic body controlled directly by position
      */
     KINEMATIC: 'kinematic',
     /**
-     * [KO] 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디 (위치 기반)
-     * [EN] Kinematic body not affected by physics laws but controlled directly by code (Position based)
+     * [KO] 위치 기반으로 직접 제어하는 키네마틱 바디
+     * [EN] Kinematic body controlled directly by position
      */
     KINEMATIC_POSITION: 'kinematicPosition',
     /**
-     * [KO] 물리 법칙의 영향은 받지 않으나 속도로 움직임을 제어하는 바디
+     * [KO] 속도 기반으로 제어하는 키네마틱 바디
      * [EN] Kinematic body controlled by velocity
      */
     KINEMATIC_VELOCITY: 'kinematicVelocity'
@@ -41,5 +41,7 @@ export const PHYSICS_BODY_TYPE = {
 /**
  * [KO] `PHYSICS_BODY_TYPE`의 값들에 대한 유니온 타입입니다.
  * [EN] Union type for the values of `PHYSICS_BODY_TYPE`.
+ *
+ * @category Physics
  */
 export type PhysicsBodyType = typeof PHYSICS_BODY_TYPE[keyof typeof PHYSICS_BODY_TYPE];

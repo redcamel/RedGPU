@@ -8,38 +8,80 @@ import definePositiveNumber from "../../../../defineProperty/funcs/number/define
 
 
 interface SSAO_AO {
-    /** [KO] 블러 사용 여부. true 시 AO 노이즈를 억제하기 위한 가우시안 블러가 수행됩니다. [EN] Whether to use blur. If true, Gaussian blur is performed to suppress AO noise. */
+    /**
+     * [KO] 가우시안 블러 사용 여부
+     * [EN] Whether to use Gaussian blur
+     * @defaultValue true
+     */
     useBlur: boolean;
-    /** [KO] AO의 대비(Contrast). 값이 클수록 그림자가 더 진해집니다. [EN] Contrast of AO. Higher values result in darker shadows. */
+    /**
+     * [KO] AO 대비 (0.5 ~ 4.0)
+     * [EN] AO contrast (0.5 ~ 4.0)
+     * @defaultValue 1.5
+     */
     contrast: number;
-    /** [KO] 샘플링 반경 (월드 단위). 물체로부터 어느 정도 거리까지 차폐를 계산할지 결정합니다. [EN] Sampling radius (in world units). Determines the distance up to which occlusion is calculated from an object. */
+    /**
+     * [KO] 샘플링 반경 (단위: 월드 거리, 0.01 ~ 5.0)
+     * [EN] Sampling radius in world units (0.01 ~ 5.0)
+     * @defaultValue 0.25
+     */
     radius: number;
-    /** [KO] AO 효과의 전체적인 강도. [EN] Overall intensity of the AO effect. */
+    /**
+     * [KO] AO 효과 강도 (0 ~ 10)
+     * [EN] AO effect intensity (0 ~ 10)
+     * @defaultValue 1
+     */
     intensity: number;
-    /** [KO] 자기 차폐 방지를 위한 바이어스 값. [EN] Bias value to prevent self-occlusion. */
+    /**
+     * [KO] 자기 차폐 방지용 깊이 바이어스 값 (0.0 ~ 0.1)
+     * [EN] Depth bias value to prevent self-occlusion (0.0 ~ 0.1)
+     * @defaultValue 0.02
+     */
     bias: number;
-    /** [KO] 거리에 따른 바이어스 가중치. [EN] Bias weight based on distance. */
+    /**
+     * [KO] 거리에 따른 바이어스 가중치 (0.0 ~ 0.5)
+     * [EN] Distance-based bias scale (0.0 ~ 0.5)
+     * @defaultValue 0.02
+     */
     biasDistanceScale: number;
-    /** [KO] AO 효과가 사라지기 시작하는 거리. [EN] Distance where the AO effect starts to fade out. */
+    /**
+     * [KO] AO 페이드 아웃 시작 거리 (1.0 ~ 200.0)
+     * [EN] Distance where AO fade-out starts (1.0 ~ 200.0)
+     * @defaultValue 30.0
+     */
     fadeDistanceStart: number;
-    /** [KO] AO 효과의 페이드 범위. [EN] Fade range of the AO effect. */
+    /**
+     * [KO] AO 페이드 거리 범위 (1.0 ~ 100.0)
+     * [EN] AO fade distance range (1.0 ~ 100.0)
+     * @defaultValue 20.0
+     */
     fadeDistanceRange: number;
 }
 
 /**
- * [KO] SSAO의 핵심인 차폐도(Occlusion) 계산을 담당하는 이펙트입니다.
- * [EN] Effect responsible for calculating Occlusion, the core of SSAO.
+ * [KO] 뷰 공간에서 반구(Hemisphere) 샘플링을 통해 화면 공간 주변광 차폐(SSAO) 값을 계산하는 내부 후처리 패스입니다.
+ * [EN] Internal post-processing pass that calculates Screen Space Ambient Occlusion (SSAO) via hemisphere sampling in view space.
  *
- * [KO] 뷰 공간(View Space)에서 법선 방향의 반구(Hemisphere) 샘플링을 수행하여 주변 지형에 의한 빛의 차폐 정도를 산출합니다.
- * [EN] Performs hemisphere sampling in the normal direction within view space to calculate the degree of light occlusion by surrounding terrain.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
+ * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
  * @category PostEffect
  */
 class SSAO_AO extends ASinglePassPostEffect {
 
-
+    /**
+     * [KO] SSAO_AO 인스턴스를 생성합니다.
+     * [EN] Creates an SSAO_AO instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
 
         this.init(
             redGPUContext,
@@ -56,7 +98,7 @@ defineBoolean(SSAO_AO, [
 ])
 definePositiveNumber(SSAO_AO, [
     {key: 'contrast', value: 1.5, min: 0.5, max: 4.0},
-    {key: 'radius', value: 0.253, min: 0.01, max: 5.0},
+    {key: 'radius', value: 0.25, min: 0.01, max: 5.0},
     {key: 'intensity', value: 1, min: 0, max: 10},
     {key: 'bias', value: 0.02, min: 0.0, max: 0.1},
     {key: 'biasDistanceScale', value: 0.02, min: 0.0, max: 0.5},

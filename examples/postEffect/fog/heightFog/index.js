@@ -1,12 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Height Fog 예제
  * [EN] Height Fog example
  *
- * [KO] 포스트 이펙트를 사용하여 높이 기반 안개(Height Fog) 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply height-based fog effects using post effects.
+ * [KO] 포스트 이펙트를 사용하여 월드 높이(Y축)와 거리 기반 안개(Height Fog) 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply world-height (Y-axis) and distance-based fog (Height Fog) effects using post effects.
  */
 
 const canvas = document.createElement('canvas');
@@ -25,11 +25,11 @@ RedGPU.init(
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-
         redGPUContext.addView(view);
 
+        // [KO] HeightFog 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create HeightFog post effect and add it to the view
         const heightFog = new RedGPU.PostEffect.HeightFog(redGPUContext);
-        heightFog.fogType = RedGPU.PostEffect.HeightFog.EXPONENTIAL;
         heightFog.density = 1.8;
         heightFog.fogColor.setColorByRGB(255, 245, 220);
         heightFog.baseHeight = -2;
@@ -38,195 +38,60 @@ RedGPU.init(
         view.postEffectManager.addEffect(heightFog);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.intensity = 0.8;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         createGroundLevelScene(redGPUContext, scene);
 
-        const autoRotateState = {enabled: true};
+        const autoRotateState = {autoRotate: true};
         const renderer = new RedGPU.Renderer();
-        const render = (time) => {
-            scene.children.forEach((child, index) => {
-                if (child.userData) {
-                    if (child.userData.isFloating) {
-                        const floatSpeed = 0.001 + (index % 3) * 0.0003;
-                        const floatAmount = 0.2 + (index % 2) * 0.15;
-                        child.y = child.userData.baseY + Math.sin(time * floatSpeed + index) * floatAmount;
+        renderer.start(redGPUContext, (time) => {
+            const {children} = scene;
+            const len = children.length;
+            for (let i = 0; i < len; i++) {
+                const child = children[i];
+                const {userData} = child;
+                if (userData) {
+                    if (userData.isFloating) {
+                        const floatSpeed = 0.001 + (i % 3) * 0.0003;
+                        const floatAmount = 0.2 + (i % 2) * 0.15;
+                        child.y = userData.baseY + Math.sin(time * floatSpeed + i) * floatAmount;
                     }
-
-                    if (child.userData.isRotating) {
-                        const rotSpeed = 0.002 + (index % 3) * 0.001;
-                        child.rotationY += rotSpeed;
+                    if (userData.isRotating) {
+                        child.rotationY += 0.002 + (i % 3) * 0.001;
                     }
-
-                    if (child.userData.isLantern) {
-                        const flickerSpeed = 0.003 + (index % 4) * 0.001;
-                        const brightness = 0.7 + Math.sin(time * flickerSpeed + index * 2) * 0.3;
-                        child.material.emissive = brightness;
+                    if (userData.isLantern) {
+                        const flickerSpeed = 0.003 + (i % 4) * 0.001;
+                        child.material.emissiveStrength = 0.7 + Math.sin(time * flickerSpeed + i * 2) * 0.3;
                     }
                 }
-            });
+            }
 
-            if (autoRotateState.enabled) {
+            if (autoRotateState.autoRotate) {
                 controller.pan += 0.2;
             }
-        };
+        });
 
-        renderer.start(redGPUContext, render);
-
-        // [KO] RedGPUExampleHelper 초기화
-        // [EN] Initialize RedGPUExampleHelper
-        renderTestPane(redGPUContext, heightFog, autoRotateState);
+        renderTestPane(redGPUContext, view, heightFog, autoRotateState);
     },
     (failReason) => {
-        console.error('HeightFog 초기화 실패:', failReason);
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] RedGPUExampleHelper 초기화
- * [EN] Initialize RedGPUExampleHelper
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.PostEffect.HeightFog} heightFog
- * @param {Object} autoRotateState
- */
-function renderTestPane(redGPUContext, heightFog, autoRotateState) {
-    const view = redGPUContext.viewList[0];
-    new RedGPUExampleHelper(redGPUContext, {
-        RedGPU,
-        ibl: true,
-        skybox: true,
-        gui: (pane) => {
-            const PARAMS = {
-                enabled: true,
-                autoRotate: autoRotateState.enabled,
-                fogType: 'EXPONENTIAL',
-                density: heightFog.density,
-                baseHeight: heightFog.baseHeight,
-                thickness: heightFog.thickness,
-                falloff: heightFog.falloff,
-                fogColor: {r: 190, g: 210, b: 235}
-            };
-
-            const heightFogFolder = pane.addFolder({title: 'Height Fog Demo', expanded: true});
-
-            heightFogFolder.addBinding(PARAMS, 'enabled').on('change', (ev) => {
-                if (ev.value) {
-                    view.postEffectManager.addEffect(heightFog);
-                } else {
-                    view.postEffectManager.removeAllEffect();
-                }
-            });
-
-            heightFogFolder.addBinding(PARAMS, 'autoRotate').on('change', (ev) => {
-                autoRotateState.enabled = ev.value;
-            });
-
-            const fogFolder = heightFogFolder.addFolder({title: 'Fog Settings', expanded: true});
-
-            fogFolder.addBinding(PARAMS, 'fogType', {
-                options: {
-                    'EXPONENTIAL': 'EXPONENTIAL',
-                    'EXPONENTIAL_SQUARED': 'EXPONENTIAL_SQUARED'
-                }
-            }).on('change', (ev) => {
-                heightFog.fogType = ev.value === 'EXPONENTIAL' ?
-                    RedGPU.PostEffect.HeightFog.EXPONENTIAL :
-                    RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED;
-            });
-
-            fogFolder.addBinding(PARAMS, 'density', {
-                min: 0, max: 5, step: 0.1
-            }).on('change', (ev) => {
-                heightFog.density = ev.value;
-            });
-
-            fogFolder.addBinding(PARAMS, 'baseHeight', {
-                label: 'Base Height',
-                min: -5, max: 8, step: 0.1
-            }).on('change', (ev) => {
-                heightFog.baseHeight = ev.value;
-            });
-
-            fogFolder.addBinding(PARAMS, 'thickness', {
-                min: 2, max: 20, step: 0.5
-            }).on('change', (ev) => {
-                heightFog.thickness = ev.value;
-            });
-
-            fogFolder.addBinding(PARAMS, 'falloff', {
-                min: 0.1, max: 2, step: 0.1
-            }).on('change', (ev) => {
-                heightFog.falloff = ev.value;
-            });
-
-            fogFolder.addBinding(PARAMS, 'fogColor').on('change', (ev) => {
-                heightFog.fogColor.setColorByRGB(
-                    Math.round(ev.value.r),
-                    Math.round(ev.value.g),
-                    Math.round(ev.value.b)
-                );
-            });
-
-            const scenarioFolder = heightFogFolder.addFolder({title: 'Scenarios', expanded: true});
-
-            const applyPreset = (density, baseHeight, thickness, falloff, fogColor, fogType) => {
-                PARAMS.density = density;
-                PARAMS.baseHeight = baseHeight;
-                PARAMS.thickness = thickness;
-                PARAMS.falloff = falloff;
-                PARAMS.fogColor = fogColor;
-                PARAMS.fogType = fogType;
-
-                heightFog.density = density;
-                heightFog.baseHeight = baseHeight;
-                heightFog.thickness = thickness;
-                heightFog.falloff = falloff;
-                heightFog.fogType = fogType === 'EXPONENTIAL' ?
-                    RedGPU.PostEffect.HeightFog.EXPONENTIAL :
-                    RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED;
-                heightFog.fogColor.setColorByRGB(fogColor.r, fogColor.g, fogColor.b);
-
-                pane.refresh();
-            };
-
-            scenarioFolder.addButton({title: 'Dawn Valley'}).on('click', () => {
-                applyPreset(1.8, -2, 6, 1.0, {r: 255, g: 245, b: 220}, 'EXPONENTIAL');
-            });
-
-            scenarioFolder.addButton({title: 'Mysterious Forest'}).on('click', () => {
-                applyPreset(2.5, -1, 8, 1.4, {r: 180, g: 200, b: 180}, 'EXPONENTIAL');
-            });
-
-            scenarioFolder.addButton({title: 'Ancient Ruins'}).on('click', () => {
-                applyPreset(2.0, 0, 7, 1.2, {r: 200, g: 190, b: 160}, 'EXPONENTIAL');
-            });
-
-            scenarioFolder.addButton({title: 'Moonlit Mist'}).on('click', () => {
-                applyPreset(1.5, -1.5, 9, 0.8, {r: 160, g: 170, b: 200}, 'EXPONENTIAL');
-            });
-        }
-    });
-}
-
-
-/**
- * [KO] 지형 레벨 씬을 생성합니다.
- * [EN] Creates a ground-level scene.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- */
-function createGroundLevelScene(redGPUContext, scene) {
+const createGroundLevelScene = (redGPUContext, scene) => {
     const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 1024, 1024);
     const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
 
     const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 512, 512, {
         mainLogic: `
-		let noise1 = getSimplexNoiseByDimension(base_uv * 2.0, uniforms);
-		let noise2 = getSimplexNoiseByDimension(base_uv * 4.0, uniforms) * 0.5;
-		let heightValue = (noise1 + noise2) * 0.3 + 0.7;
-		let finalColor = vec4<f32>(heightValue, heightValue, heightValue, 1.0);
-	`
+            let noise1 = getSimplexNoiseByDimension(base_uv * 2.0, uniforms);
+            let noise2 = getSimplexNoiseByDimension(base_uv * 4.0, uniforms) * 0.5;
+            let heightValue = (noise1 + noise2) * 0.3 + 0.7;
+            let finalColor = vec4<f32>(heightValue, heightValue, heightValue, 1.0);
+        `
     });
     terrainNoise.frequency = 1.8;
     terrainNoise.amplitude = 1.5;
@@ -236,7 +101,6 @@ function createGroundLevelScene(redGPUContext, scene) {
     terrainMaterial.displacementScale = 13.0;
 
     const terrainMesh = new RedGPU.Display.Mesh(redGPUContext, terrain, terrainMaterial);
-
     terrainMesh.y = -4;
     scene.addChild(terrainMesh);
 
@@ -248,53 +112,45 @@ function createGroundLevelScene(redGPUContext, scene) {
         {x: 25, z: 10, height: 7, radius: 0.45, density: 'medium'},
         {x: -30, z: 5, height: 6.5, radius: 0.4, density: 'medium'},
         {x: 15, z: 20, height: 9, radius: 0.6, density: 'sparse'},
-        {x: -20, z: 25, height: 10, radius: 0.55, density: 'sparse'},
+        {x: -20, z: 25, height: 10, radius: 0.55, density: 'sparse'}
     ];
 
-    forestPositions.forEach((pos, index) => {
+    const treeColors = {
+        dense: '#1a3d1a',
+        medium: '#2d5a2d',
+        sparse: '#4a7c4a'
+    };
+
+    forestPositions.forEach((pos) => {
         const treeHeight = pos.height + Math.random() * 2;
         const tree = new RedGPU.Primitive.Cylinder(redGPUContext, pos.radius, treeHeight, 8);
-
-        const treeColors = {
-            dense: '#1a3d1a',
-            medium: '#2d5a2d',
-            sparse: '#4a7c4a'
-        };
-
         const treeMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, treeColors[pos.density]);
         const treeMesh = new RedGPU.Display.Mesh(redGPUContext, tree, treeMaterial);
 
         treeMesh.x = pos.x + (Math.random() - 0.5) * 4;
         treeMesh.z = pos.z + (Math.random() - 0.5) * 4;
         treeMesh.y = treeHeight / 2 - 2;
-
-        treeMesh.userData = {
-            isRotating: pos.density === 'sparse',
-            heightLayer: pos.density
-        };
-
+        treeMesh.userData = {isRotating: pos.density === 'sparse'};
         scene.addChild(treeMesh);
 
         const crownSize = pos.radius * (1.5 + Math.random() * 0.5);
         const crown = new RedGPU.Primitive.Sphere(redGPUContext, crownSize, 12, 12);
         const crownMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d6b2d');
         const crownMesh = new RedGPU.Display.Mesh(redGPUContext, crown, crownMaterial);
-
-        crownMesh.x = treeMesh.x;
-        crownMesh.z = treeMesh.z;
-        crownMesh.y = treeMesh.y + treeHeight / 2 + crownSize * 0.7;
+        crownMesh.setPosition(treeMesh.x, treeMesh.y + treeHeight / 2 + crownSize * 0.7, treeMesh.z);
         scene.addChild(crownMesh);
     });
 
     const monuments = [
-        {x: 0, z: 0, y: 1, height: 8, type: 'obelisk', name: 'Central Obelisk'},
-        {x: -12, z: -8, y: 4, height: 5, type: 'pillar', name: 'Ancient Pillar'},
-        {x: 18, z: -5, y: 7, height: 6, type: 'statue', name: 'Guardian Statue'},
-        {x: -8, z: 15, y: 10, height: 4, type: 'altar', name: 'Sky Altar'},
+        {x: 0, z: 0, y: 1, height: 8, type: 'obelisk'},
+        {x: -12, z: -8, y: 4, height: 5, type: 'pillar'},
+        {x: 18, z: -5, y: 7, height: 6, type: 'statue'},
+        {x: -8, z: 15, y: 10, height: 4, type: 'altar'}
     ];
 
-    monuments.forEach((monument, index) => {
-        let monumentGeom, monumentColor;
+    monuments.forEach((monument) => {
+        let monumentGeom;
+        let monumentColor;
 
         switch (monument.type) {
             case 'obelisk':
@@ -316,20 +172,9 @@ function createGroundLevelScene(redGPUContext, scene) {
         }
 
         const monumentMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, monumentColor);
-        monumentMaterial.roughness = 0.7;
-        monumentMaterial.metalness = 0.1;
-
         const monumentMesh = new RedGPU.Display.Mesh(redGPUContext, monumentGeom, monumentMaterial);
-        monumentMesh.x = monument.x;
-        monumentMesh.z = monument.z;
-        monumentMesh.y = monument.y;
-
-        monumentMesh.userData = {
-            monumentName: monument.name,
-            heightLevel: monument.y,
-            isRotating: monument.type === 'obelisk'
-        };
-
+        monumentMesh.setPosition(monument.x, monument.y, monument.z);
+        monumentMesh.userData = {isRotating: monument.type === 'obelisk'};
         scene.addChild(monumentMesh);
     });
 
@@ -337,50 +182,38 @@ function createGroundLevelScene(redGPUContext, scene) {
         {x: -5, z: -10, y: 0.5},
         {x: 8, z: -12, y: 2.5},
         {x: -15, z: 8, y: 5.5},
-        {x: 12, z: 15, y: 8.5},
+        {x: 12, z: 15, y: 8.5}
     ];
 
-    lanternPositions.forEach((pos, index) => {
+    lanternPositions.forEach((pos) => {
         const lanternPole = new RedGPU.Primitive.Cylinder(redGPUContext, 0.15, 3, 8);
         const poleMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#654321');
         const poleMesh = new RedGPU.Display.Mesh(redGPUContext, lanternPole, poleMaterial);
-        poleMesh.x = pos.x;
-        poleMesh.z = pos.z;
-        poleMesh.y = pos.y + 1.5;
+        poleMesh.setPosition(pos.x, pos.y + 1.5, pos.z);
         scene.addChild(poleMesh);
 
         const lantern = new RedGPU.Primitive.Sphere(redGPUContext, 0.4, 12, 12);
         const lanternMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#FFD700');
-        lanternMaterial.emissive = 0.8;
+        lanternMaterial.emissiveColor.setColorByHEX('#FFD700');
+        lanternMaterial.emissiveStrength = 0.8;
 
         const lanternMesh = new RedGPU.Display.Mesh(redGPUContext, lantern, lanternMaterial);
-        lanternMesh.x = pos.x;
-        lanternMesh.z = pos.z;
-        lanternMesh.y = pos.y + 3.2;
-
-        lanternMesh.userData = {
-            isLantern: true,
-            heightLevel: pos.y
-        };
-
+        lanternMesh.setPosition(pos.x, pos.y + 3.2, pos.z);
+        lanternMesh.userData = {isLantern: true};
         scene.addChild(lanternMesh);
     });
 
     const bridge = new RedGPU.Primitive.Box(redGPUContext, 20, 0.5, 2.5);
     const bridgeMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#8B4513');
     const bridgeMesh = new RedGPU.Display.Mesh(redGPUContext, bridge, bridgeMaterial);
-    bridgeMesh.x = 5;
-    bridgeMesh.z = 2;
-    bridgeMesh.y = 3.5;
+    bridgeMesh.setPosition(5, 3.5, 2);
     scene.addChild(bridgeMesh);
 
     for (let i = -2; i <= 2; i++) {
         const pillar = new RedGPU.Primitive.Cylinder(redGPUContext, 0.4, 6, 8);
         const pillarMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#654321');
         const pillarMesh = new RedGPU.Display.Mesh(redGPUContext, pillar, pillarMaterial);
-        pillarMesh.x = 5 + i * 5;
-        pillarMesh.z = 2;
-        pillarMesh.y = 0.5;
+        pillarMesh.setPosition(5 + i * 5, 0.5, 2);
         scene.addChild(pillarMesh);
     }
 
@@ -389,21 +222,95 @@ function createGroundLevelScene(redGPUContext, scene) {
         const testSphere = new RedGPU.Primitive.Sphere(redGPUContext, 0.8, 16, 16);
         const intensity = Math.min(255, 100 + height * 20);
         const testMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-        testMaterial.r = intensity;
-        testMaterial.g = intensity + 20;
-        testMaterial.b = intensity + 40;
+        testMaterial.color.setColorByRGB(
+            intensity,
+            Math.min(255, intensity + 20),
+            Math.min(255, intensity + 40)
+        );
 
         const testMesh = new RedGPU.Display.Mesh(redGPUContext, testSphere, testMaterial);
-        testMesh.x = -25 + index * 3;
-        testMesh.z = 30;
-        testMesh.y = height;
-
-        testMesh.userData = {
-            isFloating: true,
-            baseY: height,
-            testHeight: height
-        };
-
+        testMesh.setPosition(-25 + index * 3, height, 30);
+        testMesh.userData = {isFloating: true, baseY: height};
         scene.addChild(testMesh);
     });
-}
+};
+
+const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU,
+        ibl: true,
+        skybox: true,
+        gui: (pane) => {
+            const config = {
+                HeightFog: true,
+                fogColor: {
+                    r: heightFog.fogColor.r,
+                    g: heightFog.fogColor.g,
+                    b: heightFog.fogColor.b
+                }
+            };
+
+            const heightFogFolder = pane.addFolder({title: 'PostEffect', expanded: true});
+
+            heightFogFolder.addBinding(config, 'HeightFog').on('change', (ev) => {
+                if (ev.value) {
+                    view.postEffectManager.addEffect(heightFog);
+                } else {
+                    view.postEffectManager.removeAllEffect();
+                }
+                controls.forEach((c) => c.disabled = !ev.value);
+                scenarioFolder.disabled = !ev.value;
+            });
+
+            heightFogFolder.addBinding(autoRotateState, 'autoRotate');
+
+            const controls = [
+                heightFogFolder.addBinding(heightFog, 'fogType', {
+                    options: {
+                        EXPONENTIAL: RedGPU.PostEffect.HeightFog.EXPONENTIAL,
+                        EXPONENTIAL_SQUARED: RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED
+                    }
+                }),
+                heightFogFolder.addBinding(heightFog, 'density', {min: 0, max: 5, step: 0.1}),
+                heightFogFolder.addBinding(heightFog, 'baseHeight', {min: -5, max: 8, step: 0.1}),
+                heightFogFolder.addBinding(heightFog, 'thickness', {min: 0.1, max: 50, step: 0.5}),
+                heightFogFolder.addBinding(heightFog, 'falloff', {min: 0.001, max: 2, step: 0.01}),
+                heightFogFolder.addBinding(heightFog, 'startDepth', {min: 0, max: 100, step: 1}),
+                heightFogFolder.addBinding(heightFog, 'endDepth', {min: 0, max: 200, step: 1}),
+                heightFogFolder.addBinding(config, 'fogColor').on('change', (ev) => {
+                    heightFog.fogColor.setColorByRGB(
+                        Math.round(ev.value.r),
+                        Math.round(ev.value.g),
+                        Math.round(ev.value.b)
+                    );
+                })
+            ];
+
+            const scenarioFolder = heightFogFolder.addFolder({title: 'Presets', expanded: true});
+
+            const applyPreset = (density, baseHeight, thickness, falloff, fogColor, fogType) => {
+                heightFog.density = density;
+                heightFog.baseHeight = baseHeight;
+                heightFog.thickness = thickness;
+                heightFog.falloff = falloff;
+                heightFog.fogType = fogType;
+                heightFog.fogColor.setColorByRGB(fogColor.r, fogColor.g, fogColor.b);
+                config.fogColor = fogColor;
+                pane.refresh();
+            };
+
+            scenarioFolder.addButton({title: 'Dawn Valley'}).on('click', () => {
+                applyPreset(1.8, -2, 6, 1.0, {r: 255, g: 245, b: 220}, RedGPU.PostEffect.HeightFog.EXPONENTIAL);
+            });
+            scenarioFolder.addButton({title: 'Mysterious Forest'}).on('click', () => {
+                applyPreset(2.5, -1, 8, 1.4, {r: 180, g: 200, b: 180}, RedGPU.PostEffect.HeightFog.EXPONENTIAL);
+            });
+            scenarioFolder.addButton({title: 'Ancient Ruins'}).on('click', () => {
+                applyPreset(2.0, 0, 7, 1.2, {r: 200, g: 190, b: 160}, RedGPU.PostEffect.HeightFog.EXPONENTIAL);
+            });
+            scenarioFolder.addButton({title: 'Moonlit Mist'}).on('click', () => {
+                applyPreset(1.5, -1.5, 9, 0.8, {r: 160, g: 170, b: 200}, RedGPU.PostEffect.HeightFog.EXPONENTIAL);
+            });
+        }
+    });
+};

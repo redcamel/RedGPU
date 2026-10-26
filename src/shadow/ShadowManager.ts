@@ -8,7 +8,7 @@ import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import updateViewportAndScissor from "../renderer/helperFunc/updateViewportAndScissor";
 import renderShadowLayer from "../renderer/renderLayers/renderShadowLayer";
-import {keepLog} from "../utils";
+import keepLog from "../utils/keepLog";
 
 /**
  * [KO] 씬의 전체적인 그림자 렌더링을 총괄하는 관리자 클래스입니다.
@@ -22,8 +22,10 @@ import {keepLog} from "../utils";
  * @category Shadow
  */
 class ShadowManager {
-    #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager()
-    #shadowPassDescriptor: GPURenderPassDescriptor
+    #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager();
+    #needsClear: boolean = true;
+    #cascadePassDescriptors: GPURenderPassDescriptor[] = [];
+    #clearPassDescriptors: GPURenderPassDescriptor[] = [];
 
     constructor() {
     }
@@ -41,18 +43,6 @@ class ShadowManager {
     }
 
     /**
-     * [KO] 섀도우 렌더 패스 디스크립터를 반환합니다.
-     * [EN] Returns the shadow render pass descriptor.
-     *
-     * @returns
-     * [KO] GPURenderPassDescriptor 객체
-     * [EN] GPURenderPassDescriptor object
-     */
-    get shadowPassDescriptor(): GPURenderPassDescriptor {
-        return this.#shadowPassDescriptor
-    }
-
-    /**
      * [KO] 그림자 렌더링을 수행합니다.
      * [EN] Performs shadow rendering.
      *
@@ -61,13 +51,30 @@ class ShadowManager {
      * [EN] Target View3D
      */
     render(view: View3D) {
-        if (this.#directionalShadowManager.castingList.length === 0) return
-        const {redGPUContext} = view
+        const {redGPUContext, scene} = view;
+        const lightManager = scene?.lightManager;
+        if (!lightManager || lightManager.directionalLightCount === 0) {
+            this.#directionalShadowManager.resetCastingList();
+            this.#needsClear = true;
+            return;
+        }
+
+        const hasCasters = this.#hasAnyShadowCaster(view);
+
+        if (!hasCasters) {
+            this.#directionalShadowManager.resetCastingList();
+            if (this.#needsClear) {
+                this.#clearShadowDepthTextures(view);
+                this.#needsClear = false;
+            }
+            return;
+        }
+
+        this.#needsClear = true;
 
         const list = this.#directionalShadowManager.castingList;
-        let i = 0;
         const len = list.length;
-        for (i; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             const target = list[i];
             const {gpuRenderInfo} = target;
             if (gpuRenderInfo && !gpuRenderInfo.shadowPipeline) {
@@ -75,36 +82,31 @@ class ShadowManager {
             }
         }
 
-        this.#shadowPassDescriptor = {
-            label: `${view.name} Shadow Render Pass`,
-            colorAttachments: [],
-            depthStencilAttachment: {
-                view: this.#directionalShadowManager.shadowDepthTextureView,
-                depthClearValue: 1.0,
-                depthLoadOp: GPU_LOAD_OP.CLEAR,
-                depthStoreOp: GPU_STORE_OP.STORE,
-            },
+        const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));
+        const {landscape} = scene;
+        const foliageManager = landscape?.foliageManager;
+        const grassManager = landscape?.grassManager;
+
+        for (let c = 0; c < cascadeCount; c++) {
+            const cascadePassDescriptor = this.#getCascadePassDescriptor(c);
+
+            redGPUContext.commandEncoderManager.addMainRenderPass(cascadePassDescriptor, (viewShadowRenderPassEncoder) => {
+                view.currentCascadeIndex = c;
+                updateViewportAndScissor(view, viewShadowRenderPassEncoder, 'SHADOW');
+
+                if (this.#directionalShadowManager.castingList.length) {
+                    renderShadowLayer(view, viewShadowRenderPassEncoder, c);
+                }
+
+                foliageManager?.renderShadow(view, viewShadowRenderPassEncoder);
+
+                if (c <= 1) {
+                    grassManager?.renderShadow(view, viewShadowRenderPassEncoder);
+                }
+
+                view.currentCascadeIndex = undefined;
+            });
         }
-        redGPUContext.commandEncoderManager.addMainRenderPass(this.shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
-            updateViewportAndScissor(view, viewShadowRenderPassEncoder, 'SHADOW')
-            if (this.#directionalShadowManager.castingList.length) {
-                renderShadowLayer(view, viewShadowRenderPassEncoder)
-            }
-        });
-
-        this.#directionalShadowManager.resetCastingList()
-    }
-
-    /**
-     * [KO] 매니저의 상태를 업데이트합니다.
-     * [EN] Updates the state of the manager.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     */
-    update(redGPUContext: RedGPUContext) {
-        this.#directionalShadowManager.update(redGPUContext)
     }
 
     /**
@@ -116,8 +118,107 @@ class ShadowManager {
             this.#directionalShadowManager.destroy();
             this.#directionalShadowManager = null;
         }
-        this.#shadowPassDescriptor = null;
+        this.#cascadePassDescriptors.length = 0;
+        this.#clearPassDescriptors.length = 0;
         keepLog("🧹 ShadowManager destroy 완료");
+    }
+
+    #getCascadePassDescriptor(c: number): GPURenderPassDescriptor {
+        let descriptor = this.#cascadePassDescriptors[c];
+        const layerView = this.#directionalShadowManager.getCascadeLayerView(c);
+        if (!descriptor) {
+            const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
+                view: layerView,
+                depthClearValue: 1.0,
+                depthLoadOp: GPU_LOAD_OP.CLEAR,
+                depthStoreOp: GPU_STORE_OP.STORE,
+            };
+            descriptor = {
+                label: `CSM Cascade ${c} Pass`,
+                colorAttachments: [],
+                depthStencilAttachment,
+            };
+            this.#cascadePassDescriptors[c] = descriptor;
+        } else if (descriptor.depthStencilAttachment) {
+            descriptor.depthStencilAttachment.view = layerView;
+        }
+        return descriptor;
+    }
+
+    #hasAnyShadowCaster(view: View3D): boolean {
+        if (this.#directionalShadowManager.castingList.length > 0) return true;
+
+        const scene = view.scene;
+        if (!scene) return false;
+
+        const landscape = scene.landscape;
+        if (landscape) {
+            const foliage = landscape.foliageManager;
+            if (foliage && foliage.enabled) {
+                const types = foliage.types;
+                const typeCount = types.length;
+                for (let t = 0; t < typeCount; t++) {
+                    if (types[t].castShadow) return true;
+                }
+            }
+
+            const grass = landscape.grassManager;
+            if (grass && grass.enabled) {
+                const types = grass.types;
+                const typeCount = types.length;
+                for (let t = 0; t < typeCount; t++) {
+                    if (types[t].castShadow) return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    #getClearPassDescriptor(c: number): GPURenderPassDescriptor {
+        let descriptor = this.#clearPassDescriptors[c];
+        const layerView = this.#directionalShadowManager.getCascadeLayerView(c);
+        if (!descriptor) {
+            const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
+                view: layerView,
+                depthClearValue: 1.0,
+                depthLoadOp: GPU_LOAD_OP.CLEAR,
+                depthStoreOp: GPU_STORE_OP.STORE,
+            };
+            descriptor = {
+                label: `CSM Cascade ${c} Cleanup Clear Pass`,
+                colorAttachments: [],
+                depthStencilAttachment,
+            };
+            this.#clearPassDescriptors[c] = descriptor;
+        } else if (descriptor.depthStencilAttachment) {
+            descriptor.depthStencilAttachment.view = layerView;
+        }
+        return descriptor;
+    }
+
+    /**
+     * [KO] 매니저의 상태를 업데이트합니다.
+     * [EN] Updates the state of the manager.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
+    update(redGPUContext: RedGPUContext) {
+        if (this.#directionalShadowManager.update(redGPUContext)) {
+            this.#needsClear = true;
+        }
+    }
+
+    #clearShadowDepthTextures(view: View3D): void {
+        const {redGPUContext} = view;
+        const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));
+        for (let c = 0; c < cascadeCount; c++) {
+            const cascadePassDescriptor = this.#getClearPassDescriptor(c);
+            redGPUContext.commandEncoderManager.addMainRenderPass(cascadePassDescriptor, () => {
+            });
+        }
     }
 }
 

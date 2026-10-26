@@ -1,6 +1,6 @@
 /**
- * [KO] Image-Based Lighting (IBL) 관련 기능을 제공합니다.
- * [EN] Provides features related to Image-Based Lighting (IBL).
+ * [KO] IBL(Image-Based Lighting) 클래스와 IBL 맵 생성용 코어 모듈을 제공합니다.
+ * [EN] Provides the IBL (Image-Based Lighting) class and core modules for generating IBL maps.
  * @packageDocumentation
  */
 import IBL from "./IBL";

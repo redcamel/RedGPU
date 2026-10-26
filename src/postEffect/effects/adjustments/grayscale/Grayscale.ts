@@ -7,27 +7,28 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
 interface Grayscale {
+    /**
+     * [KO] 흑백 효과 적용 강도 (0 ~ 1)
+     * [EN] Grayscale effect application intensity (0 ~ 1)
+     * @defaultValue 1
+     */
     amount: number
 }
 
 /**
- * [KO] 그레이스케일(Grayscale) 후처리 이펙트입니다.
- * [EN] Grayscale post-processing effect.
+ * [KO] 표준 휘도 가중치(Rec. 709)를 사용하여 컬러 이미지를 흑백으로 변환하는 후처리 이펙트입니다.
+ * [EN] Post-processing effect that converts color images to grayscale using standard luminance weights (Rec. 709).
  *
- * [KO] 컬러 이미지를 흑백으로 변환합니다. 표준적인 휘도 가중치(Rec. 709)를 사용하여 인간의 눈에 자연스러운 흑백 이미지를 생성합니다.
- * [EN] Converts color images to black and white. Uses standard luminance weights (Rec. 709) to create a grayscale image that looks natural to the human eye.
- *
- * [KO] `amount` 속성을 통해 원본 컬러와 흑백 이미지 사이의 혼합 강도를 조절할 수 있습니다.
- * [EN] The mix intensity between the original color and the grayscale image can be adjusted via the `amount` property.
- *
- * * ### Example
- * ``` TypeScript
+ * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.Grayscale(redGPUContext);
- * effect.amount = 0.5; // 반투명한 흑백 효과
+ * effect.amount = 0.5;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/grayscale/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/grayscale/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Grayscale example](/RedGPU/examples/postEffect/adjustments/grayscale/)
  * @category Adjustments
  */
 class Grayscale extends ASinglePassPostEffect {
@@ -35,11 +36,17 @@ class Grayscale extends ASinglePassPostEffect {
      * [KO] Grayscale 인스턴스를 생성합니다.
      * [EN] Creates a Grayscale instance.
      *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Grayscale(redGPUContext);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.isLdr = true;
+        super(redGPUContext, {isLdr: true});
         this.init(
             redGPUContext,
             'POST_EFFECT_GRAYSCALE',

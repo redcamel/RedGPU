@@ -6,16 +6,24 @@ import GLTFLoader from "../../GLTFLoader";
 import parseJoint_GLTF from "./parseJoint_GLTF";
 
 /**
-
- * Parse skin information from GLTF data and assign it to a mesh.
+ * [KO] GLTF 스킨(Skin) 정보와 역바인드 행렬(Inverse Bind Matrices)을 파싱하여 메쉬에 할당합니다.
+ * [EN] Parses GLTF skin information and inverse bind matrices and assigns them to the mesh.
  *
- * @param {GLTFLoader} gltfLoader - The GLTFLoader instance used to load the GLTF data.
- * @param {GLTF} scenesData - The GLTF data containing the scene information.
- * @param {Skin} skin - The skin object containing the joint and skeleton information.
- * @param {Mesh} mesh - The mesh object to which the skin information should be assigned.
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param scenesData -
+ * [KO] GLTF 데이터 객체
+ * [EN] GLTF data object
+ * @param skin -
+ * [KO] 조인트 및 스켈레톤 정보를 포함하는 GLTF Skin 객체
+ * [EN] GLTF Skin object containing joint and skeleton information
+ * @param mesh -
+ * [KO] 스킨 정보가 할당될 대상 메쉬
+ * [EN] Target mesh to which skin information will be assigned
+ * @category Loader
  */
 const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, mesh: Mesh) => {
-    // console.log('스킨설정!', skin);
     const parsedSkinInfo = new ParsedSkinInfo_GLTF()
     const inverseBindMatrices = []
     const {nodes: NODES} = scenesData;
@@ -28,12 +36,9 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
             parseJoint_GLTF(gltfLoader, parsedSkinInfo, NODES, jointGlTfId);
         }
     }
-    // 스켈레톤 정보가 있으면 정보와 메쉬를 연결해둔다.
     if (skeleton) {
         parsedSkinInfo.skeletonMesh = NODES[skeleton]['Mesh'];
     }
-    // 액세서 구하고..
-    // 정보 파싱한다.
     const accessorGlTfId = skin.inverseBindMatrices;
     const accessorInfo = new AccessorInfo_GLTF(gltfLoader, scenesData, accessorGlTfId);
     const {
@@ -71,7 +76,6 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
             console.log('알수없는 형식 엑세서 타입', type);
             break;
     }
-    // parsedSkinInfo.inverseBindMatrices = new Float32Array(inverseBindMatrices);
     parsedSkinInfo.inverseBindMatrices = []
     for (let i = 0; i < joints.length; i++) {
         parsedSkinInfo.inverseBindMatrices.push(

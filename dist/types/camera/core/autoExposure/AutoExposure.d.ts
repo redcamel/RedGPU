@@ -171,8 +171,8 @@ declare class AutoExposure extends RedGPUObject {
      */
     get maxExposureMultiplier(): number;
     /**
-     * [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 16.0)
-     * [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 16.0)
+     * [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 64.0)
+     * [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 64.0)
      *
      * @param value -
      * [KO] 설정할 최대 노출 증폭 배율

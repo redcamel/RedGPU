@@ -863,87 +863,373 @@ export declare namespace ShadowLibrary {
      */
     const getShadowClipPosition: string;
     /**
-     * // [KO] 방향성 광원의 그림자 가시성(Visibility)을 계산합니다.
-     * // [EN] Calculates the shadow visibility for a directional light.
+     * // 🌟 [수학적 최적화] 16-Tap Vogel Spiral (황금각 페르마 나선) 및 반경 기반 가우시안 텐트 가중치
+     * // - 중심부 가중치(1.0)에서 외곽(0.25)으로 부드럽게 감쇠하여 외곽선 링 밴딩을 100% 제거합니다.
      *
-     * // @param directionalShadowMap [KO] 방향성 광원용 깊이 텍스처 [EN] Depth texture for directional light
-     * // @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
-     * // @param shadowDepthTextureSize [KO] 그림자 텍스처의 크기 [EN] Size of the shadow texture
-     * // @param bias [KO] 그림자 바이어스 [EN] Shadow bias
-     * // @param shadowCoord [KO] [0, 1] 범위로 변환된 그림자 좌표 (shadow.getShadowCoord 결과값) [EN] Shadow coordinates transformed to [0, 1] range (result of shadow.getShadowCoord)
-     * // @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
-     *
-     * // 의사 난수(Pseudo-random) 회전 각도를 얻는 헬퍼 함수
      *
      * ```wgsl
-     * fn getShadowRandomAngle(co: vec2<f32>) -> f32 {
-     *     return fract(sin(dot(co, vec2<f32>(12.9898, 78.233))) * 43758.5453) * 6.28318530718;
-     * }
+     * #redgpu_include shadow.getShadowCoord;
      *
-     * fn getDirectionalShadowVisibility(
-     *    directionalShadowMap: texture_depth_2d,
-     *    directionalShadowMapSampler: sampler_comparison,
-     *    shadowDepthTextureSize: u32,
-     *    bias: f32,
-     *    filterScale: f32,
-     *    shadowCoord: vec3<f32>
+     * const VOGEL_DISK_16 = array<vec2<f32>, 16>(
+     *     vec2<f32>( 0.176777,  0.000000), vec2<f32>(-0.226325,  0.207865),
+     *     vec2<f32>( 0.038167, -0.393457), vec2<f32>( 0.280145,  0.378901),
+     *     vec2<f32>(-0.470438, -0.247161), vec2<f32>( 0.407982, -0.420807),
+     *     vec2<f32>(-0.091007,  0.629983), vec2<f32>(-0.320496, -0.603387),
+     *     vec2<f32>( 0.655823,  0.316827), vec2<f32>(-0.684123,  0.347514),
+     *     vec2<f32>( 0.354672, -0.726892), vec2<f32>( 0.198234,  0.822001),
+     *     vec2<f32>(-0.710234, -0.523912), vec2<f32>( 0.852412, -0.334125),
+     *     vec2<f32>(-0.540123,  0.778945), vec2<f32>(-0.082341, -0.977234)
+     * );
+     *
+     * // 중심거리 비례 가우시안 텐트 감쇠 가중치 (합계: 10.0)
+     * const VOGEL_WEIGHTS_16 = array<f32, 16>(
+     *     1.00, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65,
+     *     0.60, 0.55, 0.50, 0.45, 0.40, 0.35, 0.30, 0.25
+     * );
+     * const TOTAL_VOGEL_WEIGHT: f32 = 10.0;
+     *
+     * /**
+     *  * 🌟 [언리얼 엔진 5 표준 적응형 가변 탭 섀도우 샘플링]
+     *  * - Cascade 0 (0~30m): 16-Tap Vogel Spiral (초근경 무결점 화질 100% 사수)
+     *  * - Cascade 1 (30~80m): 8-Tap Golden Disk (50% 연산 절감)
+     *  * - Cascade 2 (80~200m): 4-Tap PCF (75% 연산 절감)
+     *  * - Cascade 3 & Impostor (200m+): 1-Tap 하드웨어 Bilinear PCF (94% 연산 절감)
+     *  * - 선행 4-Tap 반음영 검사로 완전 양지/음지 즉시 조기 탈출 (Early Exit)
+     *  *
+     *  *\/
+     * fn sampleModernCascadeShadow(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     cascadeIndex: u32,
+     *     shadowCoord: vec3<f32>,
+     *     oneOverTextureSize: f32,
+     *     bias: f32,
+     *     lightSize: f32,
+     *     slopeFactor: f32,
+     *     driftBias: f32
      * ) -> f32 {
-     *     let oneOverShadowDepthTextureSize = 1.0 / f32(shadowDepthTextureSize);
      *     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
+     *     // 🌟 [슬로프 스케일 뎁스 바이어스 + 대규모 오픈월드 부동소수점 오차 동적 흡수]
+     *     let cascadeBias = max(bias * (1.0 + slopeFactor * 3.5) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
      *
-     *     // 12-Sample Poisson Disk 패턴 선언
-     *     var poissonDisk = array<vec2<f32>, 12>(
-     *         vec2<f32>(-0.171104, -0.635832),
-     *         vec2<f32>(-0.580224, -0.171168),
-     *         vec2<f32>(-0.03816, -0.07152),
-     *         vec2<f32>(0.569424, -0.121344),
-     *         vec2<f32>(0.134016, 0.638592),
-     *         vec2<f32>(-0.320496, 0.490896),
-     *         vec2<f32>(-0.814272, 0.428544),
-     *         vec2<f32>(-0.18048, -0.960288),
-     *         vec2<f32>(0.395376, -0.612144),
-     *         vec2<f32>(0.741024, 0.421296),
-     *         vec2<f32>(0.320112, 0.175152),
-     *         vec2<f32>(-0.596064, -0.73032)
-     *     );
+     *     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+     *     if (invalidDepth) {
+     *         return 1.0;
+     *     }
      *
-     *     var visibility: f32 = 0.0;
+     *     // 1. 캐스케이드 거리 레벨별 탭 수 결정 (16 / 8 / 4 / 1)
+     *     let tapCount = select(select(select(1u, 4u, cascadeIndex == 2u), 8u, cascadeIndex == 1u), 16u, cascadeIndex == 0u);
      *
-     *     // 픽셀 스크린 공간 좌표 기반으로 무작위 회전 각도 계산
-     *     let randomAngle = getShadowRandomAngle(shadowCoord.xy * 1000.0);
-     *     let cosAngle = cos(randomAngle);
-     *     let sinAngle = sin(randomAngle);
-     *     let rotationMatrix = mat2x2<f32>(cosAngle, -sinAngle, sinAngle, cosAngle);
-     *
-     *     // Poisson Disk 샘플링 루프 순회
-     *     for (var i = 0; i < 12; i++) {
-     *         // 포아송 오프셋을 랜덤 각도로 회전
-     *         let rotatedOffset = rotationMatrix * poissonDisk[i];
-     *         let offset = rotatedOffset * oneOverShadowDepthTextureSize * filterScale;
-     *         let tUV = shadowCoord.xy + offset;
-     *
-     *         // textureSampleCompare는 Uniform Control Flow 규격을 유지하기 위해 분기문 밖에서 실행
-     *         let sampleVisibility = textureSampleCompare(
+     *     // 2. Cascade 3 (초원경): 하드웨어 2x2 바이리니어 PCF 1-Tap 즉시 리턴
+     *     if (tapCount == 1u) {
+     *         let tUV = shadowCoord.xy;
+     *         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+     *         if (outOfBounds) { return 1.0; }
+     *         return textureSampleCompareLevel(
      *             directionalShadowMap,
      *             directionalShadowMapSampler,
      *             tUV,
-     *             shadowDepth - bias
+     *             cascadeIndex,
+     *             shadowDepth - cascadeBias
      *         );
-     *
-     *         // 범위 밖의 영역은 그림자 가시성을 1.0으로 고정 (select 함수 사용)
-     *         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
-     *         visibility += select(sampleVisibility, 1.0, outOfBounds);
      *     }
      *
-     *     visibility /= 12.0;
+     *     // 🌟 [언리얼 엔진 표준 안티앨리어싱 필터 반경]
+     *     let cascadeScale = mix(2.5, 3.2, clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0));
+     *     let filterRadius = oneOverTextureSize * cascadeScale * max(0.8, lightSize);
      *
-     *     // 라이트 프러스트럼 범위 밖(Near/Far plane 너머)인 경우 가시성 1.0 반환
-     *     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
-     *     return select(visibility, 1.0, invalidDepth);
+     *     var weightedVisibility: f32 = 0.0;
+     *     var totalWeight: f32 = 0.0;
+     *
+     *     // 3. 선행 4-Tap 반음영(Penumbra) 검사 & 조기 탈출 (Early Exit)
+     *     for (var i = 0u; i < 4u; i++) {
+     *         let offset = VOGEL_DISK_16[i] * filterRadius;
+     *         let tUV = shadowCoord.xy + offset;
+     *
+     *         let sampleVisibility = textureSampleCompareLevel(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             cascadeIndex,
+     *             shadowDepth - cascadeBias
+     *         );
+     *
+     *         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+     *         let vis = select(sampleVisibility, 1.0, outOfBounds);
+     *         let w = VOGEL_WEIGHTS_16[i];
+     *         weightedVisibility += vis * w;
+     *         totalWeight += w;
+     *     }
+     *
+     *     // 🚀 [Early Exit] 4개 선행 탭이 모두 완전 햇빛(1.0)이거나 완전 암부(0.0)이면 나머지 루프 100% 스킵
+     *     if (weightedVisibility >= totalWeight - 0.0001) { return 1.0; }
+     *     if (weightedVisibility <= 0.0001) { return 0.0; }
+     *
+     *     // 4. 반음영(Penumbra) 경계선 픽셀만 나머지 탭 정밀 샘플링
+     *     for (var i = 4u; i < tapCount; i++) {
+     *         let offset = VOGEL_DISK_16[i] * filterRadius;
+     *         let tUV = shadowCoord.xy + offset;
+     *
+     *         let sampleVisibility = textureSampleCompareLevel(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             cascadeIndex,
+     *             shadowDepth - cascadeBias
+     *         );
+     *
+     *         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+     *         let vis = select(sampleVisibility, 1.0, outOfBounds);
+     *         let w = VOGEL_WEIGHTS_16[i];
+     *         weightedVisibility += vis * w;
+     *         totalWeight += w;
+     *     }
+     *
+     *     return weightedVisibility / totalWeight;
+     * }
+     *
+     * /**
+     *  * 🌟 [현대적인 완벽한 Clean Soft CSM 메인 진입점 - 언리얼 엔진 5 표준]
+     *  *
+     *  * @param directionalShadowMap [KO] 방향성 광원용 2D 뎁스 텍스처 어레이 [EN] 2D depth texture array for directional light
+     *  * @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
+     *  * @param worldPosition [KO] 월드 공간 상의 정점/픽셀 좌표 [EN] World position of vertex/pixel
+     *  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
+     *  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
+     *  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
+     *  *
+     *  *\/
+     * fn getDirectionalShadowVisibility(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     worldPosition: vec3<f32>,
+     *     N: vec3<f32>,
+     *     L: vec3<f32>
+     * ) -> f32 {
+     *     let nDotL = dot(N, L);
+     *     // 🚀 1. 완전 역광(-0.08 미만)은 샘플링 스킵 (GPU 부하 절감)
+     *     if (nDotL <= -0.08) {
+     *         return 0.0;
+     *     }
+     *
+     *     let shadowInfo = systemUniforms.shadow;
+     *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
+     *     let oneOverTextureSize = 1.0 / f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+     *     let bias = shadowInfo.directionalShadowBias;
+     *     let lightSize = shadowInfo.pcssLightSize;
+     *
+     *     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+     *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
+     *     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+     *     let viewDepth = -viewPos.z;
+     *
+     *     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
+     *     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+     *         return 1.0;
+     *     }
+     *
+     *     // 🌟 [대규모 오픈월드 부동소수점 오차 흡수 바이어스 계수 산출]
+     *     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
+     *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
+     *
+     *     // 3. 캐스케이드 레벨 결정
+     *     var cascadeIndex: u32 = 0u;
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
+     *
+     *     // 🚀 4. [언리얼 엔진 5 표준 슬로프 스케일 노멀 오프셋 바이어스]
+     *     // 16-Tap PCF 필터 반경 및 곡면 메시(캐릭터 등)의 자가 그림자 여드름(Acne)을 완벽 차단
+     *     let slopeBias = clamp(1.0 - nDotL, 0.0, 1.0);
+     *     var lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+     *     var orthoScale = length(lightVP[0].xyz);
+     *     var worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+     *     var normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
+     *     var biasedWorldPosition = worldPosition + normalOffset;
+     *
+     *     var shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+     *
+     *     // 🌟 [화면 모서리 원근 탈출(OOB) 자동 승격 방어망]
+     *     if ((shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0) && cascadeIndex < cascadeCount - 1u) {
+     *         cascadeIndex = cascadeIndex + 1u;
+     *         lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+     *         orthoScale = length(lightVP[0].xyz);
+     *         worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+     *         normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
+     *         biasedWorldPosition = worldPosition + normalOffset;
+     *         shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+     *
+     *         if ((shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0) && cascadeIndex < cascadeCount - 1u) {
+     *             cascadeIndex = cascadeIndex + 1u;
+     *             lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+     *             orthoScale = length(lightVP[0].xyz);
+     *             worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+     *             normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
+     *             biasedWorldPosition = worldPosition + normalOffset;
+     *             shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+     *         }
+     *     }
+     *
+     *     let visibility = sampleModernCascadeShadow(
+     *         directionalShadowMap,
+     *         directionalShadowMapSampler,
+     *         cascadeIndex,
+     *         shadowCoord,
+     *         oneOverTextureSize,
+     *         bias,
+     *         lightSize,
+     *         slopeBias,
+     *         driftBias
+     *     );
+     *
+     *     var finalVisibility = visibility;
+     *
+     *     // 🌟 5. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
+     *     // 🚀 [32-Tap 폭풍 차단]: 현재 캐스케이드가 완전 햇빛(1.0) 또는 완전 암부(0.0)이면 다음 캐스케이드 샘플링 완전 스킵!
+     *     if (cascadeIndex < cascadeCount - 1u) {
+     *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
+     *         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
+     *         let cascadeRange = splitFar - splitNear;
+     *         let blendMargin = cascadeRange * 0.20;
+     *         let blendStart = splitFar - blendMargin;
+     *
+     *         if (viewDepth > blendStart && visibility > 0.0001 && visibility < 0.9999) {
+     *             let nextIndex = cascadeIndex + 1u;
+     *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
+     *             let nextOrthoScale = length(nextLightVP[0].xyz);
+     *             let nextWorldTexelSize = select(0.01, 2.0 / nextOrthoScale, nextOrthoScale > 0.0001) * oneOverTextureSize;
+     *             let nextBiasedPos = worldPosition + N * (1.2 + slopeBias * 2.5) * nextWorldTexelSize;
+     *
+     *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
+     *             let nextVis = sampleModernCascadeShadow(
+     *                 directionalShadowMap,
+     *                 directionalShadowMapSampler,
+     *                 nextIndex,
+     *                 nextShadowCoord,
+     *                 oneOverTextureSize,
+     *                 bias,
+     *                 lightSize,
+     *                 slopeBias,
+     *                 driftBias
+     *             );
+     *
+     *             let blendFactor = smoothstep(0.0, 1.0, clamp((viewDepth - blendStart) / blendMargin, 0.0, 1.0));
+     *             finalVisibility = mix(visibility, nextVis, blendFactor);
+     *         }
+     *     } else {
+     *         // 6. 최외곽 15% 부드러운 페이드아웃 (하드 컷오프 방지)
+     *         let fadeStart = maxShadowDist * 0.85;
+     *         if (viewDepth > fadeStart) {
+     *             let fadeFactor = smoothstep(0.0, 1.0, clamp((viewDepth - fadeStart) / (maxShadowDist - fadeStart), 0.0, 1.0));
+     *             finalVisibility = mix(finalVisibility, 1.0, fadeFactor);
+     *         }
+     *     }
+     *
+     *     // 🌟 [언리얼 엔진 표준 Soft Horizon Terminator Fade]
+     *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
+     *     return finalVisibility * horizonFade;
      * }
      * ```
      */
     const getDirectionalShadowVisibility: string;
+    /**
+     * // 🌿 [식생(Foliage) 전용 초경량 1-Tap CSM 섀도우 메인 함수]
+     * // - 캐스케이드 전환 블렌딩 스킵 (2중 샘플링 폭풍 차단 및 경계선 스터터링 100% 방지)
+     * // - 전 캐스케이드 초고속 1-Tap 하드웨어 Bilinear PCF 단일화
+     * // - 풀잎 자체의 고주파 지오메트리 요철로 인해 1-Tap만으로도 완벽한 소프트 섀도우 구현
+     *
+     * // @param directionalShadowMap 방향성 광원용 2D 뎁스 텍스처 어레이
+     * // @param directionalShadowMapSampler 비교 샘플러
+     * // @param worldPosition 월드 공간 상의 정점/픽셀 좌표
+     * // @param N 단위 법선 벡터
+     * // @param L 광원 방향 단위 벡터
+     * // @returns 가시성 계수 (0.0 ~ 1.0)
+     *
+     *
+     * ```wgsl
+     * #redgpu_include shadow.getShadowCoord;
+     *
+     * fn getDirectionalShadowVisibilityFoliage(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     worldPosition: vec3<f32>,
+     *     N: vec3<f32>,
+     *     L: vec3<f32>
+     * ) -> f32 {
+     *     let nDotL = dot(N, L);
+     *     // 1. 완전 역광은 샘플링 스킵
+     *     if (nDotL <= -0.08) {
+     *         return 0.0;
+     *     }
+     *
+     *     let shadowInfo = systemUniforms.shadow;
+     *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
+     *     let oneOverTextureSize = 1.0 / f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+     *     let bias = shadowInfo.directionalShadowBias;
+     *
+     *     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+     *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
+     *     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+     *     let viewDepth = -viewPos.z;
+     *
+     *     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
+     *     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+     *         return 1.0;
+     *     }
+     *
+     *     // 3. 캐스케이드 레벨 결정 (단일 캐스케이드만 선택)
+     *     var cascadeIndex: u32 = 0u;
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
+     *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
+     *
+     *     // 4. 경량 슬로프 바이어스 및 노멀 오프셋
+     *     let slopeBias = clamp(1.0 - nDotL, 0.0, 1.0);
+     *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+     *     let orthoScale = length(lightVP[0].xyz);
+     *     let worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+     *     let normalOffset = N * (1.0 + slopeBias * 2.0) * worldTexelSize;
+     *     let biasedWorldPosition = worldPosition + normalOffset;
+     *
+     *     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+     *
+     *     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+     *     let tUV = shadowCoord.xy;
+     *     let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+     *     if (invalidDepth || outOfBounds) {
+     *         return 1.0;
+     *     }
+     *
+     *     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
+     *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
+     *     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
+     *     let cascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *
+     *     // 5. 초경량 1-Tap 하드웨어 Bilinear PCF (식생/풀잎 자체 요철로 1-Tap만으로도 완벽한 소프트 섀도우 연출)
+     *     var finalVis = textureSampleCompareLevel(
+     *         directionalShadowMap,
+     *         directionalShadowMapSampler,
+     *         tUV,
+     *         cascadeIndex,
+     *         shadowDepth - cascadeBias
+     *     );
+     *
+     *     // 6. 최외곽 캐스케이드 부드러운 페이드아웃
+     *     if (cascadeIndex == cascadeCount - 1u) {
+     *         let fadeStart = maxShadowDist * 0.85;
+     *         if (viewDepth > fadeStart) {
+     *             let fadeFactor = smoothstep(0.0, 1.0, clamp((viewDepth - fadeStart) / (maxShadowDist - fadeStart), 0.0, 1.0));
+     *             finalVis = mix(finalVis, 1.0, fadeFactor);
+     *         }
+     *     }
+     *
+     *     // 7. Soft Horizon Terminator Fade
+     *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
+     *     return finalVis * horizonFade;
+     * }
+     * ```
+     */
+    const getDirectionalShadowVisibilityFoliage: string;
 }
 export declare namespace ColorLibrary {
     /**
@@ -1424,6 +1710,7 @@ export declare namespace SkyAtmosphereLibrary {
      * #redgpu_include color.getLuminance
      *
      * const MAX_TAU: f32 = 100.0;
+     * const LN_HALF: f32 = -0.69314718056;
      *
      * const SUN_ANGULAR_RADIUS_RAD: f32 = 0.00465;
      * const SUN_SOLID_ANGLE_BASE: f32 = 6.794e-5;
@@ -1579,7 +1866,10 @@ export declare namespace SkyAtmosphereLibrary {
      *     var optExt = vec3<f32>(0.0);
      *     for (var i = 0u; i < steps; i = i + 1u) {
      *         let t = tMin + (f32(i) + 0.5) * stepSize;
-     *         let viewHeight = length(origin + dir * t) - params.groundRadius;
+     *         let p = origin + dir * t;
+     *         let pSq = dot(p, p);
+     *         let invPLen = inverseSqrt(pSq);
+     *         let viewHeight = (pSq * invPLen) - params.groundRadius;
      *         if (viewHeight < 0.0) { continue; }
      *         let d = getAtmosphereDensities(viewHeight, params);
      *
@@ -1598,7 +1888,10 @@ export declare namespace SkyAtmosphereLibrary {
      *
      * fn phaseMie(cosTheta: f32, g: f32) -> f32 {
      *     let g2 = g * g;
-     *     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
+     *     let denom = max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta);
+     *     let invSqrtDenom = inverseSqrt(denom);
+     *     let invDenom15 = invSqrtDenom * invSqrtDenom * invSqrtDenom;
+     *     return (0.25 * INV_PI) * ((1.0 - g2) * invDenom15);
      * }
      *
      * fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
@@ -1606,12 +1899,13 @@ export declare namespace SkyAtmosphereLibrary {
      * }
      *
      * fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
+     *     let viewSunDot = dot(viewDir, sunDir);
      *     let sunElevationParam = saturate(sunDir.y);
      *     let squashFactor = mix(0.85, 1.0, sunElevationParam);
      *     let verticalDist = viewDir.y - sunDir.y;
-     *     let correctionGuard = saturate(dot(viewDir, sunDir) * 10.0) * (1.0 - sunElevationParam * sunElevationParam);
+     *     let correctionGuard = saturate(viewSunDot * 10.0) * (1.0 - sunElevationParam * sunElevationParam);
      *     let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) * correctionGuard;
-     *     return dot(viewDir, sunDir) - squashCorrection;
+     *     return viewSunDot - squashCorrection;
      * }
      *
      * fn getSunDiskRadianceUnit(
@@ -1653,7 +1947,7 @@ export declare namespace SkyAtmosphereLibrary {
      *     let falloff = exp(-diff / max(1e-7, sigma_sq));
      *     if (falloff < 0.001) { return vec3<f32>(0.0); }
      *
-     *     return (radScale * falloff) * skyTrans;
+     *     return (radScale * falloff) * skyTrans / PI;
      * }
      *
      * fn getMieGlowAmountUnit(
@@ -1713,12 +2007,14 @@ export declare namespace SkyAtmosphereLibrary {
      *     for (var i = 0u; i < steps; i = i + 1u) {
      *         let t = tMin + (f32(i) + 0.5) * stepSize;
      *         let p = origin + dir * t;
-     *         let pLen = length(p);
+     *         let pSq = dot(p, p);
+     *         let invPLen = inverseSqrt(pSq);
+     *         let pLen = pSq * invPLen;
      *         let viewHeight = pLen - r;
      *
      *         if (r > 0.0 && viewHeight < 0.0) { continue; }
      *
-     *         let up = p / pLen;
+     *         let up = p * invPLen;
      *         let cosSun = dot(up, sunDir);
      *
      *         var sunTrans: vec3<f32>;
@@ -1824,7 +2120,7 @@ export declare namespace SkyAtmosphereLibrary {
      *
      * fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
      *     let cosHalf = cos(lobeHalfAngle);
-     *     let sunLobePower = clamp(log(0.5) / log(max(1e-4, cosHalf)), 2.0, 128.0);
+     *     let sunLobePower = clamp(LN_HALF / log(max(1e-4, cosHalf)), 2.0, 128.0);
      *     let sunLobeNorm = (sunLobePower + 1.0) * (0.5 * INV_PI);
      *     return sunLobeNorm * pow(max(0.0, viewSun), sunLobePower);
      * }
@@ -1871,17 +2167,25 @@ export declare namespace SkyAtmosphereLibrary {
      *     return normalize(worldRotation * viewSpaceDir);
      * }
      *
-     * // [KO] 절차적 노이즈 함수들 [EN] Procedural noise functions
+     * // [KO] 정수 비트 조작 기반 고속 해시 (sin 초월함수 100% 제거) [EN] Fast integer bit-manipulation hash (100% sin SFU elimination)
+     * fn cloud_hash_u(p: vec2<u32>) -> f32 {
+     *     var q = p * vec2<u32>(1597334673u, 3812015801u);
+     *     let n = (q.x ^ q.y) * 1597334673u;
+     *     return f32(n) * (1.0 / 4294967296.0);
+     * }
+     *
      * fn cloud_hash(p: vec2<f32>) -> f32 {
-     *     return fract(sin(dot(p, vec2<f32>(127.1, 311.7))) * 43758.5453123);
+     *     let ui = vec2<u32>(vec2<i32>(floor(p)) + vec2<i32>(0x8000));
+     *     return cloud_hash_u(ui);
      * }
      *
      * fn cloud_noise(p: vec2<f32>) -> f32 {
      *     let i = floor(p);
      *     let f = fract(p);
      *     let u = f * f * (3.0 - 2.0 * f);
-     *     return mix(mix(cloud_hash(i + vec2<f32>(0.0, 0.0)), cloud_hash(i + vec2<f32>(1.0, 0.0)), u.x),
-     *                mix(cloud_hash(i + vec2<f32>(0.0, 1.0)), cloud_hash(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
+     *     let ui = vec2<u32>(vec2<i32>(i) + vec2<i32>(0x8000));
+     *     return mix(mix(cloud_hash_u(ui + vec2<u32>(0u, 0u)), cloud_hash_u(ui + vec2<u32>(1u, 0u)), u.x),
+     *                mix(cloud_hash_u(ui + vec2<u32>(0u, 1u)), cloud_hash_u(ui + vec2<u32>(1u, 1u)), u.x), u.y);
      * }
      *
      * fn cloud_fbm(p: vec2<f32>) -> f32 {
@@ -1920,9 +2224,12 @@ export declare namespace SkyAtmosphereLibrary {
      *     let warpedUV = getCloudWarpedUV(hitP, params);
      *     let density = cloud_fbm(warpedUV);
      *     let eps = 0.2;
-     *     let dIdx = (cloud_fbm(warpedUV + vec2<f32>(eps, 0.0)) - density) / eps;
-     *     let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, eps)) - density) / eps;
-     *     return normalize(vec3<f32>(-dIdx, 2.0, -dIdy));
+     *     const INV_EPS: f32 = 5.0; // 1.0 / 0.2
+     *     let dIdx = (cloud_fbm(warpedUV + vec2<f32>(eps, 0.0)) - density) * INV_EPS;
+     *     let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, eps)) - density) * INV_EPS;
+     *     let n = vec3<f32>(-dIdx, 2.0, -dIdy);
+     *     let invNLen = inverseSqrt(dot(n, n));
+     *     return n * invNLen;
      * }
      * ```
      */
@@ -2001,8 +2308,10 @@ export declare namespace EntryPointLibrary {
          *     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
          *     let u_camera = systemUniforms.camera;
          *     let u_viewMatrix = u_camera.viewMatrix;
-         *     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
-         *     output.position = u_projectionViewMatrix * position;
+         *     let position = u_modelMatrix * vec4<f32>(input_position, 1.0);
+         *     let relPos = position.xyz - u_camera.cameraPosition;
+         *     let viewPos = (u_viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+         *     output.position = u_projectionMatrix * vec4<f32>(viewPos, 1.0);
          *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
@@ -2281,9 +2590,9 @@ export declare namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct DirectionalLight {
-     *      direction:vec3<f32>,
-     *      color:vec3<f32>,
-     *      intensity:f32,
+     * 	  direction:vec3<f32>,
+     * 	  color:vec3<f32>,
+     * 	  intensity:f32,
      * };
      * ```
      */
@@ -2295,23 +2604,29 @@ export declare namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct AmbientLight {
-     *      color:vec3<f32>,
-     *      intensity:f32
+     * 	  color:vec3<f32>,
+     * 	  intensity:f32
      * };
      * ```
      */
     const AmbientLight: string;
     /**
-     * // [KO] 그림자(Shadow) 설정 구조체 정의입니다.
-     * // [EN] Definition of the Shadow configuration structure.
+     * // [KO] CSM 및 PCSS(Percentage-Closer Soft Shadows) 설정 구조체 정의입니다.
+     * // [EN] Definition of the Cascaded Shadow Maps and PCSS configuration structure.
      *
      *
      * ```wgsl
      * struct Shadow {
+     *     cascadeLightViewProjectionMatrices: array<mat4x4<f32>, 4>,
+     *     cascadeSplitDepths: vec4<f32>,
      *     directionalShadowDepthTextureSize: u32,
      *     directionalShadowBias: f32,
      *     directionalShadowStrength: f32,
-     *     directionalShadowFilterScale: f32
+     *     pcssLightSize: f32,
+     *     cascadeCount: u32,
+     *     _pad0: f32,
+     *     _pad1: f32,
+     *     _pad2: f32,
      * };
      * ```
      */
@@ -2323,37 +2638,60 @@ export declare namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct SkyAtmosphere {
-     *    rayleighScattering: vec3<f32>,
-     *    rayleighExponentialDistribution: f32,
-     *    mieScattering: vec3<f32>,
-     *    mieAnisotropy: f32,
-     *    mieAbsorption: vec3<f32>,
-     *    mieExponentialDistribution: f32,
-     *    absorptionCoefficient: vec3<f32>,
-     *    absorptionTipAltitude: f32,
-     *    groundAlbedo: vec3<f32>,
-     *    absorptionTentWidth: f32,
-     *    skyLuminanceFactor: vec3<f32>,
-     *    multiScatteringFactor: f32,
-     *    sunDirection: vec3<f32>,
-     *    transmittanceMinLightElevationAngle: f32,
-     *    groundRadius: f32,
-     *    atmosphereHeight: f32,
-     *    aerialPerspectiveDistanceScale: f32,
-     *    aerialPerspectiveStartDepth: f32,
-     *    sunIntensity: f32,
-     *    sunSize: f32,
-     *    sunLimbDarkening: f32,
-     *    cameraHeight: f32,
-     *    cloudTime: f32,
-     *    cloudTimeMultiplier: f32,
-     *    cloudCoverage: f32,
-     *    cloudDensity: f32,
-     *    cloudHeight: f32
+     * 	rayleighScattering: vec3<f32>,
+     * 	rayleighExponentialDistribution: f32,
+     * 	mieScattering: vec3<f32>,
+     * 	mieAnisotropy: f32,
+     * 	mieAbsorption: vec3<f32>,
+     * 	mieExponentialDistribution: f32,
+     * 	absorptionCoefficient: vec3<f32>,
+     * 	absorptionTipAltitude: f32,
+     * 	groundAlbedo: vec3<f32>,
+     * 	absorptionTentWidth: f32,
+     * 	skyLuminanceFactor: vec3<f32>,
+     * 	multiScatteringFactor: f32,
+     * 	sunDirection: vec3<f32>,
+     * 	transmittanceMinLightElevationAngle: f32,
+     * 	groundRadius: f32,
+     * 	atmosphereHeight: f32,
+     * 	aerialPerspectiveDistanceScale: f32,
+     * 	aerialPerspectiveStartDepth: f32,
+     * 	sunIntensity: f32,
+     * 	sunSize: f32,
+     * 	sunLimbDarkening: f32,
+     * 	cameraHeight: f32,
+     * 	cloudTime: f32,
+     * 	cloudTimeMultiplier: f32,
+     * 	cloudCoverage: f32,
+     * 	cloudDensity: f32,
+     * 	cloudHeight: f32
      * };
      * ```
      */
     const SkyAtmosphere: string;
+    /**
+     * // [KO] 엔진 전역 바람 물리 파라미터 구조체 (32 Bytes, 16바이트 정렬)
+     * // [EN] Engine global wind physics parameter structure (32 Bytes, 16-byte aligned)
+     *
+     *
+     * ```wgsl
+     * struct Wind {
+     *     // Offset 0: 바람 진행 방향 단위 벡터 (정규화된 vec3)
+     *     direction: vec3<f32>,
+     *     // Offset 12: 바람 이동 속도 (시간 배율)
+     *     speed: f32,
+     *     // Offset 16: 줄기 및 본체 주 굽힘 강도
+     *     strength: f32,
+     *     // Offset 20: 바람 진동 주파수 (물결 주기)
+     *     frequency: f32,
+     *     // Offset 24: 잎사귀/잔가지 미세 떨림 강도
+     *     flutterStrength: f32,
+     *     // Offset 28: 바람 효과 활성화 플래그 (1 = ON, 0 = OFF)
+     *     enabled: u32,
+     * };
+     * ```
+     */
+    const Wind: string;
     /**
      * ```wgsl
      * struct MatrixList{
@@ -2385,6 +2723,7 @@ export declare namespace SystemStructLibrary {
      *     alphaBlend: u32,
      *     doubleSided: u32,
      *     useVertexTangent: u32,
+     *     isFoliage: u32,
      *     opacity: f32,
      *     useTint: u32,
      *     tint: vec4<f32>,
@@ -2731,35 +3070,37 @@ export declare namespace ShaderLibrary {
      * #redgpu_include systemStruct.Time
      * #redgpu_include systemStruct.Shadow
      * #redgpu_include systemStruct.SkyAtmosphere
+     * #redgpu_include systemStruct.Wind
      *
      * struct SystemUniform {
-     *      projection: Projection,
-     *      time: Time,
-     *      resolution:vec2<f32>,
+     * 	  projection: Projection,
+     * 	  time: Time,
+     * 	  resolution:vec2<f32>,
      *       //
      *       camera:Camera,
-     *      usePrefilterTexture:u32,
-     *      isView3D:u32,
-     *      useSkyAtmosphere:u32,
-     *      preExposure:f32,
-     *      iblIntensity:f32,
-     *      //
-     *      skyAtmosphere:SkyAtmosphere,
-     *      shadow:Shadow,
+     * 	  usePrefilterTexture:u32,
+     * 	  isView3D:u32,
+     * 	  useSkyAtmosphere:u32,
+     * 	  preExposure:f32,
+     * 	  iblIntensity:f32,
+     * 	  //
+     * 	  skyAtmosphere:SkyAtmosphere,
+     * 	  shadow:Shadow,
      *       //
      *       directionalLightCount:u32,
      *       directionalLightProjectionViewMatrix:mat4x4<f32>,
      *       directionalLightProjectionMatrix:mat4x4<f32>,
      *       directionalLightViewMatrix:mat4x4<f32>,
      *       directionalLights:array<DirectionalLight,3>,
-     *      //
-     *      ambientLight:AmbientLight,
-     *
+     * 	  //
+     * 	  ambientLight:AmbientLight,
+     * 	  //
+     * 	  wind:Wind,
      * };
      *
      * @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
      * @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
-     * @group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
+     * @group(0) @binding(2) var directionalShadowMap: texture_depth_2d_array;
      * @group(0) @binding(3) var prefilterTextureSampler: sampler;
      *
      * @group(0) @binding(7) var renderPath1ResultTextureSampler: sampler;
@@ -2783,6 +3124,8 @@ export declare namespace ShaderLibrary {
      *
      * #redgpu_include systemStruct.globalFragmentStructBuiltIn;
      * @group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
+     *
+     * @group(0) @binding(20) var renderPath1DepthTexture: texture_depth_2d;
      *
      * #redgpu_include depth.getLinearizeDepth
      *
@@ -2872,8 +3215,8 @@ export declare namespace ShaderLibrary {
      */
     const SYSTEM_UNIFORM: string;
     /**
-     * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다.
-     * // [EN] Post effect system uniform structure.
+     * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다. (Non-MSAA)
+     * // [EN] Post effect system uniform structure. (Non-MSAA)
      *
      *
      * ```wgsl
@@ -2885,17 +3228,52 @@ export declare namespace ShaderLibrary {
      * struct SystemUniform {
      *     projection: Projection,
      *     time: Time,
-     *     camera:Camera,
+     *     camera: Camera,
      *     useSkyAtmosphere: u32,
      *     preExposure: f32,
      *     devicePixelRatio: f32,
-     *     skyAtmosphere:SkyAtmosphere,
+     *     skyAtmosphere: SkyAtmosphere,
      * };
      *
+     * @group(2) @binding(0) var depthTexture : texture_depth_2d;
+     * @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
+     * @group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;
+     * @group(2) @binding(3) var prevDepthTexture : texture_depth_2d;
      * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
+     * @group(2) @binding(5) var basicSampler : sampler;
      * ```
      */
     const POST_EFFECT_SYSTEM_UNIFORM: string;
+    /**
+     * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다. (MSAA)
+     * // [EN] Post effect system uniform structure. (MSAA)
+     *
+     *
+     * ```wgsl
+     * #redgpu_include systemStruct.Camera
+     * #redgpu_include systemStruct.Projection
+     * #redgpu_include systemStruct.Time
+     * #redgpu_include systemStruct.SkyAtmosphere
+     *
+     * struct SystemUniform {
+     *     projection: Projection,
+     *     time: Time,
+     *     camera: Camera,
+     *     useSkyAtmosphere: u32,
+     *     preExposure: f32,
+     *     devicePixelRatio: f32,
+     *     skyAtmosphere: SkyAtmosphere,
+     * };
+     *
+     * @group(2) @binding(0) var depthTexture : texture_depth_multisampled_2d;
+     * @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
+     * @group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;
+     * @group(2) @binding(3) var prevDepthTexture : texture_depth_multisampled_2d;
+     * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
+     * @group(2) @binding(5) var basicSampler : sampler;
+     * ```
+     */
+    const POST_EFFECT_SYSTEM_UNIFORM_MSAA: string;
     export import math = MathLibrary;
     export import shadow = ShadowLibrary;
     export import color = ColorLibrary;

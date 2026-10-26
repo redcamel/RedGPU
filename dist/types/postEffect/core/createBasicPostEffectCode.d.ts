@@ -10,6 +10,8 @@ import { IPostEffectSourceConfig } from "./types";
  * 3. 이펙트 전용 유니폼(Group 1) 및 시스템 공용 리소스(Group 2: G-Buffer, Depth 등) 자동 포함.
  * 4. 출력용 스토리지 텍스처(Group 3) 정의.
  * 5. 클래스에 정의된 워크그룹 사이즈 반영.
+ * 6. 기본적으로 화면 경계 밖 스레드를 즉시 종료(`earlyExit: true`)하여 20여 개 이상의 기본 이펙트 안전 보호.
+ *    (TAA 등 워크그룹 공유 메모리(LDS) 및 workgroupBarrier가 필요한 특수 이펙트는 false로 설정 가능)
  *
  * [EN] This function automates repetitive boilerplate code and performs the following:
  * 1. Automatically generates separate code for MSAA and Non-MSAA.
@@ -17,14 +19,16 @@ import { IPostEffectSourceConfig } from "./types";
  * 3. Automatically includes effect-specific uniforms (Group 1) and system common resources (Group 2: G-Buffer, Depth, etc.).
  * 4. Defines the storage texture for output (Group 3).
  * 5. Reflects the workgroup size defined in the class.
+ * 6. By default, immediately terminates out-of-bounds threads (`earlyExit: true`) to protect 20+ basic effects.
  *
  * @param effect - [KO] ASinglePassPostEffect를 상속받은 이펙트 인스턴스 [EN] Effect instance inheriting ASinglePassPostEffect
  * @param code - [KO] main 함수 내부에 삽입될 WGSL 로직 [EN] WGSL logic to be inserted inside the main function
  * @param uniformStruct - [KO] (선택) 이펙트에서 사용할 Uniforms 구조체 정의 [EN] (Optional) Uniforms struct definition for the effect
  * @param sourceTextureConfigs - [KO] (선택) 입력 소스들에 대한 설정 (기본값: {name: 'sourceTexture'}) [EN] (Optional) Configurations for input sources (Default: {name: 'sourceTexture'})
+ * @param earlyExit - [KO] (선택) main 진입 시 화면 경계 검사 즉시 리턴 여부 (기본값: true, LDS 배리어 필요 시 false) [EN] (Optional) Whether to early-exit on boundary check at main entry (Default: true)
  * @returns [KO] MSAA와 Non-MSAA용으로 각각 생성된 WGSL 코드 객체 [EN] WGSL code objects generated for MSAA and Non-MSAA respectively
  */
-declare const createBasicPostEffectCode: (effect: ASinglePassPostEffect, code: string, uniformStruct?: string, sourceTextureConfigs?: IPostEffectSourceConfig | IPostEffectSourceConfig[]) => {
+declare const createBasicPostEffectCode: (effect: ASinglePassPostEffect, code: string, uniformStruct?: string, sourceTextureConfigs?: IPostEffectSourceConfig | IPostEffectSourceConfig[], earlyExit?: boolean) => {
     msaa: string;
     nonMsaa: string;
 };

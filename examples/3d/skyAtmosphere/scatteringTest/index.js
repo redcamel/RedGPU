@@ -15,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -30,7 +29,8 @@ RedGPU.init(
 
         redGPUContext.addView(view);
 
-        // 2. 조명 및 HDR IBL 설정
+        // [KO] 조명, HDR IBL 및 SkyAtmosphere 설정
+        // [EN] Configure lighting, HDR IBL, and SkyAtmosphere
         const sunLight = new RedGPU.Light.DirectionalLight();
         sunLight.elevation = 2;
         sunLight.azimuth = -90;
@@ -39,32 +39,25 @@ RedGPU.init(
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         view.ibl = ibl;
 
-        // 3. SkyAtmosphere 설정
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 
-        // 4. 테스트 환경 구성 (다양한 재질 및 객체 그리드 배치)
         createAtmosphereTestEnvironment(redGPUContext, scene);
 
-        // 5. 렌더링 시작
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        // 6. 테스트 GUI 설정
         renderTestPane(view, skyAtmosphere, sunLight);
     },
     (failReason) => {
-        console.error("Initialization failed:", failReason);
-        const errorMessage = document.createElement("div");
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] 대기 산란 테스트를 위해 거리별로 다양한 객체들을 배치합니다.
- * [EN] Places various objects by distance to test atmospheric scattering.
- */
 const createAtmosphereTestEnvironment = (redGPUContext, scene) => {
     const sphereGeo = new RedGPU.Primitive.Sphere(redGPUContext, 10, 32, 32);
     const sphereColorMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
@@ -90,12 +83,12 @@ const createAtmosphereTestEnvironment = (redGPUContext, scene) => {
         for (let j = 0; j < GRID_Z; j++) {
             const posZ = -j * STEP_Z;
 
-            if (i === 0) { // ColorMaterial
+            if (i === 0) {
                 const mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeo, sphereColorMat);
                 mesh.setPosition(posX, FIXED_Y, posZ);
                 mesh.setScale(10);
                 scene.addChild(mesh);
-            } else if (i === 1) { // GLTF Model (PBR)
+            } else if (i === 1) {
                 const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
                 new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
                     const helmet = result.resultMesh;
@@ -103,41 +96,41 @@ const createAtmosphereTestEnvironment = (redGPUContext, scene) => {
                     helmet.setScale(150);
                     scene.addChild(helmet);
                 });
-            } else if (i === 2) { // PhongMaterial
+            } else if (i === 2) {
                 const mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeo, spherePhongMat);
                 mesh.setPosition(posX, FIXED_Y, posZ);
                 mesh.setScale(10);
                 scene.addChild(mesh);
-            } else if (i === 3) { // Instancing
+            } else if (i === 3) {
                 for (let k = 0; k < 5; k++) {
                     const child = instanceMesh.instanceChildren[j * 5 + k];
                     child.setPosition(posX + (k - 2) * 100, 0, posZ);
                     child.setScale(5);
                 }
-            } else if (i === 4) { // TextField3D
+            } else if (i === 4) {
                 const textField = new RedGPU.Display.TextField3D(redGPUContext, `Distance: ${j * 2}km`);
                 textField.setPosition(posX, 300, posZ);
                 textField.worldSize = 100;
                 textField.color = '#fff';
                 scene.addChild(textField);
-            } else if (i === 5) { // Sprite3D
+            } else if (i === 5) {
                 const sprite = new RedGPU.Display.Sprite3D(redGPUContext, spriteMat);
                 sprite.setPosition(posX, FIXED_Y, posZ);
                 sprite.worldSize = 300;
                 scene.addChild(sprite);
-            } else if (i === 6) { // SpriteSheet3D
+            } else if (i === 6) {
                 const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
                 spriteSheet.setPosition(posX, FIXED_Y, posZ);
                 spriteSheet.worldSize = 300;
                 scene.addChild(spriteSheet);
-            } else if (i === 7) { // Particle
+            } else if (i === 7) {
                 const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
                 emitter.material.diffuseTexture = particleTexture;
                 emitter.setPosition(posX, FIXED_Y, posZ);
                 emitter.particleNum = 200;
                 emitter.maxEndScale = 500;
                 scene.addChild(emitter);
-            } else if (i === 8) { // Line3D
+            } else if (i === 8) {
                 const line = new RedGPU.Display.Line3D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, '#00ff00');
                 line.addPoint(0, -100, 0);
                 line.addPoint(0, 100, 0);
@@ -148,103 +141,111 @@ const createAtmosphereTestEnvironment = (redGPUContext, scene) => {
     }
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링하고 대기 산란 속성을 제어합니다.
- * [EN] Renders the GUI for testing and controls atmospheric scattering properties.
- */
 const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
     new RedGPUExampleHelper(targetView.redGPUContext, {
         gui: (pane) => {
-            const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
-            f_sun.addBinding(sunLight, 'elevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
-            f_sun.addBinding(sunLight, 'azimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
-            f_sun.addBinding(sunLight, 'lux', {min: 0, max: 200000, step: 1, label: 'sunIntensity (Lux)'});
-            f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'sunSize'});
-            f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {
-                min: 0,
-                max: 10,
-                step: 0.01,
-                label: 'sunLimbDarkening'
-            });
-            f_sun.addBinding(sunLight, 'intensityMultiplier', {
-                min: 0,
-                max: 10,
-                step: 0.1,
-                label: 'Intensity Multiplier'
-            });
-
-            const f_rayleigh = pane.addFolder({title: 'Rayleigh', expanded: false});
-            const rayleighState = {
-                scat: {
-                    r: skyAtmosphere.rayleighScattering[0],
-                    g: skyAtmosphere.rayleighScattering[1],
-                    b: skyAtmosphere.rayleighScattering[2]
-                }
-            };
-            f_rayleigh.addBinding(rayleighState, 'scat', {
-                color: {type: 'float'},
-                label: 'rayleighScattering'
-            }).on('change', (ev) => {
-                skyAtmosphere.rayleighScattering = [ev.value.r, ev.value.g, ev.value.b];
-            });
-            f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {
-                min: 0.1,
-                max: 100,
-                step: 0.1,
-                label: 'rayleighExponentialDistribution (km)'
-            });
-
-            const f_mie = pane.addFolder({title: 'Mie', expanded: false});
-            const mieState = {
-                scat: {
-                    r: skyAtmosphere.mieScattering[0],
-                    g: skyAtmosphere.mieScattering[1],
-                    b: skyAtmosphere.mieScattering[2]
+            const state = {
+                useSkyAtmosphere: true,
+                skyLuminanceFactor: {
+                    r: skyAtmosphere.skyLuminanceFactor.r,
+                    g: skyAtmosphere.skyLuminanceFactor.g,
+                    b: skyAtmosphere.skyLuminanceFactor.b
                 },
-                abs: {
-                    r: skyAtmosphere.mieAbsorption[0],
-                    g: skyAtmosphere.mieAbsorption[1],
-                    b: skyAtmosphere.mieAbsorption[2]
+                rayleighScattering: {
+                    r: skyAtmosphere.rayleighScattering.r,
+                    g: skyAtmosphere.rayleighScattering.g,
+                    b: skyAtmosphere.rayleighScattering.b
+                },
+                mieScattering: {
+                    r: skyAtmosphere.mieScattering.r,
+                    g: skyAtmosphere.mieScattering.g,
+                    b: skyAtmosphere.mieScattering.b
+                },
+                mieAbsorption: {
+                    r: skyAtmosphere.mieAbsorption.r,
+                    g: skyAtmosphere.mieAbsorption.g,
+                    b: skyAtmosphere.mieAbsorption.b
+                },
+                absorption: {
+                    r: skyAtmosphere.absorption.r,
+                    g: skyAtmosphere.absorption.g,
+                    b: skyAtmosphere.absorption.b
+                },
+                groundAlbedo: {
+                    r: skyAtmosphere.groundAlbedo.r,
+                    g: skyAtmosphere.groundAlbedo.g,
+                    b: skyAtmosphere.groundAlbedo.b
                 }
             };
-            f_mie.addBinding(mieState, 'scat', {color: {type: 'float'}, label: 'mieScattering'}).on('change', (ev) => {
-                skyAtmosphere.mieScattering = [ev.value.r, ev.value.g, ev.value.b];
-            });
-            f_mie.addBinding(mieState, 'abs', {color: {type: 'float'}, label: 'mieAbsorption'}).on('change', (ev) => {
-                skyAtmosphere.mieAbsorption = [ev.value.r, ev.value.g, ev.value.b];
-            });
-            f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {
-                min: 0,
-                max: 0.999,
-                step: 0.001,
-                label: 'mieAnisotropy (g)'
-            });
-            f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {
-                min: 0.1,
-                max: 100,
-                step: 0.1,
-                label: 'mieExponentialDistribution (km)'
+
+            pane.addBinding(state, 'useSkyAtmosphere').on('change', (ev) => {
+                targetView.skyAtmosphere = ev.value ? skyAtmosphere : null;
             });
 
-            const f_artistic = pane.addFolder({title: 'Artistic Controls', expanded: true});
-            const luminanceState = {
-                factor: {
-                    r: skyAtmosphere.skyLuminanceFactor[0],
-                    g: skyAtmosphere.skyLuminanceFactor[1],
-                    b: skyAtmosphere.skyLuminanceFactor[2]
-                }
-            };
-            f_artistic.addBinding(luminanceState, 'factor', {
-                color: {type: 'float'},
-                label: 'skyLuminanceFactor'
-            }).on('change', (ev) => {
-                skyAtmosphere.skyLuminanceFactor = [ev.value.r, ev.value.g, ev.value.b];
+            const f_sun = pane.addFolder({title: 'Sun (DirectionalLight)', expanded: true});
+            f_sun.addBinding(sunLight, 'elevation', {min: -90, max: 90, step: 0.0001});
+            f_sun.addBinding(sunLight, 'azimuth', {min: -360, max: 360, step: 0.0001});
+            f_sun.addBinding(sunLight, 'lux', {min: 0, max: 200000, step: 100});
+            f_sun.addBinding(sunLight, 'intensityMultiplier', {min: 0, max: 10, step: 0.1});
+
+            const f_atmo = pane.addFolder({title: 'SkyAtmosphere', expanded: true});
+            f_atmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01});
+            f_atmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01});
+            f_atmo.addBinding(skyAtmosphere, 'multiScatteringFactor', {min: 0, max: 10, step: 0.01});
+            f_atmo.addBinding(state, 'skyLuminanceFactor', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.skyLuminanceFactor.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
             });
-            f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {
-                min: 1,
-                max: 1000,
-                step: 1,
-                label: 'aerialPerspectiveDistanceScale (km)'
+
+            const f_aerial = f_atmo.addFolder({title: 'Aerial Perspective', expanded: true});
+            f_aerial.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1});
+            f_aerial.addBinding(skyAtmosphere, 'aerialPerspectiveStartDepth', {min: 0, max: 100, step: 0.1});
+
+            const f_clouds = f_atmo.addFolder({title: 'Clouds', expanded: false});
+            f_clouds.addBinding(skyAtmosphere, 'cloudCoverage', {min: 0, max: 1, step: 0.01});
+            f_clouds.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
+            f_clouds.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
+            f_clouds.addBinding(skyAtmosphere, 'cloudTimeMultiplier', {min: -10000, max: 10000, step: 0.01});
+
+            const f_scattering = f_atmo.addFolder({title: 'Scattering & Planet', expanded: false});
+
+            const f_rayleigh = f_scattering.addFolder({title: 'Rayleigh', expanded: true});
+            f_rayleigh.addBinding(state, 'rayleighScattering', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.rayleighScattering.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+            f_rayleigh.addBinding(skyAtmosphere, 'rayleighScatteringScale', {min: 0, max: 0.2, step: 0.0001});
+            f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 100, step: 0.1});
+
+            const f_mie = f_scattering.addFolder({title: 'Mie', expanded: true});
+            f_mie.addBinding(state, 'mieScattering', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.mieScattering.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+            f_mie.addBinding(skyAtmosphere, 'mieScatteringScale', {min: 0, max: 0.1, step: 0.0001});
+            f_mie.addBinding(state, 'mieAbsorption', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.mieAbsorption.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+            f_mie.addBinding(skyAtmosphere, 'mieAbsorptionScale', {min: 0, max: 0.1, step: 0.0001});
+            f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001});
+            f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1});
+
+            const f_ozone = f_scattering.addFolder({title: 'Ozone', expanded: true});
+            f_ozone.addBinding(state, 'absorption', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.absorption.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+            f_ozone.addBinding(skyAtmosphere, 'absorptionScale', {min: 0, max: 0.1, step: 0.0001});
+            f_ozone.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1});
+            f_ozone.addBinding(skyAtmosphere, 'absorptionTentWidth', {min: 1, max: 50, step: 0.1});
+
+            const f_planet = f_scattering.addFolder({title: 'Planet', expanded: true});
+            f_planet.addBinding(skyAtmosphere, 'groundRadius', {min: 1000, max: 10000, step: 1});
+            f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1});
+            f_planet.addBinding(state, 'groundAlbedo', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.groundAlbedo.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
             });
         }
     });

@@ -102,7 +102,28 @@ export declare class AABB {
      * [KO] Z축 최대값
      * [EN] Maximum Z value
      */
-    constructor(minX: number, maxX: number, minY: number, maxY: number, minZ: number, maxZ: number);
+    constructor(minX?: number, maxX?: number, minY?: number, maxY?: number, minZ?: number, maxZ?: number);
+    /**
+     * [KO] 기존 AABB 인스턴스의 경계값을 인플레이스로 갱신합니다. (Zero-GC)
+     * [EN] Updates the bounding values of an existing AABB instance in-place. (Zero-GC)
+     *
+     * @param minX - [KO] X축 최소값 [EN] Minimum X value
+     * @param maxX - [KO] X축 최대값 [EN] Maximum X value
+     * @param minY - [KO] Y축 최소값 [EN] Minimum Y value
+     * @param maxY - [KO] Y축 최대값 [EN] Maximum Y value
+     * @param minZ - [KO] Z축 최소값 [EN] Minimum Z value
+     * @param maxZ - [KO] Z축 최대값 [EN] Maximum Z value
+     * @returns [KO] 갱신된 현재 인스턴스 [EN] Updated current instance
+     */
+    set(minX: number, maxX: number, minY: number, maxY: number, minZ: number, maxZ: number): this;
+    /**
+     * [KO] 다른 AABB의 값을 현재 인스턴스에 복사합니다. (Zero-GC)
+     * [EN] Copies values from another AABB into the current instance. (Zero-GC)
+     *
+     * @param other - [KO] 복사할 원본 AABB [EN] Source AABB to copy from
+     * @returns [KO] 현재 인스턴스 [EN] Current instance
+     */
+    copy(other: AABB): this;
     /**
      * [KO] 다른 AABB와의 교차 여부를 반환합니다.
      * [EN] Returns whether it intersects with another AABB.

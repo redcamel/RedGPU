@@ -22,6 +22,7 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
         redGPUContext.addView(view);
 
         // 2. 조명 설정
@@ -29,9 +30,6 @@ RedGPU.init(
         // [EN] Add a directional light that will generate shadows.
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
-
-        // 3. 스카이박스 설정
-        view.skybox = createSkybox(redGPUContext);
 
         // 4. 무작위 객체 생성
         addRandomMeshes(redGPUContext, scene);
@@ -51,7 +49,7 @@ RedGPU.init(
             }
         });
 
-        // 6. 테스트 GUI 설정
+        // 7. 테스트 GUI 설정
         renderTestPane(redGPUContext, scene);
     },
     (failReason) => {
@@ -61,24 +59,6 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
-
-/**
- * [KO] 스카이박스를 생성합니다.
- * [EN] Creates a skybox.
- */
-const createSkybox = (redGPUContext) => {
-    const skyboxImagePaths = [
-        "../../../assets/skybox/px.jpg",
-        "../../../assets/skybox/nx.jpg",
-        "../../../assets/skybox/py.jpg",
-        "../../../assets/skybox/ny.jpg",
-        "../../../assets/skybox/pz.jpg",
-        "../../../assets/skybox/nz.jpg",
-    ];
-
-    const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
-    return new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
-};
 
 /**
  * [KO] 무작위 메시들을 씬에 추가합니다.
@@ -141,29 +121,9 @@ const getRandomHexValue = () => {
  */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
-        gui: (pane) => {
-            const {shadowManager} = scene;
-            const {directionalShadowManager} = shadowManager;
-
-            const folder = pane.addFolder({title: 'Directional Shadow', expanded: true});
-            folder.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
-                min: 128,
-                max: 4096,
-                step: 1,
-                label: 'Texture Size'
-            });
-            folder.addBinding(directionalShadowManager, 'strength', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.01,
-                label: 'Shadow Strength'
-            });
-            folder.addBinding(directionalShadowManager, 'filterScale', {
-                min: 0.0,
-                max: 15.0,
-                step: 0.1,
-                label: 'Filter Scale'
-            });
-        }
+        RedGPU,
+        directionalShadow: true,
+        ibl: true,
+        skybox: true,
     });
 };

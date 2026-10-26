@@ -3,19 +3,43 @@ import ResourceManager from "../../../../resources/core/resourceManager/Resource
 import Mesh from "../../Mesh";
 import PIPELINE_TYPE from "./PIPELINE_TYPE";
 
+/**
+ * [KO] 메시 렌더링을 위한 기본 GPURenderPipeline을 생성합니다.
+ * [EN] Creates a base GPURenderPipeline for mesh rendering.
+ *
+ * ::: warning
+ * [KO] 이 함수는 시스템에 의해 내부적으로 호출됩니다.<br/>직접 호출하지 마십시오.
+ * [EN] This function is called internally by the system.<br/>Do not call it directly.
+ * :::
+ *
+ * @param mesh -
+ * [KO] 대상 Mesh 인스턴스
+ * [EN] Target Mesh instance
+ * @param module -
+ * [KO] 버텍스 GPUShaderModule
+ * [EN] Vertex GPUShaderModule
+ * @param vertexBindGroupLayout -
+ * [KO] 버텍스 GPUBindGroupLayout
+ * [EN] Vertex GPUBindGroupLayout
+ * @param pipelineType -
+ * [KO] 파이프라인 타입 (`PIPELINE_TYPE.SHADOW`, `PIPELINE_TYPE.PICKING`, 또는 기본값)
+ * [EN] Pipeline type (`PIPELINE_TYPE.SHADOW`, `PIPELINE_TYPE.PICKING`, or default)
+ * @returns
+ * [KO] 생성된 GPURenderPipeline 인스턴스
+ * [EN] Created GPURenderPipeline instance
+ * @category Core
+ */
 const createBasePipeline = (
     mesh: Mesh,
     module: GPUShaderModule,
     vertexBindGroupLayout: GPUBindGroupLayout,
     pipelineType?: string,
 ): GPURenderPipeline => {
-    // 메쉬에서 GPU 리소스 관리자와 GPU 디바이스를 가져옵니다.
     const {redGPUContext} = mesh
     const {gpuDevice, resourceManager} = redGPUContext
     const material_gpuRenderInfo = mesh.material.gpuRenderInfo
     let entryPoint: string;
     let pipelineLabel: string;
-    // module = mesh.gpuRenderInfo.vertexShaderModule
     switch (pipelineType) {
         case PIPELINE_TYPE.SHADOW :
             entryPoint = 'entryPointShadowVertex'
@@ -29,13 +53,11 @@ const createBasePipeline = (
             entryPoint = 'main'
             pipelineLabel = `${module.label}_pipeline`
     }
-    // 셰이더 모듈 설명자를 생성합니다.
     const vertexState: GPUVertexState = {
         module,
         entryPoint,
         buffers: mesh.vertexStateBuffers
     }
-    // BindGroup 레이아웃을 가져온다
     const bindGroupLayouts: GPUBindGroupLayout[] = [
         resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
         vertexBindGroupLayout
@@ -46,8 +68,6 @@ const createBasePipeline = (
         label: `${pipelineLabel}_${material_gpuRenderInfo.fragmentBindGroupLayout.label}`
     }
     const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(`${pipelineLayoutDescriptor.label}`, pipelineLayoutDescriptor);
-    // keepLog('pipelineLayout',pipelineLayout)
-    // const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout(pipelineLayoutDescriptor);
     const pipelineDescriptor: GPURenderPipelineDescriptor = {
         label: pipelineLabel,
         layout: pipelineLayout,
@@ -60,6 +80,9 @@ const createBasePipeline = (
                 depthWriteEnabled: true,
                 depthCompare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
                 format: 'depth32float',
+                depthBias: 1,
+                depthBiasSlopeScale: 1.25,
+                depthBiasClamp: 0.005,
             }
             break
         case PIPELINE_TYPE.PICKING :

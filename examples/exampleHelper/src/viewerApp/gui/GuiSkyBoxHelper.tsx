@@ -47,7 +47,7 @@ const GuiSkyBoxHelper: React.FC<GuiSkyBoxHelperProps> = ({gui, view}) => {
             updatePathInfo(src);
 
             const finalSrc = resolveExamplePath(src);
-            const luminance = imageInfo.nit || 20000;
+            const luminance = imageInfo.luminance || 20000;
 
             if (RedGPU) {
                 const isHDR = typeof src === 'string' && src.toLowerCase().endsWith('.hdr');

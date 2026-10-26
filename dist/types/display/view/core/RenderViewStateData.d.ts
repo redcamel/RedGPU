@@ -178,6 +178,31 @@ declare class RenderViewStateData {
      */
     frustumPlanes: number[][];
     /**
+     * [KO] GPU 버퍼 전송 및 초고속 컬링을 위한 1차원 평탄 프러스텀 평면 버퍼 (Float32Array(24))
+     * [EN] 1D flattened frustum planes buffer for GPU buffer upload and fast culling (Float32Array(24))
+     */
+    readonly frustumPlanesFlat: Float32Array;
+    /**
+     * [KO] 4개 캐스케이드 통합 1차원 평탄 섀도우 프러스텀 평면 버퍼 (Float32Array(96) = 24 floats * 4 cascades)
+     * [EN] 1D flattened cascade shadow frustum planes buffer for 4 cascades (Float32Array(96) = 24 floats * 4 cascades)
+     */
+    readonly cascadeShadowFrustumPlanesFlat: Float32Array;
+    /**
+     * [KO] 캐스케이드별 24-float 서브어레이 뷰 캐시 배열 (Zero-GC 참조용)
+     * [EN] Per-cascade 24-float subarray view cache array (for Zero-GC reference)
+     */
+    readonly cascadeShadowFrustumPlanesByCascade: Float32Array[];
+    /**
+     * [KO] 캐스케이드별 최대 분할 거리 배열
+     * [EN] Max split distance array per cascade
+     */
+    readonly cascadeSplitDepths: Float32Array;
+    /**
+     * [KO] 현재 활성화된 캐스케이드 수 (0~4)
+     * [EN] Currently active cascade count (0~4)
+     */
+    activeCascadeCount: number;
+    /**
      * [KO] 머티리얼로부터 변경된 버텍스 유니폼의 맵
      * [EN] Map of vertex uniforms changed from materials
      */
@@ -214,6 +239,11 @@ declare class RenderViewStateData {
      */
     commandBatchStats: CommandBatchStats | null;
     /**
+     * [KO] 연결된 View3D 인스턴스
+     * [EN] Connected View3D instance
+     */
+    readonly view: View3D;
+    /**
      * [KO] 새로운 RenderViewStateData 인스턴스를 생성합니다.
      * [EN] Creates a new RenderViewStateData instance.
      *
@@ -222,13 +252,6 @@ declare class RenderViewStateData {
      * [EN] View3D instance this state data will link to
      */
     constructor(view: View3D);
-    /**
-     * [KO] 연결된 View3D 인스턴스를 가져옵니다.
-     * [EN] Returns the connected View3D instance.
-     *
-     * @readonly
-     */
-    get view(): View3D;
     /**
      * [KO] 새로운 프레임을 위해 렌더 상태 데이터를 초기화합니다.
      * [EN] Resets render state data for a new frame.

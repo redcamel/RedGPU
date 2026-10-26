@@ -20,7 +20,7 @@ import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
  * [KO] 렌더링 루프를 관리하고, 각 뷰(View3D)의 렌더링 패스를 실행하며, 최종적으로 화면에 결과를 표시합니다. 디버그 렌더링 및 애니메이션 업데이트도 담당합니다.
  * [EN] Manages the rendering loop, executes rendering passes for each View3D, and finally displays the result on the screen. It also handles debug rendering and animation updates.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const renderer = new RedGPU.Renderer();
  * renderer.start(redGPUContext, (time) => {
@@ -42,7 +42,7 @@ class Renderer {
      * [KO] 렌더링 루프를 시작합니다.
      * [EN] Starts the rendering loop.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * renderer.start(redGPUContext, (time) => {
      *     // 매 프레임 호출되는 콜백 (Callback called every frame)
@@ -70,6 +70,14 @@ class Renderer {
         redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(this.#HD_render)
     }
 
+    /**
+     * [KO] 렌더러 리소스를 정리하고 렌더 루프를 중단합니다.
+     * [EN] Cleans up renderer resources and stops the rendering loop.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스 (선택적)
+     * [EN] RedGPUContext instance (optional)
+     */
     destroy(redGPUContext?: RedGPUContext) {
         if (redGPUContext) {
             this.stop(redGPUContext);
@@ -84,7 +92,7 @@ class Renderer {
      * [KO] 렌더링 루프를 정지합니다.
      * [EN] Stops the rendering loop.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * renderer.stop(redGPUContext);
      * ```
@@ -123,15 +131,11 @@ class Renderer {
                 viewList_renderPassDescriptorList.push(renderPassDescriptor);
 
                 const {commandEncoderManager} = redGPUContext;
-                // [KO] 뷰별 1~4단계 일괄 제출 (RESOURCE, PRE_PROCESS, MAIN, POST_PROCESS)
-                // [EN] Batch submission of phases 1-4 per view
                 targetView.renderViewStateData.commandBatchStats = commandEncoderManager.submitAll()
             }
         }
 
         const {commandEncoderManager} = redGPUContext;
-        // [KO] 5단계: 최종 렌더링 (화면 출력)
-        // [EN] Phase 5: Final rendering (Screen output)
         this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList);
         commandEncoderManager.submit(COMMAND_ENCODER_TYPE.MAIN);
 
@@ -140,7 +144,6 @@ class Renderer {
             targetView.pickingManager?.checkEvents(targetView, time);
             targetView.postEffectManager.autoExposure.resolveReadback();
         });
-        // console.log('/////////////////// end renderFrame ///////////////////')
     }
 
     /**
@@ -164,6 +167,11 @@ class Renderer {
             pixelRectObject,
             renderViewStateData,
         } = view
+        if (pixelRectObject.width && pixelRectObject.height) {
+            // @ts-ignore
+            camera.update?.(view, redGPUContext.currentTime)
+        }
+        view.renderViewStateData.reset()
         const {
             globalVertexSSBO,
             globalFragmentSSBO_BuiltIn,
@@ -182,22 +190,11 @@ class Renderer {
             depthStencilAttachment,
         }
 
-        // [KO] 상태 초기화 및 컬링 계산 전에 카메라 행렬을 최신 상태로 업데이트
-        if (pixelRectObject.width && pixelRectObject.height) {
-            // @ts-ignore
-            camera.update?.(view, redGPUContext.currentTime)
-        }
-
-        // [KO] 상태 초기화 (인코더 의존성 제거됨)
-        // [EN] Reset state (encoder dependency removed)
-        view.renderViewStateData.reset()
-
         if (pixelRectObject.width && pixelRectObject.height) {
             const {scene} = view
-            const {lightManager, shadowManager} = scene
-            if (lightManager.pointLightCount || lightManager.spotLightCount) {
-                view.clusterLightManager.updateClusterLights();
-            }
+            const {shadowManager} = scene
+
+            view.clusterLightManager.updateClusterLights();
 
             {
                 const drawBufferManager = redGPUContext.drawBufferManager
@@ -207,8 +204,6 @@ class Renderer {
                 if (renderViewStateData.numFixedSteps > 0) {
                     const {scene} = view
                     if (scene.physicsEngine) {
-                        // [KO] 고정 타임스텝 수만큼 물리 시뮬레이션 반복 (제 속도 유지)
-                        // [EN] Repeat physics simulation for the number of fixed steps (maintain real-time speed)
                         let i = renderViewStateData.numFixedSteps;
                         while (i--) {
                             scene.physicsEngine.step(renderViewStateData.fixedStepDeltaTime);
@@ -218,16 +213,32 @@ class Renderer {
             }
 
             updateJitter(view)
-
-            // [KO] 쉐도우 패스용 업데이트 및 렌더링
-            // [EN] Update and render for shadow pass
-            view.update(true, false, null)
-            shadowManager.render(view)
-
-            // [KO] 기본 패스용 업데이트 및 렌더링
-            // [EN] Update and render for basic pass
+            {
+                const landscape = scene.landscape;
+                if (landscape) {
+                    landscape.update(renderViewStateData);
+                }
+            }
             const renderPath1ResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);
-            view.update(false, true, renderPath1ResultTextureView)
+            const renderPath1DepthResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT);
+            view.update(renderPath1ResultTextureView, renderPath1DepthResultTextureView);
+
+            if (scene.lightManager.directionalLightCount > 0) {
+                shadowManager.render(view);
+            }
+
+            const currentDepthView = view.viewRenderTextureManager.depthTextureView;
+            if (currentDepthView && view.hierarchicalZBuffer) {
+                redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
+                    view.hierarchicalZBuffer.generate(
+                        encoder,
+                        currentDepthView,
+                        pixelRectObject.width,
+                        pixelRectObject.height,
+                        view.antialiasingManager.useMSAA
+                    );
+                });
+            }
 
             this.#renderPassViewBasicLayer(view, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, renderPassDescriptor, depthStencilAttachment)
@@ -253,7 +264,7 @@ class Renderer {
     }
 
     #renderPassViewBasicLayer(view: View3D, renderPassDescriptor: GPURenderPassDescriptor) {
-        const {renderViewStateData, skybox, skyAtmosphere, grid, axis, redGPUContext} = view
+        const {renderViewStateData, skybox, skyAtmosphere, axis, redGPUContext, scene} = view
         if (skyAtmosphere) {
             skyAtmosphere.update(view)
         }
@@ -261,11 +272,22 @@ class Renderer {
             updateViewportAndScissor(view, viewRenderPassEncoder, 'DEFAULT')
 
             renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
+
+            const {landscape} = scene;
+            const foliageManager = landscape?.foliageManager;
+            const grassManager = landscape?.grassManager;
+
+            landscape?.render(view, viewRenderPassEncoder);
+            if (axis) axis.render(renderViewStateData);
+            scene.shadowManager?.directionalShadowManager?.resetCastingList();
+            renderBasicLayer(view, viewRenderPassEncoder);
+
+            foliageManager?.render(view, viewRenderPassEncoder);
+            grassManager?.render(view, viewRenderPassEncoder);
+
             if (skybox) skybox.render(renderViewStateData)
             if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
-            if (axis) axis.render(renderViewStateData)
-            renderBasicLayer(view, viewRenderPassEncoder)
-            if (grid) grid.render(renderViewStateData)
+
             renderAlphaLayer(view, viewRenderPassEncoder)
         });
     }
@@ -279,7 +301,6 @@ class Renderer {
             const {mipmapGenerator} = redGPUContext.resourceManager
             let renderPath1ResultTexture = view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_RESULT);
 
-            // useMSAA 설정에 따라 소스 텍스처 선택
             let sourceTexture = useMSAA
                 ? view.viewRenderTextureManager.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
                 : view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
@@ -298,6 +319,7 @@ class Renderer {
                     {texture: renderPath1ResultTexture,},
                     {width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1},
                 );
+                view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
             });
             mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, COMMAND_ENCODER_TYPE.MAIN)
 
@@ -314,6 +336,16 @@ class Renderer {
             }, (renderPassEncoder) => {
                 updateViewportAndScissor(view, renderPassEncoder)
                 renderPassEncoder.executeBundles(renderViewStateData.renderBundleResults.bundleListRender2PathLayer);
+            });
+
+            if (useMSAA && view.grid) {
+                commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
+                    view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
+                });
+            }
+        } else if (useMSAA && view.grid) {
+            commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
+                view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
             });
         }
     }
@@ -369,4 +401,5 @@ class Renderer {
 
 }
 
+Object.freeze(Renderer);
 export default Renderer

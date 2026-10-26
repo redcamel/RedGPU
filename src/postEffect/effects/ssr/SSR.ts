@@ -6,41 +6,66 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 
 interface SSR {
-    /** [KO] 최대 레이 마칭 단계 수. 값이 클수록 정밀한 반사가 가능하지만 성능 소모가 큽니다. [EN] Maximum number of ray marching steps. Higher values allow more precise reflections but increase performance cost. */
+    /**
+     * [KO] 최대 레이 마칭 단계 수 (1 ~ 512)
+     * [EN] Maximum number of ray marching steps (1 ~ 512)
+     * @defaultValue 64
+     */
     maxSteps: number;
-    /** [KO] 최대 반사 추적 거리 (월드 단위). [EN] Maximum reflection tracking distance (in world units). */
+    /**
+     * [KO] 최대 반사 추적 거리 (단위: 월드 거리, 1.0 ~ 200.0)
+     * [EN] Maximum reflection tracking distance in world units (1.0 ~ 200.0)
+     * @defaultValue 15.0
+     */
     maxDistance: number;
-    /** [KO] 레이 마칭 시 한 단계의 기본 크기. [EN] Base size of a single step during ray marching. */
+    /**
+     * [KO] 레이 마칭 단계 기본 크기 (0.001 ~ 5.0)
+     * [EN] Base step size during ray marching (0.001 ~ 5.0)
+     * @defaultValue 0.02
+     */
     stepSize: number;
-    /** [KO] 반사 효과의 전체적인 강도. [EN] Overall intensity of the reflection effect. */
+    /**
+     * [KO] 반사 효과 전체 강도 (0.0 ~ 10)
+     * [EN] Overall intensity of the reflection effect (0.0 ~ 10)
+     * @defaultValue 1
+     */
     reflectionIntensity: number;
-    /** [KO] 거리에 따른 반사 감쇠 시작 거리. [EN] Distance where reflection attenuation starts based on distance. */
+    /**
+     * [KO] 거리에 따른 반사 감쇠 시작 거리 (1.0 ~ 100.0)
+     * [EN] Distance where reflection attenuation starts (1.0 ~ 100.0)
+     * @defaultValue 12.0
+     */
     fadeDistance: number;
-    /** [KO] 화면 가장자리에서의 반사 페이드 영역 크기. [EN] Reflection fade area size at the screen edges. */
+    /**
+     * [KO] 화면 가장자리 반사 페이드 영역 크기 (0.0 ~ 0.5)
+     * [EN] Reflection fade area size at the screen edges (0.0 ~ 0.5)
+     * @defaultValue 0.15
+     */
     edgeFade: number;
 }
 
 /**
- * [KO] SSR(Screen Space Reflection) 후처리 이펙트입니다.
- * [EN] SSR (Screen Space Reflection) post-processing effect.
+ * [KO] 화면 공간의 깊이(Depth)와 법선(Normal) 정보를 기반으로 레이 마칭을 수행하여 실시간 반사를 구현하는 SSR(Screen Space Reflection) 후처리 이펙트입니다.
+ * [EN] Screen Space Reflection (SSR) post-processing effect that implements real-time reflections via ray marching using screen-space depth and normal information.
  *
- * [KO] 화면상의 깊이(Depth)와 법선(Normal) 정보를 활용하여 실시간 반사 효과를 구현합니다. 레이 마칭(Ray Marching) 기법을 통해 지형 간의 교차점을 찾아내어 정교한 거울 반사 질감을 제공합니다.
- * [EN] Implements real-time reflection effects using screen-space depth and normal information. It finds intersection points between terrains via Ray Marching to provide sophisticated mirror reflection textures.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * [KO] 이 효과는 HDR 공간에서 동작하여 주변의 밝은 광원을 반사할 때 물리적으로 정확하고 아름다운 광채를 표현합니다.
- * [EN] This effect operates in HDR space, representing physically accurate and beautiful glows when reflecting surrounding bright light sources.
- *
- * * ### Example
+ * ### Example
  * ```typescript
- * // View3D의 postEffectManager를 통해 사용 여부를 제어합니다.
- * // Controlled through the useSSR property of View3D's postEffectManager.
+ * // [KO] View3D의 postEffectManager를 통해 SSR 활성화 및 설정 제어
+ * // [EN] Enable and configure SSR through View3D's postEffectManager
  * view.postEffectManager.useSSR = true;
- * const ssrEffect = view.postEffectManager.ssr;
- * ssrEffect.maxSteps = 128;
- * ssrEffect.reflectionIntensity = 0.8;
+ * const ssr = view.postEffectManager.ssr;
+ * ssr.maxSteps = 128;
+ * ssr.reflectionIntensity = 0.8;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/ssr/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/ssr/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [SSR example](/RedGPU/examples/postEffect/ssr/)
  * @category PostEffect
  */
 class SSR extends ASinglePassPostEffect {
@@ -49,12 +74,12 @@ class SSR extends ASinglePassPostEffect {
      * [KO] SSR 인스턴스를 생성합니다.
      * [EN] Creates an SSR instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {x: 8, y: 8, z: 1});
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.init(
             redGPUContext,
             'POST_EFFECT_SSR',

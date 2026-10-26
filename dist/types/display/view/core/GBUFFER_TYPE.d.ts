@@ -23,6 +23,11 @@ declare const GBUFFER_TYPE: {
      * [EN] Render Path 1 stage result buffer
      */
     readonly RENDER_PATH1_RESULT: "renderPath1ResultTexture";
+    /**
+     * [KO] 렌더 패스 1 단계 깊이 결과 버퍼
+     * [EN] Render Path 1 stage depth result buffer
+     */
+    readonly RENDER_PATH1_DEPTH_RESULT: "renderPath1DepthResultTexture";
 };
 /**
  * [KO] GBUFFER_TYPE의 타입 정의

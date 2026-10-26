@@ -30,29 +30,25 @@ const lightGraph = `
 
 # Light
 
-While **Texture** is like applying an illustration to an object's surface, **Light** is the 'vitality' that gives that object three-dimensionality and depth.
+While **Texture** is like applying an illustration to an object's surface, **Light** is the 'vitality' that gives that
+object three-dimensionality and depth.
 
 ## 1. Physical Light Units
 
-Since RedGPU supports physically-based rendering (PBR), the lighting system uses real-world physical light units to
-control the intensity of light sources.
+Since RedGPU supports physically-based rendering (PBR), light intensity is controlled using real-world physical light
+units.
 
-| Unit           | Physical Meaning  | Role in RedGPU                                                                                                    | Description                                                                                                                                        |
-|:---------------|:------------------|:------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Lux (lx)**   | **Illuminance**   | Intensity of `DirectionalLight` (default `100,000`) <br/>and `AmbientLight` (default `50`) via the `lux` property | The brightness of light reaching a specific area. 1 Lux equals $1\text{ lm/m}^2$, and midday sunlight on a clear day is approximately 100,000 Lux. |
-| **Lumen (lm)** | **Luminous Flux** | Intensity of `PointLight` (default `1,000`) <br/>and `SpotLight` (default `1,000`) via the `lumen` property       | The total amount of light emitted in all directions from the light source. Primarily used to compare bulb brightness.                              |
-
-::: tip [Practical Tip]
-Since the most commonly used light in RedGPU, **DirectionalLight**, is a parallel light (sunlight) that illuminates
-globally, it controls its intensity using the **Lux** unit (`lux` property defaults to `100,000`, representing clear
-sunlight).
-:::
+| Unit           | Property | Target Lights                      | Description                                                                                         |
+|:---------------|:---------|:-----------------------------------|:----------------------------------------------------------------------------------------------------|
+| **Lux (lx)**   | `lux`    | `DirectionalLight`, `AmbientLight` | Illuminance reaching a surface area. Midday sunlight on a clear day is approximately `100,000` Lux. |
+| **Lumen (lm)** | `lumen`  | `PointLight`, `SpotLight`          | Total luminous flux emitted from a light source. Commonly used to measure bulb brightness.          |
 
 ---
 
 ## 2. LightManager
 
-Creating a light alone does not affect the screen. It must be registered in the `lightManager` of the **Scene** for the engine to include it in its calculations.
+Creating a light alone does not affect the screen. It must be registered in the `lightManager` of the `Scene` for the
+engine to include it in its calculations.
 
 <ClientOnly>
   <MermaidResponsive :definition="lightGraph" />
@@ -67,9 +63,9 @@ screen if no lights are configured.
 To optimize shader and buffer calculations, RedGPU restricts the maximum number of lights that can be registered.
 Attempting to exceed these limits will throw an error:
 
-- **DirectionalLight**: Maximum of **3**
+- **`DirectionalLight`**: Maximum of **3**
 - **PointLight + SpotLight (Cluster Lights)**: Combined maximum of **1,024**
-- **AmbientLight**: Maximum of **1** per Scene (assigned directly to the property)
+- **`AmbientLight`**: Maximum of **1** per Scene (assigned directly to the property)
   :::
 
 ```javascript
@@ -82,41 +78,51 @@ scene.lightManager.addPointLight(pointLight);
 
 ## 3. Main Types of Lighting
 
-RedGPU provides four types of light sources with different physical characteristics. It is important to understand the characteristics of each light and combine them appropriately.
+RedGPU provides four types of light sources with different physical characteristics. It is important to understand the
+characteristics of each light and combine them appropriately.
 
-| Type                 | Features                             | Main Usage                                             | Unit (Property)                    | Analogy    |
-|:---------------------|:-------------------------------------|:-------------------------------------------------------|:-----------------------------------|:-----------|
-| **DirectionalLight** | Parallel light (Sunlight)            | Global lighting, shadow generation                     | **Lux** (`lux`, default 100,000)   | The Sun    |
-| **PointLight**       | Spreads from a single point          | Emphasizing specific areas, distance-based attenuation | **Lumen** (`lumen`, default 1,000) | Light bulb |
-| **SpotLight**        | Concentrated cone-shaped light       | Highlight lighting, theatrical stage effects           | **Lumen** (`lumen`, default 1,000) | Flashlight |
-| **AmbientLight**     | Shines uniformly from all directions | Softening shadows, overall brightness correction       | **Lux** (`lux`, default 50)        | Fill light |
+### 3.1 `DirectionalLight`
 
-### 3.1 DirectionalLight
 Light that shines in parallel from an infinitely distant source in a specific direction, like the sun.
-- **Features**: Direction is constant regardless of position, and it is the most representative light source capable of creating shadows.
 
-### 3.2 PointLight
-Light that radiates in all directions from a point in space.
-- **Features**: **Attenuation** occurs, where brightness decreases in proportion to the square of the distance. The `radius` property determines the range the light reaches.
+- **Features & Usage**: Direction (`direction`) is constant regardless of position, primarily used for global lighting
+  and shadow generation.
+- **Unit**: **Lux** (`lux`, default `100,000`)
 
-### 3.3 SpotLight
-A light source that shines a cone-shaped light in a specific direction from a specific point.
-- **Features**: Creates concentrated lighting effects by adjusting the light's `angle` and outer softness (`exponent`).
+### 3.2 `PointLight`
 
-### 3.4 AmbientLight
+Light that radiates in all directions from a single point in space, like a light bulb.
 
-Light that shines uniformly from all directions onto objects.
+- **Features & Usage**: Distance-based **attenuation** occurs, and the `radius` property controls the reach to emphasize
+  specific areas.
+- **Unit**: **Lumen** (`lumen`, default `1,000`)
 
-- **Features**: Has no position or direction, and creates no shadows. It is used for correction to slightly brighten
-  dark areas where light does not reach.
+### 3.3 `SpotLight`
+
+A light source that shines a cone-shaped beam in a specific direction from a single point, like a flashlight or stage
+light.
+
+- **Features & Usage**: Creates concentrated lighting effects by adjusting the inner angle (`innerCutoff`), outer angle
+  (`outerCutoff`), and reach (`radius`).
+- **Unit**: **Lumen** (`lumen`, default `1,000`)
+
+### 3.4 `AmbientLight`
+
+Fill light that shines uniformly from all directions onto objects.
+
+- **Features & Usage**: Has no position or direction and casts no shadows. Used to soften dark areas where direct light
+  does not reach and to adjust overall base brightness.
+- **Unit**: **Lux** (`lux`, default `50`)
 
 ::: warning [Material Note]
-**ColorMaterial** is not affected by light and outputs only a single color. To see lighting effects, you must use a glossy or textured material such as **PhongMaterial** or **PBRMaterial**.
+**`ColorMaterial`** is not affected by light and outputs only a single color. To see lighting effects, you must use a
+glossy or textured material such as **`PhongMaterial`** or **`PBRMaterial`**.
 :::
 
 ## 4. Practice: Diverse Lighting Configuration
 
-Place a floor and multiple spheres, and implement an effect where light spreads in space by moving two **PointLights** of different colors.
+Place a floor and multiple spheres, and implement an effect where light spreads in space by moving two **PointLights**
+of different colors.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -127,12 +133,12 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
     // 1. Blue PointLight
-    const blueLight = new RedGPU.Light.PointLight('#0000ff', 1000);
+    const blueLight = new RedGPU.Light.PointLight('#0000ff', 2.0);
     blueLight.radius = 15;
     scene.lightManager.addPointLight(blueLight);
 
     // 2. Red PointLight
-    const redLight = new RedGPU.Light.PointLight('#ff0000', 1000);
+    const redLight = new RedGPU.Light.PointLight('#ff0000', 2.0);
     redLight.radius = 15;
     scene.lightManager.addPointLight(redLight);
 
@@ -198,12 +204,12 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    
-    const blueLight = new RedGPU.Light.PointLight('#0000ff', 1000);
+
+    const blueLight = new RedGPU.Light.PointLight('#0000ff', 2.0);
     blueLight.radius = 15;
     scene.lightManager.addPointLight(blueLight);
 
-    const redLight = new RedGPU.Light.PointLight('#ff0000', 1000);
+    const redLight = new RedGPU.Light.PointLight('#ff0000', 2.0);
     redLight.radius = 15;
     scene.lightManager.addPointLight(redLight);
 
@@ -246,15 +252,10 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
 
-- Manage all light sources by registering and controlling them via the **LightManager**.
-- To see lighting effects, you must use glossy materials such as **PhongMaterial** or **PBRMaterial**.
-- **DirectionalLight** is suitable for global lighting, while **PointLight** and **SpotLight** are better for highlight lighting.
+## Related Examples
 
-## Next Learning Recommendation
-
-Learn about Phong Material, a sophisticated material that expresses detailed surface texture and three-dimensionality by
-receiving light.
-
-- **[Phong Material](./phong-material.md)**
+- [DirectionalLight](/RedGPU/examples/3d/light/directionalLight/)
+- [PointLight](/RedGPU/examples/3d/light/pointLight/)
+- [Multi-PointLight Performance](/RedGPU/examples/3d/light/pointLightPerformance/)
+- [SpotLight](/RedGPU/examples/3d/light/spotLight/)

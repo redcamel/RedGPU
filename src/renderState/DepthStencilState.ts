@@ -9,15 +9,18 @@ const validateCompareList: GPUCompareFunction[] = Object.values(GPU_COMPARE_FUNC
  * [KO] 객체의 깊이(Depth) 및 스텐실(Stencil) 테스트 상태를 관리하는 클래스입니다.
  * [EN] Class that manages depth and stencil test states for objects.
  *
- * [KO] Z-버퍼 기반의 깊이 테스트 활성 여부, 쓰기 설정, 비교 함수 및 스텐실 마스킹 등을 제어합니다.
- * [EN] Controls whether Z-buffer based depth testing is active, write settings, comparison functions, and stencil masking.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const dsState = mesh.depthStencilState;
- * dsState.depthWriteEnabled = true;
- * dsState.depthCompare = RedGPU.GPU_COMPARE_FUNCTION.LESS;
+ * const depthStencilState = mesh.depthStencilState;
+ * depthStencilState.depthWriteEnabled = true;
+ * depthStencilState.depthCompare = RedGPU.GPU_COMPARE_FUNCTION.LESS_EQUAL;
  * ```
+ *
  * @category RenderState
  */
 class DepthStencilState {
@@ -36,23 +39,23 @@ class DepthStencilState {
 
     /**
      * [KO] DepthStencilState 인스턴스를 생성합니다.
-     * [EN] Creates an instance of DepthStencilState.
+     * [EN] Creates a DepthStencilState instance.
      *
      * @param targetObject3D -
-     * [KO] 상태가 적용될 대상 객체
-     * [EN] Target object to which the state is applied
+     * [KO] 상태가 적용될 대상 3D 객체
+     * [EN] Target 3D object to which the state is applied
      */
     constructor(targetObject3D: any) {
         this.#targetObject3D = targetObject3D;
     }
 
     /**
-     * [KO] 깊이/스텐실 텍스처 포맷을 가져오거나 설정합니다.
+     * [KO] 깊이/스텐실 텍스처 포맷을 반환하거나 설정합니다.
      * [EN] Gets or sets the depth/stencil texture format.
      *
      * @returns
-     * [KO] 현재 설정된 GPUTextureFormat
-     * [EN] Current GPUTextureFormat
+     * [KO] 현재 설정된 `GPUTextureFormat` 값
+     * [EN] Currently configured `GPUTextureFormat` value
      */
     get format(): GPUTextureFormat {
         return this.#format;
@@ -66,8 +69,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 깊이 버퍼에 기록할지 여부를 가져오거나 설정합니다.
-     * [EN] Gets or sets whether to write to the depth buffer.
+     * [KO] 깊이 버퍼 쓰기 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether writing to the depth buffer is enabled.
+     *
+     * @returns
+     * [KO] 깊이 버퍼 쓰기 활성화 여부
+     * [EN] Whether depth buffer writing is enabled
      */
     get depthWriteEnabled(): boolean {
         return this.#depthWriteEnabled;
@@ -79,12 +86,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 깊이 비교 함수를 가져오거나 설정합니다.
+     * [KO] 깊이 비교 함수를 반환하거나 설정합니다.
      * [EN] Gets or sets the depth comparison function.
      *
      * @returns
-     * [KO] 현재 설정된 GPUCompareFunction
-     * [EN] Current GPUCompareFunction
+     * [KO] 현재 설정된 `GPUCompareFunction` 값
+     * [EN] Currently configured `GPUCompareFunction` value
      */
     get depthCompare(): GPUCompareFunction {
         return this.#depthCompare;
@@ -98,8 +105,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 전면(Front) 스텐실 상태를 가져오거나 설정합니다.
-     * [EN] Gets or sets the front stencil state.
+     * [KO] 전면(Front) 스텐실 상태를 반환하거나 설정합니다.
+     * [EN] Gets or sets the front stencil face state.
+     *
+     * @returns
+     * [KO] 전면 `GPUStencilFaceState` 객체
+     * [EN] Front `GPUStencilFaceState` object
      */
     get stencilFront(): GPUStencilFaceState {
         return this.#stencilFront;
@@ -111,8 +122,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 후면(Back) 스텐실 상태를 가져오거나 설정합니다.
-     * [EN] Gets or sets the back stencil state.
+     * [KO] 후면(Back) 스텐실 상태를 반환하거나 설정합니다.
+     * [EN] Gets or sets the back stencil face state.
+     *
+     * @returns
+     * [KO] 후면 `GPUStencilFaceState` 객체
+     * [EN] Back `GPUStencilFaceState` object
      */
     get stencilBack(): GPUStencilFaceState {
         return this.#stencilBack;
@@ -124,8 +139,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 스텐실 읽기 마스크를 가져오거나 설정합니다.
+     * [KO] 스텐실 읽기 마스크를 반환하거나 설정합니다.
      * [EN] Gets or sets the stencil read mask.
+     *
+     * @returns
+     * [KO] 스텐실 읽기 마스크 값
+     * [EN] Stencil read mask value
      */
     get stencilReadMask(): number {
         return this.#stencilReadMask;
@@ -137,8 +156,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 스텐실 쓰기 마스크를 가져오거나 설정합니다.
+     * [KO] 스텐실 쓰기 마스크를 반환하거나 설정합니다.
      * [EN] Gets or sets the stencil write mask.
+     *
+     * @returns
+     * [KO] 스텐실 쓰기 마스크 값
+     * [EN] Stencil write mask value
      */
     get stencilWriteMask(): number {
         return this.#stencilWriteMask;
@@ -150,8 +173,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 깊이 바이어스(Depth Bias) 값을 가져오거나 설정합니다.
+     * [KO] 깊이 바이어스(Depth Bias) 값을 반환하거나 설정합니다.
      * [EN] Gets or sets the depth bias value.
+     *
+     * @returns
+     * [KO] 현재 설정된 `GPUDepthBias` 값
+     * [EN] Currently configured `GPUDepthBias` value
      */
     get depthBias(): GPUDepthBias {
         return this.#depthBias;
@@ -163,8 +190,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 깊이 바이어스 슬로프 스케일(Slope Scale)을 가져오거나 설정합니다.
-     * [EN] Gets or sets the depth bias slope scale.
+     * [KO] 깊이 바이어스 기울기 스케일(Slope Scale) 값을 반환하거나 설정합니다.
+     * [EN] Gets or sets the depth bias slope scale value.
+     *
+     * @returns
+     * [KO] 깊이 바이어스 기울기 스케일 값
+     * [EN] Depth bias slope scale value
      */
     get depthBiasSlopeScale(): number {
         return this.#depthBiasSlopeScale;
@@ -176,8 +207,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 깊이 바이어스 클램프(Clamp) 값을 가져오거나 설정합니다.
+     * [KO] 깊이 바이어스 클램프(Clamp) 값을 반환하거나 설정합니다.
      * [EN] Gets or sets the depth bias clamp value.
+     *
+     * @returns
+     * [KO] 깊이 바이어스 클램프 값
+     * [EN] Depth bias clamp value
      */
     get depthBiasClamp(): number {
         return this.#depthBiasClamp;
@@ -189,8 +224,12 @@ class DepthStencilState {
     }
 
     /**
-     * [KO] 현재 설정된 값들을 기반으로 GPUDepthStencilState 형식의 객체를 반환합니다.
-     * [EN] Returns an object in GPUDepthStencilState format based on the current settings.
+     * [KO] 현재 설정된 값들을 기반으로 `GPUDepthStencilState` 형식의 상태 객체를 반환합니다.
+     * [EN] Returns a state object in `GPUDepthStencilState` format based on the current settings.
+     *
+     * @returns
+     * [KO] 생성된 깊이/스텐실 상태 객체
+     * [EN] Generated depth/stencil state object
      */
     get state() {
         let enableBiasTopology = false;

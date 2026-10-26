@@ -10,7 +10,7 @@ redUnit.testGroup(
             try {
                 const manager = new RedGPU.Shadow.DirectionalShadowManager();
                 const check = manager.shadowDepthTextureSize === 2048 &&
-                              manager.bias === 0.005 &&
+                    manager.bias === 0.00015 &&
                               Array.isArray(manager.castingList) &&
                               manager.castingList.length === 0;
                 run(check);

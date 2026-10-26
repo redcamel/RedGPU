@@ -1,100 +1,135 @@
 {
-    // [KO] 1. 인덱스 및 기초 데이터 로드
-    // [EN] 1. Index and basic data loading
-    let pixelCoord = vec2<i32>(global_id.xy);
     let screenSizeU = textureDimensions(sourceTexture);
     let screenSize = vec2<f32>(screenSizeU);
-    let yFlipVec2 = vec2<f32>(1.0, -1.0);
+    let c_max = vec2<i32>(screenSizeU) - 1;
 
+    // 1. Cooperatively populate 10x10 workgroup shared memory (8x8 tile + 1px halo) with Karis-tonemapped color and depth
+    let tileOrigin = vec2<i32>(workgroup_id.xy) * 8 - vec2<i32>(1, 1);
+    let tid = i32(local_invocation_index);
+
+    let lx0 = tid % 10;
+    let ly0 = tid / 10;
+    let coord0 = clamp(tileOrigin + vec2<i32>(lx0, ly0), vec2<i32>(0), c_max);
+    let rawColor0 = textureLoad(sourceTexture, coord0, 0);
+    s_color[ly0][lx0] = vec4<f32>(reversible_tonemap(rawColor0.rgb), rawColor0.a);
+    s_depth[ly0][lx0] = textureLoad(depthTexture, coord0, 0);
+
+    let tid2 = tid + 64;
+    if (tid2 < 100) {
+        let lx1 = tid2 % 10;
+        let ly1 = tid2 / 10;
+        let coord1 = clamp(tileOrigin + vec2<i32>(lx1, ly1), vec2<i32>(0), c_max);
+        let rawColor1 = textureLoad(sourceTexture, coord1, 0);
+        s_color[ly1][lx1] = vec4<f32>(reversible_tonemap(rawColor1.rgb), rawColor1.a);
+        s_depth[ly1][lx1] = textureLoad(depthTexture, coord1, 0);
+    }
+
+    workgroupBarrier();
+
+    let pixelCoord = vec2<i32>(global_id.xy);
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
-    // [KO] 2. 지터링(Jittering)이 보정된 현재 UV 및 주변 통계 산출
-    // [EN] 2. Calculate current UV with jittering correction and neighborhood stats
-    let currentUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset * yFlipVec2) / screenSize;
-    let stats = calculate_neighborhood_stats_ycocg(pixelCoord, screenSizeU);
+    // 2. Compute 3x3 YCoCg neighborhood statistics and reconstruct unjittered current pixel color
+    let localCoord = vec2<i32>(local_id.xy) + vec2<i32>(1, 1);
+    let yFlipVec2 = vec2<f32>(1.0, -1.0);
 
-    // [KO] 하드웨어 샘플러를 통한 현재 프레임 컬러 로드
-    // [EN] Load current frame color via hardware sampler
-    let currentRGBA = textureSampleLevel(sourceTexture, basicSampler, currentUV, 0.0);
-    let currentRGB = currentRGBA.rgb;
-    let currentAlpha = currentRGBA.a;
-    let currentYCoCg = rgbToYCoCg(currentRGB);
-    
-    // [KO] 3. 모션 벡터(Motion Vector) 산출 (가장 가까운 깊이 픽셀 기준)
-    // [EN] 3. Calculate Motion Vector (Based on closest depth pixel)
-    // [KO] 물체의 테두리에서 정확한 추적을 위해 주변 3x3 영역 중 카메라와 가장 가까운 모션 정보를 사용합니다.
-    // [EN] Uses motion info from the pixel closest to the camera within 3x3 region for accurate edge tracking.
-    let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
-    var closestDepth = 1.0;
-    var closestCoord = pixelCoord;
-    for(var y: i32 = -1; y <= 1; y++) {
-        for(var x: i32 = -1; x <= 1; x++) {
-            let sc = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
-            let d = textureLoad(depthTexture, sc, 0);
-            if(d < closestDepth) {
-                closestDepth = d;
-                closestCoord = sc;
-            }
-        }
-    }
-    
-    let motionData = textureLoad(gBufferMotionVector, closestCoord, 0);
-    let velocity = motionData.xy;
+    let stats = calculate_neighborhood_stats_ycocg_lds(localCoord);
 
-    // 모션 벡터가 명시적으로 지터링 제외 상태인 경우 처리
-    let jitterDisabled = motionData.z > 0.5;
-    if (jitterDisabled) {
-        textureStore(outputTexture, pixelCoord, vec4<f32>(currentRGB, currentAlpha));
+    let jitterOffsetPix = uniforms.currJitterOffset * yFlipVec2;
+    let reconstructedCurrent = reconstruct_current_color_ycocg_lds(localCoord, jitterOffsetPix);
+    let currentRGB = reconstructedCurrent.rgb;
+    let currentAlpha = reconstructedCurrent.alpha;
+    let currentRGBA = vec4<f32>(currentRGB, currentAlpha);
+
+    // Output reconstructed current frame directly on the first frame after initialization or reset
+    if (uniforms.frameIndex <= 1.0) {
+        let finalHDR_RGB = inverse_tonemap(currentRGB);
+        textureStore(outputTexture, pixelCoord, vec4<f32>(finalHDR_RGB, currentAlpha));
         return;
     }
 
-    // [KO] 4. 히스토리(History) 좌표 계산 및 데이터 로드
-    // [EN] 4. Calculate History coordinates and load data
-    let historyUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset * yFlipVec2 + uniforms.prevJitterOffset * yFlipVec2) / screenSize - velocity;
+    // 3. 3x3 closest-depth velocity dilation to preserve foreground object edges during motion
+    let currentDepth = s_depth[localCoord.y][localCoord.x];
+    var closestDepth = currentDepth;
+    var closestCoord = pixelCoord;
 
-    var finalRGB: vec3<f32>;
-    var finalAlpha: f32;
+    let d_l  = s_depth[localCoord.y][localCoord.x - 1];
+    let d_r  = s_depth[localCoord.y][localCoord.x + 1];
+    let d_t  = s_depth[localCoord.y - 1][localCoord.x];
+    let d_b  = s_depth[localCoord.y + 1][localCoord.x];
+    let d_tl = s_depth[localCoord.y - 1][localCoord.x - 1];
+    let d_tr = s_depth[localCoord.y - 1][localCoord.x + 1];
+    let d_bl = s_depth[localCoord.y + 1][localCoord.x - 1];
+    let d_br = s_depth[localCoord.y + 1][localCoord.x + 1];
 
-    // 화면 경계 밖인 경우 누적 제외
+    if (d_l  < closestDepth) { closestDepth = d_l;  closestCoord = clamp(pixelCoord + vec2<i32>(-1,  0), vec2<i32>(0), c_max); }
+    if (d_r  < closestDepth) { closestDepth = d_r;  closestCoord = clamp(pixelCoord + vec2<i32>( 1,  0), vec2<i32>(0), c_max); }
+    if (d_t  < closestDepth) { closestDepth = d_t;  closestCoord = clamp(pixelCoord + vec2<i32>( 0, -1), vec2<i32>(0), c_max); }
+    if (d_b  < closestDepth) { closestDepth = d_b;  closestCoord = clamp(pixelCoord + vec2<i32>( 0,  1), vec2<i32>(0), c_max); }
+    if (d_tl < closestDepth) { closestDepth = d_tl; closestCoord = clamp(pixelCoord + vec2<i32>(-1, -1), vec2<i32>(0), c_max); }
+    if (d_tr < closestDepth) { closestDepth = d_tr; closestCoord = clamp(pixelCoord + vec2<i32>( 1, -1), vec2<i32>(0), c_max); }
+    if (d_bl < closestDepth) { closestDepth = d_bl; closestCoord = clamp(pixelCoord + vec2<i32>(-1,  1), vec2<i32>(0), c_max); }
+    if (d_br < closestDepth) { closestDepth = d_br; closestCoord = clamp(pixelCoord + vec2<i32>( 1,  1), vec2<i32>(0), c_max); }
+
+    let closestMotionData = textureLoad(gBufferMotionVector, closestCoord, 0);
+    let velocity = closestMotionData.xy;
+
+    // Bypass history accumulation when the reactive mask flag (z > 0.5) is set
+    if (closestMotionData.z > 0.5) {
+        let finalHDR_RGB = inverse_tonemap(currentRGB);
+        textureStore(outputTexture, pixelCoord, vec4<f32>(finalHDR_RGB, currentAlpha));
+        return;
+    }
+
+    // 4. Reproject to previous frame UV and resolve history via Catmull-Rom sampling and YCoCg ray-box clipping
+    let currentUnjitteredUV = (vec2<f32>(pixelCoord) + 0.5 - jitterOffsetPix) / screenSize;
+    let historyUV = currentUnjitteredUV - velocity;
+
+    var finalRGBA: vec4<f32>;
+
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
-        finalRGB = currentRGB;
-        finalAlpha = currentAlpha;
+        finalRGBA = currentRGBA;
     } else {
-        // [KO] 고정밀 필터링(Catmull-Rom)을 통한 히스토리 샘플링
-        // [EN] History sampling via high-precision filtering (Catmull-Rom)
-        let prevDepth = fetch_depth_bilinear(historyUV, screenSize);
-        let historyData = sample_texture_catmull_rom_antiflicker(historyTexture, basicSampler, historyUV, screenSize);
+        let historyCoord = clamp(vec2<i32>(historyUV * screenSize), vec2<i32>(0), c_max);
+        let prevDepth = textureLoad(prevDepthTexture, historyCoord, 0);
+        let rawHistoryData = sample_texture_catmull_rom_antiflicker(historyTexture, basicSampler, historyUV, screenSize);
+
+        var historyData: SampledColor;
+        historyData.rgb = reversible_tonemap(rawHistoryData.rgb);
+        historyData.ycocg = rgbToYCoCg(historyData.rgb);
+        historyData.alpha = rawHistoryData.alpha;
 
         let motionLen = length(velocity * screenSize);
         let motionSoft = smoothstep(0.0, 1.0, motionLen);
 
-        // [KO] 5. 히스토리 클램핑(Clipping/Clamping) 및 가중치 조절
-        // [EN] 5. History Clipping/Clamping and weight adjustment
-        // [KO] 잔상(Ghosting) 방지를 위해 히스토리 컬러를 현재 픽셀 주변의 통계 범위 내로 강제 제한합니다.
-        // [EN] Forces the history color within the statistical range of the current neighborhood to prevent ghosting.
-        let clippedYCoCg = clip_history_ycocg(historyData.ycocg, stats, motionSoft);
+        let velVariance = calculate_velocity_variance(gBufferMotionVector, closestCoord, velocity, screenSize);
+        let clippedYCoCg = clip_history_ray_box_ycocg(historyData.ycocg, reconstructedCurrent.ycocg, stats, motionSoft, velVariance);
         let clippedAlpha = clamp(historyData.alpha, stats.minAlpha, stats.maxAlpha);
-
         let clippedHistoryRGB = YCoCgToRgb(clippedYCoCg);
-        let lumaWeight = get_color_discrepancy_weight(stats, clippedHistoryRGB);
 
-        // [KO] 6. 최종 블렌딩 및 결과 저장
-        // [EN] 6. Final blending and store result
-        var blendFactor = mix(0.08, 0.4, motionSoft);
-        let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
+        // 5. Compute adaptive temporal blend factor from frame age, motion, depth disocclusion, luminance discrepancy, and alpha
+        let lumaWeight = get_color_discrepancy_weight(stats, clippedYCoCg.x);
 
-        // 깊이 차이가 크면 히스토리 신뢰도를 낮춤 (Rejection)
-        blendFactor = max(blendFactor, 1.0 - depthConfidence * depthConfidence);
-        blendFactor = max(blendFactor, lumaWeight * 0.5);
+        let effectiveAge = min(uniforms.frameIndex, 32.0);
+        let convergenceBlend = max(1.0 / max(effectiveAge, 1.0), 0.08);
+        let baseBlend = mix(convergenceBlend, 0.20, motionSoft);
 
-        let currentRGBA_final = vec4<f32>(currentRGB, currentAlpha);
+        let depthConfidence = get_geometric_depth_confidence(currentDepth, prevDepth);
+
+        let geometricConfidence = mix(1.0, depthConfidence, motionSoft);
+        var blendFactor = max(baseBlend, (1.0 - geometricConfidence) * 0.85 * motionSoft);
+
+        let motionLumaBlend = max(blendFactor, lumaWeight * 0.6);
+        blendFactor = mix(blendFactor, motionLumaBlend, motionSoft);
+
+        let reactiveTrans = get_reactive_transparency_weight(stats);
+        blendFactor = mix(blendFactor, 1.0, reactiveTrans);
+
         let clippedHistoryRGBA = vec4<f32>(clippedHistoryRGB, clippedAlpha);
-
-        let finalRGBA = mix(clippedHistoryRGBA, currentRGBA_final, blendFactor);
-
-        finalRGB = finalRGBA.rgb;
-        finalAlpha = finalRGBA.a;
+        finalRGBA = mix(clippedHistoryRGBA, currentRGBA, blendFactor);
     }
 
-    textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB, finalAlpha));
+    // 6. Restore linear HDR radiance via inverse Karis tone map and store to output texture
+    let finalHDR_RGB = inverse_tonemap(finalRGBA.rgb);
+    textureStore(outputTexture, pixelCoord, vec4<f32>(finalHDR_RGB, finalRGBA.a));
 }

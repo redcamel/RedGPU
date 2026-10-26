@@ -42,7 +42,9 @@ redUnit.testGroup(
     'RedGPU.PostEffect.Core.ASinglePassPostEffect',
     (runner) => {
         class MockSinglePass extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
-            constructor(ctx, workSize) { super(ctx, workSize); }
+            constructor(ctx, options) {
+                super(ctx, options);
+            }
         }
 
         runner.defineTest('Success Test: WORK_SIZE defaults', (run) => {
@@ -61,7 +63,7 @@ redUnit.testGroup(
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
-                    const effect = new MockSinglePass(redGPUContext, {x: 8, y: 4, z: 2});
+                    const effect = new MockSinglePass(redGPUContext, {workSizeX: 8, workSizeY: 4, workSizeZ: 2});
                     const check = effect.WORK_SIZE_X === 8 && effect.WORK_SIZE_Y === 4 && effect.WORK_SIZE_Z === 2;
                     redGPUContext.destroy();
                     run(check);

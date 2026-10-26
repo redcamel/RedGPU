@@ -7,6 +7,8 @@ import GuiViewList from './GuiViewList';
 import GuiScene from './GuiScene';
 import GuiIBLHelper from "./GuiIBLHelper";
 import GuiSkyBoxHelper from "./GuiSkyBoxHelper";
+import GuiDirectionalShadowHelper from "./GuiDirectionalShadowHelper";
+import GuiGlobalWindHelper from "./GuiGlobalWindHelper";
 
 /**
  * [KO] Tweakpane을 렌더링하고 관리하는 컴포넌트입니다.
@@ -56,6 +58,15 @@ const GuiPanel: React.FC = () => {
             )}
             {guiInstance && guiConfig.scene && redGPUContext && (
                 <GuiScene gui={guiInstance} scene={redGPUContext.viewList[0]?.scene}/>
+            )}
+            {guiInstance && guiConfig.directionalShadow && redGPUContext && redGPUContext.viewList[0]?.scene?.shadowManager?.directionalShadowManager && (
+                <GuiDirectionalShadowHelper gui={guiInstance}
+                                            directionalShadowManager={redGPUContext.viewList[0].scene.shadowManager.directionalShadowManager}/>
+            )}
+            {guiInstance && guiConfig.globalWind && redGPUContext && redGPUContext.viewList[0]?.scene?.windManager && (
+                <GuiGlobalWindHelper gui={guiInstance}
+                                     windManager={redGPUContext.viewList[0].scene.windManager}
+                                     expanded={typeof guiConfig.globalWind === 'object' ? guiConfig.globalWind.expanded : false}/>
             )}
             {guiInstance && guiConfig.ibl && redGPUContext && redGPUContext.viewList[0] && (
                 <GuiIBLHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>

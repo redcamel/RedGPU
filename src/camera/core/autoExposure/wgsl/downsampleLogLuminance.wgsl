@@ -1,18 +1,16 @@
-#redgpu_include color.getLuminance
-
 @group(0) @binding(0) var sourceTexture : texture_2d<f32>;
-@group(0) @binding(1) var depthTexture : texture_depth_2d;
 @group(1) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 256>;
+
+const MIN_LUMINANCE: f32 = 0.0000001;
 
 struct AutoExposureUniforms {
     deltaTime: f32,
-    targetLuminance: f32,
+    targetEV100Bias: f32,
     adjustmentSpeedUp: f32,
     adjustmentSpeedDown: f32,
-    exposureCompensation: f32,
+    minPossibleEV100: f32,
     minEV100: f32,
     maxEV100: f32,
-    calibrationConstant: f32,
     ev100Range: f32,
     lowPercentile: f32,
     highPercentile: f32,
@@ -20,13 +18,11 @@ struct AutoExposureUniforms {
     width: f32,
     height: f32,
     currentPreExposure: f32,
-    maxExposureMultiplier: f32,
-    meteringMode: f32
+    meteringMode: f32,
+    pad0: f32 // 16-byte tail alignment
 };
 @group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;
 
-// [KO] 공유 메모리를 사용하여 전역 원자적 연산 병목 해소
-// [EN] Use shared memory to resolve global atomic operation bottlenecks
 var<workgroup> localHistogram: array<atomic<u32>, 256>;
 
 @compute @workgroup_size(16, 16, 1)
@@ -34,7 +30,6 @@ fn main(
     @builtin(global_invocation_id) global_id : vec3<u32>,
     @builtin(local_invocation_index) local_index : u32
 ) {
-    // [KO] 로컬 히스토그램 초기화 [EN] Initialize local histogram
     if (local_index < 256u) {
         atomicStore(&localHistogram[local_index], 0u);
     }
@@ -42,57 +37,43 @@ fn main(
 
     let coords = global_id.xy * 2u;
     if (coords.x < u32(uniforms.width) && coords.y < u32(uniforms.height)) {
-        // [KO] 깊이 텍스처를 먼저 조회하여 배경(depth >= 1.0)인 경우 색상 텍스처 페칭을 생략 (Early Exit)
-        // [EN] Fetch depth texture first and skip color texture fetch for background pixels (Early Exit)
-        let depth = textureLoad(depthTexture, vec2<i32>(coords), 0);
+        let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
         
-//        if (depth < 1.0) {
-            // [KO] 단 한 번만 색상 텍스처를 페칭하여 알파와 RGB 채널을 모두 검사
-            // [EN] Fetch the color texture only once to check both alpha and RGB channels
-            let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
+        if (texel.a > 0.0) {
+            let color = texel.rgb;
+            let brightness = max(color.r, max(color.g, color.b));
+            let invPreExposure = 1.0 / max(uniforms.currentPreExposure, MIN_LUMINANCE);
+            let lum = brightness * invPreExposure;
             
-            if (texel.a > 0.0) {
-                let color = texel.rgb;
-                let brightness = max(color.r, max(color.g, color.b));
-                let lum = brightness / max(uniforms.currentPreExposure, 0.0001);
-                
-                if (lum > 0.0001) {
-                    // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
-                    // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
-                    let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
-                    
-                    let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
-                    let binIndex = u32(normalizedEV100 * 255.0);
+            if (lum > MIN_LUMINANCE) {
+                let ev100 = log2(lum) + 3.0;
+                let normalizedEV100 = saturate((ev100 - uniforms.minEV100) * uniforms.invEv100Range);
+                let binIndex = u32(normalizedEV100 * 255.0);
 
-                    // [KO] 측광 가중치 계산 [EN] Calculate metering weight
-                    var weight = 1.0;
-                    let uv = vec2<f32>(f32(coords.x) / uniforms.width, f32(coords.y) / uniforms.height);
-                    let dist = distance(uv, vec2<f32>(0.5, 0.5));
+                var weight = 1.0;
+                if (uniforms.meteringMode > 0.5) {
+                    let invHeight = 1.0 / uniforms.height;
+                    let center = vec2<f32>(uniforms.width, uniforms.height) * 0.5;
+                    let delta = (vec2<f32>(coords) - center) * invHeight;
+                    let dist = sqrt(dot(delta, delta));
 
-                    if (uniforms.meteringMode == 1.0) {
-                        // [KO] 중앙 중점 측광 (Center-weighted) [EN] Center-weighted
-                        weight = clamp(1.0 - dist * 1.0, 0.0, 1.0);
-                        weight = weight * weight; // [KO] 부드러운 감쇄 [EN] Smooth falloff
-                    } else if (uniforms.meteringMode == 2.0) {
-                        // [KO] 스포트 측광 (Spot) [EN] Spot
-                        weight = clamp(1.0 - dist * 4.0, 0.0, 1.0);
-                        weight = weight * weight * weight * weight; // [KO] 중앙 집중 [EN] Highly concentrated
+                    if (uniforms.meteringMode < 1.5) {
+                        let w = saturate(1.0 - dist);
+                        weight = w * w;
+                    } else {
+                        let w = saturate(1.0 - dist * 4.0);
+                        let w2 = w * w;
+                        weight = w2 * w2;
                     }
-
-                    // [KO] 가중치를 반영하여 로컬 히스토그램에 누적 (0~100 스케일링)
-                    // [EN] Accumulate into local histogram with weight (scaled 0-100)
-                    atomicAdd(&localHistogram[binIndex], u32(weight * 100.0));
                 }
-//            }
+
+                atomicAdd(&localHistogram[binIndex], u32(weight * 100.0));
+            }
         }
     }
 
-    // [KO] 모든 스레드가 로컬 히스토그램 작성을 마칠 때까지 대기
-    // [EN] Wait for all threads to finish writing to the local histogram
     workgroupBarrier();
 
-    // [KO] 로컬 히스토그램을 전역 히스토그램으로 병합
-    // [EN] Merge local histogram into global histogram
     if (local_index < 256u) {
         let localCount = atomicLoad(&localHistogram[local_index]);
         if (localCount > 0u) {

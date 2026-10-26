@@ -3,90 +3,94 @@ title: Camera Controller
 order: 5
 ---
 
+<script setup>
+const controllerGraph = `
+    graph LR
+        Input["User Input (Mouse · Touch · Keyboard)"]
+        Controller["Controller (Orbit / Free / Follow / Isometric)"]
+        Camera["Built-in Camera (Updates View · Projection Matrix)"]
+        View["View3D (Screen Rendering)"]
+
+        Input -->|Detects Events| Controller
+        Controller -->|Real-time Control| Camera
+        Controller -.->|Registered Directly to View| View
+
+        %% Grayscale styles applied
+        style Input fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style Controller fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style Camera fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style View fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+`
+</script>
+
 # Camera Controller
 
-If the **Camera** learned earlier is the 'eye', the **Controller** is the 'joystick' that moves that eye. It is an **Interaction Module** that detects user input (mouse, touch, keyboard) and updates the camera's position and rotation in real-time. Using it allows you to build an intuitive 3D navigation environment without complex matrix operations.
+If `Camera` learned earlier is the 'eye', **Controller** is the 'joystick' that moves that eye. It is an **Interaction
+Module** that detects user input (mouse, touch, keyboard) to control the camera's position and rotation in real time,
+enabling intuitive 3D navigation without complex matrix calculations.
 
-## 1. Controller Types
+## 1. Architecture and Role
 
-RedGPU provides standard controllers that respond to various interaction scenarios.
+<ClientOnly>
+  <MermaidResponsive :definition="controllerGraph" />
+</ClientOnly>
 
-| Class Name | Control Method | Main Usage |
-| :--- | :--- | :--- |
-| **`OrbitController`** | **Left Click**: Rotate<br>**Wheel**: Zoom | Product 360 viewer, character observation, exploration centered on a specific target |
-| **`FollowController`** | Automatic target tracking (smooth interpolation) | TPS (3rd-person) games, character tracking camera |
-| **`FreeController`** | **W, A, S, D**: Move<br>**Mouse**: Gaze rotation | FPS games, architectural interior tours, debugging |
-| **`IsometricController`** | Maintains a fixed 45-degree angle | Real-time strategy (RTS) games, isometric views |
+RedGPU provides four standard controllers (`AController`) tailored to different interaction scenarios:
+
+| Class                     | Control Method                                        | Primary Use Case                                                              |
+|:--------------------------|:------------------------------------------------------|:------------------------------------------------------------------------------|
+| **`OrbitController`**     | **Left-Click**: Rotate / **Wheel**: Zoom              | 360-degree product viewers, character inspection, target-centered exploration |
+| **`FollowController`**    | Automatic target mesh tracking (smooth interpolation) | Third-person (TPS) games, moving character tracking cameras                   |
+| **`FreeController`**      | **W, A, S, D**: Move / **Mouse**: Look around         | First-person (FPS) viewpoints, architectural interior tours, world debugging  |
+| **`IsometricController`** | Maintains a fixed isometric angle                     | Real-time strategy (RTS) games, isometric views                               |
 
 ::: tip [Camera Instance Management]
-All **Controller** classes internally create and own a dedicated **Camera** instance. Therefore, you don't need to create a separate camera when creating a **Controller**; just pass the controller into the camera argument when creating `View3D`, and it will be linked automatically.
+Every controller class automatically creates and owns a dedicated internal `Camera` instance. Therefore, when using a
+controller, you do not need to create a separate camera—simply pass the controller directly to the camera parameter of
+`new RedGPU.Display.View3D(redGPUContext, scene, controller)`.
 :::
-
-## 2. Key APIs and Configuration
-
-Each controller provides its own unique properties to finely tune rotation speeds, range limits, zoom boundaries, etc.
-The key properties of the most widely used `OrbitController` are as follows.
-
-### Key Properties of OrbitController
-
-* **`centerX`, `centerY`, `centerZ`** (`number`, default: `0`):
-  * The center target coordinate around which the camera orbits.
-* **`distance`** (`number`, default: `15`):
-  * The distance (zoom distance) of the camera from the center target.
-* **`minDistance`, `maxDistance`** (`number`):
-  * The minimum and maximum zoom limits that can be pulled in or pushed out via mouse wheel or pinch-to-zoom.
-* **`pan`, `tilt`** (`number`):
-  * Angle values for the camera's horizontal rotation (`pan`) and vertical rotation (`tilt`).
-* **`minTilt`, `maxTilt`** (`number`, default: `-90` to `90`):
-  * The minimum and maximum limit angles for vertical (up/down) rotation.
-* **`speedRotation`, `speedDistance`** (`number`):
-  * Sensitivity speed coefficients for drag rotation and scroll wheel zoom.
-
-```javascript
-const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-
-// Adjust center target up along the Y-axis and bring the camera distance closer
-controller.centerY = 2;
-controller.distance = 10;
-
-// Fix range so that the camera does not zoom too close or too far
-controller.minDistance = 2;
-controller.maxDistance = 30;
-
-// Restrict vertical rotation to prevent flipping upside down
-controller.minTilt = -60;
-controller.maxTilt = 60;
-```
 
 ---
 
-## 3. Experience Controller Samples
+## 2. Try Out Controller Samples
 
-Please experience the actual behavior of each controller directly through the previews below.
+Experience the live behavior of each controller directly in the interactive previews below.
 
 ### OrbitController
-Optimized for observing while rotating around a specific target.
-<iframe src="/RedGPU/examples/3d/controller/orbitController/" ></iframe>
+
+Optimized for rotating around and inspecting a specific target.
+<iframe src="/RedGPU/examples/3d/controller/orbitController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### FreeController
-Explore space freely from a first-person perspective using the **W, A, S, D** keys and the mouse.
-<iframe src="/RedGPU/examples/3d/controller/freeController/" ></iframe>
+
+Freely explore 3D space from a first-person perspective using the **W, A, S, D** keys and mouse.
+<iframe src="/RedGPU/examples/3d/controller/freeController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### IsometricController
-Suitable for strategy simulations or infographics by maintaining a fixed angle.
-<iframe src="/RedGPU/examples/3d/controller/isometricController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
+Maintains a fixed viewing angle suitable for strategy simulations or infographics.
+<iframe src="/RedGPU/examples/3d/controller/isometricController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### FollowController
 Provides a viewpoint that smoothly follows characters or moving objects.
-<iframe src="/RedGPU/examples/3d/controller/followController/" ></iframe>
+<iframe src="/RedGPU/examples/3d/controller/followController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
+
+---
+
+## Related Examples
+
+- [OrbitController](/RedGPU/examples/3d/controller/orbitController/)
+- [FreeController](/RedGPU/examples/3d/controller/freeController/)
+- [FollowController](/RedGPU/examples/3d/controller/followController/)
+- [IsometricController](/RedGPU/examples/3d/controller/isometricController/)
 
 ---
 
 ## Next Steps
 
-Now you've learned how to configure and navigate the screen. However, the objects we've displayed so far had only simple colors.
+Now that you have learned how to set up viewports and control camera viewpoints, the next **Basic Objects** section
+covers how to create and manipulate 3D objects using `Mesh` (combining geometry and materials), hierarchical `Group3D`
+structures, and image `Texture` mapping.
 
-Next, let's move on to the **Basic Objects** section to learn how to represent 3D objects more realistically through refined meshes and **Textures** with text and images applied.
-
-- **[Basic Objects Overview](../basic-objects/)**
+- **[Basic Objects Overview](../basic-objects/index.md)**: Composing 3D objects using `Mesh`, `Scene Graph`, and
+  `Texture`
