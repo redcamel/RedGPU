@@ -3,7 +3,7 @@
 struct Uniforms {
     backgroundColor: vec4<f32>,
     aaMode: u32,
-    sharpness: f32,
+    casPeak: f32,
     subpix: f32,
     edgeThreshold: f32,
     edgeThresholdMin: f32,
@@ -43,11 +43,10 @@ fn applyCAS(pixelCoord: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     let maxRGB = max(max(max(d, e.rgb), max(f, b)), h);
 
     let rcpMRGB = 1.0 / max(maxRGB, vec3<f32>(0.0001));
-    let ampRGB = clamp(min(minRGB, 1.0 - maxRGB) * rcpMRGB, vec3<f32>(0.0), vec3<f32>(1.0));
+    let ampRGB = saturate(min(minRGB, 1.0 - maxRGB) * rcpMRGB);
     let weightRGB = sqrt(ampRGB);
 
-    let peak = -1.0 / mix(8.0, 5.0, saturate(uniforms.sharpness));
-    let wRGB = weightRGB * peak;
+    let wRGB = weightRGB * uniforms.casPeak;
     let rcpWeightRGB = 1.0 / (1.0 + 4.0 * wRGB);
 
     let window = b + d + f + h;
@@ -56,9 +55,8 @@ fn applyCAS(pixelCoord: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     return vec4<f32>(saturate(sharpRGB), e.a);
 }
 
-fn applyFXAA(i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
+fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     let invDims = 1.0 / vec2<f32>(dims);
-    let uvM = (vec2<f32>(i_index) + 0.5) * invDims;
 
     // 1. Sample center and 4-cardinal neighbors (N, S, W, E) to evaluate local contrast
     let colorM4 = textureLoad(_texture, i_index, 0);
@@ -135,20 +133,20 @@ fn applyFXAA(i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
         let stepSize = FXAA_QUALITY[i];
         if (!doneP) {
             lumaEndP = getLuminance(textureSampleLevel(_texture, _sampler, uvP, 0.0).rgb) - lumaLocalAverage;
+            doneP = abs(lumaEndP) >= gradientScaled;
+            if (!doneP) {
+                uvP += uvOffset * stepSize;
+            }
         }
         if (!doneN) {
             lumaEndN = getLuminance(textureSampleLevel(_texture, _sampler, uvN, 0.0).rgb) - lumaLocalAverage;
+            doneN = abs(lumaEndN) >= gradientScaled;
+            if (!doneN) {
+                uvN -= uvOffset * stepSize;
+            }
         }
-        doneP = doneP || (abs(lumaEndP) >= gradientScaled);
-        doneN = doneN || (abs(lumaEndN) >= gradientScaled);
         if (doneP && doneN) {
             break;
-        }
-        if (!doneP) {
-            uvP += uvOffset * stepSize;
-        }
-        if (!doneN) {
-            uvN -= uvOffset * stepSize;
         }
     }
 
@@ -178,14 +176,14 @@ fn applyFXAA(i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
 @fragment
 fn main(@location(0) fragUV : vec2<f32>) -> @location(0) vec4<f32> {
     var viewColor: vec4<f32>;
-    if (uniforms.aaMode == 2u) {
+    if (uniforms.aaMode != 0u) {
         let dims = textureDimensions(_texture);
         let pixelCoord = clamp(vec2<i32>(fragUV * vec2<f32>(dims)), vec2<i32>(0), vec2<i32>(dims) - vec2<i32>(1));
-        viewColor = applyCAS(pixelCoord, dims);
-    } else if (uniforms.aaMode == 1u) {
-        let dims = textureDimensions(_texture);
-        let pixelCoord = clamp(vec2<i32>(fragUV * vec2<f32>(dims)), vec2<i32>(0), vec2<i32>(dims) - vec2<i32>(1));
-        viewColor = applyFXAA(pixelCoord, dims);
+        if (uniforms.aaMode == 2u) {
+            viewColor = applyCAS(pixelCoord, dims);
+        } else {
+            viewColor = applyFXAA(fragUV, pixelCoord, dims);
+        }
     } else {
         viewColor = textureSampleLevel(_texture, _sampler, fragUV, 0.0);
     }

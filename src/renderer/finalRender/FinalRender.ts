@@ -198,7 +198,7 @@ class FinalRender {
                 const {sharpness} = view.taa
                 if (sharpness > 0) {
                     aaMode = 2
-                    f32[5] = sharpness
+                    f32[5] = -1.0 / (8.0 - 3.0 * sharpness)
                 }
             }
         }
