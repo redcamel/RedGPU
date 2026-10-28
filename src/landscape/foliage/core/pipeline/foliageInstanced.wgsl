@@ -252,7 +252,7 @@ struct OutputData {
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
 
-    @location(12) motionVector: vec3<f32>,
+
     @location(13) groundColor_blendFactor: vec4<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
@@ -338,7 +338,7 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
     output.combinedOpacity = combinedOpacity;
     output.receiveShadow = renderUnitUniforms.receiveShadow;
 
-    output.motionVector = vec3<f32>(0.0);
+
     output.pickingId = vec4<f32>(0.0);
 
     let heightAboveGround = max(0.0, worldPos.y - instancePos.y);

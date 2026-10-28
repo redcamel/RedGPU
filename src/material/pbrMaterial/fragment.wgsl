@@ -68,7 +68,7 @@ struct InputData {
     @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
-    @location(12) motionVector: vec3<f32>,
+
     #redgpu_if isFoliage
     @location(13) groundColor_blendFactor: vec4<f32>,
     #redgpu_endIf

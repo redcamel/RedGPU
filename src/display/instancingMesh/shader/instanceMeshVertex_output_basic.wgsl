@@ -10,7 +10,7 @@ struct VertexOutput {
     @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     //
     @location(11) instanceOpacity: f32,
-    @location(12) motionVector: vec3<f32>,
+
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
