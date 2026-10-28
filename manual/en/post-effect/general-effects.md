@@ -56,8 +56,8 @@ All general effects are located under the `RedGPU.PostEffect` namespace.
 |                      | `Grayscale`            | Converts the image to black and white                      |
 |                      | `Invert`               | Color inversion                                            |
 |                      | `Threshold`            | Binarization based on a threshold                          |
-| **Lens**             | `OldBloom`             | Classic light bleeding effect (operates in HDR phase)      |
-|                      | `DOF`                  | Depth of Field (blurs areas out of focus)                  |
+| **Lens**             | `Bloom`                | Physically-based HDR light bleeding effect (`useBloom`)    |
+|                      | `DOF`                  | Depth of Field (blurs areas out of focus, `useDOF`)        |
 |                      | `Vignetting`           | Darkens the outer edges of the screen                      |
 |                      | `ChromaticAberration`  | Recreates lens chromatic aberration                        |
 |                      | `LensDistortion`       | Lens distortion effect                                     |

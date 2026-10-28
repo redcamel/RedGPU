@@ -541,6 +541,13 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
                 entries: this.#computeBindGroupEntries1
             });
             this.#bindGroupCache1 = this.#computeBindGroup1;
+        } else {
+            this.#computeBindGroup1 = gpuDevice.createBindGroup({
+                label: `${this.#name}_BIND_GROUP_1_EMPTY_USE_MSAA_${useMSAA}`,
+                layout: this.#computeBindGroupLayout1,
+                entries: []
+            });
+            this.#bindGroupCache1 = this.#computeBindGroup1;
         }
 
         const outputTextureId = this.#getResourceId(this.#outputTexture);

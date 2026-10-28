@@ -2,11 +2,11 @@ import * as RedGPU from "../../../dist/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 /**
- * [KO] Old Bloom 예제
- * [EN] Old Bloom example
+ * [KO] Bloom 예제
+ * [EN] Bloom example
  *
- * [KO] 포스트 이펙트를 사용하여 구버전 블룸(Old Bloom) 빛 번짐 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply the classic bloom (Old Bloom) glow effect using post effects.
+ * [KO] 물리 기반 HDR 다단 Mip-Chain 블룸(Bloom) 포스트 이펙트를 사용하여 빛 번짐 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply physically-based HDR multi-stage Mip-Chain Bloom glow effects using post effects.
  */
 
 const container = document.createElement('div');
@@ -30,8 +30,8 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] OldBloom 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create OldBloom post effect and add it to the view
+        // [KO] HDR Bloom 포스트 이펙트 활성화 및 인스턴스 참조 획득
+        // [EN] Enable HDR Bloom post effect and obtain instance reference
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -89,18 +89,45 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             targetContainer: container
         },
         gui: (pane) => {
+            const config = {
+                tint: {r: effect.tint.r, g: effect.tint.g, b: effect.tint.b}
+            };
+
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
             folder.addBinding(targetView.postEffectManager, 'useBloom').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
+                presetFolder.disabled = !v.value;
             });
 
             const controls = [
-                folder.addBinding(effect, 'threshold', {min: 1, max: 255, step: 1}),
-                folder.addBinding(effect, 'gaussianBlurSize', {min: 0, max: 256, step: 0.1}),
-                folder.addBinding(effect, 'exposure', {min: 0, max: 3, step: 0.01}),
-                folder.addBinding(effect, 'bloomStrength', {min: 0, max: 3, step: 0.01})
+                folder.addBinding(effect, 'threshold', {min: 0, max: 5, step: 0.01}),
+                folder.addBinding(effect, 'softKnee', {min: 0, max: 1, step: 0.01}),
+                folder.addBinding(effect, 'intensity', {min: 0, max: 3, step: 0.01}),
+                folder.addBinding(effect, 'radius', {min: 0, max: 1, step: 0.01}),
+                folder.addBinding(effect, 'maxBrightness', {min: 0, max: 50, step: 0.5}),
+                folder.addBinding(config, 'tint', {picker: 'inline', view: 'color'}).on('change', (ev) => {
+                    const {r, g, b} = ev.value;
+                    effect.tint.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
+                })
             ];
+
+            const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
+            const addPresetButton = (title, method) => {
+                presetFolder.addButton({title}).on('click', () => {
+                    effect[method]();
+                    config.tint.r = effect.tint.r;
+                    config.tint.g = effect.tint.g;
+                    config.tint.b = effect.tint.b;
+                    pane.refresh();
+                });
+            };
+
+            addPresetButton('Natural', 'setNatural');
+            addPresetButton('Cinematic', 'setCinematic');
+            addPresetButton('Neon Glow', 'setNeonGlow');
+            addPresetButton('Dreamy', 'setDreamy');
+            addPresetButton('Subtle', 'setSubtle');
         }
     });
 };

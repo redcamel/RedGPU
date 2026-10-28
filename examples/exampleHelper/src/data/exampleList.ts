@@ -2383,11 +2383,11 @@ Check performance limits on each device.`
                         ]
                     },
                     {
-                        name: 'OldBloom',
-                        path: 'postEffect/oldBloom',
+                        name: 'Bloom',
+                        path: 'postEffect/bloom',
                         description: {
-                            ko: `고전적인 블룸 효과를 시연하는 예제입니다.`,
-                            en: `An example demonstrating classic bloom effects.`
+                            ko: `물리 기반 HDR 다단 Mip-Chain 블룸 효과를 시연하는 예제입니다.`,
+                            en: `An example demonstrating physically-based HDR Mip-Chain Bloom effects.`
                         },
                     },
                     {

@@ -5,7 +5,7 @@ import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
-import {DOF, OldBloom, SSAO, SSR} from "./builtIn";
+import {Bloom, DOF, SSAO, SSR} from "./builtIn";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
@@ -52,7 +52,7 @@ class PostEffectManager extends RedGPUObject {
     #useSSR: boolean = false;
     #dof: DOF;
     #useDOF: boolean = false;
-    #bloom: OldBloom;
+    #bloom: Bloom;
     #useBloom: boolean = false;
     #autoExposure: AutoExposure;
     #initialResult: IPostEffectResult = {texture: null as any, textureView: null as any};
@@ -253,12 +253,12 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Returns the Bloom effect instance.
      *
      * @returns
-     * [KO] `OldBloom` 인스턴스
-     * [EN] `OldBloom` instance
+     * [KO] `Bloom` 인스턴스
+     * [EN] `Bloom` instance
      */
-    get bloom(): OldBloom {
+    get bloom(): Bloom {
         if (!this.#bloom) {
-            this.#bloom = new OldBloom(this.#view.redGPUContext)
+            this.#bloom = new Bloom(this.#view.redGPUContext)
         }
         return this.#bloom;
     }
@@ -652,7 +652,7 @@ class PostEffectManager extends RedGPUObject {
 
     #checkBloom() {
         if (!this.#bloom && this.#useBloom) {
-            this.#bloom = new OldBloom(this.#view.redGPUContext)
+            this.#bloom = new Bloom(this.#view.redGPUContext)
         }
     }
 

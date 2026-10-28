@@ -23,9 +23,9 @@ const postEffectGraph = `
 
         subgraph Transition ["2. User Effects & Tone Mapping Phase"]
             direction TB
-            HDR_EFF["HDR User Effects (OldBloom, etc.)"]:::pipelineNode
+            HDR_EFF["HDR Effects (DOF, Bloom, etc.)"]:::pipelineNode
             TM["ToneMappingManager (HDR → LDR)"]:::pipelineNode
-            LDR_EFF["LDR User Effects (Blur, DoF, etc.)"]:::pipelineNode
+            LDR_EFF["LDR User Effects (Blur, Fog, etc.)"]:::pipelineNode
             HDR_EFF --> TM --> LDR_EFF
         end
 
@@ -70,7 +70,7 @@ texture pooling (`PostEffectTexturePool`) are centrally managed by `PostEffectMa
       followed by camera `AutoExposure` luminance calculation.
 2. **User Effects & Smart Tone Mapping Transition Phase**
     - Iterates through the effect list registered via `view.postEffectManager.addEffect()`.
-    - HDR-based effects (`isLdr: false`, such as `OldBloom`) run first in HDR space. **As soon as the first LDR effect (
+   - HDR-based effects (`isLdr: false`, such as `Bloom`) run first in HDR space. **As soon as the first LDR effect (
       `isLdr: true`) is encountered, `ToneMappingManager` is executed immediately** to transition into LDR color space
       (if no LDR effects are present, tone mapping runs right after the loop).
 3. **LDR Finalization Phase**
@@ -95,7 +95,7 @@ texture pooling (`PostEffectTexturePool`) are centrally managed by `PostEffectMa
 - [SSAO (Screen Space Ambient Occlusion)](/RedGPU/examples/postEffect/ssao/)
 - [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/ssr/)
 - [Depth of Field (DoF)](/RedGPU/examples/postEffect/lens/dof/)
-- [Bloom (OldBloom)](/RedGPU/examples/postEffect/oldBloom/)
+- [Bloom](/RedGPU/examples/postEffect/bloom/)
 
 ---
 

@@ -23,9 +23,9 @@ const postEffectGraph = `
 
         subgraph Transition ["2. User Effects & Tone Mapping Phase"]
             direction TB
-            HDR_EFF["HDR User Effects (OldBloom, etc.)"]:::pipelineNode
+            HDR_EFF["HDR Effects (DOF, Bloom, etc.)"]:::pipelineNode
             TM["ToneMappingManager (HDR → LDR)"]:::pipelineNode
-            LDR_EFF["LDR User Effects (Blur, DoF, etc.)"]:::pipelineNode
+            LDR_EFF["LDR User Effects (Blur, Fog, etc.)"]:::pipelineNode
             HDR_EFF --> TM --> LDR_EFF
         end
 
@@ -68,7 +68,7 @@ const postEffectGraph = `
       계산합니다.
 2. **사용자 이펙트 및 스마트 톤 매핑 전환 (`User Effects & Tone Mapping Phase`)**
     - `view.postEffectManager.addEffect()`로 등록한 이펙트 배열을 순회합니다.
-    - `OldBloom` 등 HDR 기반 이펙트 (`isLdr: false`)는 HDR 상태에서 먼저 실행되며, 루프 도중 **최초의 LDR 이펙트 (`isLdr: true`)를 만나는 시점에 즉시
+   - `Bloom` 등 HDR 기반 이펙트 (`isLdr: false`)는 HDR 상태에서 먼저 실행되며, 루프 도중 **최초의 LDR 이펙트 (`isLdr: true`)를 만나는 시점에 즉시
       `ToneMappingManager`가 실행**되어 LDR 색공간으로 전환됩니다 (LDR 이펙트가 없을 경우 루프 종료 직후 톤 매핑 수행).
 3. **LDR 마감 단계 (`LDR Finalization Phase`)**
     - 그리드 (`view.grid`)가 활성화된 경우 깊이 버퍼를 참조하여 합성합니다.
@@ -89,7 +89,7 @@ const postEffectGraph = `
 - [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/ssao/)
 - [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/ssr/)
 - [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/lens/dof/)
-- [블룸 (OldBloom)](/RedGPU/examples/postEffect/oldBloom/)
+- [블룸 (Bloom)](/RedGPU/examples/postEffect/bloom/)
 
 ---
 

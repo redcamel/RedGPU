@@ -54,8 +54,8 @@ view.postEffectManager.removeAllEffect();
 |                      | `Grayscale`            | 흑백 이미지로 변환                             |
 |                      | `Invert`               | 색상 반전                                      |
 |                      | `Threshold`            | 임계값을 기준으로 이진화                       |
-| **Lens**             | `OldBloom`             | 클래식한 빛 번짐 효과 (HDR 단계에서 동작)      |
-|                      | `DOF`                  | 피사계 심도 (초점 외 영역 블러)                |
+| **Lens**             | `Bloom`                | 물리 기반 다단 HDR 빛 번짐 효과 (`useBloom`)   |
+|                      | `DOF`                  | 피사계 심도 (초점 외 영역 블러, `useDOF`)      |
 |                      | `Vignetting`           | 화면 외곽을 어둡게 처리하는 효과               |
 |                      | `ChromaticAberration`  | 렌즈의 색수차 현상 재현                        |
 |                      | `LensDistortion`       | 렌즈 왜곡 효과                                 |
