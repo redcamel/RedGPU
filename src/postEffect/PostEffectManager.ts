@@ -441,11 +441,9 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Final rendering result texture information (`IPostEffectResult`)
      */
     render(): IPostEffectResult {
-        const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
+        const {redGPUContext} = this.#view;
         const {antialiasingManager} = redGPUContext
-        const {useFXAA, useTAA, msaaID} = antialiasingManager;
-        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {width, height} = gBufferColorTexture;
+        const {msaaID} = antialiasingManager;
 
         if (this.#prevMSAAID_for_gbuffer !== msaaID) {
             this.#texturePool.clear();
@@ -457,15 +455,6 @@ class PostEffectManager extends RedGPUObject {
         let currentTextureView = this.#renderHDRToLDR(this.#view, this.#renderToStorageTexture(this.#view));
         currentTextureView = this.#renderLDRToScreen(this.#view, currentTextureView);
 
-
-        if (useFXAA || (useTAA && this.#view.constructor.name !== 'View3D')) {
-            currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
-        }
-
-        if (useTAA && this.#view.constructor.name === 'View3D' && taa.sharpness > 0) {
-            currentTextureView = this.#applySingleEffect(taa.casPass, currentTextureView, width, height);
-        }
-
         this.#texturePool.releaseAll();
 
         return currentTextureView;
@@ -473,7 +462,7 @@ class PostEffectManager extends RedGPUObject {
 
     #renderHDRToLDR(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const {width, height} = sourceTextureInfo.texture;
-        const {taa, redGPUContext, rawCamera, skyAtmosphere, toneMappingManager} = view;
+        const {redGPUContext, rawCamera, skyAtmosphere, toneMappingManager} = view;
         const {antialiasingManager} = redGPUContext;
         const {useTAA} = antialiasingManager;
         const {useAutoExposure} = rawCamera;
@@ -491,7 +480,7 @@ class PostEffectManager extends RedGPUObject {
         }
 
         if (useTAA && view.constructor.name === 'View3D') {
-            currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
+            currentTextureView = this.#applySingleEffect(view.taa, currentTextureView, width, height);
         }
 
         if (useAutoExposure) {
@@ -674,7 +663,6 @@ class PostEffectManager extends RedGPUObject {
             noneJitterProjectionMatrix,
             rawCamera,
             redGPUContext,
-            taa,
             renderViewStateData,
             skyAtmosphere
         } = this.#view;
@@ -701,7 +689,7 @@ class PostEffectManager extends RedGPUObject {
                 noneJitterProjectionViewMatrix,
                 inverseProjectionMatrix,
                 inverseProjectionViewMatrix: mat4.invert(temp3, projectionViewMatrix),
-                prevNoneJitterProjectionViewMatrix: antialiasingManager.useTAA ? taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix
+                prevNoneJitterProjectionViewMatrix: antialiasingManager.useTAA ? this.#view.taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix
             },
             projection.members,
             this.#uniformDataF32,
