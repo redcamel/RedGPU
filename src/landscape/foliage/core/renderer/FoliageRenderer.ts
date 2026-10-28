@@ -342,7 +342,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             colorFormats: [
                 'rgba16float',
                 navigator.gpu.getPreferredCanvasFormat(),
-                'rgba16float'
+                'rg16float'
             ],
             depthStencilFormat: 'depth32float',
             sampleCount: sampleCount,
@@ -393,7 +393,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             colorFormats: [
                 'rgba16float',
                 navigator.gpu.getPreferredCanvasFormat(),
-                'rgba16float'
+                'rg16float'
             ],
             depthStencilFormat: 'depth32float',
             sampleCount: sampleCount,

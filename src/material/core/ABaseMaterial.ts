@@ -446,7 +446,7 @@ abstract class ABaseMaterial extends ResourceBase {
                     writeMask: this.writeMaskState,
                 },
                 {
-                    format: 'rgba16float',
+                    format: 'rg16float',
                     blend: undefined,
                     writeMask: this.writeMaskState,
                 },

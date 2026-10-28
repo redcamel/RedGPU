@@ -154,7 +154,7 @@ class SkyAtmosphereBackground extends RedGPUObject {
                 targets: [
                     {format: 'rgba16float'},
                     {format: navigator.gpu.getPreferredCanvasFormat()},
-                    {format: 'rgba16float'}
+                    {format: 'rg16float'}
                 ]
             },
             primitive: {topology: 'triangle-list', cullMode: 'none'},

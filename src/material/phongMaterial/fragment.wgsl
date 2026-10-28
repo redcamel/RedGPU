@@ -331,7 +331,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let smoothness = 1.0 - roughnessParameter;
     let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
     output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, smoothnessCurved * (0.04 + 0.96 * metallicParameter * metallicParameter));
-    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
+    output.gBufferMotionVector = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
     
     return output;
 }

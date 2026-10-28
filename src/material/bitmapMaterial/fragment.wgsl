@@ -45,6 +45,6 @@ fn main(inputData: InputData) -> OutputFragment {
   }
 
   output.color = vec4<f32>(finalColor.rgb , finalColor.a);
-  output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
+  output.gBufferMotionVector = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
   return output;
 };

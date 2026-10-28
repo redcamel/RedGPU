@@ -630,7 +630,7 @@ fn main(inputData:InputData) -> OutputFragment {
         let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallicParameter * metallicParameter);
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
-    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0 );
+    output.gBufferMotionVector = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
     return output;
 }
 

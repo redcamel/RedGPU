@@ -9,7 +9,7 @@ struct VertexOutput {
 struct FragmentOutput {
     @location(0) color : vec4<f32>,
     @location(1) normal : vec4<f32>,
-    @location(2) motionVector : vec4<f32>,
+    @location(2) motionVector : vec2<f32>,
 };
 
 @group(1) @binding(0) var bg_transmittanceLUT : texture_2d<f32>;
@@ -105,6 +105,6 @@ fn main(input : VertexOutput) -> FragmentOutput {
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-    output.motionVector = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+    output.motionVector = vec2<f32>(0.0, 0.0);
     return output;
 }

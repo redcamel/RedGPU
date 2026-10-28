@@ -64,7 +64,7 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
         withResolve: true,
         useMipmap: false
     },
-    [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rgba16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
+    [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rg16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
     [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE, withResolve: true, useMipmap: false},
     [GBUFFER_TYPE.RENDER_PATH1_RESULT]: {
         format: 'rgba16float',

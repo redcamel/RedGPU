@@ -71,6 +71,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
     output.color = outColor;
     output.gBufferNormal = vec4<f32>(0.0);
-    output.gBufferMotionVector = vec4<f32>(0.0);
+    output.gBufferMotionVector = vec2<f32>(0.0);
     return output;
 }

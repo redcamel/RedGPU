@@ -312,7 +312,7 @@ class View3D extends AView {
         const {antialiasingManager} = this.redGPUContext
         const {useMSAA} = antialiasingManager
         return {
-            colorFormats: ['rgba16float', navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+            colorFormats: ['rgba16float', navigator.gpu.getPreferredCanvasFormat(), 'rg16float'],
             depthStencilFormat: 'depth32float',
             sampleCount: useMSAA ? 4 : 1
         }

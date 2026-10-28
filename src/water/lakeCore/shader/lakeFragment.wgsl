@@ -693,7 +693,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let prevClip = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
     let cameraMotion = getMotionVector(currClip, prevClip);
 
-    output.gBufferMotionVector = vec4<f32>(cameraMotion, 0.0, 1.0);
+    output.gBufferMotionVector = cameraMotion;
 
     return output;
 }

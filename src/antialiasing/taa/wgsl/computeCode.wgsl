@@ -71,11 +71,10 @@
     if (d_bl < closestDepth) { closestDepth = d_bl; closestCoord = clamp(pixelCoord + vec2<i32>(-1,  1), vec2<i32>(0), c_max); }
     if (d_br < closestDepth) { closestDepth = d_br; closestCoord = clamp(pixelCoord + vec2<i32>( 1,  1), vec2<i32>(0), c_max); }
 
-    let closestMotionData = textureLoad(gBufferMotionVector, closestCoord, 0);
-    let velocity = closestMotionData.xy;
+    let velocity = textureLoad(gBufferMotionVector, closestCoord, 0).xy;
 
-    // Bypass history accumulation when the reactive mask flag (z > 0.5) is set
-    if (closestMotionData.z > 0.5) {
+    // Bypass history accumulation when the reactive mask sentinel (velocity.x > 10.0) is set
+    if (velocity.x > 10.0) {
         let finalHDR_RGB = inverse_tonemap(currentRGB);
         textureStore(outputTexture, pixelCoord, vec4<f32>(finalHDR_RGB, currentAlpha));
         return;
