@@ -168,7 +168,7 @@ class DrawDebuggerGrid extends BaseObject {
                 entryPoint: 'fragmentMain',
                 targets: [
                     {
-                        format: 'rgba16float',
+                        format: 'rgba8unorm',
                         blend: {
                             color: this.#blendColorState.state,
                             alpha: this.#blendAlphaState.state
@@ -187,7 +187,7 @@ class DrawDebuggerGrid extends BaseObject {
 
         this.#bundleEncoderDescriptor = {
             label: this.name,
-            colorFormats: ['rgba16float'],
+            colorFormats: ['rgba8unorm'],
             depthStencilFormat: 'depth32float',
             sampleCount: 1,
             depthReadOnly: true,

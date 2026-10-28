@@ -284,14 +284,14 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         msaa: string,
         nonMsaa: string
     }) {
-        this.#name = name;
+        this.#name = this.#isLdr ? `${name}_LDR` : name;
         const {resourceManager} = redGPUContext;
 
-        this.#computeShaderMSAA = resourceManager.createGPUShaderModule(`${name}_MSAA`, {code: computeCodes.msaa});
-        this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${name}_NonMSAA`, {code: computeCodes.nonMsaa});
+        this.#computeShaderMSAA = resourceManager.createGPUShaderModule(`${this.#name}_MSAA`, {code: computeCodes.msaa});
+        this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${this.#name}_NonMSAA`, {code: computeCodes.nonMsaa});
 
-        this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${name}_MSAA`, computeCodes.msaa);
-        this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${name}_NonMSAA`, computeCodes.nonMsaa);
+        this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${this.#name}_MSAA`, computeCodes.msaa);
+        this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, computeCodes.nonMsaa);
 
         const {storage, uniforms} = this.#SHADER_INFO_MSAA;
         this.#storageInfo = storage;
@@ -345,7 +345,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         const {gpuDevice, antialiasingManager} = this;
         const {useMSAA, msaaID} = antialiasingManager;
 
-        const result = view.postEffectManager.texturePool.allocResult(width, height, 'rgba16float');
+        const result = view.postEffectManager.texturePool.allocResult(width, height, this.#isLdr ? 'rgba8unorm' : 'rgba16float');
         this.#outputTexture = result.texture;
         this.#outputTextureView = result.textureView;
 

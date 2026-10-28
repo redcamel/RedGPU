@@ -10,7 +10,8 @@ const createCode = (
     sourceTextureConfigs: IPostEffectSourceConfig | IPostEffectSourceConfig[] = {name: 'sourceTexture'},
     earlyExit: boolean = true
 ) => {
-    const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect;
+    const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z, isLdr} = effect;
+    const outputFormat = isLdr ? 'rgba8unorm' : 'rgba16float';
     const postEffectSystemUniform = useMSAA ? ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM_MSAA : ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM;
 
     let sourceTextures = '';
@@ -45,7 +46,7 @@ const createCode = (
         
         ${postEffectSystemUniform}
         
-        @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
+        @group(3) @binding(0) var outputTexture : texture_storage_2d<${outputFormat}, write>;
         
         @compute @workgroup_size(${WORK_SIZE_X}, ${WORK_SIZE_Y}, ${WORK_SIZE_Z})
         fn main(
