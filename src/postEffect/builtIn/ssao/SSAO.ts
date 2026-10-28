@@ -49,7 +49,7 @@ class SSAO extends AMultiPassPostEffect {
             redGPUContext,
             [
                 new SSAO_AO(redGPUContext),
-                new GaussianBlur(redGPUContext),
+                new GaussianBlur(redGPUContext, {isLdr: false}),
                 new SSAOBlend(redGPUContext),
             ],
         );

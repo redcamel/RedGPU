@@ -44,9 +44,15 @@ class BlurX extends ASinglePassPostEffect {
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
+     * @param options -
+     * [KO] 블러 생성 옵션. 기본값은 LDR(`isLdr: true`, `rgba8unorm`)이며, HDR 빌트인 패스(`SSAO`, `OldBloom` 등) 내부에서 사용될 경우를 대비해 `isLdr: false`(`rgba16float`) 설정을 열어둡니다.
+     * [EN] Blur creation options. Defaults to LDR (`isLdr: true`, `rgba8unorm`), and exposes `isLdr: false` (`rgba16float`) in case it is used inside an HDR built-in pass (e.g., `SSAO`, `OldBloom`).
      */
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {isLdr: true});
+    constructor(redGPUContext: RedGPUContext, options?: { isLdr?: boolean }) {
+        // [KO] HDR 패스(SSAO, OldBloom 등) 내부에서 재사용될 경우를 대비해 isLdr 옵션을 열어둠 (기본값: true)
+        // [EN] Expose isLdr option in case it is reused inside an HDR pass (e.g., SSAO, OldBloom) (default: true)
+        const isLdr = options?.isLdr ?? true;
+        super(redGPUContext, {isLdr});
         this.init(
             redGPUContext,
             'POST_EFFECT_BLUR_X',

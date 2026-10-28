@@ -50,7 +50,7 @@ class OldBloom extends AMultiPassPostEffect {
             redGPUContext,
             [
                 new OldBloomThreshold(redGPUContext),
-                new GaussianBlur(redGPUContext),
+                new GaussianBlur(redGPUContext, {isLdr: false}),
                 new OldBloomBlend(redGPUContext),
             ],
         );
