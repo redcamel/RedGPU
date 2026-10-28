@@ -42,6 +42,7 @@ class Blur extends AMultiPassPostEffect {
             [
                 new Convolution(redGPUContext),
             ],
+            true
         );
         this.#effect_convolution = this.passList[0] as Convolution;
         this.#effect_convolution.kernel = Convolution.BLUR;

@@ -42,6 +42,7 @@ class GaussianBlur extends AMultiPassPostEffect {
                 new BlurX(redGPUContext),
                 new BlurY(redGPUContext)
             ],
+            true
         );
         this.size = this.size
     }
