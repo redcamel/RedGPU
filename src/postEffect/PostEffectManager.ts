@@ -5,8 +5,7 @@ import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
-import SSAO from "./effects/ssao/SSAO";
-import SSR from "./effects/ssr/SSR";
+import {DOF, OldBloom, SSAO, SSR} from "./builtIn";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
@@ -51,6 +50,10 @@ class PostEffectManager extends RedGPUObject {
     #useSSAO: boolean = false;
     #ssr: SSR;
     #useSSR: boolean = false;
+    #dof: DOF;
+    #useDOF: boolean = false;
+    #bloom: OldBloom;
+    #useBloom: boolean = false;
     #autoExposure: AutoExposure;
     #initialResult: IPostEffectResult = {texture: null as any, textureView: null as any};
 
@@ -195,6 +198,72 @@ class PostEffectManager extends RedGPUObject {
     }
 
     /**
+     * [KO] DOF(Depth of Field) 활성화 여부입니다.
+     * [EN] Whether DOF (Depth of Field) is enabled.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] DOF 활성화 여부
+     * [EN] Whether DOF is enabled
+     */
+    get useDOF(): boolean {
+        return this.#useDOF;
+    }
+
+    set useDOF(value: boolean) {
+        this.#useDOF = value;
+        this.#checkDOF()
+    }
+
+    /**
+     * [KO] DOF 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the DOF effect instance.
+     *
+     * @returns
+     * [KO] `DOF` 인스턴스
+     * [EN] `DOF` instance
+     */
+    get dof(): DOF {
+        if (!this.#dof) {
+            this.#dof = new DOF(this.#view.redGPUContext)
+        }
+        return this.#dof;
+    }
+
+    /**
+     * [KO] Bloom 활성화 여부입니다.
+     * [EN] Whether Bloom is enabled.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] Bloom 활성화 여부
+     * [EN] Whether Bloom is enabled
+     */
+    get useBloom(): boolean {
+        return this.#useBloom;
+    }
+
+    set useBloom(value: boolean) {
+        this.#useBloom = value;
+        this.#checkBloom()
+    }
+
+    /**
+     * [KO] Bloom 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the Bloom effect instance.
+     *
+     * @returns
+     * [KO] `OldBloom` 인스턴스
+     * [EN] `OldBloom` instance
+     */
+    get bloom(): OldBloom {
+        if (!this.#bloom) {
+            this.#bloom = new OldBloom(this.#view.redGPUContext)
+        }
+        return this.#bloom;
+    }
+
+    /**
      * [KO] 후처리 시스템 공용 유니폼 버퍼를 반환합니다.
      * [EN] Returns the post-effect system common uniform buffer.
      *
@@ -263,6 +332,14 @@ class PostEffectManager extends RedGPUObject {
         if (this.#ssr) {
             this.#ssr.destroy();
             this.#ssr = null;
+        }
+        if (this.#dof) {
+            this.#dof.destroy();
+            this.#dof = null;
+        }
+        if (this.#bloom) {
+            this.#bloom.destroy();
+            this.#bloom = null;
         }
         if (this.#autoExposure) {
             this.#autoExposure.destroy();
@@ -420,6 +497,12 @@ class PostEffectManager extends RedGPUObject {
         if (useAutoExposure) {
             this.autoExposure.render(currentTextureView);
         }
+        if (this.#useDOF) {
+            currentTextureView = this.#applySingleEffect(this.dof, currentTextureView, width, height);
+        }
+        if (this.#useBloom) {
+            currentTextureView = this.#applySingleEffect(this.bloom, currentTextureView, width, height);
+        }
         currentTextureView = this.#applySingleEffect(toneMappingManager, currentTextureView, width, height);
         return currentTextureView;
     }
@@ -569,6 +652,18 @@ class PostEffectManager extends RedGPUObject {
     #checkSSR() {
         if (!this.#ssr && this.#useSSR) {
             this.#ssr = new SSR(this.#view.redGPUContext)
+        }
+    }
+
+    #checkDOF() {
+        if (!this.#dof && this.#useDOF) {
+            this.#dof = new DOF(this.#view.redGPUContext)
+        }
+    }
+
+    #checkBloom() {
+        if (!this.#bloom && this.#useBloom) {
+            this.#bloom = new OldBloom(this.#view.redGPUContext)
         }
     }
 

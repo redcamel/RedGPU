@@ -35,8 +35,8 @@ RedGPU.init(
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
-        viewEffect.postEffectManager.addEffect(effect);
+        viewEffect.postEffectManager.useBloom = true;
+        const effect = viewEffect.postEffectManager.bloom;
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -89,15 +89,9 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             targetContainer: container
         },
         gui: (pane) => {
-            const config = {OldBloom: true};
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            folder.addBinding(config, 'OldBloom').on('change', (v) => {
-                if (v.value) {
-                    targetView.postEffectManager.addEffect(effect);
-                } else {
-                    targetView.postEffectManager.removeAllEffect();
-                }
+            folder.addBinding(targetView.postEffectManager, 'useBloom').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
             });
 

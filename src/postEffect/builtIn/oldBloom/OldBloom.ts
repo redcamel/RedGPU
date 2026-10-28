@@ -3,19 +3,24 @@ import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import {IPostEffectResult} from "../../core/types";
 import OldBloomThreshold from "./oldBloomThreshold/OldBloomThreshold";
-import GaussianBlur from "../blur/GaussianBlur";
+import GaussianBlur from "../../effects/blur/GaussianBlur";
 import OldBloomBlend from "./oldBloomBlend/OldBloomBlend";
 
 /**
  * [KO] 밝은 영역 추출(Threshold), 가우시안 블러(Gaussian Blur), 원본 합성을 통해 빛 번짐을 구현하는 올드 블룸(Old Bloom) 후처리 이펙트입니다.
  * [EN] Old Bloom post-processing effect that implements light bleeding by extracting bright areas (Threshold), applying Gaussian Blur, and blending with the original image.
  *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
  * ### Example
  * ```typescript
- * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
- * effect.threshold = 180;
- * effect.gaussianBlurSize = 48;
- * view.postEffectManager.addEffect(effect);
+ * view.postEffectManager.useBloom = true;
+ * const bloom = view.postEffectManager.bloom;
+ * bloom.threshold = 180;
+ * bloom.gaussianBlurSize = 48;
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/oldBloom/" style="width:100%; height:500px;"></iframe>
@@ -35,11 +40,6 @@ class OldBloom extends AMultiPassPostEffect {
     /**
      * [KO] OldBloom 인스턴스를 생성합니다.
      * [EN] Creates an OldBloom instance.
-     *
-     * ### Example
-     * ```typescript
-     * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
-     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스

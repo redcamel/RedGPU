@@ -1,9 +1,9 @@
-import RedGPUContext from "../../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCode";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-import definePositiveNumber from "../../../../../defineProperty/funcs/number/definePositiveNumber";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
 
 interface DOFUnified {

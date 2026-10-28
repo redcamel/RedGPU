@@ -23,14 +23,13 @@ import FilmGrain from "./effects/filmGrain/FilmGrain";
 import Fog from "./effects/fog/fog/Fog";
 import HeightFog from "./effects/fog/heightFog/HeightFog";
 import ChromaticAberration from "./effects/lens/chromaticAberration/ChromaticAberration";
-import DOF from "./effects/lens/dof/DOF";
 import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
 import Vignetting from "./effects/lens/vignetting/Vignetting";
-import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
 
 export * as Core from './core'
+export * as BuiltIn from './builtIn'
 
 export {
     PostEffectManager,
@@ -50,13 +49,11 @@ export {
     RadialBlur,
     ZoomBlur,
     ChromaticAberration,
-    DOF,
     LensDistortion,
     Vignetting,
     Fog,
     HeightFog,
     FilmGrain,
-    OldBloom,
     Sharpen,
     Convolution,
 }

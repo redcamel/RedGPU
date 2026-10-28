@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import {IPostEffectResult} from "../../core/types";
-import GaussianBlur from "../blur/GaussianBlur";
+import GaussianBlur from "../../effects/blur/GaussianBlur";
 import SSAO_AO from "./ssao_ao/SSAO_AO";
 import SSAOBlend from "./ssao_blend/SSAOBlend";
 

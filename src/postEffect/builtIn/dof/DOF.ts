@@ -1,7 +1,7 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import View3D from "../../../../display/view/View3D";
-import AMultiPassPostEffect from "../../../core/AMultiPassPostEffect";
-import {IPostEffectResult} from "../../../core/types";
+import RedGPUContext from "../../../context/RedGPUContext";
+import View3D from "../../../display/view/View3D";
+import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
+import {IPostEffectResult} from "../../core/types";
 import DOFCoC from "./DOFCoC/DOFCoC";
 import DOFUnified from "./DOFUnified/DOFUnified";
 
@@ -10,14 +10,19 @@ import DOFUnified from "./DOFUnified/DOFUnified";
  * [KO] 착란원(CoC) 모델을 기반으로 초점 거리에 따른 블러와 보케(Bokeh)를 시뮬레이션하는 피사계 심도(DOF) 후처리 이펙트입니다.
  * [EN] Depth of Field (DOF) post-processing effect that simulates distance-based blur and bokeh based on the Circle of Confusion (CoC) model.
  *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
  * ### Example
  * ```typescript
- * const effect = new RedGPU.PostEffect.DOF(redGPUContext);
- * effect.focusDistance = 10;
- * effect.aperture = 1.4;
- * effect.nearBlurSize = 20;
- * effect.farBlurSize = 25;
- * view.postEffectManager.addEffect(effect);
+ * view.postEffectManager.useDOF = true;
+ * const dof = view.postEffectManager.dof;
+ * dof.focusDistance = 10;
+ * dof.aperture = 1.4;
+ * dof.nearBlurSize = 20;
+ * dof.farBlurSize = 25;
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/lens/dof/" style="width:100%; height:500px;"></iframe>
@@ -41,11 +46,6 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] DOF 인스턴스를 생성합니다.
      * [EN] Creates a DOF instance.
-     *
-     * ### Example
-     * ```typescript
-     * const effect = new RedGPU.PostEffect.DOF(redGPUContext);
-     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
