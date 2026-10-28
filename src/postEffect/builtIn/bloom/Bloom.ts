@@ -130,7 +130,7 @@ class Bloom extends AMultiPassPostEffect {
      * [KO] 최종 블룸 합성 강도(0.0 ~ 10.0)를 반환하거나 설정합니다.
      * [EN] Returns or sets the final bloom composition intensity (0.0 ~ 10.0).
      *
-     * @defaultValue 0.6
+     * @defaultValue 0.675
      * @returns
      * [KO] 블룸 합성 강도
      * [EN] Bloom composition intensity
@@ -193,13 +193,13 @@ class Bloom extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 야외 대기 및 일반 PBR 씬에 가장 자연스러운 기본 물리 카메라 블룸 프리셋을 적용합니다.
-     * [EN] Applies the default natural physical camera bloom preset suitable for outdoor atmosphere and standard PBR scenes.
+     * [KO] 야외 대기 및 일반 PBR 씬에 가장 자연스러운 기본 물리 카메라 블룸 프리셋(언리얼 엔진 표준 `intensity = 0.675`)을 적용합니다.
+     * [EN] Applies the default natural physical camera bloom preset (Unreal Engine standard `intensity = 0.675`) suitable for outdoor atmosphere and standard PBR scenes.
      */
     setNatural(): void {
         this.threshold = 1.0;
         this.softKnee = 0.5;
-        this.intensity = 0.6;
+        this.intensity = 0.675;
         this.radius = 0.65;
         this.maxBrightness = 32.0;
         this.tint.setColorByRGB(255, 255, 255);
@@ -213,7 +213,7 @@ class Bloom extends AMultiPassPostEffect {
         this.threshold = 0.8;
         this.softKnee = 0.65;
         this.intensity = 1.0;
-        this.radius = 0.80;
+        this.radius = 0.78;
         this.maxBrightness = 32.0;
         this.tint.setColorByRGB(255, 248, 238);
     }
@@ -223,10 +223,10 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Applies an intense neon glow preset for emissive neon signs, magic effects, and sci-fi scenes.
      */
     setNeonGlow(): void {
-        this.threshold = 1.2;
-        this.softKnee = 0.3;
-        this.intensity = 1.8;
-        this.radius = 0.75;
+        this.threshold = 1.0;
+        this.softKnee = 0.35;
+        this.intensity = 1.6;
+        this.radius = 0.72;
         this.maxBrightness = 64.0;
         this.tint.setColorByRGB(255, 255, 255);
     }
@@ -236,10 +236,10 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Applies a dreamy bloom preset with an ethereal and soft-focus style.
      */
     setDreamy(): void {
-        this.threshold = 0.5;
+        this.threshold = 0.6;
         this.softKnee = 0.85;
-        this.intensity = 1.2;
-        this.radius = 0.90;
+        this.intensity = 1.25;
+        this.radius = 0.85;
         this.maxBrightness = 16.0;
         this.tint.setColorByRGB(255, 245, 250);
     }
@@ -249,10 +249,10 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Applies a subtle specular glow preset for product configurators and architectural visualization.
      */
     setSubtle(): void {
-        this.threshold = 1.5;
+        this.threshold = 1.4;
         this.softKnee = 0.5;
         this.intensity = 0.35;
-        this.radius = 0.50;
+        this.radius = 0.45;
         this.maxBrightness = 32.0;
         this.tint.setColorByRGB(255, 255, 255);
     }

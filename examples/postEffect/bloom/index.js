@@ -19,8 +19,8 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 3;
-        controller.speedDistance = 0.1;
+        controller.tilt = 0;
+        controller.speedDistance = 0.2;
 
         const scene = new RedGPU.Display.Scene();
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
@@ -44,9 +44,11 @@ RedGPU.init(
 
         new RedGPU.GLTFLoader(
             redGPUContext,
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EmissiveStrengthTest/glTF-Binary/EmissiveStrengthTest.glb',
             (v) => {
-                scene.addChild(v.resultMesh);
+                const mesh = v.resultMesh;
+                scene.addChild(mesh);
+                RedGPUExampleHelper.fitMeshToScreenCenter(mesh, viewNormal);
             }
         );
 

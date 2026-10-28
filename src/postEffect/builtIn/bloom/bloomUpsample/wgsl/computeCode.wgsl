@@ -4,6 +4,6 @@ let lowMipTexelSize = 1.0 / vec2<f32>(textureDimensions(lowMipTexture));
 
 let highMipColor = textureLoad(highMipTexture, index, 0).rgb;
 let lowMipUpsampled = sampleTent9Tap(lowMipTexture, uv, lowMipTexelSize);
-let combinedBloom = mix(highMipColor, highMipColor + lowMipUpsampled, uniforms.radius);
+let combinedBloom = mix(highMipColor, lowMipUpsampled, uniforms.radius);
 
 textureStore(outputTexture, index, vec4<f32>(combinedBloom, 1.0));

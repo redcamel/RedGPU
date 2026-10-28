@@ -13,7 +13,7 @@ interface BloomComposite {
     /**
      * [KO] 최종 블룸 합성 강도 (0.0 ~ 10.0)
      * [EN] Final bloom composition intensity (0.0 ~ 10.0)
-     * @defaultValue 0.6
+     * @defaultValue 0.675
      */
     intensity: number;
     /**
@@ -90,7 +90,7 @@ class BloomComposite extends ASinglePassPostEffect {
 }
 
 definePositiveNumber(BloomComposite, [
-    {key: 'intensity', value: 0.6, min: 0.0, max: 10.0},
+    {key: 'intensity', value: 0.675, min: 0.0, max: 10.0},
 ]);
 defineColorRGB(BloomComposite, [
     {key: 'tint', value: '#ffffff'},

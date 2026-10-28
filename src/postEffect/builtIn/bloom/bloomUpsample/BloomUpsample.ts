@@ -11,7 +11,7 @@ interface BloomUpsample {
     /**
      * [KO] 다단계 밉 간 빛 확산 반경 비율 (0.0 ~ 1.0)
      * [EN] Light scatter radius ratio between mip levels (0.0 ~ 1.0)
-     * @defaultValue 0.7
+     * @defaultValue 0.65
      */
     radius: number;
 }
@@ -82,7 +82,7 @@ class BloomUpsample extends ASinglePassPostEffect {
 }
 
 definePositiveNumber(BloomUpsample, [
-    {key: 'radius', value: 0.7, min: 0.0, max: 1.0},
+    {key: 'radius', value: 0.65, min: 0.0, max: 1.0},
 ]);
 Object.freeze(BloomUpsample);
 export default BloomUpsample;
