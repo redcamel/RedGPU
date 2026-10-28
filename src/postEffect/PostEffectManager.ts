@@ -292,6 +292,9 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Post-processing effect instance to add
      */
     addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+        if (!v.isLdr) {
+            console.warn(`[PostEffectManager] ${v.constructor.name} is not an LDR effect (isLdr: false).`);
+        }
         this.#postEffects.push(v)
     }
 
@@ -363,7 +366,7 @@ class PostEffectManager extends RedGPUObject {
     render(): IPostEffectResult {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
         const {antialiasingManager} = redGPUContext
-        const {useMSAA, useFXAA, useTAA, msaaID} = antialiasingManager;
+        const {useFXAA, useTAA, msaaID} = antialiasingManager;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {width, height} = gBufferColorTexture;
 
@@ -373,51 +376,10 @@ class PostEffectManager extends RedGPUObject {
 
         this.#updateSystemUniforms();
         this.#updateGbufferBindGroup();
-        const {useAutoExposure} = this.#view.rawCamera;
 
-        let currentTextureView = this.#renderToStorageTexture(this.#view);
+        let currentTextureView = this.#renderHDRToLDR(this.#view, this.#renderToStorageTexture(this.#view));
+        currentTextureView = this.#renderLDRToScreen(this.#view, currentTextureView);
 
-        if (this.#view.skyAtmosphere) {
-            currentTextureView = this.#applySingleEffect(this.#view.skyAtmosphere, currentTextureView, width, height);
-        }
-
-        if (this.#useSSAO) {
-            currentTextureView = this.#applySingleEffect(this.ssao, currentTextureView, width, height);
-        }
-        if (this.#useSSR) {
-            currentTextureView = this.#applySingleEffect(this.ssr, currentTextureView, width, height);
-        }
-
-        if (useTAA && this.#view.constructor.name === 'View3D') {
-            currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
-        }
-
-        if (useAutoExposure) {
-            this.autoExposure.render(currentTextureView);
-        }
-
-        let toneMapped = false;
-        const effects = this.#postEffects;
-        for (let i = 0, len = effects.length; i < len; i++) {
-            const effect = effects[i];
-            if (effect.isLdr && !toneMapped) {
-                currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
-                toneMapped = true;
-            }
-
-            currentTextureView = this.#applySingleEffect(effect, currentTextureView, width, height);
-        }
-
-        if (!toneMapped) {
-            currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
-        }
-
-        if (this.#view.grid) {
-            const singleSampleDepthView = useMSAA
-                ? viewRenderTextureManager.renderPath1DepthResultTextureView
-                : viewRenderTextureManager.depthTextureView;
-            this.#view.grid.render(this.#view, currentTextureView.textureView, singleSampleDepthView);
-        }
 
         if (useFXAA || (useTAA && this.#view.constructor.name !== 'View3D')) {
             currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
@@ -429,6 +391,57 @@ class PostEffectManager extends RedGPUObject {
 
         this.#texturePool.releaseAll();
 
+        return currentTextureView;
+    }
+
+    #renderHDRToLDR(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        const {width, height} = sourceTextureInfo.texture;
+        const {taa, redGPUContext, rawCamera, skyAtmosphere, toneMappingManager} = view;
+        const {antialiasingManager} = redGPUContext;
+        const {useTAA} = antialiasingManager;
+        const {useAutoExposure} = rawCamera;
+
+        let currentTextureView = sourceTextureInfo;
+        if (skyAtmosphere) {
+            currentTextureView = this.#applySingleEffect(skyAtmosphere, currentTextureView, width, height);
+        }
+
+        if (this.#useSSAO) {
+            currentTextureView = this.#applySingleEffect(this.ssao, currentTextureView, width, height);
+        }
+        if (this.#useSSR) {
+            currentTextureView = this.#applySingleEffect(this.ssr, currentTextureView, width, height);
+        }
+
+        if (useTAA && view.constructor.name === 'View3D') {
+            currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
+        }
+
+        if (useAutoExposure) {
+            this.autoExposure.render(currentTextureView);
+        }
+        currentTextureView = this.#applySingleEffect(toneMappingManager, currentTextureView, width, height);
+        return currentTextureView;
+    }
+
+    #renderLDRToScreen(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        const {width, height} = sourceTextureInfo.texture;
+        const {viewRenderTextureManager, redGPUContext, grid} = view;
+        const {antialiasingManager} = redGPUContext;
+        const {useMSAA} = antialiasingManager;
+
+        let currentTextureView = sourceTextureInfo;
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            currentTextureView = this.#applySingleEffect(effects[i], currentTextureView, width, height);
+        }
+
+        if (grid) {
+            const singleSampleDepthView = useMSAA
+                ? viewRenderTextureManager.renderPath1DepthResultTextureView
+                : viewRenderTextureManager.depthTextureView;
+            grid.render(view, currentTextureView.textureView, singleSampleDepthView);
+        }
         return currentTextureView;
     }
 
