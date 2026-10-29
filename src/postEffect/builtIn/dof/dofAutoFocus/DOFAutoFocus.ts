@@ -21,7 +21,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  */
 class DOFAutoFocus extends ASinglePassPostEffect {
     #focusDistance: number = 15.0;
-    #deltaTime: number = 0.0166;
     #useAutoFocus: number = 0;
 
     constructor(redGPUContext: RedGPUContext) {
@@ -40,7 +39,6 @@ class DOFAutoFocus extends ASinglePassPostEffect {
             {msaa, nonMsaa}
         );
         this.focusDistance = this.#focusDistance;
-        this.deltaTime = this.#deltaTime;
         this.useAutoFocus = this.#useAutoFocus;
     }
 
@@ -52,15 +50,6 @@ class DOFAutoFocus extends ASinglePassPostEffect {
         validateNumberRange(value, 0.1, 10000);
         this.#focusDistance = value;
         this.updateUniform('focusDistance', value);
-    }
-
-    get deltaTime(): number {
-        return this.#deltaTime;
-    }
-
-    set deltaTime(value: number) {
-        this.#deltaTime = value;
-        this.updateUniform('deltaTime', value);
     }
 
     get useAutoFocus(): number {

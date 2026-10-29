@@ -1,20 +1,31 @@
 let tileIndex = vec2<i32>(global_id.xy);
+let tileDims = vec2<i32>(postEffectOutputDimensions);
 let halfDims = vec2<i32>(textureDimensions(sourceTexture));
 let maxCoord = max(halfDims - vec2<i32>(1), vec2<i32>(0));
-let tileOrigin = tileIndex * 8;
+
+let tileSpan = max(vec2<i32>(ceil(vec2<f32>(halfDims) / max(vec2<f32>(tileDims), vec2<f32>(1.0)))), vec2<i32>(1));
+let tileOrigin = tileIndex * tileSpan;
+let tileMaxLocal = vec2<f32>(max(tileSpan - vec2<i32>(1), vec2<i32>(0)));
+
+let dpr = min(systemUniforms.devicePixelRatio, 2.0);
+let maxHalfCoC = 0.5 * uniforms.maxCoC * dpr;
+let searchStep: i32 = 4;
+let searchRadius = i32(ceil(maxHalfCoC / f32(searchStep))) * searchStep;
 
 var minNearCoC: f32 = 0.0;
 var maxFarCoC: f32 = 0.0;
-var minFarCoC: f32 = 64.0;
+var minFarCoC: f32 = maxHalfCoC;
 var hasFarSample: bool = false;
 
-// [KO] 언리얼 Diaphragm DOF의 3-Tile 광역 확장(Tile Flatten & Dilate): 현재 8x8 타일 중심으로부터 주변 ±24 Half-Res 텍셀(원본 48px) 반경을 4-텍셀 스텝으로 스캔하여 대구경 근접 전경 보케가 타일 경계에서 절단되지 않도록 보장
-// [EN] Unreal Diaphragm DOF 3-Tile wide dilation (Tile Flatten & Dilate): scan ±24 half-res texels (48px full-res) with 4-texel step around the current 8x8 tile to ensure large-aperture near bokeh is never clipped at tile boundaries
-for (var y = -24; y < 32; y = y + 4) {
-    for (var x = -24; x < 32; x = x + 4) {
+// [KO] maxCoC 및 DPR에 연동된 동적 반경(searchRadius)과 타일 AABB 유클리드 거리(distToTile)를 계산하여 전/배경 최대 CoC를 광역 확장
+// [EN] Dynamically compute search radius (searchRadius) from maxCoC and DPR and exact Euclidean distance to the tile AABB (distToTile) for wide near/far CoC dilation
+for (var y = -searchRadius; y < tileSpan.y + searchRadius; y = y + searchStep) {
+    for (var x = -searchRadius; x < tileSpan.x + searchRadius; x = x + searchStep) {
         let sampleCoord = clamp(tileOrigin + vec2<i32>(x, y), vec2<i32>(0), maxCoord);
         let coc = textureLoad(sourceTexture, sampleCoord, 0).a;
-        let distToTile = max(0.0, length(vec2<f32>(f32(x) - 3.5, f32(y) - 3.5)) - 5.5);
+        let samplePos = vec2<f32>(f32(x), f32(y));
+        let closestInTile = clamp(samplePos, vec2<f32>(0.0), tileMaxLocal);
+        let distToTile = distance(samplePos, closestInTile);
 
         if (coc < -0.25 && (-coc) >= distToTile) {
             minNearCoC = min(minNearCoC, coc);

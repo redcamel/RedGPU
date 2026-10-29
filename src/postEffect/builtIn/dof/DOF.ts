@@ -199,6 +199,7 @@ class DOF extends AMultiPassPostEffect {
         validateNumberRange(value, 4.0, 64.0);
         this.#maxCoC = value;
         this.#effect_cocDownsample.maxCoC = value;
+        this.#effect_tileMaxCoC.maxCoC = value;
         this.#effect_bokehBlurBg.maxCoC = value;
         this.#effect_bokehBlurFg.maxCoC = value;
         this.#effect_composite.maxCoC = value;
@@ -400,12 +401,10 @@ class DOF extends AMultiPassPostEffect {
         const quarterH = Math.max(1, height >> 2);
         const eighthW = Math.max(1, width >> 3);
         const eighthH = Math.max(1, height >> 3);
-        const tileW = Math.max(1, halfW >> 3);
-        const tileH = Math.max(1, halfH >> 3);
+        const tileW = Math.max(1, Math.ceil(halfW / 8));
+        const tileH = Math.max(1, Math.ceil(halfH / 8));
 
         // Stage 0: GPU-Driven 9-Point Zone Auto-Focus (1x1 Thread, Zero CPU Readback)
-        const rawDt = view.renderViewStateData.deltaTime;
-        this.#effect_autoFocus.deltaTime = Number.isFinite(rawDt) && rawDt > 0 ? Math.min(rawDt, 0.1) : 0.0166;
         const prevFocusResult = this.#ensurePersistentFocusTexture();
         const currFocusResult = this.#effect_autoFocus.render(view, 1, 1, prevFocusResult);
         this.#copySrcInfo.texture = currFocusResult.texture;

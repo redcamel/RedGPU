@@ -8,11 +8,13 @@ struct Uniforms {
     maxCoC: f32,
 };
 
+const INV_SQRT2: f32 = 1.0 / sqrt(2.0);
+
 const SLIGHT_DOF_OFFSETS = array<vec2<f32>, 8>(
-    vec2<f32>(0.7071, 0.7071),
-    vec2<f32>(-0.7071, 0.7071),
-    vec2<f32>(-0.7071, -0.7071),
-    vec2<f32>(0.7071, -0.7071),
+    vec2<f32>(INV_SQRT2, INV_SQRT2),
+    vec2<f32>(-INV_SQRT2, INV_SQRT2),
+    vec2<f32>(-INV_SQRT2, -INV_SQRT2),
+    vec2<f32>(INV_SQRT2, -INV_SQRT2),
     vec2<f32>(1.0, 0.0),
     vec2<f32>(0.0, 1.0),
     vec2<f32>(-1.0, 0.0),
@@ -20,10 +22,25 @@ const SLIGHT_DOF_OFFSETS = array<vec2<f32>, 8>(
 );
 
 fn reconstructViewDepth(coord: vec2<i32>, invFullDims: vec2<f32>, invProj: mat4x4<f32>) -> f32 {
-    let uv = (vec2<f32>(coord) + 0.5) * invFullDims;
-    let rawDepth = textureLoad(depthTexture, coord, 0);
+    let maxCoord = max(vec2<i32>(textureDimensions(depthTexture)) - vec2<i32>(1), vec2<i32>(0));
+    let ndcJitter = systemUniforms.projection.projectionMatrix[2].xy - systemUniforms.projection.noneJitterProjectionMatrix[2].xy;
+    let jitterUV = vec2<f32>(-0.5 * ndcJitter.x, 0.5 * ndcJitter.y);
+    let jitterPix = jitterUV / max(invFullDims, vec2<f32>(1e-6));
+    let hasJitter = (abs(jitterPix.x) + abs(jitterPix.y)) > 1e-3;
+    let stepDir = select(vec2<i32>(0), vec2<i32>(sign(jitterPix)), hasJitter);
+
+    let c00 = clamp(coord, vec2<i32>(0), maxCoord);
+    let c10 = clamp(coord + vec2<i32>(stepDir.x, 0), vec2<i32>(0), maxCoord);
+    let c01 = clamp(coord + vec2<i32>(0, stepDir.y), vec2<i32>(0), maxCoord);
+    let d00 = textureLoad(depthTexture, c00, 0);
+    let d10 = textureLoad(depthTexture, c10, 0);
+    let d01 = textureLoad(depthTexture, c01, 0);
+    let rawDepth = min(d00, min(d10, d01));
+
+    let uv = clamp((vec2<f32>(c00) + 0.5) * invFullDims + jitterUV, vec2<f32>(0.0), vec2<f32>(1.0));
     let viewPos = getViewPositionFromDepth(uv, rawDepth, invProj);
-    return max(0.001, -viewPos.z);
+    let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
+    return max(minNearDepth, -viewPos.z);
 }
 
 fn calculatePhysicalHalfCoC(viewDepth: f32, halfScreenHeight: f32, maxHalfCoC: f32, effectiveFocusDistance: f32) -> f32 {

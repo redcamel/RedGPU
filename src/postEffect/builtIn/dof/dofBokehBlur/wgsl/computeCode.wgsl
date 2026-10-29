@@ -45,13 +45,13 @@ let activeRingCount = select(rawRingCount, min(rawRingCount, 3u), !isForegroundP
 let invActiveRingCount = 1.0 / f32(activeRingCount);
 
 let ringSpacing = gatherRadius * invActiveRingCount;
-let mipLevel = clamp(log2(max(ringSpacing * 1.35, 1.0)), 0.0, 2.0);
+let mipLevel = clamp(log2(max(ringSpacing, 1.0)), 0.0, 2.0);
 
 var centerFilteredColor = centerColor;
 let centerAllowMip = clamp(abs(centerCoC) - 0.5, 0.0, 1.0);
 if (mipLevel > 0.05 && centerAllowMip > 0.0) {
     let centerTolerance = max(0.5, abs(centerCoC) * 0.25);
-    if (mipLevel < 1.35) {
+    if (mipLevel < 1.5) {
         let centerMip1 = textureSampleLevel(cocMip1Texture, basicSampler, centerUV, 0.0);
         let centerMip1Valid = clamp(1.0 - abs(centerMip1.a - centerCoC) / centerTolerance, 0.0, 1.0) * select(0.0, 1.0, centerCoC * centerMip1.a > 0.0) * centerAllowMip;
         centerFilteredColor = mix(centerColor, centerMip1.rgb, clamp(mipLevel, 0.25, 1.0) * centerMip1Valid);
@@ -90,7 +90,7 @@ if (!isForegroundPass) {
 }
 
 let usePolygon = uniforms.bladeCount >= 3u;
-let sectorCount = select(6u, uniforms.bladeCount, usePolygon);
+let sectorCount = select(CIRCULAR_SECTOR_COUNT, uniforms.bladeCount, usePolygon);
 let sectorAngle = TWO_PI / f32(sectorCount);
 
 // [KO] 조리개 날(Blade) 양 끝 꼭짓점 벡터(v0, v1) 간 직선 선형 보간(mix(v0, v1, t))을 통한 5-Ring 정다각형/원형 동심 링 개더링
@@ -132,12 +132,12 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
             // [EN] Single active Mip selective fetch (4 -> 2 fetches/tap): sample only the active Mip for the mipLevel range while protecting silhouette/focus edges (cocTolerance)
             var activeMipSample: vec4<f32>;
             var mipBlendWeight: f32;
-            if (mipLevel < 0.35) {
+            if (mipLevel < 0.5) {
                 activeMipSample = textureSampleLevel(cocMip0Texture, basicSampler, sampleUV, 0.0);
                 mipBlendWeight = 1.0;
-            } else if (mipLevel < 1.35) {
+            } else if (mipLevel < 1.5) {
                 activeMipSample = textureSampleLevel(cocMip1Texture, basicSampler, sampleUV, 0.0);
-                mipBlendWeight = clamp(mipLevel, 0.35, 1.0) * smoothstep(0.25, 0.85, abs(discreteMip0.a));
+                mipBlendWeight = clamp(mipLevel, 0.5, 1.0) * smoothstep(0.25, 0.85, abs(discreteMip0.a));
             } else {
                 activeMipSample = textureSampleLevel(cocMip2Texture, basicSampler, sampleUV, 0.0);
                 mipBlendWeight = smoothstep(0.25, 0.85, abs(discreteMip0.a));

@@ -10,6 +10,7 @@ let sharpColor = sharpSample.rgb;
 
 let halfDims = vec2<f32>(textureDimensions(bgBokehTexture));
 let halfTexelSize = 1.0 / halfDims;
+let halfToFullScale = fullDims.y / max(halfDims.y, 1.0);
 
 // [KO] 1. 풀해상도(1x1) 깊이에서 직접 복원한 정확한 물리 착란원 반경 산출 (2x2 블록 계단 현상 원천 제거)
 // [EN] 1. Compute exact physical CoC radius reconstructed directly from full-resolution (1x1) depth (eliminating 2x2 blocky silhouettes)
@@ -19,7 +20,7 @@ let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
 let effectiveFocusDistance = select(uniforms.focusDistance, focusState.r, focusState.g > 0.5);
 let viewDepth = reconstructViewDepth(vec2<i32>(index), invFullDims, systemUniforms.projection.inverseProjectionMatrix);
 let exactHalfCoC = calculatePhysicalHalfCoC(viewDepth, halfDims.y, maxHalfCoC, effectiveFocusDistance);
-let exactFullCoC = abs(exactHalfCoC) * 2.0;
+let exactFullCoC = abs(exactHalfCoC) * halfToFullScale;
 
 // [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.35px ~ 4.5px, 전경 및 배경 양방향)에서 원본 풀해상도 8-Tap 직접 개더링 수행
 // [EN] 2. Unreal DOF_Recombine specification: direct full-resolution 8-Tap gathering in the slight out-of-focus transition zone (0.35px ~ 4.5px, both near and far)
@@ -34,7 +35,7 @@ if (exactFullCoC > 0.35 && exactFullCoC < 4.5) {
         let tapCoord = clamp(vec2<i32>(floor(vec2<f32>(index) + 0.5 + tapOffset)), vec2<i32>(0), maxFullCoord);
         let tapDepth = reconstructViewDepth(tapCoord, invFullDims, systemUniforms.projection.inverseProjectionMatrix);
         let tapHalfCoC = calculatePhysicalHalfCoC(tapDepth, halfDims.y, maxHalfCoC, effectiveFocusDistance);
-        let tapFullCoC = abs(tapHalfCoC) * 2.0;
+        let tapFullCoC = abs(tapHalfCoC) * halfToFullScale;
         let sameLayerWeight = select(0.25, 1.0, tapHalfCoC * exactHalfCoC >= 0.0);
         let tapWeight = smoothstep(0.15, 0.85, tapFullCoC) * sameLayerWeight;
         if (tapWeight > 0.0) {

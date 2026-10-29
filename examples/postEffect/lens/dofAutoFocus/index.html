@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="../../../assets/css/example.css" rel="stylesheet">
+    <style>
+        .vf-reticle {
+            position: fixed;
+            top: 50%;
+            width: 58px;
+            height: 58px;
+            transform: translate(-50%, -50%);
+            border-radius: 6px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .vf-reticle::before,
+        .vf-reticle::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .vf-reticle::before {
+            width: 12px;
+            height: 1.5px;
+        }
+
+        .vf-reticle::after {
+            width: 1.5px;
+            height: 12px;
+        }
+
+        .vf-reticle-mf {
+            left: 25%;
+            border: 1.5px dashed rgba(255, 140, 0, 0.85);
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.65);
+        }
+
+        .vf-reticle-mf::before,
+        .vf-reticle-mf::after {
+            background: rgba(255, 140, 0, 0.9);
+        }
+
+        .vf-reticle-af {
+            left: 75%;
+            border: 1.5px solid rgba(0, 220, 50, 0.9);
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.7), inset 0 0 8px rgba(0, 220, 50, 0.2);
+        }
+
+        .vf-reticle-af::before,
+        .vf-reticle-af::after {
+            background: rgba(0, 220, 50, 0.95);
+        }
+
+        .vf-reticle-label {
+            position: absolute;
+            top: calc(100% + 7px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 2px 7px;
+            font-family: monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: rgba(10, 12, 16, 0.88);
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .vf-reticle-mf .vf-reticle-label {
+            color: #ff8c00;
+            border: 1px solid rgba(255, 140, 0, 0.55);
+        }
+
+        .vf-reticle-af .vf-reticle-label {
+            color: #00dc32;
+            border: 1px solid rgba(0, 220, 50, 0.55);
+        }
+
+        @media (max-width: 768px) {
+            .vf-reticle-mf {
+                left: 50%;
+                top: 25%;
+            }
+
+            .vf-reticle-af {
+                left: 50%;
+                top: 75%;
+            }
+        }
+    </style>
+    <script src="index.js" type="module"></script>
+</head>
+<body>
+</body>
+</html>

@@ -8,12 +8,6 @@ struct Uniforms {
     passMode: u32,
 };
 
-const TWO_PI: f32 = 6.28318530718;
+const TWO_PI: f32 = PI * 2.0;
+const CIRCULAR_SECTOR_COUNT: u32 = u32(round(TWO_PI));
 const RING_COUNT: u32 = 5u;
-const INV_RING_COUNT: f32 = 0.2;
-
-fn getOpticalSampleWeight(color: vec3<f32>, bokehBrightness: f32) -> f32 {
-    let luma = max(getLuminance(color), 0.0);
-    let hdrExcess = max(luma - 1.0, 0.0);
-    return 1.0 + hdrExcess * bokehBrightness;
-}

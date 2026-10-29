@@ -2273,6 +2273,14 @@ Check performance limits on each device.`
                                 }
                             },
                             {
+                                name: 'DepthOfField (Auto Focus)',
+                                path: 'postEffect/lens/dofAutoFocus',
+                                description: {
+                                    ko: `화면 중앙 9-Point Zone 깊이 버퍼를 실시간 측거하여 피사체 거리 변화에 따라 초점을 자동 추적(Rack Focus)하는 오토포커스(useAutoFocus) 예제입니다.`,
+                                    en: `Auto-Focus (useAutoFocus) example that meters the center 9-Point Zone depth buffer in real time for automatic subject focus tracking (Rack Focus).`
+                                },
+                            },
+                            {
                                 name: 'Vignetting',
                                 path: 'postEffect/lens/vignetting',
                                 description: {

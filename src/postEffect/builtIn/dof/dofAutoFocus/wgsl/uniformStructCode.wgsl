@@ -1,8 +1,8 @@
 #redgpu_include math.reconstruct.getViewPositionFromDepth
+#redgpu_include math.getIsFinite
 
 struct Uniforms {
     focusDistance: f32,
-    deltaTime: f32,
     useAutoFocus: u32,
 };
 
@@ -11,6 +11,7 @@ struct Uniforms {
 const AF_CENTER_UV = vec2<f32>(0.5, 0.5);
 const AF_ZONE_RADIUS: f32 = 0.025;
 const AF_MOTOR_SPEED: f32 = 8.0;
+const INV_SQRT2: f32 = 1.0 / sqrt(2.0);
 
 const AF_ZONE_OFFSETS = array<vec2<f32>, 9>(
     vec2<f32>(0.0, 0.0),
@@ -18,10 +19,10 @@ const AF_ZONE_OFFSETS = array<vec2<f32>, 9>(
     vec2<f32>(-0.5, 0.0),
     vec2<f32>(0.0, 0.5),
     vec2<f32>(0.0, -0.5),
-    vec2<f32>(0.7071, 0.7071),
-    vec2<f32>(-0.7071, 0.7071),
-    vec2<f32>(-0.7071, -0.7071),
-    vec2<f32>(0.7071, -0.7071)
+    vec2<f32>(INV_SQRT2, INV_SQRT2),
+    vec2<f32>(-INV_SQRT2, INV_SQRT2),
+    vec2<f32>(-INV_SQRT2, -INV_SQRT2),
+    vec2<f32>(INV_SQRT2, -INV_SQRT2)
 );
 
 const AF_ZONE_WEIGHTS = array<f32, 9>(

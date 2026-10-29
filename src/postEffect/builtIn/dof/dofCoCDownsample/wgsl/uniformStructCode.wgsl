@@ -12,7 +12,8 @@ fn reconstructViewDepth(coord: vec2<i32>, invFullDims: vec2<f32>, invProj: mat4x
     let uv = (vec2<f32>(coord) + 0.5) * invFullDims;
     let rawDepth = textureLoad(depthTexture, coord, 0);
     let viewPos = getViewPositionFromDepth(uv, rawDepth, invProj);
-    return max(0.001, -viewPos.z);
+    let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
+    return max(minNearDepth, -viewPos.z);
 }
 
 fn calculatePhysicalHalfCoC(viewDepth: f32, halfScreenHeight: f32, maxHalfCoC: f32, effectiveFocusDistance: f32) -> f32 {
