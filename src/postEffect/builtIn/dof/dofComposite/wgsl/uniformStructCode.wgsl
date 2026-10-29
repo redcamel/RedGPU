@@ -26,11 +26,11 @@ fn reconstructViewDepth(coord: vec2<i32>, invFullDims: vec2<f32>, invProj: mat4x
     return max(0.001, -viewPos.z);
 }
 
-fn calculatePhysicalHalfCoC(viewDepth: f32, halfScreenHeight: f32, maxHalfCoC: f32) -> f32 {
+fn calculatePhysicalHalfCoC(viewDepth: f32, halfScreenHeight: f32, maxHalfCoC: f32, effectiveFocusDistance: f32) -> f32 {
     let safeAperture = max(uniforms.aperture, 0.1);
     let safeFocalLength = max(uniforms.focalLength, 1.0);
     let safeSensorSize = max(uniforms.sensorSize, 1.0);
-    let focusDistMM = max(uniforms.focusDistance * 1000.0, safeFocalLength + 1.0);
+    let focusDistMM = max(effectiveFocusDistance * 1000.0, safeFocalLength + 1.0);
     let depthMM = max(viewDepth * 1000.0, 1.0);
 
     let cocDiameterMM = (safeFocalLength * safeFocalLength) / (safeAperture * (focusDistMM - safeFocalLength)) * ((depthMM - focusDistMM) / depthMM);

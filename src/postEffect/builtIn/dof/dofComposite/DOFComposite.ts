@@ -45,7 +45,8 @@ class DOFComposite extends ASinglePassPostEffect {
                     {name: 'sourceTexture'},
                     {name: 'cocTexture'},
                     {name: 'bgBokehTexture'},
-                    {name: 'fgBokehTexture'}
+                    {name: 'fgBokehTexture'},
+                    {name: 'focusTexture'}
                 ]
             )
         );
@@ -126,6 +127,9 @@ class DOFComposite extends ASinglePassPostEffect {
      * @param fgBokehTextureInfo -
      * [KO] `1/2` 해상도 후처리된 전경 보케 및 불투명도 텍스처 정보
      * [EN] `1/2` resolution post-filtered foreground bokeh and opacity texture information
+     * @param focusTextureInfo -
+     * [KO] `1x1` 유효 초점 거리 상태 텍스처 정보
+     * [EN] `1x1` effective focus distance state texture information
      * @returns
      * [KO] 최종 합성된 풀해상도 DOF 텍스처 정보 (`IPostEffectResult`)
      * [EN] Final composited full-resolution DOF texture information (`IPostEffectResult`)
@@ -137,9 +141,10 @@ class DOFComposite extends ASinglePassPostEffect {
         sourceTextureInfo: IPostEffectResult,
         cocTextureInfo: IPostEffectResult,
         bgBokehTextureInfo: IPostEffectResult,
-        fgBokehTextureInfo: IPostEffectResult
+        fgBokehTextureInfo: IPostEffectResult,
+        focusTextureInfo: IPostEffectResult
     ): IPostEffectResult {
-        return super.render(view, width, height, sourceTextureInfo, cocTextureInfo, bgBokehTextureInfo, fgBokehTextureInfo);
+        return super.render(view, width, height, sourceTextureInfo, cocTextureInfo, bgBokehTextureInfo, fgBokehTextureInfo, focusTextureInfo);
     }
 }
 

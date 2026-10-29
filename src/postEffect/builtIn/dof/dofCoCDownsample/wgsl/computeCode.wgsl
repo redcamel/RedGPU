@@ -13,16 +13,18 @@ let c11 = clamp(baseCoord + vec2<i32>(1, 1), vec2<i32>(0), maxCoord);
 let invProj = systemUniforms.projection.inverseProjectionMatrix;
 let dpr = min(systemUniforms.devicePixelRatio, 2.0);
 let maxHalfCoC = 0.5 * uniforms.maxCoC * dpr;
+let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
+let effectiveFocusDistance = select(uniforms.focusDistance, focusState.r, focusState.g > 0.5);
 
 let d00 = reconstructViewDepth(c00, invFullDims, invProj);
 let d10 = reconstructViewDepth(c10, invFullDims, invProj);
 let d01 = reconstructViewDepth(c01, invFullDims, invProj);
 let d11 = reconstructViewDepth(c11, invFullDims, invProj);
 
-let coc00 = calculatePhysicalHalfCoC(d00, halfDims.y, maxHalfCoC);
-let coc10 = calculatePhysicalHalfCoC(d10, halfDims.y, maxHalfCoC);
-let coc01 = calculatePhysicalHalfCoC(d01, halfDims.y, maxHalfCoC);
-let coc11 = calculatePhysicalHalfCoC(d11, halfDims.y, maxHalfCoC);
+let coc00 = calculatePhysicalHalfCoC(d00, halfDims.y, maxHalfCoC, effectiveFocusDistance);
+let coc10 = calculatePhysicalHalfCoC(d10, halfDims.y, maxHalfCoC, effectiveFocusDistance);
+let coc01 = calculatePhysicalHalfCoC(d01, halfDims.y, maxHalfCoC, effectiveFocusDistance);
+let coc11 = calculatePhysicalHalfCoC(d11, halfDims.y, maxHalfCoC, effectiveFocusDistance);
 
 // [KO] 연속적인 표면에서는 2x2 평균 CoC를 사용하고, 깊이 단절(실루엣 경계)에서는 가장 가까운 전면 표면의 CoC(minSignedCoC)를 채택하여 허공의 가짜 중간 CoC 및 배경 색 번짐을 원천 차단
 // [EN] Use 2x2 average CoC on continuous surfaces and adopt the closest front-surface CoC (minSignedCoC) across depth discontinuities (silhouette edges) to prevent phantom mid-air CoC and background color leaking

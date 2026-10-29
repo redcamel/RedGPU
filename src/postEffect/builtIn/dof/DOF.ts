@@ -1,9 +1,11 @@
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import {IPostEffectResult} from "../../core/types";
+import DOFAutoFocus from "./dofAutoFocus/DOFAutoFocus";
 import DOFBokehBlur from "./dofBokehBlur/DOFBokehBlur";
 import DOFCoCDownsample from "./dofCoCDownsample/DOFCoCDownsample";
 import DOFComposite from "./dofComposite/DOFComposite";
@@ -29,6 +31,7 @@ import DOFTileMaxCoC from "./dofTileMaxCoC/DOFTileMaxCoC";
  * @category PostEffect
  */
 class DOF extends AMultiPassPostEffect {
+    #effect_autoFocus: DOFAutoFocus;
     #effect_cocDownsample: DOFCoCDownsample;
     #effect_mipDownsample1: DOFMipDownsample;
     #effect_mipDownsample2: DOFMipDownsample;
@@ -39,6 +42,12 @@ class DOF extends AMultiPassPostEffect {
     #effect_postFilterFg: DOFPostFilter;
     #effect_composite: DOFComposite;
 
+    #persistentFocusTexture: GPUTexture = null;
+    #persistentFocusResult: IPostEffectResult = null;
+    #copySrcInfo: { texture: GPUTexture } = {texture: null};
+    #copyDstInfo: { texture: GPUTexture } = {texture: null};
+    #copyExtent: { width: number; height: number } = {width: 1, height: 1};
+
     #focusDistance: number = 15.0;
     #aperture: number = 2.0;
     #focalLength: number = 65.0;
@@ -46,6 +55,8 @@ class DOF extends AMultiPassPostEffect {
     #maxCoC: number = 32.0;
     #bladeCount: number = 6;
     #bokehBrightness: number = 1.5;
+
+    #useAutoFocus: boolean = false;
 
     /**
      * [KO] `DOF` 인스턴스를 생성합니다.
@@ -56,6 +67,7 @@ class DOF extends AMultiPassPostEffect {
      * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
+        const autoFocus = new DOFAutoFocus(redGPUContext);
         const cocDownsample = new DOFCoCDownsample(redGPUContext);
         const mipDownsample1 = new DOFMipDownsample(redGPUContext);
         const mipDownsample2 = new DOFMipDownsample(redGPUContext);
@@ -69,6 +81,7 @@ class DOF extends AMultiPassPostEffect {
         super(
             redGPUContext,
             [
+                autoFocus,
                 cocDownsample,
                 mipDownsample1,
                 mipDownsample2,
@@ -81,6 +94,7 @@ class DOF extends AMultiPassPostEffect {
             ]
         );
 
+        this.#effect_autoFocus = autoFocus;
         this.#effect_cocDownsample = cocDownsample;
         this.#effect_mipDownsample1 = mipDownsample1;
         this.#effect_mipDownsample2 = mipDownsample2;
@@ -107,6 +121,7 @@ class DOF extends AMultiPassPostEffect {
     set focusDistance(value: number) {
         validateNumberRange(value, 0.1, 10000);
         this.#focusDistance = value;
+        this.#effect_autoFocus.focusDistance = value;
         this.#effect_cocDownsample.focusDistance = value;
         this.#effect_composite.focusDistance = value;
     }
@@ -225,6 +240,38 @@ class DOF extends AMultiPassPostEffect {
         this.#bokehBrightness = value;
         this.#effect_bokehBlurBg.bokehBrightness = value;
         this.#effect_bokehBlurFg.bokehBrightness = value;
+    }
+
+    /**
+     * [KO] 화면 깊이 버퍼 기반 9-Point Zone 연속 자동 초점(AF-C) 활성화 여부를 반환합니다. (기본값: `false`)
+     * [EN] Returns whether screen-depth-based 9-Point Zone continuous auto-focus (AF-C) is enabled. (Default: `false`)
+     */
+    get useAutoFocus(): boolean {
+        return this.#useAutoFocus;
+    }
+
+    /**
+     * [KO] 화면 깊이 버퍼 기반 9-Point Zone 연속 자동 초점(AF-C) 활성화 여부를 설정합니다.
+     * [EN] Sets whether screen-depth-based 9-Point Zone continuous auto-focus (AF-C) is enabled.
+     */
+    set useAutoFocus(value: boolean) {
+        this.#useAutoFocus = Boolean(value);
+        this.#effect_autoFocus.useAutoFocus = this.#useAutoFocus ? 1 : 0;
+    }
+
+    /**
+     * [KO] 내부 서브패스 및 영구 초점 상태 텍스처 리소스를 파기합니다.
+     * [EN] Destroys internal sub-passes and persistent focus state texture resources.
+     */
+    destroy(): void {
+        if (this.#persistentFocusTexture) {
+            this.#persistentFocusTexture.destroy();
+            this.#persistentFocusTexture = null;
+            this.#persistentFocusResult = null;
+            this.#copySrcInfo.texture = null;
+            this.#copyDstInfo.texture = null;
+        }
+        super.destroy();
     }
 
     /**
@@ -356,9 +403,17 @@ class DOF extends AMultiPassPostEffect {
         const tileW = Math.max(1, halfW >> 3);
         const tileH = Math.max(1, halfH >> 3);
 
+        // Stage 0: GPU-Driven 9-Point Zone Auto-Focus (1x1 Thread, Zero CPU Readback)
+        const rawDt = view.renderViewStateData.deltaTime;
+        this.#effect_autoFocus.deltaTime = Number.isFinite(rawDt) && rawDt > 0 ? Math.min(rawDt, 0.1) : 0.0166;
+        const prevFocusResult = this.#ensurePersistentFocusTexture();
+        const currFocusResult = this.#effect_autoFocus.render(view, 1, 1, prevFocusResult);
+        this.#copySrcInfo.texture = currFocusResult.texture;
+        this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyFocusStateCallback);
+
         // Stage 1: CoC-Aware Bilateral Mip Pyramid (Mip 0: 1/2 -> Mip 1: 1/4 -> Mip 2: 1/8)
         const cocMip0 = this.#effect_cocDownsample.render(
-            view, halfW, halfH, sourceTextureInfo
+            view, halfW, halfH, sourceTextureInfo, currFocusResult
         );
         const cocMip1 = this.#effect_mipDownsample1.render(
             view, quarterW, quarterH, cocMip0
@@ -396,14 +451,38 @@ class DOF extends AMultiPassPostEffect {
 
         // Stage 5: Diaphragm Recombine (Full-Res Slight-DoF 8-Tap + Bg Bilateral Blend + Fg Opacity Over)
         const finalResult = this.#effect_composite.render(
-            view, width, height, sourceTextureInfo, cocMip0, bgPostFiltered, fgPostFiltered
+            view, width, height, sourceTextureInfo, cocMip0, bgPostFiltered, fgPostFiltered, currFocusResult
         );
 
+        pool.release(currFocusResult.texture);
         pool.release(cocMip0.texture);
         pool.release(bgPostFiltered.texture);
         pool.release(fgPostFiltered.texture);
 
         return finalResult;
+    }
+
+    #copyFocusStateCallback = (encoder: GPUCommandEncoder): void => {
+        if (this.#copySrcInfo.texture && this.#copyDstInfo.texture) {
+            encoder.copyTextureToTexture(this.#copySrcInfo, this.#copyDstInfo, this.#copyExtent);
+        }
+    };
+
+    #ensurePersistentFocusTexture(): IPostEffectResult {
+        if (!this.#persistentFocusTexture) {
+            const {resourceManager} = this;
+            const texture = resourceManager.createManagedTexture({
+                size: {width: 1, height: 1},
+                format: 'rgba16float',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                label: 'DOF_PersistentFocusState_1x1'
+            });
+            const textureView = resourceManager.getGPUResourceBitmapTextureView(texture);
+            this.#persistentFocusTexture = texture;
+            this.#persistentFocusResult = {texture, textureView};
+            this.#copyDstInfo.texture = texture;
+        }
+        return this.#persistentFocusResult;
     }
 }
 

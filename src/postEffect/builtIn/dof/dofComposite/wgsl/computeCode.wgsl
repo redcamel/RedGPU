@@ -15,8 +15,10 @@ let halfTexelSize = 1.0 / halfDims;
 // [EN] 1. Compute exact physical CoC radius reconstructed directly from full-resolution (1x1) depth (eliminating 2x2 blocky silhouettes)
 let dpr = min(systemUniforms.devicePixelRatio, 2.0);
 let maxHalfCoC = 0.5 * uniforms.maxCoC * dpr;
+let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
+let effectiveFocusDistance = select(uniforms.focusDistance, focusState.r, focusState.g > 0.5);
 let viewDepth = reconstructViewDepth(vec2<i32>(index), invFullDims, systemUniforms.projection.inverseProjectionMatrix);
-let exactHalfCoC = calculatePhysicalHalfCoC(viewDepth, halfDims.y, maxHalfCoC);
+let exactHalfCoC = calculatePhysicalHalfCoC(viewDepth, halfDims.y, maxHalfCoC, effectiveFocusDistance);
 let exactFullCoC = abs(exactHalfCoC) * 2.0;
 
 // [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.35px ~ 4.5px, 전경 및 배경 양방향)에서 원본 풀해상도 8-Tap 직접 개더링 수행
@@ -31,7 +33,7 @@ if (exactFullCoC > 0.35 && exactFullCoC < 4.5) {
         let tapOffset = SLIGHT_DOF_OFFSETS[i] * slightRadius;
         let tapCoord = clamp(vec2<i32>(floor(vec2<f32>(index) + 0.5 + tapOffset)), vec2<i32>(0), maxFullCoord);
         let tapDepth = reconstructViewDepth(tapCoord, invFullDims, systemUniforms.projection.inverseProjectionMatrix);
-        let tapHalfCoC = calculatePhysicalHalfCoC(tapDepth, halfDims.y, maxHalfCoC);
+        let tapHalfCoC = calculatePhysicalHalfCoC(tapDepth, halfDims.y, maxHalfCoC, effectiveFocusDistance);
         let tapFullCoC = abs(tapHalfCoC) * 2.0;
         let sameLayerWeight = select(0.25, 1.0, tapHalfCoC * exactHalfCoC >= 0.0);
         let tapWeight = smoothstep(0.15, 0.85, tapFullCoC) * sameLayerWeight;

@@ -1,7 +1,9 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -25,7 +27,15 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        const {msaa, nonMsaa} = createBasicPostEffectCode(this, computeCode, uniformStructCode);
+        const {msaa, nonMsaa} = createBasicPostEffectCode(
+            this,
+            computeCode,
+            uniformStructCode,
+            [
+                {name: 'sourceTexture'},
+                {name: 'focusTexture'}
+            ]
+        );
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_COC_DOWNSAMPLE',
@@ -86,6 +96,16 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
         validateNumberRange(value, 4.0, 64.0);
         this.#maxCoC = value;
         this.updateUniform('maxCoC', value);
+    }
+
+    render(
+        view: View3D,
+        width: number,
+        height: number,
+        sourceTextureInfo: IPostEffectResult,
+        focusTextureInfo: IPostEffectResult
+    ): IPostEffectResult {
+        return super.render(view, width, height, sourceTextureInfo, focusTextureInfo);
     }
 }
 

@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Depth of Field (DOF) 예제
  * [EN] Depth of Field (DOF) example
  *
- * [KO] 물리 Thin-Lens 착란원(CoC)과 48-Tap 황금각 나선(Vogel Disk) 보케 기반 피사계 심도(Depth of Field) 후처리 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply physically-based Depth of Field (DOF) out-of-focus and bokeh effects using Thin-Lens CoC and 48-Tap Golden-Angle Vogel Disk sampling.
+ * [KO] 35mm 풀프레임 Thin-Lens 착란원(CoC), 전/배경 분리 다각형 조리개 보케, 및 화면 깊이 기반 9-Point Zone 자동 초점(`useAutoFocus`)을 적용하는 피사계 심도(DOF) 후처리 예제입니다.
+ * [EN] Demonstrates physically-based Depth of Field (DOF) post-processing with 35mm full-frame Thin-Lens CoC, foreground/background separated polygonal aperture bokeh, and screen-depth 9-Point Zone auto-focus (`useAutoFocus`).
  */
 
 const container = document.createElement('div');
@@ -155,11 +155,16 @@ const renderTestPane = (redGPUContext, targetView, effect, controller, container
 
             folder.addBinding(targetView.postEffectManager, 'useDOF').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
+                focusDistanceControl.disabled = !v.value || effect.useAutoFocus;
                 presetFolder.disabled = !v.value;
             });
 
+            const useAutoFocusControl = folder.addBinding(effect, 'useAutoFocus').on('change', (v) => {
+                focusDistanceControl.disabled = !targetView.postEffectManager.useDOF || v.value;
+            });
+            const focusDistanceControl = folder.addBinding(effect, 'focusDistance', {min: 0.5, max: 50, step: 0.1});
             const controls = [
-                folder.addBinding(effect, 'focusDistance', {min: 0.5, max: 50, step: 0.1}),
+                useAutoFocusControl,
                 folder.addBinding(effect, 'focalLength', {min: 12, max: 200, step: 1}),
                 folder.addBinding(effect, 'aperture', {min: 0.7, max: 22.0, step: 0.1}),
                 folder.addBinding(effect, 'sensorSize', {min: 12, max: 48, step: 1}),
@@ -172,7 +177,9 @@ const renderTestPane = (redGPUContext, targetView, effect, controller, container
             const addPresetButton = (title, method, speedDistance) => {
                 presetFolder.addButton({title}).on('click', () => {
                     effect[method]();
-                    controller.distance = effect.focusDistance;
+                    if (!effect.useAutoFocus) {
+                        controller.distance = effect.focusDistance;
+                    }
                     controller.speedDistance = speedDistance;
                     pane.refresh();
                 });
