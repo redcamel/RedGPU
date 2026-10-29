@@ -6,14 +6,16 @@ struct Uniforms {
     focalLength: f32,
     sensorSize: f32,
     maxCoC: f32,
+    historyValid: u32,
 };
 
 fn reconstructViewDepth(coord: vec2<i32>, invFullDims: vec2<f32>, invProj: mat4x4<f32>) -> f32 {
-    let uv = (vec2<f32>(coord) + 0.5) * invFullDims;
-    let rawDepth = textureLoad(depthTexture, coord, 0);
-    let viewPos = getViewPositionFromDepth(uv, rawDepth, invProj);
+    let maxCoord = max(vec2<i32>(textureDimensions(depthTexture)) - vec2<i32>(1), vec2<i32>(0));
+    let safeCoord = clamp(coord, vec2<i32>(0), maxCoord);
+    let uv = (vec2<f32>(safeCoord) + 0.5) * invFullDims;
+    let currRawDepth = textureLoad(depthTexture, safeCoord, 0);
     let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
-    return max(minNearDepth, -viewPos.z);
+    return max(minNearDepth, -getViewPositionFromDepth(uv, currRawDepth, invProj).z);
 }
 
 fn calculatePhysicalHalfCoC(viewDepth: f32, halfScreenHeight: f32, maxHalfCoC: f32, effectiveFocusDistance: f32) -> f32 {

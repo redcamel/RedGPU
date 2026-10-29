@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
+import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
@@ -24,6 +25,7 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
     #focalLength: number = 65.0;
     #sensorSize: number = 24.0;
     #maxCoC: number = 32.0;
+    #historyValid: number = 0;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -33,7 +35,8 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
             uniformStructCode,
             [
                 {name: 'sourceTexture'},
-                {name: 'focusTexture'}
+                {name: 'focusTexture'},
+                {name: 'prevCoCTexture'}
             ]
         );
         this.init(
@@ -46,6 +49,7 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
         this.focalLength = this.#focalLength;
         this.sensorSize = this.#sensorSize;
         this.maxCoC = this.#maxCoC;
+        this.historyValid = this.#historyValid;
     }
 
     get focusDistance(): number {
@@ -98,14 +102,25 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
         this.updateUniform('maxCoC', value);
     }
 
+    get historyValid(): number {
+        return this.#historyValid;
+    }
+
+    set historyValid(value: number) {
+        validateUintRange(value, 0, 1);
+        this.#historyValid = value;
+        this.updateUniform('historyValid', value);
+    }
+
     render(
         view: View3D,
         width: number,
         height: number,
         sourceTextureInfo: IPostEffectResult,
-        focusTextureInfo: IPostEffectResult
+        focusTextureInfo: IPostEffectResult,
+        prevCoCTextureInfo: IPostEffectResult
     ): IPostEffectResult {
-        return super.render(view, width, height, sourceTextureInfo, focusTextureInfo);
+        return super.render(view, width, height, sourceTextureInfo, focusTextureInfo, prevCoCTextureInfo);
     }
 }
 

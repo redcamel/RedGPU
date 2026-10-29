@@ -12,16 +12,17 @@ let c11 = textureLoad(sourceTexture, clamp(baseCoord + vec2<i32>(1, 1), vec2<i32
 
 let minCenterCoC = min(min(c00, c10), min(c01, c11));
 let maxCenterCoC = max(max(c00, c10), max(c01, c11));
-let isForegroundDominant = minCenterCoC < -0.25;
-let isBackgroundDominant = !isForegroundDominant && maxCenterCoC > 0.25;
+let fgDominance = smoothstep(-0.15, -0.55, minCenterCoC);
+let bgDominance = (1.0 - fgDominance) * smoothstep(0.15, 0.55, maxCenterCoC);
+let focusDominance = max(0.0, 1.0 - fgDominance - bgDominance);
 
 let tentWeights = array<f32, 4>(1.0, 3.0, 3.0, 1.0);
 var sumColor = vec3<f32>(0.0);
 var sumCoC: f32 = 0.0;
 var sumWeight: f32 = 0.0;
 
-// [KO] 4x4 이산 B-Spline/Tent 커널([1, 3, 3, 1]) 샘플링: 하드웨어 양선형 보간으로 인한 음수(전경)/양수(배경) CoC 상쇄(0.0 가짜 초점 생성)를 원천 차단하고 넓고 매끄러운 프리필터링 수행
-// [EN] 4x4 discrete B-Spline/Tent kernel ([1, 3, 3, 1]) sampling: prevent negative (near) / positive (far) CoC cancellation (phantom 0.0 focus) caused by hardware bilinear filtering while performing wide smooth pre-filtering
+// [KO] 4x4 이산 B-Spline/Tent 커널([1, 3, 3, 1]) 샘플링 및 연속 레이어 가중치 블렌딩으로 경계 플리커링 및 가짜 초점 상쇄 방지
+// [EN] 4x4 discrete B-Spline/Tent kernel ([1, 3, 3, 1]) sampling with continuous layer dominance blending to prevent boundary flickering and phantom focus cancellation
 for (var ky = 0; ky < 4; ky = ky + 1) {
     let wy = tentWeights[ky];
     let sy = clamp(baseCoord.y + ky - 1, 0, maxSrcCoord.y);
@@ -32,14 +33,10 @@ for (var ky = 0; ky < 4; ky = ky + 1) {
         let s = textureLoad(sourceTexture, vec2<i32>(sx, sy), 0);
         let spatialW = wx * wy;
 
-        var layerGate: f32 = 1.0;
-        if (isForegroundDominant) {
-            layerGate = smoothstep(-0.15, -0.75, s.a);
-        } else if (isBackgroundDominant) {
-            layerGate = smoothstep(0.15, 0.75, s.a);
-        } else {
-            layerGate = 1.0 - smoothstep(0.25, 1.0, abs(s.a));
-        }
+        let fgGate = smoothstep(-0.15, -0.75, s.a);
+        let bgGate = smoothstep(0.15, 0.75, s.a);
+        let focusGate = 1.0 - smoothstep(0.25, 1.0, abs(s.a));
+        let layerGate = fgGate * fgDominance + bgGate * bgDominance + focusGate * focusDominance;
 
         let w = spatialW * max(layerGate, 1e-4);
         sumColor += s.rgb * w;

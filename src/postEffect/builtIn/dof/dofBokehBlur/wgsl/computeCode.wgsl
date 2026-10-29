@@ -134,16 +134,16 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
             var mipBlendWeight: f32;
             if (mipLevel < 0.5) {
                 activeMipSample = textureSampleLevel(cocMip0Texture, basicSampler, sampleUV, 0.0);
-                mipBlendWeight = 1.0;
+                mipBlendWeight = smoothstep(0.1, 0.5, mipLevel);
             } else if (mipLevel < 1.5) {
                 activeMipSample = textureSampleLevel(cocMip1Texture, basicSampler, sampleUV, 0.0);
-                mipBlendWeight = clamp(mipLevel, 0.5, 1.0) * smoothstep(0.25, 0.85, abs(discreteMip0.a));
+                mipBlendWeight = smoothstep(0.5, 1.25, mipLevel) * smoothstep(0.25, 0.85, abs(discreteMip0.a));
             } else {
                 activeMipSample = textureSampleLevel(cocMip2Texture, basicSampler, sampleUV, 0.0);
                 mipBlendWeight = smoothstep(0.25, 0.85, abs(discreteMip0.a));
             }
 
-            let cocTolerance = max(0.5, abs(discreteMip0.a) * 0.25);
+            let cocTolerance = max(0.85, abs(discreteMip0.a) * 0.35);
             let mipValid = mipBlendWeight * clamp(1.0 - abs(activeMipSample.a - discreteMip0.a) / cocTolerance, 0.0, 1.0) * select(0.0, 1.0, discreteMip0.a * activeMipSample.a >= 0.0);
             let sampleColor = mix(discreteMip0.rgb, activeMipSample.rgb, mipValid);
             let sampleCoC = mix(discreteMip0.a, activeMipSample.a, mipValid);

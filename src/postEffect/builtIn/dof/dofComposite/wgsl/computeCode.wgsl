@@ -12,41 +12,63 @@ let halfDims = vec2<f32>(textureDimensions(bgBokehTexture));
 let halfTexelSize = 1.0 / halfDims;
 let halfToFullScale = fullDims.y / max(halfDims.y, 1.0);
 
-// [KO] 1. 풀해상도(1x1) 깊이에서 직접 복원한 정확한 물리 착란원 반경 산출 (2x2 블록 계단 현상 원천 제거)
-// [EN] 1. Compute exact physical CoC radius reconstructed directly from full-resolution (1x1) depth (eliminating 2x2 blocky silhouettes)
+// [KO] 1. 풀해상도(1x1) 5-Tap 십자 깊이 범위 및 시간 안정화된 CoC(cocTexture) 결합으로 2x2 블록 계단 현상과 TAA 서브픽셀 경계 떨림을 동시 제거
+// [EN] 1. Combine full-resolution (1x1) 5-Tap cross depth bounds with temporally stabilized CoC (cocTexture) to eliminate both 2x2 blocky silhouettes and TAA sub-pixel edge jitter
 let dpr = min(systemUniforms.devicePixelRatio, 2.0);
 let maxHalfCoC = 0.5 * uniforms.maxCoC * dpr;
 let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
 let effectiveFocusDistance = select(uniforms.focusDistance, focusState.r, focusState.g > 0.5);
-let viewDepth = reconstructViewDepth(vec2<i32>(index), invFullDims, systemUniforms.projection.inverseProjectionMatrix);
-let exactHalfCoC = calculatePhysicalHalfCoC(viewDepth, halfDims.y, maxHalfCoC, effectiveFocusDistance);
+let invProj = systemUniforms.projection.inverseProjectionMatrix;
+
+let coordC = clamp(vec2<i32>(index), vec2<i32>(0), maxFullCoord);
+let cocC = calculatePhysicalHalfCoC(reconstructViewDepth(coordC, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+
+let ndcJitter = systemUniforms.projection.projectionMatrix[2].xy - systemUniforms.projection.noneJitterProjectionMatrix[2].xy;
+let isTAAActive = (abs(ndcJitter.x) + abs(ndcJitter.y)) > 1e-6;
+
+var exactHalfCoC = cocC;
+if (isTAAActive) {
+    let coordL = clamp(coordC + vec2<i32>(-1, 0), vec2<i32>(0), maxFullCoord);
+    let coordR = clamp(coordC + vec2<i32>(1, 0), vec2<i32>(0), maxFullCoord);
+    let coordU = clamp(coordC + vec2<i32>(0, -1), vec2<i32>(0), maxFullCoord);
+    let coordD = clamp(coordC + vec2<i32>(0, 1), vec2<i32>(0), maxFullCoord);
+
+    let cocL = calculatePhysicalHalfCoC(reconstructViewDepth(coordL, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+    let cocR = calculatePhysicalHalfCoC(reconstructViewDepth(coordR, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+    let cocU = calculatePhysicalHalfCoC(reconstructViewDepth(coordU, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+    let cocD = calculatePhysicalHalfCoC(reconstructViewDepth(coordD, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+
+    let minCrossCoC = min(cocC, min(min(cocL, cocR), min(cocU, cocD)));
+    let maxCrossCoC = max(cocC, max(max(cocL, cocR), max(cocU, cocD)));
+    let stabilizedHalfCoC = textureSampleLevel(cocTexture, basicSampler, uv, 0.0).a;
+    exactHalfCoC = clamp(stabilizedHalfCoC, minCrossCoC, maxCrossCoC);
+}
 let exactFullCoC = abs(exactHalfCoC) * halfToFullScale;
 
-// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.35px ~ 4.5px, 전경 및 배경 양방향)에서 원본 풀해상도 8-Tap 직접 개더링 수행
-// [EN] 2. Unreal DOF_Recombine specification: direct full-resolution 8-Tap gathering in the slight out-of-focus transition zone (0.35px ~ 4.5px, both near and far)
+// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, 전경 및 배경 양방향)에서 양선형 보간 기반 8-Tap 직접 개더링 수행
+// [EN] 2. Unreal DOF_Recombine specification: bilinear-interpolated 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px, near and far)
 var baseFullResColor = sharpColor;
-if (exactFullCoC > 0.35 && exactFullCoC < 4.5) {
-    let slightRadius = clamp(exactFullCoC, 0.5, 2.5);
+if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
+    let slightRadius = clamp(exactFullCoC, 0.75, 2.5);
     var slightSumColor = sharpColor;
     var slightSumWeight: f32 = 1.0;
 
     for (var i = 0u; i < 8u; i = i + 1u) {
         let tapOffset = SLIGHT_DOF_OFFSETS[i] * slightRadius;
-        let tapCoord = clamp(vec2<i32>(floor(vec2<f32>(index) + 0.5 + tapOffset)), vec2<i32>(0), maxFullCoord);
-        let tapDepth = reconstructViewDepth(tapCoord, invFullDims, systemUniforms.projection.inverseProjectionMatrix);
-        let tapHalfCoC = calculatePhysicalHalfCoC(tapDepth, halfDims.y, maxHalfCoC, effectiveFocusDistance);
+        let tapUV = clamp(uv + tapOffset * invFullDims, vec2<f32>(0.0), vec2<f32>(1.0));
+        let tapHalfCoC = textureSampleLevel(cocTexture, basicSampler, tapUV, 0.0).a;
         let tapFullCoC = abs(tapHalfCoC) * halfToFullScale;
         let sameLayerWeight = select(0.25, 1.0, tapHalfCoC * exactHalfCoC >= 0.0);
-        let tapWeight = smoothstep(0.15, 0.85, tapFullCoC) * sameLayerWeight;
+        let tapWeight = smoothstep(0.35, 1.15, tapFullCoC) * sameLayerWeight;
         if (tapWeight > 0.0) {
-            let tapColor = textureLoad(sourceTexture, tapCoord, 0).rgb;
+            let tapColor = textureSampleLevel(sourceTexture, basicSampler, tapUV, 0.0).rgb;
             slightSumColor += tapColor * tapWeight;
             slightSumWeight += tapWeight;
         }
     }
 
     let slightGatherColor = slightSumColor / max(slightSumWeight, 1e-4);
-    let slightBlend = smoothstep(0.35, 1.5, exactFullCoC);
+    let slightBlend = smoothstep(0.75, 2.0, exactFullCoC);
     baseFullResColor = mix(sharpColor, slightGatherColor, slightBlend);
 }
 

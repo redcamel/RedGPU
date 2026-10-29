@@ -48,6 +48,15 @@ class DOF extends AMultiPassPostEffect {
     #copyDstInfo: { texture: GPUTexture } = {texture: null};
     #copyExtent: { width: number; height: number } = {width: 1, height: 1};
 
+    #persistentCoCTexture: GPUTexture = null;
+    #persistentCoCResult: IPostEffectResult = null;
+    #prevCoCHalfW: number = 0;
+    #prevCoCHalfH: number = 0;
+    #cocHistoryValid: number = 0;
+    #copyCoCSrcInfo: { texture: GPUTexture } = {texture: null};
+    #copyCoCDstInfo: { texture: GPUTexture } = {texture: null};
+    #copyCoCExtent: { width: number; height: number } = {width: 1, height: 1};
+
     #focusDistance: number = 15.0;
     #aperture: number = 2.0;
     #focalLength: number = 65.0;
@@ -272,6 +281,16 @@ class DOF extends AMultiPassPostEffect {
             this.#copySrcInfo.texture = null;
             this.#copyDstInfo.texture = null;
         }
+        if (this.#persistentCoCTexture) {
+            this.#persistentCoCTexture.destroy();
+            this.#persistentCoCTexture = null;
+            this.#persistentCoCResult = null;
+            this.#copyCoCSrcInfo.texture = null;
+            this.#copyCoCDstInfo.texture = null;
+            this.#prevCoCHalfW = 0;
+            this.#prevCoCHalfH = 0;
+            this.#cocHistoryValid = 0;
+        }
         super.destroy();
     }
 
@@ -411,9 +430,15 @@ class DOF extends AMultiPassPostEffect {
         this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyFocusStateCallback);
 
         // Stage 1: CoC-Aware Bilateral Mip Pyramid (Mip 0: 1/2 -> Mip 1: 1/4 -> Mip 2: 1/8)
+        const prevCoCResult = this.#ensurePersistentCoCTexture(halfW, halfH);
+        this.#effect_cocDownsample.historyValid = this.#cocHistoryValid;
         const cocMip0 = this.#effect_cocDownsample.render(
-            view, halfW, halfH, sourceTextureInfo, currFocusResult
+            view, halfW, halfH, sourceTextureInfo, currFocusResult, prevCoCResult
         );
+        this.#copyCoCSrcInfo.texture = cocMip0.texture;
+        this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyCoCStateCallback);
+        this.#cocHistoryValid = 1;
+
         const cocMip1 = this.#effect_mipDownsample1.render(
             view, quarterW, quarterH, cocMip0
         );
@@ -467,6 +492,12 @@ class DOF extends AMultiPassPostEffect {
         }
     };
 
+    #copyCoCStateCallback = (encoder: GPUCommandEncoder): void => {
+        if (this.#copyCoCSrcInfo.texture && this.#copyCoCDstInfo.texture) {
+            encoder.copyTextureToTexture(this.#copyCoCSrcInfo, this.#copyCoCDstInfo, this.#copyCoCExtent);
+        }
+    };
+
     #ensurePersistentFocusTexture(): IPostEffectResult {
         if (!this.#persistentFocusTexture) {
             const {resourceManager} = this;
@@ -482,6 +513,31 @@ class DOF extends AMultiPassPostEffect {
             this.#copyDstInfo.texture = texture;
         }
         return this.#persistentFocusResult;
+    }
+
+    #ensurePersistentCoCTexture(halfW: number, halfH: number): IPostEffectResult {
+        if (!this.#persistentCoCTexture || this.#prevCoCHalfW !== halfW || this.#prevCoCHalfH !== halfH) {
+            if (this.#persistentCoCTexture) {
+                this.#persistentCoCTexture.destroy();
+            }
+            const {resourceManager} = this;
+            const texture = resourceManager.createManagedTexture({
+                size: {width: halfW, height: halfH},
+                format: 'rgba16float',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                label: `DOF_PersistentCoCMip0_${halfW}x${halfH}`
+            });
+            const textureView = resourceManager.getGPUResourceBitmapTextureView(texture);
+            this.#persistentCoCTexture = texture;
+            this.#persistentCoCResult = {texture, textureView};
+            this.#copyCoCDstInfo.texture = texture;
+            this.#copyCoCExtent.width = halfW;
+            this.#copyCoCExtent.height = halfH;
+            this.#prevCoCHalfW = halfW;
+            this.#prevCoCHalfH = halfH;
+            this.#cocHistoryValid = 0;
+        }
+        return this.#persistentCoCResult;
     }
 }
 

@@ -26,27 +26,72 @@ let coc10 = calculatePhysicalHalfCoC(d10, halfDims.y, maxHalfCoC, effectiveFocus
 let coc01 = calculatePhysicalHalfCoC(d01, halfDims.y, maxHalfCoC, effectiveFocusDistance);
 let coc11 = calculatePhysicalHalfCoC(d11, halfDims.y, maxHalfCoC, effectiveFocusDistance);
 
-// [KO] 연속적인 표면에서는 2x2 평균 CoC를 사용하고, 깊이 단절(실루엣 경계)에서는 가장 가까운 전면 표면의 CoC(minSignedCoC)를 채택하여 허공의 가짜 중간 CoC 및 배경 색 번짐을 원천 차단
-// [EN] Use 2x2 average CoC on continuous surfaces and adopt the closest front-surface CoC (minSignedCoC) across depth discontinuities (silhouette edges) to prevent phantom mid-air CoC and background color leaking
 let minSignedCoC = min(min(coc00, coc10), min(coc01, coc11));
 let maxSignedCoC = max(max(coc00, coc10), max(coc01, coc11));
 let avgCoC = (coc00 + coc10 + coc01 + coc11) * 0.25;
-let edgeDiscontinuity = clamp(maxSignedCoC - minSignedCoC - 0.5, 0.0, 1.0);
-let tileCoC = mix(avgCoC, minSignedCoC, edgeDiscontinuity);
+
+// [KO] 실질적인 전경 비초점(minSignedCoC < -0.25) 실루엣에서만 최소 전경 CoC를 우선 채택하고, 합초-배경 경계에서는 연속 평균 CoC를 유지하여 TAA 지터 시 타일 점프를 방지
+// [EN] Prioritize min foreground CoC only on genuine foreground defocus silhouettes (minSignedCoC < -0.25) while keeping continuous average CoC on in-focus/background edges to prevent tile jumping under TAA jitter
+let fgDiscontinuity = clamp(maxSignedCoC - minSignedCoC - 0.5, 0.0, 1.0) * smoothstep(-0.25, -1.25, minSignedCoC);
+var tileCoC = mix(avgCoC, minSignedCoC, fgDiscontinuity);
 
 let col00 = textureLoad(sourceTexture, c00, 0).rgb;
 let col10 = textureLoad(sourceTexture, c10, 0).rgb;
 let col01 = textureLoad(sourceTexture, c01, 0).rgb;
 let col11 = textureLoad(sourceTexture, c11, 0).rgb;
 
-// [KO] CoC 반경 차이(단위: 텍셀)에 기반한 양방향(Bilateral) 가중 평균으로 깊이 경계 컬러 리크(Halo) 차단
-// [EN] Prevent depth-edge color leaking (Halo) via bilateral weighted average based on CoC radius difference (in texels)
+var hasValidHistory: bool = false;
+var prevSample = vec4<f32>(0.0);
+var minOuterCoC = minSignedCoC;
+var maxOuterCoC = maxSignedCoC;
+var temporalCoCBlend: f32 = 1.0;
+
+if (uniforms.historyValid == 1u) {
+    let cL = clamp(baseCoord + vec2<i32>(-1, 0), vec2<i32>(0), maxCoord);
+    let cR = clamp(baseCoord + vec2<i32>(2, 0), vec2<i32>(0), maxCoord);
+    let cU = clamp(baseCoord + vec2<i32>(0, -1), vec2<i32>(0), maxCoord);
+    let cD = clamp(baseCoord + vec2<i32>(0, 2), vec2<i32>(0), maxCoord);
+
+    let cocL = calculatePhysicalHalfCoC(reconstructViewDepth(cL, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+    let cocR = calculatePhysicalHalfCoC(reconstructViewDepth(cR, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+    let cocU = calculatePhysicalHalfCoC(reconstructViewDepth(cU, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+    let cocD = calculatePhysicalHalfCoC(reconstructViewDepth(cD, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+
+    minOuterCoC = min(minSignedCoC, min(min(cocL, cocR), min(cocU, cocD)));
+    maxOuterCoC = max(maxSignedCoC, max(max(cocL, cocR), max(cocU, cocD)));
+
+    let velocity = textureLoad(gBufferMotionVector, c00, 0).xy;
+    if (velocity.x <= 10.0) {
+        let centerUV = (vec2<f32>(index) + 0.5) / max(halfDims, vec2<f32>(1.0));
+        let prevUV = centerUV - velocity;
+        if (all(prevUV >= vec2<f32>(0.0)) && all(prevUV <= vec2<f32>(1.0))) {
+            prevSample = textureSampleLevel(prevCoCTexture, basicSampler, prevUV, 0.0);
+            hasValidHistory = true;
+
+            let clampedPrevCoC = clamp(prevSample.a, minOuterCoC, maxOuterCoC);
+            let motionPixels = length(velocity * vec2<f32>(fullDims));
+            temporalCoCBlend = clamp(0.10 + motionPixels * 0.15, 0.10, 0.65);
+            tileCoC = mix(clampedPrevCoC, tileCoC, temporalCoCBlend);
+        }
+    }
+}
+
+// [KO] 시간 안정화된 tileCoC 기준 양방향(Bilateral) 가중 평균 및 이웃 컬러 AABB 클램핑 누적
+// [EN] Bilateral weighted average based on temporally stabilized tileCoC and neighborhood color AABB clamped accumulation
 let w00 = 1.0 / (0.25 + abs(coc00 - tileCoC) * 4.0);
 let w10 = 1.0 / (0.25 + abs(coc10 - tileCoC) * 4.0);
 let w01 = 1.0 / (0.25 + abs(coc01 - tileCoC) * 4.0);
 let w11 = 1.0 / (0.25 + abs(coc11 - tileCoC) * 4.0);
 let wSum = w00 + w10 + w01 + w11;
 
-let downsampledColor = (col00 * w00 + col10 * w10 + col01 * w01 + col11 * w11) / wSum;
+var downsampledColor = (col00 * w00 + col10 * w10 + col01 * w01 + col11 * w11) / wSum;
+
+if (hasValidHistory) {
+    let minCol = min(min(col00, col10), min(col01, col11));
+    let maxCol = max(max(col00, col10), max(col01, col11));
+    let colMargin = (maxCol - minCol) * 0.15;
+    let clampedPrevColor = clamp(prevSample.rgb, max(vec3<f32>(0.0), minCol - colMargin), maxCol + colMargin);
+    downsampledColor = mix(clampedPrevColor, downsampledColor, temporalCoCBlend);
+}
 
 textureStore(outputTexture, index, vec4<f32>(downsampledColor, tileCoC));
