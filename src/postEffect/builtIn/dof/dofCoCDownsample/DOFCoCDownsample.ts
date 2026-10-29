@@ -11,8 +11,8 @@ import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 /**
- * [KO] 물리 카메라 센서(`sensorSize`) 및 Thin-Lens 광학 공식으로 절반 해상도(`1/2`) 착란원 반경(단위: 텍셀)을 산출하고 CoC-Aware 양방향 다운샘플링을 수행하는 내부 서브패스입니다.
- * [EN] Internal sub-pass that computes half-resolution (`1/2`) Circle of Confusion radius (in texels) using physical camera sensor (`sensorSize`) and Thin-Lens optics, and performs CoC-aware bilateral downsampling.
+ * [KO] 35mm 풀프레임 센서(`24mm`) 및 Thin-Lens 광학 공식으로 절반 해상도(`1/2`) 착란원 반경(단위: 텍셀)을 자동 산출하고 CoC-Aware 양방향 다운샘플링을 수행하는 내부 서브패스입니다.
+ * [EN] Internal sub-pass that automatically computes half-resolution (`1/2`) Circle of Confusion radius (in texels) using a 35mm full-frame sensor (`24mm`) and Thin-Lens optics, and performs CoC-aware bilateral downsampling.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -25,8 +25,6 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
     #focusDistance: number = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
     #aperture: number = DOF_CONFIG.DEFAULT_APERTURE;
     #focalLength: number = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
-    #sensorSize: number = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-    #maxCoC: number = DOF_CONFIG.DEFAULT_MAX_COC;
     #useAutoFocus: number = 0;
     #historyValid: number = 0;
 
@@ -79,28 +77,6 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
         if (this.#focalLength === value) return;
         this.#focalLength = value;
         this.updateUniform('focalLength', value);
-    }
-
-    get sensorSize(): number {
-        return this.#sensorSize;
-    }
-
-    set sensorSize(value: number) {
-        validateNumberRange(value, DOF_CONFIG.MIN_SENSOR_SIZE, DOF_CONFIG.MAX_SENSOR_SIZE);
-        if (this.#sensorSize === value) return;
-        this.#sensorSize = value;
-        this.updateUniform('sensorSize', value);
-    }
-
-    get maxCoC(): number {
-        return this.#maxCoC;
-    }
-
-    set maxCoC(value: number) {
-        validateNumberRange(value, DOF_CONFIG.MIN_MAX_COC, DOF_CONFIG.MAX_MAX_COC);
-        if (this.#maxCoC === value) return;
-        this.#maxCoC = value;
-        this.updateUniform('maxCoC', value);
     }
 
     get useAutoFocus(): number {

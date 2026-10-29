@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792989250000";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792989250000";
+import * as RedGPU from "../../../../dist/index.js?t=1792990800000";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792990800000";
 
 /**
  * [KO] Depth of Field - Auto Focus (DOF 자동 초점) 예제
@@ -458,7 +458,6 @@ const renderTestPane = (
                 useAutoFocusControl,
                 syncLensProperty('focalLength', 12, 200, 1),
                 syncLensProperty('aperture', 0.7, 22.0, 0.1),
-                syncLensProperty('maxCoC', 8, 64, 1),
                 syncLensProperty('bladeCount', 0, 9, 1),
                 syncLensProperty('bokehBrightness', 0, 5.0, 0.1)
             ];

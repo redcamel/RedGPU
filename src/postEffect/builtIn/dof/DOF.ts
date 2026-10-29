@@ -71,8 +71,6 @@ class DOF extends AMultiPassPostEffect {
     #focusDistance: number = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
     #aperture: number = DOF_CONFIG.DEFAULT_APERTURE;
     #focalLength: number = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
-    #sensorSize: number = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-    #maxCoC: number = DOF_CONFIG.DEFAULT_MAX_COC;
     #bladeCount: number = DOF_CONFIG.DEFAULT_BLADE_COUNT;
     #bokehBrightness: number = DOF_CONFIG.DEFAULT_BOKEH_BRIGHTNESS;
 
@@ -212,51 +210,6 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 카메라 센서 세로 높이 $H_{\text{sensor}}$(단위: `mm`)를 반환하거나 설정합니다. (`4.0 ~ 70.0`, 기본값: `24.0`, 35mm 풀프레임 표준)
-     * [EN] Gets or sets the vertical camera sensor height $H_{\text{sensor}}$ (in `mm`). (`4.0 ~ 70.0`, default: `24.0`, 35mm full-frame standard)
-     *
-     * @defaultValue 24.0
-     * @returns
-     * [KO] 센서 세로 높이 (`mm`)
-     * [EN] Vertical sensor height (`mm`)
-     */
-    get sensorSize(): number {
-        return this.#sensorSize;
-    }
-
-    set sensorSize(value: number) {
-        validateNumberRange(value, DOF_CONFIG.MIN_SENSOR_SIZE, DOF_CONFIG.MAX_SENSOR_SIZE);
-        if (this.#sensorSize === value) return;
-        this.#sensorSize = value;
-        this.#cocDownsamplePass.sensorSize = value;
-        this.#compositePass.sensorSize = value;
-    }
-
-    /**
-     * [KO] 최대 허용 착란원(CoC) 반경 상한(단위: 풀해상도 픽셀 `px`)을 반환하거나 설정합니다. (`4.0 ~ 64.0`, 기본값: `32.0`)
-     * [EN] Gets or sets the maximum allowed Circle of Confusion (CoC) radius cap (in full-resolution pixels `px`). (`4.0 ~ 64.0`, default: `32.0`)
-     *
-     * @defaultValue 32.0
-     * @returns
-     * [KO] 최대 착란원 반경 (`px`)
-     * [EN] Maximum CoC radius (`px`)
-     */
-    get maxCoC(): number {
-        return this.#maxCoC;
-    }
-
-    set maxCoC(value: number) {
-        validateNumberRange(value, DOF_CONFIG.MIN_MAX_COC, DOF_CONFIG.MAX_MAX_COC);
-        if (this.#maxCoC === value) return;
-        this.#maxCoC = value;
-        this.#cocDownsamplePass.maxCoC = value;
-        this.#tileMaxCoCPass.maxCoC = value;
-        this.#bokehBlurBgPass.maxCoC = value;
-        this.#bokehBlurFgPass.maxCoC = value;
-        this.#compositePass.maxCoC = value;
-    }
-
-    /**
      * [KO] 조리개 날 개수(`0 ~ 9`)를 반환하거나 설정합니다. `0 ~ 2`는 완전 원형 보케, `3 ~ 9`는 정다각형 조리개 보케를 생성합니다. (기본값: `6`)
      * [EN] Gets or sets the aperture blade count (`0 ~ 9`). `0 ~ 2` produces circular bokeh; `3 ~ 9` produces regular polygonal aperture bokeh. (Default: `6`)
      *
@@ -353,8 +306,6 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
         this.focalLength = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
         this.aperture = DOF_CONFIG.DEFAULT_APERTURE;
-        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-        this.maxCoC = DOF_CONFIG.DEFAULT_MAX_COC;
         this.bladeCount = DOF_CONFIG.DEFAULT_BLADE_COUNT;
         this.bokehBrightness = DOF_CONFIG.DEFAULT_BOKEH_BRIGHTNESS;
     }
@@ -367,8 +318,6 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 10.0;
         this.focalLength = 85.0;
         this.aperture = 1.4;
-        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-        this.maxCoC = 40.0;
         this.bladeCount = 8;
         this.bokehBrightness = 2.2;
     }
@@ -381,8 +330,6 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 7.5;
         this.focalLength = 85.0;
         this.aperture = 1.4;
-        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-        this.maxCoC = 36.0;
         this.bladeCount = 0;
         this.bokehBrightness = 1.8;
     }
@@ -395,8 +342,6 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 25.0;
         this.focalLength = 24.0;
         this.aperture = 8.0;
-        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-        this.maxCoC = 16.0;
         this.bladeCount = 6;
         this.bokehBrightness = 1.0;
     }
@@ -409,8 +354,6 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 4.2;
         this.focalLength = 105.0;
         this.aperture = 2.0;
-        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-        this.maxCoC = 44.0;
         this.bladeCount = 0;
         this.bokehBrightness = 2.4;
     }
@@ -423,8 +366,6 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 18.0;
         this.focalLength = 135.0;
         this.aperture = 2.8;
-        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-        this.maxCoC = 28.0;
         this.bladeCount = 6;
         this.bokehBrightness = 1.4;
     }
@@ -437,8 +378,6 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 9.0;
         this.focalLength = 75.0;
         this.aperture = 1.2;
-        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-        this.maxCoC = 44.0;
         this.bladeCount = 6;
         this.bokehBrightness = 3.5;
     }

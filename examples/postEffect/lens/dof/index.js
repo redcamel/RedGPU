@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792988560000";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792988560000";
+import * as RedGPU from "../../../../dist/index.js?t=1792990800000";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792990800000";
 
 /**
  * [KO] Depth of Field (DOF) 예제
@@ -225,8 +225,6 @@ const renderTestPane = (redGPUContext, targetView, effect, controller, container
                 folder.addBinding(effect, 'focusDistance', {min: 2.0, max: 30.0, step: 0.1}),
                 folder.addBinding(effect, 'focalLength', {min: 12, max: 200, step: 1}),
                 folder.addBinding(effect, 'aperture', {min: 0.7, max: 22.0, step: 0.1}),
-                folder.addBinding(effect, 'sensorSize', {min: 12, max: 48, step: 1}),
-                folder.addBinding(effect, 'maxCoC', {min: 8, max: 64, step: 1}),
                 folder.addBinding(effect, 'bladeCount', {min: 0, max: 9, step: 1}),
                 folder.addBinding(effect, 'bokehBrightness', {min: 0, max: 5.0, step: 0.1})
             ];

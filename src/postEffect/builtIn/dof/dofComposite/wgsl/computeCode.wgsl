@@ -12,8 +12,7 @@ let halfToFullScale = fullDims.y / max(halfDims.y, 1.0);
 
 // [KO] 1. 풀해상도(1x1) 5-Tap 십자 깊이 범위 및 시간 안정화된 CoC(cocTexture) 결합으로 2x2 블록 계단 현상과 TAA 서브픽셀 경계 떨림을 동시 제거
 // [EN] 1. Combine full-resolution (1x1) 5-Tap cross depth bounds with temporally stabilized CoC (cocTexture) to eliminate both 2x2 blocky silhouettes and TAA sub-pixel edge jitter
-let dpr = min(systemUniforms.devicePixelRatio, 2.0);
-let maxHalfCoC = 0.5 * uniforms.maxCoC * dpr;
+let maxHalfCoC = computeAutoMaxHalfCoC(systemUniforms.devicePixelRatio);
 let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
 let invProjZW = extractInvProjZW(systemUniforms.projection.inverseProjectionMatrix);
 
@@ -29,7 +28,6 @@ if (uniforms.useAutoFocus == 1u) {
 let lensParams = computeDOFCoCLensParams(
     uniforms.aperture,
     uniforms.focalLength,
-    uniforms.sensorSize,
     effectiveFocusDistance,
     halfDims.y
 );
@@ -90,7 +88,8 @@ if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
 // [KO] 3. 배경(Background) 보케 버퍼 조건부 9-Tap CoC-Bilateral Tent 업샘플링 및 블렌딩 (초점 영역 0-Tap 조기 스킵)
 // [EN] 3. Conditional Background bokeh buffer 9-Tap CoC-Bilateral Tent upsampling and blending (0-Tap early skip in in-focus regions)
 let d = halfTexelSize.xyxy * vec4<f32>(1.0, 1.0, -1.0, 0.0);
-let farBokehBlend = select(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(1.25, 2.5, -exactHalfCoC), exactHalfCoC < 0.0);
+let isForegroundPixel = exactHalfCoC < -0.25;
+let farBokehBlend = select(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(0.25, 1.5, -exactHalfCoC), isForegroundPixel);
 
 var compositedBgColor = baseFullResColor;
 if (farBokehBlend > 1e-3) {
@@ -104,7 +103,10 @@ if (farBokehBlend > 1e-3) {
     let b12 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.wy, 0.0);
     let b22 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xy, 0.0);
 
-    let centerSharpClamp = clamp(abs(exactHalfCoC), 0.0, 1.5);
+    // [KO] 전경 픽셀(isForegroundPixel)에서는 전경 자신의 음수 CoC 절대값이 아닌, 홀필링으로 복원된 실제 후면 배경 CoC(b11.a)를 양방향 가중치 기준으로 사용
+    // [EN] On foreground pixels (isForegroundPixel), use the reconstructed background CoC (b11.a) rather than abs(exactHalfCoC) as the bilateral reference
+    let effectiveBgHalfCoC = select(max(exactHalfCoC, 0.0), b11.a, isForegroundPixel);
+    let centerSharpClamp = clamp(effectiveBgHalfCoC, 0.0, 1.5);
     let bw00 = computeBgUpsampleBilateralWeight(b00.a, centerSharpClamp, 1.0);
     let bw10 = computeBgUpsampleBilateralWeight(b10.a, centerSharpClamp, 2.0);
     let bw20 = computeBgUpsampleBilateralWeight(b20.a, centerSharpClamp, 1.0);
@@ -116,11 +118,32 @@ if (farBokehBlend > 1e-3) {
     let bw22 = computeBgUpsampleBilateralWeight(b22.a, centerSharpClamp, 1.0);
 
     let bgWeightSum = max(bw00 + bw10 + bw20 + bw01 + bw11 + bw21 + bw02 + bw12 + bw22, 1e-4);
-    let upsampledBgColor = (
+    var upsampledBgColor = (
         b00.rgb * bw00 + b10.rgb * bw10 + b20.rgb * bw20 +
         b01.rgb * bw01 + b11.rgb * bw11 + b21.rgb * bw21 +
         b02.rgb * bw02 + b12.rgb * bw12 + b22.rgb * bw22
     ) / bgWeightSum;
+
+    // [KO] 전경 실루엣 경계 내부(1~3px)에서 후면 배경이 초점/미세 비초점 구간(effectiveBgHalfCoC < 1.5)일 때, 인접 비차폐 풀해상도 원본 탭을 결합하여 1/2 해상도 경계 단차 제거
+    // [EN] Inside the foreground silhouette boundary (1~3px) when the background is in-focus/slight-DoF (effectiveBgHalfCoC < 1.5), blend adjacent unoccluded full-res source taps to eliminate the 1/2-res boundary step
+    if (isForegroundPixel && effectiveBgHalfCoC < 1.5) {
+        var fullResBgSum = vec3<f32>(0.0);
+        var fullResBgWeight: f32 = 0.0;
+        for (var i = 0u; i < 8u; i = i + 1u) {
+            let tapUV = saturate(uv + SLIGHT_DOF_OFFSETS[i] * 2.5 * invFullDims);
+            let tapHalfCoC = textureSampleLevel(cocTexture, basicSampler, tapUV, 0.0).a;
+            if (tapHalfCoC > -0.15 && tapHalfCoC < 1.5) {
+                let w = smoothstep(-0.15, 0.1, tapHalfCoC) * (1.0 - smoothstep(0.5, 1.5, tapHalfCoC));
+                fullResBgSum += textureSampleLevel(sourceTexture, basicSampler, tapUV, 0.0).rgb * w;
+                fullResBgWeight += w;
+            }
+        }
+        if (fullResBgWeight > 1e-4) {
+            let fullResBgSharpness = 1.0 - smoothstep(0.35, 1.35, effectiveBgHalfCoC);
+            let edgeReach = saturate(fullResBgWeight * 0.5) * fullResBgSharpness;
+            upsampledBgColor = mix(upsampledBgColor, fullResBgSum / fullResBgWeight, edgeReach);
+        }
+    }
 
     compositedBgColor = mix(baseFullResColor, upsampledBgColor, farBokehBlend);
 }

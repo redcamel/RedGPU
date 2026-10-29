@@ -1,7 +1,19 @@
+// [KO] 35mm 풀프레임 표준 세로 센서 높이(24.0mm) 및 5-Ring + Mip 2(1/8) 나이퀴스트 샘플링 한계 기반 최대 착란원 반경(36.0px)
+// [EN] 35mm full-frame standard vertical sensor height (24.0mm) and 5-Ring + Mip 2 (1/8) Nyquist-safe maximum CoC radius (36.0px)
+const DOF_SENSOR_HEIGHT_MM: f32 = 24.0;
+const DOF_MAX_COC_FULL_PX: f32 = 36.0;
+
 struct DOFCoCLensParams {
     focusDistMM: f32,
     cocScale: f32,
 };
+
+// [KO] 디스플레이 DPR 및 5-Ring + Mip 2 커널 대역폭에 기반한 절반 해상도 최대 착란원 반경(maxHalfCoC) 자동 산출
+// [EN] Automatically compute maximum half-resolution CoC radius (maxHalfCoC) from display DPR and 5-Ring + Mip 2 kernel budget
+fn computeAutoMaxHalfCoC(devicePixelRatio: f32) -> f32 {
+    let dpr = clamp(devicePixelRatio, 1.0, 2.0);
+    return 0.5 * DOF_MAX_COC_FULL_PX * dpr;
+}
 
 // [KO] 원근(TAA 지터 포함) 및 직교 역투영 행렬에서 뷰 깊이(Z/W) 복원에 필요한 3·4열 Z/W 계수만 추출 (invProj[0..1].zw === 0 항등 이용)
 // [EN] Extract Z/W coefficients of columns 2 and 3 from perspective (including TAA jitter) or orthographic inverse projection matrix (using invProj[0..1].zw === 0 identity)
@@ -16,20 +28,18 @@ fn reconstructViewDepthFromRaw(rawDepth: f32, invProjZW: vec4<f32>, minNearDepth
     return max(minNearDepth, viewZ);
 }
 
-// [KO] 기하광학 Thin-Lens 공식의 픽셀 불변 렌즈 비례 계수(cocScale) 및 초점 거리(mm) 사전 산출
-// [EN] Precompute thread-invariant geometric Thin-Lens CoC scale factor (cocScale) and focus distance (mm)
+// [KO] 35mm 풀프레임 센서(24mm) 기준 기하광학 Thin-Lens 공식의 픽셀 불변 렌즈 비례 계수(cocScale) 및 초점 거리(mm) 사전 산출
+// [EN] Precompute thread-invariant geometric Thin-Lens CoC scale factor (cocScale) and focus distance (mm) for a 35mm full-frame sensor (24mm)
 fn computeDOFCoCLensParams(
     aperture: f32,
     focalLength: f32,
-    sensorSize: f32,
     effectiveFocusDistance: f32,
     halfScreenHeight: f32
 ) -> DOFCoCLensParams {
     let safeAperture = max(aperture, 0.1);
     let safeFocalLength = max(focalLength, 1.0);
-    let safeSensorSize = max(sensorSize, 1.0);
     let focusDistMM = max(effectiveFocusDistance * 1000.0, safeFocalLength + 1.0);
-    let cocScale = (0.5 * halfScreenHeight * safeFocalLength * safeFocalLength) / (safeAperture * (focusDistMM - safeFocalLength) * safeSensorSize);
+    let cocScale = (0.5 * halfScreenHeight * safeFocalLength * safeFocalLength) / (safeAperture * (focusDistMM - safeFocalLength) * DOF_SENSOR_HEIGHT_MM);
     return DOFCoCLensParams(focusDistMM, cocScale);
 }
 

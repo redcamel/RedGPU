@@ -2,11 +2,7 @@ struct Uniforms {
     focusDistance: f32,
     aperture: f32,
     focalLength: f32,
-    sensorSize: f32,
-    maxCoC: f32,
     useAutoFocus: u32,
-    pad0: f32, // 16-byte tail alignment
-    pad1: f32,
 };
 
 const INV_SQRT2: f32 = 1.0 / sqrt(2.0);

@@ -25,8 +25,6 @@ class DOFComposite extends ASinglePassPostEffect {
     #focusDistance: number = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
     #aperture: number = DOF_CONFIG.DEFAULT_APERTURE;
     #focalLength: number = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
-    #sensorSize: number = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
-    #maxCoC: number = DOF_CONFIG.DEFAULT_MAX_COC;
     #useAutoFocus: number = 0;
 
     /**
@@ -88,28 +86,6 @@ class DOFComposite extends ASinglePassPostEffect {
         if (this.#focalLength === value) return;
         this.#focalLength = value;
         this.updateUniform('focalLength', value);
-    }
-
-    get sensorSize(): number {
-        return this.#sensorSize;
-    }
-
-    set sensorSize(value: number) {
-        validateNumberRange(value, DOF_CONFIG.MIN_SENSOR_SIZE, DOF_CONFIG.MAX_SENSOR_SIZE);
-        if (this.#sensorSize === value) return;
-        this.#sensorSize = value;
-        this.updateUniform('sensorSize', value);
-    }
-
-    get maxCoC(): number {
-        return this.#maxCoC;
-    }
-
-    set maxCoC(value: number) {
-        validateNumberRange(value, DOF_CONFIG.MIN_MAX_COC, DOF_CONFIG.MAX_MAX_COC);
-        if (this.#maxCoC === value) return;
-        this.#maxCoC = value;
-        this.updateUniform('maxCoC', value);
     }
 
     get useAutoFocus(): number {

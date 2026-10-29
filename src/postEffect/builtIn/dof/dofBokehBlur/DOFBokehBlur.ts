@@ -21,7 +21,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  * @category PostEffect
  */
 class DOFBokehBlur extends ASinglePassPostEffect {
-    #maxCoC: number = DOF_CONFIG.DEFAULT_MAX_COC;
     #bokehBrightness: number = DOF_CONFIG.DEFAULT_BOKEH_BRIGHTNESS;
     #bladeCount: number = DOF_CONFIG.DEFAULT_BLADE_COUNT;
     #passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND;
@@ -45,17 +44,6 @@ class DOFBokehBlur extends ASinglePassPostEffect {
                 false
             )
         );
-    }
-
-    get maxCoC(): number {
-        return this.#maxCoC;
-    }
-
-    set maxCoC(value: number) {
-        validateNumberRange(value, DOF_CONFIG.MIN_MAX_COC, DOF_CONFIG.MAX_MAX_COC);
-        if (this.#maxCoC === value) return;
-        this.#maxCoC = value;
-        this.updateUniform('maxCoC', value);
     }
 
     get bokehBrightness(): number {

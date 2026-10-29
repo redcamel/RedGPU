@@ -12,8 +12,7 @@ let d11Coord = clamp(baseCoord + vec2<i32>(1, 1), vec2<i32>(0), maxDepthCoord);
 
 let invProjZW = extractInvProjZW(systemUniforms.projection.inverseProjectionMatrix);
 let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
-let dpr = min(systemUniforms.devicePixelRatio, 2.0);
-let maxHalfCoC = 0.5 * uniforms.maxCoC * dpr;
+let maxHalfCoC = computeAutoMaxHalfCoC(systemUniforms.devicePixelRatio);
 
 let minFocusDepth = max(systemUniforms.camera.nearClipping, 0.01);
 let maxFocusDepth = min(max(systemUniforms.camera.farClipping, minFocusDepth + 1.0), 65000.0);
@@ -27,7 +26,6 @@ if (uniforms.useAutoFocus == 1u) {
 let lensParams = computeDOFCoCLensParams(
     uniforms.aperture,
     uniforms.focalLength,
-    uniforms.sensorSize,
     effectiveFocusDistance,
     halfDims.y
 );
