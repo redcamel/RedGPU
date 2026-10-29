@@ -83,15 +83,26 @@ for (var i = 0u; i < 9u; i = i + 1u) {
 
 var rawMeasuredDepth = prevMeasuredDist;
 if (anyValid) {
-    // [KO] 전경 피사체 클러스터(최단 깊이 대비 15% 두께)를 통합 가중 평균하여 캐릭터 팔/다리 움직임에 의한 깊이 출렁임과 배경 누수를 동시에 차단
-    // [EN] Weight the foreground subject cluster (15% thickness of closest depth) to prevent both limb-swing depth hunting and background leakage
-    let depthFalloffScale = max(minValidDepth * 0.15, 0.6);
+    // [KO] 중앙 십자(0..4번) 측거점에 유효 피사체가 존재하면 해당 최단 표면을 기준 깊이로 삼아 외곽 코너(5..8번)의 전경 스침 간섭을 방지하고,
+    //      최단 표면 대비 2.5%(최소 5cm) 전면 표면 클러스터만 집중 가중 평균하여 곡면 피사체 측면이나 후방 모뉴먼트로 초점이 밀리는 현상을 원천 차단
+    // [EN] Anchor reference depth to the inner cross (points 0..4) when valid to prevent outer corner (5..8) grazing interference,
+    //      and tightly weight the front-most surface cluster (2.5% of depth, min 5cm) so focus locks onto the front visor/face rather than receding sides or backdrop monuments
+    var innerMinDepth: f32 = maxFocusDepth;
+    var hasInnerValid: bool = false;
+    for (var k = 0u; k < 5u; k = k + 1u) {
+        if (sampleValid[k]) {
+            innerMinDepth = min(innerMinDepth, sampleDepths[k]);
+            hasInnerValid = true;
+        }
+    }
+    let referenceSurfaceDepth = select(minValidDepth, innerMinDepth, hasInnerValid);
+    let depthFalloffScale = max(referenceSurfaceDepth * 0.025, 0.05);
     var weightedDepthSum: f32 = 0.0;
     var weightSum: f32 = 0.0;
     for (var i = 0u; i < 9u; i = i + 1u) {
         if (sampleValid[i]) {
-            let distFromClosest = max(0.0, sampleDepths[i] - minValidDepth);
-            let proximityWeight = exp(-distFromClosest / depthFalloffScale);
+            let distFromFront = abs(sampleDepths[i] - referenceSurfaceDepth);
+            let proximityWeight = exp(-distFromFront / depthFalloffScale);
             let w = AF_ZONE_WEIGHTS[i] * proximityWeight;
             weightedDepthSum += sampleDepths[i] * w;
             weightSum += w;
@@ -106,28 +117,29 @@ let rawDt = systemUniforms.time.deltaTime;
 let defaultFrameDt = 1.0 / 60.0;
 let safeDt = select(defaultFrameDt, clamp(rawDt, 1.0 / 1000.0, 0.1), getIsFiniteScalar(rawDt) && rawDt > 0.0);
 
-let measureAlpha = saturate(1.0 - exp(-12.0 * safeDt));
+let measureAlpha = saturate(1.0 - exp(-14.0 * safeDt));
 let measuredDepth = select(rawMeasuredDepth, mix(prevMeasuredDist, rawMeasuredDepth, measureAlpha), hasPrev);
 
-// [KO] AF-C 목표 앵커 히스테리시스(±12% Deadband): 피사체 애니메이션 및 TAA 지터 구간에서는 목표 앵커를 완전 고정(0.0)하고, 실질적 피사체 전환 시에만 갱신
-// [EN] AF-C Target Anchor Hysteresis (±12% Deadband): completely locks the target anchor (0.0) during subject animation and TAA jitter, updating only on genuine subject transitions
-let anchorRelDiff = abs(measuredDepth - prevAnchorDist) / max(prevAnchorDist, 0.1);
-let anchorShiftWeight = smoothstep(0.12, 0.25, anchorRelDiff);
+// [KO] AF-C 슈미트 트리거(Schmidt-Trigger) 앵커 갱신: 미세 지터 구간(±0.8% 이내, CoC < 0.16px)에서는 앵커를 완전 고정하고,
+//      이를 초과하는 피사체 거리 변화 시에는 보간 정체(Deadband Creep Trap) 없이 실제 측정 표면 깊이(rawMeasuredDepth)로 앵커를 즉시 갱신
+// [EN] AF-C Schmidt-Trigger anchor update: locks the anchor within the micro-jitter deadband (±0.8%, CoC < 0.16px),
+//      and updates directly to rawMeasuredDepth without deadband creep trap whenever subject depth changes beyond 0.8%
+let anchorRelDiff = abs(rawMeasuredDepth - prevAnchorDist) / max(prevAnchorDist, 0.1);
 let nextAnchorDist = select(
-    measuredDepth,
-    mix(prevAnchorDist, measuredDepth, anchorShiftWeight),
+    rawMeasuredDepth,
+    select(prevAnchorDist, rawMeasuredDepth, anchorRelDiff > 0.008),
     hasPrev
 );
 
-// [KO] 프레임 레이트 독립적 지수 감쇠 보간(EMA) 및 수렴 스냅(0.8% 이내 도달 시 목표 앵커에 완전 고정)
-// [EN] Frame-rate independent EMA damping and convergence snap (locks onto target anchor when within 0.8%)
+// [KO] 프레임 레이트 독립적 지수 감쇠 보간(EMA) 및 수렴 스냅(0.15% 이내 도달 시 목표 앵커에 완전 일치)
+// [EN] Frame-rate independent EMA damping and convergence snap (snaps to exact target anchor within 0.15%)
 let alpha = saturate(1.0 - exp(-AF_MOTOR_SPEED * safeDt));
 let distToAnchor = abs(nextAnchorDist - prevFocusDist);
 let nextFocusDist = clamp(
     select(
         nextAnchorDist,
         mix(prevFocusDist, nextAnchorDist, alpha),
-        hasPrev && (distToAnchor > prevFocusDist * 0.008)
+        hasPrev && (distToAnchor > prevFocusDist * 0.0015)
     ),
     minFocusDepth,
     maxFocusDepth
