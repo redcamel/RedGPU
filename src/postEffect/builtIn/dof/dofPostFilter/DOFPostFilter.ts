@@ -4,6 +4,7 @@ import validateUintRange from "../../../../runtimeChecker/validateFunc/validateU
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
+import DOF_CONFIG from "../DOF_CONFIG";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -12,33 +13,30 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  * [EN] Internal sub-pass that independently performs 9-Tap Tent smoothing on the half-resolution (`1/2`) background bokeh buffer (`passMode = 0`) and foreground bokeh+opacity buffer (`passMode = 1`) matching Unreal Engine's `Diaphragm DOF`.
  *
  * ::: warning
- * [KO] 이 클래스는 `DOF` 내부에서 자동으로 생성 및 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created and managed inside `DOF`.<br/>Do not create an instance directly.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category PostEffect
  */
 class DOFPostFilter extends ASinglePassPostEffect {
-    #passMode: number = 0;
+    #passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND;
 
-    constructor(redGPUContext: RedGPUContext, passMode: number = 0) {
+    constructor(redGPUContext: RedGPUContext, passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND) {
         super(redGPUContext);
         this.#passMode = passMode;
-        const {msaa, nonMsaa} = createBasicPostEffectCode(
-            this,
-            computeCode,
-            uniformStructCode,
-            [
-                {name: 'bokehTexture'},
-                {name: 'cocTexture'}
-            ]
-        );
         this.init(
             redGPUContext,
             `POST_EFFECT_DOF_POST_FILTER_MODE_${passMode}`,
-            {msaa, nonMsaa}
+            createBasicPostEffectCode(
+                this,
+                computeCode,
+                uniformStructCode,
+                [
+                    {name: 'bokehTexture'}
+                ]
+            )
         );
-        this.passMode = this.#passMode;
     }
 
     get passMode(): number {
@@ -46,7 +44,8 @@ class DOFPostFilter extends ASinglePassPostEffect {
     }
 
     set passMode(value: number) {
-        validateUintRange(value, 0, 1);
+        validateUintRange(value, DOF_CONFIG.PASS_MODE.BACKGROUND, DOF_CONFIG.PASS_MODE.FOREGROUND);
+        if (this.#passMode === value) return;
         this.#passMode = value;
         this.updateUniform('passMode', value);
     }
@@ -55,10 +54,9 @@ class DOFPostFilter extends ASinglePassPostEffect {
         view: View3D,
         width: number,
         height: number,
-        bokehTextureInfo: IPostEffectResult,
-        cocTextureInfo: IPostEffectResult
+        bokehTextureInfo: IPostEffectResult
     ): IPostEffectResult {
-        return super.render(view, width, height, bokehTextureInfo, cocTextureInfo);
+        return super.render(view, width, height, bokehTextureInfo);
     }
 }
 

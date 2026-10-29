@@ -1,6 +1,4 @@
 let index = global_id.xy;
-let fullDimsI = vec2<i32>(postEffectOutputDimensions);
-let maxFullCoord = max(fullDimsI - vec2<i32>(1), vec2<i32>(0));
 let fullDims = vec2<f32>(postEffectOutputDimensions);
 let invFullDims = 1.0 / fullDims;
 let uv = (vec2<f32>(index) + 0.5) * invFullDims;
@@ -16,27 +14,44 @@ let halfToFullScale = fullDims.y / max(halfDims.y, 1.0);
 // [EN] 1. Combine full-resolution (1x1) 5-Tap cross depth bounds with temporally stabilized CoC (cocTexture) to eliminate both 2x2 blocky silhouettes and TAA sub-pixel edge jitter
 let dpr = min(systemUniforms.devicePixelRatio, 2.0);
 let maxHalfCoC = 0.5 * uniforms.maxCoC * dpr;
-let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
-let effectiveFocusDistance = select(uniforms.focusDistance, focusState.r, focusState.g > 0.5);
-let invProj = systemUniforms.projection.inverseProjectionMatrix;
+let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
+let invProjZW = extractInvProjZW(systemUniforms.projection.inverseProjectionMatrix);
 
-let coordC = clamp(vec2<i32>(index), vec2<i32>(0), maxFullCoord);
-let cocC = calculatePhysicalHalfCoC(reconstructViewDepth(coordC, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+let minFocusDepth = max(systemUniforms.camera.nearClipping, 0.01);
+let maxFocusDepth = min(max(systemUniforms.camera.farClipping, minFocusDepth + 1.0), 65000.0);
+let manualFocusDistance = clamp(uniforms.focusDistance, minFocusDepth, maxFocusDepth);
+var effectiveFocusDistance = manualFocusDistance;
+if (uniforms.useAutoFocus == 1u) {
+    let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
+    effectiveFocusDistance = select(manualFocusDistance, focusState.r, focusState.g > 0.5);
+}
+
+let lensParams = computeDOFCoCLensParams(
+    uniforms.aperture,
+    uniforms.focalLength,
+    uniforms.sensorSize,
+    effectiveFocusDistance,
+    halfDims.y
+);
+
+let maxDepthCoord = max(vec2<i32>(textureDimensions(depthTexture)) - vec2<i32>(1), vec2<i32>(0));
+let coordC = clamp(vec2<i32>(index), vec2<i32>(0), maxDepthCoord);
+let cocC = samplePhysicalHalfCoCAtDepthCoord(coordC, invProjZW, minNearDepth, lensParams, maxHalfCoC);
 
 let ndcJitter = systemUniforms.projection.projectionMatrix[2].xy - systemUniforms.projection.noneJitterProjectionMatrix[2].xy;
 let isTAAActive = (abs(ndcJitter.x) + abs(ndcJitter.y)) > 1e-6;
 
 var exactHalfCoC = cocC;
 if (isTAAActive) {
-    let coordL = clamp(coordC + vec2<i32>(-1, 0), vec2<i32>(0), maxFullCoord);
-    let coordR = clamp(coordC + vec2<i32>(1, 0), vec2<i32>(0), maxFullCoord);
-    let coordU = clamp(coordC + vec2<i32>(0, -1), vec2<i32>(0), maxFullCoord);
-    let coordD = clamp(coordC + vec2<i32>(0, 1), vec2<i32>(0), maxFullCoord);
+    let coordL = clamp(coordC + vec2<i32>(-1, 0), vec2<i32>(0), maxDepthCoord);
+    let coordR = clamp(coordC + vec2<i32>(1, 0), vec2<i32>(0), maxDepthCoord);
+    let coordU = clamp(coordC + vec2<i32>(0, -1), vec2<i32>(0), maxDepthCoord);
+    let coordD = clamp(coordC + vec2<i32>(0, 1), vec2<i32>(0), maxDepthCoord);
 
-    let cocL = calculatePhysicalHalfCoC(reconstructViewDepth(coordL, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
-    let cocR = calculatePhysicalHalfCoC(reconstructViewDepth(coordR, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
-    let cocU = calculatePhysicalHalfCoC(reconstructViewDepth(coordU, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
-    let cocD = calculatePhysicalHalfCoC(reconstructViewDepth(coordD, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+    let cocL = samplePhysicalHalfCoCAtDepthCoord(coordL, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocR = samplePhysicalHalfCoCAtDepthCoord(coordR, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocU = samplePhysicalHalfCoCAtDepthCoord(coordU, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocD = samplePhysicalHalfCoCAtDepthCoord(coordD, invProjZW, minNearDepth, lensParams, maxHalfCoC);
 
     let minCrossCoC = min(cocC, min(min(cocL, cocR), min(cocU, cocD)));
     let maxCrossCoC = max(cocC, max(max(cocL, cocR), max(cocU, cocD)));
@@ -55,7 +70,7 @@ if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
 
     for (var i = 0u; i < 8u; i = i + 1u) {
         let tapOffset = SLIGHT_DOF_OFFSETS[i] * slightRadius;
-        let tapUV = clamp(uv + tapOffset * invFullDims, vec2<f32>(0.0), vec2<f32>(1.0));
+        let tapUV = saturate(uv + tapOffset * invFullDims);
         let tapHalfCoC = textureSampleLevel(cocTexture, basicSampler, tapUV, 0.0).a;
         let tapFullCoC = abs(tapHalfCoC) * halfToFullScale;
         let sameLayerWeight = select(0.25, 1.0, tapHalfCoC * exactHalfCoC >= 0.0);
@@ -89,15 +104,16 @@ if (farBokehBlend > 1e-3) {
     let b12 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.wy, 0.0);
     let b22 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xy, 0.0);
 
-    let bw00 = computeBgUpsampleBilateralWeight(b00.a, exactHalfCoC, 1.0);
-    let bw10 = computeBgUpsampleBilateralWeight(b10.a, exactHalfCoC, 2.0);
-    let bw20 = computeBgUpsampleBilateralWeight(b20.a, exactHalfCoC, 1.0);
-    let bw01 = computeBgUpsampleBilateralWeight(b01.a, exactHalfCoC, 2.0);
-    let bw11 = computeBgUpsampleBilateralWeight(b11.a, exactHalfCoC, 4.0);
-    let bw21 = computeBgUpsampleBilateralWeight(b21.a, exactHalfCoC, 2.0);
-    let bw02 = computeBgUpsampleBilateralWeight(b02.a, exactHalfCoC, 1.0);
-    let bw12 = computeBgUpsampleBilateralWeight(b12.a, exactHalfCoC, 2.0);
-    let bw22 = computeBgUpsampleBilateralWeight(b22.a, exactHalfCoC, 1.0);
+    let centerSharpClamp = clamp(abs(exactHalfCoC), 0.0, 1.5);
+    let bw00 = computeBgUpsampleBilateralWeight(b00.a, centerSharpClamp, 1.0);
+    let bw10 = computeBgUpsampleBilateralWeight(b10.a, centerSharpClamp, 2.0);
+    let bw20 = computeBgUpsampleBilateralWeight(b20.a, centerSharpClamp, 1.0);
+    let bw01 = computeBgUpsampleBilateralWeight(b01.a, centerSharpClamp, 2.0);
+    let bw11 = computeBgUpsampleBilateralWeight(b11.a, centerSharpClamp, 4.0);
+    let bw21 = computeBgUpsampleBilateralWeight(b21.a, centerSharpClamp, 2.0);
+    let bw02 = computeBgUpsampleBilateralWeight(b02.a, centerSharpClamp, 1.0);
+    let bw12 = computeBgUpsampleBilateralWeight(b12.a, centerSharpClamp, 2.0);
+    let bw22 = computeBgUpsampleBilateralWeight(b22.a, centerSharpClamp, 1.0);
 
     let bgWeightSum = max(bw00 + bw10 + bw20 + bw01 + bw11 + bw21 + bw02 + bw12 + bw22, 1e-4);
     let upsampledBgColor = (
@@ -109,16 +125,16 @@ if (farBokehBlend > 1e-3) {
     compositedBgColor = mix(baseFullResColor, upsampledBgColor, farBokehBlend);
 }
 
-// [KO] 4. 전경(Foreground) 보케 및 불투명도(α_fg) 2단계 코너 게이팅 기반 프리멀티플라이드 9-Tap Tent 업샘플링
-// [EN] 4. Foreground bokeh and opacity (α_fg) premultiplied 9-Tap Tent upsampling with 2-stage corner gating
-let f11 = textureSampleLevel(fgBokehTexture, basicSampler, uv, 0.0);
+// [KO] 4. 전경(Foreground) 보케 및 불투명도(α_fg) 4-코너 양선형 볼록 상한 부등식(α_tent <= 3.0625 * sum_corners) 기반 2단계 게이팅 9-Tap Tent 업샘플링
+// [EN] 4. Foreground bokeh and opacity (α_fg) 9-Tap Tent upsampling with 2-stage gating via exact 4-corner bilinear convex upper bound (α_tent <= 3.0625 * sum_corners)
 let f00 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.xy, 0.0);
 let f20 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.zy, 0.0);
 let f02 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.zy, 0.0);
 let f22 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.xy, 0.0);
 
 var finalColor = compositedBgColor;
-if (f11.a + f00.a + f20.a + f02.a + f22.a > 1e-3) {
+if (f00.a + f20.a + f02.a + f22.a > 3e-4) {
+    let f11 = textureSampleLevel(fgBokehTexture, basicSampler, uv, 0.0);
     let f10 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.wy, 0.0);
     let f01 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.zw, 0.0);
     let f21 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.xw, 0.0);
@@ -148,7 +164,7 @@ if (f11.a + f00.a + f20.a + f02.a + f22.a > 1e-3) {
             f02.rgb * fcw02 + f12.rgb * fcw12 + f22.rgb * fcw22
         ) / fgColorWeightSum;
 
-        let finalFgOpacity = clamp(upsampledFgOpacity, 0.0, 1.0);
+        let finalFgOpacity = saturate(upsampledFgOpacity);
         finalColor = mix(compositedBgColor, upsampledFgColor, finalFgOpacity);
     }
 }

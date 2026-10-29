@@ -5,6 +5,8 @@ import validateUintRange from "../../../../runtimeChecker/validateFunc/validateU
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
+import DOF_CONFIG from "../DOF_CONFIG";
+import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -13,33 +15,30 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  * [EN] Internal sub-pass that computes effective focus distance inside the GPU without CPU readback via 9-Point Zone AF multi-point metering on `depthTexture` and Exponential Moving Average (EMA) damping.
  *
  * ::: warning
- * [KO] 이 클래스는 `DOF` 내부에서 자동으로 생성 및 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created and managed inside `DOF`.<br/>Do not create an instance directly.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category PostEffect
  */
 class DOFAutoFocus extends ASinglePassPostEffect {
-    #focusDistance: number = 15.0;
-    #useAutoFocus: number = 0;
+    #focusDistance: number = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
+    #historyMode: number = DOF_CONFIG.AF_HISTORY_MODE.NONE;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 1, workSizeY: 1, workSizeZ: 1});
-        const {msaa, nonMsaa} = createBasicPostEffectCode(
-            this,
-            computeCode,
-            uniformStructCode,
-            [
-                {name: 'prevFocusTexture'}
-            ]
-        );
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_AUTO_FOCUS',
-            {msaa, nonMsaa}
+            createBasicPostEffectCode(
+                this,
+                computeCode,
+                `${uniformStructCode}\n${dofOpticsCommon}`,
+                [
+                    {name: 'prevFocusTexture'}
+                ]
+            )
         );
-        this.focusDistance = this.#focusDistance;
-        this.useAutoFocus = this.#useAutoFocus;
     }
 
     get focusDistance(): number {
@@ -47,19 +46,21 @@ class DOFAutoFocus extends ASinglePassPostEffect {
     }
 
     set focusDistance(value: number) {
-        validateNumberRange(value, 0.1, 10000);
+        validateNumberRange(value, DOF_CONFIG.MIN_FOCUS_DISTANCE, DOF_CONFIG.MAX_FOCUS_DISTANCE);
+        if (this.#focusDistance === value) return;
         this.#focusDistance = value;
         this.updateUniform('focusDistance', value);
     }
 
-    get useAutoFocus(): number {
-        return this.#useAutoFocus;
+    get historyMode(): number {
+        return this.#historyMode;
     }
 
-    set useAutoFocus(value: number) {
-        validateUintRange(value, 0, 1);
-        this.#useAutoFocus = value;
-        this.updateUniform('useAutoFocus', value);
+    set historyMode(value: number) {
+        validateUintRange(value, DOF_CONFIG.AF_HISTORY_MODE.NONE, DOF_CONFIG.AF_HISTORY_MODE.SEED_MANUAL);
+        if (this.#historyMode === value) return;
+        this.#historyMode = value;
+        this.updateUniform('historyMode', value);
     }
 
     render(

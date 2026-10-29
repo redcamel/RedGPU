@@ -1,8 +1,12 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
+import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
+import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
+import DOF_CONFIG from "../DOF_CONFIG";
+import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -15,18 +19,19 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Lens
+ * @category PostEffect
  */
 class DOFComposite extends ASinglePassPostEffect {
-    #focusDistance: number = 15.0;
-    #aperture: number = 2.0;
-    #focalLength: number = 65.0;
-    #sensorSize: number = 24.0;
-    #maxCoC: number = 32.0;
+    #focusDistance: number = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
+    #aperture: number = DOF_CONFIG.DEFAULT_APERTURE;
+    #focalLength: number = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
+    #sensorSize: number = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
+    #maxCoC: number = DOF_CONFIG.DEFAULT_MAX_COC;
+    #useAutoFocus: number = 0;
 
     /**
-     * [KO] DOFComposite 인스턴스를 생성합니다.
-     * [EN] Creates a DOFComposite instance.
+     * [KO] `DOFComposite` 인스턴스를 생성합니다.
+     * [EN] Creates a `DOFComposite` instance.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -40,7 +45,7 @@ class DOFComposite extends ASinglePassPostEffect {
             createBasicPostEffectCode(
                 this,
                 computeCode,
-                uniformStructCode,
+                `${dofOpticsCommon}\n${uniformStructCode}`,
                 [
                     {name: 'sourceTexture'},
                     {name: 'cocTexture'},
@@ -50,11 +55,6 @@ class DOFComposite extends ASinglePassPostEffect {
                 ]
             )
         );
-        this.focusDistance = this.#focusDistance;
-        this.aperture = this.#aperture;
-        this.focalLength = this.#focalLength;
-        this.sensorSize = this.#sensorSize;
-        this.maxCoC = this.#maxCoC;
     }
 
     get focusDistance(): number {
@@ -62,6 +62,8 @@ class DOFComposite extends ASinglePassPostEffect {
     }
 
     set focusDistance(value: number) {
+        validateNumberRange(value, DOF_CONFIG.MIN_FOCUS_DISTANCE, DOF_CONFIG.MAX_FOCUS_DISTANCE);
+        if (this.#focusDistance === value) return;
         this.#focusDistance = value;
         this.updateUniform('focusDistance', value);
     }
@@ -71,6 +73,8 @@ class DOFComposite extends ASinglePassPostEffect {
     }
 
     set aperture(value: number) {
+        validateNumberRange(value, DOF_CONFIG.MIN_APERTURE, DOF_CONFIG.MAX_APERTURE);
+        if (this.#aperture === value) return;
         this.#aperture = value;
         this.updateUniform('aperture', value);
     }
@@ -80,6 +84,8 @@ class DOFComposite extends ASinglePassPostEffect {
     }
 
     set focalLength(value: number) {
+        validateNumberRange(value, DOF_CONFIG.MIN_FOCAL_LENGTH, DOF_CONFIG.MAX_FOCAL_LENGTH);
+        if (this.#focalLength === value) return;
         this.#focalLength = value;
         this.updateUniform('focalLength', value);
     }
@@ -89,6 +95,8 @@ class DOFComposite extends ASinglePassPostEffect {
     }
 
     set sensorSize(value: number) {
+        validateNumberRange(value, DOF_CONFIG.MIN_SENSOR_SIZE, DOF_CONFIG.MAX_SENSOR_SIZE);
+        if (this.#sensorSize === value) return;
         this.#sensorSize = value;
         this.updateUniform('sensorSize', value);
     }
@@ -98,8 +106,21 @@ class DOFComposite extends ASinglePassPostEffect {
     }
 
     set maxCoC(value: number) {
+        validateNumberRange(value, DOF_CONFIG.MIN_MAX_COC, DOF_CONFIG.MAX_MAX_COC);
+        if (this.#maxCoC === value) return;
         this.#maxCoC = value;
         this.updateUniform('maxCoC', value);
+    }
+
+    get useAutoFocus(): number {
+        return this.#useAutoFocus;
+    }
+
+    set useAutoFocus(value: number) {
+        validateUintRange(value, 0, 1);
+        if (this.#useAutoFocus === value) return;
+        this.#useAutoFocus = value;
+        this.updateUniform('useAutoFocus', value);
     }
 
     /**

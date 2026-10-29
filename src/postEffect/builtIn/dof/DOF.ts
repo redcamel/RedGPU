@@ -3,8 +3,10 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
+import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import {IPostEffectResult} from "../../core/types";
+import DOF_CONFIG from "./DOF_CONFIG";
 import DOFAutoFocus from "./dofAutoFocus/DOFAutoFocus";
 import DOFBokehBlur from "./dofBokehBlur/DOFBokehBlur";
 import DOFCoCDownsample from "./dofCoCDownsample/DOFCoCDownsample";
@@ -17,30 +19,39 @@ import DOFTileMaxCoC from "./dofTileMaxCoC/DOFTileMaxCoC";
  * [KO] 언리얼 엔진 5(`Diaphragm DOF`) 규격의 35mm 풀프레임 센서(`sensorSize = 24mm`) 기하광학 Thin-Lens 착란원(CoC), CoC-Aware 양방향 3단 밉체인(`Mip 0 ~ Mip 2`), 타일 최대 착란원 확장(`DOFTileMaxCoC`), 전/배경 Dual-Buffer 분리 정다각형 개더링, 및 풀해상도 Slight Out-of-Focus 8-Tap 직접 개더링·Recombine 기반의 차세대 물리 보케 피사계 심도(Physical Bokeh Depth of Field) 후처리 이펙트입니다.
  * [EN] Next-generation Physical Bokeh Depth of Field (DOF) post-processing effect matching Unreal Engine 5 (`Diaphragm DOF`), featuring 35mm full-frame sensor (`sensorSize = 24mm`) geometric Thin-Lens Circle of Confusion (CoC), CoC-Aware bilateral 3-level mip chain (`Mip 0 ~ Mip 2`), dilated Tile Max CoC (`DOFTileMaxCoC`), foreground/background Dual-Buffer polygonal gathering, and full-resolution Slight Out-of-Focus 8-Tap direct gathering & Recombine.
  *
- * [KO] `View3D`의 [`PostEffectManager.useDOF`](file:///D:/github/RedGPU/src/postEffect/PostEffectManager.ts)를 `true`로 설정하여 활성화하며, `view.postEffectManager.dof`를 통해 카메라 렌즈 파라미터 및 프리셋을 제어합니다.
- * [EN] Activated by setting [`PostEffectManager.useDOF`](file:///D:/github/RedGPU/src/postEffect/PostEffectManager.ts) of `View3D` to `true`, and camera lens parameters and presets are controlled via `view.postEffectManager.dof`.
+ * [KO] `View3D`의 `PostEffectManager.useDOF`를 `true`로 설정하여 시스템 내부에서 자동 활성화하며, `view.postEffectManager.dof`를 통해 카메라 렌즈 파라미터 및 프리셋을 제어합니다.
+ * [EN] Automatically activated by the system when setting `PostEffectManager.useDOF` of `View3D` to `true`, and camera lens parameters and presets are controlled via `view.postEffectManager.dof`.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
  * ### Example
  * ```typescript
+ * // [KO] View3D의 postEffectManager를 통해 DOF 활성화 및 프리셋 적용
+ * // [EN] Enable DOF and apply a preset through View3D's postEffectManager
  * view.postEffectManager.useDOF = true;
  * view.postEffectManager.dof.setCinematic();
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/dof/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/dof/" style="width:100%; height:500px;"></iframe>
  *
+ * @see [DOF example](/RedGPU/examples/postEffect/lens/dof/)
+ * @see [DOF Auto Focus example](/RedGPU/examples/postEffect/lens/dofAutoFocus/)
  * @category PostEffect
  */
 class DOF extends AMultiPassPostEffect {
-    #effect_autoFocus: DOFAutoFocus;
-    #effect_cocDownsample: DOFCoCDownsample;
-    #effect_mipDownsample1: DOFMipDownsample;
-    #effect_mipDownsample2: DOFMipDownsample;
-    #effect_tileMaxCoC: DOFTileMaxCoC;
-    #effect_bokehBlurBg: DOFBokehBlur;
-    #effect_bokehBlurFg: DOFBokehBlur;
-    #effect_postFilterBg: DOFPostFilter;
-    #effect_postFilterFg: DOFPostFilter;
-    #effect_composite: DOFComposite;
+    #autoFocusPass: DOFAutoFocus;
+    #cocDownsamplePass: DOFCoCDownsample;
+    #mipDownsample1Pass: DOFMipDownsample;
+    #mipDownsample2Pass: DOFMipDownsample;
+    #tileMaxCoCPass: DOFTileMaxCoC;
+    #bokehBlurBgPass: DOFBokehBlur;
+    #bokehBlurFgPass: DOFBokehBlur;
+    #postFilterBgPass: DOFPostFilter;
+    #postFilterFgPass: DOFPostFilter;
+    #compositePass: DOFComposite;
 
     #persistentFocusTexture: GPUTexture = null;
     #persistentFocusResult: IPostEffectResult = null;
@@ -52,20 +63,22 @@ class DOF extends AMultiPassPostEffect {
     #persistentCoCResult: IPostEffectResult = null;
     #prevCoCHalfW: number = 0;
     #prevCoCHalfH: number = 0;
-    #cocHistoryValid: number = 0;
+    #isCoCHistoryValid: boolean = false;
     #copyCoCSrcInfo: { texture: GPUTexture } = {texture: null};
     #copyCoCDstInfo: { texture: GPUTexture } = {texture: null};
     #copyCoCExtent: { width: number; height: number } = {width: 1, height: 1};
 
-    #focusDistance: number = 15.0;
-    #aperture: number = 2.0;
-    #focalLength: number = 65.0;
-    #sensorSize: number = 24.0;
-    #maxCoC: number = 32.0;
-    #bladeCount: number = 6;
-    #bokehBrightness: number = 1.5;
+    #focusDistance: number = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
+    #aperture: number = DOF_CONFIG.DEFAULT_APERTURE;
+    #focalLength: number = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
+    #sensorSize: number = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
+    #maxCoC: number = DOF_CONFIG.DEFAULT_MAX_COC;
+    #bladeCount: number = DOF_CONFIG.DEFAULT_BLADE_COUNT;
+    #bokehBrightness: number = DOF_CONFIG.DEFAULT_BOKEH_BRIGHTNESS;
 
     #useAutoFocus: boolean = false;
+    #hasRenderedManualFocus: boolean = false;
+    #isAutoFocusHistoryValid: boolean = false;
 
     /**
      * [KO] `DOF` 인스턴스를 생성합니다.
@@ -76,221 +89,259 @@ class DOF extends AMultiPassPostEffect {
      * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
-        const autoFocus = new DOFAutoFocus(redGPUContext);
-        const cocDownsample = new DOFCoCDownsample(redGPUContext);
-        const mipDownsample1 = new DOFMipDownsample(redGPUContext);
-        const mipDownsample2 = new DOFMipDownsample(redGPUContext);
-        const tileMaxCoC = new DOFTileMaxCoC(redGPUContext);
-        const bokehBlurBg = new DOFBokehBlur(redGPUContext, 0);
-        const bokehBlurFg = new DOFBokehBlur(redGPUContext, 1);
-        const postFilterBg = new DOFPostFilter(redGPUContext, 0);
-        const postFilterFg = new DOFPostFilter(redGPUContext, 1);
-        const composite = new DOFComposite(redGPUContext);
+        const autoFocusPass = new DOFAutoFocus(redGPUContext);
+        const cocDownsamplePass = new DOFCoCDownsample(redGPUContext);
+        const mipDownsample1Pass = new DOFMipDownsample(redGPUContext);
+        const mipDownsample2Pass = new DOFMipDownsample(redGPUContext);
+        const tileMaxCoCPass = new DOFTileMaxCoC(redGPUContext);
+        const bokehBlurBgPass = new DOFBokehBlur(redGPUContext, DOF_CONFIG.PASS_MODE.BACKGROUND);
+        const bokehBlurFgPass = new DOFBokehBlur(redGPUContext, DOF_CONFIG.PASS_MODE.FOREGROUND);
+        const postFilterBgPass = new DOFPostFilter(redGPUContext, DOF_CONFIG.PASS_MODE.BACKGROUND);
+        const postFilterFgPass = new DOFPostFilter(redGPUContext, DOF_CONFIG.PASS_MODE.FOREGROUND);
+        const compositePass = new DOFComposite(redGPUContext);
 
         super(
             redGPUContext,
             [
-                autoFocus,
-                cocDownsample,
-                mipDownsample1,
-                mipDownsample2,
-                tileMaxCoC,
-                bokehBlurBg,
-                bokehBlurFg,
-                postFilterBg,
-                postFilterFg,
-                composite
+                autoFocusPass,
+                cocDownsamplePass,
+                mipDownsample1Pass,
+                mipDownsample2Pass,
+                tileMaxCoCPass,
+                bokehBlurBgPass,
+                bokehBlurFgPass,
+                postFilterBgPass,
+                postFilterFgPass,
+                compositePass
             ]
         );
 
-        this.#effect_autoFocus = autoFocus;
-        this.#effect_cocDownsample = cocDownsample;
-        this.#effect_mipDownsample1 = mipDownsample1;
-        this.#effect_mipDownsample2 = mipDownsample2;
-        this.#effect_tileMaxCoC = tileMaxCoC;
-        this.#effect_bokehBlurBg = bokehBlurBg;
-        this.#effect_bokehBlurFg = bokehBlurFg;
-        this.#effect_postFilterBg = postFilterBg;
-        this.#effect_postFilterFg = postFilterFg;
-        this.#effect_composite = composite;
+        this.#autoFocusPass = autoFocusPass;
+        this.#cocDownsamplePass = cocDownsamplePass;
+        this.#mipDownsample1Pass = mipDownsample1Pass;
+        this.#mipDownsample2Pass = mipDownsample2Pass;
+        this.#tileMaxCoCPass = tileMaxCoCPass;
+        this.#bokehBlurBgPass = bokehBlurBgPass;
+        this.#bokehBlurFgPass = bokehBlurFgPass;
+        this.#postFilterBgPass = postFilterBgPass;
+        this.#postFilterFgPass = postFilterFgPass;
+        this.#compositePass = compositePass;
     }
 
     /**
-     * [KO] 초점이 맺히는 피사체 거리 $S_1$을 반환합니다. (단위: 월드 미터 `m`, 기본값: `15.0`)
-     * [EN] Returns the in-focus subject distance $S_1$. (Unit: world meters `m`, default: `15.0`)
+     * [KO] 모든 내부 서브패스 및 영구 초점·착란원 히스토리 텍스처의 총 비디오 메모리 사용량(바이트)을 반환합니다.
+     * [EN] Returns the total video memory usage (in bytes) of all internal sub-passes and persistent focus/CoC history textures.
+     *
+     * @returns
+     * [KO] 총 비디오 메모리 사용량 (단위: 바이트)
+     * [EN] Total video memory usage (in bytes)
+     */
+    get videoMemorySize(): number {
+        let totalSize = super.videoMemorySize;
+        if (this.#persistentFocusTexture) {
+            totalSize += calculateTextureByteSize(this.#persistentFocusTexture);
+        }
+        if (this.#persistentCoCTexture) {
+            totalSize += calculateTextureByteSize(this.#persistentCoCTexture);
+        }
+        return totalSize;
+    }
+
+    /**
+     * [KO] 초점이 맺히는 피사체 거리 $S_1$을 반환하거나 설정합니다. (단위: 월드 미터 `m`, 허용 범위: `0.1 ~ 10000`, 기본값: `15.0`)
+     * [EN] Gets or sets the in-focus subject distance $S_1$. (Unit: world meters `m`, valid range: `0.1 ~ 10000`, default: `15.0`)
+     *
+     * @defaultValue 15.0
+     * @returns
+     * [KO] 피사체 초점 거리 (`m`)
+     * [EN] Subject focus distance (`m`)
      */
     get focusDistance(): number {
         return this.#focusDistance;
     }
 
-    /**
-     * [KO] 초점이 맺히는 피사체 거리 $S_1$을 설정합니다. (`0.1 ~ 10000`)
-     * [EN] Sets the in-focus subject distance $S_1$. (`0.1 ~ 10000`)
-     */
     set focusDistance(value: number) {
-        validateNumberRange(value, 0.1, 10000);
+        validateNumberRange(value, DOF_CONFIG.MIN_FOCUS_DISTANCE, DOF_CONFIG.MAX_FOCUS_DISTANCE);
+        if (this.#focusDistance === value) return;
         this.#focusDistance = value;
-        this.#effect_autoFocus.focusDistance = value;
-        this.#effect_cocDownsample.focusDistance = value;
-        this.#effect_composite.focusDistance = value;
+        this.#autoFocusPass.focusDistance = value;
+        this.#cocDownsamplePass.focusDistance = value;
+        this.#compositePass.focusDistance = value;
     }
 
     /**
-     * [KO] 조리개 F-값($N$, F-number)을 반환합니다. (기본값: `2.0`)
-     * [EN] Returns the aperture F-number ($N$). (Default: `2.0`)
+     * [KO] 조리개 F-값($N$, F-number)을 반환하거나 설정합니다. 낮을수록(`f/1.4`) 심도가 얕아지고 보케가 커지며, 높을수록(`f/8.0`) 전 영역이 선명해집니다. (`0.5 ~ 32.0`, 기본값: `2.0`)
+     * [EN] Gets or sets the aperture F-number ($N$). Lower values (`f/1.4`) produce shallower depth of field and larger bokeh; higher values (`f/8.0`) keep the entire scene sharp. (`0.5 ~ 32.0`, default: `2.0`)
+     *
+     * @defaultValue 2.0
+     * @returns
+     * [KO] 조리개 F-값
+     * [EN] Aperture F-number
      */
     get aperture(): number {
         return this.#aperture;
     }
 
-    /**
-     * [KO] 조리개 F-값($N$, F-number)을 설정합니다. 낮을수록(`f/1.4`) 심도가 얕아지고 보케가 커지며, 높을수록(`f/8.0`) 전 영역이 선명해집니다. (`0.5 ~ 32.0`)
-     * [EN] Sets the aperture F-number ($N$). Lower values (`f/1.4`) produce shallower depth of field and larger bokeh; higher values (`f/8.0`) keep the entire scene sharp. (`0.5 ~ 32.0`)
-     */
     set aperture(value: number) {
-        validateNumberRange(value, 0.5, 32.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_APERTURE, DOF_CONFIG.MAX_APERTURE);
+        if (this.#aperture === value) return;
         this.#aperture = value;
-        this.#effect_cocDownsample.aperture = value;
-        this.#effect_composite.aperture = value;
+        this.#cocDownsamplePass.aperture = value;
+        this.#compositePass.aperture = value;
     }
 
     /**
-     * [KO] 렌즈 초점 거리 $f$ (단위: `mm`)를 반환합니다. (기본값: `65.0`)
-     * [EN] Returns the lens focal length $f$ (in `mm`). (Default: `65.0`)
+     * [KO] 렌즈 초점 거리 $f$(단위: `mm`)를 반환하거나 설정합니다. 망원(`85mm ~ 135mm`)일수록 배경 압축과 보케 크기가 증가합니다. (`12.0 ~ 300.0`, 기본값: `65.0`)
+     * [EN] Gets or sets the lens focal length $f$ (in `mm`). Longer telephoto focal lengths (`85mm ~ 135mm`) increase background compression and bokeh size. (`12.0 ~ 300.0`, default: `65.0`)
+     *
+     * @defaultValue 65.0
+     * @returns
+     * [KO] 렌즈 초점 거리 (`mm`)
+     * [EN] Lens focal length (`mm`)
      */
     get focalLength(): number {
         return this.#focalLength;
     }
 
-    /**
-     * [KO] 렌즈 초점 거리 $f$ (단위: `mm`)를 설정합니다. 망원(`85mm ~ 135mm`)일수록 배경 압축과 보케 크기가 증가합니다. (`12.0 ~ 300.0`)
-     * [EN] Sets the lens focal length $f$ (in `mm`). Longer telephoto focal lengths (`85mm ~ 135mm`) increase background compression and bokeh size. (`12.0 ~ 300.0`)
-     */
     set focalLength(value: number) {
-        validateNumberRange(value, 12.0, 300.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_FOCAL_LENGTH, DOF_CONFIG.MAX_FOCAL_LENGTH);
+        if (this.#focalLength === value) return;
         this.#focalLength = value;
-        this.#effect_cocDownsample.focalLength = value;
-        this.#effect_composite.focalLength = value;
+        this.#cocDownsamplePass.focalLength = value;
+        this.#compositePass.focalLength = value;
     }
 
     /**
-     * [KO] 카메라 센서 세로 높이 $H_{\text{sensor}}$ (단위: `mm`)를 반환합니다. (기본값: `24.0`, 35mm 풀프레임 표준)
-     * [EN] Returns the vertical camera sensor height $H_{\text{sensor}}$ (in `mm`). (Default: `24.0`, 35mm full-frame standard)
+     * [KO] 카메라 센서 세로 높이 $H_{\text{sensor}}$(단위: `mm`)를 반환하거나 설정합니다. (`4.0 ~ 70.0`, 기본값: `24.0`, 35mm 풀프레임 표준)
+     * [EN] Gets or sets the vertical camera sensor height $H_{\text{sensor}}$ (in `mm`). (`4.0 ~ 70.0`, default: `24.0`, 35mm full-frame standard)
+     *
+     * @defaultValue 24.0
+     * @returns
+     * [KO] 센서 세로 높이 (`mm`)
+     * [EN] Vertical sensor height (`mm`)
      */
     get sensorSize(): number {
         return this.#sensorSize;
     }
 
-    /**
-     * [KO] 카메라 센서 세로 높이 $H_{\text{sensor}}$ (단위: `mm`)를 설정합니다. (`4.0 ~ 70.0`)
-     * [EN] Sets the vertical camera sensor height $H_{\text{sensor}}$ (in `mm`). (`4.0 ~ 70.0`)
-     */
     set sensorSize(value: number) {
-        validateNumberRange(value, 4.0, 70.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_SENSOR_SIZE, DOF_CONFIG.MAX_SENSOR_SIZE);
+        if (this.#sensorSize === value) return;
         this.#sensorSize = value;
-        this.#effect_cocDownsample.sensorSize = value;
-        this.#effect_composite.sensorSize = value;
+        this.#cocDownsamplePass.sensorSize = value;
+        this.#compositePass.sensorSize = value;
     }
 
     /**
-     * [KO] 최대 허용 착란원(CoC) 반경 상한(단위: 풀해상도 픽셀 `px`)을 반환합니다. (기본값: `32.0`)
-     * [EN] Returns the maximum allowed Circle of Confusion (CoC) radius cap (in full-resolution pixels `px`). (Default: `32.0`)
+     * [KO] 최대 허용 착란원(CoC) 반경 상한(단위: 풀해상도 픽셀 `px`)을 반환하거나 설정합니다. (`4.0 ~ 64.0`, 기본값: `32.0`)
+     * [EN] Gets or sets the maximum allowed Circle of Confusion (CoC) radius cap (in full-resolution pixels `px`). (`4.0 ~ 64.0`, default: `32.0`)
+     *
+     * @defaultValue 32.0
+     * @returns
+     * [KO] 최대 착란원 반경 (`px`)
+     * [EN] Maximum CoC radius (`px`)
      */
     get maxCoC(): number {
         return this.#maxCoC;
     }
 
-    /**
-     * [KO] 최대 허용 착란원(CoC) 반경 상한(단위: 풀해상도 픽셀 `px`)을 설정합니다. (`4.0 ~ 64.0`)
-     * [EN] Sets the maximum allowed Circle of Confusion (CoC) radius cap (in full-resolution pixels `px`). (`4.0 ~ 64.0`)
-     */
     set maxCoC(value: number) {
-        validateNumberRange(value, 4.0, 64.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_MAX_COC, DOF_CONFIG.MAX_MAX_COC);
+        if (this.#maxCoC === value) return;
         this.#maxCoC = value;
-        this.#effect_cocDownsample.maxCoC = value;
-        this.#effect_tileMaxCoC.maxCoC = value;
-        this.#effect_bokehBlurBg.maxCoC = value;
-        this.#effect_bokehBlurFg.maxCoC = value;
-        this.#effect_composite.maxCoC = value;
+        this.#cocDownsamplePass.maxCoC = value;
+        this.#tileMaxCoCPass.maxCoC = value;
+        this.#bokehBlurBgPass.maxCoC = value;
+        this.#bokehBlurFgPass.maxCoC = value;
+        this.#compositePass.maxCoC = value;
     }
 
     /**
-     * [KO] 조리개 날 개수(`0 ~ 9`)를 반환합니다. (기본값: `6`)
-     * [EN] Returns the aperture blade count (`0 ~ 9`). (Default: `6`)
+     * [KO] 조리개 날 개수(`0 ~ 9`)를 반환하거나 설정합니다. `0 ~ 2`는 완전 원형 보케, `3 ~ 9`는 정다각형 조리개 보케를 생성합니다. (기본값: `6`)
+     * [EN] Gets or sets the aperture blade count (`0 ~ 9`). `0 ~ 2` produces circular bokeh; `3 ~ 9` produces regular polygonal aperture bokeh. (Default: `6`)
+     *
+     * @defaultValue 6
+     * @returns
+     * [KO] 조리개 날 개수
+     * [EN] Aperture blade count
      */
     get bladeCount(): number {
         return this.#bladeCount;
     }
 
-    /**
-     * [KO] 조리개 날 개수를 설정합니다. `0 ~ 2`는 완전 원형 보케, `3 ~ 9`는 정다각형 조리개 보케를 생성합니다.
-     * [EN] Sets the aperture blade count. `0 ~ 2` produces circular bokeh; `3 ~ 9` produces regular polygonal aperture bokeh.
-     */
     set bladeCount(value: number) {
-        validateUintRange(value, 0, 9);
+        validateUintRange(value, DOF_CONFIG.MIN_BLADE_COUNT, DOF_CONFIG.MAX_BLADE_COUNT);
+        if (this.#bladeCount === value) return;
         this.#bladeCount = value;
-        this.#effect_bokehBlurBg.bladeCount = value;
-        this.#effect_bokehBlurFg.bladeCount = value;
+        this.#bokehBlurBgPass.bladeCount = value;
+        this.#bokehBlurFgPass.bladeCount = value;
     }
 
     /**
-     * [KO] 고휘도 HDR 하이라이트 보케 디스크 강조 강도를 반환합니다. (기본값: `1.5`)
-     * [EN] Returns the high-luminance HDR highlight bokeh disc boost intensity. (Default: `1.5`)
+     * [KO] 고휘도 HDR 하이라이트 보케 디스크 강조 강도를 반환하거나 설정합니다. (`0.0 ~ 5.0`, 기본값: `1.5`)
+     * [EN] Gets or sets the high-luminance HDR highlight bokeh disc boost intensity. (`0.0 ~ 5.0`, default: `1.5`)
+     *
+     * @defaultValue 1.5
+     * @returns
+     * [KO] 보케 하이라이트 강조 강도
+     * [EN] Bokeh highlight boost intensity
      */
     get bokehBrightness(): number {
         return this.#bokehBrightness;
     }
 
-    /**
-     * [KO] 고휘도 HDR 하이라이트 보케 디스크 강조 강도를 설정합니다. (`0.0 ~ 5.0`)
-     * [EN] Sets the high-luminance HDR highlight bokeh disc boost intensity. (`0.0 ~ 5.0`)
-     */
     set bokehBrightness(value: number) {
-        validateNumberRange(value, 0.0, 5.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_BOKEH_BRIGHTNESS, DOF_CONFIG.MAX_BOKEH_BRIGHTNESS);
+        if (this.#bokehBrightness === value) return;
         this.#bokehBrightness = value;
-        this.#effect_bokehBlurBg.bokehBrightness = value;
-        this.#effect_bokehBlurFg.bokehBrightness = value;
+        this.#bokehBlurBgPass.bokehBrightness = value;
+        this.#bokehBlurFgPass.bokehBrightness = value;
     }
 
     /**
-     * [KO] 화면 깊이 버퍼 기반 9-Point Zone 연속 자동 초점(AF-C) 활성화 여부를 반환합니다. (기본값: `false`)
-     * [EN] Returns whether screen-depth-based 9-Point Zone continuous auto-focus (AF-C) is enabled. (Default: `false`)
+     * [KO] 화면 깊이 버퍼 기반 9-Point Zone 연속 자동 초점(AF-C) 활성화 여부를 반환하거나 설정합니다. (기본값: `false`)
+     * [EN] Gets or sets whether screen-depth-based 9-Point Zone continuous auto-focus (AF-C) is enabled. (Default: `false`)
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] 자동 초점 활성화 여부
+     * [EN] Whether auto-focus is enabled
      */
     get useAutoFocus(): boolean {
         return this.#useAutoFocus;
     }
 
-    /**
-     * [KO] 화면 깊이 버퍼 기반 9-Point Zone 연속 자동 초점(AF-C) 활성화 여부를 설정합니다.
-     * [EN] Sets whether screen-depth-based 9-Point Zone continuous auto-focus (AF-C) is enabled.
-     */
     set useAutoFocus(value: boolean) {
-        this.#useAutoFocus = Boolean(value);
-        this.#effect_autoFocus.useAutoFocus = this.#useAutoFocus ? 1 : 0;
+        const nextValue = Boolean(value);
+        if (this.#useAutoFocus === nextValue) return;
+        this.#useAutoFocus = nextValue;
+        const flag = nextValue ? 1 : 0;
+        this.#cocDownsamplePass.useAutoFocus = flag;
+        this.#compositePass.useAutoFocus = flag;
+        if (!nextValue) {
+            this.#isAutoFocusHistoryValid = false;
+        }
     }
 
     /**
-     * [KO] 내부 서브패스 및 영구 초점 상태 텍스처 리소스를 파기합니다.
-     * [EN] Destroys internal sub-passes and persistent focus state texture resources.
+     * [KO] 할당된 영구 초점·착란원 히스토리 텍스처 및 내부 서브패스의 바인드 그룹 캐시를 모두 정리합니다.
+     * [EN] Clears allocated persistent focus/CoC history textures and bind group caches of all internal sub-passes.
+     */
+    clear(): void {
+        this.#releasePersistentFocusTexture();
+        this.#releasePersistentCoCTexture();
+        this.#hasRenderedManualFocus = false;
+        super.clear();
+    }
+
+    /**
+     * [KO] 내부 서브패스 및 영구 초점·착란원 상태 텍스처 리소스를 영구 파기합니다.
+     * [EN] Permanently destroys internal sub-passes and persistent focus/CoC state texture resources.
      */
     destroy(): void {
-        if (this.#persistentFocusTexture) {
-            this.#persistentFocusTexture.destroy();
-            this.#persistentFocusTexture = null;
-            this.#persistentFocusResult = null;
-            this.#copySrcInfo.texture = null;
-            this.#copyDstInfo.texture = null;
-        }
-        if (this.#persistentCoCTexture) {
-            this.#persistentCoCTexture.destroy();
-            this.#persistentCoCTexture = null;
-            this.#persistentCoCResult = null;
-            this.#copyCoCSrcInfo.texture = null;
-            this.#copyCoCDstInfo.texture = null;
-            this.#prevCoCHalfW = 0;
-            this.#prevCoCHalfH = 0;
-            this.#cocHistoryValid = 0;
-        }
+        this.#releasePersistentFocusTexture();
+        this.#releasePersistentCoCTexture();
+        this.#hasRenderedManualFocus = false;
         super.destroy();
     }
 
@@ -299,13 +350,13 @@ class DOF extends AMultiPassPostEffect {
      * [EN] Applies the standard game camera (`65mm f/2.0`, 6-blade aperture) default preset.
      */
     setGameDefault(): void {
-        this.focusDistance = 15.0;
-        this.focalLength = 65.0;
-        this.aperture = 2.0;
-        this.sensorSize = 24.0;
-        this.maxCoC = 32.0;
-        this.bladeCount = 6;
-        this.bokehBrightness = 1.5;
+        this.focusDistance = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
+        this.focalLength = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
+        this.aperture = DOF_CONFIG.DEFAULT_APERTURE;
+        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
+        this.maxCoC = DOF_CONFIG.DEFAULT_MAX_COC;
+        this.bladeCount = DOF_CONFIG.DEFAULT_BLADE_COUNT;
+        this.bokehBrightness = DOF_CONFIG.DEFAULT_BOKEH_BRIGHTNESS;
     }
 
     /**
@@ -316,7 +367,7 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 10.0;
         this.focalLength = 85.0;
         this.aperture = 1.4;
-        this.sensorSize = 24.0;
+        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
         this.maxCoC = 40.0;
         this.bladeCount = 8;
         this.bokehBrightness = 2.2;
@@ -330,7 +381,7 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 7.5;
         this.focalLength = 85.0;
         this.aperture = 1.4;
-        this.sensorSize = 24.0;
+        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
         this.maxCoC = 36.0;
         this.bladeCount = 0;
         this.bokehBrightness = 1.8;
@@ -344,7 +395,7 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 25.0;
         this.focalLength = 24.0;
         this.aperture = 8.0;
-        this.sensorSize = 24.0;
+        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
         this.maxCoC = 16.0;
         this.bladeCount = 6;
         this.bokehBrightness = 1.0;
@@ -358,7 +409,7 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 4.2;
         this.focalLength = 105.0;
         this.aperture = 2.0;
-        this.sensorSize = 24.0;
+        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
         this.maxCoC = 44.0;
         this.bladeCount = 0;
         this.bokehBrightness = 2.4;
@@ -372,7 +423,7 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 18.0;
         this.focalLength = 135.0;
         this.aperture = 2.8;
-        this.sensorSize = 24.0;
+        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
         this.maxCoC = 28.0;
         this.bladeCount = 6;
         this.bokehBrightness = 1.4;
@@ -386,7 +437,7 @@ class DOF extends AMultiPassPostEffect {
         this.focusDistance = 9.0;
         this.focalLength = 75.0;
         this.aperture = 1.2;
-        this.sensorSize = 24.0;
+        this.sensorSize = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
         this.maxCoC = 44.0;
         this.bladeCount = 6;
         this.bokehBrightness = 3.5;
@@ -423,39 +474,65 @@ class DOF extends AMultiPassPostEffect {
         const tileW = Math.max(1, Math.ceil(halfW / 8));
         const tileH = Math.max(1, Math.ceil(halfH / 8));
 
-        // Stage 0: GPU-Driven 9-Point Zone Auto-Focus (1x1 Thread, Zero CPU Readback)
-        const prevFocusResult = this.#ensurePersistentFocusTexture();
-        const currFocusResult = this.#effect_autoFocus.render(view, 1, 1, prevFocusResult);
-        this.#copySrcInfo.texture = currFocusResult.texture;
-        this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyFocusStateCallback);
+        const fallbackFocusResult = this.#ensurePersistentFocusTexture();
+
+        // Stage 0: Conditional GPU-Driven 9-Point Zone Auto-Focus (skipped completely in manual focus mode)
+        let currFocusResult = fallbackFocusResult;
+        const isAutoFocusDispatched = this.#useAutoFocus;
+        if (isAutoFocusDispatched) {
+            const historyMode = this.#isAutoFocusHistoryValid
+                ? DOF_CONFIG.AF_HISTORY_MODE.VALID
+                : (this.#hasRenderedManualFocus ? DOF_CONFIG.AF_HISTORY_MODE.SEED_MANUAL : DOF_CONFIG.AF_HISTORY_MODE.NONE);
+            this.#autoFocusPass.historyMode = historyMode;
+            currFocusResult = this.#autoFocusPass.render(view, 1, 1, fallbackFocusResult);
+            this.#copySrcInfo.texture = currFocusResult.texture;
+            this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyFocusStateCallback);
+            this.#isAutoFocusHistoryValid = true;
+            this.#hasRenderedManualFocus = false;
+        } else {
+            this.#hasRenderedManualFocus = true;
+        }
 
         // Stage 1: CoC-Aware Bilateral Mip Pyramid (Mip 0: 1/2 -> Mip 1: 1/4 -> Mip 2: 1/8)
-        const prevCoCResult = this.#ensurePersistentCoCTexture(halfW, halfH);
-        this.#effect_cocDownsample.historyValid = this.#cocHistoryValid;
-        const cocMip0 = this.#effect_cocDownsample.render(
+        const {useTAA} = view.redGPUContext.antialiasingManager;
+        let prevCoCResult = fallbackFocusResult;
+        if (useTAA) {
+            prevCoCResult = this.#ensurePersistentCoCTexture(halfW, halfH);
+            this.#cocDownsamplePass.historyValid = this.#isCoCHistoryValid ? 1 : 0;
+        } else {
+            if (this.#persistentCoCTexture) {
+                this.#releasePersistentCoCTexture();
+            }
+            this.#cocDownsamplePass.historyValid = 0;
+        }
+
+        const cocMip0 = this.#cocDownsamplePass.render(
             view, halfW, halfH, sourceTextureInfo, currFocusResult, prevCoCResult
         );
-        this.#copyCoCSrcInfo.texture = cocMip0.texture;
-        this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyCoCStateCallback);
-        this.#cocHistoryValid = 1;
 
-        const cocMip1 = this.#effect_mipDownsample1.render(
+        if (useTAA) {
+            this.#copyCoCSrcInfo.texture = cocMip0.texture;
+            this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyCoCStateCallback);
+            this.#isCoCHistoryValid = true;
+        }
+
+        const cocMip1 = this.#mipDownsample1Pass.render(
             view, quarterW, quarterH, cocMip0
         );
-        const cocMip2 = this.#effect_mipDownsample2.render(
+        const cocMip2 = this.#mipDownsample2Pass.render(
             view, eighthW, eighthH, cocMip1
         );
 
         // Stage 2: Tile Flatten & Dilate (1/16)
-        const tileMaxResult = this.#effect_tileMaxCoC.render(
+        const tileMaxResult = this.#tileMaxCoCPass.render(
             view, tileW, tileH, cocMip0
         );
 
         // Stage 3: Dual-Buffer Mip-Adaptive Diaphragm Bokeh Gather (Background & Foreground separated)
-        const bgBokehResult = this.#effect_bokehBlurBg.render(
+        const bgBokehResult = this.#bokehBlurBgPass.render(
             view, halfW, halfH, cocMip0, cocMip1, cocMip2, tileMaxResult
         );
-        const fgBokehResult = this.#effect_bokehBlurFg.render(
+        const fgBokehResult = this.#bokehBlurFgPass.render(
             view, halfW, halfH, cocMip0, cocMip1, cocMip2, tileMaxResult
         );
         pool.release(cocMip1.texture);
@@ -463,22 +540,24 @@ class DOF extends AMultiPassPostEffect {
         pool.release(tileMaxResult.texture);
 
         // Stage 4: Dual-Buffer Independent PostFilter (Background & Foreground separated)
-        const bgPostFiltered = this.#effect_postFilterBg.render(
-            view, halfW, halfH, bgBokehResult, cocMip0
+        const bgPostFiltered = this.#postFilterBgPass.render(
+            view, halfW, halfH, bgBokehResult
         );
         pool.release(bgBokehResult.texture);
 
-        const fgPostFiltered = this.#effect_postFilterFg.render(
-            view, halfW, halfH, fgBokehResult, cocMip0
+        const fgPostFiltered = this.#postFilterFgPass.render(
+            view, halfW, halfH, fgBokehResult
         );
         pool.release(fgBokehResult.texture);
 
         // Stage 5: Diaphragm Recombine (Full-Res Slight-DoF 8-Tap + Bg Bilateral Blend + Fg Opacity Over)
-        const finalResult = this.#effect_composite.render(
+        const finalResult = this.#compositePass.render(
             view, width, height, sourceTextureInfo, cocMip0, bgPostFiltered, fgPostFiltered, currFocusResult
         );
 
-        pool.release(currFocusResult.texture);
+        if (isAutoFocusDispatched) {
+            pool.release(currFocusResult.texture);
+        }
         pool.release(cocMip0.texture);
         pool.release(bgPostFiltered.texture);
         pool.release(fgPostFiltered.texture);
@@ -511,6 +590,7 @@ class DOF extends AMultiPassPostEffect {
             this.#persistentFocusTexture = texture;
             this.#persistentFocusResult = {texture, textureView};
             this.#copyDstInfo.texture = texture;
+            this.#isAutoFocusHistoryValid = false;
         }
         return this.#persistentFocusResult;
     }
@@ -535,9 +615,33 @@ class DOF extends AMultiPassPostEffect {
             this.#copyCoCExtent.height = halfH;
             this.#prevCoCHalfW = halfW;
             this.#prevCoCHalfH = halfH;
-            this.#cocHistoryValid = 0;
+            this.#isCoCHistoryValid = false;
         }
         return this.#persistentCoCResult;
+    }
+
+    #releasePersistentFocusTexture(): void {
+        if (this.#persistentFocusTexture) {
+            this.#persistentFocusTexture.destroy();
+            this.#persistentFocusTexture = null;
+            this.#persistentFocusResult = null;
+            this.#copySrcInfo.texture = null;
+            this.#copyDstInfo.texture = null;
+        }
+        this.#isAutoFocusHistoryValid = false;
+    }
+
+    #releasePersistentCoCTexture(): void {
+        if (this.#persistentCoCTexture) {
+            this.#persistentCoCTexture.destroy();
+            this.#persistentCoCTexture = null;
+            this.#persistentCoCResult = null;
+            this.#copyCoCSrcInfo.texture = null;
+            this.#copyCoCDstInfo.texture = null;
+        }
+        this.#prevCoCHalfW = 0;
+        this.#prevCoCHalfH = 0;
+        this.#isCoCHistoryValid = false;
     }
 }
 

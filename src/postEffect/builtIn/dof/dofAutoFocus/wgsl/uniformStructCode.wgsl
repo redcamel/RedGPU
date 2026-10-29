@@ -1,9 +1,10 @@
-#redgpu_include math.reconstruct.getViewPositionFromDepth
 #redgpu_include math.getIsFinite
 
 struct Uniforms {
     focusDistance: f32,
-    useAutoFocus: u32,
+    historyMode: u32,
+    pad0: u32, // 16-byte tail alignment
+    pad1: u32,
 };
 
 // [KO] 표준 카메라 뷰파인더 정중앙 측거점, 세로 높이 대비 ±2.5% Zone AF 반경, 및 초음파 모터(USM/STM) 표준 AF-C 추적 속도 상수

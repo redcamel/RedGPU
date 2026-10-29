@@ -5,6 +5,7 @@ import validateUintRange from "../../../../runtimeChecker/validateFunc/validateU
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
+import DOF_CONFIG from "../DOF_CONFIG";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -13,41 +14,37 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  * [EN] Internal sub-pass that independently gathers background (`passMode = 0`) and foreground (`passMode = 1`) bokeh using `Mip 0 ~ Mip 2` adaptive sampling and blade-vertex linear interpolation (`mix(V0, V1, t)`) matching Unreal Engine's `Diaphragm DOF`.
  *
  * ::: warning
- * [KO] 이 클래스는 `DOF` 내부에서 자동으로 생성 및 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created and managed inside `DOF`.<br/>Do not create an instance directly.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category PostEffect
  */
 class DOFBokehBlur extends ASinglePassPostEffect {
-    #maxCoC: number = 32.0;
-    #bokehBrightness: number = 1.5;
-    #bladeCount: number = 6;
-    #passMode: number = 0;
+    #maxCoC: number = DOF_CONFIG.DEFAULT_MAX_COC;
+    #bokehBrightness: number = DOF_CONFIG.DEFAULT_BOKEH_BRIGHTNESS;
+    #bladeCount: number = DOF_CONFIG.DEFAULT_BLADE_COUNT;
+    #passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND;
 
-    constructor(redGPUContext: RedGPUContext, passMode: number = 0) {
-        super(redGPUContext);
+    constructor(redGPUContext: RedGPUContext, passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND) {
+        super(redGPUContext, {workSizeX: 16, workSizeY: 16, workSizeZ: 1});
         this.#passMode = passMode;
-        const {msaa, nonMsaa} = createBasicPostEffectCode(
-            this,
-            computeCode,
-            uniformStructCode,
-            [
-                {name: 'cocMip0Texture'},
-                {name: 'cocMip1Texture'},
-                {name: 'cocMip2Texture'},
-                {name: 'tileMaxTexture'}
-            ]
-        );
         this.init(
             redGPUContext,
             `POST_EFFECT_DOF_BOKEH_BLUR_MODE_${passMode}`,
-            {msaa, nonMsaa}
+            createBasicPostEffectCode(
+                this,
+                computeCode,
+                uniformStructCode,
+                [
+                    {name: 'cocMip0Texture'},
+                    {name: 'cocMip1Texture'},
+                    {name: 'cocMip2Texture'},
+                    {name: 'tileMaxTexture'}
+                ],
+                false
+            )
         );
-        this.maxCoC = this.#maxCoC;
-        this.bokehBrightness = this.#bokehBrightness;
-        this.bladeCount = this.#bladeCount;
-        this.passMode = this.#passMode;
     }
 
     get maxCoC(): number {
@@ -55,7 +52,8 @@ class DOFBokehBlur extends ASinglePassPostEffect {
     }
 
     set maxCoC(value: number) {
-        validateNumberRange(value, 4.0, 64.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_MAX_COC, DOF_CONFIG.MAX_MAX_COC);
+        if (this.#maxCoC === value) return;
         this.#maxCoC = value;
         this.updateUniform('maxCoC', value);
     }
@@ -65,7 +63,8 @@ class DOFBokehBlur extends ASinglePassPostEffect {
     }
 
     set bokehBrightness(value: number) {
-        validateNumberRange(value, 0.0, 5.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_BOKEH_BRIGHTNESS, DOF_CONFIG.MAX_BOKEH_BRIGHTNESS);
+        if (this.#bokehBrightness === value) return;
         this.#bokehBrightness = value;
         this.updateUniform('bokehBrightness', value);
     }
@@ -75,7 +74,8 @@ class DOFBokehBlur extends ASinglePassPostEffect {
     }
 
     set bladeCount(value: number) {
-        validateUintRange(value, 0, 9);
+        validateUintRange(value, DOF_CONFIG.MIN_BLADE_COUNT, DOF_CONFIG.MAX_BLADE_COUNT);
+        if (this.#bladeCount === value) return;
         this.#bladeCount = value;
         this.updateUniform('bladeCount', value);
     }
@@ -85,7 +85,8 @@ class DOFBokehBlur extends ASinglePassPostEffect {
     }
 
     set passMode(value: number) {
-        validateUintRange(value, 0, 1);
+        validateUintRange(value, DOF_CONFIG.PASS_MODE.BACKGROUND, DOF_CONFIG.PASS_MODE.FOREGROUND);
+        if (this.#passMode === value) return;
         this.#passMode = value;
         this.updateUniform('passMode', value);
     }

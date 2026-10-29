@@ -5,6 +5,8 @@ import validateUintRange from "../../../../runtimeChecker/validateFunc/validateU
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
+import DOF_CONFIG from "../DOF_CONFIG";
+import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -13,43 +15,37 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  * [EN] Internal sub-pass that computes half-resolution (`1/2`) Circle of Confusion radius (in texels) using physical camera sensor (`sensorSize`) and Thin-Lens optics, and performs CoC-aware bilateral downsampling.
  *
  * ::: warning
- * [KO] 이 클래스는 `DOF` 내부에서 자동으로 생성 및 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created and managed inside `DOF`.<br/>Do not create an instance directly.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category PostEffect
  */
 class DOFCoCDownsample extends ASinglePassPostEffect {
-    #focusDistance: number = 15.0;
-    #aperture: number = 2.0;
-    #focalLength: number = 65.0;
-    #sensorSize: number = 24.0;
-    #maxCoC: number = 32.0;
+    #focusDistance: number = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
+    #aperture: number = DOF_CONFIG.DEFAULT_APERTURE;
+    #focalLength: number = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
+    #sensorSize: number = DOF_CONFIG.DEFAULT_SENSOR_SIZE;
+    #maxCoC: number = DOF_CONFIG.DEFAULT_MAX_COC;
+    #useAutoFocus: number = 0;
     #historyValid: number = 0;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        const {msaa, nonMsaa} = createBasicPostEffectCode(
-            this,
-            computeCode,
-            uniformStructCode,
-            [
-                {name: 'sourceTexture'},
-                {name: 'focusTexture'},
-                {name: 'prevCoCTexture'}
-            ]
-        );
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_COC_DOWNSAMPLE',
-            {msaa, nonMsaa}
+            createBasicPostEffectCode(
+                this,
+                computeCode,
+                `${dofOpticsCommon}\n${uniformStructCode}`,
+                [
+                    {name: 'sourceTexture'},
+                    {name: 'focusTexture'},
+                    {name: 'prevCoCTexture'}
+                ]
+            )
         );
-        this.focusDistance = this.#focusDistance;
-        this.aperture = this.#aperture;
-        this.focalLength = this.#focalLength;
-        this.sensorSize = this.#sensorSize;
-        this.maxCoC = this.#maxCoC;
-        this.historyValid = this.#historyValid;
     }
 
     get focusDistance(): number {
@@ -57,7 +53,8 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
     }
 
     set focusDistance(value: number) {
-        validateNumberRange(value, 0.1, 10000);
+        validateNumberRange(value, DOF_CONFIG.MIN_FOCUS_DISTANCE, DOF_CONFIG.MAX_FOCUS_DISTANCE);
+        if (this.#focusDistance === value) return;
         this.#focusDistance = value;
         this.updateUniform('focusDistance', value);
     }
@@ -67,7 +64,8 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
     }
 
     set aperture(value: number) {
-        validateNumberRange(value, 0.5, 32.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_APERTURE, DOF_CONFIG.MAX_APERTURE);
+        if (this.#aperture === value) return;
         this.#aperture = value;
         this.updateUniform('aperture', value);
     }
@@ -77,7 +75,8 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
     }
 
     set focalLength(value: number) {
-        validateNumberRange(value, 12.0, 300.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_FOCAL_LENGTH, DOF_CONFIG.MAX_FOCAL_LENGTH);
+        if (this.#focalLength === value) return;
         this.#focalLength = value;
         this.updateUniform('focalLength', value);
     }
@@ -87,7 +86,8 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
     }
 
     set sensorSize(value: number) {
-        validateNumberRange(value, 4.0, 70.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_SENSOR_SIZE, DOF_CONFIG.MAX_SENSOR_SIZE);
+        if (this.#sensorSize === value) return;
         this.#sensorSize = value;
         this.updateUniform('sensorSize', value);
     }
@@ -97,9 +97,21 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
     }
 
     set maxCoC(value: number) {
-        validateNumberRange(value, 4.0, 64.0);
+        validateNumberRange(value, DOF_CONFIG.MIN_MAX_COC, DOF_CONFIG.MAX_MAX_COC);
+        if (this.#maxCoC === value) return;
         this.#maxCoC = value;
         this.updateUniform('maxCoC', value);
+    }
+
+    get useAutoFocus(): number {
+        return this.#useAutoFocus;
+    }
+
+    set useAutoFocus(value: number) {
+        validateUintRange(value, 0, 1);
+        if (this.#useAutoFocus === value) return;
+        this.#useAutoFocus = value;
+        this.updateUniform('useAutoFocus', value);
     }
 
     get historyValid(): number {
@@ -108,6 +120,7 @@ class DOFCoCDownsample extends ASinglePassPostEffect {
 
     set historyValid(value: number) {
         validateUintRange(value, 0, 1);
+        if (this.#historyValid === value) return;
         this.#historyValid = value;
         this.updateUniform('historyValid', value);
     }

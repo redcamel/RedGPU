@@ -1,30 +1,41 @@
 let index = global_id.xy;
 let halfDims = vec2<f32>(postEffectOutputDimensions);
 let fullDims = vec2<i32>(textureDimensions(sourceTexture));
-let invFullDims = 1.0 / vec2<f32>(fullDims);
-let maxCoord = max(fullDims - vec2<i32>(1), vec2<i32>(0));
+let maxColorCoord = max(fullDims - vec2<i32>(1), vec2<i32>(0));
+let maxDepthCoord = max(vec2<i32>(textureDimensions(depthTexture)) - vec2<i32>(1), vec2<i32>(0));
 let baseCoord = vec2<i32>(index) * 2;
 
-let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxCoord);
-let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxCoord);
-let c01 = clamp(baseCoord + vec2<i32>(0, 1), vec2<i32>(0), maxCoord);
-let c11 = clamp(baseCoord + vec2<i32>(1, 1), vec2<i32>(0), maxCoord);
+let d00Coord = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxDepthCoord);
+let d10Coord = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxDepthCoord);
+let d01Coord = clamp(baseCoord + vec2<i32>(0, 1), vec2<i32>(0), maxDepthCoord);
+let d11Coord = clamp(baseCoord + vec2<i32>(1, 1), vec2<i32>(0), maxDepthCoord);
 
-let invProj = systemUniforms.projection.inverseProjectionMatrix;
+let invProjZW = extractInvProjZW(systemUniforms.projection.inverseProjectionMatrix);
+let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
 let dpr = min(systemUniforms.devicePixelRatio, 2.0);
 let maxHalfCoC = 0.5 * uniforms.maxCoC * dpr;
-let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
-let effectiveFocusDistance = select(uniforms.focusDistance, focusState.r, focusState.g > 0.5);
 
-let d00 = reconstructViewDepth(c00, invFullDims, invProj);
-let d10 = reconstructViewDepth(c10, invFullDims, invProj);
-let d01 = reconstructViewDepth(c01, invFullDims, invProj);
-let d11 = reconstructViewDepth(c11, invFullDims, invProj);
+let minFocusDepth = max(systemUniforms.camera.nearClipping, 0.01);
+let maxFocusDepth = min(max(systemUniforms.camera.farClipping, minFocusDepth + 1.0), 65000.0);
+let manualFocusDistance = clamp(uniforms.focusDistance, minFocusDepth, maxFocusDepth);
+var effectiveFocusDistance = manualFocusDistance;
+if (uniforms.useAutoFocus == 1u) {
+    let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
+    effectiveFocusDistance = select(manualFocusDistance, focusState.r, focusState.g > 0.5);
+}
 
-let coc00 = calculatePhysicalHalfCoC(d00, halfDims.y, maxHalfCoC, effectiveFocusDistance);
-let coc10 = calculatePhysicalHalfCoC(d10, halfDims.y, maxHalfCoC, effectiveFocusDistance);
-let coc01 = calculatePhysicalHalfCoC(d01, halfDims.y, maxHalfCoC, effectiveFocusDistance);
-let coc11 = calculatePhysicalHalfCoC(d11, halfDims.y, maxHalfCoC, effectiveFocusDistance);
+let lensParams = computeDOFCoCLensParams(
+    uniforms.aperture,
+    uniforms.focalLength,
+    uniforms.sensorSize,
+    effectiveFocusDistance,
+    halfDims.y
+);
+
+let coc00 = samplePhysicalHalfCoCAtDepthCoord(d00Coord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+let coc10 = samplePhysicalHalfCoCAtDepthCoord(d10Coord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+let coc01 = samplePhysicalHalfCoCAtDepthCoord(d01Coord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+let coc11 = samplePhysicalHalfCoCAtDepthCoord(d11Coord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
 
 let minSignedCoC = min(min(coc00, coc10), min(coc01, coc11));
 let maxSignedCoC = max(max(coc00, coc10), max(coc01, coc11));
@@ -32,8 +43,13 @@ let avgCoC = (coc00 + coc10 + coc01 + coc11) * 0.25;
 
 // [KO] 실질적인 전경 비초점(minSignedCoC < -0.25) 실루엣에서만 최소 전경 CoC를 우선 채택하고, 합초-배경 경계에서는 연속 평균 CoC를 유지하여 TAA 지터 시 타일 점프를 방지
 // [EN] Prioritize min foreground CoC only on genuine foreground defocus silhouettes (minSignedCoC < -0.25) while keeping continuous average CoC on in-focus/background edges to prevent tile jumping under TAA jitter
-let fgDiscontinuity = clamp(maxSignedCoC - minSignedCoC - 0.5, 0.0, 1.0) * smoothstep(-0.25, -1.25, minSignedCoC);
+let fgDiscontinuity = saturate(maxSignedCoC - minSignedCoC - 0.5) * smoothstep(-0.25, -1.25, minSignedCoC);
 var tileCoC = mix(avgCoC, minSignedCoC, fgDiscontinuity);
+
+let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxColorCoord);
+let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxColorCoord);
+let c01 = clamp(baseCoord + vec2<i32>(0, 1), vec2<i32>(0), maxColorCoord);
+let c11 = clamp(baseCoord + vec2<i32>(1, 1), vec2<i32>(0), maxColorCoord);
 
 let col00 = textureLoad(sourceTexture, c00, 0).rgb;
 let col10 = textureLoad(sourceTexture, c10, 0).rgb;
@@ -42,25 +58,23 @@ let col11 = textureLoad(sourceTexture, c11, 0).rgb;
 
 var hasValidHistory: bool = false;
 var prevSample = vec4<f32>(0.0);
-var minOuterCoC = minSignedCoC;
-var maxOuterCoC = maxSignedCoC;
 var temporalCoCBlend: f32 = 1.0;
 
 if (uniforms.historyValid == 1u) {
-    let cL = clamp(baseCoord + vec2<i32>(-1, 0), vec2<i32>(0), maxCoord);
-    let cR = clamp(baseCoord + vec2<i32>(2, 0), vec2<i32>(0), maxCoord);
-    let cU = clamp(baseCoord + vec2<i32>(0, -1), vec2<i32>(0), maxCoord);
-    let cD = clamp(baseCoord + vec2<i32>(0, 2), vec2<i32>(0), maxCoord);
+    let dLCoord = clamp(baseCoord + vec2<i32>(-1, 0), vec2<i32>(0), maxDepthCoord);
+    let dRCoord = clamp(baseCoord + vec2<i32>(2, 0), vec2<i32>(0), maxDepthCoord);
+    let dUCoord = clamp(baseCoord + vec2<i32>(0, -1), vec2<i32>(0), maxDepthCoord);
+    let dDCoord = clamp(baseCoord + vec2<i32>(0, 2), vec2<i32>(0), maxDepthCoord);
 
-    let cocL = calculatePhysicalHalfCoC(reconstructViewDepth(cL, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
-    let cocR = calculatePhysicalHalfCoC(reconstructViewDepth(cR, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
-    let cocU = calculatePhysicalHalfCoC(reconstructViewDepth(cU, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
-    let cocD = calculatePhysicalHalfCoC(reconstructViewDepth(cD, invFullDims, invProj), halfDims.y, maxHalfCoC, effectiveFocusDistance);
+    let cocL = samplePhysicalHalfCoCAtDepthCoord(dLCoord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocR = samplePhysicalHalfCoCAtDepthCoord(dRCoord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocU = samplePhysicalHalfCoCAtDepthCoord(dUCoord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocD = samplePhysicalHalfCoCAtDepthCoord(dDCoord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
 
-    minOuterCoC = min(minSignedCoC, min(min(cocL, cocR), min(cocU, cocD)));
-    maxOuterCoC = max(maxSignedCoC, max(max(cocL, cocR), max(cocU, cocD)));
+    let minOuterCoC = min(minSignedCoC, min(min(cocL, cocR), min(cocU, cocD)));
+    let maxOuterCoC = max(maxSignedCoC, max(max(cocL, cocR), max(cocU, cocD)));
 
-    let velocity = textureLoad(gBufferMotionVector, c00, 0).xy;
+    let velocity = textureLoad(gBufferMotionVector, d00Coord, 0).xy;
     if (velocity.x <= 10.0) {
         let centerUV = (vec2<f32>(index) + 0.5) / max(halfDims, vec2<f32>(1.0));
         let prevUV = centerUV - velocity;

@@ -1,23 +1,28 @@
 let minFocusDepth = max(systemUniforms.camera.nearClipping, 0.01);
 let maxFocusDepth = min(max(systemUniforms.camera.farClipping, minFocusDepth + 1.0), 65000.0);
-
 let manualDist = clamp(uniforms.focusDistance, minFocusDepth, maxFocusDepth);
-if (uniforms.useAutoFocus == 0u) {
-    textureStore(outputTexture, vec2<u32>(0u, 0u), vec4<f32>(manualDist, 1.0, manualDist, manualDist));
-    return;
-}
 
-let prevState = textureLoad(prevFocusTexture, vec2<i32>(0, 0), 0);
-let hasPrev = prevState.g > 0.5;
-let prevFocusDist = select(manualDist, clamp(prevState.r, minFocusDepth, maxFocusDepth), hasPrev);
-let prevAnchorDist = select(prevFocusDist, clamp(prevState.b, minFocusDepth, maxFocusDepth), hasPrev && (prevState.b > 0.0));
-let prevMeasuredDist = select(prevAnchorDist, clamp(prevState.a, minFocusDepth, maxFocusDepth), hasPrev && (prevState.a > 0.0));
+var hasPrev: bool = false;
+var prevFocusDist: f32 = manualDist;
+var prevAnchorDist: f32 = manualDist;
+var prevMeasuredDist: f32 = manualDist;
+
+if (uniforms.historyMode == 1u) {
+    let prevState = textureLoad(prevFocusTexture, vec2<i32>(0, 0), 0);
+    if (prevState.g > 0.5) {
+        hasPrev = true;
+        prevFocusDist = clamp(prevState.r, minFocusDepth, maxFocusDepth);
+        prevAnchorDist = select(prevFocusDist, clamp(prevState.b, minFocusDepth, maxFocusDepth), prevState.b > 0.0);
+        prevMeasuredDist = select(prevAnchorDist, clamp(prevState.a, minFocusDepth, maxFocusDepth), prevState.a > 0.0);
+    }
+} else if (uniforms.historyMode == 2u) {
+    hasPrev = true;
+}
 
 let fullDimsU = textureDimensions(depthTexture);
 let fullDims = vec2<f32>(fullDimsU);
-let invFullDims = 1.0 / max(fullDims, vec2<f32>(1.0));
 let maxCoord = max(vec2<i32>(fullDimsU) - vec2<i32>(1), vec2<i32>(0));
-let invProj = systemUniforms.projection.inverseProjectionMatrix;
+let invProjZW = extractInvProjZW(systemUniforms.projection.inverseProjectionMatrix);
 
 let aspect = fullDims.x / max(fullDims.y, 1.0);
 let radiusUV = vec2<f32>(AF_ZONE_RADIUS / max(aspect, 0.01), AF_ZONE_RADIUS);
@@ -30,9 +35,8 @@ var anyValid: bool = false;
 // [KO] 9-Point Zone AF 다중 측거: 각 포인트별 5-Tap 선형 뷰 깊이의 절삭 평균(최소/최대 이상치 제거)으로 TAA 서브픽셀 경계 지터 원천 차단
 // [EN] 9-Point Zone AF multi-point metering: use trimmed mean (dropping min/max outliers) of 5-Tap linear view depths per point to eliminate TAA sub-pixel edge jitter
 for (var i = 0u; i < 9u; i = i + 1u) {
-    let tapUV = clamp(AF_CENTER_UV + AF_ZONE_OFFSETS[i] * radiusUV, vec2<f32>(0.0), vec2<f32>(1.0));
+    let tapUV = saturate(AF_CENTER_UV + AF_ZONE_OFFSETS[i] * radiusUV);
     let centerCoord = clamp(vec2<i32>(floor(tapUV * fullDims)), vec2<i32>(0), maxCoord);
-    let exactUV = (vec2<f32>(centerCoord) + 0.5) * invFullDims;
 
     let cL = clamp(centerCoord + vec2<i32>(-1, 0), vec2<i32>(0), maxCoord);
     let cR = clamp(centerCoord + vec2<i32>(1, 0), vec2<i32>(0), maxCoord);
@@ -49,11 +53,11 @@ for (var i = 0u; i < 9u; i = i + 1u) {
     let minRaw = min(rC, min(min(rL, rR), min(rU, rD)));
 
     if (minRaw < 0.9999) {
-        let dC = clamp(-getViewPositionFromDepth(exactUV, min(rC, 0.9999), invProj).z, minFocusDepth, maxFocusDepth);
-        let dL = clamp(-getViewPositionFromDepth(exactUV, min(rL, 0.9999), invProj).z, minFocusDepth, maxFocusDepth);
-        let dR = clamp(-getViewPositionFromDepth(exactUV, min(rR, 0.9999), invProj).z, minFocusDepth, maxFocusDepth);
-        let dU = clamp(-getViewPositionFromDepth(exactUV, min(rU, 0.9999), invProj).z, minFocusDepth, maxFocusDepth);
-        let dD = clamp(-getViewPositionFromDepth(exactUV, min(rD, 0.9999), invProj).z, minFocusDepth, maxFocusDepth);
+        let dC = min(reconstructViewDepthFromRaw(min(rC, 0.9999), invProjZW, minFocusDepth), maxFocusDepth);
+        let dL = min(reconstructViewDepthFromRaw(min(rL, 0.9999), invProjZW, minFocusDepth), maxFocusDepth);
+        let dR = min(reconstructViewDepthFromRaw(min(rR, 0.9999), invProjZW, minFocusDepth), maxFocusDepth);
+        let dU = min(reconstructViewDepthFromRaw(min(rU, 0.9999), invProjZW, minFocusDepth), maxFocusDepth);
+        let dD = min(reconstructViewDepthFromRaw(min(rD, 0.9999), invProjZW, minFocusDepth), maxFocusDepth);
 
         let minTapD = min(dC, min(min(dL, dR), min(dU, dD)));
         let maxTapD = max(dC, max(max(dL, dR), max(dU, dD)));
@@ -61,7 +65,7 @@ for (var i = 0u; i < 9u; i = i + 1u) {
 
         let prevRaw = textureLoad(prevDepthTexture, centerCoord, 0);
         if (prevRaw > 0.0 && prevRaw < 0.9999) {
-            let prevD = clamp(-getViewPositionFromDepth(exactUV, prevRaw, invProj).z, minFocusDepth, maxFocusDepth);
+            let prevD = min(reconstructViewDepthFromRaw(prevRaw, invProjZW, minFocusDepth), maxFocusDepth);
             if (abs(viewDepth - prevD) < viewDepth * 0.05) {
                 viewDepth = (viewDepth + prevD) * 0.5;
             }
@@ -102,7 +106,7 @@ let rawDt = systemUniforms.time.deltaTime;
 let defaultFrameDt = 1.0 / 60.0;
 let safeDt = select(defaultFrameDt, clamp(rawDt, 1.0 / 1000.0, 0.1), getIsFiniteScalar(rawDt) && rawDt > 0.0);
 
-let measureAlpha = clamp(1.0 - exp(-12.0 * safeDt), 0.0, 1.0);
+let measureAlpha = saturate(1.0 - exp(-12.0 * safeDt));
 let measuredDepth = select(rawMeasuredDepth, mix(prevMeasuredDist, rawMeasuredDepth, measureAlpha), hasPrev);
 
 // [KO] AF-C 목표 앵커 히스테리시스(±12% Deadband): 피사체 애니메이션 및 TAA 지터 구간에서는 목표 앵커를 완전 고정(0.0)하고, 실질적 피사체 전환 시에만 갱신
@@ -117,7 +121,7 @@ let nextAnchorDist = select(
 
 // [KO] 프레임 레이트 독립적 지수 감쇠 보간(EMA) 및 수렴 스냅(0.8% 이내 도달 시 목표 앵커에 완전 고정)
 // [EN] Frame-rate independent EMA damping and convergence snap (locks onto target anchor when within 0.8%)
-let alpha = clamp(1.0 - exp(-AF_MOTOR_SPEED * safeDt), 0.0, 1.0);
+let alpha = saturate(1.0 - exp(-AF_MOTOR_SPEED * safeDt));
 let distToAnchor = abs(nextAnchorDist - prevFocusDist);
 let nextFocusDist = clamp(
     select(
