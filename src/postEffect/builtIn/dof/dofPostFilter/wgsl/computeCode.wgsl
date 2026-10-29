@@ -53,13 +53,21 @@ if (!isForegroundPass) {
     let d = texelSize.xyxy * vec4<f32>(1.0, 1.0, -1.0, 0.0) * fgTentOffset;
 
     let s00 = textureSampleLevel(bokehTexture, basicSampler, uv - d.xy, 0.0);
-    let s10 = textureSampleLevel(bokehTexture, basicSampler, uv - d.wy, 0.0);
     let s20 = textureSampleLevel(bokehTexture, basicSampler, uv - d.zy, 0.0);
+    let s02 = textureSampleLevel(bokehTexture, basicSampler, uv + d.zy, 0.0);
+    let s22 = textureSampleLevel(bokehTexture, basicSampler, uv + d.xy, 0.0);
+
+    // [KO] 대각 4-코너 양선형 샘플은 3x3 인접 9개 텍셀 전체를 포괄하므로, 합이 0이면 십자 4-Tap 페치 없이 즉시 조기 종료
+    // [EN] Diagonal 4-corner bilinear samples cover all 9 texels of the 3x3 neighborhood; early-out immediately without the 4 cardinal fetches if their sum is 0
+    if (centerBokeh.a + s00.a + s20.a + s02.a + s22.a < 1e-4) {
+        textureStore(outputTexture, index, vec4<f32>(centerBokeh.rgb, 0.0));
+        return;
+    }
+
+    let s10 = textureSampleLevel(bokehTexture, basicSampler, uv - d.wy, 0.0);
     let s01 = textureSampleLevel(bokehTexture, basicSampler, uv + d.zw, 0.0);
     let s21 = textureSampleLevel(bokehTexture, basicSampler, uv + d.xw, 0.0);
-    let s02 = textureSampleLevel(bokehTexture, basicSampler, uv + d.zy, 0.0);
     let s12 = textureSampleLevel(bokehTexture, basicSampler, uv + d.wy, 0.0);
-    let s22 = textureSampleLevel(bokehTexture, basicSampler, uv + d.xy, 0.0);
 
     let outAlpha = (
         s00.a * 1.0 + s10.a * 2.0 + s20.a * 1.0 +

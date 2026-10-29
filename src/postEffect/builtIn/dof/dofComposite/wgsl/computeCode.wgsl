@@ -47,79 +47,85 @@ if (exactFullCoC > 0.35 && exactFullCoC < 4.5) {
     baseFullResColor = mix(sharpColor, slightGatherColor, slightBlend);
 }
 
-// [KO] 3. 배경(Background) 보케 버퍼 9-Tap CoC-Bilateral Tent 업샘플링 및 블렌딩
-// [EN] 3. Background bokeh buffer 9-Tap CoC-Bilateral Tent upsampling and blending
+// [KO] 3. 배경(Background) 보케 버퍼 조건부 9-Tap CoC-Bilateral Tent 업샘플링 및 블렌딩 (초점 영역 0-Tap 조기 스킵)
+// [EN] 3. Conditional Background bokeh buffer 9-Tap CoC-Bilateral Tent upsampling and blending (0-Tap early skip in in-focus regions)
 let d = halfTexelSize.xyxy * vec4<f32>(1.0, 1.0, -1.0, 0.0);
-
-let b00 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.xy, 0.0);
-let b10 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.wy, 0.0);
-let b20 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.zy, 0.0);
-let b01 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.zw, 0.0);
-let b11 = textureSampleLevel(bgBokehTexture, basicSampler, uv, 0.0);
-let b21 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xw, 0.0);
-let b02 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.zy, 0.0);
-let b12 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.wy, 0.0);
-let b22 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xy, 0.0);
-
-let bw00 = computeBgUpsampleBilateralWeight(b00.a, exactHalfCoC, 1.0);
-let bw10 = computeBgUpsampleBilateralWeight(b10.a, exactHalfCoC, 2.0);
-let bw20 = computeBgUpsampleBilateralWeight(b20.a, exactHalfCoC, 1.0);
-let bw01 = computeBgUpsampleBilateralWeight(b01.a, exactHalfCoC, 2.0);
-let bw11 = computeBgUpsampleBilateralWeight(b11.a, exactHalfCoC, 4.0);
-let bw21 = computeBgUpsampleBilateralWeight(b21.a, exactHalfCoC, 2.0);
-let bw02 = computeBgUpsampleBilateralWeight(b02.a, exactHalfCoC, 1.0);
-let bw12 = computeBgUpsampleBilateralWeight(b12.a, exactHalfCoC, 2.0);
-let bw22 = computeBgUpsampleBilateralWeight(b22.a, exactHalfCoC, 1.0);
-
-let bgWeightSum = max(bw00 + bw10 + bw20 + bw01 + bw11 + bw21 + bw02 + bw12 + bw22, 1e-4);
-let upsampledBgColor = (
-    b00.rgb * bw00 + b10.rgb * bw10 + b20.rgb * bw20 +
-    b01.rgb * bw01 + b11.rgb * bw11 + b21.rgb * bw21 +
-    b02.rgb * bw02 + b12.rgb * bw12 + b22.rgb * bw22
-) / bgWeightSum;
-
 let farBokehBlend = select(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(1.25, 2.5, -exactHalfCoC), exactHalfCoC < 0.0);
-let compositedBgColor = mix(baseFullResColor, upsampledBgColor, farBokehBlend);
 
-// [KO] 4. 전경(Foreground) 보케 및 불투명도(α_fg) 프리멀티플라이드 9-Tap Tent 업샘플링 및 연속 Porter-Duff Over 합성
-// [EN] 4. Foreground bokeh and opacity (α_fg) premultiplied 9-Tap Tent upsampling and continuous Porter-Duff Over composition
-let f00 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.xy, 0.0);
-let f10 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.wy, 0.0);
-let f20 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.zy, 0.0);
-let f01 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.zw, 0.0);
+var compositedBgColor = baseFullResColor;
+if (farBokehBlend > 1e-3) {
+    let b00 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.xy, 0.0);
+    let b10 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.wy, 0.0);
+    let b20 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.zy, 0.0);
+    let b01 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.zw, 0.0);
+    let b11 = textureSampleLevel(bgBokehTexture, basicSampler, uv, 0.0);
+    let b21 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xw, 0.0);
+    let b02 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.zy, 0.0);
+    let b12 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.wy, 0.0);
+    let b22 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xy, 0.0);
+
+    let bw00 = computeBgUpsampleBilateralWeight(b00.a, exactHalfCoC, 1.0);
+    let bw10 = computeBgUpsampleBilateralWeight(b10.a, exactHalfCoC, 2.0);
+    let bw20 = computeBgUpsampleBilateralWeight(b20.a, exactHalfCoC, 1.0);
+    let bw01 = computeBgUpsampleBilateralWeight(b01.a, exactHalfCoC, 2.0);
+    let bw11 = computeBgUpsampleBilateralWeight(b11.a, exactHalfCoC, 4.0);
+    let bw21 = computeBgUpsampleBilateralWeight(b21.a, exactHalfCoC, 2.0);
+    let bw02 = computeBgUpsampleBilateralWeight(b02.a, exactHalfCoC, 1.0);
+    let bw12 = computeBgUpsampleBilateralWeight(b12.a, exactHalfCoC, 2.0);
+    let bw22 = computeBgUpsampleBilateralWeight(b22.a, exactHalfCoC, 1.0);
+
+    let bgWeightSum = max(bw00 + bw10 + bw20 + bw01 + bw11 + bw21 + bw02 + bw12 + bw22, 1e-4);
+    let upsampledBgColor = (
+        b00.rgb * bw00 + b10.rgb * bw10 + b20.rgb * bw20 +
+        b01.rgb * bw01 + b11.rgb * bw11 + b21.rgb * bw21 +
+        b02.rgb * bw02 + b12.rgb * bw12 + b22.rgb * bw22
+    ) / bgWeightSum;
+
+    compositedBgColor = mix(baseFullResColor, upsampledBgColor, farBokehBlend);
+}
+
+// [KO] 4. 전경(Foreground) 보케 및 불투명도(α_fg) 2단계 코너 게이팅 기반 프리멀티플라이드 9-Tap Tent 업샘플링
+// [EN] 4. Foreground bokeh and opacity (α_fg) premultiplied 9-Tap Tent upsampling with 2-stage corner gating
 let f11 = textureSampleLevel(fgBokehTexture, basicSampler, uv, 0.0);
-let f21 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.xw, 0.0);
+let f00 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.xy, 0.0);
+let f20 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.zy, 0.0);
 let f02 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.zy, 0.0);
-let f12 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.wy, 0.0);
 let f22 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.xy, 0.0);
 
-let upsampledFgOpacity = (
-    f00.a * 1.0 + f10.a * 2.0 + f20.a * 1.0 +
-    f01.a * 2.0 + f11.a * 4.0 + f21.a * 2.0 +
-    f02.a * 1.0 + f12.a * 2.0 + f22.a * 1.0
-) * (1.0 / 16.0);
-
 var finalColor = compositedBgColor;
-if (upsampledFgOpacity > 1e-3) {
-    let fcw00 = 1.0 * max(f00.a, 1e-4);
-    let fcw10 = 2.0 * max(f10.a, 1e-4);
-    let fcw20 = 1.0 * max(f20.a, 1e-4);
-    let fcw01 = 2.0 * max(f01.a, 1e-4);
-    let fcw11 = 4.0 * max(f11.a, 1e-4);
-    let fcw21 = 2.0 * max(f21.a, 1e-4);
-    let fcw02 = 1.0 * max(f02.a, 1e-4);
-    let fcw12 = 2.0 * max(f12.a, 1e-4);
-    let fcw22 = 1.0 * max(f22.a, 1e-4);
+if (f11.a + f00.a + f20.a + f02.a + f22.a > 1e-3) {
+    let f10 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.wy, 0.0);
+    let f01 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.zw, 0.0);
+    let f21 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.xw, 0.0);
+    let f12 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.wy, 0.0);
 
-    let fgColorWeightSum = max(fcw00 + fcw10 + fcw20 + fcw01 + fcw11 + fcw21 + fcw02 + fcw12 + fcw22, 1e-4);
-    let upsampledFgColor = (
-        f00.rgb * fcw00 + f10.rgb * fcw10 + f20.rgb * fcw20 +
-        f01.rgb * fcw01 + f11.rgb * fcw11 + f21.rgb * fcw21 +
-        f02.rgb * fcw02 + f12.rgb * fcw12 + f22.rgb * fcw22
-    ) / fgColorWeightSum;
+    let upsampledFgOpacity = (
+        f00.a * 1.0 + f10.a * 2.0 + f20.a * 1.0 +
+        f01.a * 2.0 + f11.a * 4.0 + f21.a * 2.0 +
+        f02.a * 1.0 + f12.a * 2.0 + f22.a * 1.0
+    ) * (1.0 / 16.0);
 
-    let finalFgOpacity = clamp(upsampledFgOpacity, 0.0, 1.0);
-    finalColor = mix(compositedBgColor, upsampledFgColor, finalFgOpacity);
+    if (upsampledFgOpacity > 1e-3) {
+        let fcw00 = 1.0 * max(f00.a, 1e-4);
+        let fcw10 = 2.0 * max(f10.a, 1e-4);
+        let fcw20 = 1.0 * max(f20.a, 1e-4);
+        let fcw01 = 2.0 * max(f01.a, 1e-4);
+        let fcw11 = 4.0 * max(f11.a, 1e-4);
+        let fcw21 = 2.0 * max(f21.a, 1e-4);
+        let fcw02 = 1.0 * max(f02.a, 1e-4);
+        let fcw12 = 2.0 * max(f12.a, 1e-4);
+        let fcw22 = 1.0 * max(f22.a, 1e-4);
+
+        let fgColorWeightSum = max(fcw00 + fcw10 + fcw20 + fcw01 + fcw11 + fcw21 + fcw02 + fcw12 + fcw22, 1e-4);
+        let upsampledFgColor = (
+            f00.rgb * fcw00 + f10.rgb * fcw10 + f20.rgb * fcw20 +
+            f01.rgb * fcw01 + f11.rgb * fcw11 + f21.rgb * fcw21 +
+            f02.rgb * fcw02 + f12.rgb * fcw12 + f22.rgb * fcw22
+        ) / fgColorWeightSum;
+
+        let finalFgOpacity = clamp(upsampledFgOpacity, 0.0, 1.0);
+        finalColor = mix(compositedBgColor, upsampledFgColor, finalFgOpacity);
+    }
 }
 
 textureStore(outputTexture, index, vec4<f32>(finalColor, sharpSample.a));

@@ -38,17 +38,29 @@ if (gatherRadius < 0.25) {
     return;
 }
 
-let ringSpacing = gatherRadius * INV_RING_COUNT;
-let mipLevel = clamp(log2(max(ringSpacing * 1.35, 1.0)), 0.0, 2.0);
-let mipWeight1 = clamp(mipLevel, 0.0, 1.0);
-let mipWeight2 = clamp(mipLevel - 1.0, 0.0, 1.0);
+// [KO] 반경 비례 적응형 링 스케일링(2~5 Rings, 18~90 Taps) 및 전경 후면 홀필링 3-Ring 캡 적용
+// [EN] Radius-proportional adaptive ring scaling (2~5 Rings, 18~90 Taps) and 3-Ring cap for background hole-filling behind foreground
+let rawRingCount = clamp(u32(ceil(gatherRadius * 0.55)) + 1u, 2u, RING_COUNT);
+let activeRingCount = select(rawRingCount, min(rawRingCount, 3u), !isForegroundPass && isCenterForeground);
+let invActiveRingCount = 1.0 / f32(activeRingCount);
 
-let centerMip1 = textureSampleLevel(cocMip1Texture, basicSampler, centerUV, 0.0);
-let centerMip2 = textureSampleLevel(cocMip2Texture, basicSampler, centerUV, 0.0);
-let centerTolerance = max(0.5, abs(centerCoC) * 0.25);
-let centerMip1Valid = clamp(1.0 - abs(centerMip1.a - centerCoC) / centerTolerance, 0.0, 1.0) * select(0.0, 1.0, centerCoC * centerMip1.a > 0.0) * clamp(abs(centerCoC) - 0.5, 0.0, 1.0);
-let centerMip2Valid = clamp(1.0 - abs(centerMip2.a - centerCoC) / centerTolerance, 0.0, 1.0) * select(0.0, 1.0, centerCoC * centerMip2.a > 0.0) * clamp(abs(centerCoC) - 0.5, 0.0, 1.0);
-let centerFilteredColor = mix(mix(centerColor, centerMip1.rgb, mipWeight1 * centerMip1Valid), centerMip2.rgb, mipWeight2 * centerMip2Valid);
+let ringSpacing = gatherRadius * invActiveRingCount;
+let mipLevel = clamp(log2(max(ringSpacing * 1.35, 1.0)), 0.0, 2.0);
+
+var centerFilteredColor = centerColor;
+let centerAllowMip = clamp(abs(centerCoC) - 0.5, 0.0, 1.0);
+if (mipLevel > 0.05 && centerAllowMip > 0.0) {
+    let centerTolerance = max(0.5, abs(centerCoC) * 0.25);
+    if (mipLevel < 1.35) {
+        let centerMip1 = textureSampleLevel(cocMip1Texture, basicSampler, centerUV, 0.0);
+        let centerMip1Valid = clamp(1.0 - abs(centerMip1.a - centerCoC) / centerTolerance, 0.0, 1.0) * select(0.0, 1.0, centerCoC * centerMip1.a > 0.0) * centerAllowMip;
+        centerFilteredColor = mix(centerColor, centerMip1.rgb, clamp(mipLevel, 0.25, 1.0) * centerMip1Valid);
+    } else {
+        let centerMip2 = textureSampleLevel(cocMip2Texture, basicSampler, centerUV, 0.0);
+        let centerMip2Valid = clamp(1.0 - abs(centerMip2.a - centerCoC) / centerTolerance, 0.0, 1.0) * select(0.0, 1.0, centerCoC * centerMip2.a > 0.0) * centerAllowMip;
+        centerFilteredColor = mix(centerColor, centerMip2.rgb, centerMip2Valid);
+    }
+}
 
 var accumColor = vec3<f32>(0.0);
 var accumWeight: f32 = 0.0;
@@ -89,8 +101,8 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
     let v0 = vec2<f32>(cos(angle0), sin(angle0));
     let v1 = vec2<f32>(cos(angle1), sin(angle1));
 
-    for (var ring = 1u; ring <= RING_COUNT; ring = ring + 1u) {
-        let normRadius = (f32(ring) - 0.35) * INV_RING_COUNT;
+    for (var ring = 1u; ring <= activeRingCount; ring = ring + 1u) {
+        let normRadius = (f32(ring) - 0.35) * invActiveRingCount;
         let radialWindow = 1.0 - 0.2 * normRadius;
 
         for (var step = 0u; step < ring; step = step + 1u) {
@@ -115,26 +127,26 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
 
             let sampleCoord0 = clamp(vec2<i32>(floor(vec2<f32>(index) + 0.5 + offsetTexels)), vec2<i32>(0), maxHalfCoord);
             let discreteMip0 = textureLoad(cocMip0Texture, sampleCoord0, 0);
-            let bilinearMip0 = textureSampleLevel(cocMip0Texture, basicSampler, sampleUV, 0.0);
-            let sampleMip1 = textureSampleLevel(cocMip1Texture, basicSampler, sampleUV, 0.0);
-            let sampleMip2 = textureSampleLevel(cocMip2Texture, basicSampler, sampleUV, 0.0);
 
-            // [KO] 실루엣 및 초점 경계 보호: 이산 텍셀(discreteMip0.a) 대비 부호가 반전되거나 CoC 편차가 허용치(cocTolerance)를 초과하는 하드웨어 양선형/밉맵 샘플을 차단
-            // [EN] Silhouette & focus edge protection: reject hardware bilinear/mip samples whose CoC sign flips or whose CoC difference exceeds cocTolerance relative to discreteMip0.a
+            // [KO] 단일 활성 Mip 선택 페치(탭당 4회 -> 2회): mipLevel 구간에 맞는 단일 Mip만 샘플링하고 실루엣/초점 경계(cocTolerance)를 보호
+            // [EN] Single active Mip selective fetch (4 -> 2 fetches/tap): sample only the active Mip for the mipLevel range while protecting silhouette/focus edges (cocTolerance)
+            var activeMipSample: vec4<f32>;
+            var mipBlendWeight: f32;
+            if (mipLevel < 0.35) {
+                activeMipSample = textureSampleLevel(cocMip0Texture, basicSampler, sampleUV, 0.0);
+                mipBlendWeight = 1.0;
+            } else if (mipLevel < 1.35) {
+                activeMipSample = textureSampleLevel(cocMip1Texture, basicSampler, sampleUV, 0.0);
+                mipBlendWeight = clamp(mipLevel, 0.35, 1.0) * smoothstep(0.25, 0.85, abs(discreteMip0.a));
+            } else {
+                activeMipSample = textureSampleLevel(cocMip2Texture, basicSampler, sampleUV, 0.0);
+                mipBlendWeight = smoothstep(0.25, 0.85, abs(discreteMip0.a));
+            }
+
             let cocTolerance = max(0.5, abs(discreteMip0.a) * 0.25);
-            let mip0Valid = clamp(1.0 - abs(bilinearMip0.a - discreteMip0.a) / cocTolerance, 0.0, 1.0) * select(0.0, 1.0, discreteMip0.a * bilinearMip0.a >= 0.0);
-            let cleanMip0Color = mix(discreteMip0.rgb, bilinearMip0.rgb, mip0Valid);
-            let cleanMip0CoC = mix(discreteMip0.a, bilinearMip0.a, mip0Valid);
-
-            let baseMipGate = smoothstep(0.25, 0.85, abs(discreteMip0.a)) * mip0Valid;
-            let mip1Valid = baseMipGate * clamp(1.0 - abs(sampleMip1.a - discreteMip0.a) / cocTolerance, 0.0, 1.0) * select(0.0, 1.0, discreteMip0.a * sampleMip1.a > 0.0);
-            let mip2Valid = mip1Valid * clamp(1.0 - abs(sampleMip2.a - discreteMip0.a) / cocTolerance, 0.0, 1.0) * select(0.0, 1.0, discreteMip0.a * sampleMip2.a > 0.0);
-
-            let mip01Color = mix(cleanMip0Color, sampleMip1.rgb, mipWeight1 * mip1Valid);
-            let sampleColor = mix(mip01Color, sampleMip2.rgb, mipWeight2 * mip2Valid);
-
-            let mip01CoC = mix(cleanMip0CoC, sampleMip1.a, mipWeight1 * mip1Valid);
-            let sampleCoC = mix(mip01CoC, sampleMip2.a, mipWeight2 * mip2Valid);
+            let mipValid = mipBlendWeight * clamp(1.0 - abs(activeMipSample.a - discreteMip0.a) / cocTolerance, 0.0, 1.0) * select(0.0, 1.0, discreteMip0.a * activeMipSample.a >= 0.0);
+            let sampleColor = mix(discreteMip0.rgb, activeMipSample.rgb, mipValid);
+            let sampleCoC = mix(discreteMip0.a, activeMipSample.a, mipValid);
 
             if (!isForegroundPass) {
                 if (isCenterForeground) {
