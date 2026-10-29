@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Depth of Field (DOF) 예제
  * [EN] Depth of Field (DOF) example
  *
- * [KO] 포스트 이펙트를 사용하여 피사계 심도(Depth of Field) 아웃포커싱 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply Depth of Field (DOF) out-of-focus effects using post effects.
+ * [KO] 물리 Thin-Lens 착란원(CoC)과 48-Tap 황금각 나선(Vogel Disk) 보케 기반 피사계 심도(Depth of Field) 후처리 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply physically-based Depth of Field (DOF) out-of-focus and bokeh effects using Thin-Lens CoC and 48-Tap Golden-Angle Vogel Disk sampling.
  */
 
 const container = document.createElement('div');
@@ -19,9 +19,8 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 15;
         controller.speedDistance = 0.5;
-        controller.tilt = -15;
+        controller.tilt = -10;
 
         const scene = new RedGPU.Display.Scene();
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
@@ -31,13 +30,14 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] DOF 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create DOF post effect and add it to the view
+        // [KO] 물리 보케 DOF 포스트 이펙트 활성화 및 인스턴스 참조 획득
+        // [EN] Enable Physical Bokeh DOF post effect and obtain instance reference
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         viewEffect.postEffectManager.useDOF = true;
         const effect = viewEffect.postEffectManager.dof;
+        controller.distance = effect.focusDistance;
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -66,7 +66,7 @@ RedGPU.init(
         renderer.start(redGPUContext, (time) => {
         });
 
-        renderTestPane(redGPUContext, viewEffect, effect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, controller, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -77,26 +77,73 @@ RedGPU.init(
 );
 
 const setupDOFScene = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.BitmapMaterial(
+    const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+    groundMaterial.color.setColorByHEX('#1a1d24');
+    groundMaterial.specularStrength = 0.5;
+    groundMaterial.shininess = 80;
+    const ground = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
+        new RedGPU.Primitive.Ground(redGPUContext, 100, 100),
+        groundMaterial
     );
-    const zLineObjects = 15;
-    const zStart = -30;
-    const zEnd = 40;
-    const zInterval = (zEnd - zStart) / (zLineObjects - 1);
+    ground.y = -1.6;
+    scene.addChild(ground);
 
-    for (let i = 0; i < zLineObjects; i++) {
-        const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), material);
-        mesh.setPosition(0, 0, zStart + i * zInterval);
-        const normalizedDistance = i / (zLineObjects - 1);
-        mesh.setScale(2 + normalizedDistance * 3);
-        mesh.rotationY = i * 20;
-        scene.addChild(mesh);
+    const cesiumManUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf';
+    new RedGPU.GLTFLoader(
+        redGPUContext,
+        cesiumManUrl,
+        (result) => {
+            const heroMesh = scene.addChild(result.resultMesh);
+            heroMesh.setPosition(0, -1.6, 0);
+            heroMesh.setScale(2.0);
+        },
+        (e) => RedGPUExampleHelper.loadingProgressInfoHandler(e)
+    );
+
+    const helmetUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
+    const helmetPlacements = [
+        {x: -1.6, y: -0.2, z: 2.5, scale: 1.4, rotY: 28},
+        {x: 2.1, y: 0.0, z: -3.5, scale: 1.7, rotY: -22},
+        {x: -2.2, y: 0.1, z: -7.5, scale: 1.7, rotY: 18},
+        {x: 2.5, y: 0.1, z: -12.0, scale: 1.8, rotY: -15},
+        {x: -2.8, y: 0.2, z: -17.0, scale: 1.8, rotY: 12}
+    ];
+
+    helmetPlacements.forEach((pos) => {
+        new RedGPU.GLTFLoader(redGPUContext, helmetUrl, (result) => {
+            const mesh = scene.addChild(result.resultMesh);
+            mesh.setPosition(pos.x, pos.y, pos.z);
+            mesh.setScale(pos.scale);
+            mesh.rotationY = pos.rotY;
+        });
+    });
+
+    const bokehLightGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.22, 16, 16);
+    const bokehColors = ['#ffaa22', '#22ddff', '#ff3388', '#ffeeaa', '#66ff44'];
+
+    for (let i = 0; i < 32; i++) {
+        const mat = new RedGPU.Material.PhongMaterial(redGPUContext);
+        const hex = bokehColors[i % bokehColors.length];
+        mat.color.setColorByHEX(hex);
+        mat.emissiveColor.setColorByHEX(hex);
+        mat.emissiveStrength = 10.0;
+
+        const lightOrb = new RedGPU.Display.Mesh(redGPUContext, bokehLightGeometry, mat);
+        const angle = i * 2.39996;
+        const radiusX = 1.8 + (i % 7) * 1.4;
+        const posX = Math.cos(angle) * radiusX;
+        const posY = -0.6 + ((i * 37) % 100) / 100 * 5.5;
+        const posZ = -6.0 - (i / 32) * 24.0;
+        const orbScale = 0.65 + (i % 4) * 0.3;
+
+        lightOrb.setPosition(posX, posY, posZ);
+        lightOrb.setScale(orbScale);
+        scene.addChild(lightOrb);
     }
 };
 
-const renderTestPane = (redGPUContext, targetView, effect, container) => {
+const renderTestPane = (redGPUContext, targetView, effect, controller, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect',
@@ -112,32 +159,32 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             });
 
             const controls = [
-                folder.addBinding(effect, 'focusDistance', {min: 0, max: 100}),
-                folder.addBinding(effect, 'aperture', {min: 0.1, max: 22.0}),
-                folder.addBinding(effect, 'maxCoC', {min: 0, max: 100}),
-                folder.addBinding(effect, 'nearPlane', {min: 0, max: 10}),
-                folder.addBinding(effect, 'farPlane', {min: 10, max: 2000}),
-                folder.addBinding(effect, 'nearBlurSize', {min: 0, max: 100}),
-                folder.addBinding(effect, 'farBlurSize', {min: 0, max: 100}),
-                folder.addBinding(effect, 'nearStrength', {min: 0, max: 3.0}),
-                folder.addBinding(effect, 'farStrength', {min: 0, max: 3.0})
+                folder.addBinding(effect, 'focusDistance', {min: 0.5, max: 50, step: 0.1}),
+                folder.addBinding(effect, 'focalLength', {min: 12, max: 200, step: 1}),
+                folder.addBinding(effect, 'aperture', {min: 0.7, max: 22.0, step: 0.1}),
+                folder.addBinding(effect, 'sensorSize', {min: 12, max: 48, step: 1}),
+                folder.addBinding(effect, 'maxCoC', {min: 8, max: 64, step: 1}),
+                folder.addBinding(effect, 'bladeCount', {min: 0, max: 9, step: 1}),
+                folder.addBinding(effect, 'bokehBrightness', {min: 0, max: 5.0, step: 0.1})
             ];
 
             const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
-            const addPresetButton = (title, method) => {
+            const addPresetButton = (title, method, speedDistance) => {
                 presetFolder.addButton({title}).on('click', () => {
                     effect[method]();
+                    controller.distance = effect.focusDistance;
+                    controller.speedDistance = speedDistance;
                     pane.refresh();
                 });
             };
 
-            addPresetButton('Game Default', 'setGameDefault');
-            addPresetButton('Cinematic', 'setCinematic');
-            addPresetButton('Portrait', 'setPortrait');
-            addPresetButton('Landscape', 'setLandscape');
-            addPresetButton('Macro', 'setMacro');
-            addPresetButton('Sports', 'setSports');
-            addPresetButton('Night Mode', 'setNightMode');
+            addPresetButton('Game Default', 'setGameDefault', 0.5);
+            addPresetButton('Cinematic', 'setCinematic', 0.35);
+            addPresetButton('Portrait', 'setPortrait', 0.25);
+            addPresetButton('Landscape', 'setLandscape', 1.0);
+            addPresetButton('Macro', 'setMacro', 0.15);
+            addPresetButton('Sports', 'setSports', 0.7);
+            addPresetButton('Night Mode', 'setNightMode', 0.3);
         }
     });
 };
