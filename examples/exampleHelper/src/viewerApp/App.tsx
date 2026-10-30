@@ -51,8 +51,10 @@ const App = () => {
 
     const dynamicPanelStyle: React.CSSProperties = {
         ...panelStyle,
-        maxHeight: isNarrow ? 'calc(100vh - 160px)' : 'calc(100vh - 103px)',
-        transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 10px))',
+        top: isNarrow ? '58px' : '68px',
+        right: isNarrow ? '10px' : '16px',
+        maxHeight: isNarrow ? 'calc(100dvh - 190px)' : 'calc(100dvh - 84px)',
+        transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 24px))',
         opacity: showSettingsPanel ? 1 : 0,
         pointerEvents: showSettingsPanel ? 'auto' : 'none',
         transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -73,9 +75,9 @@ const App = () => {
 
             <GuiCompareLabelHelper/>
 
-            <Footer 
-                narrowTitle={<Title />}
-                narrowSettings={<RenderingSettingsGroup />}
+            <Footer
+                narrowTitle={<Title/>}
+                narrowSettings={<RenderingSettingsGroup/>}
                 isNarrow={isNarrow}
                 onShowSource={() => setShowSourceModal(true)}
             />
@@ -88,14 +90,20 @@ const App = () => {
 // Styles
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    right: '6px',
-    top: '60px',
+    right: '16px',
+    top: '68px',
     display: 'flex',
     flexDirection: 'column',
     color: 'white',
     fontFamily: 'monospace',
     zIndex: 10002,
-    borderLeft: '1px solid rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(17, 17, 18, 0.88)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    borderRadius: '12px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+    padding: 0,
     overflow: 'hidden',
 };
 

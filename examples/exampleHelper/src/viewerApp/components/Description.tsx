@@ -19,16 +19,26 @@ const Description = () => {
     if (!description) return null;
 
     return (
-        <div style={{...containerStyle, right: showSettingsPanel && !isNarrow? '320px' : 0}}>
-            <div style={contentStyle}>
-                <span dangerouslySetInnerHTML={{__html: description}}/>
+        <div
+            style={{
+                ...containerStyle,
+                top: isNarrow ? '58px' : '68px',
+                left: isNarrow ? '10px' : '16px',
+                right: showSettingsPanel && !isNarrow ? '336px' : '16px'
+            }}
+        >
+            <div style={pillWrapperStyle}>
+                <div style={contentStyle}>
+                    <span dangerouslySetInnerHTML={{__html: description}}/>
+                </div>
+                <button
+                    style={toggleButtonStyle}
+                    onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                    title={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
+                >
+                    {language === 'ko' ? 'EN' : 'KO'}
+                </button>
             </div>
-            <button
-                style={toggleButtonStyle}
-                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-            >
-                {language === 'ko' ? 'ENGLISH' : '한국어'}
-            </button>
         </div>
     );
 };
@@ -36,43 +46,54 @@ const Description = () => {
 // Styles
 const containerStyle: React.CSSProperties = {
     position: 'fixed',
-    top: '52px',
-    left: 0,
-    right: 0,
+    top: '68px',
+    left: '16px',
+    right: '16px',
     backgroundColor: 'transparent',
-    padding: '12px 20px',
+    padding: 0,
     zIndex: 10002,
     display: 'flex',
-    flexDirection: 'column', // 수직 배치로 변경
-    alignItems: 'flex-start', // 왼쪽 정렬
+    alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    gap: '10px', // 글과 버튼 사이 간격 축소
     pointerEvents: 'none'
 };
 
-const contentStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: '#eee',
-    lineHeight: '1.6',
-    maxWidth: '800px',
-    wordBreak: 'keep-all',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)',
+const pillWrapperStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '10px',
+    maxWidth: '580px',
+    padding: '0 4px',
+    backgroundColor: 'transparent',
     pointerEvents: 'auto'
 };
 
+const contentStyle: React.CSSProperties = {
+    fontSize: '12.5px',
+    color: 'rgba(245, 245, 247, 0.96)',
+    lineHeight: '1.55',
+    wordBreak: 'keep-all',
+    textShadow: '0 1px 3px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.65)'
+};
+
 const toggleButtonStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // 배경 투명도 조정
-    color: '#ccc',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    padding: '3px 10px',
-    fontSize: '9px', // 버튼 크기 살짝 축소
-    fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 'auto',
+    height: '20px',
+    padding: '0 7px',
+    backgroundColor: 'transparent',
+    color: '#fdb48d',
+    border: '1px solid rgba(253, 180, 141, 0.45)',
+    fontSize: '10px',
+    fontWeight: 800,
+    letterSpacing: '0.04em',
+    textShadow: '0 1px 3px rgba(0, 0, 0, 0.9)',
     cursor: 'pointer',
-    borderRadius: '4px',
+    borderRadius: '5px',
     flexShrink: 0,
-    transition: 'all 0.2s',
-    pointerEvents: 'auto',
-    backdropFilter: 'blur(4px)'
+    transition: 'all 0.2s'
 };
 
 export default Description;

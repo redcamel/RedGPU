@@ -8,12 +8,13 @@ interface SelectBoxProps {
     value: string;
     options: { value: string; label: string }[];
     onChange: (value: string) => void;
+    style?: React.CSSProperties;
 }
 
 /**
  * [KO] 커스텀 스타일이 적용된 선택 박스 컴포넌트입니다.
  */
-const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange}) => {
+const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange, style}) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [openDirection, setOpenDirection] = useState<'up' | 'down'>('down');
@@ -51,7 +52,9 @@ const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange}) 
             ref={dropdownRef}
             style={{
                 ...selectBoxStyle,
-                backgroundColor: (isHovered || isOpen) ? '#1a1a1c' : '#111112',
+                backgroundColor: (isHovered || isOpen) ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
+                boxShadow: isOpen ? 'inset 0 0 0 1px rgba(253, 180, 141, 0.35)' : 'none',
+                ...style
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -59,7 +62,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange}) 
         >
             <span style={titleLabelStyle}>{label}</span>
             <div style={customSelectTriggerStyle}>
-                <span style={currentValueStyle}>{currentLabel}</span>
+                <span style={currentValueStyle} title={currentLabel}>{currentLabel}</span>
                 <div style={{
                     ...arrowIconStyle,
                     transform: isOpen
@@ -71,13 +74,11 @@ const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange}) 
             {isOpen && (
                 <div style={{
                     ...optionsListStyle,
-                    top: openDirection === 'down' ? '100%' : 'auto',
-                    bottom: openDirection === 'up' ? '100%' : 'auto',
-                    borderTop: openDirection === 'down' ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
-                    borderBottom: openDirection === 'up' ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+                    top: openDirection === 'down' ? 'calc(100% + 8px)' : 'auto',
+                    bottom: openDirection === 'up' ? 'calc(100% + 8px)' : 'auto',
                     boxShadow: openDirection === 'down'
-                        ? '0 10px 20px rgba(0,0,0,0.5)'
-                        : '0 -10px 20px rgba(0,0,0,0.5)',
+                        ? '0 12px 32px rgba(0,0,0,0.55)'
+                        : '0 -12px 32px rgba(0,0,0,0.55)',
                 }}>
                     {options.map(option => {
                         const isSelected = value === option.value;
@@ -87,7 +88,9 @@ const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange}) 
                                 key={option.value}
                                 style={{
                                     ...optionItemStyle,
-                                    backgroundColor: isSelected ? '#2a2a2c' : (isItemHovered ? '#252527' : 'transparent'),
+                                    backgroundColor: isSelected
+                                        ? 'rgba(253, 180, 141, 0.16)'
+                                        : (isItemHovered ? 'rgba(255, 255, 255, 0.06)' : 'transparent'),
                                     color: (isSelected || isItemHovered) ? '#fff' : '#fdb48d'
                                 }}
                                 onMouseEnter={() => setHoveredOption(option.value)}
@@ -114,20 +117,28 @@ const selectBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    padding: '0 16px',
-    backgroundColor: '#111112',
-    minWidth: '110px',
+    height: '36px',
+    padding: '0 11px',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    border: 'none',
+    minWidth: 0,
     flexShrink: 0,
     cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    userSelect: 'none'
+    transition: 'background-color 0.2s, box-shadow 0.2s',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+    boxSizing: 'border-box'
 };
 
 const titleLabelStyle: React.CSSProperties = {
-    fontSize: '9px',
-    color: '#666',
+    fontSize: '8px',
+    color: '#888',
     fontWeight: 'bold',
-    marginBottom: '2px'
+    lineHeight: '1',
+    marginBottom: '2px',
+    letterSpacing: '0.05em',
+    whiteSpace: 'nowrap'
 };
 
 const customSelectTriggerStyle: React.CSSProperties = {
@@ -135,18 +146,27 @@ const customSelectTriggerStyle: React.CSSProperties = {
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
+    minWidth: 0,
+    gap: '6px'
 };
 
 const currentValueStyle: React.CSSProperties = {
     fontSize: '11px',
+    lineHeight: '1.1',
     color: '#fdb48d',
     fontWeight: 'bold',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    minWidth: 0,
+    flex: 1
 };
 
 const arrowIconStyle: React.CSSProperties = {
     width: '10px',
     height: '10px',
-    marginLeft: '8px',
+    marginLeft: '2px',
+    flexShrink: 0,
     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fdb48d%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
@@ -156,24 +176,31 @@ const arrowIconStyle: React.CSSProperties = {
 
 const optionsListStyle: React.CSSProperties = {
     position: 'absolute',
-    top: '100%',
+    top: 'calc(100% + 8px)',
     left: 0,
-    right: 0,
-    backgroundColor: '#1a1a1c',
-    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-    boxShadow: '0 10px 20px rgba(0,0,0,0.5)',
+    minWidth: '100%',
+    width: 'max-content',
+    backgroundColor: 'rgba(22, 22, 24, 0.92)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    borderRadius: '8px',
+    boxShadow: '0 12px 32px rgba(0,0,0,0.55)',
     zIndex: 10004,
     display: 'flex',
     flexDirection: 'column',
-    padding: '4px 0',
+    padding: '5px',
+    overflow: 'hidden'
 };
 
 const optionItemStyle: React.CSSProperties = {
-    padding: '10px 16px',
+    padding: '8px 13px',
     fontSize: '11px',
     fontWeight: 'bold',
+    borderRadius: '5px',
     cursor: 'pointer',
     transition: 'background-color 0.1s, color 0.1s',
+    whiteSpace: 'nowrap'
 };
 
 export default SelectBox;

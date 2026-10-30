@@ -8,6 +8,7 @@ import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
  */
 const RenderingSettingsGroup: React.FC = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
+    const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
 
     const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
     const [toneMapping, setToneMapping] = useState<string>(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
@@ -71,6 +72,7 @@ const RenderingSettingsGroup: React.FC = () => {
                 label="TONE MAPPING"
                 value={toneMapping}
                 options={tmOptions}
+                style={isNarrow ? {flex: 1.5, minWidth: 0} : {minWidth: '132px', maxWidth: '168px'}}
                 onChange={handleToneMappingChange}
             />
 
@@ -78,6 +80,7 @@ const RenderingSettingsGroup: React.FC = () => {
                 label="ANTIALIASING"
                 value={antialiasing}
                 options={aaOptions}
+                style={isNarrow ? {flex: 1, minWidth: '88px'} : {minWidth: '88px'}}
                 onChange={handleAntialiasingChange}
             />
         </>

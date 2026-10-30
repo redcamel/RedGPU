@@ -1,12 +1,6 @@
 import React, {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {useExampleHelperStore} from '../../store';
 
-// [KO] 레이아웃 상수 정의
-// [EN] Define layout constants
-const HEADER_HEIGHT = 51;
-const FOOTER_HEIGHT_NORMAL = 50;
-const FOOTER_HEIGHT_NARROW = 148;
-
 /**
  * [KO] 뷰 비교를 위한 레이블을 표시하는 컴포넌트입니다.
  * [EN] Component that displays labels for view comparison.
@@ -20,16 +14,14 @@ const GuiCompareLabelHelper: React.FC = () => {
     const updateContainerStyle = useCallback(() => {
         const container = guiConfig?.compareLabel?.targetContainer;
         if (container) {
-            const bottomOffset = isNarrow ? FOOTER_HEIGHT_NARROW : FOOTER_HEIGHT_NORMAL;
-
-            // [KO] 컨테이너 스타일 직접 설정 (고정 위치 및 영역 확보)
-            // [EN] Set container styles directly (fixed position and area allocation)
+            // [KO] 플로팅 레이아웃에서는 전체 화면(0~100%)을 온전히 사용
+            // [EN] Use full screen (0~100%) in floating layout
             Object.assign(container.style, {
                 position: 'fixed',
-                top: `${HEADER_HEIGHT}px`,
+                top: '0',
                 left: '0',
                 width: '100%',
-                bottom: `${bottomOffset}px`
+                bottom: '0'
             });
 
             setRect(container.getBoundingClientRect());
@@ -38,8 +30,6 @@ const GuiCompareLabelHelper: React.FC = () => {
         }
     }, [guiConfig?.compareLabel?.targetContainer, isNarrow]);
 
-    // [KO] 브라우저가 그리기 전에 스타일을 즉시 적용하여 레이아웃 어긋남 방지
-    // [EN] Apply styles immediately before the browser paints to prevent layout mismatch
     useLayoutEffect(() => {
         updateContainerStyle();
     }, [updateContainerStyle]);
@@ -48,8 +38,6 @@ const GuiCompareLabelHelper: React.FC = () => {
         const container = guiConfig?.compareLabel?.targetContainer;
         if (!container) return;
 
-        // [KO] ResizeObserver를 사용하여 컨테이너 크기 변화 정밀 감지
-        // [EN] Use ResizeObserver for precise detection of container size changes
         const resizeObserver = new ResizeObserver(() => {
             updateContainerStyle();
         });
@@ -61,8 +49,6 @@ const GuiCompareLabelHelper: React.FC = () => {
             resizeObserver.disconnect();
             window.removeEventListener('resize', updateContainerStyle);
 
-            // [KO] 컴포넌트 언마운트 시 스타일 초기화
-            // [EN] Reset styles when component unmounts
             Object.assign(container.style, {
                 position: '',
                 top: '',
@@ -82,10 +68,15 @@ const GuiCompareLabelHelper: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '8px 10px',
-        backgroundColor: '#5b52aa',
+        padding: '7px 12px',
+        backgroundColor: 'rgba(91, 82, 170, 0.85)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
         color: '#fff',
-        fontSize: '12px',
+        fontSize: '11px',
         fontWeight: 600,
         pointerEvents: 'none',
         lineHeight: 1,
@@ -93,28 +84,25 @@ const GuiCompareLabelHelper: React.FC = () => {
     };
 
     const getStyle = (isNormal: boolean): React.CSSProperties => {
-        // [KO] rect가 아직 계산되지 않았을 경우를 위한 기본값 설정
-        // [EN] Set default values for when rect is not yet calculated
-        const top = rect ? rect.top : HEADER_HEIGHT;
+        const top = rect ? rect.top : 0;
         const left = rect ? rect.left : 0;
         const width = rect ? rect.width : window.innerWidth;
-        const footerHeight = isNarrow ? FOOTER_HEIGHT_NARROW : FOOTER_HEIGHT_NORMAL;
-        const height = rect ? rect.height : (window.innerHeight - (HEADER_HEIGHT + footerHeight));
+        const height = rect ? rect.height : window.innerHeight;
 
         if (isNarrow) {
             return {
                 ...baseStyle,
-                left: left,
+                left: left + 12,
                 [isNormal ? 'bottom' : 'top']: isNormal
-                    ? (window.innerHeight - (top + height / 2))
-                    : (top + height / 2 + 1)
+                    ? (window.innerHeight - (top + height / 2) + 6)
+                    : (top + height / 2 + 6)
             };
         }
         return {
             ...baseStyle,
-            bottom: window.innerHeight - (top + height),
+            bottom: '16px',
             left: left + width / 2,
-            ...(isNormal ? {transform: 'translateX(calc(-100% - 1px))'} : {})
+            ...(isNormal ? {transform: 'translateX(calc(-100% - 6px))'} : {transform: 'translateX(6px)'})
         };
     };
 

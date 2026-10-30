@@ -9,6 +9,7 @@ interface IconButtonProps {
 
 /**
  * [KO] 아이콘 전용 버튼 컴포넌트입니다.
+ * 동심원 곡률(Nested Radius): 외부 컨테이너(12px) - 패딩(4px) = 내부 버튼(8px), 36px × 36px
  */
 const IconButton: React.FC<IconButtonProps> = ({icon, label, onClick, title}) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -24,8 +25,7 @@ const IconButton: React.FC<IconButtonProps> = ({icon, label, onClick, title}) =>
         <button
             style={{
                 ...baseButtonStyle,
-                width: '52px',
-                backgroundColor: isHovered ? '#1a1a1c' : '#111112',
+                backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
             }}
             onClick={onClick}
             title={title || label}
@@ -42,8 +42,10 @@ const baseButtonStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100%',
-    backgroundColor: '#111112',
+    width: '36px',
+    height: '36px',
+    borderRadius: '8px',
+    backgroundColor: 'transparent',
     color: '#fdb48d',
     border: 'none',
     fontSize: '11px',

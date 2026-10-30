@@ -22,8 +22,6 @@ const SourceModal = () => {
         if (showSourceModal) {
             setLoading(true);
 
-            // [KO] 현재 예제 헬퍼는 예제 페이지(index.html)에서 실행되므로 
-            // 현재 경로의 index.js를 직접 불러오면 됩니다.
             fetch('./index.js')
                 .then(response => {
                     if (!response.ok) throw new Error('Failed to load source code');
@@ -46,7 +44,6 @@ const SourceModal = () => {
         }
     }, [showSourceModal, loadPrism]);
 
-    // [KO] 모달이 열린 상태에서 코드가 준비되면 하이라이팅 적용
     useEffect(() => {
         if (showSourceModal && !loading && sourceCode && (window as any).Prism && codeRef.current) {
             (window as any).Prism.highlightElement(codeRef.current);
@@ -85,60 +82,68 @@ const overlayStyle: React.CSSProperties = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     zIndex: 20000,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '40px',
-    backdropFilter: 'blur(10px)'
+    padding: '34px',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)'
 };
 
 const modalStyle: React.CSSProperties = {
     width: '100%',
     maxWidth: '1200px',
     height: '100%',
-    backgroundColor: '#111112',
-    border: '1px solid #333',
-    borderRadius: '8px',
+    backgroundColor: 'rgba(17, 17, 18, 0.88)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    borderRadius: '12px',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+    boxShadow: '0 24px 60px rgba(0,0,0,0.6)'
 };
 
 const headerStyle: React.CSSProperties = {
-    padding: '16px 24px',
-    borderBottom: '1px solid #333',
+    padding: '12px 18px',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1a1a1b'
+    backgroundColor: 'rgba(255, 255, 255, 0.03)'
 };
 
 const titleStyle: React.CSSProperties = {
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: 'bold',
     color: '#fdb48d',
     letterSpacing: '0.05em'
 };
 
 const closeButtonStyle: React.CSSProperties = {
-    backgroundColor: '#333',
-    color: '#ccc',
-    border: 'none',
-    padding: '6px 16px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 'auto',
+    height: '30px',
+    padding: '0 14px',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    color: '#eee',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
     fontSize: '11px',
     fontWeight: 'bold',
     cursor: 'pointer',
-    borderRadius: '4px',
+    borderRadius: '8px',
     transition: 'all 0.2s'
 };
 
 const contentStyle: React.CSSProperties = {
     flex: 1,
     overflow: 'auto',
-    backgroundColor: '#000'
+    backgroundColor: 'rgba(0, 0, 0, 0.4)'
 };
 
 const loadingStyle: React.CSSProperties = {
@@ -146,7 +151,7 @@ const loadingStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#666',
+    color: '#888',
     fontSize: '13px'
 };
 
@@ -158,7 +163,7 @@ const preStyle: React.CSSProperties = {
 
 const codeStyle: React.CSSProperties = {
     fontSize: '13px',
-    lineHeight: '1.6',
+    lineHeight: '1.618',
     fontFamily: 'Consolas, "Courier New", monospace',
     textShadow: 'none',
     color: '#ccc'

@@ -33,7 +33,6 @@ const Title = () => {
         const pathname = window.location.pathname;
         const examplesIndex = pathname.indexOf('/examples/');
         if (examplesIndex === -1) {
-            // [KO] 만약 /examples/가 경로에 없다면 (테스트 환경 등), 현재 경로를 기반으로 추측
             window.location.href = `${window.location.origin}/examples/${path}/index.html`;
         } else {
             const base = pathname.substring(0, examplesIndex);
@@ -41,22 +40,22 @@ const Title = () => {
         }
     };
 
-    return <>
+    return (
         <div style={isNarrow ? narrowTitleBoxStyle : titleBoxStyle}>
             <div style={{
                 display: 'flex',
-                alignItems: 'stretch',
+                alignItems: 'center',
                 height: '100%',
-                gap: '1px',
-                backgroundColor: '#222',
-                justifyContent: isNarrow ? 'center' : 'flex-start'
+                gap: '2px',
+                justifyContent: isNarrow ? 'space-between' : 'flex-start'
             }}>
                 {prevExample && (
                     <button
                         style={{
                             ...buttonStyle,
-                            width: isNarrow ? '46px' : '52px',
-                            backgroundColor: isPrevHovered ? '#1a1a1c' : '#111112'
+                            width: '28px',
+                            height: isNarrow ? '32px' : '36px',
+                            backgroundColor: isPrevHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
                         }}
                         onClick={() => navigate(prevExample.path!)}
                         title={`Previous Example : ${prevExample.name}`}
@@ -91,8 +90,9 @@ const Title = () => {
                     <button
                         style={{
                             ...buttonStyle,
-                            width: isNarrow ? '46px' : '52px',
-                            backgroundColor: isNextHovered ? '#1a1a1c' : '#111112'
+                            width: '28px',
+                            height: isNarrow ? '32px' : '36px',
+                            backgroundColor: isNextHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
                         }}
                         onClick={() => navigate(nextExample.path!)}
                         title={`Next Example : ${nextExample.name}`}
@@ -104,24 +104,25 @@ const Title = () => {
                 )}
             </div>
         </div>
-    </>
-}
+    );
+};
 
 const narrowTitleBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'stretch',
-    backgroundColor: '#111112',
+    backgroundColor: 'transparent',
     width: '100%',
     flexShrink: 0
 };
+
 const titleBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    backgroundColor: '#111112',
-    minWidth: '200px',
+    backgroundColor: 'transparent',
+    height: '36px',
     flexShrink: 0,
     alignItems: 'stretch'
 };
@@ -130,24 +131,26 @@ const contentBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    padding: '0 16px',
+    padding: '0 10px',
     flexGrow: 1,
-    minWidth: '100px',
+    minWidth: '110px',
     textAlign: 'center'
 };
 
 const titleLabelStyle: React.CSSProperties = {
-    fontSize: '9px',
-    color: '#666',
+    fontSize: '8px',
+    lineHeight: '1',
+    color: '#888',
     fontWeight: 'bold',
     marginBottom: '2px',
+    letterSpacing: '0.05em'
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {
     fontSize: '8px',
     backgroundColor: '#ff4d4d',
     color: '#fff',
-    padding: '4px 5px',
+    padding: '3px 5px',
     borderRadius: '4px',
     fontWeight: 'bold',
     lineHeight: '1',
@@ -155,8 +158,9 @@ const experimentalBadgeStyle: React.CSSProperties = {
 };
 
 const titleValueStyle: React.CSSProperties = {
-    fontSize: '11px',
-    color: '#ccc',
+    fontSize: '11.5px',
+    lineHeight: '1.1',
+    color: '#eee',
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -164,10 +168,12 @@ const titleValueStyle: React.CSSProperties = {
 };
 
 const buttonStyle: React.CSSProperties = {
-    backgroundColor: '#111112',
+    backgroundColor: 'transparent',
     color: '#fdb48d',
     border: 'none',
-    width: '40px',
+    width: '28px',
+    height: '36px',
+    borderRadius: '8px',
     cursor: 'pointer',
     fontSize: '14px',
     fontWeight: 'bold',
@@ -175,7 +181,8 @@ const buttonStyle: React.CSSProperties = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'background-color 0.2s',
-    padding: 0
+    padding: 0,
+    flexShrink: 0
 };
 
-export default Title
+export default Title;
