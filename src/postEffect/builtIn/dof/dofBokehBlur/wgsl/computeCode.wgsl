@@ -55,8 +55,6 @@ if (global_id.x >= postEffectOutputDimensions.x || global_id.y >= postEffectOutp
 let index = global_id.xy;
 let halfDimsI = vec2<i32>(postEffectOutputDimensions);
 let maxHalfCoord = max(halfDimsI - vec2<i32>(1), vec2<i32>(0));
-let maxMip1Coord = max(vec2<i32>(textureDimensions(cocMip1Texture)) - vec2<i32>(1), vec2<i32>(0));
-let maxMip2Coord = max(vec2<i32>(textureDimensions(cocMip2Texture)) - vec2<i32>(1), vec2<i32>(0));
 let halfDims = vec2<f32>(postEffectOutputDimensions);
 let invHalfDims = 1.0 / halfDims;
 let centerUV = (vec2<f32>(index) + 0.5) * invHalfDims;
@@ -79,14 +77,17 @@ let dilatedMinNearCoC = min(tCenter.r, min(min(tLeft.r, tRight.r), min(tUp.r, tD
 let dilatedMaxFarCoC = max(tCenter.g, max(max(tLeft.g, tRight.g), max(tUp.g, tDown.g)));
 
 let isForegroundPass = uniforms.passMode == 1u;
-let isCenterForeground = centerCoC < -0.25;
+let isCenterForeground = centerCoC < -0.15;
 let centerNearRadius = max(-centerCoC, 0.0);
 let centerFarRadius = max(centerCoC, 0.0);
 
 let nearGatherRadius = min(max(-dilatedMinNearCoC, centerNearRadius), maxHalfRadius);
-// [KO] 배경 패스(Pass 3A): 전경 픽셀에서는 후면 홀필링 반경을 탐색하고, 비전경 픽셀에서는 중심 픽셀의 배경 CoC 반경으로 탐색하여 원경이 근경 배경 위로 역침범하는 현상 차단
-// [EN] Background pass (Pass 3A): search hole-filling radius on foreground pixels, and gather within center Far CoC on non-foreground pixels to prevent distant background from bleeding over closer background
-let farGatherRadius = min(select(centerFarRadius, max(nearGatherRadius, dilatedMaxFarCoC), isCenterForeground), maxHalfRadius);
+// [KO] 배경 패스(Pass 3A): 전경 픽셀에서는 타일 최대 전경 대비 중심 전경의 지배율(nearDominance)과 중심 전경 반경(centerNearRadius)에 연동된 연속 홀필링 반경을 탐색하고, 비전경 픽셀에서는 합초 개구부 게이트(saturate(centerFarRadius - 0.25))로 합초 피사체 침범만 차단하면서 타일 최대 배경 보케 반경을 온전히 탐색
+// [EN] Background pass (Pass 3A): search continuous hole-filling radius driven by centerNearRadius and nearDominance on foreground pixels, and gather full tile max far bokeh radius gated by in-focus aperture (saturate(centerFarRadius - 0.25)) on non-foreground pixels
+let bgApertureGate = saturate(centerFarRadius - 0.25);
+let nearDominance = saturate(centerNearRadius / max(nearGatherRadius, 0.5));
+let holeFillGatherRadius = min(max(centerNearRadius * 1.25, dilatedMaxFarCoC * nearDominance), maxHalfRadius);
+let farGatherRadius = min(select(max(centerFarRadius, dilatedMaxFarCoC * bgApertureGate), holeFillGatherRadius, isCenterForeground), maxHalfRadius);
 let gatherRadius = select(farGatherRadius, nearGatherRadius, isForegroundPass);
 
 if (gatherRadius < 0.25) {
@@ -124,6 +125,8 @@ if (!isBgHoleFill && mipLevel > 0.05 && centerAllowMip > 0.0) {
 var accumColor = vec3<f32>(0.0);
 var accumWeight: f32 = 0.0;
 var accumFarCoC: f32 = 0.0;
+var fallbackBgColor = centerFilteredColor;
+var fallbackBgWeight: f32 = 1.0;
 var fgCoverageSum: f32 = 0.0;
 var fgRadiusSum: f32 = 0.0;
 var fgRadiusWeightSum: f32 = 0.0;
@@ -135,9 +138,7 @@ if (!isForegroundPass) {
     if (!isCenterForeground) {
         let centerExcessLuma = max(getLuminance(centerFilteredColor) - 0.25, 0.0);
         let centerHighlight = centerExcessLuma / (1.0 + centerExcessLuma * 0.25);
-        let centerAreaRatio = gatherRadius / max(centerFarRadius, 1.0);
-        let centerAreaWeight = clamp(centerAreaRatio * centerAreaRatio, 0.1, 16.0);
-        let centerW = centerAreaWeight * (1.0 + centerHighlight * halfBokehBrightness);
+        let centerW = 1.0 + centerHighlight * halfBokehBrightness;
         accumColor += centerFilteredColor * centerW;
         accumWeight += centerW;
         accumFarCoC += centerFarRadius * centerW;
@@ -146,7 +147,7 @@ if (!isForegroundPass) {
     let centerExcessLuma = max(getLuminance(centerFilteredColor) - 0.25, 0.0);
     let centerHighlight = centerExcessLuma / (1.0 + centerExcessLuma * 0.25);
     let centerW = 1.0 + centerHighlight * halfBokehBrightness;
-    let selfCoverage = smoothstep(0.25, 0.75, centerNearRadius);
+    let selfCoverage = smoothstep(0.15, 0.65, centerNearRadius);
     accumColor += centerFilteredColor * centerW * selfCoverage;
     accumWeight += centerW * selfCoverage;
     fgCoverageSum += selfCoverage;
@@ -155,25 +156,26 @@ if (!isForegroundPass) {
 }
 
 let basePixelCenter = vec2<f32>(index) + 0.5;
+let halfRingTransition = max(ringSpacing * 0.5, 0.5);
 
-// [KO] 워크그룹 공유 메모리(sharedKernel)에 캐싱된 정다각형/원형 탭 벡터를 참조하여 초월함수 호출 없이 5-Ring 동심 링 개더링 수행 (최외곽 링 normRadius = 1.0 완전 도달)
-// [EN] Perform 5-Ring polygonal/circular concentric ring gathering from workgroup shared memory (sharedKernel) without per-pixel SFU calls (outermost ring reaches exact normRadius = 1.0)
+// [KO] 워크그룹 공유 메모리(sharedKernel)에 캐싱된 정다각형/원형 탭 벡터를 참조하여 초월함수 호출 없이 5-Ring 동심 링 개더링 수행 (링 간격 기반 연속 전이 폭 정규화)
+// [EN] Perform 5-Ring polygonal/circular concentric ring gathering from workgroup shared memory (sharedKernel) without per-pixel SFU calls (ringSpacing-driven continuous transition width normalization)
 for (var b = 0u; b < sectorCount; b = b + 1u) {
     var tapSlot = b * TAPS_PER_SECTOR;
 
     for (var ring = 1u; ring <= activeRingCount; ring = ring + 1u) {
-        let normRadius = (f32(ring) - 0.35) * invActiveRingCount;
+        let normRadius = (f32(ring) - 0.25) * invActiveRingCount;
         let normGatherRadius = normRadius * gatherRadius;
 
         for (var step = 0u; step < ring; step = step + 1u) {
-            totalKernelWeight += 1.0;
-
             let kernelTap = sharedKernel[tapSlot];
             tapSlot = tapSlot + 1u;
 
             let offsetTexels = kernelTap.xy * normGatherRadius;
             let polyScale = kernelTap.z;
             let distTexels = polyScale * normGatherRadius;
+            let kernelTapWeight = smoothstep(-halfRingTransition, halfRingTransition, gatherRadius * polyScale - distTexels);
+            totalKernelWeight += kernelTapWeight;
 
             let sampleCoord0 = clamp(vec2<i32>(floor(basePixelCenter + offsetTexels)), vec2<i32>(0), maxHalfCoord);
             let discreteMip0 = textureLoad(cocMip0Texture, sampleCoord0, 0);
@@ -184,60 +186,69 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
             if (mipLevel > 0.1) {
                 let sampleUV = centerUV + offsetTexels * invHalfDims;
                 var activeMipSample: vec4<f32>;
-                var discreteMipCoC: f32 = discreteMip0.a;
                 var mipBlendWeight: f32;
+                let sampleAllowMip = select(smoothstep(0.25, 0.85, abs(discreteMip0.a)), smoothstep(ringSpacing * 0.5, ringSpacing * 1.5, distTexels), isBgHoleFill);
                 if (mipLevel < 0.5) {
                     activeMipSample = textureSampleLevel(cocMip0Texture, basicSampler, sampleUV, 0.0);
                     mipBlendWeight = smoothstep(0.1, 0.5, mipLevel);
                 } else if (mipLevel < 1.5) {
                     activeMipSample = textureSampleLevel(cocMip1Texture, basicSampler, sampleUV, 0.0);
-                    discreteMipCoC = textureLoad(cocMip1Texture, clamp(sampleCoord0 / 2, vec2<i32>(0), maxMip1Coord), 0).a;
-                    mipBlendWeight = smoothstep(0.5, 1.25, mipLevel) * smoothstep(0.25, 0.85, abs(discreteMip0.a));
+                    mipBlendWeight = smoothstep(0.5, 1.25, mipLevel) * sampleAllowMip;
                 } else {
                     activeMipSample = textureSampleLevel(cocMip2Texture, basicSampler, sampleUV, 0.0);
-                    discreteMipCoC = textureLoad(cocMip2Texture, clamp(sampleCoord0 / 4, vec2<i32>(0), maxMip2Coord), 0).a;
-                    mipBlendWeight = smoothstep(0.25, 0.85, abs(discreteMip0.a));
+                    mipBlendWeight = sampleAllowMip;
                 }
 
                 let cocTolerance = max(min(abs(discreteMip0.a), abs(activeMipSample.a)) * 0.35, 0.25);
-                let isMipSignConsistent = (discreteMip0.a * activeMipSample.a > 0.0) && (discreteMip0.a * discreteMipCoC > 0.0) && (abs(discreteMipCoC - discreteMip0.a) <= cocTolerance * 1.5);
-                let mipValid = mipBlendWeight * saturate(1.0 - abs(activeMipSample.a - discreteMip0.a) / cocTolerance) * select(0.0, 1.0, isMipSignConsistent);
+                let isSameDomain = (discreteMip0.a * activeMipSample.a > 0.0) || (abs(discreteMip0.a) < 0.35 && abs(activeMipSample.a) < 0.35);
+                let mipValid = mipBlendWeight * saturate(1.0 - abs(activeMipSample.a - discreteMip0.a) / cocTolerance) * select(0.0, 1.0, isSameDomain);
                 sampleColor = mix(discreteMip0.rgb, activeMipSample.rgb, mipValid);
                 sampleCoC = mix(discreteMip0.a, activeMipSample.a, mipValid);
             }
 
             if (!isForegroundPass) {
                 if (isCenterForeground) {
-                    // [KO] 전경 픽셀 뒤편의 비차폐 배경 복원(Disocclusion Hole-Filling): 비전경 샘플(sampleCoC > -0.25)에 대해 순수 거리 감쇠 가중치로 후면 배경을 100% 복원하여 전경 실루엣 테두리 잔상 원천 차단
-                    // [EN] Background reconstruction behind foreground pixels (Disocclusion Hole-Filling): reconstruct background from non-foreground samples (sampleCoC > -0.25) with distance decay to eliminate foreground silhouette edge ghosts
-                    if (discreteMip0.a > -0.25 && sampleCoC > -0.25) {
+                    // [KO] 전경 픽셀 뒤편의 비차폐 배경 복원(Disocclusion Hole-Filling): 상대 CoC 깊이 차이(cocDepthDelta)와 링 간격/배경 반경 스케일(effectiveHoleScale) 기반의 연속 거리 감쇠 가중치로 다중 전경 칼자국 및 원본 이중 상 원천 차단
+                    // [EN] Background reconstruction behind foreground pixels (Disocclusion Hole-Filling): continuous distance-decay weighting driven by relative CoC depth delta (cocDepthDelta) and ringSpacing/background radius scale (effectiveHoleScale)
+                    fallbackBgColor += sampleColor * kernelTapWeight;
+                    fallbackBgWeight += kernelTapWeight;
+
+                    let minTapCoC = min(discreteMip0.a, sampleCoC);
+                    let cocDepthDelta = minTapCoC - centerCoC;
+                    let isNonFgSample = smoothstep(-0.25, 0.0, minTapCoC);
+                    let isBehindFgSample = smoothstep(ringSpacing * 0.25, ringSpacing * 1.25, cocDepthDelta);
+                    let depthBehindWeight = max(isNonFgSample, isBehindFgSample);
+                    if (depthBehindWeight > 0.0) {
                         let sampleFarCoC = max(sampleCoC, 0.0);
-                        let bgHoleWeight = 1.0 / (1.0 + distTexels * 0.5);
+                        let effectiveHoleScale = max(sampleFarCoC, ringSpacing);
+                        let normHoleDist = distTexels / max(effectiveHoleScale, 0.5);
+                        let bgHoleWeight = depthBehindWeight / (0.1 + normHoleDist * normHoleDist * distTexels);
                         accumColor += sampleColor * bgHoleWeight;
                         accumWeight += bgHoleWeight;
                         accumFarCoC += sampleFarCoC * bgHoleWeight;
                     }
                 } else if (discreteMip0.a > 0.25 && sampleCoC > 0.25) {
-                    // [KO] 물리 기반 다층 배경 보케 개더링 (Layered Background Scatter-as-Gather):
-                    //      1) 전방 배경 샘플(sampleCoC <= centerFarRadius)은 자신의 물리적 반경(sampleCoC)만큼 후방 배경(centerFarRadius) 위로 번지며,
-                    //         넓은 탐색 반경(gatherRadius)에서의 탭 밀도 희석을 보상하기 위해 원판 면적 역제곱 가중치((gatherRadius / sampleCoC)^2)를 곱함
-                    //      2) 후방 배경 샘플(sampleCoC > centerFarRadius)은 전방 불투명 표면에 의해 차폐(frontOcclusion)되어 역침범을 차단함
-                    // [EN] Physically-based layered background bokeh gathering:
-                    //      1) Closer background samples (sampleCoC <= centerFarRadius) spread over farther background within their own radius (sampleCoC),
-                    //         weighted by inverse-square disc area ((gatherRadius / sampleCoC)^2) to compensate for tap density dilution
-                    //      2) Farther background samples (sampleCoC > centerFarRadius) are occluded by closer opaque surfaces (frontOcclusion)
-                    let effectiveSampleFarCoC = max(sampleCoC, min(centerFarRadius, ringSpacing));
-                    let sampleFarRadius = effectiveSampleFarCoC * polyScale;
+                    // [KO] 물리 기반 배경 보케 개더링:
+                    //      1) 일반 배경 표면(diffuseWeight)은 양측 최소 반경(min(centerFarRadius, sampleCoC))과 링 간격 전이 폭(halfRingTransition)으로 결합하여 계단 현상과 원경 후광 누수를 동시 차단
+                    //      2) 하이라이트 보케 원판(highlightWeight)은 샘플 자체의 물리적 보케 반경(sampleCoC) 전체로 확산하되, 중심 픽셀이 샘플보다 카메라에 더 가까우면 차폐(depthOcclusion)
+                    // [EN] Physically-based background bokeh gathering:
+                    //      1) Diffuse surface blur uses min(centerFarRadius, sampleCoC) and halfRingTransition to eliminate both stair-stepping and background halo leakage
+                    //      2) Highlight bokeh discs spread across their full sampleCoC radius, occluded when center pixel is closer than sample (depthOcclusion)
+                    let sampleFarRadius = sampleCoC * polyScale;
                     let bokehDiscCoverage = saturate(sampleFarRadius - distTexels + 0.5);
-                    if (bokehDiscCoverage > 0.0) {
-                        let occlusionTolerance = max(centerFarRadius * 0.35, 0.75);
-                        let frontOcclusion = smoothstep(centerFarRadius + occlusionTolerance, centerFarRadius - 0.25, sampleCoC);
-                        let areaRatio = gatherRadius / max(effectiveSampleFarCoC, 1.0);
-                        let areaWeight = clamp(areaRatio * areaRatio, 0.1, 16.0);
-                        let diffuseWeight = bokehDiscCoverage * frontOcclusion * areaWeight * smoothstep(0.25, 1.0, sampleCoC);
+                    let pairFarRadius = min(centerFarRadius, sampleCoC) * polyScale;
+                    let diffuseCoverage = smoothstep(-halfRingTransition, halfRingTransition, pairFarRadius - distTexels);
+                    if (bokehDiscCoverage > 0.0 || diffuseCoverage > 0.0) {
+                        let diffuseWeight = diffuseCoverage * smoothstep(0.25, 1.0, sampleCoC);
+
                         let sampleExcessLuma = max(getLuminance(sampleColor) - 0.25, 0.0);
                         let highlightBoost = (sampleExcessLuma / (1.0 + sampleExcessLuma * 0.25)) * halfBokehBrightness;
-                        let w = diffuseWeight + bokehDiscCoverage * frontOcclusion * areaWeight * highlightBoost;
+                        let depthOcclusion = smoothstep(centerFarRadius + max(sampleCoC * 0.5, 1.0), centerFarRadius - 0.5, sampleCoC);
+                        let areaRatio = max(centerFarRadius, ringSpacing) / max(sampleCoC, ringSpacing);
+                        let areaWeight = clamp(areaRatio * areaRatio, 0.2, 1.0);
+                        let highlightWeight = bokehDiscCoverage * depthOcclusion * highlightBoost * areaWeight;
+
+                        let w = diffuseWeight + highlightWeight;
                         if (w > 0.0) {
                             accumColor += sampleColor * w;
                             accumWeight += w;
@@ -246,19 +257,18 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
                     }
                 }
             } else {
-                // [KO] Pass 3B: 전경(Near < 0) 전용 레이어 개더링 - 샘플 자신의 물리적 전경 반경(-sampleCoC)과 연속 표면 연장 반경에 기반한 면적 정규화 및 기하 불투명도 적분
-                // [EN] Pass 3B: Foreground (Near < 0) dedicated layer gathering - area normalization and geometric opacity integration based on sample's physical near radius (-sampleCoC) and continuous surface extension
-                if (discreteMip0.a < -0.25 && sampleCoC < -0.25) {
+                // [KO] Pass 3B: 전경(Near < 0) 전용 레이어 개더링 - 링 간격 전이 폭(halfRingTransition)과 커널 탭 가중치(kernelTapWeight)의 1:1 동형 정규화로 내부 불투명도 100% 도달과 무계단 외곽 감쇠를 동시 보장
+                // [EN] Pass 3B: Foreground (Near < 0) dedicated layer gathering - 1:1 isomorphic normalization between halfRingTransition coverage and kernelTapWeight to guarantee both 100% interior opacity and step-free outer falloff
+                if (discreteMip0.a < -0.15 && sampleCoC < -0.15) {
                     let sampleNearRadius = -sampleCoC;
                     let surfaceContinuity = smoothstep(centerNearRadius * 0.25, centerNearRadius * 0.75, sampleNearRadius);
-                    let effectiveNearRadius = max(mix(sampleNearRadius, max(centerNearRadius, sampleNearRadius), surfaceContinuity), min(gatherRadius, ringSpacing));
-                    let coverage = saturate((effectiveNearRadius - normGatherRadius) * polyScale + 0.5);
+                    let effectiveNearRadius = mix(sampleNearRadius, max(centerNearRadius, sampleNearRadius), surfaceContinuity);
+                    let coverage = smoothstep(-halfRingTransition, halfRingTransition, effectiveNearRadius * polyScale - distTexels);
                     if (coverage > 0.0) {
                         let sampleExcessLuma = max(getLuminance(sampleColor) - 0.25, 0.0);
                         let opticalW = 1.0 + (sampleExcessLuma / (1.0 + sampleExcessLuma * 0.25)) * halfBokehBrightness;
-                        let areaRatio = max(centerNearRadius, 1.5) / max(sampleNearRadius, 1.5);
-                        let areaWeight = clamp(areaRatio * areaRatio, 0.25, 1.0);
-                        let w = coverage * opticalW * areaWeight;
+                        let tapDensityWeight = clamp(gatherRadius / max(effectiveNearRadius, ringSpacing), 1.0, 4.0);
+                        let w = coverage * opticalW * tapDensityWeight;
                         accumColor += sampleColor * w;
                         accumWeight += w;
                         fgCoverageSum += coverage;
@@ -274,9 +284,10 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
 if (!isForegroundPass) {
     let hasBg = accumWeight > 1e-5;
     let invAccumWeight = 1.0 / max(accumWeight, 1e-5);
-    let bgColor = select(centerFilteredColor, accumColor * invAccumWeight, hasBg);
+    let defaultBgColor = fallbackBgColor / max(fallbackBgWeight, 1.0);
+    let bgColor = select(defaultBgColor, accumColor * invAccumWeight, hasBg);
     let avgFarCoC = accumFarCoC * invAccumWeight;
-    let holeFilledFarCoC = select(avgFarCoC, max(avgFarCoC, min(gatherRadius, 1.0)), isCenterForeground);
+    let holeFilledFarCoC = select(avgFarCoC, max(avgFarCoC, 0.3), isCenterForeground);
     let outFarCoC = select(centerFarRadius, holeFilledFarCoC, hasBg);
     textureStore(outputTexture, index, vec4<f32>(bgColor, outFarCoC));
 } else {

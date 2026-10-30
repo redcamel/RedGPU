@@ -71,7 +71,13 @@ let nonFgAvgCoC = select(
 );
 let fgAvgCoC = select(minSignedCoC, (coc00 * fgMask00 + coc10 * fgMask10 + coc01 * fgMask01 + coc11 * fgMask11) / max(fgCount, 1.0), fgCount > 0.0);
 let fgPreserve = mix(fgAvgCoC, minSignedCoC, saturate(maxSignedCoC - minSignedCoC - 0.5));
-var tileCoC = select(nonFgAvgCoC, fgPreserve, fgCount > 0.0);
+let fgDiscontinuity = smoothstep(-0.15, -0.75, minSignedCoC);
+let hasOppositeSignQuad = (minSignedCoC < -0.25) && (maxSignedCoC > 0.25);
+var tileCoC = select(
+    mix(nonFgAvgCoC, fgPreserve, fgDiscontinuity),
+    fgPreserve,
+    hasOppositeSignQuad
+);
 
 let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxColorCoord);
 let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxColorCoord);
@@ -123,16 +129,12 @@ if (uniforms.historyValid == 1u) {
     }
 }
 
-// [KO] 시간 안정화된 tileCoC와 동일 부호 도메인에 속한 픽셀만 양방향(Bilateral) 가중 평균하여 반대 부호 컬러 오염 차단
-// [EN] Bilaterally average only pixels in the same sign domain as temporally stabilized tileCoC to prevent opposite-sign color contamination
-let sameSign00 = select(1e-4, 1.0, coc00 * tileCoC >= 0.0 || (abs(coc00) < 0.2 && abs(tileCoC) < 0.2));
-let sameSign10 = select(1e-4, 1.0, coc10 * tileCoC >= 0.0 || (abs(coc10) < 0.2 && abs(tileCoC) < 0.2));
-let sameSign01 = select(1e-4, 1.0, coc01 * tileCoC >= 0.0 || (abs(coc01) < 0.2 && abs(tileCoC) < 0.2));
-let sameSign11 = select(1e-4, 1.0, coc11 * tileCoC >= 0.0 || (abs(coc11) < 0.2 && abs(tileCoC) < 0.2));
-let w00 = sameSign00 / (0.25 + abs(coc00 - tileCoC) * 4.0);
-let w10 = sameSign10 / (0.25 + abs(coc10 - tileCoC) * 4.0);
-let w01 = sameSign01 / (0.25 + abs(coc01 - tileCoC) * 4.0);
-let w11 = sameSign11 / (0.25 + abs(coc11 - tileCoC) * 4.0);
+// [KO] 시간 안정화된 tileCoC 기준 양방향(Bilateral) 컬러 가중 평균
+// [EN] Bilateral color weighted average based on temporally stabilized tileCoC
+let w00 = 1.0 / (0.25 + abs(coc00 - tileCoC) * 4.0);
+let w10 = 1.0 / (0.25 + abs(coc10 - tileCoC) * 4.0);
+let w01 = 1.0 / (0.25 + abs(coc01 - tileCoC) * 4.0);
+let w11 = 1.0 / (0.25 + abs(coc11 - tileCoC) * 4.0);
 let wSum = w00 + w10 + w01 + w11;
 
 var downsampledColor = (col00 * w00 + col10 * w10 + col01 * w01 + col11 * w11) / wSum;

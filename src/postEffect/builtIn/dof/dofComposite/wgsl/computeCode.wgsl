@@ -94,8 +94,7 @@ if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
 // [KO] 3. 배경(Background) 보케 버퍼 조건부 9-Tap CoC-Bilateral Tent 업샘플링 및 블렌딩 (초점 영역 0-Tap 조기 스킵)
 // [EN] 3. Conditional Background bokeh buffer 9-Tap CoC-Bilateral Tent upsampling and blending (0-Tap early skip in in-focus regions)
 let d = halfTexelSize.xyxy * vec4<f32>(1.0, 1.0, -1.0, 0.0);
-let isForegroundPixel = exactHalfCoC < -0.25;
-let farBokehBlend = select(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(0.25, 0.75, -exactHalfCoC), isForegroundPixel);
+let farBokehBlend = max(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(0.15, 0.65, -exactHalfCoC));
 
 var compositedBgColor = baseFullResColor;
 if (farBokehBlend > 1e-3) {
@@ -109,19 +108,19 @@ if (farBokehBlend > 1e-3) {
     let b12 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.wy, 0.0);
     let b22 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xy, 0.0);
 
-    // [KO] 전경 픽셀(isForegroundPixel)에서는 홀필링으로 복원된 실제 후면 배경 CoC(b11.a)를 기준으로 삼고, 합초 개구부 게이트(saturate)로 합초 경계만 보호하여 비초점 간 Z-버퍼 계단 복원 차단
-    // [EN] On foreground pixels, reference reconstructed background CoC (b11.a) and gate only the in-focus boundary (saturate) to prevent aliased Z-buffer steps between out-of-focus layers
-    let effectiveBgHalfCoC = select(max(exactHalfCoC, 0.0), b11.a, isForegroundPixel);
-    let centerSharpGate = saturate(effectiveBgHalfCoC);
-    let bw00 = computeBgUpsampleBilateralWeight(b00.a, centerSharpGate, 1.0);
-    let bw10 = computeBgUpsampleBilateralWeight(b10.a, centerSharpGate, 2.0);
-    let bw20 = computeBgUpsampleBilateralWeight(b20.a, centerSharpGate, 1.0);
-    let bw01 = computeBgUpsampleBilateralWeight(b01.a, centerSharpGate, 2.0);
-    let bw11 = computeBgUpsampleBilateralWeight(b11.a, centerSharpGate, 4.0);
-    let bw21 = computeBgUpsampleBilateralWeight(b21.a, centerSharpGate, 2.0);
-    let bw02 = computeBgUpsampleBilateralWeight(b02.a, centerSharpGate, 1.0);
-    let bw12 = computeBgUpsampleBilateralWeight(b12.a, centerSharpGate, 2.0);
-    let bw22 = computeBgUpsampleBilateralWeight(b22.a, centerSharpGate, 1.0);
+    // [KO] 비전경 픽셀에서는 합초 개구부 게이트(saturate) 기반 양방향 가중치로 합초 경계를 보호하고, 전경 픽셀로 갈수록 양방향 페널티(penaltyScale)를 연속적으로 0으로 감쇠시켜 실루엣 안팎의 홀필링 배경과 실제 배경을 부드럽게 보간
+    // [EN] On non-foreground pixels, protect in-focus boundaries via bilateral weights; as CoC transitions into foreground, continuously attenuate penaltyScale to 0 to smoothly interpolate hole-filled and adjacent real background
+    let centerSharpGate = saturate(max(exactHalfCoC, 0.0));
+    let penaltyScale = 6.0 * (1.0 - smoothstep(-0.05, -0.45, exactHalfCoC));
+    let bw00 = computeBgUpsampleBilateralWeight(b00.a, centerSharpGate, 1.0, penaltyScale);
+    let bw10 = computeBgUpsampleBilateralWeight(b10.a, centerSharpGate, 2.0, penaltyScale);
+    let bw20 = computeBgUpsampleBilateralWeight(b20.a, centerSharpGate, 1.0, penaltyScale);
+    let bw01 = computeBgUpsampleBilateralWeight(b01.a, centerSharpGate, 2.0, penaltyScale);
+    let bw11 = computeBgUpsampleBilateralWeight(b11.a, centerSharpGate, 4.0, penaltyScale);
+    let bw21 = computeBgUpsampleBilateralWeight(b21.a, centerSharpGate, 2.0, penaltyScale);
+    let bw02 = computeBgUpsampleBilateralWeight(b02.a, centerSharpGate, 1.0, penaltyScale);
+    let bw12 = computeBgUpsampleBilateralWeight(b12.a, centerSharpGate, 2.0, penaltyScale);
+    let bw22 = computeBgUpsampleBilateralWeight(b22.a, centerSharpGate, 1.0, penaltyScale);
 
     let bgWeightSum = max(bw00 + bw10 + bw20 + bw01 + bw11 + bw21 + bw02 + bw12 + bw22, 1e-4);
     let upsampledBgColor = (

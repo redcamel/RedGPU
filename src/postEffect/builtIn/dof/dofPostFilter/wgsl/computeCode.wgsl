@@ -28,15 +28,24 @@ if (!isForegroundPass) {
     let s22 = textureSampleLevel(bokehTexture, basicSampler, uv + d.xy, 0.0);
 
     let cSharp = saturate(centerFarCoC);
-    let w00 = 1.0 / (0.1 + abs(saturate(s00.a) - cSharp) * 8.0);
-    let w10 = 2.0 / (0.1 + abs(saturate(s10.a) - cSharp) * 8.0);
-    let w20 = 1.0 / (0.1 + abs(saturate(s20.a) - cSharp) * 8.0);
-    let w01 = 2.0 / (0.1 + abs(saturate(s01.a) - cSharp) * 8.0);
+    let d00 = saturate(s00.a) - cSharp;
+    let d10 = saturate(s10.a) - cSharp;
+    let d20 = saturate(s20.a) - cSharp;
+    let d01 = saturate(s01.a) - cSharp;
+    let d21 = saturate(s21.a) - cSharp;
+    let d02 = saturate(s02.a) - cSharp;
+    let d12 = saturate(s12.a) - cSharp;
+    let d22 = saturate(s22.a) - cSharp;
+
+    let w00 = 1.0 / (0.1 + max(d00, 0.0) * 8.0 + max(-d00, 0.0) * 1.5);
+    let w10 = 2.0 / (0.1 + max(d10, 0.0) * 8.0 + max(-d10, 0.0) * 1.5);
+    let w20 = 1.0 / (0.1 + max(d20, 0.0) * 8.0 + max(-d20, 0.0) * 1.5);
+    let w01 = 2.0 / (0.1 + max(d01, 0.0) * 8.0 + max(-d01, 0.0) * 1.5);
     let w11 = 4.0 / 0.1;
-    let w21 = 2.0 / (0.1 + abs(saturate(s21.a) - cSharp) * 8.0);
-    let w02 = 1.0 / (0.1 + abs(saturate(s02.a) - cSharp) * 8.0);
-    let w12 = 2.0 / (0.1 + abs(saturate(s12.a) - cSharp) * 8.0);
-    let w22 = 1.0 / (0.1 + abs(saturate(s22.a) - cSharp) * 8.0);
+    let w21 = 2.0 / (0.1 + max(d21, 0.0) * 8.0 + max(-d21, 0.0) * 1.5);
+    let w02 = 1.0 / (0.1 + max(d02, 0.0) * 8.0 + max(-d02, 0.0) * 1.5);
+    let w12 = 2.0 / (0.1 + max(d12, 0.0) * 8.0 + max(-d12, 0.0) * 1.5);
+    let w22 = 1.0 / (0.1 + max(d22, 0.0) * 8.0 + max(-d22, 0.0) * 1.5);
 
     let weightSum = w00 + w10 + w20 + w01 + w11 + w21 + w02 + w12 + w22;
     let filteredColor = (
