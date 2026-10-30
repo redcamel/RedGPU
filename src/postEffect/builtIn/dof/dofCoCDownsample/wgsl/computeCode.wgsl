@@ -37,19 +37,32 @@ let coc11 = samplePhysicalHalfCoCAtDepthCoord(d11Coord, invProjZW, minNearDepth,
 
 let minSignedCoC = min(min(coc00, coc10), min(coc01, coc11));
 let maxSignedCoC = max(max(coc00, coc10), max(coc01, coc11));
-let avgCoC = (coc00 + coc10 + coc01 + coc11) * 0.25;
 
-// [KO] 전경(coc < -0.1)과 배경(coc > 0)이 공존하는 깊이 불연속 2x2 쿼드에서 양수 배경 CoC가 음수 전경 CoC를 상쇄하여 가짜 합초(CoC ≈ 0)를 만드는 현상을 원천 차단
-// [EN] Prevent positive background CoC from canceling negative foreground CoC into a phantom in-focus (CoC ≈ 0) on 2x2 depth-discontinuity quads
-let fgMask00 = select(0.0, 1.0, coc00 < -0.1);
-let fgMask10 = select(0.0, 1.0, coc10 < -0.1);
-let fgMask01 = select(0.0, 1.0, coc01 < -0.1);
-let fgMask11 = select(0.0, 1.0, coc11 < -0.1);
-let fgCount = fgMask00 + fgMask10 + fgMask01 + fgMask11;
-let fgAvgCoC = select(minSignedCoC, (coc00 * fgMask00 + coc10 * fgMask10 + coc01 * fgMask01 + coc11 * fgMask11) / max(fgCount, 1.0), fgCount > 0.0);
-let fgPreserve = mix(fgAvgCoC, minSignedCoC, saturate(maxSignedCoC - minSignedCoC - 0.5));
-let fgDiscontinuity = smoothstep(-0.15, -0.75, minSignedCoC);
-var tileCoC = mix(avgCoC, fgPreserve, fgDiscontinuity);
+// [KO] 2x2 쿼드 내 카메라 최근접(최소 CoC) 픽셀 좌표를 판별하여 전경 차폐 우선 대표 CoC 및 모션 벡터 샘플링 좌표로 활용
+// [EN] Identify the camera-closest (minimum CoC) pixel coordinate within the 2x2 quad for foreground-occluding CoC and motion vector sampling
+var closestDepthCoord = d00Coord;
+var closestCoC = coc00;
+if (coc10 < closestCoC) {
+    closestCoC = coc10;
+    closestDepthCoord = d10Coord;
+}
+if (coc01 < closestCoC) {
+    closestCoC = coc01;
+    closestDepthCoord = d01Coord;
+}
+if (coc11 < closestCoC) {
+    closestCoC = coc11;
+    closestDepthCoord = d11Coord;
+}
+
+// [KO] 광학적 전후 차폐(Front-to-Back Occlusion) 가중 평균: 카메라에 더 가까운 샘플일수록 지수적 우선순위를 부여하여 전/배경 부호 상쇄(가짜 합초) 원천 차단
+// [EN] Optical front-to-back occlusion weighted average: assign exponential priority to closer samples to prevent foreground/background sign cancellation (phantom in-focus)
+let cocSpread = max(maxSignedCoC - minSignedCoC, 0.5);
+let occW00 = exp(-(coc00 - minSignedCoC) / cocSpread);
+let occW10 = exp(-(coc10 - minSignedCoC) / cocSpread);
+let occW01 = exp(-(coc01 - minSignedCoC) / cocSpread);
+let occW11 = exp(-(coc11 - minSignedCoC) / cocSpread);
+var tileCoC = (coc00 * occW00 + coc10 * occW10 + coc01 * occW01 + coc11 * occW11) / (occW00 + occW10 + occW01 + occW11);
 
 let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxColorCoord);
 let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxColorCoord);
@@ -79,8 +92,8 @@ if (uniforms.historyValid == 1u) {
     let minOuterCoC = min(minSignedCoC, min(min(cocL, cocR), min(cocU, cocD)));
     let maxOuterCoC = max(maxSignedCoC, max(max(cocL, cocR), max(cocU, cocD)));
 
-    let velocity = textureLoad(gBufferMotionVector, d00Coord, 0).xy;
-    if (velocity.x <= 10.0) {
+    let velocity = textureLoad(gBufferMotionVector, closestDepthCoord, 0).xy;
+    if (all(abs(velocity) <= vec2<f32>(DOF_MAX_VALID_MOTION_UV))) {
         let centerUV = (vec2<f32>(index) + 0.5) / max(halfDims, vec2<f32>(1.0));
         let prevUV = centerUV - velocity;
         if (all(prevUV >= vec2<f32>(0.0)) && all(prevUV <= vec2<f32>(1.0))) {

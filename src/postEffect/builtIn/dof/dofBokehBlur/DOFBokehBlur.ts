@@ -6,6 +6,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import DOF_CONFIG from "../DOF_CONFIG";
+import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -34,7 +35,7 @@ class DOFBokehBlur extends ASinglePassPostEffect {
             createBasicPostEffectCode(
                 this,
                 computeCode,
-                uniformStructCode,
+                `${dofOpticsCommon}\n${uniformStructCode}`,
                 [
                     {name: 'cocMip0Texture'},
                     {name: 'cocMip1Texture'},

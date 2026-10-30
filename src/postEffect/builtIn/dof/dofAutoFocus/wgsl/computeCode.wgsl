@@ -61,15 +61,7 @@ for (var i = 0u; i < 9u; i = i + 1u) {
 
         let minTapD = min(dC, min(min(dL, dR), min(dU, dD)));
         let maxTapD = max(dC, max(max(dL, dR), max(dU, dD)));
-        var viewDepth = select(minTapD, (dC + dL + dR + dU + dD - minTapD - maxTapD) / 3.0, maxRaw < 0.9999);
-
-        let prevRaw = textureLoad(prevDepthTexture, centerCoord, 0);
-        if (prevRaw > 0.0 && prevRaw < 0.9999) {
-            let prevD = min(reconstructViewDepthFromRaw(prevRaw, invProjZW, minFocusDepth), maxFocusDepth);
-            if (abs(viewDepth - prevD) < viewDepth * 0.05) {
-                viewDepth = (viewDepth + prevD) * 0.5;
-            }
-        }
+        let viewDepth = select(minTapD, (dC + dL + dR + dU + dD - minTapD - maxTapD) / 3.0, maxRaw < 0.9999);
 
         sampleDepths[i] = viewDepth;
         sampleValid[i] = true;
@@ -83,33 +75,53 @@ for (var i = 0u; i < 9u; i = i + 1u) {
 
 var rawMeasuredDepth = prevMeasuredDist;
 if (anyValid) {
-    // [KO] 중앙 십자(0..4번) 측거점에 유효 피사체가 존재하면 해당 최단 표면을 기준 깊이로 삼아 외곽 코너(5..8번)의 전경 스침 간섭을 방지하고,
-    //      최단 표면 대비 2.5%(최소 5cm) 전면 표면 클러스터만 집중 가중 평균하여 곡면 피사체 측면이나 후방 모뉴먼트로 초점이 밀리는 현상을 원천 차단
-    // [EN] Anchor reference depth to the inner cross (points 0..4) when valid to prevent outer corner (5..8) grazing interference,
-    //      and tightly weight the front-most surface cluster (2.5% of depth, min 5cm) so focus locks onto the front visor/face rather than receding sides or backdrop monuments
-    var innerMinDepth: f32 = maxFocusDepth;
-    var hasInnerValid: bool = false;
-    for (var k = 0u; k < 5u; k = k + 1u) {
-        if (sampleValid[k]) {
-            innerMinDepth = min(innerMinDepth, sampleDepths[k]);
-            hasInnerValid = true;
+    // [KO] 광학 디옵터(Diopter = 1 / S, 단위: m^-1) 공간에서의 9-Point Zone 가중 클러스터 합의(Consensus):
+    //      단일 최단점(1-Point Min)에 의존하지 않고 9개 측거점 중 가장 높은 공간·광학 밀도를 가진 주 피사체 표면 클러스터를 선별하여
+    //      외곽 전경 스침(Grazing Outlier)과 후방 배경 누수를 동시에 배제
+    // [EN] 9-Point Zone weighted cluster consensus in optical Diopter space (Diopter = 1 / S, unit: m^-1):
+    //      Selects the dominant subject surface cluster with highest spatial/optical density rather than a single minimum point,
+    //      rejecting both grazing foreground outliers and background leakage
+    var bestClusterScore: f32 = -1.0;
+    var bestClusterDiopter: f32 = 1.0 / max(minValidDepth, minFocusDepth);
+
+    for (var i = 0u; i < 9u; i = i + 1u) {
+        if (sampleValid[i]) {
+            let candidateDiopter = 1.0 / max(sampleDepths[i], minFocusDepth);
+            let clusterBandwidth = max(candidateDiopter * 0.08, 0.02);
+            var affinitySum: f32 = 0.0;
+            for (var j = 0u; j < 9u; j = j + 1u) {
+                if (sampleValid[j]) {
+                    let neighborDiopter = 1.0 / max(sampleDepths[j], minFocusDepth);
+                    let normDiff = (neighborDiopter - candidateDiopter) / clusterBandwidth;
+                    affinitySum += AF_ZONE_WEIGHTS[j] * exp(-0.5 * normDiff * normDiff);
+                }
+            }
+            // [KO] 동등한 면적의 클러스터 간에는 카메라에 더 가까운(디옵터가 큰) 주 피사체 표면을 우선 선택
+            // [EN] Among clusters of comparable area, prioritize the closer subject surface (higher diopter)
+            let foregroundPreference = pow(candidateDiopter / max(1.0 / max(minValidDepth, minFocusDepth), 1e-5), 0.35);
+            let score = affinitySum * foregroundPreference;
+            if (score > bestClusterScore) {
+                bestClusterScore = score;
+                bestClusterDiopter = candidateDiopter;
+            }
         }
     }
-    let referenceSurfaceDepth = select(minValidDepth, innerMinDepth, hasInnerValid);
-    let depthFalloffScale = max(referenceSurfaceDepth * 0.025, 0.05);
-    var weightedDepthSum: f32 = 0.0;
+
+    let refineBandwidth = max(bestClusterDiopter * 0.06, 0.015);
+    var weightedDiopterSum: f32 = 0.0;
     var weightSum: f32 = 0.0;
     for (var i = 0u; i < 9u; i = i + 1u) {
         if (sampleValid[i]) {
-            let distFromFront = abs(sampleDepths[i] - referenceSurfaceDepth);
-            let proximityWeight = exp(-distFromFront / depthFalloffScale);
-            let w = AF_ZONE_WEIGHTS[i] * proximityWeight;
-            weightedDepthSum += sampleDepths[i] * w;
+            let sampleDiopter = 1.0 / max(sampleDepths[i], minFocusDepth);
+            let normDiff = (sampleDiopter - bestClusterDiopter) / refineBandwidth;
+            let w = AF_ZONE_WEIGHTS[i] * exp(-0.5 * normDiff * normDiff);
+            weightedDiopterSum += sampleDiopter * w;
             weightSum += w;
         }
     }
     if (weightSum > 1e-5) {
-        rawMeasuredDepth = clamp(weightedDepthSum / weightSum, minFocusDepth, maxFocusDepth);
+        let consensusDiopter = weightedDiopterSum / weightSum;
+        rawMeasuredDepth = clamp(1.0 / max(consensusDiopter, 1e-6), minFocusDepth, maxFocusDepth);
     }
 }
 

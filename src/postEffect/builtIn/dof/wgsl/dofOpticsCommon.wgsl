@@ -1,7 +1,8 @@
-// [KO] 35mm 풀프레임 표준 세로 센서 높이(24.0mm) 및 5-Ring + Mip 2(1/8) 나이퀴스트 샘플링 한계 기반 최대 착란원 반경(36.0px)
-// [EN] 35mm full-frame standard vertical sensor height (24.0mm) and 5-Ring + Mip 2 (1/8) Nyquist-safe maximum CoC radius (36.0px)
+// [KO] 35mm 풀프레임 표준 세로 센서 높이(24.0mm), 5-Ring + Mip 2(1/8) 나이퀴스트 샘플링 한계 기반 최대 착란원 반경(36.0px), 및 유효 화면 공간 모션 벡터 UV 상한(2.0)
+// [EN] 35mm full-frame standard vertical sensor height (24.0mm), 5-Ring + Mip 2 (1/8) Nyquist-safe maximum CoC radius (36.0px), and valid screen-space motion vector UV bound (2.0)
 const DOF_SENSOR_HEIGHT_MM: f32 = 24.0;
 const DOF_MAX_COC_FULL_PX: f32 = 36.0;
+const DOF_MAX_VALID_MOTION_UV: f32 = 2.0;
 
 struct DOFCoCLensParams {
     focusDistMM: f32,

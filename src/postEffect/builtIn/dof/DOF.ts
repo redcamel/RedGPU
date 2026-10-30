@@ -55,6 +55,7 @@ class DOF extends AMultiPassPostEffect {
 
     #persistentFocusTexture: GPUTexture = null;
     #persistentFocusResult: IPostEffectResult = null;
+    #inactiveBindingResult: IPostEffectResult = null;
     #copySrcInfo: { texture: GPUTexture } = {texture: null};
     #copyDstInfo: { texture: GPUTexture } = {texture: null};
     #copyExtent: { width: number; height: number } = {width: 1, height: 1};
@@ -413,28 +414,32 @@ class DOF extends AMultiPassPostEffect {
         const tileW = Math.max(1, Math.ceil(halfW / 8));
         const tileH = Math.max(1, Math.ceil(halfH / 8));
 
-        const fallbackFocusResult = this.#ensurePersistentFocusTexture();
+        const inactiveBindingResult = this.#getInactiveBindingResult();
 
         // Stage 0: Conditional GPU-Driven 9-Point Zone Auto-Focus (skipped completely in manual focus mode)
-        let currFocusResult = fallbackFocusResult;
+        let currFocusResult = inactiveBindingResult;
         const isAutoFocusDispatched = this.#useAutoFocus;
         if (isAutoFocusDispatched) {
+            const prevFocusResult = this.#ensurePersistentFocusTexture();
             const historyMode = this.#isAutoFocusHistoryValid
                 ? DOF_CONFIG.AF_HISTORY_MODE.VALID
                 : (this.#hasRenderedManualFocus ? DOF_CONFIG.AF_HISTORY_MODE.SEED_MANUAL : DOF_CONFIG.AF_HISTORY_MODE.NONE);
             this.#autoFocusPass.historyMode = historyMode;
-            currFocusResult = this.#autoFocusPass.render(view, 1, 1, fallbackFocusResult);
+            currFocusResult = this.#autoFocusPass.render(view, 1, 1, prevFocusResult);
             this.#copySrcInfo.texture = currFocusResult.texture;
             this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyFocusStateCallback);
             this.#isAutoFocusHistoryValid = true;
             this.#hasRenderedManualFocus = false;
         } else {
+            if (this.#persistentFocusTexture) {
+                this.#releasePersistentFocusTexture();
+            }
             this.#hasRenderedManualFocus = true;
         }
 
         // Stage 1: CoC-Aware Bilateral Mip Pyramid (Mip 0: 1/2 -> Mip 1: 1/4 -> Mip 2: 1/8)
         const {useTAA} = view.redGPUContext.antialiasingManager;
-        let prevCoCResult = fallbackFocusResult;
+        let prevCoCResult = inactiveBindingResult;
         if (useTAA) {
             prevCoCResult = this.#ensurePersistentCoCTexture(halfW, halfH);
             this.#cocDownsamplePass.historyValid = this.#isCoCHistoryValid ? 1 : 0;
@@ -515,6 +520,16 @@ class DOF extends AMultiPassPostEffect {
             encoder.copyTextureToTexture(this.#copyCoCSrcInfo, this.#copyCoCDstInfo, this.#copyCoCExtent);
         }
     };
+
+    #getInactiveBindingResult(): IPostEffectResult {
+        if (!this.#inactiveBindingResult) {
+            this.#inactiveBindingResult = {
+                texture: null,
+                textureView: this.resourceManager.emptyBitmapTextureView
+            };
+        }
+        return this.#inactiveBindingResult;
+    }
 
     #ensurePersistentFocusTexture(): IPostEffectResult {
         if (!this.#persistentFocusTexture) {
