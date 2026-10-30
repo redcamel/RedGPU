@@ -146,10 +146,10 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 초점이 맺히는 피사체 거리 $S_1$을 반환하거나 설정합니다. (단위: 월드 미터 `m`, 허용 범위: `0.1 ~ 10000`, 기본값: `15.0`)
-     * [EN] Gets or sets the in-focus subject distance $S_1$. (Unit: world meters `m`, valid range: `0.1 ~ 10000`, default: `15.0`)
+     * [KO] 초점이 맺히는 피사체 거리 $S_1$을 반환하거나 설정합니다. (단위: 월드 미터 `m`, 허용 범위: `0.1 ~ 10000`, 기본값: `10.0`)
+     * [EN] Gets or sets the in-focus subject distance $S_1$. (Unit: world meters `m`, valid range: `0.1 ~ 10000`, default: `10.0`)
      *
-     * @defaultValue 15.0
+     * @defaultValue 10.0
      * @returns
      * [KO] 피사체 초점 거리 (`m`)
      * [EN] Subject focus distance (`m`)

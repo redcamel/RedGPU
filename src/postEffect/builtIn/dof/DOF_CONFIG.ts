@@ -5,7 +5,7 @@
  * @category PostEffect
  */
 const DOF_CONFIG = {
-    DEFAULT_FOCUS_DISTANCE: 15.0,
+    DEFAULT_FOCUS_DISTANCE: 10.0,
     MIN_FOCUS_DISTANCE: 0.1,
     MAX_FOCUS_DISTANCE: 10000.0,
 

@@ -117,9 +117,6 @@ let rawDt = systemUniforms.time.deltaTime;
 let defaultFrameDt = 1.0 / 60.0;
 let safeDt = select(defaultFrameDt, clamp(rawDt, 1.0 / 1000.0, 0.1), getIsFiniteScalar(rawDt) && rawDt > 0.0);
 
-let measureAlpha = saturate(1.0 - exp(-14.0 * safeDt));
-let measuredDepth = select(rawMeasuredDepth, mix(prevMeasuredDist, rawMeasuredDepth, measureAlpha), hasPrev);
-
 // [KO] AF-C 슈미트 트리거(Schmidt-Trigger) 앵커 갱신: 미세 지터 구간(±0.8% 이내, CoC < 0.16px)에서는 앵커를 완전 고정하고,
 //      이를 초과하는 피사체 거리 변화 시에는 보간 정체(Deadband Creep Trap) 없이 실제 측정 표면 깊이(rawMeasuredDepth)로 앵커를 즉시 갱신
 // [EN] AF-C Schmidt-Trigger anchor update: locks the anchor within the micro-jitter deadband (±0.8%, CoC < 0.16px),
@@ -131,18 +128,22 @@ let nextAnchorDist = select(
     hasPrev
 );
 
-// [KO] 프레임 레이트 독립적 지수 감쇠 보간(EMA) 및 수렴 스냅(0.15% 이내 도달 시 목표 앵커에 완전 일치)
-// [EN] Frame-rate independent EMA damping and convergence snap (snaps to exact target anchor within 0.15%)
+// [KO] 광학 디옵터(Diopter = 1 / S1, 단위: m^-1) 공간에서의 프레임 레이트 독립적 지수 감쇠 보간(EMA) 및 수렴 스냅(0.15% 이내 도달 시 목표 앵커에 완전 일치)
+// [EN] Frame-rate independent EMA damping in optical Diopter space (Diopter = 1 / S1, unit: m^-1) and convergence snap (snaps to exact target anchor within 0.15%)
 let alpha = saturate(1.0 - exp(-AF_MOTOR_SPEED * safeDt));
 let distToAnchor = abs(nextAnchorDist - prevFocusDist);
+let prevDiopter = 1.0 / max(prevFocusDist, minFocusDepth);
+let targetDiopter = 1.0 / max(nextAnchorDist, minFocusDepth);
+let interpDiopter = mix(prevDiopter, targetDiopter, alpha);
+let diopterFocusDist = 1.0 / max(interpDiopter, 1e-6);
 let nextFocusDist = clamp(
     select(
         nextAnchorDist,
-        mix(prevFocusDist, nextAnchorDist, alpha),
+        diopterFocusDist,
         hasPrev && (distToAnchor > prevFocusDist * 0.0015)
     ),
     minFocusDepth,
     maxFocusDepth
 );
 
-textureStore(outputTexture, vec2<u32>(0u, 0u), vec4<f32>(nextFocusDist, 1.0, nextAnchorDist, measuredDepth));
+textureStore(outputTexture, vec2<u32>(0u, 0u), vec4<f32>(nextFocusDist, 1.0, nextAnchorDist, rawMeasuredDepth));

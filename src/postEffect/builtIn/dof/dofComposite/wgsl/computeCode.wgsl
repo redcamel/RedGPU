@@ -62,7 +62,7 @@ let exactFullCoC = abs(exactHalfCoC) * halfToFullScale;
 // [EN] 2. Unreal DOF_Recombine specification: bilinear-interpolated 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px, near and far)
 var baseFullResColor = sharpColor;
 if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
-    let slightRadius = clamp(exactFullCoC, 0.75, 2.5);
+    let slightRadius = clamp(exactFullCoC, 0.75, 3.5);
     var slightSumColor = sharpColor;
     var slightSumWeight: f32 = 1.0;
 

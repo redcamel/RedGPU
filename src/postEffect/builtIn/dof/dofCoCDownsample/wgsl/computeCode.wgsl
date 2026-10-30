@@ -39,10 +39,17 @@ let minSignedCoC = min(min(coc00, coc10), min(coc01, coc11));
 let maxSignedCoC = max(max(coc00, coc10), max(coc01, coc11));
 let avgCoC = (coc00 + coc10 + coc01 + coc11) * 0.25;
 
-// [KO] 실질적인 전경 비초점(minSignedCoC < -0.25) 실루엣에서만 최소 전경 CoC를 우선 채택하고, 합초-배경 경계에서는 연속 평균 CoC를 유지하여 TAA 지터 시 타일 점프를 방지
-// [EN] Prioritize min foreground CoC only on genuine foreground defocus silhouettes (minSignedCoC < -0.25) while keeping continuous average CoC on in-focus/background edges to prevent tile jumping under TAA jitter
-let fgDiscontinuity = saturate(maxSignedCoC - minSignedCoC - 0.5) * smoothstep(-0.25, -1.25, minSignedCoC);
-var tileCoC = mix(avgCoC, minSignedCoC, fgDiscontinuity);
+// [KO] 전경(coc < -0.1)과 배경(coc > 0)이 공존하는 깊이 불연속 2x2 쿼드에서 양수 배경 CoC가 음수 전경 CoC를 상쇄하여 가짜 합초(CoC ≈ 0)를 만드는 현상을 원천 차단
+// [EN] Prevent positive background CoC from canceling negative foreground CoC into a phantom in-focus (CoC ≈ 0) on 2x2 depth-discontinuity quads
+let fgMask00 = select(0.0, 1.0, coc00 < -0.1);
+let fgMask10 = select(0.0, 1.0, coc10 < -0.1);
+let fgMask01 = select(0.0, 1.0, coc01 < -0.1);
+let fgMask11 = select(0.0, 1.0, coc11 < -0.1);
+let fgCount = fgMask00 + fgMask10 + fgMask01 + fgMask11;
+let fgAvgCoC = select(minSignedCoC, (coc00 * fgMask00 + coc10 * fgMask10 + coc01 * fgMask01 + coc11 * fgMask11) / max(fgCount, 1.0), fgCount > 0.0);
+let fgPreserve = mix(fgAvgCoC, minSignedCoC, saturate(maxSignedCoC - minSignedCoC - 0.5));
+let fgDiscontinuity = smoothstep(-0.15, -0.75, minSignedCoC);
+var tileCoC = mix(avgCoC, fgPreserve, fgDiscontinuity);
 
 let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxColorCoord);
 let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxColorCoord);
