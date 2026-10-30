@@ -53,7 +53,7 @@ const Title = () => {
                     <button
                         style={{
                             ...buttonStyle,
-                            width: isNarrow ? '32px' : '34px',
+                            width: '28px',
                             height: isNarrow ? '32px' : '34px',
                             backgroundColor: isPrevHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
                         }}
@@ -79,7 +79,7 @@ const Title = () => {
                     <button
                         style={{
                             ...buttonStyle,
-                            width: isNarrow ? '32px' : '34px',
+                            width: '28px',
                             height: isNarrow ? '32px' : '34px',
                             backgroundColor: isNextHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
                         }}
@@ -149,7 +149,7 @@ const experimentalBadgeStyle: React.CSSProperties = {
 const titleValueStyle: React.CSSProperties = {
     fontSize: '13px',
     lineHeight: '1.2',
-    color: '#f4f4f5',
+    color: '#b19898',
     fontWeight: 600,
     letterSpacing: '-0.01em',
     whiteSpace: 'nowrap',

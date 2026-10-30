@@ -53,14 +53,14 @@ const ExampleHeader = () => {
                 top: isNarrow ? '10px' : '16px',
                 left: isNarrow ? '10px' : '16px',
                 right: isNarrow ? '10px' : '16px',
-                height: isNarrow ? '40px' : '42px'
+                height: '42px'
             }}
         >
             <div style={navBarStyle}>
                 <div style={{...leftGroupStyle, gap: isNarrow ? '6px' : '8px'}}>
-                    <div style={leftSectionStyle}>
+                    <div style={circleIslandStyle}>
                         <IconButton
-                            icon={<HomeIcon color="#fff" size={24}/>}
+                            icon={<HomeIcon color="#fff" size={17}/>}
                             label="HOME"
                             onClick={() => {
                                 window.location.href = '/RedGPU/examples/index.html'
@@ -69,48 +69,45 @@ const ExampleHeader = () => {
                         />
                     </div>
                     {!isNarrow && (
-                        <div style={leftSectionStyle}>
-                            <Title/>
-                        </div>
+                        <>
+                            <div style={leftSectionStyle}>
+                                <Title/>
+                            </div>
+                            <div style={leftSectionStyle}>
+                                <LabelButton
+                                    label="CODE"
+                                    onClick={() => setShowSourceModal(!showSourceModal)}
+                                />
+                            </div>
+                        </>
                     )}
                 </div>
 
-                <div style={{...rightGroupStyle, gap: isNarrow ? '6px' : '8px'}}>
+                <div style={rightSectionStyle}>
                     {!isNarrow && (
-                        <div style={rightSectionStyle}>
-                            <LabelButton
-                                label="CODE"
-                                onClick={() => setShowSourceModal(!showSourceModal)}
-                            />
-                        </div>
+                        <>
+                            <RenderingSettingsGroup/>
+                            <div style={dividerStyle}/>
+                        </>
                     )}
-
-                    <div style={rightSectionStyle}>
-                        {!isNarrow && (
-                            <>
-                                <RenderingSettingsGroup/>
-                                <div style={dividerStyle}/>
-                            </>
-                        )}
+                    <IconToggleButton
+                        label="SSAO"
+                        onClick={handleSSAOChange}
+                        isActive={ssao}
+                    />
+                    <div style={dividerStyle}/>
+                    {viewportActions.map((action) => (
                         <IconToggleButton
-                            label="SSAO"
-                            onClick={handleSSAOChange}
-                            isActive={ssao}
+                            key={action.id}
+                            icon={action.icon}
+                            label={action.label}
+                            onClick={action.onClick}
+                            isActive={!!action.isActive}
                         />
-                        <div style={dividerStyle}/>
-                        {viewportActions.map((action) => (
-                            <IconToggleButton
-                                key={action.id}
-                                icon={action.icon}
-                                label={action.label}
-                                onClick={action.onClick}
-                                isActive={!!action.isActive}
-                            />
-                        ))}
-                    </div>
-
+                    ))}
                     {settingAction && (
-                        <div style={rightSectionStyle}>
+                        <>
+                            <div style={dividerStyle}/>
                             <IconToggleButton
                                 key={settingAction.id}
                                 icon={settingAction.icon}
@@ -118,7 +115,7 @@ const ExampleHeader = () => {
                                 onClick={settingAction.onClick}
                                 isActive={!!settingAction.isActive}
                             />
-                        </div>
+                        </>
                     )}
                 </div>
             </div>
@@ -166,11 +163,29 @@ const rightGroupStyle: React.CSSProperties = {
     backgroundColor: 'transparent'
 };
 
+const circleIslandStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '42px',
+    height: '42px',
+    padding: 0,
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '50%',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+    boxSizing: 'border-box',
+    flexShrink: 0,
+    pointerEvents: 'auto'
+};
+
 const leftSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    height: '100%',
-    padding: '4px',
+    height: '42px',
+    padding: '3px 6px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',
@@ -185,8 +200,8 @@ const leftSectionStyle: React.CSSProperties = {
 const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    height: '100%',
-    padding: '4px',
+    height: '42px',
+    padding: '3px 6px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',

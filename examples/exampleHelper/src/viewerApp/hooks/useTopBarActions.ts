@@ -36,7 +36,7 @@ export const useTopBarActions = () => {
             addTopBarRightAction({
                 id: 'axis-toggle',
                 label: 'AXIS',
-                icon: (React.createElement(AxisIcon, {color: axisActive ? "#fdb48d" : "#ccc", size: 20})),
+                icon: (React.createElement(AxisIcon, {color: axisActive ? "#fdb48d" : "#ccc", size: 17})),
                 isActive: axisActive,
                 onClick: () => {
                     const nextValue = !axisActive;
@@ -51,7 +51,7 @@ export const useTopBarActions = () => {
             addTopBarRightAction({
                 id: 'grid-toggle',
                 label: 'GRID',
-                icon: (React.createElement(GridIcon, {color: gridActive ? "#fdb48d" : "#ccc", size: 24})),
+                icon: (React.createElement(GridIcon, {color: gridActive ? "#fdb48d" : "#ccc", size: 17})),
                 isActive: gridActive,
                 onClick: () => {
                     const nextValue = !gridActive;
@@ -66,7 +66,7 @@ export const useTopBarActions = () => {
             addTopBarRightAction({
                 id: 'debug-toggle',
                 label: 'DEBUG',
-                icon: (React.createElement(DebugIcon, {color: debugActive ? "#fdb48d" : "#ccc", size: 19})),
+                icon: (React.createElement(DebugIcon, {color: debugActive ? "#fdb48d" : "#ccc", size: 17})),
                 isActive: debugActive,
                 onClick: () => {
                     const nextValue = !debugActive;
@@ -93,7 +93,7 @@ export const useTopBarActions = () => {
                 addTopBarRightAction({
                     id: 'setting-toggle',
                     label: 'SETTING',
-                    icon: (React.createElement(SettingIcon, {color: showSettingsPanel ? "#fdb48d" : "#ccc", size: 18})),
+                    icon: (React.createElement(SettingIcon, {color: showSettingsPanel ? "#fdb48d" : "#ccc", size: 17})),
                     isActive: showSettingsPanel,
                     onClick: () => {
                         setShowSettingsPanel(!showSettingsPanel);
