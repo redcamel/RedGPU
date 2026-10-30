@@ -25,70 +25,83 @@ const Description = () => {
         : '';
 
     return (
-        <div
-            style={{
-                ...containerStyle,
-                top: isNarrow ? '74px' : 'auto',
-                bottom: isNarrow ? 'auto' : '20px',
-                left: isNarrow ? '16px' : '20px',
-                right: isNarrow ? '16px' : '270px'
-            }}
-        >
-            <div style={{...editorialWrapperStyle, maxWidth: isNarrow ? 'none' : '840px'}}>
-                {!isNarrow && <div style={accentBarStyle}/>}
-                <div style={textColumnStyle}>
-                    {!isNarrow && (
-                        <>
-                            <div style={eyebrowRowStyle}>
-                                <span style={brandTagStyle}>RedGPU</span>
-                                <span style={eyebrowDotStyle}>·</span>
-                                <span style={brandSubStyle}>WebGPU Engine</span>
-                                {categoryLabel && (
-                                    <>
-                                        <span style={eyebrowDividerStyle}>/</span>
-                                        <span style={eyebrowCategoryStyle}>{categoryLabel}</span>
-                                    </>
-                                )}
-                            </div>
-                            <div style={titleRowStyle}>
-                                <span style={titleStyle}>
-                                    {currentExample.name}
-                                </span>
-                                {currentExample.experimental && (
-                                    <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
-                                )}
-                            </div>
-                        </>
-                    )}
-                    <div style={{
-                        ...contentStyle,
-                        fontSize: isNarrow ? '13px' : '14px',
-                        fontWeight: isNarrow ? 500 : 400,
-                        color: isNarrow ? 'rgba(255, 255, 255, 0.95)' : 'rgba(210, 214, 224, 0.68)'
-                    }}>
-                        <span style={{verticalAlign: 'middle'}} dangerouslySetInnerHTML={{__html: description}}/>
-                        <button
-                            style={{
-                                ...toggleButtonStyle,
-                                backgroundColor: isToggleHovered ? 'rgba(253, 180, 141, 0.24)' : 'rgba(253, 180, 141, 0.12)',
-                                borderColor: isToggleHovered ? 'rgba(253, 180, 141, 0.65)' : 'rgba(253, 180, 141, 0.35)',
-                                color: isToggleHovered ? '#fff' : '#fdb48d'
-                            }}
-                            onMouseEnter={() => setIsToggleHovered(true)}
-                            onMouseLeave={() => setIsToggleHovered(false)}
-                            onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-                            title={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
-                        >
-                            {language === 'ko' ? 'EN' : 'KO'}
-                        </button>
+        <>
+            {!isNarrow && <div style={bottomScrimStyle}/>}
+            <div
+                style={{
+                    ...containerStyle,
+                    top: isNarrow ? '74px' : 'auto',
+                    bottom: isNarrow ? 'auto' : '20px',
+                    left: isNarrow ? '16px' : '20px',
+                    right: isNarrow ? '16px' : '270px'
+                }}
+            >
+                <div style={{...editorialWrapperStyle, maxWidth: isNarrow ? 'none' : '840px'}}>
+                    {!isNarrow && <div style={accentBarStyle}/>}
+                    <div style={textColumnStyle}>
+                        {!isNarrow && (
+                            <>
+                                <div style={eyebrowRowStyle}>
+                                    <span style={brandTagStyle}>RedGPU</span>
+                                    <span style={eyebrowDotStyle}>·</span>
+                                    <span style={brandSubStyle}>WebGPU Engine</span>
+                                    {categoryLabel && (
+                                        <>
+                                            <span style={eyebrowDividerStyle}>/</span>
+                                            <span style={eyebrowCategoryStyle}>{categoryLabel}</span>
+                                        </>
+                                    )}
+                                </div>
+                                <div style={titleRowStyle}>
+                                    <span style={titleStyle}>
+                                        {currentExample.name}
+                                    </span>
+                                    {currentExample.experimental && (
+                                        <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                        <div style={{
+                            ...contentStyle,
+                            fontSize: isNarrow ? '13px' : '14px',
+                            fontWeight: isNarrow ? 500 : 400,
+                            color: isNarrow ? 'rgba(255, 255, 255, 0.95)' : 'rgba(232, 235, 242, 0.86)'
+                        }}>
+                            <span style={{verticalAlign: 'middle'}} dangerouslySetInnerHTML={{__html: description}}/>
+                            <button
+                                style={{
+                                    ...toggleButtonStyle,
+                                    backgroundColor: isToggleHovered ? 'rgba(253, 180, 141, 0.24)' : 'rgba(253, 180, 141, 0.14)',
+                                    borderColor: isToggleHovered ? 'rgba(253, 180, 141, 0.65)' : 'rgba(253, 180, 141, 0.38)',
+                                    color: isToggleHovered ? '#fff' : '#fdb48d'
+                                }}
+                                onMouseEnter={() => setIsToggleHovered(true)}
+                                onMouseLeave={() => setIsToggleHovered(false)}
+                                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                                title={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
+                            >
+                                {language === 'ko' ? 'EN' : 'KO'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
 // Styles
+const bottomScrimStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '136px',
+    background: 'linear-gradient(180deg, rgba(8, 8, 10, 0) 0%, rgba(8, 8, 10, 0.28) 52%, rgba(8, 8, 10, 0.56) 100%)',
+    pointerEvents: 'none',
+    zIndex: 10001
+};
 const containerStyle: React.CSSProperties = {
     position: 'fixed',
     top: '80px',
@@ -138,8 +151,8 @@ const eyebrowRowStyle: React.CSSProperties = {
     minHeight: '12px',
     gap: '5px',
     flexWrap: 'wrap',
-    opacity: 0.65,
-    textShadow: '0 1px 4px rgba(0, 0, 0, 0.9)'
+    opacity: 0.78,
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.35)'
 };
 
 const brandTagStyle: React.CSSProperties = {
@@ -158,7 +171,7 @@ const eyebrowDotStyle: React.CSSProperties = {
     alignItems: 'center',
     fontSize: '9.5px',
     fontWeight: 700,
-    color: 'rgba(255, 255, 255, 0.4)',
+    color: 'rgba(255, 255, 255, 0.45)',
     lineHeight: '1'
 };
 
@@ -167,7 +180,7 @@ const brandSubStyle: React.CSSProperties = {
     alignItems: 'center',
     fontSize: '9.5px',
     fontWeight: 600,
-    color: 'rgba(255, 255, 255, 0.65)',
+    color: 'rgba(255, 255, 255, 0.72)',
     letterSpacing: '0.06em',
     lineHeight: '1',
     textTransform: 'uppercase'
@@ -178,7 +191,7 @@ const eyebrowDividerStyle: React.CSSProperties = {
     alignItems: 'center',
     fontSize: '9px',
     fontWeight: 600,
-    color: 'rgba(253, 180, 141, 0.4)',
+    color: 'rgba(253, 180, 141, 0.45)',
     margin: '0 1px',
     lineHeight: '1'
 };
@@ -188,7 +201,7 @@ const eyebrowCategoryStyle: React.CSSProperties = {
     alignItems: 'center',
     fontSize: '9.5px',
     fontWeight: 700,
-    color: 'rgba(253, 180, 141, 0.9)',
+    color: 'rgba(253, 180, 141, 0.92)',
     letterSpacing: '0.07em',
     lineHeight: '1',
     textTransform: 'uppercase'
@@ -209,7 +222,7 @@ const titleStyle: React.CSSProperties = {
     color: '#f8f9fa',
     lineHeight: '1.15',
     letterSpacing: '-0.015em',
-    textShadow: '0 2px 10px rgba(0, 0, 0, 0.85), 0 1px 3px rgba(0, 0, 0, 0.95)'
+    textShadow: '0 1px 3px rgba(0, 0, 0, 0.4)'
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {
@@ -233,11 +246,11 @@ const experimentalBadgeStyle: React.CSSProperties = {
 const contentStyle: React.CSSProperties = {
     fontSize: '14px',
     fontWeight: 400,
-    color: 'rgba(210, 214, 224, 0.68)',
+    color: 'rgba(232, 235, 242, 0.86)',
     lineHeight: '1.6',
     letterSpacing: '-0.01em',
     wordBreak: 'keep-all',
-    textShadow: '0 1px 4px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 0, 0, 0.7)'
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)'
 };
 
 const toggleButtonStyle: React.CSSProperties = {
@@ -250,16 +263,16 @@ const toggleButtonStyle: React.CSSProperties = {
     width: 'auto',
     height: '20px',
     padding: '0 8px',
-    backgroundColor: 'rgba(253, 180, 141, 0.12)',
+    backgroundColor: 'rgba(253, 180, 141, 0.14)',
     backdropFilter: 'blur(8px)',
     WebkitBackdropFilter: 'blur(8px)',
     color: '#fdb48d',
-    border: '1px solid rgba(253, 180, 141, 0.35)',
+    border: '1px solid rgba(253, 180, 141, 0.38)',
     fontSize: '10px',
     fontWeight: 800,
     lineHeight: '1',
     letterSpacing: '0.06em',
-    textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)',
+    textShadow: 'none',
     cursor: 'pointer',
     borderRadius: '9999px',
     flexShrink: 0,

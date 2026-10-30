@@ -87,15 +87,16 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                 onMouseLeave={() => setIsLinkHovered(false)}
             >
                 <span style={{
-                    color: '#b19898',
+                    color: 'rgba(220, 212, 212, 0.88)',
                     fontSize: '12.5px',
+                    fontWeight: 500,
                     lineHeight: '1',
                     letterSpacing: '0.02em',
-                    textShadow: '0 1px 4px rgba(0, 0, 0, 0.95), 0 0 12px rgba(0, 0, 0, 0.7)'
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.35)'
                 }}>
                     This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                 </span>
-                <span style={{...iconWrapperStyle, filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85))'}}>
+                <span style={{...iconWrapperStyle, filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35))'}}>
                     <img src={githubIcon} width="18" height="18" style={{display: 'block'}} alt="GitHub"/>
                 </span>
             </a>
