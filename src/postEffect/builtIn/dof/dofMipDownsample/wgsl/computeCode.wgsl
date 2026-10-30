@@ -27,18 +27,20 @@ let s22 = textureLoad(sourceTexture, vec2<i32>(xs[2], ys[2]), 0);
 
 let minCenterCoC = min(min(s11.a, s21.a), min(s12.a, s22.a));
 let maxCenterCoC = max(max(s11.a, s21.a), max(s12.a, s22.a));
-let fgDominance = smoothstep(-0.15, -0.55, minCenterCoC);
+let fgDominance = smoothstep(0.15, 0.55, -minCenterCoC);
 let bgDominance = (1.0 - fgDominance) * smoothstep(0.15, 0.55, maxCenterCoC);
 let focusDominance = max(0.0, 1.0 - fgDominance - bgDominance);
-let isFgDominant = minCenterCoC < -0.15;
+let centerAvgCoC = (s11.a + s21.a + s12.a + s22.a) * 0.25;
+let refCoC = mix(mix(centerAvgCoC, maxCenterCoC, bgDominance), minCenterCoC, fgDominance);
+let cocBandwidth = max(abs(refCoC) * 0.5, 0.5);
 
 var sumColor = vec3<f32>(0.0);
 var sumCoC: f32 = 0.0;
 var sumWeight: f32 = 0.0;
 var sumCoCWeight: f32 = 0.0;
 
-// [KO] 4x4 이산 B-Spline/Tent 커널([1, 3, 3, 1]) 샘플링 및 전·배경 레이어 분리 가중치로 경계 번짐과 계단 현상을 동시 억제
-// [EN] 4x4 discrete B-Spline/Tent kernel ([1, 3, 3, 1]) sampling with foreground/background layer-separated weights to suppress both boundary bleeding and stair-stepping
+// [KO] 4x4 이산 B-Spline/Tent 커널([1, 3, 3, 1]) 샘플링 및 전·배경 레이어 분리·상대 CoC 반경 가중치로 경계 번짐과 계단 현상을 동시 억제
+// [EN] 4x4 discrete B-Spline/Tent kernel ([1, 3, 3, 1]) sampling with foreground/background layer separation and relative CoC radius weighting to suppress both boundary bleeding and stair-stepping
 for (var ky = 0; ky < 4; ky = ky + 1) {
     let wy = TENT_WEIGHTS[ky];
     let sy = ys[ky];
@@ -59,22 +61,21 @@ for (var ky = 0; ky < 4; ky = ky + 1) {
         }
 
         let spatialW = wx * wy;
-        let isFgSample = smoothstep(-0.10, -0.45, s.a);
+        let isFgSample = smoothstep(0.10, 0.45, -s.a);
         let isBgSample = smoothstep(0.10, 0.45, s.a);
         let isFocusSample = 1.0 - max(isFgSample, isBgSample);
         let layerGate = max(
             fgDominance * isFgSample + bgDominance * isBgSample + focusDominance * isFocusSample,
             1e-4
         );
+        let normCoCDiff = abs(s.a - refCoC) / cocBandwidth;
+        let cocDistWeight = 1.0 / (1.0 + normCoCDiff * normCoCDiff);
 
-        let w = spatialW * layerGate;
+        let w = spatialW * layerGate * cocDistWeight;
         sumColor += s.rgb * w;
         sumWeight += w;
-
-        let isSameSignCoC = select(s.a >= -0.15, s.a <= 0.15, isFgDominant);
-        let cocW = select(1e-5, w, isSameSignCoC);
-        sumCoC += s.a * cocW;
-        sumCoCWeight += cocW;
+        sumCoC += s.a * w;
+        sumCoCWeight += w;
     }
 }
 

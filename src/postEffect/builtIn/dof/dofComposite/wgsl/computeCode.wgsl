@@ -61,11 +61,12 @@ if (uniforms.historyValid == 1u) {
     exactHalfCoC = select(clamp(stabilizedHalfCoC, safeMinCoC, safeMaxCoC), cocC, isBilinearSignCancelled);
 }
 let exactFullCoC = abs(exactHalfCoC) * halfToFullScale;
+let farBokehBlend = max(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(0.35, 1.5, -exactHalfCoC));
 
-// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, 전경 및 배경 양방향)에서 이산 CoC 검증 및 동일 부호 레이어 8-Tap 직접 개더링 수행
-// [EN] 2. Unreal DOF_Recombine specification: 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px) with discrete CoC lookup and strict same-sign layer gating
+// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, farBokehBlend < 0.999)에서 이산 CoC 검증 및 동일 부호 레이어 8-Tap 직접 개더링 수행
+// [EN] 2. Unreal DOF_Recombine specification: 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px, farBokehBlend < 0.999) with discrete CoC lookup and strict same-sign layer gating
 var baseFullResColor = sharpColor;
-if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
+if (exactFullCoC > 0.75 && farBokehBlend < 0.999) {
     let slightRadius = clamp(exactFullCoC, 0.75, 3.5);
     var slightSumColor = sharpColor;
     var slightSumWeight: f32 = 1.0;
@@ -94,7 +95,6 @@ if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
 // [KO] 3. 배경(Background) 보케 버퍼 조건부 9-Tap CoC-Bilateral Tent 업샘플링 및 블렌딩 (초점 영역 0-Tap 조기 스킵)
 // [EN] 3. Conditional Background bokeh buffer 9-Tap CoC-Bilateral Tent upsampling and blending (0-Tap early skip in in-focus regions)
 let d = halfTexelSize.xyxy * vec4<f32>(1.0, 1.0, -1.0, 0.0);
-let farBokehBlend = max(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(0.15, 0.65, -exactHalfCoC));
 
 var compositedBgColor = baseFullResColor;
 if (farBokehBlend > 1e-3) {
@@ -111,7 +111,7 @@ if (farBokehBlend > 1e-3) {
     // [KO] 비전경 픽셀에서는 합초 개구부 게이트(saturate) 기반 양방향 가중치로 합초 경계를 보호하고, 전경 픽셀로 갈수록 양방향 페널티(penaltyScale)를 연속적으로 0으로 감쇠시켜 실루엣 안팎의 홀필링 배경과 실제 배경을 부드럽게 보간
     // [EN] On non-foreground pixels, protect in-focus boundaries via bilateral weights; as CoC transitions into foreground, continuously attenuate penaltyScale to 0 to smoothly interpolate hole-filled and adjacent real background
     let centerSharpGate = saturate(max(exactHalfCoC, 0.0));
-    let penaltyScale = 6.0 * (1.0 - smoothstep(-0.05, -0.45, exactHalfCoC));
+    let penaltyScale = 6.0 * (1.0 - smoothstep(0.05, 0.45, -exactHalfCoC));
     let bw00 = computeBgUpsampleBilateralWeight(b00.a, centerSharpGate, 1.0, penaltyScale);
     let bw10 = computeBgUpsampleBilateralWeight(b10.a, centerSharpGate, 2.0, penaltyScale);
     let bw20 = computeBgUpsampleBilateralWeight(b20.a, centerSharpGate, 1.0, penaltyScale);

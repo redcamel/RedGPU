@@ -11,15 +11,16 @@ let tileOrigin = tileIndex * tileSpan;
 let tileMaxLocal = vec2<f32>(max(tileSpan - vec2<i32>(1), vec2<i32>(0)));
 
 let dpr = clamp(systemUniforms.devicePixelRatio, 1.0, 2.0);
-let maxHalfCoC = 0.5 * DOF_MAX_COC_FULL_PX * dpr + 3.0;
+let tileInterpMargin = 0.5 * f32(max(tileSpan.x, tileSpan.y));
+let maxHalfCoC = 0.5 * DOF_MAX_COC_FULL_PX * dpr + tileInterpMargin;
 let maxHalfCoCSq = maxHalfCoC * maxHalfCoC;
 let searchRadius = i32(ceil(maxHalfCoC / f32(SEARCH_STEP))) * SEARCH_STEP;
 
 var minNearCoC: f32 = 0.0;
 var maxFarCoC: f32 = 0.0;
 
-// [KO] maxCoC 및 DPR에 연동된 동적 반경과 타일 AABB 유클리드 제곱 거리(distToTileSq)를 계산하여 sqrt 없이 전/배경 최대 CoC를 광역 확장 (타일 경계 보간 감쇠 방지를 위한 3.0 하프 텍셀 안전 마진 포함)
-// [EN] Dynamically compute search radius from maxCoC/DPR and squared Euclidean distance to the tile AABB (distToTileSq) for sqrt-free near/far CoC dilation (including a 3.0 half-texel safety margin to prevent tile-boundary interpolation attenuation)
+// [KO] maxCoC 및 DPR에 연동된 동적 반경과 타일 AABB 유클리드 제곱 거리(distToTileSq)를 계산하여 sqrt 없이 전/배경 최대 CoC를 광역 확장 (타일 반경 tileInterpMargin 기반 양선형 보간 감쇠 방지)
+// [EN] Dynamically compute search radius from maxCoC/DPR and squared Euclidean distance to the tile AABB (distToTileSq) for sqrt-free near/far CoC dilation (with tileInterpMargin to prevent bilinear interpolation attenuation)
 for (var y = -searchRadius; y < tileSpan.y + searchRadius; y = y + SEARCH_STEP) {
     let sampleY = f32(y);
     let dy = sampleY - clamp(sampleY, 0.0, tileMaxLocal.y);
@@ -36,7 +37,7 @@ for (var y = -searchRadius; y < tileSpan.y + searchRadius; y = y + SEARCH_STEP) 
 
         let clampedCoordX = clamp(tileOrigin.x + x, 0, maxCoord.x);
         let coc = textureLoad(sourceTexture, vec2<i32>(clampedCoordX, clampedCoordY), 0).a;
-        let reachRadius = abs(coc) + 3.0;
+        let reachRadius = abs(coc) + tileInterpMargin;
         let reachSq = reachRadius * reachRadius;
 
         if (coc < -0.25 && reachSq >= distToTileSq) {

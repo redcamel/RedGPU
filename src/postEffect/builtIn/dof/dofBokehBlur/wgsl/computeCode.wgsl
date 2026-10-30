@@ -86,7 +86,9 @@ let nearGatherRadius = min(max(-dilatedMinNearCoC, centerNearRadius), maxHalfRad
 // [EN] Background pass (Pass 3A): search continuous hole-filling radius driven by centerNearRadius and nearDominance on foreground pixels, and gather full tile max far bokeh radius gated by in-focus aperture (saturate(centerFarRadius - 0.25)) on non-foreground pixels
 let bgApertureGate = saturate(centerFarRadius - 0.25);
 let nearDominance = saturate(centerNearRadius / max(nearGatherRadius, 0.5));
-let occludedMidFgWeight = (1.0 - smoothstep(0.35, 0.75, nearDominance)) * smoothstep(0.15, 0.65, centerNearRadius);
+let centerFgWeight = smoothstep(0.15, 0.65, centerNearRadius);
+let primaryFgOcclusion = centerFgWeight * smoothstep(0.35, 0.75, nearDominance);
+let occludedMidFgWeight = centerFgWeight - primaryFgOcclusion;
 let holeFillGatherRadius = min(max(centerNearRadius * 1.25, dilatedMaxFarCoC * nearDominance), maxHalfRadius);
 let farGatherRadius = min(select(max(centerFarRadius, dilatedMaxFarCoC * bgApertureGate), holeFillGatherRadius, isCenterForeground), maxHalfRadius);
 let gatherRadius = select(farGatherRadius, nearGatherRadius, isForegroundPass);
@@ -134,9 +136,9 @@ var fgRadiusWeightSum: f32 = 0.0;
 var totalKernelWeight: f32 = 1.0;
 
 if (!isForegroundPass) {
-    // [KO] 배경 패스에서 중심 픽셀이 비전경일 때는 중심 샘플을 온전히 누적하고, 더 가까운 전경 보케에 덮인 중경 픽셀(occludedMidFgWeight > 0)에서는 중경 자체 색상을 연속 보존하여 실루엣 경계 단차 차단
-    // [EN] In the background pass, accumulate full center sample when non-foreground, and continuously preserve mid-foreground self color when occluded by a closer foreground bokeh (occludedMidFgWeight > 0)
-    let bgSelfWeight = select(1.0, occludedMidFgWeight, isCenterForeground);
+    // [KO] 배경 패스에서 주 전경 차폐율(primaryFgOcclusion)의 여집합(1.0 - primaryFgOcclusion)을 중심 가중치로 부여하여 비전경(1.0) -> 중전경(1.0) -> 주전경(0.0) 간 연속 전이 보장
+    // [EN] In the background pass, weight center sample by (1.0 - primaryFgOcclusion) to ensure a continuous transition across non-foreground (1.0) -> mid-foreground (1.0) -> primary foreground (0.0)
+    let bgSelfWeight = 1.0 - primaryFgOcclusion;
     if (bgSelfWeight > 0.0) {
         let centerExcessLuma = max(getLuminance(centerFilteredColor) - 0.25, 0.0);
         let centerHighlight = centerExcessLuma / (1.0 + centerExcessLuma * 0.25);
@@ -246,7 +248,7 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
 
                         let sampleExcessLuma = max(getLuminance(sampleColor) - 0.25, 0.0);
                         let highlightBoost = (sampleExcessLuma / (1.0 + sampleExcessLuma * 0.25)) * halfBokehBrightness;
-                        let depthOcclusion = smoothstep(centerFarRadius + max(sampleCoC * 0.5, 1.0), centerFarRadius - 0.5, sampleCoC);
+                        let depthOcclusion = 1.0 - smoothstep(centerFarRadius - halfRingTransition, centerFarRadius + max(sampleCoC * 0.5, ringSpacing), sampleCoC);
                         let areaRatio = max(centerFarRadius, ringSpacing) / max(sampleCoC, ringSpacing);
                         let areaWeight = clamp(areaRatio * areaRatio, 0.2, 1.0);
                         let highlightWeight = bokehDiscCoverage * depthOcclusion * highlightBoost * areaWeight;
@@ -291,7 +293,7 @@ if (!isForegroundPass) {
     let defaultBgColor = fallbackBgColor / max(fallbackBgWeight, 1.0);
     let bgColor = select(defaultBgColor, accumColor * invAccumWeight, hasBg);
     let avgFarCoC = accumFarCoC * invAccumWeight;
-    let holeFilledFarCoC = select(avgFarCoC, max(avgFarCoC, 0.3), isCenterForeground);
+    let holeFilledFarCoC = max(avgFarCoC, centerNearRadius * primaryFgOcclusion);
     let outFarCoC = select(centerFarRadius, holeFilledFarCoC, hasBg);
     textureStore(outputTexture, index, vec4<f32>(bgColor, outFarCoC));
 } else {
@@ -299,7 +301,7 @@ if (!isForegroundPass) {
     let fgColor = select(centerFilteredColor, accumColor / max(accumWeight, 1e-5), hasFg);
     let activeFgRadius = select(gatherRadius, clamp(fgRadiusSum / max(fgRadiusWeightSum, 1e-5), 0.5, gatherRadius), fgRadiusWeightSum > 1e-5);
     let radiusRatio = activeFgRadius / max(gatherRadius, 0.5);
-    let activeKernelWeight = max(totalKernelWeight * clamp(radiusRatio * radiusRatio, 0.05, 1.0), 1.0);
+    let activeKernelWeight = max(totalKernelWeight * radiusRatio * radiusRatio, 1.0);
     let fgOpacity = select(0.0, saturate(fgCoverageSum / activeKernelWeight), hasFg);
     textureStore(outputTexture, index, vec4<f32>(fgColor, fgOpacity));
 }

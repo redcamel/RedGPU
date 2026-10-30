@@ -55,29 +55,27 @@ if (coc11 < closestCoC) {
     closestDepthCoord = d11Coord;
 }
 
-// [KO] 전경(coc < -0.1)과 비전경(coc >= -0.1) 도메인을 완전 분리하여 중간값 정리에 의한 양·음수 선형 혼합 영점 교차(CoC ≈ 0) 및 부호 역전을 원천 차단
-// [EN] Completely separate foreground (coc < -0.1) and non-foreground (coc >= -0.1) domains to prevent zero-crossing (CoC ≈ 0) and sign inversion from positive/negative linear mixing
+// [KO] 전경(coc < 0)과 비전경(coc >= 0) 도메인을 연속 가중치로 분리하여 중간값 정리에 의한 양·음수 선형 혼합 영점 교차(CoC ≈ 0) 및 이진 스텝 점프를 원천 차단
+// [EN] Continuously separate foreground (coc < 0) and non-foreground (coc >= 0) domains to prevent zero-crossing (CoC ≈ 0) and binary step jumps from positive/negative linear mixing
 let avgCoC = (coc00 + coc10 + coc01 + coc11) * 0.25;
-let fgMask00 = select(0.0, 1.0, coc00 < -0.1);
-let fgMask10 = select(0.0, 1.0, coc10 < -0.1);
-let fgMask01 = select(0.0, 1.0, coc01 < -0.1);
-let fgMask11 = select(0.0, 1.0, coc11 < -0.1);
+let fgMask00 = smoothstep(0.05, 0.35, -coc00);
+let fgMask10 = smoothstep(0.05, 0.35, -coc10);
+let fgMask01 = smoothstep(0.05, 0.35, -coc01);
+let fgMask11 = smoothstep(0.05, 0.35, -coc11);
 let fgCount = fgMask00 + fgMask10 + fgMask01 + fgMask11;
 let nonFgCount = 4.0 - fgCount;
 let nonFgAvgCoC = select(
     avgCoC,
-    (coc00 * (1.0 - fgMask00) + coc10 * (1.0 - fgMask10) + coc01 * (1.0 - fgMask01) + coc11 * (1.0 - fgMask11)) / max(nonFgCount, 1.0),
-    nonFgCount > 0.0
+    (coc00 * (1.0 - fgMask00) + coc10 * (1.0 - fgMask10) + coc01 * (1.0 - fgMask01) + coc11 * (1.0 - fgMask11)) / max(nonFgCount, 1e-4),
+    nonFgCount > 1e-4
 );
-let fgAvgCoC = select(minSignedCoC, (coc00 * fgMask00 + coc10 * fgMask10 + coc01 * fgMask01 + coc11 * fgMask11) / max(fgCount, 1.0), fgCount > 0.0);
-let fgPreserve = mix(fgAvgCoC, minSignedCoC, saturate(maxSignedCoC - minSignedCoC - 0.5));
-let fgDiscontinuity = smoothstep(-0.15, -0.75, minSignedCoC);
-let hasOppositeSignQuad = (minSignedCoC < -0.25) && (maxSignedCoC > 0.25);
-var tileCoC = select(
-    mix(nonFgAvgCoC, fgPreserve, fgDiscontinuity),
-    fgPreserve,
-    hasOppositeSignQuad
-);
+let fgAvgCoC = select(minSignedCoC, (coc00 * fgMask00 + coc10 * fgMask10 + coc01 * fgMask01 + coc11 * fgMask11) / max(fgCount, 1e-4), fgCount > 1e-4);
+let cocSpan = maxSignedCoC - minSignedCoC;
+let relativeSpan = cocSpan / max(abs(minSignedCoC), 0.5);
+let fgPreserve = mix(fgAvgCoC, minSignedCoC, smoothstep(0.25, 1.0, relativeSpan));
+let oppositeSignWeight = smoothstep(0.10, 0.35, -minSignedCoC) * smoothstep(0.10, 0.35, maxSignedCoC);
+let fgBlendWeight = max(smoothstep(0.15, 0.75, -minSignedCoC), oppositeSignWeight);
+var tileCoC = mix(nonFgAvgCoC, fgPreserve, fgBlendWeight);
 
 let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxColorCoord);
 let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxColorCoord);
@@ -129,12 +127,13 @@ if (uniforms.historyValid == 1u) {
     }
 }
 
-// [KO] 시간 안정화된 tileCoC 기준 양방향(Bilateral) 컬러 가중 평균
-// [EN] Bilateral color weighted average based on temporally stabilized tileCoC
-let w00 = 1.0 / (0.25 + abs(coc00 - tileCoC) * 4.0);
-let w10 = 1.0 / (0.25 + abs(coc10 - tileCoC) * 4.0);
-let w01 = 1.0 / (0.25 + abs(coc01 - tileCoC) * 4.0);
-let w11 = 1.0 / (0.25 + abs(coc11 - tileCoC) * 4.0);
+// [KO] 시간 안정화된 tileCoC 반경 크기에 비례하는 양방향(Bilateral) 컬러 가중 평균
+// [EN] Bilateral color weighted average proportional to temporally stabilized tileCoC radius magnitude
+let cocScaleRef = max(abs(tileCoC) * 0.25, 0.25);
+let w00 = 1.0 / (0.25 + abs(coc00 - tileCoC) / cocScaleRef);
+let w10 = 1.0 / (0.25 + abs(coc10 - tileCoC) / cocScaleRef);
+let w01 = 1.0 / (0.25 + abs(coc01 - tileCoC) / cocScaleRef);
+let w11 = 1.0 / (0.25 + abs(coc11 - tileCoC) / cocScaleRef);
 let wSum = w00 + w10 + w01 + w11;
 
 var downsampledColor = (col00 * w00 + col10 * w10 + col01 * w01 + col11 * w11) / wSum;
