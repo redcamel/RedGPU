@@ -53,7 +53,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange, s
             style={{
                 ...selectBoxStyle,
                 backgroundColor: (isHovered || isOpen) ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
-                boxShadow: isOpen ? 'inset 0 0 0 1px rgba(253, 180, 141, 0.35)' : 'none',
+                boxShadow: isOpen ? 'inset 0 0 0 1px rgba(255, 255, 255, 0.28)' : 'none',
                 ...style
             }}
             onMouseEnter={() => setIsHovered(true)}
@@ -115,29 +115,28 @@ const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange, s
 const selectBoxStyle: React.CSSProperties = {
     position: 'relative',
     display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    height: '36px',
-    padding: '0 11px',
-    borderRadius: '8px',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: '7px',
+    height: '34px',
+    padding: '0 12px',
+    borderRadius: '9999px',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
     border: 'none',
     minWidth: 0,
     flexShrink: 0,
     cursor: 'pointer',
-    transition: 'background-color 0.2s, box-shadow 0.2s',
+    transition: 'background-color 0.15s, box-shadow 0.15s',
     userSelect: 'none',
     whiteSpace: 'nowrap',
     boxSizing: 'border-box'
 };
 
 const titleLabelStyle: React.CSSProperties = {
-    fontSize: '8px',
-    color: '#888',
-    fontWeight: 'bold',
+    fontSize: '11.5px',
+    color: '#8e8e93',
+    fontWeight: 500,
     lineHeight: '1',
-    marginBottom: '2px',
-    letterSpacing: '0.05em',
     whiteSpace: 'nowrap'
 };
 
@@ -145,27 +144,25 @@ const customSelectTriggerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
     minWidth: 0,
-    gap: '6px'
+    gap: '5px'
 };
 
 const currentValueStyle: React.CSSProperties = {
-    fontSize: '11px',
+    fontSize: '12px',
     lineHeight: '1.1',
     color: '#fdb48d',
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    minWidth: 0,
-    flex: 1
+    minWidth: 0
 };
 
 const arrowIconStyle: React.CSSProperties = {
     width: '10px',
     height: '10px',
-    marginLeft: '2px',
+    marginLeft: '1px',
     flexShrink: 0,
     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fdb48d%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`,
     backgroundRepeat: 'no-repeat',
@@ -176,28 +173,29 @@ const arrowIconStyle: React.CSSProperties = {
 
 const optionsListStyle: React.CSSProperties = {
     position: 'absolute',
-    top: 'calc(100% + 8px)',
+    top: 'calc(100% + 6px)',
     left: 0,
     minWidth: '100%',
     width: 'max-content',
-    backgroundColor: 'rgba(22, 22, 24, 0.92)',
+    backgroundColor: 'rgba(22, 22, 24, 0.94)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '8px',
+    borderRadius: '14px',
     boxShadow: '0 12px 32px rgba(0,0,0,0.55)',
     zIndex: 10004,
     display: 'flex',
     flexDirection: 'column',
-    padding: '5px',
+    padding: '4px',
+    gap: '1px',
     overflow: 'hidden'
 };
 
 const optionItemStyle: React.CSSProperties = {
-    padding: '8px 13px',
-    fontSize: '11px',
+    padding: '7px 12px',
+    fontSize: '12px',
     fontWeight: 'bold',
-    borderRadius: '5px',
+    borderRadius: '9999px',
     cursor: 'pointer',
     transition: 'background-color 0.1s, color 0.1s',
     whiteSpace: 'nowrap'

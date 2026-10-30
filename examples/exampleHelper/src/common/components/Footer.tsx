@@ -32,8 +32,8 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                     onMouseEnter={() => setIsLinkHovered(true)}
                     onMouseLeave={() => setIsLinkHovered(false)}
                 >
-                    <span style={{color: '#e8e8e8', fontSize: '11.5px', letterSpacing: '0.02em'}}>
-                        This project is maintained by <b style={{color: '#fdb48d', fontWeight: 800}}>RedCamel</b>
+                    <span style={{color: '#b19898', fontSize: '11.5px', letterSpacing: '0.02em'}}>
+                        This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                     </span>
                     <span style={iconWrapperStyle}>
                         <img src={githubIcon} width="16" height="16" alt="GitHub"/>
@@ -60,8 +60,8 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                         rel="noreferrer"
                         style={footerLeftLinkStyle}
                     >
-                        <span style={{color: '#e0e0e0', fontSize: '11px'}}>
-                            Maintained by <b style={{color: '#fdb48d'}}>RedCamel</b>
+                        <span style={{color: '#b19898', fontSize: '11px'}}>
+                            This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                         </span>
                         <span style={iconWrapperStyle}>
                             <img src={githubIcon} width="16" height="16" alt="GitHub"/>
@@ -81,14 +81,14 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                 rel="noreferrer"
                 style={{
                     ...leftCapsuleStyle,
-                    backgroundColor: isLinkHovered ? 'rgba(28, 28, 30, 0.92)' : 'rgba(17, 17, 18, 0.84)',
-                    borderColor: isLinkHovered ? 'rgba(253, 180, 141, 0.35)' : 'rgba(255, 255, 255, 0.12)'
+                    backgroundColor: isLinkHovered ? 'rgba(28, 28, 30, 0.9)' : 'rgba(18, 18, 20, 0.82)',
+                    borderColor: isLinkHovered ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.1)'
                 }}
                 onMouseEnter={() => setIsLinkHovered(true)}
                 onMouseLeave={() => setIsLinkHovered(false)}
             >
-                <span style={{color: '#e8e8e8', fontSize: '11.5px', letterSpacing: '0.02em'}}>
-                    Maintained by <b style={{color: '#fdb48d', fontWeight: 800}}>RedCamel</b>
+                <span style={{color: '#b19898', fontSize: '11.5px', letterSpacing: '0.02em'}}>
+                    This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                 </span>
                 <span style={iconWrapperStyle}>
                     <img src={githubIcon} width="16" height="16" alt="GitHub"/>
@@ -148,9 +148,9 @@ const narrowFooterContainerStyle: React.CSSProperties = {
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '12px',
+    borderRadius: '20px',
     boxShadow: '0 8px 28px rgba(0, 0, 0, 0.55)',
-    overflow: 'hidden',
+    overflow: 'visible',
     pointerEvents: 'auto'
 };
 
@@ -164,12 +164,12 @@ const mobileSelectContainerStyle: React.CSSProperties = {
 
 const leftCapsuleStyle: React.CSSProperties = {
     height: '40px',
-    padding: '0 14px',
+    padding: '0 16px',
     backgroundColor: 'rgba(17, 17, 18, 0.84)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '12px',
+    borderRadius: '9999px',
     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
     display: 'flex',
     alignItems: 'center',
@@ -188,7 +188,7 @@ const rightCapsuleStyle: React.CSSProperties = {
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '12px',
+    borderRadius: '9999px',
     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
     display: 'flex',
     alignItems: 'center',

@@ -53,8 +53,8 @@ const Title = () => {
                     <button
                         style={{
                             ...buttonStyle,
-                            width: '28px',
-                            height: isNarrow ? '32px' : '36px',
+                            width: isNarrow ? '32px' : '34px',
+                            height: isNarrow ? '32px' : '34px',
                             backgroundColor: isPrevHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
                         }}
                         onClick={() => navigate(prevExample.path!)}
@@ -67,31 +67,20 @@ const Title = () => {
                 )}
 
                 <div style={{...contentBoxStyle, textAlign: isNarrow ? 'center' : 'left'}}>
-                    {(!isNarrow || currentExample?.experimental) && (
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: isNarrow ? 'center' : 'flex-start',
-                            gap: '6px',
-                            marginBottom: '2px'
-                        }}>
-                            {!isNarrow && <span style={{...titleLabelStyle, marginBottom: 0}}>Example</span>}
-                            {currentExample?.experimental && (
-                                <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
-                            )}
-                        </div>
-                    )}
                     <span style={titleValueStyle}>
-                        {currentExample ? currentExample.name : 'empty example name'}
+                        {currentExample ? currentExample.name : 'Example'}
                     </span>
+                    {currentExample?.experimental && (
+                        <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
+                    )}
                 </div>
 
                 {nextExample && (
                     <button
                         style={{
                             ...buttonStyle,
-                            width: '28px',
-                            height: isNarrow ? '32px' : '36px',
+                            width: isNarrow ? '32px' : '34px',
+                            height: isNarrow ? '32px' : '34px',
                             backgroundColor: isNextHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
                         }}
                         onClick={() => navigate(nextExample.path!)}
@@ -122,46 +111,47 @@ const titleBoxStyle: React.CSSProperties = {
     flexDirection: 'column',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    height: '36px',
+    height: '34px',
     flexShrink: 0,
     alignItems: 'stretch'
 };
 
 const contentBoxStyle: React.CSSProperties = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 10px',
+    gap: '8px',
+    padding: '0 8px',
     flexGrow: 1,
-    minWidth: '110px',
     textAlign: 'center'
 };
 
 const titleLabelStyle: React.CSSProperties = {
-    fontSize: '8px',
+    fontSize: '11px',
     lineHeight: '1',
-    color: '#888',
-    fontWeight: 'bold',
-    marginBottom: '2px',
-    letterSpacing: '0.05em'
+    color: '#8e8e93',
+    fontWeight: 500
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '8px',
-    backgroundColor: '#ff4d4d',
-    color: '#fff',
-    padding: '3px 5px',
-    borderRadius: '4px',
-    fontWeight: 'bold',
-    lineHeight: '1',
+    fontSize: '10px',
+    backgroundColor: 'rgba(255, 90, 95, 0.16)',
+    color: '#ff6b70',
+    border: '1px solid rgba(255, 90, 95, 0.35)',
+    padding: '2px 6px',
+    borderRadius: '5px',
+    fontWeight: 600,
+    lineHeight: '1.1',
     display: 'inline-block'
 };
 
 const titleValueStyle: React.CSSProperties = {
-    fontSize: '11.5px',
-    lineHeight: '1.1',
-    color: '#eee',
-    fontWeight: 'bold',
+    fontSize: '13px',
+    lineHeight: '1.2',
+    color: '#f4f4f5',
+    fontWeight: 600,
+    letterSpacing: '-0.01em',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis'
@@ -171,16 +161,16 @@ const buttonStyle: React.CSSProperties = {
     backgroundColor: 'transparent',
     color: '#fdb48d',
     border: 'none',
-    width: '28px',
-    height: '36px',
-    borderRadius: '8px',
+    width: '34px',
+    height: '34px',
+    borderRadius: '50%',
     cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 'bold',
+    fontSize: '13px',
+    fontWeight: 500,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'background-color 0.2s',
+    transition: 'background-color 0.15s, color 0.15s',
     padding: 0,
     flexShrink: 0
 };

@@ -1,4 +1,10 @@
 
+.RedGPUExampleHelper, .RedGPUExampleHelper button {
+    font-family: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 .loading-ui {
     position: fixed;
     top: 50%;

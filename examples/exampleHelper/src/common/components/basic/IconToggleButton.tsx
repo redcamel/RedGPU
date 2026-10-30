@@ -30,13 +30,11 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({icon, label, isActiv
         <button
             style={{
                 ...baseButtonStyle,
-                width: icon ? '36px' : 'auto',
-                padding: icon ? '0' : '0 12px',
-                backgroundColor: isActive
-                    ? 'rgba(253, 180, 141, 0.16)'
-                    : (isHovered ? 'rgba(255, 255, 255, 0.07)' : 'transparent'),
-                boxShadow: isActive ? 'inset 0 0 0 1px rgba(253, 180, 141, 0.3)' : 'none',
-                color: isActive ? '#fdb48d' : '#fff',
+                width: icon ? '34px' : 'auto',
+                padding: icon ? '0' : '0 10px',
+                backgroundColor: 'transparent',
+                boxShadow: 'none',
+                color: isActive ? '#fdb48d' : '#ccc',
             }}
             onClick={onClick}
             title={title || label}
@@ -46,13 +44,17 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({icon, label, isActiv
             onMouseLeave={() => setIsHovered(false)}
         >
             <div style={{
-                opacity: isActive ? 1 : (isHovered ? 0.8 : 0.45),
+                opacity: isActive ? 1 : (isHovered ? 0.7 : 0.35),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '100%',
                 height: '100%',
-                transition: 'opacity 0.2s'
+                fontSize: '12px',
+                lineHeight: '1.1',
+                color: isActive ? '#fdb48d' : '#ccc',
+                fontWeight: 'bold',
+                transition: 'opacity 0.15s'
             }}>
                 {renderIcon()}
             </div>
@@ -64,22 +66,22 @@ const baseButtonStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '36px',
-    borderRadius: '8px',
+    height: '34px',
+    borderRadius: '50%',
     backgroundColor: 'transparent',
     border: 'none',
-    fontSize: '11px',
+    fontSize: '12px',
+    lineHeight: '1.1',
     fontWeight: 'bold',
     cursor: 'pointer',
-    transition: 'background-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s',
-    letterSpacing: '0.05em',
+    transition: 'background-color 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s',
     flexShrink: 0,
     boxSizing: 'border-box'
 };
 
 const iconStyle: React.CSSProperties = {
-    width: '18px',
-    height: '18px'
+    width: '24px',
+    height: '24px'
 };
 
 export default IconToggleButton;

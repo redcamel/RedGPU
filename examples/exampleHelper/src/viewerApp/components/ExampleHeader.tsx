@@ -15,6 +15,7 @@ const ExampleHeader = () => {
     const topBarRightActions = useExampleHelperStore((state: ExampleHelperState) => state.topBarRightActions);
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
+    const showSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.showSourceModal);
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
 
     const [ssao, setSSAO] = useState<boolean>(false);
@@ -42,6 +43,9 @@ const ExampleHeader = () => {
         }
     };
 
+    const viewportActions = topBarRightActions.filter((action) => action.id !== 'setting-toggle');
+    const settingAction = topBarRightActions.find((action) => action.id === 'setting-toggle');
+
     return (
         <header
             style={{
@@ -49,55 +53,73 @@ const ExampleHeader = () => {
                 top: isNarrow ? '10px' : '16px',
                 left: isNarrow ? '10px' : '16px',
                 right: isNarrow ? '10px' : '16px',
-                height: isNarrow ? '42px' : '44px'
+                height: isNarrow ? '40px' : '42px'
             }}
         >
             <div style={navBarStyle}>
-                <div style={leftSectionStyle}>
-                    <IconButton
-                        icon={<HomeIcon color="#fff" size={18}/>}
-                        label="HOME"
-                        onClick={() => {
-                            window.location.href = '/RedGPU/examples/index.html'
-                        }}
-                        title="HOME"
-                    />
+                <div style={{...leftGroupStyle, gap: isNarrow ? '6px' : '8px'}}>
+                    <div style={leftSectionStyle}>
+                        <IconButton
+                            icon={<HomeIcon color="#fff" size={24}/>}
+                            label="HOME"
+                            onClick={() => {
+                                window.location.href = '/RedGPU/examples/index.html'
+                            }}
+                            title="HOME"
+                        />
+                    </div>
                     {!isNarrow && (
-                        <>
-                            <div style={dividerStyle}/>
+                        <div style={leftSectionStyle}>
                             <Title/>
-                        </>
+                        </div>
                     )}
                 </div>
 
-                <div style={rightSectionStyle}>
-                    <LabelButton
-                        label="</> SOURCE"
-                        onClick={() => setShowSourceModal(true)}
-                        style={isNarrow ? {height: '32px', padding: '0 10px', fontSize: '10px'} : undefined}
-                    />
-                    <div style={dividerStyle}/>
+                <div style={{...rightGroupStyle, gap: isNarrow ? '6px' : '8px'}}>
                     {!isNarrow && (
-                        <>
-                            <RenderingSettingsGroup/>
-                            <div style={dividerStyle}/>
-                        </>
+                        <div style={rightSectionStyle}>
+                            <LabelButton
+                                label="CODE"
+                                onClick={() => setShowSourceModal(!showSourceModal)}
+                            />
+                        </div>
                     )}
-                    <IconToggleButton
-                        label="SSAO"
-                        onClick={handleSSAOChange}
-                        isActive={ssao}
-                    />
-                    <div style={dividerStyle}/>
-                    {topBarRightActions.map((action) => (
+
+                    <div style={rightSectionStyle}>
+                        {!isNarrow && (
+                            <>
+                                <RenderingSettingsGroup/>
+                                <div style={dividerStyle}/>
+                            </>
+                        )}
                         <IconToggleButton
-                            key={action.id}
-                            icon={action.icon}
-                            label={action.label}
-                            onClick={action.onClick}
-                            isActive={!!action.isActive}
+                            label="SSAO"
+                            onClick={handleSSAOChange}
+                            isActive={ssao}
                         />
-                    ))}
+                        <div style={dividerStyle}/>
+                        {viewportActions.map((action) => (
+                            <IconToggleButton
+                                key={action.id}
+                                icon={action.icon}
+                                label={action.label}
+                                onClick={action.onClick}
+                                isActive={!!action.isActive}
+                            />
+                        ))}
+                    </div>
+
+                    {settingAction && (
+                        <div style={rightSectionStyle}>
+                            <IconToggleButton
+                                key={settingAction.id}
+                                icon={settingAction.icon}
+                                label={settingAction.label}
+                                onClick={settingAction.onClick}
+                                isActive={!!settingAction.isActive}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </header>
@@ -110,7 +132,7 @@ const containerStyle: React.CSSProperties = {
     top: '16px',
     left: '16px',
     right: '16px',
-    height: '44px',
+    height: '42px',
     backgroundColor: 'transparent',
     zIndex: 10003,
     display: 'flex',
@@ -128,18 +150,34 @@ const navBarStyle: React.CSSProperties = {
     backgroundColor: 'transparent'
 };
 
+const leftGroupStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    height: '100%',
+    gap: '8px',
+    backgroundColor: 'transparent'
+};
+
+const rightGroupStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    height: '100%',
+    gap: '8px',
+    backgroundColor: 'transparent'
+};
+
 const leftSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     height: '100%',
     padding: '4px',
     gap: '4px',
-    backgroundColor: 'rgba(17, 17, 18, 0.84)',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '12px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '9999px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
     boxSizing: 'border-box',
     pointerEvents: 'auto'
 };
@@ -150,19 +188,19 @@ const rightSectionStyle: React.CSSProperties = {
     height: '100%',
     padding: '4px',
     gap: '4px',
-    backgroundColor: 'rgba(17, 17, 18, 0.84)',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '12px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '9999px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
     boxSizing: 'border-box',
     pointerEvents: 'auto'
 };
 
 const dividerStyle: React.CSSProperties = {
     width: '1px',
-    height: '18px',
+    height: '16px',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     margin: '0 2px',
     flexShrink: 0

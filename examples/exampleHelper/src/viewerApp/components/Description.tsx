@@ -85,7 +85,7 @@ const toggleButtonStyle: React.CSSProperties = {
     padding: '0 7px',
     backgroundColor: 'transparent',
     color: '#fdb48d',
-    border: '1px solid rgba(253, 180, 141, 0.45)',
+    border: '1px solid rgba(253, 180, 141, 0.35)',
     fontSize: '10px',
     fontWeight: 800,
     letterSpacing: '0.04em',

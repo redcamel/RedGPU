@@ -42,24 +42,23 @@ const baseButtonStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
+    width: '34px',
+    height: '34px',
+    borderRadius: '50%',
     backgroundColor: 'transparent',
-    color: '#fdb48d',
+    color: '#f4f4f5',
     border: 'none',
-    fontSize: '11px',
-    fontWeight: 'bold',
+    fontSize: '12px',
+    fontWeight: 500,
     cursor: 'pointer',
-    transition: 'background-color 0.2s, color 0.2s',
-    letterSpacing: '0.05em',
+    transition: 'background-color 0.15s, color 0.15s',
     padding: 0,
     flexShrink: 0
 };
 
 const iconStyle: React.CSSProperties = {
-    width: '18px',
-    height: '18px'
+    width: '16px',
+    height: '16px'
 };
 
 export default IconButton;

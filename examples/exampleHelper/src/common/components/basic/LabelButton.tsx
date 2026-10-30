@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 
 interface LabelButtonProps {
     label: string;
+    icon?: React.ReactNode;
     isActive?: boolean;
     onClick: () => void;
     title?: string;
@@ -9,19 +10,17 @@ interface LabelButtonProps {
 }
 
 /**
- * [KO] 텍스트 라벨 전용 버튼 컴포넌트입니다.
- * Intrinsic Auto-Layout: width: auto + 상하/좌우 비례 여백(height: 32px, padding: 0 14px, borderRadius: 8px)
+ * [KO] 아이콘+텍스트 캡슐 버튼 컴포넌트입니다.
  */
-const LabelButton: React.FC<LabelButtonProps> = ({label, isActive = true, onClick, title, style}) => {
+const LabelButton: React.FC<LabelButtonProps> = ({label, icon, isActive = true, onClick, title, style}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
         <button
             style={{
                 ...baseButtonStyle,
-                backgroundColor: isHovered ? '#fdb48d' : 'rgba(253, 180, 141, 0.14)',
-                borderColor: isHovered ? '#fdb48d' : 'rgba(253, 180, 141, 0.4)',
-                color: isHovered ? '#111112' : '#fdb48d',
+                backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                color: '#fdb48d',
                 ...style
             }}
             onClick={onClick}
@@ -29,8 +28,13 @@ const LabelButton: React.FC<LabelButtonProps> = ({label, isActive = true, onClic
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
+            {icon && <span style={{display: 'flex', alignItems: 'center', opacity: isActive ? 1 : 0.4}}>{icon}</span>}
             <span style={{
                 opacity: isActive ? 1 : 0.4,
+                fontSize: '12px',
+                lineHeight: '1.1',
+                color: '#fdb48d',
+                fontWeight: 'bold',
                 transition: 'opacity 0.2s'
             }}>
                 {label}
@@ -43,17 +47,19 @@ const baseButtonStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: '6px',
     width: 'auto',
-    height: '36px',
-    padding: '0 13px',
-    backgroundColor: 'rgba(253, 180, 141, 0.14)',
-    border: '1px solid rgba(253, 180, 141, 0.4)',
-    borderRadius: '8px',
-    fontSize: '11px',
-    fontWeight: 800,
+    height: '34px',
+    padding: '0 12px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '9999px',
+    fontSize: '12px',
+    lineHeight: '1.1',
+    color: '#fdb48d',
+    fontWeight: 'bold',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    letterSpacing: '0.05em',
+    transition: 'all 0.15s ease',
     whiteSpace: 'nowrap',
     flexShrink: 0,
     boxSizing: 'border-box',

@@ -1,21 +1,16 @@
 import React from 'react';
 
-/**
- * [KO] 모든 아이콘을 중앙 관리하고 최적화된 SVG 컴포넌트로 제공합니다.
- * [EN] Centralized management of all icons as optimized SVG components.
- */
-
 interface IconProps {
     color?: string;
-    size?: number | string;
+    size?: number;
     style?: React.CSSProperties;
     opacity?: number;
+    strokeWidth?: number;
 }
 
-const defaultSize = 18;
-const defaultColor = '#ccc';
+const DEFAULT_COLOR = '#ccc';
 
-export const AxisIcon: React.FC<IconProps> = ({color = defaultColor, size = defaultSize, style, opacity}) => (
+export const AxisIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 20, style, opacity}) => (
     <svg width={size} height={size} viewBox="0 0 14 14" fill={color} style={{...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
@@ -23,7 +18,7 @@ export const AxisIcon: React.FC<IconProps> = ({color = defaultColor, size = defa
     </svg>
 );
 
-export const DebugIcon: React.FC<IconProps> = ({color = defaultColor, size = 24, style, opacity}) => (
+export const DebugIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 19, style, opacity}) => (
     <svg width={size} height={size} viewBox="0 0 640 640" fill={color} style={{...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
@@ -31,7 +26,7 @@ export const DebugIcon: React.FC<IconProps> = ({color = defaultColor, size = 24,
     </svg>
 );
 
-export const GridIcon: React.FC<IconProps> = ({color = defaultColor, size = 24, style, opacity}) => (
+export const GridIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 24, style, opacity}) => (
     <svg width={size} height={size} viewBox="0 0 640 640" fill={color} style={{...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
@@ -45,7 +40,7 @@ export const GridIcon: React.FC<IconProps> = ({color = defaultColor, size = 24, 
     </svg>
 );
 
-export const SettingIcon: React.FC<IconProps> = ({color = defaultColor, size = 24, style, opacity}) => (
+export const SettingIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 18, style, opacity}) => (
     <svg width={size} height={size} viewBox="0 0 640 640" fill={color} style={{...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
@@ -69,39 +64,25 @@ export const OutLinkIcon: React.FC<IconProps> = ({color = '#fff', size = 24, sty
     </svg>
 );
 
-export const ToneMappingIcon: React.FC<IconProps> = ({color = '#fff', size = 20, style, opacity}) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke="currentColor" strokeWidth="2"
+export const ChevronLeft: React.FC<IconProps> = ({color = '#fdb48d', size = 14, style, opacity, strokeWidth = 3}) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}
+         strokeLinecap="round" strokeLinejoin="round" style={{...style, opacity}}>
+        <polyline points="15 18 9 12 15 6"/>
+    </svg>
+);
+
+export const ChevronRight: React.FC<IconProps> = ({color = '#fdb48d', size = 14, style, opacity, strokeWidth = 3}) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}
+         strokeLinecap="round" strokeLinejoin="round" style={{...style, opacity}}>
+        <polyline points="9 18 15 12 9 6"/>
+    </svg>
+);
+
+export const CodeIcon: React.FC<IconProps> = ({color = '#fdb48d', size = 15, style, opacity, strokeWidth = 2.4}) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}
          strokeLinecap="round" strokeLinejoin="round" style={{...style, opacity}} xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 2v20"/>
-        <path d="M12 12h5" opacity="0.6"/>
-        <path d="M12 7h5" opacity="0.6"/>
-        <path d="M12 17h5" opacity="0.6"/>
-    </svg>
-);
-
-export const ChevronLeft: React.FC<IconProps & { strokeWidth?: number }> = ({
-                                                                                color = '#fdb48d',
-                                                                                size = 14,
-                                                                                style,
-                                                                                opacity,
-                                                                                strokeWidth = 3
-                                                                            }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}
-         strokeLinecap="round" strokeLinejoin="round" style={{...style, opacity}}>
-        <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-);
-
-export const ChevronRight: React.FC<IconProps & { strokeWidth?: number }> = ({
-                                                                                 color = '#fdb48d',
-                                                                                 size = 14,
-                                                                                 style,
-                                                                                 opacity,
-                                                                                 strokeWidth = 3
-                                                                             }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}
-         strokeLinecap="round" strokeLinejoin="round" style={{...style, opacity}}>
-        <polyline points="9 18 15 12 9 6"></polyline>
+        <polyline points="16 18 22 12 16 6"/>
+        <polyline points="8 6 2 12 8 18"/>
+        <line x1="14" y1="4" x2="10" y2="20"/>
     </svg>
 );

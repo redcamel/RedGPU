@@ -55,32 +55,47 @@ const RenderingSettingsGroup: React.FC = () => {
     };
 
     const aaOptions = [
-        {value: 'NONE', label: 'NONE'},
+        {value: 'NONE', label: 'None'},
         {value: 'useMSAA', label: 'MSAA'},
         {value: 'useFXAA', label: 'FXAA'},
         {value: 'useTAA', label: 'TAA'},
     ];
 
+    const formatToneMappingLabel = (key: string) => {
+        switch (key) {
+            case 'KHRONOS_PBR_NEUTRAL':
+                return 'Khronos PBR';
+            case 'ACES_FILMIC_HILL':
+                return 'ACES Hill';
+            case 'ACES_FILMIC_NARKOWICZ':
+                return 'ACES Narkowicz';
+            case 'LINEAR':
+                return 'Linear';
+            default:
+                return key.replace(/_/g, ' ');
+        }
+    };
+
     const tmOptions = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => ({
         value,
-        label: key.replace(/_/g, ' ')
+        label: formatToneMappingLabel(key)
     }));
 
     return (
         <>
             <SelectBox
-                label="TONE MAPPING"
+                label="Tone"
                 value={toneMapping}
                 options={tmOptions}
-                style={isNarrow ? {flex: 1.5, minWidth: 0} : {minWidth: '132px', maxWidth: '168px'}}
+                style={isNarrow ? {flex: 1.4, minWidth: 0} : undefined}
                 onChange={handleToneMappingChange}
             />
 
             <SelectBox
-                label="ANTIALIASING"
+                label="AA"
                 value={antialiasing}
                 options={aaOptions}
-                style={isNarrow ? {flex: 1, minWidth: '88px'} : {minWidth: '88px'}}
+                style={isNarrow ? {flex: 1, minWidth: 0} : undefined}
                 onChange={handleAntialiasingChange}
             />
         </>
