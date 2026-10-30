@@ -27,20 +27,16 @@ let s22 = textureLoad(sourceTexture, vec2<i32>(xs[2], ys[2]), 0);
 
 let minCenterCoC = min(min(s11.a, s21.a), min(s12.a, s22.a));
 let maxCenterCoC = max(max(s11.a, s21.a), max(s12.a, s22.a));
-let centerSpread = max(maxCenterCoC - minCenterCoC, 0.5);
-let cw11 = exp(-(s11.a - minCenterCoC) / centerSpread);
-let cw21 = exp(-(s21.a - minCenterCoC) / centerSpread);
-let cw12 = exp(-(s12.a - minCenterCoC) / centerSpread);
-let cw22 = exp(-(s22.a - minCenterCoC) / centerSpread);
-let refCoC = (s11.a * cw11 + s21.a * cw21 + s12.a * cw12 + s22.a * cw22) / (cw11 + cw21 + cw12 + cw22);
-let bilateralScale = max(abs(refCoC) * 0.35, 0.5);
+let fgDominance = smoothstep(-0.15, -0.55, minCenterCoC);
+let bgDominance = (1.0 - fgDominance) * smoothstep(0.15, 0.55, maxCenterCoC);
+let focusDominance = max(0.0, 1.0 - fgDominance - bgDominance);
 
 var sumColor = vec3<f32>(0.0);
 var sumCoC: f32 = 0.0;
 var sumWeight: f32 = 0.0;
 
-// [KO] 4x4 이산 B-Spline/Tent 커널([1, 3, 3, 1]) 샘플링 및 refCoC 기준 연속 양방향(Bilateral) 가중치로 임계값 지글거림 및 부호 상쇄 원천 차단
-// [EN] 4x4 discrete B-Spline/Tent kernel ([1, 3, 3, 1]) sampling with continuous refCoC bilateral weighting to eliminate threshold shimmering and sign cancellation
+// [KO] 4x4 이산 B-Spline/Tent 커널([1, 3, 3, 1]) 샘플링 및 연속 레이어 가중치 블렌딩으로 경계 플리커링 및 가짜 초점 상쇄 방지
+// [EN] 4x4 discrete B-Spline/Tent kernel ([1, 3, 3, 1]) sampling with continuous layer dominance blending to prevent boundary flickering and phantom focus cancellation
 for (var ky = 0; ky < 4; ky = ky + 1) {
     let wy = TENT_WEIGHTS[ky];
     let sy = ys[ky];
@@ -61,10 +57,12 @@ for (var ky = 0; ky < 4; ky = ky + 1) {
         }
 
         let spatialW = wx * wy;
-        let cocDiff = abs(s.a - refCoC) / bilateralScale;
-        let bilateralW = 1.0 / (1.0 + cocDiff * cocDiff);
+        let fgGate = smoothstep(-0.15, -0.75, s.a);
+        let bgGate = smoothstep(0.15, 0.75, s.a);
+        let focusGate = 1.0 - smoothstep(0.25, 1.0, abs(s.a));
+        let layerGate = fgGate * fgDominance + bgGate * bgDominance + focusGate * focusDominance;
 
-        let w = spatialW * bilateralW;
+        let w = spatialW * max(layerGate, 1e-4);
         sumColor += s.rgb * w;
         sumCoC += s.a * w;
         sumWeight += w;

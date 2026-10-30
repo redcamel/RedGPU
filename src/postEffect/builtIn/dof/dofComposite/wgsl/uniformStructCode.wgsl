@@ -30,7 +30,8 @@ fn samplePhysicalHalfCoCAtDepthCoord(
     return evaluatePhysicalHalfCoC(viewDepth, lensParams, maxHalfCoC);
 }
 
-fn computeBgUpsampleBilateralWeight(sampleFarCoC: f32, refBgHalfCoC: f32, bilateralScale: f32, tentWeight: f32) -> f32 {
-    let cocDiff = abs(sampleFarCoC - refBgHalfCoC) / bilateralScale;
-    return tentWeight / (1.0 + cocDiff * cocDiff);
+fn computeBgUpsampleBilateralWeight(sampleFarCoC: f32, centerSharpGate: f32, tentWeight: f32) -> f32 {
+    let sampleSharpGate = saturate(sampleFarCoC);
+    let focusBoundaryDiff = abs(sampleSharpGate - centerSharpGate);
+    return tentWeight / (0.1 + focusBoundaryDiff * 6.0);
 }

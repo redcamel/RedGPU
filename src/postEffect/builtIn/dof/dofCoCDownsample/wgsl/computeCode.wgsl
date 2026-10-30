@@ -55,14 +55,18 @@ if (coc11 < closestCoC) {
     closestDepthCoord = d11Coord;
 }
 
-// [KO] 광학적 전후 차폐(Front-to-Back Occlusion) 가중 평균: 카메라에 더 가까운 샘플일수록 지수적 우선순위를 부여하여 전/배경 부호 상쇄(가짜 합초) 원천 차단
-// [EN] Optical front-to-back occlusion weighted average: assign exponential priority to closer samples to prevent foreground/background sign cancellation (phantom in-focus)
-let cocSpread = max(maxSignedCoC - minSignedCoC, 0.5);
-let occW00 = exp(-(coc00 - minSignedCoC) / cocSpread);
-let occW10 = exp(-(coc10 - minSignedCoC) / cocSpread);
-let occW01 = exp(-(coc01 - minSignedCoC) / cocSpread);
-let occW11 = exp(-(coc11 - minSignedCoC) / cocSpread);
-var tileCoC = (coc00 * occW00 + coc10 * occW10 + coc01 * occW01 + coc11 * occW11) / (occW00 + occW10 + occW01 + occW11);
+// [KO] 전경(coc < -0.1)과 배경(coc > 0)이 공존하는 깊이 불연속 2x2 쿼드에서 양수 배경 CoC가 음수 전경 CoC를 상쇄하여 가짜 합초(CoC ≈ 0)를 만드는 현상을 원천 차단
+// [EN] Prevent positive background CoC from canceling negative foreground CoC into a phantom in-focus (CoC ≈ 0) on 2x2 depth-discontinuity quads
+let avgCoC = (coc00 + coc10 + coc01 + coc11) * 0.25;
+let fgMask00 = select(0.0, 1.0, coc00 < -0.1);
+let fgMask10 = select(0.0, 1.0, coc10 < -0.1);
+let fgMask01 = select(0.0, 1.0, coc01 < -0.1);
+let fgMask11 = select(0.0, 1.0, coc11 < -0.1);
+let fgCount = fgMask00 + fgMask10 + fgMask01 + fgMask11;
+let fgAvgCoC = select(minSignedCoC, (coc00 * fgMask00 + coc10 * fgMask10 + coc01 * fgMask01 + coc11 * fgMask11) / max(fgCount, 1.0), fgCount > 0.0);
+let fgPreserve = mix(fgAvgCoC, minSignedCoC, saturate(maxSignedCoC - minSignedCoC - 0.5));
+let fgDiscontinuity = smoothstep(-0.15, -0.75, minSignedCoC);
+var tileCoC = mix(avgCoC, fgPreserve, fgDiscontinuity);
 
 let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxColorCoord);
 let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxColorCoord);
@@ -91,6 +95,9 @@ if (uniforms.historyValid == 1u) {
 
     let minOuterCoC = min(minSignedCoC, min(min(cocL, cocR), min(cocU, cocD)));
     let maxOuterCoC = max(maxSignedCoC, max(max(cocL, cocR), max(cocU, cocD)));
+    let hasSignDiscontinuity = (minOuterCoC < -0.25) && (maxOuterCoC > 0.25);
+    let safeMinOuterCoC = select(minOuterCoC, max(minOuterCoC, 0.0), hasSignDiscontinuity && (tileCoC >= 0.0));
+    let safeMaxOuterCoC = select(maxOuterCoC, min(maxOuterCoC, 0.0), hasSignDiscontinuity && (tileCoC < 0.0));
 
     let velocity = textureLoad(gBufferMotionVector, closestDepthCoord, 0).xy;
     if (all(abs(velocity) <= vec2<f32>(DOF_MAX_VALID_MOTION_UV))) {
@@ -98,12 +105,14 @@ if (uniforms.historyValid == 1u) {
         let prevUV = centerUV - velocity;
         if (all(prevUV >= vec2<f32>(0.0)) && all(prevUV <= vec2<f32>(1.0))) {
             prevSample = textureSampleLevel(prevCoCTexture, basicSampler, prevUV, 0.0);
-            hasValidHistory = true;
-
-            let clampedPrevCoC = clamp(prevSample.a, minOuterCoC, maxOuterCoC);
-            let motionPixels = length(velocity * vec2<f32>(fullDims));
-            temporalCoCBlend = clamp(0.10 + motionPixels * 0.15, 0.10, 0.65);
-            tileCoC = mix(clampedPrevCoC, tileCoC, temporalCoCBlend);
+            let isSameLayerHistory = !hasSignDiscontinuity || (prevSample.a * tileCoC > 0.0 && abs(prevSample.a - tileCoC) <= max(abs(tileCoC) * 0.5, 1.0));
+            if (isSameLayerHistory) {
+                hasValidHistory = true;
+                let clampedPrevCoC = clamp(prevSample.a, safeMinOuterCoC, safeMaxOuterCoC);
+                let motionPixels = length(velocity * vec2<f32>(fullDims));
+                temporalCoCBlend = clamp(0.10 + motionPixels * 0.15, 0.10, 0.65);
+                tileCoC = mix(clampedPrevCoC, tileCoC, temporalCoCBlend);
+            }
         }
     }
 }

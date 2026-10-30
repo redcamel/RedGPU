@@ -53,16 +53,22 @@ if (isTAAActive) {
 
     let minCrossCoC = min(cocC, min(min(cocL, cocR), min(cocU, cocD)));
     let maxCrossCoC = max(cocC, max(max(cocL, cocR), max(cocU, cocD)));
+
+    // [KO] 전경(음수 CoC)과 배경(양수 CoC)이 맞닿는 실루엣 경계에서 양선형 보간(textureSampleLevel)이 음수와 양수를 상쇄하여 가짜 합초(exactHalfCoC ≈ 0)의 1픽셀 점선을 만드는 현상을 원천 차단
+    // [EN] Prevent bilinear interpolation (textureSampleLevel) from canceling negative foreground CoC and positive background CoC into a 1-pixel phantom in-focus (exactHalfCoC ≈ 0) contour on silhouettes
+    let hasSignDiscontinuity = (minCrossCoC < -0.25) && (maxCrossCoC > 0.25);
+    let safeMinCoC = select(minCrossCoC, max(minCrossCoC, 0.0), hasSignDiscontinuity && (cocC >= 0.0));
+    let safeMaxCoC = select(maxCrossCoC, min(maxCrossCoC, 0.0), hasSignDiscontinuity && (cocC < 0.0));
     let stabilizedHalfCoC = textureSampleLevel(cocTexture, basicSampler, uv, 0.0).a;
-    exactHalfCoC = clamp(stabilizedHalfCoC, minCrossCoC, maxCrossCoC);
+    exactHalfCoC = select(clamp(stabilizedHalfCoC, safeMinCoC, safeMaxCoC), cocC, hasSignDiscontinuity && (abs(stabilizedHalfCoC) < abs(cocC) * 0.5 || stabilizedHalfCoC * cocC <= 0.0));
 }
 let exactFullCoC = abs(exactHalfCoC) * halfToFullScale;
 
-// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 3.5px, 전경 및 배경 양방향)에서 양선형 보간 기반 8-Tap 직접 개더링 수행
-// [EN] 2. Unreal DOF_Recombine specification: bilinear-interpolated 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 3.5px, near and far)
+// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, 전경 및 배경 양방향)에서 양선형 보간 기반 8-Tap 직접 개더링 수행
+// [EN] 2. Unreal DOF_Recombine specification: bilinear-interpolated 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px, near and far)
 var baseFullResColor = sharpColor;
-if (exactFullCoC > 0.75 && exactFullCoC < 3.5) {
-    let slightRadius = exactFullCoC;
+if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
+    let slightRadius = clamp(exactFullCoC, 0.75, 3.5);
     var slightSumColor = sharpColor;
     var slightSumWeight: f32 = 1.0;
 
@@ -71,11 +77,8 @@ if (exactFullCoC > 0.75 && exactFullCoC < 3.5) {
         let tapUV = saturate(uv + tapOffset * invFullDims);
         let tapHalfCoC = textureSampleLevel(cocTexture, basicSampler, tapUV, 0.0).a;
         let tapFullCoC = abs(tapHalfCoC) * halfToFullScale;
-        // [KO] 전후방 단방향 차폐: 탭이 중심 픽셀보다 뒤에 있으면(tapHalfCoC > exactHalfCoC) 앞쪽 표면을 침범하지 못하도록 차단하고, 동일/전방 레이어만 도달 허용
-        // [EN] Front-to-back directional occlusion: block taps behind the center pixel (tapHalfCoC > exactHalfCoC) from bleeding over closer surfaces
-        let frontVisibility = smoothstep(exactHalfCoC + 0.5, exactHalfCoC - 0.1, tapHalfCoC);
-        let tapReach = saturate(tapFullCoC - slightRadius + 1.0);
-        let tapWeight = smoothstep(0.35, 1.15, tapFullCoC) * frontVisibility * tapReach;
+        let sameLayerWeight = select(0.25, 1.0, tapHalfCoC * exactHalfCoC >= 0.0);
+        let tapWeight = smoothstep(0.35, 1.15, tapFullCoC) * sameLayerWeight;
         if (tapWeight > 0.0) {
             let tapColor = textureSampleLevel(sourceTexture, basicSampler, tapUV, 0.0).rgb;
             slightSumColor += tapColor * tapWeight;
@@ -92,7 +95,7 @@ if (exactFullCoC > 0.75 && exactFullCoC < 3.5) {
 // [EN] 3. Conditional Background bokeh buffer 9-Tap CoC-Bilateral Tent upsampling and blending (0-Tap early skip in in-focus regions)
 let d = halfTexelSize.xyxy * vec4<f32>(1.0, 1.0, -1.0, 0.0);
 let isForegroundPixel = exactHalfCoC < -0.25;
-let farBokehBlend = select(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(1.25, 2.5, -exactHalfCoC), isForegroundPixel);
+let farBokehBlend = select(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(0.25, 0.75, -exactHalfCoC), isForegroundPixel);
 
 var compositedBgColor = baseFullResColor;
 if (farBokehBlend > 1e-3) {
@@ -106,19 +109,19 @@ if (farBokehBlend > 1e-3) {
     let b12 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.wy, 0.0);
     let b22 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xy, 0.0);
 
-    // [KO] 전경 픽셀(isForegroundPixel)에서는 홀필링으로 복원된 실제 후면 배경 CoC(b11.a)를 기준으로 삼고, 상대 CoC 편차(bilateralScale)로 중경-원경 경계 보존
-    // [EN] On foreground pixels, reference reconstructed background CoC (b11.a) and preserve mid-ground vs far-ground boundaries via relative CoC scale
+    // [KO] 전경 픽셀(isForegroundPixel)에서는 홀필링으로 복원된 실제 후면 배경 CoC(b11.a)를 기준으로 삼고, 합초 개구부 게이트(saturate)로 합초 경계만 보호하여 비초점 간 Z-버퍼 계단 복원 차단
+    // [EN] On foreground pixels, reference reconstructed background CoC (b11.a) and gate only the in-focus boundary (saturate) to prevent aliased Z-buffer steps between out-of-focus layers
     let effectiveBgHalfCoC = select(max(exactHalfCoC, 0.0), b11.a, isForegroundPixel);
-    let bilateralScale = max(effectiveBgHalfCoC * 0.35, 0.25);
-    let bw00 = computeBgUpsampleBilateralWeight(b00.a, effectiveBgHalfCoC, bilateralScale, 1.0);
-    let bw10 = computeBgUpsampleBilateralWeight(b10.a, effectiveBgHalfCoC, bilateralScale, 2.0);
-    let bw20 = computeBgUpsampleBilateralWeight(b20.a, effectiveBgHalfCoC, bilateralScale, 1.0);
-    let bw01 = computeBgUpsampleBilateralWeight(b01.a, effectiveBgHalfCoC, bilateralScale, 2.0);
-    let bw11 = computeBgUpsampleBilateralWeight(b11.a, effectiveBgHalfCoC, bilateralScale, 4.0);
-    let bw21 = computeBgUpsampleBilateralWeight(b21.a, effectiveBgHalfCoC, bilateralScale, 2.0);
-    let bw02 = computeBgUpsampleBilateralWeight(b02.a, effectiveBgHalfCoC, bilateralScale, 1.0);
-    let bw12 = computeBgUpsampleBilateralWeight(b12.a, effectiveBgHalfCoC, bilateralScale, 2.0);
-    let bw22 = computeBgUpsampleBilateralWeight(b22.a, effectiveBgHalfCoC, bilateralScale, 1.0);
+    let centerSharpGate = saturate(effectiveBgHalfCoC);
+    let bw00 = computeBgUpsampleBilateralWeight(b00.a, centerSharpGate, 1.0);
+    let bw10 = computeBgUpsampleBilateralWeight(b10.a, centerSharpGate, 2.0);
+    let bw20 = computeBgUpsampleBilateralWeight(b20.a, centerSharpGate, 1.0);
+    let bw01 = computeBgUpsampleBilateralWeight(b01.a, centerSharpGate, 2.0);
+    let bw11 = computeBgUpsampleBilateralWeight(b11.a, centerSharpGate, 4.0);
+    let bw21 = computeBgUpsampleBilateralWeight(b21.a, centerSharpGate, 2.0);
+    let bw02 = computeBgUpsampleBilateralWeight(b02.a, centerSharpGate, 1.0);
+    let bw12 = computeBgUpsampleBilateralWeight(b12.a, centerSharpGate, 2.0);
+    let bw22 = computeBgUpsampleBilateralWeight(b22.a, centerSharpGate, 1.0);
 
     let bgWeightSum = max(bw00 + bw10 + bw20 + bw01 + bw11 + bw21 + bw02 + bw12 + bw22, 1e-4);
     let upsampledBgColor = (
