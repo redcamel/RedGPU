@@ -51,9 +51,9 @@ const App = () => {
 
     const dynamicPanelStyle: React.CSSProperties = {
         ...panelStyle,
-        top: isNarrow ? '64px' : '70px',
-        right: isNarrow ? '10px' : '16px',
-        maxHeight: isNarrow ? 'calc(100dvh - 194px)' : 'calc(100dvh - 86px)',
+        top: isNarrow ? '74px' : '80px',
+        right: isNarrow ? '16px' : '20px',
+        maxHeight: isNarrow ? 'calc(100dvh - 212px)' : 'calc(100dvh - 100px)',
         transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 24px))',
         opacity: showSettingsPanel ? 1 : 0,
         pointerEvents: showSettingsPanel ? 'auto' : 'none',
@@ -90,20 +90,20 @@ const App = () => {
 // Styles
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    right: '16px',
-    top: '70px',
+    right: '20px',
+    top: '80px',
     display: 'flex',
     flexDirection: 'column',
     color: 'white',
     fontFamily: 'monospace',
     zIndex: 10002,
-    backgroundColor: 'rgba(17, 17, 18, 0.88)',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '12px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
-    padding: 0,
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '18px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+    padding: '8px',
     overflow: 'hidden',
 };
 
@@ -111,6 +111,7 @@ const contentStyle: React.CSSProperties = {
     fontSize: '12px',
     flex: 1,
     overflowY: 'auto',
+    borderRadius: '10px',
     display: 'flex',
     flexDirection: 'column',
     gap: '24px'

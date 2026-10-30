@@ -22,9 +22,9 @@ const Description = () => {
         <div
             style={{
                 ...containerStyle,
-                top: isNarrow ? '64px' : '70px',
-                left: isNarrow ? '10px' : '16px',
-                right: showSettingsPanel && !isNarrow ? '336px' : '16px'
+                top: isNarrow ? '74px' : '80px',
+                left: isNarrow ? '16px' : '20px',
+                right: showSettingsPanel && !isNarrow ? '340px' : (isNarrow ? '16px' : '20px')
             }}
         >
             <div style={pillWrapperStyle}>
@@ -46,9 +46,9 @@ const Description = () => {
 // Styles
 const containerStyle: React.CSSProperties = {
     position: 'fixed',
-    top: '70px',
-    left: '16px',
-    right: '16px',
+    top: '80px',
+    left: '20px',
+    right: '20px',
     backgroundColor: 'transparent',
     padding: 0,
     zIndex: 10002,

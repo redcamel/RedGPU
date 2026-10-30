@@ -117,17 +117,17 @@ const titleContainerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '44px',
-    padding: '4px',
+    height: '46px',
+    padding: '5px 6px',
     borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
     boxSizing: 'border-box'
 };
 
 const footerContainerStyle: React.CSSProperties = {
     position: 'fixed',
-    bottom: '16px',
-    left: '16px',
-    right: '16px',
+    bottom: '20px',
+    left: '20px',
+    right: '20px',
     height: '42px',
     zIndex: 10002,
     display: 'flex',
@@ -138,18 +138,18 @@ const footerContainerStyle: React.CSSProperties = {
 
 const narrowFooterContainerStyle: React.CSSProperties = {
     position: 'fixed',
-    bottom: '10px',
-    left: '10px',
-    right: '10px',
+    bottom: '16px',
+    left: '16px',
+    right: '16px',
     zIndex: 10002,
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: 'rgba(17, 17, 18, 0.88)',
+    backgroundColor: 'rgba(18, 18, 20, 0.84)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '20px',
-    boxShadow: '0 8px 28px rgba(0, 0, 0, 0.55)',
+    boxShadow: '0 8px 28px rgba(0, 0, 0, 0.5)',
     overflow: 'visible',
     pointerEvents: 'auto'
 };
@@ -157,7 +157,7 @@ const narrowFooterContainerStyle: React.CSSProperties = {
 const mobileSelectContainerStyle: React.CSSProperties = {
     display: 'flex',
     gap: '4px',
-    padding: '4px',
+    padding: '5px 6px',
     borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
     boxSizing: 'border-box'
 };
@@ -201,7 +201,7 @@ const narrowFooterBarStyle: React.CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '0 12px',
+    padding: '0 14px',
     fontSize: '12px',
     color: '#e8e8e8'
 };

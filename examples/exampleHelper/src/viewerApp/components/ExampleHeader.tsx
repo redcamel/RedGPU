@@ -50,14 +50,14 @@ const ExampleHeader = () => {
         <header
             style={{
                 ...containerStyle,
-                top: isNarrow ? '10px' : '16px',
-                left: isNarrow ? '10px' : '16px',
-                right: isNarrow ? '10px' : '16px',
+                top: isNarrow ? '16px' : '20px',
+                left: isNarrow ? '16px' : '20px',
+                right: isNarrow ? '16px' : '20px',
                 height: '46px'
             }}
         >
             <div style={navBarStyle}>
-                <div style={{...leftGroupStyle, gap: isNarrow ? '6px' : '8px'}}>
+                <div style={{...leftGroupStyle, gap: '8px'}}>
                     <div style={circleIslandStyle}>
                         <IconButton
                             icon={<HomeIcon color="#fff" size={18}/>}
@@ -126,9 +126,9 @@ const ExampleHeader = () => {
 // Styles
 const containerStyle: React.CSSProperties = {
     position: 'fixed',
-    top: '16px',
-    left: '16px',
-    right: '16px',
+    top: '20px',
+    left: '20px',
+    right: '20px',
     height: '46px',
     backgroundColor: 'transparent',
     zIndex: 10003,
@@ -185,7 +185,7 @@ const leftSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     height: '46px',
-    padding: '4px 6px',
+    padding: '4px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',
@@ -201,7 +201,7 @@ const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     height: '46px',
-    padding: '4px 6px',
+    padding: '4px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',
