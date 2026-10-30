@@ -5,93 +5,89 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="../../../assets/css/example.css" rel="stylesheet">
     <style>
-        .vf-reticle {
+        .af-viewfinder {
             position: fixed;
+            left: 50%;
             top: 50%;
-            width: 58px;
-            height: 58px;
+            width: 72px;
+            height: 72px;
             transform: translate(-50%, -50%);
             border-radius: 6px;
             pointer-events: none;
             z-index: 10;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .vf-reticle::before,
-        .vf-reticle::after {
+        .af-viewfinder::before,
+        .af-viewfinder::after {
             content: '';
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
+            transition: background-color 0.2s ease;
         }
 
-        .vf-reticle::before {
-            width: 12px;
+        .af-viewfinder::before {
+            width: 14px;
             height: 1.5px;
         }
 
-        .vf-reticle::after {
+        .af-viewfinder::after {
             width: 1.5px;
-            height: 12px;
+            height: 14px;
         }
 
-        .vf-reticle-mf {
-            left: 25%;
-            border: 1.5px dashed rgba(255, 140, 0, 0.85);
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.65);
+        .af-viewfinder.is-af {
+            border: 1.5px solid rgba(0, 225, 65, 0.9);
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 225, 65, 0.18);
         }
 
-        .vf-reticle-mf::before,
-        .vf-reticle-mf::after {
-            background: rgba(255, 140, 0, 0.9);
+        .af-viewfinder.is-af::before,
+        .af-viewfinder.is-af::after {
+            background: rgba(0, 225, 65, 0.95);
         }
 
-        .vf-reticle-af {
-            left: 75%;
-            border: 1.5px solid rgba(0, 220, 50, 0.9);
-            box-shadow: 0 0 14px rgba(0, 0, 0, 0.7), inset 0 0 8px rgba(0, 220, 50, 0.2);
+        .af-viewfinder.is-mf {
+            border: 1.5px dashed rgba(255, 145, 0, 0.9);
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
         }
 
-        .vf-reticle-af::before,
-        .vf-reticle-af::after {
-            background: rgba(0, 220, 50, 0.95);
+        .af-viewfinder.is-mf::before,
+        .af-viewfinder.is-mf::after {
+            background: rgba(255, 145, 0, 0.95);
         }
 
-        .vf-reticle-label {
+        .af-zone-dots {
             position: absolute;
-            top: calc(100% + 7px);
+            inset: 14px;
+            border: 1px dotted rgba(255, 255, 255, 0.28);
+            border-radius: 3px;
+        }
+
+        .af-viewfinder-label {
+            position: absolute;
+            top: calc(100% + 8px);
             left: 50%;
             transform: translateX(-50%);
-            padding: 2px 7px;
+            padding: 3px 9px;
             font-family: monospace;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             background: rgba(10, 12, 16, 0.88);
             border-radius: 4px;
             white-space: nowrap;
         }
 
-        .vf-reticle-mf .vf-reticle-label {
-            color: #ff8c00;
-            border: 1px solid rgba(255, 140, 0, 0.55);
+        .af-viewfinder.is-af .af-viewfinder-label {
+            color: #00e141;
+            border: 1px solid rgba(0, 225, 65, 0.55);
         }
 
-        .vf-reticle-af .vf-reticle-label {
-            color: #00dc32;
-            border: 1px solid rgba(0, 220, 50, 0.55);
-        }
-
-        @media (max-width: 768px) {
-            .vf-reticle-mf {
-                left: 50%;
-                top: 25%;
-            }
-
-            .vf-reticle-af {
-                left: 50%;
-                top: 75%;
-            }
+        .af-viewfinder.is-mf .af-viewfinder-label {
+            color: #ff9100;
+            border: 1px solid rgba(255, 145, 0, 0.55);
         }
     </style>
     <script src="index.js" type="module"></script>

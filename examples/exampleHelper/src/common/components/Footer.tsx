@@ -60,11 +60,11 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                         rel="noreferrer"
                         style={footerLeftLinkStyle}
                     >
-                        <span style={{color: '#b19898', fontSize: '12px'}}>
+                        <span style={{color: '#b19898', fontSize: '12px', lineHeight: '1'}}>
                             This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                         </span>
                         <span style={iconWrapperStyle}>
-                            <img src={githubIcon} width="18" height="18" alt="GitHub"/>
+                            <img src={githubIcon} width="18" height="18" style={{display: 'block'}} alt="GitHub"/>
                         </span>
                     </a>
                 </div>
@@ -72,7 +72,7 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
         );
     }
 
-    // [KO] 3. 데스크톱 3D 뷰어: 하단 좌측 저작자/GitHub 플로팅 캡슐 (우측 및 중앙 100% 개방)
+    // [KO] 3. 데스크톱 3D 뷰어: 하단 좌측 저작자/GitHub 투명 플로팅 텍스트 (우측 및 중앙 100% 개방)
     return (
         <div style={footerContainerStyle}>
             <a
@@ -81,17 +81,22 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                 rel="noreferrer"
                 style={{
                     ...leftCapsuleStyle,
-                    backgroundColor: isLinkHovered ? 'rgba(28, 28, 30, 0.9)' : 'rgba(18, 18, 20, 0.82)',
-                    borderColor: isLinkHovered ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.1)'
+                    opacity: isLinkHovered ? 1 : 0.85
                 }}
                 onMouseEnter={() => setIsLinkHovered(true)}
                 onMouseLeave={() => setIsLinkHovered(false)}
             >
-                <span style={{color: '#b19898', fontSize: '12.5px', letterSpacing: '0.02em'}}>
+                <span style={{
+                    color: '#b19898',
+                    fontSize: '12.5px',
+                    lineHeight: '1',
+                    letterSpacing: '0.02em',
+                    textShadow: '0 1px 4px rgba(0, 0, 0, 0.95), 0 0 12px rgba(0, 0, 0, 0.7)'
+                }}>
                     This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                 </span>
-                <span style={iconWrapperStyle}>
-                    <img src={githubIcon} width="18" height="18" alt="GitHub"/>
+                <span style={{...iconWrapperStyle, filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85))'}}>
+                    <img src={githubIcon} width="18" height="18" style={{display: 'block'}} alt="GitHub"/>
                 </span>
             </a>
         </div>
@@ -128,11 +133,11 @@ const footerContainerStyle: React.CSSProperties = {
     bottom: '20px',
     left: '20px',
     right: '20px',
-    height: '42px',
+    height: '24px',
     zIndex: 10002,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     pointerEvents: 'none'
 };
 
@@ -163,20 +168,17 @@ const mobileSelectContainerStyle: React.CSSProperties = {
 };
 
 const leftCapsuleStyle: React.CSSProperties = {
-    height: '42px',
-    padding: '0 18px',
-    backgroundColor: 'rgba(17, 17, 18, 0.84)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '9999px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
-    display: 'flex',
+    height: '22px',
+    padding: 0,
+    backgroundColor: 'transparent',
+    border: 'none',
+    display: 'inline-flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
+    lineHeight: '1',
     textDecoration: 'none',
     cursor: 'pointer',
-    transition: 'background-color 0.2s, border-color 0.2s',
+    transition: 'opacity 0.2s',
     boxSizing: 'border-box',
     pointerEvents: 'auto'
 };
@@ -201,7 +203,7 @@ const narrowFooterBarStyle: React.CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '0 14px',
+    padding: '0 18px',
     fontSize: '12px',
     color: '#e8e8e8'
 };
@@ -229,8 +231,9 @@ const narrowSourceButtonStyle: React.CSSProperties = {
 };
 
 const iconWrapperStyle: React.CSSProperties = {
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
+    transform: 'translateY(-1.5px)',
     opacity: 0.95,
     transition: 'opacity 0.2s'
 };

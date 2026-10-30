@@ -1,264 +1,197 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792990800000";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792990800000";
+import * as RedGPU from "../../../../dist/index.js?t=1793006500000";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1793006500000";
 
 /**
  * [KO] Depth of Field - Auto Focus (DOF 자동 초점) 예제
  * [EN] Depth of Field - Auto Focus (DOF Auto-Focus) example
  *
- * [KO] 화면 중앙(9-Point Zone) 깊이 버퍼를 GPU에서 실시간 측거하여 근경(3.6m) · 중경(9.0m) · 원경(16.5m) 피사체로 시선이 이동하거나 타겟 스테이지를 고정(Lock Stage)할 때 피사체 전면 표면에 정확히 초점을 맞추는 `dof.useAutoFocus` 기능을 시연합니다.
- * [EN] Demonstrates `dof.useAutoFocus`, which meters the center screen (9-Point Zone) depth buffer on the GPU in real time to accurately focus on the front surface of Near (3.6m), Mid (9.0m), and Far (16.5m) subjects during camera panning or stage locking.
+ * [KO] 화면 정중앙(9-Point Zone) 깊이 버퍼를 GPU에서 실시간 측거하여 시선 이동 및 카메라 줌·회전에 따라 뷰파인더 중앙 피사체에 자동으로 초점을 맞추는 `dof.useAutoFocus` 기능을 시연합니다.
+ * [EN] Demonstrates `dof.useAutoFocus`, which meters the center screen (9-Point Zone) depth buffer on the GPU in real time to automatically track focus on whatever subject is inside the center viewfinder reticle during camera panning, orbiting, and zooming.
  */
 
-const DEG_TO_RAD = Math.PI / 180;
-const CAMERA_DISTANCE = 9.0;
-const CAMERA_TILT_DEG = -2;
-const TAN_CAMERA_TILT = Math.tan(CAMERA_TILT_DEG * DEG_TO_RAD);
-
-// [KO] 각 스테이지의 목표 초점 거리(3.6m / 9.0m / 16.5m)에 해당하는 월드 전면 표면 Z 좌표(z = CAMERA_DISTANCE - focusDist) 및
-//      카메라 틸트(-2도) 광축이 피사체 정중앙(aimY)을 정확히 관통하도록 보정된 OrbitController 목표 centerY(aimY + zFront * tan(tilt))
-// [EN] World front-surface Z coordinates (z = CAMERA_DISTANCE - focusDist) for each stage's target focus distance (3.6m / 9.0m / 16.5m),
-//      and tilt-compensated OrbitController target centerY (aimY + zFront * tan(tilt)) so the optical axis passes dead-center through aimY
 const STAGE_TARGETS = [
     {
-        x: -1.65,
-        aimY: -0.12,
-        zFront: CAMERA_DISTANCE - 3.6,
-        targetY: -0.12 + (CAMERA_DISTANCE - 3.6) * TAN_CAMERA_TILT,
-        focusDist: 3.6,
-        label: 'AF-C : NEAR 3.6m'
+        x: -2.8,
+        y: -0.55,
+        z: 4.8,
+        distance: 5.0,
+        pan: -14,
+        tilt: -4,
+        label: 'AF-C [9-POINT ZONE] : NEAR LEFT'
+    },
+    {
+        x: 2.6,
+        y: -0.48,
+        z: 2.2,
+        distance: 6.8,
+        pan: 14,
+        tilt: -5,
+        label: 'AF-C [9-POINT ZONE] : NEAR-MID RIGHT'
     },
     {
         x: 0.0,
-        aimY: 0.05,
-        zFront: CAMERA_DISTANCE - 9.0,
-        targetY: 0.05 + (CAMERA_DISTANCE - 9.0) * TAN_CAMERA_TILT,
-        focusDist: 9.0,
-        label: 'AF-C : MID 9.0m'
+        y: -0.45,
+        z: -0.5,
+        distance: 8.5,
+        pan: 0,
+        tilt: -6,
+        label: 'AF-C [9-POINT ZONE] : CENTER CHARACTER'
     },
     {
-        x: 1.65,
-        aimY: -0.15,
-        zFront: CAMERA_DISTANCE - 16.5,
-        targetY: -0.15 + (CAMERA_DISTANCE - 16.5) * TAN_CAMERA_TILT,
-        focusDist: 16.5,
-        label: 'AF-C : FAR 16.5m'
+        x: -3.2,
+        y: -0.32,
+        z: -4.5,
+        distance: 11.0,
+        pan: -12,
+        tilt: -5,
+        label: 'AF-C [9-POINT ZONE] : MID-FAR LEFT'
+    },
+    {
+        x: 3.4,
+        y: -0.18,
+        z: -9.0,
+        distance: 14.5,
+        pan: 10,
+        tilt: -4,
+        label: 'AF-C [9-POINT ZONE] : FAR RIGHT'
     }
 ];
 
-const DIRECTOR_SEQUENCE = [
-    STAGE_TARGETS[0],
-    STAGE_TARGETS[1],
-    STAGE_TARGETS[2],
-    STAGE_TARGETS[1]
-];
-
-/**
- * [KO] 로드된 glTF 모델의 로컬 TRS 및 지오메트리 볼륨으로부터 카메라 방향(+Z) 전면 표면 돌출 반경(maxZ)과 하단(minY) 경계를 산출합니다.
- * [EN] Computes the camera-facing (+Z) front-surface protrusion radius (maxZ) and bottom (minY) bound from a loaded glTF model's local TRS and geometry volumes.
- */
-const measureModelFrontAndBottom = (rootMesh) => {
-    let minY = Infinity;
-    let maxZ = -Infinity;
-    const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-
-    const traverse = (node, parentM, isRoot) => {
-        let m = parentM;
-        if (!isRoot) {
-            const rx = (node.rotationX || 0) * DEG_TO_RAD;
-            const ry = (node.rotationY || 0) * DEG_TO_RAD;
-            const rz = (node.rotationZ || 0) * DEG_TO_RAD;
-            const cx = Math.cos(rx), sx = Math.sin(rx);
-            const cy = Math.cos(ry), sy = Math.sin(ry);
-            const cz = Math.cos(rz), sz = Math.sin(rz);
-            const sxS = node.scaleX ?? 1, syS = node.scaleY ?? 1, szS = node.scaleZ ?? 1;
-
-            const l0 = (cy * cz) * sxS, l1 = (cx * sz + sx * sy * cz) * sxS, l2 = (sx * sz - cx * sy * cz) * sxS;
-            const l4 = (-cy * sz) * syS, l5 = (cx * cz - sx * sy * sz) * syS, l6 = (sx * cz + cx * sy * sz) * syS;
-            const l8 = sy * szS, l9 = (-sx * cy) * szS, l10 = (cx * cy) * szS;
-            const l12 = node.x || 0, l13 = node.y || 0, l14 = node.z || 0;
-
-            m = [
-                l0 * parentM[0] + l1 * parentM[4] + l2 * parentM[8],
-                l0 * parentM[1] + l1 * parentM[5] + l2 * parentM[9],
-                l0 * parentM[2] + l1 * parentM[6] + l2 * parentM[10],
-                0,
-                l4 * parentM[0] + l5 * parentM[4] + l6 * parentM[8],
-                l4 * parentM[1] + l5 * parentM[5] + l6 * parentM[9],
-                l4 * parentM[2] + l5 * parentM[6] + l6 * parentM[10],
-                0,
-                l8 * parentM[0] + l9 * parentM[4] + l10 * parentM[8],
-                l8 * parentM[1] + l9 * parentM[5] + l10 * parentM[9],
-                l8 * parentM[2] + l9 * parentM[6] + l10 * parentM[10],
-                0,
-                l12 * parentM[0] + l13 * parentM[4] + l14 * parentM[8] + parentM[12],
-                l12 * parentM[1] + l13 * parentM[5] + l14 * parentM[9] + parentM[13],
-                l12 * parentM[2] + l13 * parentM[6] + l14 * parentM[10] + parentM[14],
-                1
-            ];
-        }
-
-        const vol = node.geometry?.volume;
-        if (vol) {
-            for (let i = 0; i < 8; i++) {
-                const vx = (i & 1) ? vol.maxX : vol.minX;
-                const vy = (i & 2) ? vol.maxY : vol.minY;
-                const vz = (i & 4) ? vol.maxZ : vol.minZ;
-                const wy = m[1] * vx + m[5] * vy + m[9] * vz + m[13];
-                const wz = m[2] * vx + m[6] * vy + m[10] * vz + m[14];
-                if (wy < minY) minY = wy;
-                if (wz > maxZ) maxZ = wz;
-            }
-        }
-
-        const children = node.children;
-        if (children) {
-            for (let i = 0; i < children.length; i++) {
-                traverse(children[i], m, false);
-            }
-        }
-    };
-
-    traverse(rootMesh, identity, true);
-    return {
-        minY: Number.isFinite(minY) ? minY : -1.0,
-        maxZ: Number.isFinite(maxZ) ? maxZ : 1.0
-    };
-};
-
-const container = document.createElement('div');
-document.body.appendChild(container);
-
 const canvas = document.createElement('canvas');
-container.appendChild(canvas);
+document.body.appendChild(canvas);
 
-const mfReticle = document.createElement('div');
-mfReticle.className = 'vf-reticle vf-reticle-mf';
-const mfReticleLabel = document.createElement('div');
-mfReticleLabel.className = 'vf-reticle-label';
-mfReticleLabel.textContent = 'MF FIXED : 9.0m';
-mfReticle.appendChild(mfReticleLabel);
-container.appendChild(mfReticle);
-
-const afReticle = document.createElement('div');
-afReticle.className = 'vf-reticle vf-reticle-af';
-const afReticleLabel = document.createElement('div');
-afReticleLabel.className = 'vf-reticle-label';
-afReticleLabel.textContent = STAGE_TARGETS[0].label;
-afReticle.appendChild(afReticleLabel);
-container.appendChild(afReticle);
+const viewfinder = document.createElement('div');
+viewfinder.className = 'af-viewfinder is-af';
+const zoneDots = document.createElement('div');
+zoneDots.className = 'af-zone-dots';
+viewfinder.appendChild(zoneDots);
+const viewfinderLabel = document.createElement('div');
+viewfinderLabel.className = 'af-viewfinder-label';
+viewfinderLabel.textContent = STAGE_TARGETS[0].label;
+viewfinder.appendChild(viewfinderLabel);
+document.body.appendChild(viewfinder);
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        const initialStage = STAGE_TARGETS[0];
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = CAMERA_DISTANCE;
+        controller.centerX = initialStage.x;
+        controller.centerY = initialStage.y;
+        controller.centerZ = initialStage.z;
+        controller.distance = initialStage.distance;
         controller.speedDistance = 0.4;
-        controller.tilt = CAMERA_TILT_DEG;
-        controller.centerX = STAGE_TARGETS[0].x;
-        controller.centerY = STAGE_TARGETS[0].targetY;
+        controller.distanceInterpolation = 0.0001;
+        controller.rotationInterpolation = 0.0001;
+        controller.pan = initialStage.pan;
+        controller.tilt = initialStage.tilt;
 
         const scene = new RedGPU.Display.Scene();
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
-        // [KO] 좌측 비교 뷰: 수동 고정 초점 (useAutoFocus = false, focusDistance = 9.0m 고정)
-        //         카메라가 근경(3.6m)이나 원경(16.5m)을 조준할 때 초점이 맞지 않아 흐려지는 대조군 역할
-        // [EN] Left comparison view: Manual Fixed Focus (useAutoFocus = false, locked at focusDistance = 9.0m)
-        //         Serves as a baseline that goes out of focus when the camera aims at Near (3.6m) or Far (16.5m)
-        const viewManual = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        viewManual.ibl = ibl;
-        viewManual.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        viewManual.postEffectManager.useDOF = true;
-        const manualEffect = viewManual.postEffectManager.dof;
-        manualEffect.setCinematic();
-        manualEffect.aperture = 1.2;
-        manualEffect.focusDistance = 9.0;
-        manualEffect.useAutoFocus = false;
-        redGPUContext.addView(viewManual);
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        // [KO] 우측 메인 뷰: 화면 중앙 9-Point Zone 연속 자동 초점 활성화 (useAutoFocus = true)
-        //         뷰파인더 중앙 레티클이 가리키는 피사체 전면 표면 깊이(3.6m / 9.0m / 16.5m)로 렌즈 초점을 실시간 자동 추적
-        // [EN] Right main view: Screen-center 9-Point Zone continuous auto-focus enabled (useAutoFocus = true)
-        //         Automatically racks focus in real time to the front-surface depth (3.6m / 9.0m / 16.5m) under the center reticle
-        const viewAuto = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        viewAuto.ibl = ibl;
-        viewAuto.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        viewAuto.postEffectManager.useDOF = true;
-        const autoEffect = viewAuto.postEffectManager.dof;
-        autoEffect.setCinematic();
-        autoEffect.aperture = 1.2;
-        autoEffect.focusDistance = 9.0;
-        autoEffect.useAutoFocus = true;
-        redGPUContext.addView(viewAuto);
+        // [KO] 물리 보케 DOF 및 GPU 기반 화면 중앙 9-Point Zone 연속 자동 초점(useAutoFocus = true) 활성화
+        //      - useAutoFocus = true: 매 프레임 화면 정중앙(UV 0.5, 0.5 주변 9개 측거점)의 깊이 버퍼를 GPU에서 실시간 계측하여
+        //        카메라 회전·줌·이동 시 별도의 focusDistance 수동 계산 없이 중앙 레티클 내 피사체에 자동으로 초점을 추종합니다.
+        // [EN] Enable Physical Bokeh DOF and GPU-driven screen-center 9-Point Zone continuous auto-focus (useAutoFocus = true)
+        //      - useAutoFocus = true: Meters the depth buffer at 9 points around screen center (UV 0.5, 0.5) on the GPU every frame,
+        //        automatically tracking focus on the subject inside the center reticle during camera rotation, zoom, or panning.
+        view.postEffectManager.useDOF = true;
+        const effect = view.postEffectManager.dof;
+        effect.setCinematic();
+        effect.aperture = 1.4;
+        effect.useAutoFocus = true;
+        redGPUContext.addView(view);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const sceneState = setupAutoFocusTheaterScene(redGPUContext, scene);
+        const sceneState = setupAutoFocusScene(redGPUContext, scene);
 
-        const updateLayout = () => {
-            const isNarrow = window.innerWidth <= 768;
-            if (isNarrow) {
-                viewManual.setSize('100%', '50%');
-                viewManual.setPosition(0, 0);
-                viewAuto.setSize('100%', '50%');
-                viewAuto.setPosition(0, '50%');
+        const updateReticleUI = () => {
+            if (!view.postEffectManager.useDOF) {
+                viewfinder.style.display = 'none';
+                return;
+            }
+            viewfinder.style.display = 'block';
+            if (effect.useAutoFocus) {
+                viewfinder.className = 'af-viewfinder is-af';
+                viewfinderLabel.textContent = sceneState.activeLabel;
             } else {
-                viewManual.setSize('50%', '100%');
-                viewManual.setPosition(0, 0);
-                viewAuto.setSize('50%', '100%');
-                viewAuto.setPosition('50%', 0);
+                viewfinder.className = 'af-viewfinder is-mf';
+                viewfinderLabel.textContent = 'MF [MANUAL FOCUS]';
             }
         };
-        updateLayout();
-        window.addEventListener('resize', updateLayout);
+
+        const aimAtStage = (stage, applyCameraPose) => {
+            sceneState.targetX = stage.x;
+            sceneState.targetY = stage.y;
+            sceneState.targetZ = stage.z;
+            sceneState.transitionActive = true;
+            sceneState.activeLabel = stage.label;
+            if (applyCameraPose) {
+                controller.distance = stage.distance;
+                const angleDiff = ((stage.pan - controller.pan + 540) % 360) - 180;
+                controller.pan = controller.pan + angleDiff;
+                controller.tilt = stage.tilt;
+            }
+            updateReticleUI();
+        };
+
+        // [KO] 사용자가 마우스 드래그나 휠로 카메라를 직접 조작하면 자동 순회(Auto Tour) 및 프리셋 이동 보간을 멈추고 자유 조작 모드로 즉시 전환
+        // [EN] Immediately stop Auto Tour and preset transition interpolation and switch to free control when the user drags or scrolls
+        const onUserInteract = () => {
+            sceneState.transitionActive = false;
+            if (sceneState.mode === 'tour') {
+                sceneState.mode = 'manualAim';
+                sceneState.activeLabel = 'AF-C [9-POINT ZONE] : FREE AIM';
+                updateReticleUI();
+            }
+        };
+        canvas.addEventListener('pointerdown', onUserInteract);
+        canvas.addEventListener('wheel', onUserInteract, {passive: true});
 
         let lastStageIndex = -1;
+        let prevTime = -1;
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            if (sceneState.mode === 'director') {
-                const stageIndex = Math.floor(time / 3200) % 4;
-                const activeStage = DIRECTOR_SEQUENCE[stageIndex];
-                sceneState.targetX = activeStage.x;
-                sceneState.targetY = activeStage.targetY;
+            const rawDt = prevTime < 0 ? (1 / 60) : (time - prevTime) / 1000;
+            prevTime = time;
+            const dt = Math.min(Math.max(rawDt, 1 / 240), 0.05);
 
+            if (sceneState.mode === 'tour') {
+                const stageIndex = Math.floor(time / 2400) % STAGE_TARGETS.length;
                 if (stageIndex !== lastStageIndex) {
                     lastStageIndex = stageIndex;
-                    if (autoEffect.useAutoFocus) {
-                        afReticleLabel.textContent = activeStage.label;
-                    }
+                    aimAtStage(STAGE_TARGETS[stageIndex], true);
                 }
             } else {
                 lastStageIndex = -1;
             }
 
-            if (sceneState.nearHelmet) {
-                sceneState.nearHelmet.rotationY = 22 + Math.sin(time * 0.0015) * 14;
-            }
-
-            const dx = sceneState.targetX - controller.centerX;
-            const dy = sceneState.targetY - controller.centerY;
-            controller.centerX = Math.abs(dx) > 0.0005 ? controller.centerX + dx * 0.06 : sceneState.targetX;
-            controller.centerY = Math.abs(dy) > 0.0005 ? controller.centerY + dy * 0.06 : sceneState.targetY;
-
-            if (sceneState.farHelmet) {
-                sceneState.farHelmet.rotationY = -18 + Math.cos(time * 0.0012) * 12;
+            if (sceneState.transitionActive) {
+                const alpha = 1.0 - Math.pow(0.0001, dt);
+                const dx = sceneState.targetX - controller.centerX;
+                const dy = sceneState.targetY - controller.centerY;
+                const dz = sceneState.targetZ - controller.centerZ;
+                if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 0.002) {
+                    controller.centerX += dx * alpha;
+                    controller.centerY += dy * alpha;
+                    controller.centerZ += dz * alpha;
+                } else {
+                    controller.centerX = sceneState.targetX;
+                    controller.centerY = sceneState.targetY;
+                    controller.centerZ = sceneState.targetZ;
+                    sceneState.transitionActive = false;
+                }
             }
         });
 
-        renderTestPane(
-            redGPUContext,
-            viewManual,
-            viewAuto,
-            manualEffect,
-            autoEffect,
-            controller,
-            sceneState,
-            mfReticle,
-            afReticle,
-            afReticleLabel,
-            container
-        );
+        renderTestPane(redGPUContext, view, effect, sceneState, aimAtStage, updateReticleUI);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -268,14 +201,14 @@ RedGPU.init(
     }
 );
 
-const setupAutoFocusTheaterScene = (redGPUContext, scene) => {
+const setupAutoFocusScene = (redGPUContext, scene) => {
     const state = {
-        mode: 'director',
+        mode: 'tour',
         targetX: STAGE_TARGETS[0].x,
-        targetY: STAGE_TARGETS[0].targetY,
-        nearHelmet: null,
-        nearPedestal: null,
-        farHelmet: null
+        targetY: STAGE_TARGETS[0].y,
+        targetZ: STAGE_TARGETS[0].z,
+        transitionActive: false,
+        activeLabel: STAGE_TARGETS[0].label
     };
 
     const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
@@ -284,217 +217,148 @@ const setupAutoFocusTheaterScene = (redGPUContext, scene) => {
     groundMaterial.shininess = 96;
     const ground = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Ground(redGPUContext, 120, 120),
+        new RedGPU.Primitive.Ground(redGPUContext, 160, 160),
         groundMaterial
     );
     ground.y = -1.6;
     scene.addChild(ground);
 
+    // [KO] 1. 광폭 바닥 심도 가이드 라인: 와이드스크린 단일 뷰에 맞춰 좌우 폭(11m)을 넓게 확장하여 초점면 이동을 표시
+    // [EN] 1. Wide floor depth guide bars: Expanded to 11m width for the widescreen single view to clearly show focal plane movement
+    const majorBarGeo = new RedGPU.Primitive.Box(redGPUContext, 11.0, 0.035, 0.11);
+    const minorBarGeo = new RedGPU.Primitive.Box(redGPUContext, 7.2, 0.02, 0.06);
+    const minorBarMat = new RedGPU.Material.PhongMaterial(redGPUContext);
+    minorBarMat.color.setColorByHEX('#4a5260');
+    const zoneColors = ['#e62e00', '#f07800', '#e6b800', '#00a844', '#0055e6'];
+
+    for (let step = 0; step <= 44; step++) {
+        const z = 7.0 - step * 0.5;
+        if (step % 2 === 0) {
+            const majorMat = new RedGPU.Material.PhongMaterial(redGPUContext);
+            majorMat.color.setColorByHEX(zoneColors[Math.floor(step / 8) % zoneColors.length]);
+            const bar = new RedGPU.Display.Mesh(redGPUContext, majorBarGeo, majorMat);
+            bar.setPosition(0, -1.58, z);
+            scene.addChild(bar);
+        } else {
+            const minorBar = new RedGPU.Display.Mesh(redGPUContext, minorBarGeo, minorBarMat);
+            minorBar.setPosition(0, -1.585, z);
+            scene.addChild(minorBar);
+        }
+    }
+
+    // [KO] 2. 좌우 파노라마(X: -3.2 ~ +3.4) 및 전·중·원경 깊이(Z: +4.8 ~ -9.0)로 넓게 펼친 피사체 배치
+    // [EN] 2. Wide panoramic subject placement spread across horizontal (X: -3.2 ~ +3.4) and depth (Z: +4.8 ~ -9.0) stages
     const helmetUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
+    const helmetPlacements = [
+        {x: STAGE_TARGETS[0].x, y: -0.58, z: STAGE_TARGETS[0].z, scale: 0.78, rotY: 26},
+        {x: STAGE_TARGETS[1].x, y: -0.48, z: STAGE_TARGETS[1].z, scale: 0.82, rotY: -24},
+        {x: STAGE_TARGETS[3].x, y: -0.32, z: STAGE_TARGETS[3].z, scale: 0.88, rotY: 20},
+        {x: STAGE_TARGETS[4].x, y: -0.18, z: STAGE_TARGETS[4].z, scale: 0.95, rotY: -18}
+    ];
 
-    // [KO] 1. Stage 1 - 근경(Near 3.6m, 좌측 레인 x = -1.65): 모델의 전면 바이저 표면이 정확히 3.6m(z = 5.4)에 위치하도록 모델 반경만큼 보정
-    // [EN] 1. Stage 1 - Near (3.6m, left lane x = -1.65): offset by model front radius so the front visor surface sits at exact 3.6m (z = 5.4)
-    const nearPedestalMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-    nearPedestalMat.color.setColorByHEX('#22262e');
-    const nearPedestal = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Cylinder(redGPUContext, 0.36, 0.42, 0.9, 24, 1),
-        nearPedestalMat
-    );
-    nearPedestal.setPosition(STAGE_TARGETS[0].x, -1.15, STAGE_TARGETS[0].zFront - 0.72);
-    scene.addChild(nearPedestal);
-    state.nearPedestal = nearPedestal;
+    helmetPlacements.forEach((item, idx) => {
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            helmetUrl,
+            (result) => {
+                const mesh = scene.addChild(result.resultMesh);
+                mesh.setPosition(item.x, item.y, item.z);
+                mesh.setScale(item.scale);
+                mesh.rotationY = item.rotY;
+            },
+            idx === 0 ? (e) => RedGPUExampleHelper.loadingProgressInfoHandler(e) : undefined
+        );
+    });
 
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        helmetUrl,
-        (result) => {
-            const nearMesh = scene.addChild(result.resultMesh);
-            const nearScale = 0.75;
-            const bounds = measureModelFrontAndBottom(nearMesh);
-            const frontRadius = bounds.maxZ * nearScale * 0.9;
-            const nearZ = STAGE_TARGETS[0].zFront - frontRadius;
-
-            nearMesh.setScale(nearScale);
-            nearMesh.setPosition(STAGE_TARGETS[0].x, STAGE_TARGETS[0].aimY, nearZ);
-            nearMesh.rotationY = 22;
-            nearPedestal.setPosition(STAGE_TARGETS[0].x, -1.15, nearZ);
-            state.nearHelmet = nearMesh;
-        },
-        (e) => RedGPUExampleHelper.loadingProgressInfoHandler(e)
-    );
-
-    // [KO] 2. Stage 2 - 중경(Mid 9.0m, 중앙 레인 x = 0.0): 캐릭터와 서브 헬멧의 전면 표면이 정확히 9.0m(z = 0.0)에 위치하도록 모델 두께만큼 보정
-    // [EN] 2. Stage 2 - Midground (9.0m, center lane x = 0.0): offset by model thickness so the front surfaces sit at exact 9.0m (z = 0.0)
     const cesiumManUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf';
     new RedGPU.GLTFLoader(redGPUContext, cesiumManUrl, (result) => {
         const heroMesh = scene.addChild(result.resultMesh);
-        const heroScale = 1.85;
-        const bounds = measureModelFrontAndBottom(heroMesh);
-        const frontOffset = bounds.maxZ * heroScale * 0.85;
-
-        heroMesh.setScale(heroScale);
-        heroMesh.setPosition(STAGE_TARGETS[1].x, -1.6, STAGE_TARGETS[1].zFront - frontOffset);
+        heroMesh.setPosition(STAGE_TARGETS[2].x, -1.6, STAGE_TARGETS[2].z);
+        heroMesh.setScale(1.85);
     });
 
-    new RedGPU.GLTFLoader(redGPUContext, helmetUrl, (result) => {
-        const midSubMesh = scene.addChild(result.resultMesh);
-        const midSubScale = 0.78;
-        const bounds = measureModelFrontAndBottom(midSubMesh);
-        const frontRadius = bounds.maxZ * midSubScale * 0.9;
+    // [KO] 3. 광폭 후방 보케 아치(Wide Bokeh Archway): 반경 5.6m ~ 9.6m의 넓은 아치로 화면 전체에 다각형 보케 형성
+    // [EN] 3. Wide Rear Bokeh Archway: 5.6m ~ 9.6m radius arches spanning the full widescreen field
+    const bokehOrbGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.24, 16, 16);
+    const bokehPalette = ['#e65c00', '#d91400', '#e6a800', '#0055e6', '#00a838'];
 
-        midSubMesh.setScale(midSubScale);
-        midSubMesh.setPosition(-0.82, -0.35, STAGE_TARGETS[1].zFront - frontRadius);
-        midSubMesh.rotationY = 16;
-    });
+    for (let archIdx = 0; archIdx < 4; archIdx++) {
+        const archZ = -6.5 - archIdx * 5.2;
+        const archRadius = 5.6 + archIdx * 1.35;
+        const orbCount = 15;
 
-    // [KO] 3. Stage 3 - 원경(Far 16.5m, 우측 레인 x = 1.65): 원경 헬멧 전면 표면이 정확히 16.5m(z = -7.5)에 위치하도록 모델 반경만큼 보정
-    // [EN] 3. Stage 3 - Far (16.5m, right lane x = 1.65): offset by model front radius so the far helmet's front surface sits at exact 16.5m (z = -7.5)
-    const farMonumentMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-    farMonumentMat.color.setColorByHEX('#1e222a');
-    farMonumentMat.specularStrength = 0.8;
-    const farMonument = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 1.75, 2.7, 0.45),
-        farMonumentMat
-    );
-    farMonument.setPosition(STAGE_TARGETS[2].x, -0.25, -9.45);
-    scene.addChild(farMonument);
+        for (let j = 0; j < orbCount; j++) {
+            const t = j / (orbCount - 1);
+            const theta = Math.PI * (0.06 + t * 0.88);
+            const posX = Math.cos(theta) * archRadius;
+            const posY = -1.2 + Math.sin(theta) * (archRadius * 0.62);
 
-    const farTrimMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-    farTrimMat.color.setColorByHEX('#e67300');
-    const farTrim = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 1.85, 0.12, 0.52),
-        farTrimMat
-    );
-    farTrim.setPosition(STAGE_TARGETS[2].x, 1.12, -9.45);
-    scene.addChild(farTrim);
+            const mat = new RedGPU.Material.PhongMaterial(redGPUContext);
+            mat.color.setColorByHEX(bokehPalette[(archIdx * 3 + j) % bokehPalette.length]);
+            mat.specularStrength = 0.9;
+            mat.shininess = 128;
 
-    new RedGPU.GLTFLoader(redGPUContext, helmetUrl, (result) => {
-        const farMesh = scene.addChild(result.resultMesh);
-        const farScale = 0.92;
-        const bounds = measureModelFrontAndBottom(farMesh);
-        const frontRadius = bounds.maxZ * farScale * 0.9;
-        const farZ = STAGE_TARGETS[2].zFront - frontRadius;
-
-        farMesh.setScale(farScale);
-        farMesh.setPosition(STAGE_TARGETS[2].x, STAGE_TARGETS[2].aimY, farZ);
-        farMesh.rotationY = -18;
-        farMonument.setPosition(STAGE_TARGETS[2].x, -0.25, farZ - frontRadius - 0.35);
-        farTrim.setPosition(STAGE_TARGETS[2].x, 1.12, farZ - frontRadius - 0.35);
-        state.farHelmet = farMesh;
-    });
-
-    // [KO] 4. 후방 다각형 보케 구체 월: 근경/중경 합초 시 배경에서 다각형 보케를 형성하는 컬러 구체 배치
-    // [EN] 4. Rear polygonal bokeh sphere wall: Colored spheres that form polygonal bokeh discs when focused at Near or Mid stages
-    const bokehLightGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.22, 16, 16);
-    const bokehColors = ['#e65c00', '#d91400', '#e6a800', '#0055e6', '#00a838'];
-
-    for (let i = 0; i < 38; i++) {
-        const mat = new RedGPU.Material.PhongMaterial(redGPUContext);
-        const hex = bokehColors[i % bokehColors.length];
-        mat.color.setColorByHEX(hex);
-        mat.specularStrength = 0.9;
-        mat.shininess = 128;
-
-        const lightOrb = new RedGPU.Display.Mesh(redGPUContext, bokehLightGeometry, mat);
-        const angle = i * 2.39996;
-        const radiusX = 1.5 + (i % 7) * 1.3;
-        const posX = Math.cos(angle) * radiusX;
-        const posY = -0.6 + ((i * 37) % 100) / 100 * 5.6;
-        const posZ = -10.2 - (i / 38) * 20.0;
-        const orbScale = 0.65 + (i % 4) * 0.28;
-
-        lightOrb.setPosition(posX, posY, posZ);
-        lightOrb.setScale(orbScale);
-        scene.addChild(lightOrb);
+            const orb = new RedGPU.Display.Mesh(redGPUContext, bokehOrbGeo, mat);
+            orb.setPosition(posX, posY, archZ);
+            orb.setScale(0.7 + (archIdx % 3) * 0.25);
+            scene.addChild(orb);
+        }
     }
 
     return state;
 };
 
-const renderTestPane = (
-    redGPUContext,
-    viewManual,
-    viewAuto,
-    manualEffect,
-    autoEffect,
-    controller,
-    sceneState,
-    mfReticle,
-    afReticle,
-    afReticleLabel,
-    container
-) => {
+const renderTestPane = (redGPUContext, targetView, effect, sceneState, aimAtStage, updateReticleUI) => {
     new RedGPUExampleHelper(redGPUContext, {
-        compareLabel: {
-            title: 'Auto Focus (AF-C 9-Point Zone)',
-            normalTitle: 'Manual Focus (Fixed 9.0m)',
-            targetContainer: container
-        },
         gui: (pane) => {
-            const folder = pane.addFolder({title: 'Auto Focus DOF', expanded: true});
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            folder.addBinding(viewAuto.postEffectManager, 'useDOF').on('change', (v) => {
-                viewManual.postEffectManager.useDOF = v.value;
+            folder.addBinding(targetView.postEffectManager, 'useDOF').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
-                directorFolder.disabled = !v.value;
-                mfReticle.style.display = v.value ? 'block' : 'none';
-                afReticle.style.display = v.value ? 'block' : 'none';
+                focusDistanceControl.disabled = !v.value || effect.useAutoFocus;
+                targetFolder.disabled = !v.value;
+                updateReticleUI();
             });
 
-            const useAutoFocusControl = folder.addBinding(autoEffect, 'useAutoFocus').on('change', (v) => {
-                afReticleLabel.textContent = v.value ? 'AF-C : ACTIVE' : 'MF : PAUSED';
+            const useAutoFocusControl = folder.addBinding(effect, 'useAutoFocus').on('change', (v) => {
+                focusDistanceControl.disabled = !targetView.postEffectManager.useDOF || v.value;
+                updateReticleUI();
             });
 
-            const syncLensProperty = (prop, min, max, step) => {
-                return folder.addBinding(autoEffect, prop, {min, max, step}).on('change', (v) => {
-                    manualEffect[prop] = v.value;
-                });
-            };
+            const focusDistanceControl = folder.addBinding(effect, 'focusDistance', {
+                min: 2.0,
+                max: 30.0,
+                step: 0.1,
+                disabled: effect.useAutoFocus
+            });
 
             const controls = [
                 useAutoFocusControl,
-                syncLensProperty('focalLength', 12, 200, 1),
-                syncLensProperty('aperture', 0.7, 22.0, 0.1),
-                syncLensProperty('bladeCount', 0, 9, 1),
-                syncLensProperty('bokehBrightness', 0, 5.0, 0.1)
+                folder.addBinding(effect, 'focalLength', {min: 12, max: 200, step: 1}),
+                folder.addBinding(effect, 'aperture', {min: 0.7, max: 22.0, step: 0.1}),
+                folder.addBinding(effect, 'bladeCount', {min: 0, max: 9, step: 1}),
+                folder.addBinding(effect, 'bokehBrightness', {min: 0, max: 5.0, step: 0.1})
             ];
 
-            const directorFolder = pane.addFolder({title: 'AF-C Camera Director & Targets', expanded: true});
+            const targetFolder = pane.addFolder({title: 'Viewfinder Aim Target', expanded: true});
 
-            directorFolder.addButton({title: 'Auto-Director (3-Depth Tour: 3.6m / 9.0m / 16.5m)'}).on('click', () => {
-                sceneState.mode = 'director';
-                controller.distance = CAMERA_DISTANCE;
-                controller.pan = 0;
-                controller.tilt = CAMERA_TILT_DEG;
+            targetFolder.addButton({title: 'Auto Focus Tour (Cycle 5 Stages)'}).on('click', () => {
+                sceneState.mode = 'tour';
+                aimAtStage(STAGE_TARGETS[0], true);
             });
 
-            const lockTargetStage = (stage) => {
-                sceneState.mode = 'manualAim';
-                sceneState.targetX = stage.x;
-                sceneState.targetY = stage.targetY;
-                controller.distance = CAMERA_DISTANCE;
-                controller.pan = 0;
-                controller.tilt = CAMERA_TILT_DEG;
-                autoEffect.focusDistance = stage.focusDist;
-                if (autoEffect.useAutoFocus) {
-                    afReticleLabel.textContent = stage.label;
-                }
+            const addTargetButton = (title, stage) => {
+                targetFolder.addButton({title}).on('click', () => {
+                    sceneState.mode = 'manualAim';
+                    aimAtStage(stage, true);
+                });
             };
 
-            directorFolder.addButton({title: 'Lock Stage 1 : Near Subject (3.6m)'}).on('click', () => {
-                lockTargetStage(STAGE_TARGETS[0]);
-            });
-
-            directorFolder.addButton({title: 'Lock Stage 2 : Mid Subject (9.0m)'}).on('click', () => {
-                lockTargetStage(STAGE_TARGETS[1]);
-            });
-
-            directorFolder.addButton({title: 'Lock Stage 3 : Far Subject (16.5m)'}).on('click', () => {
-                lockTargetStage(STAGE_TARGETS[2]);
-            });
+            addTargetButton('Aim : Near Left', STAGE_TARGETS[0]);
+            addTargetButton('Aim : Near-Mid Right', STAGE_TARGETS[1]);
+            addTargetButton('Aim : Center Character', STAGE_TARGETS[2]);
+            addTargetButton('Aim : Mid-Far Left', STAGE_TARGETS[3]);
+            addTargetButton('Aim : Far Right', STAGE_TARGETS[4]);
         }
     });
 };

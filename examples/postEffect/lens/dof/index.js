@@ -1,13 +1,23 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792990800000";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792990800000";
+import * as RedGPU from "../../../../dist/index.js?t=1793006500000";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1793006500000";
 
 /**
  * [KO] Depth of Field (DOF) 예제
  * [EN] Depth of Field (DOF) example
  *
- * [KO] 35mm 풀프레임 Thin-Lens 착란원(CoC)과 전/배경 분리 다각형 조리개 보케 기반의 수동 피사계 심도(Manual DOF), 바닥 광학 심도 눈금자(Optical Depth Ruler), 및 렌즈 프리셋을 시연합니다.
- * [EN] Demonstrates manual Depth of Field (DOF), an optical depth ruler corridor, and lens presets based on 35mm full-frame Thin-Lens CoC and foreground/background separated polygonal aperture bokeh.
+ * [KO] 35mm 풀프레임 Thin-Lens 착란원(CoC)과 전·배경 분리 다각형 조리개 보케 기반의 피사계 심도(DOF) 포스트 이펙트 및 카메라 렌즈 프리셋을 시연합니다.
+ * [EN] Demonstrates the Depth of Field (DOF) post effect and camera lens presets based on 35mm full-frame Thin-Lens CoC and foreground/background separated polygonal aperture bokeh.
  */
+
+const PRESET_CAMERA_TARGETS = {
+    setGameDefault: {x: 0.0, y: -0.45, z: 0.35, distance: 10.0, pan: 0, tilt: -10},
+    setCinematic: {x: 0.0, y: -0.42, z: 0.35, distance: 10.0, pan: -9, tilt: -2},
+    setPortrait: {x: 1.15, y: -0.52, z: 3.0, distance: 7.5, pan: 14, tilt: -3},
+    setLandscape: {x: 0.0, y: -0.50, z: -3.5, distance: 13.5, pan: -16, tilt: -18},
+    setMacro: {x: -1.15, y: -0.65, z: 6.3, distance: 4.2, pan: -12, tilt: 1},
+    setSports: {x: -1.45, y: -0.22, z: -7.45, distance: 18.0, pan: 6, tilt: -4},
+    setNightMode: {x: -1.25, y: -0.45, z: 1.5, distance: 9.0, pan: -11, tilt: 3}
+};
 
 const container = document.createElement('div');
 document.body.appendChild(container);
@@ -18,10 +28,26 @@ container.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        const defaultTarget = PRESET_CAMERA_TARGETS.setGameDefault;
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 9.0;
+        controller.centerX = defaultTarget.x;
+        controller.centerY = defaultTarget.y;
+        controller.centerZ = defaultTarget.z;
+        controller.distance = defaultTarget.distance;
         controller.speedDistance = 0.4;
-        controller.tilt = -9;
+        controller.distanceInterpolation = 0.01;
+        controller.rotationInterpolation = 0.01;
+        controller.pan = defaultTarget.pan;
+        controller.tilt = defaultTarget.tilt;
+
+        const cameraTransition = {
+            x: defaultTarget.x,
+            y: defaultTarget.y,
+            z: defaultTarget.z,
+            targetFocusDistance: 10.0,
+            active: false,
+            onUpdate: null
+        };
 
         const scene = new RedGPU.Display.Scene();
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
@@ -31,21 +57,39 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] 물리 보케 DOF 포스트 이펙트 활성화 및 시네마틱 기본 렌즈 설정
-        // [EN] Enable Physical Bokeh DOF post effect and configure default cinematic lens
+        // [KO] 물리 보케 DOF(피사계 심도) 활성화 및 렌즈 파라미터 제어용 인스턴스 참조 획득
+        //      - focusDistance: 초점이 맺히는 피사체 거리 (단위: m, 기본값: 10.0)
+        //      - focalLength: 렌즈 초점 거리 (단위: mm, 망원일수록 배경 압축 및 착란원 확대, 기본값: 65.0)
+        //      - aperture: 조리개 F-값 (낮을수록 심도가 얕아지고 보케 확대, 기본값: 2.0)
+        //      - bladeCount: 조리개 날 개수 (0~2: 원형 보케, 3~9: 정다각형 보케, 기본값: 6)
+        //      - bokehBrightness: 고휘도 하이라이트 보케 디스크 강조 강도 (기본값: 1.5)
+        // [EN] Enable Physical Bokeh DOF and obtain the effect instance to control lens parameters
+        //      - focusDistance: In-focus subject distance (in meters, default: 10.0)
+        //      - focalLength: Lens focal length (in mm; longer telephoto increases bokeh size, default: 65.0)
+        //      - aperture: Aperture F-number (lower values yield shallower depth of field, default: 2.0)
+        //      - bladeCount: Aperture blade count (0~2: circular bokeh, 3~9: polygonal bokeh, default: 6)
+        //      - bokehBrightness: High-luminance highlight bokeh disc boost intensity (default: 1.5)
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         viewEffect.postEffectManager.useDOF = true;
         const effect = viewEffect.postEffectManager.dof;
-        effect.setCinematic();
-        controller.distance = effect.focusDistance;
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
         setupOpticalBenchScene(redGPUContext, scene);
+
+        const cancelTransition = () => {
+            if (cameraTransition.active) {
+                effect.focusDistance = cameraTransition.targetFocusDistance;
+                cameraTransition.active = false;
+                cameraTransition.onUpdate?.();
+            }
+        };
+        canvas.addEventListener('pointerdown', cancelTransition);
+        canvas.addEventListener('wheel', cancelTransition, {passive: true});
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -64,11 +108,38 @@ RedGPU.init(
         updateLayout();
         window.addEventListener('resize', updateLayout);
 
+        let prevTime = -1;
+
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
+            const rawDt = prevTime < 0 ? (1 / 60) : (time - prevTime) / 1000;
+            prevTime = time;
+            const dt = Math.min(Math.max(rawDt, 1 / 240), 0.05);
+
+            if (cameraTransition.active) {
+                const alpha = 1.0 - Math.pow(0.0001, dt);
+                const dx = cameraTransition.x - controller.centerX;
+                const dy = cameraTransition.y - controller.centerY;
+                const dz = cameraTransition.z - controller.centerZ;
+                const df = cameraTransition.targetFocusDistance - effect.focusDistance;
+                if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) + Math.abs(df) > 0.002) {
+                    controller.centerX += dx * alpha;
+                    controller.centerY += dy * alpha;
+                    controller.centerZ += dz * alpha;
+                    effect.focusDistance += df * alpha;
+                    cameraTransition.onUpdate?.();
+                } else {
+                    controller.centerX = cameraTransition.x;
+                    controller.centerY = cameraTransition.y;
+                    controller.centerZ = cameraTransition.z;
+                    effect.focusDistance = cameraTransition.targetFocusDistance;
+                    cameraTransition.active = false;
+                    cameraTransition.onUpdate?.();
+                }
+            }
         });
 
-        renderTestPane(redGPUContext, viewEffect, effect, controller, container);
+        renderTestPane(redGPUContext, viewEffect, effect, controller, cameraTransition, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -91,51 +162,26 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
     ground.y = -1.6;
     scene.addChild(ground);
 
-    // [KO] 1. 광학 심도 눈금자(Optical Depth Ruler): 카메라 거리 3.0m ~ 22.0m 구간에 0.5m 간격으로 바닥 눈금 슬래브를 배치하여,
-    //         focusDistance와 aperture(조리개) 변화에 따른 합초 구간(In-Focus Band)의 위치와 심도 두께를 바닥에서 즉시 판독 가능하게 구성
-    // [EN] 1. Optical Depth Ruler: Places floor scale bars every 0.5m from 3.0m to 22.0m camera depth so the exact position
-    //         and thickness of the in-focus band can be visually read across focusDistance and aperture changes
-    const majorBarGeo = new RedGPU.Primitive.Box(redGPUContext, 3.6, 0.035, 0.1);
-    const minorBarGeo = new RedGPU.Primitive.Box(redGPUContext, 2.1, 0.02, 0.055);
-    const sidePostGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.06, 0.06, 1.05, 16, 1);
-    const sideCapGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.13, 16, 16);
-
+    // [KO] 1. 광학 심도 눈금자(Optical Depth Ruler): 카메라 거리 3.0m ~ 25.0m 구간에 0.5m 간격으로 눈금 슬래브를 배치하여
+    //         focusDistance 및 aperture 변화에 따른 합초 구간(In-Focus Band)과 전·배경 착란원 전이를 바닥에서 직관적으로 확인
+    // [EN] 1. Optical Depth Ruler: Places floor scale bars every 0.5m from 3.0m to 25.0m camera depth to visually inspect
+    //         the in-focus band and foreground/background CoC transition as focusDistance and aperture change
+    const majorBarGeo = new RedGPU.Primitive.Box(redGPUContext, 3.8, 0.035, 0.1);
+    const minorBarGeo = new RedGPU.Primitive.Box(redGPUContext, 2.2, 0.02, 0.055);
     const minorBarMat = new RedGPU.Material.PhongMaterial(redGPUContext);
     minorBarMat.color.setColorByHEX('#4a5260');
-
-    const postBaseMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-    postBaseMat.color.setColorByHEX('#22262e');
-
     const zoneColors = ['#e62e00', '#f07800', '#e6b800', '#00a844', '#0055e6'];
 
-    for (let step = 0; step <= 38; step++) {
+    for (let step = 0; step <= 44; step++) {
         const depthFromCam = 3.0 + step * 0.5;
-        const z = 9.0 - depthFromCam;
-        const isMajor = step % 2 === 0;
-
-        if (isMajor) {
+        const z = 10.0 - depthFromCam;
+        if (step % 2 === 0) {
             const colorIdx = Math.floor(step / 8) % zoneColors.length;
-            const hex = zoneColors[colorIdx];
-
             const majorMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-            majorMat.color.setColorByHEX(hex);
-
+            majorMat.color.setColorByHEX(zoneColors[colorIdx]);
             const bar = new RedGPU.Display.Mesh(redGPUContext, majorBarGeo, majorMat);
             bar.setPosition(0, -1.58, z);
             scene.addChild(bar);
-
-            const capMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-            capMat.color.setColorByHEX(hex);
-
-            [-2.4, 2.4].forEach((xSide) => {
-                const post = new RedGPU.Display.Mesh(redGPUContext, sidePostGeo, postBaseMat);
-                post.setPosition(xSide, -1.07, z);
-                scene.addChild(post);
-
-                const cap = new RedGPU.Display.Mesh(redGPUContext, sideCapGeo, capMat);
-                cap.setPosition(xSide, -0.45, z);
-                scene.addChild(cap);
-            });
         } else {
             const minorBar = new RedGPU.Display.Mesh(redGPUContext, minorBarGeo, minorBarMat);
             minorBar.setPosition(0, -1.585, z);
@@ -143,16 +189,15 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
         }
     }
 
-    // [KO] 2. 근경(3.5m) -> 근중경(5.8m) -> 중심(9.0m) -> 원중경(12.5m) -> 원경(16.2m, 20.0m) 6단계 깊이의 PBR 헬멧 및 캐릭터 배치
-    // [EN] 2. 6-stage depth placement of PBR helmets and character at Near (3.5m), Near-Mid (5.8m), Center (9.0m), Mid-Far (12.5m), and Far (16.2m, 20.0m)
+    // [KO] 2. 렌즈 프리셋별 목표 초점 거리(Macro 4.2m / Portrait 7.5m / NightMode 9.0m / Default·Cinematic 10.0m / Sports 18.0m)에 맞춘 피사체 배치
+    // [EN] 2. Subject placement calibrated to each lens preset's target focusDistance (Macro 4.2m / Portrait 7.5m / NightMode 9.0m / Default·Cinematic 10.0m / Sports 18.0m)
     const helmetUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
     const helmetStages = [
-        {x: -0.9, y: -0.68, z: 5.5, scale: 0.72, rotY: 28},
-        {x: 0.92, y: -0.58, z: 3.2, scale: 0.76, rotY: -25},
-        {x: -0.55, y: -0.48, z: 0.0, scale: 0.80, rotY: 18},
-        {x: 1.15, y: -0.38, z: -3.5, scale: 0.84, rotY: -20},
-        {x: -1.35, y: -0.28, z: -7.2, scale: 0.88, rotY: 18},
-        {x: 1.55, y: -0.18, z: -11.0, scale: 0.92, rotY: -15}
+        {x: -1.15, y: -0.65, z: 5.8, scale: 0.74, rotY: 26},   // 4.2m (Macro)
+        {x: 1.15, y: -0.52, z: 2.5, scale: 0.78, rotY: -24},   // 7.5m (Portrait)
+        {x: -1.25, y: -0.45, z: 1.0, scale: 0.82, rotY: 18},   // 9.0m (Night Mode)
+        {x: 1.30, y: -0.35, z: -3.5, scale: 0.86, rotY: -20},  // 13.5m (Mid-Far)
+        {x: -1.45, y: -0.22, z: -8.0, scale: 0.92, rotY: 16}   // 18.0m (Sports)
     ];
 
     helmetStages.forEach((stage, idx) => {
@@ -172,17 +217,17 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
     const cesiumManUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf';
     new RedGPU.GLTFLoader(redGPUContext, cesiumManUrl, (result) => {
         const heroMesh = scene.addChild(result.resultMesh);
-        heroMesh.setPosition(0.68, -1.6, 0.0);
+        heroMesh.setPosition(0.0, -1.6, 0.0); // 10.0m (Game Default / Cinematic)
         heroMesh.setScale(1.85);
     });
 
-    // [KO] 3. 다중 깊이 아치형 보케 게이트(Bokeh Archway Gates): 조리개 날 개수(bladeCount)와 구경(aperture)에 따른 다각형 보케 형태를 입체적으로 시각화
-    // [EN] 3. Multi-depth Bokeh Archway Gates: Visualizes polygonal bokeh shapes driven by bladeCount and aperture across multiple background depths
-    const bokehOrbGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.21, 16, 16);
+    // [KO] 3. 후방 다중 깊이 보케 아치(Bokeh Archway): bladeCount(원형/정다각형)와 bokehBrightness에 따른 하이라이트 보케 디스크 시각화
+    // [EN] 3. Multi-depth Bokeh Archway: Visualizes circular/polygonal highlight bokeh discs driven by bladeCount and bokehBrightness
+    const bokehOrbGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.22, 16, 16);
     const bokehPalette = ['#e65c00', '#d91400', '#e6a800', '#0055e6', '#00a838'];
 
     for (let archIdx = 0; archIdx < 4; archIdx++) {
-        const archZ = -5.5 - archIdx * 5.2;
+        const archZ = -5.5 - archIdx * 5.0;
         const archRadius = 3.2 + archIdx * 0.85;
         const orbCount = 11;
 
@@ -193,8 +238,7 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
             const posY = -1.2 + Math.sin(theta) * (archRadius * 0.82);
 
             const mat = new RedGPU.Material.PhongMaterial(redGPUContext);
-            const hex = bokehPalette[(archIdx * 3 + j) % bokehPalette.length];
-            mat.color.setColorByHEX(hex);
+            mat.color.setColorByHEX(bokehPalette[(archIdx * 3 + j) % bokehPalette.length]);
             mat.specularStrength = 0.9;
             mat.shininess = 128;
 
@@ -206,10 +250,10 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
     }
 };
 
-const renderTestPane = (redGPUContext, targetView, effect, controller, container) => {
+const renderTestPane = (redGPUContext, targetView, effect, controller, cameraTransition, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'Manual DOF (Optical Bench)',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
@@ -221,30 +265,61 @@ const renderTestPane = (redGPUContext, targetView, effect, controller, container
                 presetFolder.disabled = !v.value;
             });
 
+            let isRefreshingUI = false;
+            const focusDistanceControl = folder.addBinding(effect, 'focusDistance', {min: 2.0, max: 30.0, step: 0.1});
+            focusDistanceControl.on('change', (ev) => {
+                if (!isRefreshingUI) {
+                    cameraTransition.targetFocusDistance = ev.value;
+                    cameraTransition.active = false;
+                }
+            });
+
             const controls = [
-                folder.addBinding(effect, 'focusDistance', {min: 2.0, max: 30.0, step: 0.1}),
+                focusDistanceControl,
                 folder.addBinding(effect, 'focalLength', {min: 12, max: 200, step: 1}),
                 folder.addBinding(effect, 'aperture', {min: 0.7, max: 22.0, step: 0.1}),
                 folder.addBinding(effect, 'bladeCount', {min: 0, max: 9, step: 1}),
                 folder.addBinding(effect, 'bokehBrightness', {min: 0, max: 5.0, step: 0.1})
             ];
 
-            const presetFolder = folder.addFolder({title: 'Lens Presets', expanded: true});
+            cameraTransition.onUpdate = () => {
+                isRefreshingUI = true;
+                focusDistanceControl.refresh();
+                isRefreshingUI = false;
+            };
+
+            const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
             const addPresetButton = (title, method) => {
                 presetFolder.addButton({title}).on('click', () => {
+                    const prevFocusDist = effect.focusDistance;
                     effect[method]();
-                    controller.distance = effect.focusDistance;
+                    const targetFocusDist = effect.focusDistance;
+                    const camTarget = PRESET_CAMERA_TARGETS[method];
+                    if (camTarget) {
+                        effect.focusDistance = prevFocusDist;
+                        cameraTransition.targetFocusDistance = targetFocusDist;
+                        cameraTransition.x = camTarget.x;
+                        cameraTransition.y = camTarget.y;
+                        cameraTransition.z = camTarget.z;
+                        cameraTransition.active = true;
+                        controller.distance = camTarget.distance;
+                        const angleDiff = ((camTarget.pan - controller.pan + 540) % 360) - 180;
+                        controller.pan = controller.pan + angleDiff;
+                        controller.tilt = camTarget.tilt;
+                    }
+                    isRefreshingUI = true;
                     pane.refresh();
+                    isRefreshingUI = false;
                 });
             };
 
-            addPresetButton('Game Default (65mm f/2.0)', 'setGameDefault');
-            addPresetButton('Cinematic (85mm f/1.4)', 'setCinematic');
-            addPresetButton('Portrait (85mm f/1.4)', 'setPortrait');
-            addPresetButton('Landscape (24mm f/8.0)', 'setLandscape');
-            addPresetButton('Macro (105mm f/2.8)', 'setMacro');
-            addPresetButton('Sports (135mm f/2.8)', 'setSports');
-            addPresetButton('Night Mode (75mm f/1.2 Hex)', 'setNightMode');
+            addPresetButton('Game Default (65mm f/2.0, 10m)', 'setGameDefault');
+            addPresetButton('Cinematic (85mm f/1.4, 10m)', 'setCinematic');
+            addPresetButton('Portrait (85mm f/1.4, 7.5m)', 'setPortrait');
+            addPresetButton('Landscape (24mm f/8.0, 25m)', 'setLandscape');
+            addPresetButton('Macro (105mm f/2.0, 4.2m)', 'setMacro');
+            addPresetButton('Sports (135mm f/2.8, 18m)', 'setSports');
+            addPresetButton('Night Mode (75mm f/1.2, 9m)', 'setNightMode');
         }
     });
 };

@@ -53,7 +53,7 @@ const App = () => {
         ...panelStyle,
         top: isNarrow ? '74px' : '80px',
         right: isNarrow ? '16px' : '20px',
-        maxHeight: isNarrow ? 'calc(100dvh - 212px)' : 'calc(100dvh - 100px)',
+        maxHeight: isNarrow ? 'calc(100dvh - 212px)' : 'calc(100dvh - 132px)',
         transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 24px))',
         opacity: showSettingsPanel ? 1 : 0,
         pointerEvents: showSettingsPanel ? 'auto' : 'none',
