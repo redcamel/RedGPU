@@ -182,7 +182,7 @@ class OrbitController extends AController {
     }
 
     set distanceInterpolation(value: number) {
-        validateNumberRange(value, 0.01, 1);
+        validateNumberRange(value, 0.0001, 1);
         this.#distanceInterpolation = value;
     }
 
@@ -250,7 +250,7 @@ class OrbitController extends AController {
     }
 
     set rotationInterpolation(value: number) {
-        validateNumberRange(value, 0.01, 1);
+        validateNumberRange(value, 0.0001, 1);
         this.#rotationInterpolation = value;
     }
 
@@ -341,31 +341,35 @@ class OrbitController extends AController {
         if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
         if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
         const {camera} = this;
-
-        const panDelta = this.#pan - this.#currentPan;
-
-        if (Math.abs(panDelta) > ROTATION_THRESHOLD) {
-            this.#currentPan += panDelta * (1 - Math.pow(this.#rotationInterpolation, deltaTime));
-        } else {
-            this.#currentPan = this.#pan;
-        }
-
-        const tiltDelta = this.#tilt - this.#currentTilt;
-        if (Math.abs(tiltDelta) > ROTATION_THRESHOLD) {
-            this.#currentTilt += tiltDelta * (1 - Math.pow(this.#rotationInterpolation, deltaTime));
-        } else {
-            this.#currentTilt = this.#tilt;
-        }
-
         if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
         if (this.#distance < this.#minDistance) this.#distance = this.#minDistance;
         if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
 
-        const distanceDelta = this.#distance - this.#currentDistance;
-        if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
-            this.#currentDistance += distanceDelta * (1 - Math.pow(this.#distanceInterpolation, deltaTime));
-        } else {
+        if (deltaTime === 0) {
+            this.#currentPan = this.#pan;
+            this.#currentTilt = this.#tilt;
             this.#currentDistance = this.#distance;
+        } else {
+            const panDelta = this.#pan - this.#currentPan;
+            if (Math.abs(panDelta) > ROTATION_THRESHOLD) {
+                this.#currentPan += panDelta * (1 - Math.pow(this.#rotationInterpolation, deltaTime));
+            } else {
+                this.#currentPan = this.#pan;
+            }
+
+            const tiltDelta = this.#tilt - this.#currentTilt;
+            if (Math.abs(tiltDelta) > ROTATION_THRESHOLD) {
+                this.#currentTilt += tiltDelta * (1 - Math.pow(this.#rotationInterpolation, deltaTime));
+            } else {
+                this.#currentTilt = this.#tilt;
+            }
+
+            const distanceDelta = this.#distance - this.#currentDistance;
+            if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
+                this.#currentDistance += distanceDelta * (1 - Math.pow(this.#distanceInterpolation, deltaTime));
+            } else {
+                this.#currentDistance = this.#distance;
+            }
         }
 
         if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
