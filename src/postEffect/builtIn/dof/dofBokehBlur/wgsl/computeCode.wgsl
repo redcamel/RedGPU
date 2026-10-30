@@ -86,6 +86,7 @@ let nearGatherRadius = min(max(-dilatedMinNearCoC, centerNearRadius), maxHalfRad
 // [EN] Background pass (Pass 3A): search continuous hole-filling radius driven by centerNearRadius and nearDominance on foreground pixels, and gather full tile max far bokeh radius gated by in-focus aperture (saturate(centerFarRadius - 0.25)) on non-foreground pixels
 let bgApertureGate = saturate(centerFarRadius - 0.25);
 let nearDominance = saturate(centerNearRadius / max(nearGatherRadius, 0.5));
+let occludedMidFgWeight = (1.0 - smoothstep(0.35, 0.75, nearDominance)) * smoothstep(0.15, 0.65, centerNearRadius);
 let holeFillGatherRadius = min(max(centerNearRadius * 1.25, dilatedMaxFarCoC * nearDominance), maxHalfRadius);
 let farGatherRadius = min(select(max(centerFarRadius, dilatedMaxFarCoC * bgApertureGate), holeFillGatherRadius, isCenterForeground), maxHalfRadius);
 let gatherRadius = select(farGatherRadius, nearGatherRadius, isForegroundPass);
@@ -133,12 +134,13 @@ var fgRadiusWeightSum: f32 = 0.0;
 var totalKernelWeight: f32 = 1.0;
 
 if (!isForegroundPass) {
-    // [KO] 배경 패스에서 중심 픽셀이 비전경일 때만 중심 샘플을 누적하고, 전경 픽셀(isCenterForeground)에서는 전경 자체 색상을 완전히 배제하여 배경 버퍼 오염 차단
-    // [EN] In the background pass, accumulate center sample only when non-foreground; exclude center foreground color completely on foreground pixels to prevent background buffer contamination
-    if (!isCenterForeground) {
+    // [KO] 배경 패스에서 중심 픽셀이 비전경일 때는 중심 샘플을 온전히 누적하고, 더 가까운 전경 보케에 덮인 중경 픽셀(occludedMidFgWeight > 0)에서는 중경 자체 색상을 연속 보존하여 실루엣 경계 단차 차단
+    // [EN] In the background pass, accumulate full center sample when non-foreground, and continuously preserve mid-foreground self color when occluded by a closer foreground bokeh (occludedMidFgWeight > 0)
+    let bgSelfWeight = select(1.0, occludedMidFgWeight, isCenterForeground);
+    if (bgSelfWeight > 0.0) {
         let centerExcessLuma = max(getLuminance(centerFilteredColor) - 0.25, 0.0);
         let centerHighlight = centerExcessLuma / (1.0 + centerExcessLuma * 0.25);
-        let centerW = 1.0 + centerHighlight * halfBokehBrightness;
+        let centerW = (1.0 + centerHighlight * halfBokehBrightness) * bgSelfWeight;
         accumColor += centerFilteredColor * centerW;
         accumWeight += centerW;
         accumFarCoC += centerFarRadius * centerW;
@@ -208,20 +210,21 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
 
             if (!isForegroundPass) {
                 if (isCenterForeground) {
-                    // [KO] 전경 픽셀 뒤편의 비차폐 배경 복원(Disocclusion Hole-Filling): 상대 CoC 깊이 차이(cocDepthDelta)와 링 간격/배경 반경 스케일(effectiveHoleScale) 기반의 연속 거리 감쇠 가중치로 다중 전경 칼자국 및 원본 이중 상 원천 차단
-                    // [EN] Background reconstruction behind foreground pixels (Disocclusion Hole-Filling): continuous distance-decay weighting driven by relative CoC depth delta (cocDepthDelta) and ringSpacing/background radius scale (effectiveHoleScale)
-                    fallbackBgColor += sampleColor * kernelTapWeight;
-                    fallbackBgWeight += kernelTapWeight;
-
+                    // [KO] 전경 픽셀 뒤편의 비차폐 배경 복원(Disocclusion Hole-Filling): 상대 CoC 깊이 차이(cocDepthDelta)와 링 간격(ringSpacing) 기반의 연속 거리 감쇠 가중치로 다중 전경 칼자국 및 원본 이중 상 원천 차단
+                    // [EN] Background reconstruction behind foreground pixels (Disocclusion Hole-Filling): continuous distance-decay weighting driven by relative CoC depth delta (cocDepthDelta) and ringSpacing
                     let minTapCoC = min(discreteMip0.a, sampleCoC);
                     let cocDepthDelta = minTapCoC - centerCoC;
+                    let fallbackValid = smoothstep(-ringSpacing, 0.0, cocDepthDelta) * kernelTapWeight;
+                    fallbackBgColor += sampleColor * fallbackValid;
+                    fallbackBgWeight += fallbackValid;
+
                     let isNonFgSample = smoothstep(-0.25, 0.0, minTapCoC);
                     let isBehindFgSample = smoothstep(ringSpacing * 0.25, ringSpacing * 1.25, cocDepthDelta);
-                    let depthBehindWeight = max(isNonFgSample, isBehindFgSample);
+                    let isSameMidFgSample = occludedMidFgWeight * (1.0 - smoothstep(ringSpacing * 0.25, ringSpacing * 1.25, abs(cocDepthDelta))) * smoothstep(-halfRingTransition, halfRingTransition, centerNearRadius * polyScale - distTexels);
+                    let depthBehindWeight = max(max(isNonFgSample, isBehindFgSample), isSameMidFgSample);
                     if (depthBehindWeight > 0.0) {
                         let sampleFarCoC = max(sampleCoC, 0.0);
-                        let effectiveHoleScale = max(sampleFarCoC, ringSpacing);
-                        let normHoleDist = distTexels / max(effectiveHoleScale, 0.5);
+                        let normHoleDist = distTexels / max(ringSpacing, 0.5);
                         let bgHoleWeight = depthBehindWeight / (0.1 + normHoleDist * normHoleDist * distTexels);
                         accumColor += sampleColor * bgHoleWeight;
                         accumWeight += bgHoleWeight;
@@ -261,7 +264,8 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
                 // [EN] Pass 3B: Foreground (Near < 0) dedicated layer gathering - 1:1 isomorphic normalization between halfRingTransition coverage and kernelTapWeight to guarantee both 100% interior opacity and step-free outer falloff
                 if (discreteMip0.a < -0.15 && sampleCoC < -0.15) {
                     let sampleNearRadius = -sampleCoC;
-                    let surfaceContinuity = smoothstep(centerNearRadius * 0.25, centerNearRadius * 0.75, sampleNearRadius);
+                    let radiusDiff = max(centerNearRadius - sampleNearRadius, 0.0);
+                    let surfaceContinuity = 1.0 - smoothstep(ringSpacing * 0.5, ringSpacing * 1.5, radiusDiff);
                     let effectiveNearRadius = mix(sampleNearRadius, max(centerNearRadius, sampleNearRadius), surfaceContinuity);
                     let coverage = smoothstep(-halfRingTransition, halfRingTransition, effectiveNearRadius * polyScale - distTexels);
                     if (coverage > 0.0) {
