@@ -73,7 +73,7 @@ const ExampleHeader = () => {
                             <div style={leftSectionStyle}>
                                 <Title/>
                             </div>
-                            <div style={leftSectionStyle}>
+                            <div style={{...leftSectionStyle, flexShrink: 0}}>
                                 <LabelButton
                                     label="CODE"
                                     onClick={() => setShowSourceModal(!showSourceModal)}
@@ -142,6 +142,7 @@ const navBarStyle: React.CSSProperties = {
     display: 'flex',
     height: '100%',
     width: '100%',
+    gap: '12px',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: 'transparent'
@@ -151,6 +152,8 @@ const leftGroupStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     height: '100%',
+    minWidth: 0,
+    flex: '0 1 auto',
     gap: '8px',
     backgroundColor: 'transparent'
 };
@@ -185,6 +188,7 @@ const leftSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     height: '46px',
+    minWidth: 0,
     padding: '4px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
@@ -201,6 +205,7 @@ const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     height: '46px',
+    flexShrink: 0,
     padding: '4px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',

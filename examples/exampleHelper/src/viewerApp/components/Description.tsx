@@ -31,10 +31,10 @@ const Description = () => {
                 top: isNarrow ? '74px' : 'auto',
                 bottom: isNarrow ? 'auto' : '20px',
                 left: isNarrow ? '16px' : '20px',
-                right: showSettingsPanel && !isNarrow ? '340px' : (isNarrow ? '16px' : '280px')
+                right: isNarrow ? '16px' : '270px'
             }}
         >
-            <div style={editorialWrapperStyle}>
+            <div style={{...editorialWrapperStyle, maxWidth: isNarrow ? 'none' : '840px'}}>
                 {!isNarrow && <div style={accentBarStyle}/>}
                 <div style={textColumnStyle}>
                     {!isNarrow && (
@@ -108,7 +108,7 @@ const editorialWrapperStyle: React.CSSProperties = {
     flexDirection: 'row',
     alignItems: 'stretch',
     gap: '12px',
-    maxWidth: '600px',
+    maxWidth: '840px',
     padding: 0,
     backgroundColor: 'transparent',
     pointerEvents: 'auto'

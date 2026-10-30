@@ -46,6 +46,8 @@ const Title = () => {
                 display: 'flex',
                 alignItems: 'center',
                 height: '100%',
+                width: '100%',
+                minWidth: 0,
                 gap: '2px',
                 justifyContent: isNarrow ? 'space-between' : 'flex-start'
             }}>
@@ -65,10 +67,13 @@ const Title = () => {
                 )}
 
                 <div style={{...contentBoxStyle, textAlign: isNarrow ? 'center' : 'left'}}>
-                    <span style={titleValueStyle}>
+                    <span
+                        style={{...titleValueStyle, maxWidth: isNarrow ? '100%' : '180px'}}
+                        title={currentExample ? currentExample.name : 'Example'}
+                    >
                         {currentExample ? currentExample.name : 'Example'}
                     </span>
-                    {currentExample?.experimental && (
+                    {isNarrow && currentExample?.experimental && (
                         <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
                     )}
                 </div>
@@ -99,6 +104,7 @@ const narrowTitleBoxStyle: React.CSSProperties = {
     alignItems: 'stretch',
     backgroundColor: 'transparent',
     width: '100%',
+    minWidth: 0,
     flexShrink: 0
 };
 
@@ -108,7 +114,8 @@ const titleBoxStyle: React.CSSProperties = {
     justifyContent: 'center',
     backgroundColor: 'transparent',
     height: '36px',
-    flexShrink: 0,
+    minWidth: 0,
+    flexShrink: 1,
     alignItems: 'stretch'
 };
 
@@ -120,6 +127,8 @@ const contentBoxStyle: React.CSSProperties = {
     gap: '8px',
     padding: '0 8px',
     flexGrow: 1,
+    minWidth: 0,
+    overflow: 'hidden',
     textAlign: 'center'
 };
 
@@ -139,10 +148,13 @@ const experimentalBadgeStyle: React.CSSProperties = {
     borderRadius: '5px',
     fontWeight: 600,
     lineHeight: '1.1',
-    display: 'inline-block'
+    display: 'inline-block',
+    flexShrink: 0
 };
 
 const titleValueStyle: React.CSSProperties = {
+    display: 'block',
+    minWidth: 0,
     fontSize: '14px',
     lineHeight: '1.2',
     color: '#b19898',
