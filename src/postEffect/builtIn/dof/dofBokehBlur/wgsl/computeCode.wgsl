@@ -82,11 +82,9 @@ let isCenterForeground = centerCoC < -0.25;
 let centerNearRadius = max(-centerCoC, 0.0);
 
 let nearGatherRadius = min(max(-dilatedMinNearCoC, centerNearRadius), maxHalfRadius);
-// [KO] 배경 패스(Pass 3A): 전경 픽셀(isCenterForeground)에서는 후면 홀필링 반경을 탐색하고, 비초점 배경 픽셀(centerCoC > 0.25)에서는 후방 원경 보케 디스크가 주변 배경 위로 온전히 확산되도록 타일 최대 배경 착란원(dilatedMaxFarCoC)까지 확장 탐색
-// [EN] Background pass (Pass 3A): search hole-filling radius on foreground pixels (isCenterForeground), and expand up to dilatedMaxFarCoC on defocused background pixels (centerCoC > 0.25) so rear far bokeh discs spread across surrounding backgrounds without clipping
-let bgExpandWeight = smoothstep(0.25, 1.25, centerCoC);
-let expandedBgRadius = mix(max(centerCoC, 0.0), max(centerCoC, dilatedMaxFarCoC), bgExpandWeight);
-let farGatherRadius = min(select(expandedBgRadius, max(nearGatherRadius, dilatedMaxFarCoC), isCenterForeground), maxHalfRadius);
+// [KO] 배경 패스(Pass 3A): 전경 픽셀(isCenterForeground)에서는 후면 홀필링 반경을 탐색하고, 비전경 픽셀에서는 중심 픽셀의 배경 CoC 반경으로 탐색하여 원경이 근경 배경 위로 역침범하는 현상 차단
+// [EN] Background pass (Pass 3A): search hole-filling radius on foreground pixels (isCenterForeground), and gather within center Far CoC on non-foreground pixels to prevent distant background from bleeding over closer background
+let farGatherRadius = min(select(max(centerCoC, 0.0), max(nearGatherRadius, dilatedMaxFarCoC), isCenterForeground), maxHalfRadius);
 let gatherRadius = select(farGatherRadius, nearGatherRadius, isForegroundPass);
 
 if (gatherRadius < 0.25) {
@@ -159,7 +157,7 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
     var tapSlot = b * TAPS_PER_SECTOR;
 
     for (var ring = 1u; ring <= activeRingCount; ring = ring + 1u) {
-        let normRadius = f32(ring) * invActiveRingCount;
+        let normRadius = (f32(ring) - 0.35) * invActiveRingCount;
         let normGatherRadius = normRadius * gatherRadius;
 
         for (var step = 0u; step < ring; step = step + 1u) {
@@ -178,10 +176,9 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
             var sampleColor = discreteMip0.rgb;
             var sampleCoC = discreteMip0.a;
 
-            // [KO] 전경 후면 홀필링(isBgHoleFill) 시에는 전경 탐색 반경이 아닌 샘플링된 배경 자체의 Far CoC에 비례하여 밉 레벨을 결정함으로써 초점 맞은 배경의 1/8 저해상도 뭉개짐 방지
-            // [EN] During background hole-filling (isBgHoleFill), select mip level from the sampled background's own Far CoC rather than the foreground search radius to prevent 1/8-res blurring of in-focus backgrounds
-            let tapRingSpacing = select(ringSpacing, max(discreteMip0.a, 0.0) * invActiveRingCount, isBgHoleFill);
-            let tapMipLevel = select(mipLevel, clamp(log2(max(tapRingSpacing, 1.0)), 0.0, 2.0), isBgHoleFill);
+            // [KO] 전경 후면 홀필링(isBgHoleFill) 시에는 밉 레벨 상한을 1.0(1/4 해상도)으로 제한하여 링 간격의 점박이 노이즈와 1/8 저해상도 뭉개짐을 동시에 방지
+            // [EN] During background hole-filling (isBgHoleFill), cap mip level at 1.0 (1/4-res) to prevent both discrete ring-tap dots and 1/8-res blurring
+            let tapMipLevel = select(mipLevel, min(mipLevel, 1.0), isBgHoleFill);
             if (tapMipLevel > 0.1) {
                 let sampleUV = centerUV + offsetTexels * invHalfDims;
                 var activeMipSample: vec4<f32>;
@@ -205,30 +202,24 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
 
             if (!isForegroundPass) {
                 if (isCenterForeground) {
-                    // [KO] 전경 픽셀 뒤편의 배경 복원(Disocclusion Hole-Filling): 비전경 샘플(discreteMip0.a > -0.25)의 물리적 배경 CoC 반경(sampleFarRadius) 도달 여부와 최근접 경계 외삽(excessDist)을 결합
-                    // [EN] Background reconstruction behind foreground pixels (Disocclusion Hole-Filling): combine physical background CoC reach (sampleFarRadius) and nearest-boundary extrapolation (excessDist) for non-foreground samples
+                    // [KO] 전경 픽셀 뒤편의 배경 복원(Disocclusion Hole-Filling): 비전경 샘플(discreteMip0.a > -0.25)에 대해 원경 CoC 편향 없는 순수 거리 감쇠 가중치를 적용하여 근경 배경(CesiumMan) 위 원경 하늘 역침범 점박이 차단
+                    // [EN] Background reconstruction behind foreground pixels (Disocclusion Hole-Filling): apply Far-CoC-unbiased distance decay to non-foreground samples (discreteMip0.a > -0.25) to prevent distant sky splotches over closer background objects
                     if (discreteMip0.a > -0.25 && sampleCoC > -0.25) {
                         let sampleFarCoC = max(sampleCoC, 0.0);
-                        let sampleFarRadius = sampleFarCoC * polyScale;
-                        let excessDist = max(0.0, distTexels - sampleFarRadius);
-                        let bgHoleWeight = exp(-excessDist * 1.5);
+                        let bgHoleWeight = 1.0 / (1.0 + distTexels * 0.5);
                         accumColor += sampleColor * bgHoleWeight;
                         accumWeight += bgHoleWeight;
                         accumFarCoC += sampleFarCoC * bgHoleWeight;
                     }
                 } else if (discreteMip0.a > 0.25 && sampleCoC > 0.25) {
-                    // [KO] 물리적 Scatter-as-Gather: 샘플 자신의 다각형 착란원 도달율(scatterCoverage), 전후 깊이 순서(depthOrdering), 및 착란원 면적 반비례(1/R^2, areaWeight) 결합
-                    // [EN] Physical Scatter-as-Gather: combine sample's own polygonal CoC reach (scatterCoverage), front-to-back depth ordering (depthOrdering), and inverse-square CoC area normalization (1/R^2, areaWeight)
-                    let scatterCoverage = saturate((sampleCoC - normGatherRadius) * polyScale + 0.5);
-                    let gatherCoverage = saturate((centerCoC - normGatherRadius) * polyScale + 0.5);
-                    let depthOrdering = smoothstep(centerCoC - 1.0, centerCoC + 0.25, sampleCoC);
-                    let areaRatio = max(centerCoC, 1.5) / max(sampleCoC, 1.5);
-                    let areaWeight = clamp(areaRatio * areaRatio, 0.2, 1.0);
-                    let baseCoverage = max(scatterCoverage * depthOrdering * areaWeight, gatherCoverage) * smoothstep(0.25, 1.25, sampleCoC);
-                    let bokehDiscCoverage = scatterCoverage * depthOrdering;
+                    // [KO] 배경 상호 보케 개더링: min(centerCoC, sampleCoC) 기반 대칭 반경 판정으로 전경/근경 배경 경계의 누수 차단 및 부드러운 보케 블러 형성
+                    // [EN] Mutual background bokeh gathering: use min(centerCoC, sampleCoC) symmetric radius to prevent bleeding across foreground/near-background boundaries while forming smooth bokeh blur
+                    let pairFarRadius = min(centerCoC, sampleCoC) * polyScale;
+                    let bokehDiscCoverage = saturate(pairFarRadius - distTexels + 0.5);
+                    let diffuseWeight = bokehDiscCoverage * smoothstep(0.25, 1.25, sampleCoC);
                     let sampleExcessLuma = max(getLuminance(sampleColor) - 0.25, 0.0);
                     let highlightBoost = (sampleExcessLuma / (1.0 + sampleExcessLuma * 0.25)) * halfBokehBrightness;
-                    let w = baseCoverage + bokehDiscCoverage * highlightBoost;
+                    let w = diffuseWeight + bokehDiscCoverage * highlightBoost;
                     if (w > 0.0) {
                         accumColor += sampleColor * w;
                         accumWeight += w;
@@ -265,8 +256,9 @@ if (!isForegroundPass) {
     let hasBg = accumWeight > 1e-4;
     let invAccumWeight = 1.0 / max(accumWeight, 1e-4);
     let gatheredBg = accumColor * invAccumWeight;
-    let bgColor = select(centerFilteredColor, gatheredBg, hasBg);
-    let outFarCoC = select(max(centerCoC, 0.0), accumFarCoC * invAccumWeight, hasBg);
+    let bgHoleConfidence = select(1.0, saturate(accumWeight / (totalKernelWeight * 0.08)), isCenterForeground);
+    let bgColor = select(centerFilteredColor, mix(centerFilteredColor, gatheredBg, bgHoleConfidence), hasBg);
+    let outFarCoC = select(max(centerCoC, 0.0), accumFarCoC * invAccumWeight * bgHoleConfidence, hasBg);
     textureStore(outputTexture, index, vec4<f32>(bgColor, outFarCoC));
 } else {
     let hasFg = accumWeight > 1e-4;
