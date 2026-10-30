@@ -3,6 +3,10 @@ struct Uniforms {
     aperture: f32,
     focalLength: f32,
     useAutoFocus: u32,
+    historyValid: u32,
+    pad0: u32, // 16-byte tail alignment
+    pad1: u32,
+    pad2: u32,
 };
 
 const INV_SQRT2: f32 = 1.0 / sqrt(2.0);

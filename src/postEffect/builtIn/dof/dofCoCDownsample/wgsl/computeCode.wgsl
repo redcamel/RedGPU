@@ -55,18 +55,23 @@ if (coc11 < closestCoC) {
     closestDepthCoord = d11Coord;
 }
 
-// [KO] 전경(coc < -0.1)과 배경(coc > 0)이 공존하는 깊이 불연속 2x2 쿼드에서 양수 배경 CoC가 음수 전경 CoC를 상쇄하여 가짜 합초(CoC ≈ 0)를 만드는 현상을 원천 차단
-// [EN] Prevent positive background CoC from canceling negative foreground CoC into a phantom in-focus (CoC ≈ 0) on 2x2 depth-discontinuity quads
+// [KO] 전경(coc < -0.1)과 비전경(coc >= -0.1) 도메인을 완전 분리하여 중간값 정리에 의한 양·음수 선형 혼합 영점 교차(CoC ≈ 0) 및 부호 역전을 원천 차단
+// [EN] Completely separate foreground (coc < -0.1) and non-foreground (coc >= -0.1) domains to prevent zero-crossing (CoC ≈ 0) and sign inversion from positive/negative linear mixing
 let avgCoC = (coc00 + coc10 + coc01 + coc11) * 0.25;
 let fgMask00 = select(0.0, 1.0, coc00 < -0.1);
 let fgMask10 = select(0.0, 1.0, coc10 < -0.1);
 let fgMask01 = select(0.0, 1.0, coc01 < -0.1);
 let fgMask11 = select(0.0, 1.0, coc11 < -0.1);
 let fgCount = fgMask00 + fgMask10 + fgMask01 + fgMask11;
+let nonFgCount = 4.0 - fgCount;
+let nonFgAvgCoC = select(
+    avgCoC,
+    (coc00 * (1.0 - fgMask00) + coc10 * (1.0 - fgMask10) + coc01 * (1.0 - fgMask01) + coc11 * (1.0 - fgMask11)) / max(nonFgCount, 1.0),
+    nonFgCount > 0.0
+);
 let fgAvgCoC = select(minSignedCoC, (coc00 * fgMask00 + coc10 * fgMask10 + coc01 * fgMask01 + coc11 * fgMask11) / max(fgCount, 1.0), fgCount > 0.0);
 let fgPreserve = mix(fgAvgCoC, minSignedCoC, saturate(maxSignedCoC - minSignedCoC - 0.5));
-let fgDiscontinuity = smoothstep(-0.15, -0.75, minSignedCoC);
-var tileCoC = mix(avgCoC, fgPreserve, fgDiscontinuity);
+var tileCoC = select(nonFgAvgCoC, fgPreserve, fgCount > 0.0);
 
 let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxColorCoord);
 let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxColorCoord);
@@ -95,9 +100,9 @@ if (uniforms.historyValid == 1u) {
 
     let minOuterCoC = min(minSignedCoC, min(min(cocL, cocR), min(cocU, cocD)));
     let maxOuterCoC = max(maxSignedCoC, max(max(cocL, cocR), max(cocU, cocD)));
-    let hasSignDiscontinuity = (minOuterCoC < -0.25) && (maxOuterCoC > 0.25);
-    let safeMinOuterCoC = select(minOuterCoC, max(minOuterCoC, 0.0), hasSignDiscontinuity && (tileCoC >= 0.0));
-    let safeMaxOuterCoC = select(maxOuterCoC, min(maxOuterCoC, 0.0), hasSignDiscontinuity && (tileCoC < 0.0));
+    let hasSignDiscontinuity = (minOuterCoC < -0.1) && (maxOuterCoC > 0.1);
+    let safeMinOuterCoC = select(minOuterCoC, max(minOuterCoC, 0.0), tileCoC >= 0.0);
+    let safeMaxOuterCoC = select(maxOuterCoC, min(maxOuterCoC, 0.0), tileCoC < 0.0);
 
     let velocity = textureLoad(gBufferMotionVector, closestDepthCoord, 0).xy;
     if (all(abs(velocity) <= vec2<f32>(DOF_MAX_VALID_MOTION_UV))) {
@@ -105,8 +110,9 @@ if (uniforms.historyValid == 1u) {
         let prevUV = centerUV - velocity;
         if (all(prevUV >= vec2<f32>(0.0)) && all(prevUV <= vec2<f32>(1.0))) {
             prevSample = textureSampleLevel(prevCoCTexture, basicSampler, prevUV, 0.0);
-            let isSameLayerHistory = !hasSignDiscontinuity || (prevSample.a * tileCoC > 0.0 && abs(prevSample.a - tileCoC) <= max(abs(tileCoC) * 0.5, 1.0));
-            if (isSameLayerHistory) {
+            let isSameSignHistory = (prevSample.a * tileCoC >= 0.0) || (abs(prevSample.a) < 0.2 && abs(tileCoC) < 0.2);
+            let isNotCancelledOnEdge = !hasSignDiscontinuity || (prevSample.a * tileCoC > 0.0 && abs(prevSample.a - tileCoC) <= max(abs(tileCoC) * 0.5, 1.0));
+            if (isSameSignHistory && isNotCancelledOnEdge) {
                 hasValidHistory = true;
                 let clampedPrevCoC = clamp(prevSample.a, safeMinOuterCoC, safeMaxOuterCoC);
                 let motionPixels = length(velocity * vec2<f32>(fullDims));
@@ -117,12 +123,16 @@ if (uniforms.historyValid == 1u) {
     }
 }
 
-// [KO] 시간 안정화된 tileCoC 기준 양방향(Bilateral) 가중 평균 및 이웃 컬러 AABB 클램핑 누적
-// [EN] Bilateral weighted average based on temporally stabilized tileCoC and neighborhood color AABB clamped accumulation
-let w00 = 1.0 / (0.25 + abs(coc00 - tileCoC) * 4.0);
-let w10 = 1.0 / (0.25 + abs(coc10 - tileCoC) * 4.0);
-let w01 = 1.0 / (0.25 + abs(coc01 - tileCoC) * 4.0);
-let w11 = 1.0 / (0.25 + abs(coc11 - tileCoC) * 4.0);
+// [KO] 시간 안정화된 tileCoC와 동일 부호 도메인에 속한 픽셀만 양방향(Bilateral) 가중 평균하여 반대 부호 컬러 오염 차단
+// [EN] Bilaterally average only pixels in the same sign domain as temporally stabilized tileCoC to prevent opposite-sign color contamination
+let sameSign00 = select(1e-4, 1.0, coc00 * tileCoC >= 0.0 || (abs(coc00) < 0.2 && abs(tileCoC) < 0.2));
+let sameSign10 = select(1e-4, 1.0, coc10 * tileCoC >= 0.0 || (abs(coc10) < 0.2 && abs(tileCoC) < 0.2));
+let sameSign01 = select(1e-4, 1.0, coc01 * tileCoC >= 0.0 || (abs(coc01) < 0.2 && abs(tileCoC) < 0.2));
+let sameSign11 = select(1e-4, 1.0, coc11 * tileCoC >= 0.0 || (abs(coc11) < 0.2 && abs(tileCoC) < 0.2));
+let w00 = sameSign00 / (0.25 + abs(coc00 - tileCoC) * 4.0);
+let w10 = sameSign10 / (0.25 + abs(coc10 - tileCoC) * 4.0);
+let w01 = sameSign01 / (0.25 + abs(coc01 - tileCoC) * 4.0);
+let w11 = sameSign11 / (0.25 + abs(coc11 - tileCoC) * 4.0);
 let wSum = w00 + w10 + w01 + w11;
 
 var downsampledColor = (col00 * w00 + col10 * w10 + col01 * w01 + col11 * w11) / wSum;

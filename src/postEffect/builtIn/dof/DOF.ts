@@ -439,22 +439,26 @@ class DOF extends AMultiPassPostEffect {
 
         // Stage 1: CoC-Aware Bilateral Mip Pyramid (Mip 0: 1/2 -> Mip 1: 1/4 -> Mip 2: 1/8)
         const {useTAA} = view.redGPUContext.antialiasingManager;
+        const isTAADispatched = useTAA && view.constructor.name === 'View3D';
         let prevCoCResult = inactiveBindingResult;
-        if (useTAA) {
+        if (isTAADispatched) {
             prevCoCResult = this.#ensurePersistentCoCTexture(halfW, halfH);
-            this.#cocDownsamplePass.historyValid = this.#isCoCHistoryValid ? 1 : 0;
+            const cocHistoryFlag = this.#isCoCHistoryValid ? 1 : 0;
+            this.#cocDownsamplePass.historyValid = cocHistoryFlag;
+            this.#compositePass.historyValid = cocHistoryFlag;
         } else {
             if (this.#persistentCoCTexture) {
                 this.#releasePersistentCoCTexture();
             }
             this.#cocDownsamplePass.historyValid = 0;
+            this.#compositePass.historyValid = 0;
         }
 
         const cocMip0 = this.#cocDownsamplePass.render(
             view, halfW, halfH, sourceTextureInfo, currFocusResult, prevCoCResult
         );
 
-        if (useTAA) {
+        if (isTAADispatched) {
             this.#copyCoCSrcInfo.texture = cocMip0.texture;
             this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#copyCoCStateCallback);
             this.#isCoCHistoryValid = true;

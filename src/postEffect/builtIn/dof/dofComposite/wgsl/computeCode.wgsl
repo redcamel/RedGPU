@@ -33,14 +33,12 @@ let lensParams = computeDOFCoCLensParams(
 );
 
 let maxDepthCoord = max(vec2<i32>(textureDimensions(depthTexture)) - vec2<i32>(1), vec2<i32>(0));
+let maxHalfCoord = max(vec2<i32>(textureDimensions(cocTexture)) - vec2<i32>(1), vec2<i32>(0));
 let coordC = clamp(vec2<i32>(index), vec2<i32>(0), maxDepthCoord);
 let cocC = samplePhysicalHalfCoCAtDepthCoord(coordC, invProjZW, minNearDepth, lensParams, maxHalfCoC);
 
-let ndcJitter = systemUniforms.projection.projectionMatrix[2].xy - systemUniforms.projection.noneJitterProjectionMatrix[2].xy;
-let isTAAActive = (abs(ndcJitter.x) + abs(ndcJitter.y)) > 1e-6;
-
 var exactHalfCoC = cocC;
-if (isTAAActive) {
+if (uniforms.historyValid == 1u) {
     let coordL = clamp(coordC + vec2<i32>(-1, 0), vec2<i32>(0), maxDepthCoord);
     let coordR = clamp(coordC + vec2<i32>(1, 0), vec2<i32>(0), maxDepthCoord);
     let coordU = clamp(coordC + vec2<i32>(0, -1), vec2<i32>(0), maxDepthCoord);
@@ -54,18 +52,18 @@ if (isTAAActive) {
     let minCrossCoC = min(cocC, min(min(cocL, cocR), min(cocU, cocD)));
     let maxCrossCoC = max(cocC, max(max(cocL, cocR), max(cocU, cocD)));
 
-    // [KO] 전경(음수 CoC)과 배경(양수 CoC)이 맞닿는 실루엣 경계에서 양선형 보간(textureSampleLevel)이 음수와 양수를 상쇄하여 가짜 합초(exactHalfCoC ≈ 0)의 1픽셀 점선을 만드는 현상을 원천 차단
-    // [EN] Prevent bilinear interpolation (textureSampleLevel) from canceling negative foreground CoC and positive background CoC into a 1-pixel phantom in-focus (exactHalfCoC ≈ 0) contour on silhouettes
-    let hasSignDiscontinuity = (minCrossCoC < -0.25) && (maxCrossCoC > 0.25);
-    let safeMinCoC = select(minCrossCoC, max(minCrossCoC, 0.0), hasSignDiscontinuity && (cocC >= 0.0));
-    let safeMaxCoC = select(maxCrossCoC, min(maxCrossCoC, 0.0), hasSignDiscontinuity && (cocC < 0.0));
+    // [KO] 상시 0.0 부호 경계 클램핑 및 양선형 부호 상쇄·급감 폴백으로 대각선 및 [-0.25, +0.25] 구간에서도 부호 역전과 1픽셀 점선을 100% 원천 차단
+    // [EN] Unconditionally enforce 0.0 sign-boundary clamping and bilinear sign-cancellation/magnitude-drop fallback to completely prevent sign inversion and 1-pixel contours across diagonals and [-0.25, +0.25]
+    let safeMinCoC = select(minCrossCoC, max(minCrossCoC, 0.0), cocC >= 0.0);
+    let safeMaxCoC = select(maxCrossCoC, min(maxCrossCoC, 0.0), cocC < 0.0);
     let stabilizedHalfCoC = textureSampleLevel(cocTexture, basicSampler, uv, 0.0).a;
-    exactHalfCoC = select(clamp(stabilizedHalfCoC, safeMinCoC, safeMaxCoC), cocC, hasSignDiscontinuity && (abs(stabilizedHalfCoC) < abs(cocC) * 0.5 || stabilizedHalfCoC * cocC <= 0.0));
+    let isBilinearSignCancelled = (stabilizedHalfCoC * cocC <= 0.0) || (abs(cocC) > 0.2 && abs(stabilizedHalfCoC) < abs(cocC) * 0.5);
+    exactHalfCoC = select(clamp(stabilizedHalfCoC, safeMinCoC, safeMaxCoC), cocC, isBilinearSignCancelled);
 }
 let exactFullCoC = abs(exactHalfCoC) * halfToFullScale;
 
-// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, 전경 및 배경 양방향)에서 양선형 보간 기반 8-Tap 직접 개더링 수행
-// [EN] 2. Unreal DOF_Recombine specification: bilinear-interpolated 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px, near and far)
+// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, 전경 및 배경 양방향)에서 이산 CoC 검증 및 동일 부호 레이어 8-Tap 직접 개더링 수행
+// [EN] 2. Unreal DOF_Recombine specification: 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px) with discrete CoC lookup and strict same-sign layer gating
 var baseFullResColor = sharpColor;
 if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
     let slightRadius = clamp(exactFullCoC, 0.75, 3.5);
@@ -74,10 +72,12 @@ if (exactFullCoC > 0.75 && exactFullCoC < 4.5) {
 
     for (var i = 0u; i < 8u; i = i + 1u) {
         let tapOffset = SLIGHT_DOF_OFFSETS[i] * slightRadius;
-        let tapUV = saturate(uv + tapOffset * invFullDims);
-        let tapHalfCoC = textureSampleLevel(cocTexture, basicSampler, tapUV, 0.0).a;
+        let tapFullCoord = vec2<f32>(index) + 0.5 + tapOffset;
+        let tapUV = saturate(tapFullCoord * invFullDims);
+        let tapHalfCoord = clamp(vec2<i32>(tapFullCoord * 0.5), vec2<i32>(0), maxHalfCoord);
+        let tapHalfCoC = textureLoad(cocTexture, tapHalfCoord, 0).a;
         let tapFullCoC = abs(tapHalfCoC) * halfToFullScale;
-        let sameLayerWeight = select(0.25, 1.0, tapHalfCoC * exactHalfCoC >= 0.0);
+        let sameLayerWeight = select(0.0, 1.0, tapHalfCoC * exactHalfCoC >= 0.0);
         let tapWeight = smoothstep(0.35, 1.15, tapFullCoC) * sameLayerWeight;
         if (tapWeight > 0.0) {
             let tapColor = textureSampleLevel(sourceTexture, basicSampler, tapUV, 0.0).rgb;

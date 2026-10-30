@@ -1,4 +1,4 @@
-const SEARCH_STEP: i32 = 4;
+const SEARCH_STEP: i32 = 2;
 const DOF_MAX_COC_FULL_PX: f32 = 36.0;
 
 let tileIndex = vec2<i32>(global_id.xy);

@@ -27,16 +27,15 @@ let s22 = textureLoad(sourceTexture, vec2<i32>(xs[2], ys[2]), 0);
 
 let minCenterCoC = min(min(s11.a, s21.a), min(s12.a, s22.a));
 let maxCenterCoC = max(max(s11.a, s21.a), max(s12.a, s22.a));
-let fgDominance = smoothstep(-0.15, -0.55, minCenterCoC);
-let bgDominance = (1.0 - fgDominance) * smoothstep(0.15, 0.55, maxCenterCoC);
-let focusDominance = max(0.0, 1.0 - fgDominance - bgDominance);
+let isFgDomain = minCenterCoC < -0.15;
+let isBgDomain = !isFgDomain && (maxCenterCoC > 0.15);
 
 var sumColor = vec3<f32>(0.0);
 var sumCoC: f32 = 0.0;
 var sumWeight: f32 = 0.0;
 
-// [KO] 4x4 이산 B-Spline/Tent 커널([1, 3, 3, 1]) 샘플링 및 연속 레이어 가중치 블렌딩으로 경계 플리커링 및 가짜 초점 상쇄 방지
-// [EN] 4x4 discrete B-Spline/Tent kernel ([1, 3, 3, 1]) sampling with continuous layer dominance blending to prevent boundary flickering and phantom focus cancellation
+// [KO] 4x4 이산 B-Spline/Tent 커널([1, 3, 3, 1]) 샘플링 및 배타적 부호 도메인 게이팅으로 전·배경 양·음수 CoC 상쇄(CoC ≈ 0) 원천 차단
+// [EN] 4x4 discrete B-Spline/Tent kernel ([1, 3, 3, 1]) sampling with mutually exclusive sign-domain gating to prevent foreground/background positive/negative CoC cancellation
 for (var ky = 0; ky < 4; ky = ky + 1) {
     let wy = TENT_WEIGHTS[ky];
     let sy = ys[ky];
@@ -57,17 +56,24 @@ for (var ky = 0; ky < 4; ky = ky + 1) {
         }
 
         let spatialW = wx * wy;
-        let fgGate = smoothstep(-0.15, -0.75, s.a);
-        let bgGate = smoothstep(0.15, 0.75, s.a);
-        let focusGate = 1.0 - smoothstep(0.25, 1.0, abs(s.a));
-        let layerGate = fgGate * fgDominance + bgGate * bgDominance + focusGate * focusDominance;
+        var layerGate: f32;
+        if (isFgDomain) {
+            layerGate = select(0.0, smoothstep(-0.05, -0.55, s.a), s.a < -0.05);
+        } else if (isBgDomain) {
+            layerGate = select(0.0, smoothstep(0.05, 0.55, s.a), s.a > 0.05);
+        } else {
+            layerGate = 1.0 - smoothstep(0.25, 1.0, abs(s.a));
+        }
 
-        let w = spatialW * max(layerGate, 1e-4);
+        let w = spatialW * layerGate;
         sumColor += s.rgb * w;
         sumCoC += s.a * w;
         sumWeight += w;
     }
 }
 
-let invW = 1.0 / max(sumWeight, 1e-4);
-textureStore(outputTexture, global_id.xy, vec4<f32>(sumColor * invW, sumCoC * invW));
+let hasValidSum = sumWeight > 1e-5;
+let invW = 1.0 / max(sumWeight, 1e-5);
+let outColor = select(s11.rgb, sumColor * invW, hasValidSum);
+let outCoC = select(s11.a, sumCoC * invW, hasValidSum);
+textureStore(outputTexture, global_id.xy, vec4<f32>(outColor, outCoC));

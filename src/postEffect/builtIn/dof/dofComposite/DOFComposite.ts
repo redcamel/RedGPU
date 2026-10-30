@@ -26,6 +26,7 @@ class DOFComposite extends ASinglePassPostEffect {
     #aperture: number = DOF_CONFIG.DEFAULT_APERTURE;
     #focalLength: number = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
     #useAutoFocus: number = 0;
+    #historyValid: number = 0;
 
     /**
      * [KO] `DOFComposite` 인스턴스를 생성합니다.
@@ -97,6 +98,17 @@ class DOFComposite extends ASinglePassPostEffect {
         if (this.#useAutoFocus === value) return;
         this.#useAutoFocus = value;
         this.updateUniform('useAutoFocus', value);
+    }
+
+    get historyValid(): number {
+        return this.#historyValid;
+    }
+
+    set historyValid(value: number) {
+        validateUintRange(value, 0, 1);
+        if (this.#historyValid === value) return;
+        this.#historyValid = value;
+        this.updateUniform('historyValid', value);
     }
 
     /**

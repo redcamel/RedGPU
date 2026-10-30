@@ -55,6 +55,8 @@ if (global_id.x >= postEffectOutputDimensions.x || global_id.y >= postEffectOutp
 let index = global_id.xy;
 let halfDimsI = vec2<i32>(postEffectOutputDimensions);
 let maxHalfCoord = max(halfDimsI - vec2<i32>(1), vec2<i32>(0));
+let maxMip1Coord = max(vec2<i32>(textureDimensions(cocMip1Texture)) - vec2<i32>(1), vec2<i32>(0));
+let maxMip2Coord = max(vec2<i32>(textureDimensions(cocMip2Texture)) - vec2<i32>(1), vec2<i32>(0));
 let halfDims = vec2<f32>(postEffectOutputDimensions);
 let invHalfDims = 1.0 / halfDims;
 let centerUV = (vec2<f32>(index) + 0.5) * invHalfDims;
@@ -182,20 +184,24 @@ for (var b = 0u; b < sectorCount; b = b + 1u) {
             if (mipLevel > 0.1) {
                 let sampleUV = centerUV + offsetTexels * invHalfDims;
                 var activeMipSample: vec4<f32>;
+                var discreteMipCoC: f32 = discreteMip0.a;
                 var mipBlendWeight: f32;
                 if (mipLevel < 0.5) {
                     activeMipSample = textureSampleLevel(cocMip0Texture, basicSampler, sampleUV, 0.0);
                     mipBlendWeight = smoothstep(0.1, 0.5, mipLevel);
                 } else if (mipLevel < 1.5) {
                     activeMipSample = textureSampleLevel(cocMip1Texture, basicSampler, sampleUV, 0.0);
+                    discreteMipCoC = textureLoad(cocMip1Texture, clamp(sampleCoord0 / 2, vec2<i32>(0), maxMip1Coord), 0).a;
                     mipBlendWeight = smoothstep(0.5, 1.25, mipLevel) * smoothstep(0.25, 0.85, abs(discreteMip0.a));
                 } else {
                     activeMipSample = textureSampleLevel(cocMip2Texture, basicSampler, sampleUV, 0.0);
+                    discreteMipCoC = textureLoad(cocMip2Texture, clamp(sampleCoord0 / 4, vec2<i32>(0), maxMip2Coord), 0).a;
                     mipBlendWeight = smoothstep(0.25, 0.85, abs(discreteMip0.a));
                 }
 
                 let cocTolerance = max(min(abs(discreteMip0.a), abs(activeMipSample.a)) * 0.35, 0.25);
-                let mipValid = mipBlendWeight * saturate(1.0 - abs(activeMipSample.a - discreteMip0.a) / cocTolerance) * select(0.0, 1.0, discreteMip0.a * activeMipSample.a > 0.0);
+                let isMipSignConsistent = (discreteMip0.a * activeMipSample.a > 0.0) && (discreteMip0.a * discreteMipCoC > 0.0) && (abs(discreteMipCoC - discreteMip0.a) <= cocTolerance * 1.5);
+                let mipValid = mipBlendWeight * saturate(1.0 - abs(activeMipSample.a - discreteMip0.a) / cocTolerance) * select(0.0, 1.0, isMipSignConsistent);
                 sampleColor = mix(discreteMip0.rgb, activeMipSample.rgb, mipValid);
                 sampleCoC = mix(discreteMip0.a, activeMipSample.a, mipValid);
             }
@@ -269,7 +275,9 @@ if (!isForegroundPass) {
     let hasBg = accumWeight > 1e-5;
     let invAccumWeight = 1.0 / max(accumWeight, 1e-5);
     let bgColor = select(centerFilteredColor, accumColor * invAccumWeight, hasBg);
-    let outFarCoC = select(centerFarRadius, accumFarCoC * invAccumWeight, hasBg);
+    let avgFarCoC = accumFarCoC * invAccumWeight;
+    let holeFilledFarCoC = select(avgFarCoC, max(avgFarCoC, min(gatherRadius, 1.0)), isCenterForeground);
+    let outFarCoC = select(centerFarRadius, holeFilledFarCoC, hasBg);
     textureStore(outputTexture, index, vec4<f32>(bgColor, outFarCoC));
 } else {
     let hasFg = accumWeight > 1e-5;
