@@ -1,6 +1,6 @@
 import React from 'react';
 import {useExamplesStore} from '../../store/useExamplesStore';
-import {OutLinkIcon} from '../../../common/components/Icons';
+import {GitHubIcon} from '../../../common/components/Icons';
 import IconButton from '../../../common/components/basic/IconButton';
 
 const HeaderActions: React.FC = () => {
@@ -12,7 +12,7 @@ const HeaderActions: React.FC = () => {
     return (
         <div style={rightSection}>
             <IconButton
-                icon={<OutLinkIcon color="#fff" size={isNarrow ? 14 : 18} />}
+                icon={<GitHubIcon color="#fff" size={isNarrow ? 16 : 18}/>}
                 label="GITHUB"
                 onClick={() => openLink('https://github.com/redcamel/RedGPU')}
                 title="GitHub Repository"
@@ -34,7 +34,7 @@ const HeaderActions: React.FC = () => {
 
 const rightSection: React.CSSProperties = {
     display: 'flex',
-    alignItems: 'stretch',
+    alignItems: 'center',
     gap: '1px',
 };
 
