@@ -51,9 +51,9 @@ const App = () => {
 
     const dynamicPanelStyle: React.CSSProperties = {
         ...panelStyle,
-        top: isNarrow ? '58px' : '68px',
+        top: isNarrow ? '64px' : '70px',
         right: isNarrow ? '10px' : '16px',
-        maxHeight: isNarrow ? 'calc(100dvh - 190px)' : 'calc(100dvh - 84px)',
+        maxHeight: isNarrow ? 'calc(100dvh - 194px)' : 'calc(100dvh - 86px)',
         transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 24px))',
         opacity: showSettingsPanel ? 1 : 0,
         pointerEvents: showSettingsPanel ? 'auto' : 'none',
@@ -91,7 +91,7 @@ const App = () => {
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
     right: '16px',
-    top: '68px',
+    top: '70px',
     display: 'flex',
     flexDirection: 'column',
     color: 'white',

@@ -32,11 +32,11 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                     onMouseEnter={() => setIsLinkHovered(true)}
                     onMouseLeave={() => setIsLinkHovered(false)}
                 >
-                    <span style={{color: '#b19898', fontSize: '11.5px', letterSpacing: '0.02em'}}>
+                    <span style={{color: '#b19898', fontSize: '12.5px', letterSpacing: '0.02em'}}>
                         This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                     </span>
                     <span style={iconWrapperStyle}>
-                        <img src={githubIcon} width="16" height="16" alt="GitHub"/>
+                        <img src={githubIcon} width="18" height="18" alt="GitHub"/>
                     </span>
                 </a>
             </div>
@@ -60,11 +60,11 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                         rel="noreferrer"
                         style={footerLeftLinkStyle}
                     >
-                        <span style={{color: '#b19898', fontSize: '11px'}}>
+                        <span style={{color: '#b19898', fontSize: '12px'}}>
                             This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                         </span>
                         <span style={iconWrapperStyle}>
-                            <img src={githubIcon} width="16" height="16" alt="GitHub"/>
+                            <img src={githubIcon} width="18" height="18" alt="GitHub"/>
                         </span>
                     </a>
                 </div>
@@ -87,11 +87,11 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                 onMouseEnter={() => setIsLinkHovered(true)}
                 onMouseLeave={() => setIsLinkHovered(false)}
             >
-                <span style={{color: '#b19898', fontSize: '11.5px', letterSpacing: '0.02em'}}>
+                <span style={{color: '#b19898', fontSize: '12.5px', letterSpacing: '0.02em'}}>
                     This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                 </span>
                 <span style={iconWrapperStyle}>
-                    <img src={githubIcon} width="16" height="16" alt="GitHub"/>
+                    <img src={githubIcon} width="18" height="18" alt="GitHub"/>
                 </span>
             </a>
         </div>
@@ -117,7 +117,7 @@ const titleContainerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '40px',
+    height: '44px',
     padding: '4px',
     borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
     boxSizing: 'border-box'
@@ -128,7 +128,7 @@ const footerContainerStyle: React.CSSProperties = {
     bottom: '16px',
     left: '16px',
     right: '16px',
-    height: '40px',
+    height: '42px',
     zIndex: 10002,
     display: 'flex',
     alignItems: 'center',
@@ -163,8 +163,8 @@ const mobileSelectContainerStyle: React.CSSProperties = {
 };
 
 const leftCapsuleStyle: React.CSSProperties = {
-    height: '40px',
-    padding: '0 16px',
+    height: '42px',
+    padding: '0 18px',
     backgroundColor: 'rgba(17, 17, 18, 0.84)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
@@ -182,7 +182,7 @@ const leftCapsuleStyle: React.CSSProperties = {
 };
 
 const rightCapsuleStyle: React.CSSProperties = {
-    height: '40px',
+    height: '42px',
     padding: '4px',
     backgroundColor: 'rgba(17, 17, 18, 0.84)',
     backdropFilter: 'blur(16px)',
@@ -197,12 +197,12 @@ const rightCapsuleStyle: React.CSSProperties = {
 };
 
 const narrowFooterBarStyle: React.CSSProperties = {
-    height: '40px',
+    height: '42px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '0 12px',
-    fontSize: '11px',
+    fontSize: '12px',
     color: '#e8e8e8'
 };
 

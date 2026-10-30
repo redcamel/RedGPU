@@ -53,8 +53,6 @@ const Title = () => {
                     <button
                         style={{
                             ...buttonStyle,
-                            width: '28px',
-                            height: isNarrow ? '32px' : '34px',
                             backgroundColor: isPrevHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
                         }}
                         onClick={() => navigate(prevExample.path!)}
@@ -79,8 +77,6 @@ const Title = () => {
                     <button
                         style={{
                             ...buttonStyle,
-                            width: '28px',
-                            height: isNarrow ? '32px' : '34px',
                             backgroundColor: isNextHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
                         }}
                         onClick={() => navigate(nextExample.path!)}
@@ -111,7 +107,7 @@ const titleBoxStyle: React.CSSProperties = {
     flexDirection: 'column',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    height: '34px',
+    height: '36px',
     flexShrink: 0,
     alignItems: 'stretch'
 };
@@ -135,11 +131,11 @@ const titleLabelStyle: React.CSSProperties = {
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '10px',
+    fontSize: '10.5px',
     backgroundColor: 'rgba(255, 90, 95, 0.16)',
     color: '#ff6b70',
     border: '1px solid rgba(255, 90, 95, 0.35)',
-    padding: '2px 6px',
+    padding: '2px 7px',
     borderRadius: '5px',
     fontWeight: 600,
     lineHeight: '1.1',
@@ -147,7 +143,7 @@ const experimentalBadgeStyle: React.CSSProperties = {
 };
 
 const titleValueStyle: React.CSSProperties = {
-    fontSize: '13px',
+    fontSize: '14px',
     lineHeight: '1.2',
     color: '#b19898',
     fontWeight: 600,
@@ -161,11 +157,11 @@ const buttonStyle: React.CSSProperties = {
     backgroundColor: 'transparent',
     color: '#fdb48d',
     border: 'none',
-    width: '34px',
-    height: '34px',
+    width: '32px',
+    height: '32px',
     borderRadius: '50%',
     cursor: 'pointer',
-    fontSize: '13px',
+    fontSize: '14px',
     fontWeight: 500,
     display: 'flex',
     alignItems: 'center',

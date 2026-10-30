@@ -91,6 +91,8 @@ const RenderingSettingsGroup: React.FC = () => {
                 onChange={handleToneMappingChange}
             />
 
+            <div style={dividerStyle}/>
+
             <SelectBox
                 label="AA"
                 value={antialiasing}
@@ -100,6 +102,15 @@ const RenderingSettingsGroup: React.FC = () => {
             />
         </>
     );
+};
+
+const dividerStyle: React.CSSProperties = {
+    width: '1px',
+    height: '16px',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    margin: '0 2px',
+    flexShrink: 0,
+    alignSelf: 'center'
 };
 
 export default RenderingSettingsGroup;

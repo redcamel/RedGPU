@@ -10,23 +10,23 @@ interface IconProps {
 
 const DEFAULT_COLOR = '#ccc';
 
-export const AxisIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 17, style, opacity}) => (
-    <svg width={size} height={size} viewBox="1 1 12 12" fill={color} style={{display: 'block', ...style, opacity}}
+export const AxisIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 20, style, opacity}) => (
+    <svg width={size} height={size} viewBox="1 1.6 12 10.8" fill={color} style={{display: 'block', ...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
             d="M6.995 1.802L6.258 3.981c.154.087.328.145.509.173v3.361l-.979.565v1.082L2.922 10.818c-.118-.155-.256-.276-.408-.366L1 12.198l2.255-.452c-.002-.177-.038-.356-.105-.528l2.827-1.632 1.021.589 1.021-.589 2.827 1.632c-.066.171-.102.351-.105.528L13 12.192l-1.518-1.728c-.152.09-.29.211-.405.354l-2.869-1.656v-1.082l-.979-.565V4.154c.181-.028.355-.087.509-.173L6.995 1.802z"/>
     </svg>
 );
 
-export const DebugIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 17, style, opacity}) => (
-    <svg width={size} height={size} viewBox="32 31.1 576 576" fill={color} style={{display: 'block', ...style, opacity}}
+export const DebugIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 18, style, opacity}) => (
+    <svg width={size} height={size} viewBox="32 56 576 528" fill={color} style={{display: 'block', ...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
             d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z"/>
     </svg>
 );
 
-export const GridIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 17, style, opacity}) => (
+export const GridIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 16, style, opacity}) => (
     <svg width={size} height={size} viewBox="96 96 448 448" fill={color} style={{display: 'block', ...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
@@ -40,7 +40,7 @@ export const GridIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 17,
     </svg>
 );
 
-export const SettingIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 17, style, opacity}) => (
+export const SettingIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 18, style, opacity}) => (
     <svg width={size} height={size} viewBox="17.5 17.5 605 605" fill={color}
          style={{display: 'block', ...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
@@ -49,15 +49,16 @@ export const SettingIcon: React.FC<IconProps> = ({color = DEFAULT_COLOR, size = 
     </svg>
 );
 
-export const HomeIcon: React.FC<IconProps> = ({color = '#fff', size = 17, style, opacity}) => (
-    <svg width={size} height={size} viewBox="64 64 512 512" fill={color} style={{display: 'block', ...style, opacity}}
+export const HomeIcon: React.FC<IconProps> = ({color = '#fff', size = 18, style, opacity}) => (
+    <svg width={size} height={size} viewBox="64 64 512 512" fill={color}
+         style={{display: 'block', transform: 'translateY(-1px)', ...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
             d="M341.8 72.6C329.5 61.2 310.5 61.2 298.3 72.6L74.3 280.6C64.7 289.6 61.5 303.5 66.3 315.7C71.1 327.9 82.8 336 96 336L112 336L112 512C112 547.3 140.7 576 176 576L464 576C499.3 576 528 547.3 528 512L528 336L544 336C557.2 336 569 327.9 573.8 315.7C578.6 303.5 575.4 289.5 565.8 280.6L341.8 72.6zM304 384L336 384C362.5 384 384 405.5 384 432L384 528L256 528L256 432C256 405.5 277.5 384 304 384z"/>
     </svg>
 );
 
-export const OutLinkIcon: React.FC<IconProps> = ({color = '#fff', size = 17, style, opacity}) => (
+export const OutLinkIcon: React.FC<IconProps> = ({color = '#fff', size = 20, style, opacity}) => (
     <svg width={size} height={size} viewBox="64 64 512 512" fill={color} style={{display: 'block', ...style, opacity}}
          xmlns="http://www.w3.org/2000/svg">
         <path
@@ -65,7 +66,7 @@ export const OutLinkIcon: React.FC<IconProps> = ({color = '#fff', size = 17, sty
     </svg>
 );
 
-export const ChevronLeft: React.FC<IconProps> = ({color = '#fdb48d', size = 14, style, opacity, strokeWidth = 2.5}) => (
+export const ChevronLeft: React.FC<IconProps> = ({color = '#fdb48d', size = 16, style, opacity, strokeWidth = 2.5}) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}
          strokeLinecap="round" strokeLinejoin="round" style={{display: 'block', ...style, opacity}}>
         <polyline points="15 18 9 12 15 6"/>
@@ -74,7 +75,7 @@ export const ChevronLeft: React.FC<IconProps> = ({color = '#fdb48d', size = 14, 
 
 export const ChevronRight: React.FC<IconProps> = ({
                                                       color = '#fdb48d',
-                                                      size = 14,
+                                                      size = 16,
                                                       style,
                                                       opacity,
                                                       strokeWidth = 2.5

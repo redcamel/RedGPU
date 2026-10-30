@@ -53,14 +53,14 @@ const ExampleHeader = () => {
                 top: isNarrow ? '10px' : '16px',
                 left: isNarrow ? '10px' : '16px',
                 right: isNarrow ? '10px' : '16px',
-                height: '42px'
+                height: '46px'
             }}
         >
             <div style={navBarStyle}>
                 <div style={{...leftGroupStyle, gap: isNarrow ? '6px' : '8px'}}>
                     <div style={circleIslandStyle}>
                         <IconButton
-                            icon={<HomeIcon color="#fff" size={17}/>}
+                            icon={<HomeIcon color="#fff" size={18}/>}
                             label="HOME"
                             onClick={() => {
                                 window.location.href = '/RedGPU/examples/index.html'
@@ -129,7 +129,7 @@ const containerStyle: React.CSSProperties = {
     top: '16px',
     left: '16px',
     right: '16px',
-    height: '42px',
+    height: '46px',
     backgroundColor: 'transparent',
     zIndex: 10003,
     display: 'flex',
@@ -167,8 +167,8 @@ const circleIslandStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '42px',
-    height: '42px',
+    width: '46px',
+    height: '46px',
     padding: 0,
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',
@@ -184,8 +184,8 @@ const circleIslandStyle: React.CSSProperties = {
 const leftSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    height: '42px',
-    padding: '3px 6px',
+    height: '46px',
+    padding: '4px 6px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',
@@ -200,8 +200,8 @@ const leftSectionStyle: React.CSSProperties = {
 const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    height: '42px',
-    padding: '3px 6px',
+    height: '46px',
+    padding: '4px 6px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',

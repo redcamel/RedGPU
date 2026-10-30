@@ -22,7 +22,7 @@ const Description = () => {
         <div
             style={{
                 ...containerStyle,
-                top: isNarrow ? '58px' : '68px',
+                top: isNarrow ? '64px' : '70px',
                 left: isNarrow ? '10px' : '16px',
                 right: showSettingsPanel && !isNarrow ? '336px' : '16px'
             }}
@@ -46,7 +46,7 @@ const Description = () => {
 // Styles
 const containerStyle: React.CSSProperties = {
     position: 'fixed',
-    top: '68px',
+    top: '70px',
     left: '16px',
     right: '16px',
     backgroundColor: 'transparent',
@@ -60,16 +60,17 @@ const containerStyle: React.CSSProperties = {
 
 const pillWrapperStyle: React.CSSProperties = {
     display: 'inline-flex',
-    alignItems: 'center',
-    gap: '10px',
-    maxWidth: '580px',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '6px',
+    maxWidth: '620px',
     padding: '0 4px',
     backgroundColor: 'transparent',
     pointerEvents: 'auto'
 };
 
 const contentStyle: React.CSSProperties = {
-    fontSize: '12.5px',
+    fontSize: '13.5px',
     color: 'rgba(245, 245, 247, 0.96)',
     lineHeight: '1.55',
     wordBreak: 'keep-all',
@@ -81,17 +82,17 @@ const toggleButtonStyle: React.CSSProperties = {
     alignItems: 'center',
     justifyContent: 'center',
     width: 'auto',
-    height: '20px',
-    padding: '0 7px',
+    height: '24px',
+    padding: '0 8px',
     backgroundColor: 'transparent',
     color: '#fdb48d',
     border: '1px solid rgba(253, 180, 141, 0.35)',
-    fontSize: '10px',
+    fontSize: '11px',
     fontWeight: 800,
     letterSpacing: '0.04em',
     textShadow: '0 1px 3px rgba(0, 0, 0, 0.9)',
     cursor: 'pointer',
-    borderRadius: '5px',
+    borderRadius: '6px',
     flexShrink: 0,
     transition: 'all 0.2s'
 };

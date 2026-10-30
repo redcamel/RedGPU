@@ -52,8 +52,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange, s
             ref={dropdownRef}
             style={{
                 ...selectBoxStyle,
-                backgroundColor: (isHovered || isOpen) ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
-                boxShadow: isOpen ? 'inset 0 0 0 1px rgba(255, 255, 255, 0.28)' : 'none',
+                backgroundColor: (isHovered || isOpen) ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
                 ...style
             }}
             onMouseEnter={() => setIsHovered(true)}
@@ -118,22 +117,22 @@ const selectBoxStyle: React.CSSProperties = {
     flexDirection: 'row',
     alignItems: 'center',
     gap: '7px',
-    height: '34px',
+    height: '36px',
     padding: '0 12px',
     borderRadius: '9999px',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: 'transparent',
     border: 'none',
     minWidth: 0,
     flexShrink: 0,
     cursor: 'pointer',
-    transition: 'background-color 0.15s, box-shadow 0.15s',
+    transition: 'background-color 0.15s',
     userSelect: 'none',
     whiteSpace: 'nowrap',
     boxSizing: 'border-box'
 };
 
 const titleLabelStyle: React.CSSProperties = {
-    fontSize: '11.5px',
+    fontSize: '12px',
     color: '#8e8e93',
     fontWeight: 500,
     lineHeight: '1',
@@ -144,12 +143,13 @@ const customSelectTriggerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flex: 1,
     minWidth: 0,
     gap: '5px'
 };
 
 const currentValueStyle: React.CSSProperties = {
-    fontSize: '12px',
+    fontSize: '13px',
     lineHeight: '1.1',
     color: '#fdb48d',
     fontWeight: 'bold',
@@ -160,8 +160,8 @@ const currentValueStyle: React.CSSProperties = {
 };
 
 const arrowIconStyle: React.CSSProperties = {
-    width: '10px',
-    height: '10px',
+    width: '11px',
+    height: '11px',
     marginLeft: '1px',
     flexShrink: 0,
     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fdb48d%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`,
@@ -192,8 +192,8 @@ const optionsListStyle: React.CSSProperties = {
 };
 
 const optionItemStyle: React.CSSProperties = {
-    padding: '7px 12px',
-    fontSize: '12px',
+    padding: '8px 13px',
+    fontSize: '13px',
     fontWeight: 'bold',
     borderRadius: '9999px',
     cursor: 'pointer',
