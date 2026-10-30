@@ -4,6 +4,7 @@ import {HomeIcon} from '../../common/components/Icons';
 import IconButton from '../../common/components/basic/IconButton';
 import IconToggleButton from '../../common/components/basic/IconToggleButton';
 import LabelButton from '../../common/components/basic/LabelButton';
+import SelectBox from '../../common/components/basic/SelectBox';
 import RenderingSettingsGroup from '../../viewerApp/components/RenderingSettingsGroup';
 import Title from '../../viewerApp/components/Title';
 
@@ -19,6 +20,7 @@ const ExampleHeader = () => {
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
 
     const [ssao, setSSAO] = useState<boolean>(false);
+    const [bloom, setBloom] = useState<string>('NONE');
 
     useEffect(() => {
         if (redGPUContext) {
@@ -26,6 +28,7 @@ const ExampleHeader = () => {
                 const firstView = redGPUContext.viewList[0];
                 if (firstView.postEffectManager) {
                     setSSAO(firstView.postEffectManager.useSSAO);
+                    setBloom(firstView.postEffectManager.useBloom ? 'NATURAL' : 'NONE');
                 }
             }
         }
@@ -42,6 +45,39 @@ const ExampleHeader = () => {
             });
         }
     };
+
+    const handleBloomChange = (value: string) => {
+        setBloom(value);
+        if (redGPUContext) {
+            redGPUContext.viewList.forEach((view: any) => {
+                const postEffectManager = view.postEffectManager;
+                if (postEffectManager) {
+                    if (value === 'NONE') {
+                        postEffectManager.useBloom = false;
+                    } else {
+                        postEffectManager.useBloom = true;
+                        const bloomEffect = postEffectManager.bloom;
+                        if (bloomEffect) {
+                            if (value === 'NATURAL') bloomEffect.setNatural();
+                            else if (value === 'CINEMATIC') bloomEffect.setCinematic();
+                            else if (value === 'NEON_GLOW') bloomEffect.setNeonGlow();
+                            else if (value === 'DREAMY') bloomEffect.setDreamy();
+                            else if (value === 'SUBTLE') bloomEffect.setSubtle();
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    const bloomOptions = [
+        {value: 'NONE', label: 'None'},
+        {value: 'NATURAL', label: 'Natural'},
+        {value: 'CINEMATIC', label: 'Cinematic'},
+        {value: 'NEON_GLOW', label: 'Neon Glow'},
+        {value: 'DREAMY', label: 'Dreamy'},
+        {value: 'SUBTLE', label: 'Subtle'},
+    ];
 
     const viewportActions = topBarRightActions.filter((action) => action.id !== 'setting-toggle');
     const settingAction = topBarRightActions.find((action) => action.id === 'setting-toggle');
@@ -90,6 +126,13 @@ const ExampleHeader = () => {
                             <div style={dividerStyle}/>
                         </>
                     )}
+                    <SelectBox
+                        label="Bloom"
+                        value={bloom}
+                        options={bloomOptions}
+                        onChange={handleBloomChange}
+                    />
+                    <div style={dividerStyle}/>
                     <IconToggleButton
                         label="SSAO"
                         onClick={handleSSAOChange}
