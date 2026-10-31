@@ -14,6 +14,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                     {`
                     .sidebar-item:hover {
                         color: #fdb48d !important;
+                        background-color: rgba(255, 255, 255, 0.04);
                     }
                     `}
                 </style>
@@ -56,21 +57,22 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
 };
 
 const groupTitleStyle: React.CSSProperties = {
-    fontSize: '10px',
-    color: '#8a8a8a',
-    fontWeight: 'bold',
+    fontSize: '10.5px',
+    color: '#8e8e93',
+    fontWeight: 700,
     textTransform: 'uppercase',
-    marginTop: '15px',
-    marginBottom: '8px',
-    letterSpacing: '0.05em',
+    marginTop: '16px',
+    marginBottom: '6px',
+    letterSpacing: '0.06em',
 };
 
 const itemStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: '#e0e0e0',
-    padding: '6px 0',
+    fontSize: '12.5px',
+    color: '#d8dae0',
+    padding: '6px 8px',
+    borderRadius: '6px',
     cursor: 'pointer',
-    transition: 'color 0.2s',
+    transition: 'color 0.15s, background-color 0.15s',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -79,12 +81,13 @@ const itemStyle: React.CSSProperties = {
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '8px',
-    backgroundColor: '#ff4d4d',
-    color: '#fff',
-    padding: '3px 4px',
-    borderRadius: '4px',
-    fontWeight: 'bold',
+    fontSize: '8.5px',
+    backgroundColor: 'rgba(255, 90, 95, 0.16)',
+    color: '#ff7b80',
+    border: '1px solid rgba(255, 90, 95, 0.35)',
+    padding: '2px 6px',
+    borderRadius: '9999px',
+    fontWeight: 700,
     lineHeight: '1',
     display: 'inline-block',
     marginLeft: '6px',

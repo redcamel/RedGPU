@@ -8,7 +8,11 @@ const Header: React.FC = () => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
 
     return (
-        <header style={{...headerStyle, padding: isNarrow ? '0 10px' : '0 20px'}}>
+        <header style={{
+            ...headerStyle,
+            margin: isNarrow ? '10px 10px 0 10px' : '14px 20px 0 20px',
+            height: isNarrow ? '40px' : '46px',
+        }}>
             <Logo />
 
             <div style={centerSectionStyle}>
@@ -22,13 +26,13 @@ const Header: React.FC = () => {
 
 const headerStyle: React.CSSProperties = {
     display: 'flex',
-    alignItems: 'stretch',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    height: '60px',
-    backgroundColor: '#111112',
-    borderBottom: '1px solid #333',
-    padding: '0 20px',
+    height: '46px',
+    backgroundColor: 'transparent',
+    padding: 0,
     zIndex: 100,
+    flexShrink: 0,
 };
 
 const centerSectionStyle: React.CSSProperties = {
@@ -36,8 +40,8 @@ const centerSectionStyle: React.CSSProperties = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    maxWidth: '600px',
-    padding: '0 20px',
+    maxWidth: '560px',
+    padding: '0 16px',
 };
 
 export default Header;

@@ -5,7 +5,11 @@ const Logo: React.FC = () => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
 
     return (
-        <div style={logoContainer}>
+        <div style={{
+            ...logoContainer,
+            height: isNarrow ? '38px' : '44px',
+            padding: isNarrow ? '0 14px' : '0 20px',
+        }}>
             <div style={{
                 display: 'flex',
                 flexDirection: isNarrow ? 'column' : 'row',
@@ -16,7 +20,7 @@ const Logo: React.FC = () => {
                     RedGPU
                 </h1>
                 <span style={{
-                    ...subTitleStyle, 
+                    ...subTitleStyle,
                     fontSize: isNarrow ? '12px' : '18px',
                     marginTop: isNarrow ? '-2px' : '0',
                     opacity: isNarrow ? 0.7 : 1
@@ -31,6 +35,13 @@ const Logo: React.FC = () => {
 const logoContainer: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
+    backgroundColor: 'rgba(14, 14, 18, 0.72)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '9999px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+    flexShrink: 0,
 };
 
 const titleStyle: React.CSSProperties = {

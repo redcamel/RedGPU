@@ -30,8 +30,9 @@
     font-size: 11.5px;
 }
 
-.RedGPUExampleHelper .tp-rotv_c > .tp-fldv:not(.tp-v-fst) {
-    margin-top: 8px;
+.RedGPUExampleHelper .tp-rotv_c > .tp-cntv:not(.tp-v-hidden) + .tp-cntv,
+.RedGPUExampleHelper .tp-fldv_c > .tp-cntv:not(.tp-v-hidden) + .tp-cntv {
+    margin-top: 1px;
 }
 
 .RedGPUExampleHelper .tp-rotv_c > .tp-fldv > .tp-fldv_b {

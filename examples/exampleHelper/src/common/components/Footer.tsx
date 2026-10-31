@@ -17,10 +17,14 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
     const githubIcon = new URL(RELATIVE_PATH, import.meta.url).href;
     const [isLinkHovered, setIsLinkHovered] = useState(false);
 
-    // [KO] 1. 예제 목록 페이지(ExamplesApp: useSourceModal === false)에서는 일반 플렉스 하단 바로 렌더링하여 레이아웃 간섭 방지
+    // [KO] 1. 예제 목록 페이지(ExamplesApp: useSourceModal === false)에서는 Flex 영역 내 하단 플로팅 글래스 바로 렌더링하여 컨텐츠 침범 방지
     if (!useSourceModal) {
         return (
-            <div style={staticFooterContainerStyle}>
+            <div style={{
+                ...staticFooterContainerStyle,
+                margin: isNarrow ? '8px 10px 10px 10px' : '12px 20px 14px 20px',
+                padding: isNarrow ? '0 14px' : '0 20px',
+            }}>
                 <a
                     href="https://github.com/redcamel/RedGPU"
                     target="_blank"
@@ -106,10 +110,8 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
 
 // Styles
 const staticFooterContainerStyle: React.CSSProperties = {
-    width: '100%',
-    height: '44px',
-    backgroundColor: '#111112',
-    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    height: '36px',
+    backgroundColor: 'transparent',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',

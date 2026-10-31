@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import {useExamplesStore, STORAGE_KEY} from '../store/useExamplesStore';
+import {STORAGE_KEY, useExamplesStore} from '../store/useExamplesStore';
 import ExampleGrid from './ExampleGrid';
 import ViewControls from './ViewControls';
 
@@ -11,76 +11,69 @@ const MainContent: React.FC = () => {
     const searchQuery = useExamplesStore(state => state.searchQuery);
     const scrollPosition = useExamplesStore(state => state.scrollPosition);
     const setScrollPosition = useExamplesStore(state => state.setScrollPosition);
-    const saveState = useExamplesStore(state => state.saveState);
+    useExamplesStore(state => state.saveState);
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-
     const isInitialMount = useRef(true);
-// [KO] 스크롤 위치 복원
-// [EN] Restore scroll position
-useEffect(() => {
-    if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'manual';
-    }
 
-    // [KO] 약간의 지연을 주어 레이아웃이 완료된 후 스크롤 이동
-    // [EN] Apply scroll with a small delay to ensure layout completion
-    const timer = setTimeout(() => {
-        if (scrollAreaRef.current && scrollPosition > 0) {
-            scrollAreaRef.current.scrollTop = scrollPosition;
+    useEffect(() => {
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
         }
-    }, 50);
+        const timer = setTimeout(() => {
+            if (scrollAreaRef.current && scrollPosition > 0) {
+                scrollAreaRef.current.scrollTop = scrollPosition;
+            }
+        }, 50);
+        return () => clearTimeout(timer);
+    }, []);
 
-    return () => clearTimeout(timer);
-}, []);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTop = 0;
+            setScrollPosition(0);
+            const saved = sessionStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    parsed.scrollPosition = 0;
+                    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+                } catch (e) {
+                }
+            }
+        }
+    }, [activeTab, searchQuery]);
 
-// [KO] 탭이나 검색어가 변경될 때 스크롤을 상단으로 이동
-// [EN] Reset scroll to top when tab or search query changes
-useEffect(() => {
-    if (isInitialMount.current) {
-        isInitialMount.current = false;
-        return;
-    }
-    if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTop = 0;
-        setScrollPosition(0);
-
-        // [KO] 세션 스토리지 즉시 업데이트
-        // [EN] Update session storage immediately
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const newPos = e.currentTarget.scrollTop;
+        setScrollPosition(newPos);
         const saved = sessionStorage.getItem(STORAGE_KEY);
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                parsed.scrollPosition = 0;
+                parsed.scrollPosition = newPos;
                 sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-            } catch (e) {}
+            } catch (e) {
+            }
         }
-    }
-}, [activeTab, searchQuery]);
-
-const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const newPos = e.currentTarget.scrollTop;
-
-    // [KO] 매 스크롤마다 스토어와 세션 스토리지 업데이트
-    // [EN] Update store and session storage on every scroll
-    setScrollPosition(newPos);
-
-    const saved = sessionStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        try {
-            const parsed = JSON.parse(saved);
-            parsed.scrollPosition = newPos;
-            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-        } catch (e) {}
-    }
-};
+    };
 
     return (
         <main style={mainStyle}>
-            <div style={{...topBar, padding: isNarrow ? '0 10px' : '0 20px'}}>
+            <div style={{
+                ...topBar,
+                margin: isNarrow
+                    ? '10px 10px 0 10px'
+                    : (sidebarOpen && !searchQuery ? '12px 20px 0 12px' : '12px 20px 0 20px'),
+                padding: isNarrow ? '0 14px' : '0 18px',
+            }}>
                 {!isNarrow && !searchQuery && (
-                    <button 
-                        onClick={() => setSidebarOpen(!sidebarOpen)} 
+                    <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
                         style={toggleSidebarButton}
                         title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
                         aria-label={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
@@ -93,19 +86,20 @@ const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
                         <span>Global Search</span>
                     ) : (
                         <>
-                            <span style={{opacity: 0.5}}>Examples /</span> {activeTab}
+                            <span style={{opacity: 0.45, fontWeight: 500}}>Examples /</span>{' '}
+                            <span style={{color: '#fdb48d'}}>{activeTab}</span>
                         </>
                     )}
                 </div>
                 <ViewControls />
             </div>
-            
-            <div 
+
+            <div
                 ref={scrollAreaRef}
                 onScroll={handleScroll}
                 style={{
-                    ...scrollArea, 
-                    padding: isNarrow ? '20px 15px 100px 15px' : '40px 40px 100px 40px'
+                    ...scrollArea,
+                    padding: isNarrow ? '20px 15px 100px 15px' : '28px 36px 100px 36px'
                 }}
             >
                 <ExampleGrid />
@@ -125,33 +119,43 @@ const mainStyle: React.CSSProperties = {
 const topBar: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    height: '40px',
-    padding: '0 20px',
-    borderBottom: '1px solid #222',
-    backgroundColor: '#0a0a0b',
+    height: '44px',
+    padding: '0 18px',
+    backgroundColor: 'transparent',
+    flexShrink: 0,
 };
 
 const toggleSidebarButton: React.CSSProperties = {
-    backgroundColor: 'transparent',
-    border: 'none',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '28px',
+    height: '28px',
+    borderRadius: '9999px',
+    backgroundColor: 'rgba(14, 14, 18, 0.68)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
     color: '#fdb48d',
     cursor: 'pointer',
-    padding: '5px 10px',
-    marginRight: '10px',
-    fontSize: '12px',
+    marginRight: '12px',
+    fontSize: '10px',
+    transition: 'background-color 0.18s',
 };
 
 const pathStyle: React.CSSProperties = {
     fontSize: '13px',
-    fontWeight: 'bold',
-    color: '#eee',
+    fontWeight: 600,
+    color: '#f8f9fa',
+    letterSpacing: '-0.01em',
+    textShadow: '0 1px 4px rgba(0, 0, 0, 0.65)',
     flex: 1,
 };
 
 const scrollArea: React.CSSProperties = {
     flex: 1,
     overflowY: 'auto',
-    padding: '40px 40px 100px 40px',
+    padding: '36px 40px 100px 40px',
 };
 
 export default MainContent;
