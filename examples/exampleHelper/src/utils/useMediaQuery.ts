@@ -7,7 +7,7 @@ import {useEffect, useState} from 'react';
  * @returns [KO] 중단점 이하 여부 [EN] Whether it is below the breakpoint
  */
 export const useMediaQuery = (width: number) => {
-    const [targetReached, setTargetReached] = useState(false);
+    const [targetReached, setTargetReached] = useState(() => typeof window !== 'undefined' ? window.matchMedia(`(max-width: ${width}px)`).matches : false);
 
     useEffect(() => {
         const updateTarget = (e: MediaQueryListEvent) => {

@@ -16,6 +16,25 @@ import {keepLog} from "@redgpu/src/utils";
 const LazyGuiPanel = React.lazy(() => import('./gui/GuiPanel'));
 
 /**
+ * [KO] 모바일 기기에서 가로(Landscape) 모드로 보고 있는지 여부를 판별합니다.
+ * [EN] Determines whether the user is viewing in landscape mode on a mobile device.
+ */
+const checkIsMobileLandscape = (): boolean => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+    const isCoarseNoHover = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const isMobileUA = (navigator as any).userAgentData?.mobile === true ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTouchDevice = isCoarseNoHover || navigator.maxTouchPoints > 0;
+    const isLandscape = window.matchMedia('(orientation: landscape)').matches ||
+        window.innerWidth > window.innerHeight;
+
+    return isLandscape && (
+        (isMobileUA && isTouchDevice) ||
+        (isCoarseNoHover && window.innerHeight <= 600)
+    );
+};
+
+/**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
  * [EN] Main application component of the example helper.
  */
@@ -25,19 +44,23 @@ const App = () => {
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
     const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
 
-    // [KO] 모바일 환경(isNarrow)에서 진입 시 설정 패널을 1초 후 자동으로 닫음 (사용자 경험 개선)
-    // [EN] Automatically close the settings panel after 1 second on mobile (isNarrow) for better UX
+    // [KO] 모바일 환경(세로 협소 화면 또는 모바일 가로 모드) 진입 시 설정 패널을 1초 후 자동으로 닫음 (사용자 경험 개선)
+    // [EN] Automatically close the settings panel after 1 second on mobile (narrow portrait or mobile landscape) for better UX
     const autoCloseTriggered = React.useRef(false);
     React.useEffect(() => {
-        if (isNarrow && showSettingsPanel && !autoCloseTriggered.current) {
-            autoCloseTriggered.current = true;
+        if (autoCloseTriggered.current || !showSettingsPanel) return;
+        const shouldAutoClose = isNarrow || checkIsMobileLandscape();
+        if (shouldAutoClose) {
             const timer = setTimeout(() => {
+                autoCloseTriggered.current = true;
                 setShowSettingsPanel(false);
                 keepLog('Auto close settings panel');
             }, 1000);
             return () => clearTimeout(timer);
+        } else {
+            autoCloseTriggered.current = true;
         }
-    }, []);
+    }, [isNarrow, showSettingsPanel, setShowSettingsPanel]);
 
     // [KO] 뷰포트 상태 동기화
     useViewportSync();
