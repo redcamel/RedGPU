@@ -6,6 +6,7 @@ import LabelButton from '../../../common/components/basic/LabelButton';
 
 const HeaderActions: React.FC = () => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
+    const hideManual = useExamplesStore(state => state.hideManual);
     const language = useExamplesStore(state => state.language);
 
     const openLink = (url: string) => window.open(url, '_blank');
@@ -17,12 +18,16 @@ const HeaderActions: React.FC = () => {
         }}>
             {!isNarrow && (
                 <>
-                    <LabelButton
-                        label="MANUAL"
-                        style={labelButtonStyle}
-                        onClick={() => openLink('/RedGPU/manual/')}
-                    />
-                    <div style={dividerStyle}/>
+                    {!hideManual && (
+                        <>
+                            <LabelButton
+                                label="MANUAL"
+                                style={labelButtonStyle}
+                                onClick={() => openLink('/RedGPU/manual/')}
+                            />
+                            <div style={dividerStyle}/>
+                        </>
+                    )}
                     <LabelButton
                         label="API"
                         style={labelButtonStyle}

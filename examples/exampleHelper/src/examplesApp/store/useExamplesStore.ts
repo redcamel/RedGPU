@@ -12,6 +12,8 @@ export interface ExamplesState {
     scrollPosition: number;
     isNarrow: boolean; // [KO] 비PC(태블릿/모바일 <= 1024px) 여부 [EN] Non-PC flag
     isCompact: boolean; // [KO] 협소 모바일(<= 640px) 여부 [EN] Compact mobile viewport flag
+    hideManual: boolean; // [KO] PC 중폭(<= 1260px)에서 상단 MANUAL 링크 숨김 여부 [EN] Hide MANUAL link on medium PC width
+    hideFooterLang: boolean; // [KO] 초소형 모바일(<= 420px)에서 하단 KO/EN 버튼 숨김 여부 [EN] Hide footer KO/EN on narrow mobile
 
     setActiveTab: (tab: string) => void;
     setSearchQuery: (query: string) => void;
@@ -21,6 +23,8 @@ export interface ExamplesState {
     setScrollPosition: (pos: number) => void;
     setIsNarrow: (isNarrow: boolean) => void;
     setIsCompact: (isCompact: boolean) => void;
+    setHideManual: (hideManual: boolean) => void;
+    setHideFooterLang: (hideFooterLang: boolean) => void;
     
     // [KO] 세션 스토리지에서 상태 복원
     // [EN] Restore state from session storage
@@ -41,6 +45,8 @@ export const useExamplesStore = create<ExamplesState>((set, get) => ({
     scrollPosition: 0,
     isNarrow: typeof window !== 'undefined' ? window.innerWidth <= 1024 : false,
     isCompact: typeof window !== 'undefined' ? window.innerWidth <= 640 : false,
+    hideManual: typeof window !== 'undefined' ? window.innerWidth <= 1260 : false,
+    hideFooterLang: typeof window !== 'undefined' ? window.innerWidth <= 420 : false,
 
     setActiveTab: (activeTab) => {
         set({activeTab});
@@ -62,6 +68,8 @@ export const useExamplesStore = create<ExamplesState>((set, get) => ({
     setScrollPosition: (scrollPosition) => set({scrollPosition}),
     setIsNarrow: (isNarrow) => set({isNarrow}),
     setIsCompact: (isCompact) => set({isCompact}),
+    setHideManual: (hideManual) => set({hideManual}),
+    setHideFooterLang: (hideFooterLang) => set({hideFooterLang}),
 
     saveState: () => {
         const {activeTab, searchQuery, viewMode, language, scrollPosition} = get();

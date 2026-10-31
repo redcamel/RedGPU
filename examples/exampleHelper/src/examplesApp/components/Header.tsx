@@ -72,8 +72,7 @@ const leftGroupStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
-    minWidth: 0,
-    flex: '1 1 auto',
+    flex: '0 0 auto',
 };
 
 const brandColumnStyle: React.CSSProperties = {
@@ -88,13 +87,17 @@ const brandColumnStyle: React.CSSProperties = {
 const rightGroupStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     gap: '8px',
-    flexShrink: 0,
+    flex: '1 1 auto',
+    minWidth: 0,
 };
 
 const desktopSearchWrapperStyle: React.CSSProperties = {
-    width: '220px',
-    flexShrink: 0,
+    width: '100%',
+    maxWidth: '220px',
+    minWidth: '100px',
+    flex: '0 1 220px',
 };
 
 const toggleSidebarButton: React.CSSProperties = {

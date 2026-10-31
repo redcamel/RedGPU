@@ -31,9 +31,6 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                                 alignItems: 'center',
                             }}>
                                 {item.name}
-                                {item.experimental && depth === 0 && (
-                                    <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
-                                )}
                             </div>
                             <SidebarTree items={item.list} depth={depth + 1} />
                         </div>
@@ -62,18 +59,19 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
 };
 
 const groupTitleStyle: React.CSSProperties = {
-    fontSize: '10.5px',
-    color: '#8e8e93',
+    fontSize: '14px',
+    color: '#fdb48d',
     fontWeight: 700,
     marginTop: '16px',
     marginBottom: '6px',
-    letterSpacing: '0.04em',
+    letterSpacing: '0.03em',
+    textShadow: '0 1px 4px rgba(0, 0, 0, 0.75)',
 };
 
 const itemStyle: React.CSSProperties = {
     fontSize: '12.5px',
     color: '#d8dae0',
-    padding: '6px 8px',
+    padding: '5px 8px',
     borderRadius: '6px',
     cursor: 'pointer',
     transition: 'color 0.15s, background-color 0.15s',
@@ -82,20 +80,7 @@ const itemStyle: React.CSSProperties = {
     textOverflow: 'ellipsis',
     display: 'flex',
     alignItems: 'center',
-};
-
-const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '8.5px',
-    backgroundColor: 'rgba(255, 90, 95, 0.16)',
-    color: '#ff7b80',
-    border: '1px solid rgba(255, 90, 95, 0.35)',
-    padding: '2px 6px',
-    borderRadius: '9999px',
-    fontWeight: 700,
-    lineHeight: '1',
-    display: 'inline-block',
-    marginLeft: '6px',
-    flexShrink: 0
+    textShadow: '0 1px 3px rgba(0, 0, 0, 0.5)',
 };
 
 export default SidebarTree;

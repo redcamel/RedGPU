@@ -9,6 +9,7 @@ const ViewControls: React.FC = () => {
     const language = useExamplesStore(state => state.language);
     const setLanguage = useExamplesStore(state => state.setLanguage);
     const isNarrow = useExamplesStore(state => state.isNarrow);
+    const hideFooterLang = useExamplesStore(state => state.hideFooterLang);
 
     return (
         <div style={{
@@ -24,18 +25,22 @@ const ViewControls: React.FC = () => {
                 {viewMode === 'grid' ? '▤' : '☰'}
             </button>
 
-            <div style={divider} />
+            {(!isNarrow || !hideFooterLang) && (
+                <>
+                    <div style={divider}/>
 
-            <button
-                style={{
-                    ...langButtonStyle,
-                    padding: isNarrow ? '0 11px' : '0 13px 0 11px',
-                }}
-                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-                aria-label={`Switch to ${language === 'ko' ? 'English' : 'Korean'}`}
-            >
-                {language === 'ko' ? 'KO' : 'EN'}
-            </button>
+                    <button
+                        style={{
+                            ...langButtonStyle,
+                            padding: isNarrow ? '0 11px' : '0 13px 0 11px',
+                        }}
+                        onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                        aria-label={`Switch to ${language === 'ko' ? 'English' : 'Korean'}`}
+                    >
+                        {language === 'ko' ? 'KO' : 'EN'}
+                    </button>
+                </>
+            )}
 
             {isNarrow && (
                 <>

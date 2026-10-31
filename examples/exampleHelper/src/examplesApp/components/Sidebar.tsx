@@ -34,8 +34,7 @@ const Sidebar: React.FC = () => {
             <aside style={{
                 ...sidebarStyle,
                 margin: sidebarOpen ? '12px 0 42px 20px' : '12px 0 42px 0',
-                border: sidebarOpen ? '1px solid rgba(255, 255, 255, 0.1)' : '0',
-                boxShadow: sidebarOpen ? '0 8px 24px rgba(0, 0, 0, 0.4)' : 'none',
+                borderRight: sidebarOpen ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
                 width: sidebarOpen ? '272px' : '0',
                 opacity: sidebarOpen ? 1 : 0,
             }}>
@@ -46,12 +45,13 @@ const Sidebar: React.FC = () => {
                         onMouseLeave={() => setIsToggleHovered(false)}
                         style={{
                             ...openToggleButtonStyle,
-                            backgroundColor: isToggleHovered ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+                            backgroundColor: isToggleHovered ? 'rgba(36, 36, 40, 0.95)' : 'rgba(18, 18, 20, 0.85)',
+                            borderColor: isToggleHovered ? 'rgba(253, 180, 141, 0.45)' : 'rgba(255, 255, 255, 0.16)',
                         }}
                         title="Hide Sidebar"
                         aria-label="Hide Sidebar"
                     >
-                        <ChevronLeft color="#fdb48d" size={15}/>
+                        <ChevronLeft color="#fdb48d" size={16}/>
                     </button>
                 )}
                 <div style={treeContainerStyle}>
@@ -64,10 +64,7 @@ const Sidebar: React.FC = () => {
 
 const sidebarStyle: React.CSSProperties = {
     position: 'relative',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    borderRadius: '18px',
+    backgroundColor: 'transparent',
     display: 'flex',
     flexDirection: 'column',
     transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -78,8 +75,8 @@ const sidebarStyle: React.CSSProperties = {
 
 const openToggleButtonStyle: React.CSSProperties = {
     position: 'absolute',
-    top: '10px',
-    right: '10px',
+    top: '11px',
+    right: '12px',
     zIndex: 10,
     display: 'inline-flex',
     alignItems: 'center',
@@ -87,11 +84,14 @@ const openToggleButtonStyle: React.CSSProperties = {
     width: '28px',
     height: '28px',
     borderRadius: '50%',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.16)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45)',
     color: '#fdb48d',
     cursor: 'pointer',
     padding: 0,
-    transition: 'background-color 0.18s',
+    transition: 'all 0.18s ease',
     boxSizing: 'border-box',
 };
 
@@ -121,7 +121,7 @@ const collapsedToggleButtonStyle: React.CSSProperties = {
 const treeContainerStyle: React.CSSProperties = {
     flex: 1,
     overflowY: 'auto',
-    padding: '16px 16px 32px 18px',
+    padding: '17px 14px 32px 2px',
     minHeight: 0,
 };
 

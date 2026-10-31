@@ -11,6 +11,8 @@ export const useAppInitialization = () => {
     const restoreState = useExamplesStore(state => state.restoreState);
     const setIsNarrow = useExamplesStore(state => state.setIsNarrow);
     const setIsCompact = useExamplesStore(state => state.setIsCompact);
+    const setHideManual = useExamplesStore(state => state.setHideManual);
+    const setHideFooterLang = useExamplesStore(state => state.setHideFooterLang);
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
 
     // [KO] SEO: 활성 탭이나 검색어에 따라 문서 제목 업데이트
@@ -50,9 +52,13 @@ export const useAppInitialization = () => {
             const width = window.innerWidth;
             const narrow = width <= 1024;
             const compact = width <= 640;
+            const hideManual = width <= 1260;
+            const hideFooterLang = width <= 420;
             
             setIsNarrow(narrow);
             setIsCompact(compact);
+            setHideManual(hideManual);
+            setHideFooterLang(hideFooterLang);
 
             // [KO] 비PC(<= 1024px)에서는 사이드바를 닫고, PC(> 1024px)에서는 열어줌
             // [EN] Close sidebar on non-PC, open on PC
@@ -67,5 +73,5 @@ export const useAppInitialization = () => {
         handleResize(); // [KO] 초기 체크 [EN] Initial check
 
         return () => window.removeEventListener('resize', handleResize);
-    }, [restoreState, setIsNarrow, setIsCompact, setSidebarOpen]);
+    }, [restoreState, setIsNarrow, setIsCompact, setHideManual, setHideFooterLang, setSidebarOpen]);
 };
