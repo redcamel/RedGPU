@@ -8,6 +8,7 @@ const MainContent: React.FC = () => {
     const sidebarOpen = useExamplesStore(state => state.sidebarOpen);
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
     const isNarrow = useExamplesStore(state => state.isNarrow);
+    const isCompact = useExamplesStore(state => state.isCompact);
     const searchQuery = useExamplesStore(state => state.searchQuery);
     const scrollPosition = useExamplesStore(state => state.scrollPosition);
     const setScrollPosition = useExamplesStore(state => state.setScrollPosition);
@@ -64,7 +65,7 @@ const MainContent: React.FC = () => {
 
     return (
         <main style={mainStyle}>
-            {isNarrow && !searchQuery && (
+            {isCompact && !searchQuery && (
                 <div style={{
                     ...topBar,
                     margin: '10px 16px 10px 16px',
@@ -80,7 +81,7 @@ const MainContent: React.FC = () => {
                 onScroll={handleScroll}
                 style={{
                     ...scrollArea,
-                    marginTop: isNarrow ? (searchQuery ? '10px' : '0') : '12px',
+                    marginTop: isNarrow ? ((isCompact && !searchQuery) ? '0' : '10px') : '12px',
                     padding: isNarrow
                         ? '8px 16px 24px 16px'
                         : (sidebarOpen && !searchQuery ? '8px 20px 32px 16px' : '8px 20px 32px 20px')

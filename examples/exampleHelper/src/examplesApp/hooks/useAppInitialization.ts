@@ -10,6 +10,7 @@ export const useAppInitialization = () => {
     const searchQuery = useExamplesStore(state => state.searchQuery);
     const restoreState = useExamplesStore(state => state.restoreState);
     const setIsNarrow = useExamplesStore(state => state.setIsNarrow);
+    const setIsCompact = useExamplesStore(state => state.setIsCompact);
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
 
     // [KO] SEO: 활성 탭이나 검색어에 따라 문서 제목 업데이트
@@ -47,17 +48,17 @@ export const useAppInitialization = () => {
         // [EN] Manage viewport resize events
         const handleResize = () => {
             const width = window.innerWidth;
-            const narrow = width <= 768;
+            const narrow = width <= 1024;
+            const compact = width <= 640;
             
             setIsNarrow(narrow);
-            
-            // [KO] 모바일에서는 사이드바를 자동으로 닫고, 넓은 화면에서는 열림 상태를 고려
-            // [EN] Automatically close sidebar on mobile, consider open state on wide screens
+            setIsCompact(compact);
+
+            // [KO] 비PC(<= 1024px)에서는 사이드바를 닫고, PC(> 1024px)에서는 열어줌
+            // [EN] Close sidebar on non-PC, open on PC
             if (narrow) {
                 setSidebarOpen(false);
-            } else if (width > 1024) {
-                // [KO] 충분히 넓은 화면으로 돌아오면 사이드바를 다시 열어줌 (선택사항)
-                // [EN] Re-open sidebar when returning to a sufficiently wide screen (optional)
+            } else {
                 setSidebarOpen(true);
             }
         };
@@ -66,5 +67,5 @@ export const useAppInitialization = () => {
         handleResize(); // [KO] 초기 체크 [EN] Initial check
 
         return () => window.removeEventListener('resize', handleResize);
-    }, [restoreState, setIsNarrow, setSidebarOpen]);
+    }, [restoreState, setIsNarrow, setIsCompact, setSidebarOpen]);
 };

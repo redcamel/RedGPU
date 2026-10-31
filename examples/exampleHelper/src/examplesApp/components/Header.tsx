@@ -8,6 +8,7 @@ import HeaderActions from './header/HeaderActions';
 
 const Header: React.FC = () => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
+    const isCompact = useExamplesStore(state => state.isCompact);
     const searchQuery = useExamplesStore(state => state.searchQuery);
     const sidebarOpen = useExamplesStore(state => state.sidebarOpen);
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
@@ -18,9 +19,10 @@ const Header: React.FC = () => {
                 ...headerStyle,
                 margin: '16px 16px 0 16px',
                 height: '46px',
+                gap: '12px',
             }}>
                 <Logo/>
-
+                {!isCompact && !searchQuery && <CategoryNav/>}
                 <div style={centerSectionStyle}>
                     <SearchInput/>
                 </div>
@@ -128,10 +130,11 @@ const toggleSidebarButton: React.CSSProperties = {
 
 const centerSectionStyle: React.CSSProperties = {
     flex: 1,
+    minWidth: 0,
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    padding: '0 0 0 16px',
+    padding: 0,
 };
 
 export default Header;
