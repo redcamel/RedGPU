@@ -74,33 +74,8 @@ const GuiPanel: React.FC = () => {
             {guiInstance && guiConfig.skybox && redGPUContext && redGPUContext.viewList[0] && (
                 <GuiSkyBoxHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>
             )}
-            {/*{guiInstance && redGPUContext && (*/}
-            {/*    <GuiDestroyTest gui={guiInstance} redGPUContext={redGPUContext}/>*/}
-            {/*)}*/}
         </>
     );
-};
-
-interface GuiDestroyTestProps {
-    gui: any;
-    redGPUContext: any;
-}
-
-const GuiDestroyTest: React.FC<GuiDestroyTestProps> = ({gui, redGPUContext}) => {
-    useEffect(() => {
-        const btn = gui.addButton({
-            title: 'destroy test',
-        });
-        btn.on('click', () => {
-            console.log('💥 Calling redGPUContext.destroy() via tweakpane destroy test button');
-            redGPUContext.destroy();
-        });
-        return () => {
-            btn.dispose();
-        };
-    }, [gui, redGPUContext]);
-
-    return null;
 };
 
 const guiContainerStyle: React.CSSProperties = {

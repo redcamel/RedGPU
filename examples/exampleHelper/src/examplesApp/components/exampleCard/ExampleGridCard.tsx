@@ -8,7 +8,6 @@ interface CardProps {
     hovered: boolean;
     isNarrow: boolean;
     isLCP: boolean;
-    onClick: () => void;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
 }
@@ -36,11 +35,9 @@ export const ExampleGridCard: React.FC<CardProps> = ({
     return (
         <a
             href={href}
-            style={{...cardStyle(hovered, isNarrow), textDecoration: 'none', display: 'block'}}
+            style={cardStyle(hovered, isNarrow)}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            onClick={() => {
-            }}
         >
             <div style={{
                 ...thumbWrapperStyle,
@@ -61,7 +58,6 @@ export const ExampleGridCard: React.FC<CardProps> = ({
                 )}
             </div>
             <div style={{
-                ...contentStyle,
                 padding: isCompact ? '8px 8px 4px' : (isNarrow ? '10px 8px 6px' : '11px 10px 7px')
             }}>
                 <div style={{
@@ -83,6 +79,8 @@ export const ExampleGridCard: React.FC<CardProps> = ({
 };
 
 const cardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => ({
+    display: 'block',
+    textDecoration: 'none',
     backgroundColor: hovered ? 'rgba(22, 22, 28, 0.78)' : 'rgba(14, 14, 18, 0.68)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
@@ -99,7 +97,6 @@ const cardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => 
 
 const thumbWrapperStyle: React.CSSProperties = {
     position: 'relative',
-    aspectRatio: '16 / 10',
     borderRadius: '11px',
     overflow: 'hidden',
     backgroundColor: '#09090b',
@@ -141,12 +138,7 @@ const viewButtonStyle: React.CSSProperties = {
     boxShadow: '0 6px 20px rgba(0, 0, 0, 0.45)',
 };
 
-const contentStyle: React.CSSProperties = {
-    padding: '11px 10px 7px',
-};
-
 const titleStyle: React.CSSProperties = {
-    fontSize: '14px',
     fontWeight: 600,
     letterSpacing: '-0.01em',
     color: '#f8f9fa',
@@ -156,7 +148,6 @@ const titleStyle: React.CSSProperties = {
 };
 
 const descStyle: React.CSSProperties = {
-    fontSize: '12px',
     color: '#9898a2',
     lineHeight: '1.4',
     whiteSpace: 'nowrap',

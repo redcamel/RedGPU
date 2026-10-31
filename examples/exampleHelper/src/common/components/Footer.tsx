@@ -10,10 +10,9 @@ interface FooterProps {
     narrowTitle?: React.ReactNode;
     narrowSettings?: React.ReactNode;
     isNarrow?: boolean;
-    onShowSource?: () => void;
 }
 
-const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = false, onShowSource}: FooterProps) => {
+const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = false}: FooterProps) => {
     const [isLinkHovered, setIsLinkHovered] = useState(false);
 
     // [KO] 1. 예제 목록 페이지(ExamplesApp: useSourceModal === false)
@@ -234,21 +233,6 @@ const githubCircleIslandStyle: React.CSSProperties = {
     transition: 'background-color 0.18s',
 };
 
-const rightCapsuleStyle: React.CSSProperties = {
-    height: '42px',
-    padding: '4px',
-    backgroundColor: 'rgba(17, 17, 18, 0.84)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '9999px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
-    display: 'flex',
-    alignItems: 'center',
-    boxSizing: 'border-box',
-    pointerEvents: 'auto'
-};
-
 const narrowFooterBarStyle: React.CSSProperties = {
     height: '42px',
     display: 'flex',
@@ -266,19 +250,6 @@ const footerLeftLinkStyle: React.CSSProperties = {
     textDecoration: 'none',
     cursor: 'pointer',
     transition: 'opacity 0.2s'
-};
-
-const footerRightStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    pointerEvents: 'auto'
-};
-
-const narrowSourceButtonStyle: React.CSSProperties = {
-    height: '28px',
-    padding: '0 12px',
-    fontSize: '10px',
-    borderRadius: '7px'
 };
 
 const iconWrapperStyle: React.CSSProperties = {

@@ -92,7 +92,6 @@ const CategoryNav: React.FC = () => {
 const navStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
-    width: 'fit-content',
     maxWidth: '100%',
     minWidth: 0,
     height: '46px',
@@ -116,7 +115,6 @@ const containerStyle: React.CSSProperties = {
 const tabButtonStyle: React.CSSProperties = {
     position: 'relative',
     height: '36px',
-    padding: '0 16px',
     border: 'none',
     outline: 'none',
     borderRadius: '9999px',

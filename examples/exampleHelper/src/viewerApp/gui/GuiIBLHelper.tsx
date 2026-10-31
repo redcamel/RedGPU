@@ -181,8 +181,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
 
         // Initial setup
         syncLight(settings.useLight);
-        if (settings.useIBL) updateIBL(settings.texture);
-        else iblFolder.disabled = true;
+        updateIBL(settings.texture);
 
         return () => {
             lightingFolder.dispose();

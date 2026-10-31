@@ -19,7 +19,6 @@ const SearchInput: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                     ...searchInputStyle,
-                    height: '46px',
                     borderColor: focused ? 'rgba(253, 180, 141, 0.55)' : 'rgba(255, 255, 255, 0.1)',
                     backgroundColor: focused ? 'rgba(24, 24, 28, 0.9)' : 'rgba(18, 18, 20, 0.82)'
                 }}

@@ -173,7 +173,6 @@ const arrowIconStyle: React.CSSProperties = {
 
 const optionsListStyle: React.CSSProperties = {
     position: 'absolute',
-    top: 'calc(100% + 6px)',
     left: 0,
     minWidth: '100%',
     width: 'max-content',
@@ -182,7 +181,6 @@ const optionsListStyle: React.CSSProperties = {
     WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255, 255, 255, 0.12)',
     borderRadius: '14px',
-    boxShadow: '0 12px 32px rgba(0,0,0,0.55)',
     zIndex: 10004,
     display: 'flex',
     flexDirection: 'column',

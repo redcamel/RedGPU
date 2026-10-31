@@ -13,6 +13,4 @@ export const useViewportSync = () => {
     useEffect(() => {
         setIsNarrow(isNarrow);
     }, [isNarrow, setIsNarrow]);
-
-    return isNarrow;
 };

@@ -2562,35 +2562,6 @@ Check performance limits on each device.`
                             },
                         ]
                     },
-                    // {
-                    //     name: 'Line2D',
-                    //     list: [
-                    //         {
-                    //             name: 'Linear Type',
-                    //             path: '2d/line2D/linear',
-                    //             description: {
-                    //                 ko: ``, 
-                    //                 en: ``
-                    //             },
-                    //         },
-                    //         {
-                    //             name: 'TODO - Bezier Type',
-                    //             // path: '2d/line2D/bezier',
-                    //             description: {
-                    //                 ko: ``, 
-                    //                 en: ``
-                    //             },
-                    //         },
-                    //         {
-                    //             name: 'TODO - CatmullRom Type',
-                    //             // path: '2d/line2D/catmullRom',
-                    //             description: {
-                    //                 ko: ``, 
-                    //                 en: ``
-                    //             },
-                    //         },
-                    //     ]
-                    // },
                 ]
             },
             {
@@ -2646,19 +2617,6 @@ Check performance limits on each device.`
                             },
                         ]
                     },
-                    // {
-                    // 	name: '2D CompositeMode',
-                    // 	list: [
-                    // 		{
-                    // 			name: 'CompositeMode',
-                    // 			path: '2d/compositeMode/basic',
-                    // 			description: {
-                    // 				ko: ``, 
-                    // 				en: ``
-                    // 			},
-                    // 		},
-                    // 	]
-                    // },
                 ]
             },
             {

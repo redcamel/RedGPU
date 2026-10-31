@@ -73,7 +73,6 @@ class RedGPUExampleHelper {
         // - padding: 1.15 정도로 설정하여 모델이 테두리에 닿지 않게 여유를 줌
         // - zSize / 2: 카메라가 모델 '중심'이 아닌 '앞면'을 기준으로 거리를 잡도록 보정
         const padding = 1.15;
-        // const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
         const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
 
         // 5. 타겟(Center) 설정 - 질문하신 centerY 보정 적용
@@ -95,9 +94,6 @@ class RedGPUExampleHelper {
             orbitController.distance = 1;
         }
         orbitController.speedDistance = Math.max(0.1, requiredDistance * 0.1);
-
-        // },1000)
-
     }
 
     private root: ReactDOM.Root | null = null;

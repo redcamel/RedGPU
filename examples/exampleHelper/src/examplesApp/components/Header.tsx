@@ -17,8 +17,6 @@ const Header: React.FC = () => {
             <header style={{
                 ...headerStyle,
                 margin: '16px 16px 0 16px',
-                height: '46px',
-                gap: '12px',
             }}>
                 <Logo/>
                 {!isCompact && !searchQuery && <CategoryNav/>}
@@ -33,8 +31,6 @@ const Header: React.FC = () => {
         <header style={{
             ...headerStyle,
             margin: '20px 20px 0 20px',
-            height: '46px',
-            gap: '12px',
         }}>
             <div style={leftGroupStyle}>
                 <div style={{
@@ -62,6 +58,7 @@ const headerStyle: React.CSSProperties = {
     alignItems: 'center',
     justifyContent: 'space-between',
     height: '46px',
+    gap: '12px',
     backgroundColor: 'transparent',
     padding: 0,
     zIndex: 100,
@@ -98,26 +95,6 @@ const desktopSearchWrapperStyle: React.CSSProperties = {
     maxWidth: '220px',
     minWidth: '100px',
     flex: '0 1 220px',
-};
-
-const toggleSidebarButton: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '46px',
-    height: '46px',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    color: '#fdb48d',
-    cursor: 'pointer',
-    fontSize: '11px',
-    transition: 'background-color 0.18s',
-    boxSizing: 'border-box',
-    flexShrink: 0,
 };
 
 const centerSectionStyle: React.CSSProperties = {

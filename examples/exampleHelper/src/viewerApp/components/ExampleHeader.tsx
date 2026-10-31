@@ -53,11 +53,10 @@ const ExampleHeader = () => {
                 top: isNarrow ? '16px' : '20px',
                 left: isNarrow ? '16px' : '20px',
                 right: isNarrow ? '16px' : '20px',
-                height: '46px'
             }}
         >
             <div style={navBarStyle}>
-                <div style={{...leftGroupStyle, gap: '8px'}}>
+                <div style={leftGroupStyle}>
                     <div style={circleIslandStyle}>
                         <IconButton
                             icon={<HomeIcon color="#fff" size={18}/>}
@@ -126,9 +125,6 @@ const ExampleHeader = () => {
 // Styles
 const containerStyle: React.CSSProperties = {
     position: 'fixed',
-    top: '20px',
-    left: '20px',
-    right: '20px',
     height: '46px',
     backgroundColor: 'transparent',
     zIndex: 10003,
@@ -154,14 +150,6 @@ const leftGroupStyle: React.CSSProperties = {
     height: '100%',
     minWidth: 0,
     flex: '0 1 auto',
-    gap: '8px',
-    backgroundColor: 'transparent'
-};
-
-const rightGroupStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    height: '100%',
     gap: '8px',
     backgroundColor: 'transparent'
 };

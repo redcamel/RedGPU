@@ -35,7 +35,6 @@ const logoContainer: React.CSSProperties = {
 };
 
 const titleStyle: React.CSSProperties = {
-    fontSize: '18px',
     fontWeight: 'bold',
     letterSpacing: '0.02em',
     color: '#fff',

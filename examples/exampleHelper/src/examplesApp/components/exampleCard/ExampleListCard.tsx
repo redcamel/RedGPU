@@ -7,7 +7,6 @@ interface CardProps {
     hovered: boolean;
     isNarrow: boolean;
     isLCP: boolean;
-    onClick: () => void;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
 }
@@ -34,11 +33,9 @@ export const ExampleListCard: React.FC<CardProps> = ({
     return (
         <a
             href={href}
-            style={{...listCardStyle(hovered, isNarrow), textDecoration: 'none', display: 'flex'}}
+            style={listCardStyle(hovered, isNarrow)}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            onClick={() => {
-            }}
         >
             <img
                 src={thumbUrl}
@@ -60,6 +57,7 @@ export const ExampleListCard: React.FC<CardProps> = ({
 const listCardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => ({
     display: 'flex',
     alignItems: 'center',
+    textDecoration: 'none',
     width: '100%',
     minWidth: 0,
     padding: isNarrow ? '8px 12px' : '8px 14px',
@@ -92,7 +90,6 @@ const listContentStyle: React.CSSProperties = {
 };
 
 const titleStyle: React.CSSProperties = {
-    fontSize: '14px',
     fontWeight: 600,
     lineHeight: '1.35',
     color: '#f8f9fa',
@@ -124,5 +121,3 @@ const experimentalBadgeStyle: React.CSSProperties = {
     lineHeight: '1.1',
     flexShrink: 0,
 };
-
-export default ExampleListCard;

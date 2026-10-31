@@ -119,11 +119,7 @@ const GuiSkyBoxHelper: React.FC<GuiSkyBoxHelperProps> = ({gui, view}) => {
         });
 
         // Initial setup
-        if (settings.useSkyBox) {
-            updateSkyBox(settings.texture);
-        } else {
-            settingsFolder.disabled = true;
-        }
+        updateSkyBox(settings.texture);
 
         return () => {
             skyboxFolder.dispose();

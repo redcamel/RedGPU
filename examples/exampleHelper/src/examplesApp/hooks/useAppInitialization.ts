@@ -8,7 +8,6 @@ import {useExamplesStore} from '../store/useExamplesStore';
 export const useAppInitialization = () => {
     const activeTab = useExamplesStore(state => state.activeTab);
     const searchQuery = useExamplesStore(state => state.searchQuery);
-    const restoreState = useExamplesStore(state => state.restoreState);
     const setIsNarrow = useExamplesStore(state => state.setIsNarrow);
     const setIsCompact = useExamplesStore(state => state.setIsCompact);
     const setHideManual = useExamplesStore(state => state.setHideManual);
@@ -73,5 +72,5 @@ export const useAppInitialization = () => {
         handleResize(); // [KO] 초기 체크 [EN] Initial check
 
         return () => window.removeEventListener('resize', handleResize);
-    }, [restoreState, setIsNarrow, setIsCompact, setHideManual, setHideFooterLang, setSidebarOpen]);
+    }, [setIsNarrow, setIsCompact, setHideManual, setHideFooterLang, setSidebarOpen]);
 };

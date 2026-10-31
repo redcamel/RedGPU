@@ -24,10 +24,7 @@
     "types": ["@webgpu/types", "vite/client"]
   },
   "include": [
-    "src", 
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.d.ts",
+    "src",
     "vite.config.ts",
     "../../src/types.d.ts"
   ]

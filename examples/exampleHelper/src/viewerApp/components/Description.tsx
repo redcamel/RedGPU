@@ -9,7 +9,6 @@ const Description = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
     const language = useExampleHelperStore((state: ExampleHelperState) => state.language);
     const setLanguage = useExampleHelperStore((state: ExampleHelperState) => state.setLanguage);
-    const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
     const [isToggleHovered, setIsToggleHovered] = React.useState(false);
 
@@ -30,9 +29,7 @@ const Description = () => {
             <div
                 style={{
                     ...containerStyle,
-                    top: 'auto',
                     bottom: isNarrow ? '164px' : '32px',
-                    left: isNarrow ? '20px' : '20px',
                     right: isNarrow ? '20px' : '270px'
                 }}
             >
@@ -108,9 +105,7 @@ const bottomScrimStyle: React.CSSProperties = {
 };
 const containerStyle: React.CSSProperties = {
     position: 'fixed',
-    top: '80px',
-    left: '22px',
-    right: '22px',
+    left: '20px',
     backgroundColor: 'transparent',
     padding: 0,
     zIndex: 10002,
@@ -124,8 +119,6 @@ const editorialWrapperStyle: React.CSSProperties = {
     display: 'inline-flex',
     flexDirection: 'row',
     alignItems: 'stretch',
-    gap: '12px',
-    maxWidth: '840px',
     padding: 0,
     backgroundColor: 'transparent',
     pointerEvents: 'auto'
@@ -245,9 +238,6 @@ const experimentalBadgeStyle: React.CSSProperties = {
 };
 
 const contentStyle: React.CSSProperties = {
-    fontSize: '14px',
-    fontWeight: 400,
-    color: 'rgba(232, 235, 242, 0.86)',
     lineHeight: '1.6',
     letterSpacing: '-0.01em',
     wordBreak: 'keep-all',

@@ -53,7 +53,6 @@ const rightSectionStyle: React.CSSProperties = {
     alignItems: 'center',
     height: '46px',
     flexShrink: 0,
-    padding: '4px',
     gap: '4px',
     backgroundColor: 'rgba(18, 18, 20, 0.82)',
     backdropFilter: 'blur(16px)',

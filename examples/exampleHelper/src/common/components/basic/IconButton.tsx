@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
 interface IconButtonProps {
-    icon: string | React.ReactNode;
+    icon: React.ReactNode;
     label: string;
     onClick: () => void;
     title?: string;
@@ -13,13 +13,6 @@ interface IconButtonProps {
  */
 const IconButton: React.FC<IconButtonProps> = ({icon, label, onClick, title}) => {
     const [isHovered, setIsHovered] = useState(false);
-
-    const renderIcon = () => {
-        if (typeof icon === 'string') {
-            return <img src={icon} style={iconStyle} alt={label}/>;
-        }
-        return icon;
-    };
 
     return (
         <button
@@ -33,7 +26,7 @@ const IconButton: React.FC<IconButtonProps> = ({icon, label, onClick, title}) =>
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {renderIcon()}
+            {icon}
         </button>
     );
 };
@@ -54,11 +47,6 @@ const baseButtonStyle: React.CSSProperties = {
     transition: 'background-color 0.15s, color 0.15s',
     padding: 0,
     flexShrink: 0
-};
-
-const iconStyle: React.CSSProperties = {
-    width: '16px',
-    height: '16px'
 };
 
 export default IconButton;

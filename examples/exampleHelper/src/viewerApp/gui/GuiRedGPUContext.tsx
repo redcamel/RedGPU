@@ -61,7 +61,7 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
 
         sizeFolder.addBinding(SIZE_DATA, 'widthUnit', {
             options: {'%': '%', 'px': 'px', 'number': 'number'}
-        }).on('change', (ev) => {
+        }).on('change', () => {
             // Tweakpane 3.x doesn't support dynamic max change easily on input, 
             // but we can at least update the value.
             updateWidth();

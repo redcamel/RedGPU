@@ -64,8 +64,6 @@ export interface ExampleHelperState {
     setShowSourceModal: (value: boolean) => void;
     setShowSettingsPanel: (value: boolean) => void;
     addTopBarRightAction: (action: TopBarAction) => void;
-    removeTopBarRightAction: (id: string) => void;
-    clearTopBarRightActions: () => void;
     setGuiConfig: (config: GuiConfig | null) => void;
     setIsNarrow: (value: boolean) => void;
     updateLoadingState: (info: LoadingInfo) => void;
@@ -96,10 +94,6 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
         const filtered = state.topBarRightActions.filter(a => a.id !== action.id);
         return {topBarRightActions: [...filtered, action]};
     }),
-    removeTopBarRightAction: (id) => set((state) => ({
-        topBarRightActions: state.topBarRightActions.filter(a => a.id !== id)
-    })),
-    clearTopBarRightActions: () => set({topBarRightActions: []}),
     setGuiConfig: (config: GuiConfig | null) => {
         const hasPanels = !!(
             config?.redGPUContext ||

@@ -6,13 +6,11 @@ import ExampleGrid from './ExampleGrid';
 const MainContent: React.FC = () => {
     const activeTab = useExamplesStore(state => state.activeTab);
     const sidebarOpen = useExamplesStore(state => state.sidebarOpen);
-    const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
     const isNarrow = useExamplesStore(state => state.isNarrow);
     const isCompact = useExamplesStore(state => state.isCompact);
     const searchQuery = useExamplesStore(state => state.searchQuery);
     const scrollPosition = useExamplesStore(state => state.scrollPosition);
     const setScrollPosition = useExamplesStore(state => state.setScrollPosition);
-    useExamplesStore(state => state.saveState);
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const isInitialMount = useRef(true);
@@ -120,46 +118,9 @@ const leftGroupStyle: React.CSSProperties = {
     flex: 1,
 };
 
-const toggleSidebarButton: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '46px',
-    height: '46px',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    color: '#fdb48d',
-    cursor: 'pointer',
-    fontSize: '11px',
-    transition: 'background-color 0.18s',
-    boxSizing: 'border-box',
-    flexShrink: 0,
-};
-
-const pathStyle: React.CSSProperties = {
-    fontSize: '13px',
-    fontWeight: 600,
-    color: '#f8f9fa',
-    letterSpacing: '-0.01em',
-    textShadow: '0 1px 4px rgba(0, 0, 0, 0.65)',
-    flex: 1,
-};
-
 const scrollArea: React.CSSProperties = {
     flex: 1,
     overflowY: 'auto',
-    padding: '36px 40px 100px 40px',
-};
-
-const floatingBottomRightStyle: React.CSSProperties = {
-    position: 'fixed',
-    right: '16px',
-    bottom: '16px',
-    zIndex: 110,
 };
 
 export default MainContent;

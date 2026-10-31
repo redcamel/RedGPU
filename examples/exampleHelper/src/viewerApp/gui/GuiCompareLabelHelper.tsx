@@ -28,7 +28,7 @@ const GuiCompareLabelHelper: React.FC = () => {
         } else {
             setRect(null);
         }
-    }, [guiConfig?.compareLabel?.targetContainer, isNarrow]);
+    }, [guiConfig?.compareLabel?.targetContainer]);
 
     useLayoutEffect(() => {
         updateContainerStyle();

@@ -1,8 +1,7 @@
 import React, {useState} from 'react';
 
 interface IconToggleButtonProps {
-    id?: string;
-    icon?: string | React.ReactNode;
+    icon?: React.ReactNode;
     label: string;
     isActive: boolean;
     onClick: () => void;
@@ -17,14 +16,6 @@ interface IconToggleButtonProps {
  */
 const IconToggleButton: React.FC<IconToggleButtonProps> = ({icon, label, isActive, onClick, title}) => {
     const [isHovered, setIsHovered] = useState(false);
-
-    const renderIcon = () => {
-        if (!icon) return label;
-        if (typeof icon === 'string') {
-            return <img src={icon} style={iconStyle} alt={label}/>;
-        }
-        return icon;
-    };
 
     return (
         <button
@@ -56,7 +47,7 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({icon, label, isActiv
                 fontWeight: 'bold',
                 transition: 'opacity 0.15s'
             }}>
-                {renderIcon()}
+                {icon ?? label}
             </div>
         </button>
     );
@@ -77,11 +68,6 @@ const baseButtonStyle: React.CSSProperties = {
     transition: 'background-color 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s',
     flexShrink: 0,
     boxSizing: 'border-box'
-};
-
-const iconStyle: React.CSSProperties = {
-    width: '24px',
-    height: '24px'
 };
 
 export default IconToggleButton;

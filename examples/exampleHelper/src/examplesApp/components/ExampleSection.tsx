@@ -58,7 +58,6 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0, lcpCoun
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '25px',
     fontWeight: 700,
     lineHeight: 1.15,
     marginTop: 0,
@@ -71,7 +70,6 @@ const sectionTitleStyle: React.CSSProperties = {
 };
 
 const subSectionTitleStyle: React.CSSProperties = {
-    fontSize: '17px',
     fontWeight: 600,
     marginTop: 0,
     marginBottom: '16px',
@@ -85,7 +83,6 @@ const subSectionTitleStyle: React.CSSProperties = {
 };
 
 const subSubSectionTitleStyle: React.CSSProperties = {
-    fontSize: '12.5px',
     fontWeight: 700,
     marginTop: 0,
     marginBottom: '12px',

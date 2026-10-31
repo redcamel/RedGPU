@@ -24,7 +24,7 @@ const Title = () => {
     }, [currentExample, flatList]);
 
     const prevExample = currentIndex > 0 ? flatList[currentIndex - 1] : null;
-    const nextExample = currentIndex < flatList.length - 1 ? flatList[currentIndex + 1] : null;
+    const nextExample = (currentIndex >= 0 && currentIndex < flatList.length - 1) ? flatList[currentIndex + 1] : null;
 
     const [isPrevHovered, setIsPrevHovered] = React.useState(false);
     const [isNextHovered, setIsNextHovered] = React.useState(false);
@@ -129,14 +129,6 @@ const contentBoxStyle: React.CSSProperties = {
     flexGrow: 1,
     minWidth: 0,
     overflow: 'hidden',
-    textAlign: 'center'
-};
-
-const titleLabelStyle: React.CSSProperties = {
-    fontSize: '11px',
-    lineHeight: '1',
-    color: '#8e8e93',
-    fontWeight: 500
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {

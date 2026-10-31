@@ -23,7 +23,6 @@ const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
-    const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
     const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
 
     // [KO] 모바일 환경(isNarrow)에서 진입 시 설정 패널을 1초 후 자동으로 닫음 (사용자 경험 개선)
@@ -79,7 +78,6 @@ const App = () => {
                 narrowTitle={<Title/>}
                 narrowSettings={<RenderingSettingsGroup/>}
                 isNarrow={isNarrow}
-                onShowSource={() => setShowSourceModal(true)}
             />
             <SourceModal/>
             <LoadingUI/>
@@ -90,8 +88,6 @@ const App = () => {
 // Styles
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    right: '20px',
-    top: '80px',
     display: 'flex',
     flexDirection: 'column',
     color: 'white',

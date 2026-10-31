@@ -104,7 +104,6 @@ export const useTopBarActions = () => {
     }, [redGPUContext, axisActive, gridActive, debugActive, showSettingsPanel, guiConfig, addTopBarRightAction, setShowSettingsPanel]);
 
     return {
-        debugActive,
         setDebugActive
     };
 };
