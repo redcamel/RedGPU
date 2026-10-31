@@ -31,7 +31,7 @@ const Description = () => {
                 style={{
                     ...containerStyle,
                     top: 'auto',
-                    bottom: isNarrow ? '164px' : '20px',
+                    bottom: isNarrow ? '164px' : '32px',
                     left: isNarrow ? '20px' : '20px',
                     right: isNarrow ? '20px' : '270px'
                 }}

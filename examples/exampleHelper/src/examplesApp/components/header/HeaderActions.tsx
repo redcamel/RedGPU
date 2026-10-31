@@ -11,7 +11,10 @@ const HeaderActions: React.FC = () => {
     const openLink = (url: string) => window.open(url, '_blank');
 
     return (
-        <div style={rightSectionStyle}>
+        <div style={{
+            ...rightSectionStyle,
+            padding: isNarrow ? '4px' : '4px 8px 4px 6px',
+        }}>
             {!isNarrow && (
                 <>
                     <LabelButton
@@ -28,12 +31,14 @@ const HeaderActions: React.FC = () => {
                     <div style={dividerStyle}/>
                 </>
             )}
-            <IconButton
-                icon={<GitHubIcon color="#fff" size={18}/>}
-                label="GITHUB"
-                onClick={() => openLink('https://github.com/redcamel/RedGPU')}
-                title="GitHub Repository"
-            />
+            <div style={!isNarrow ? {display: 'flex', marginLeft: '2px'} : {display: 'flex'}}>
+                <IconButton
+                    icon={<GitHubIcon color="#fff" size={18}/>}
+                    label="GITHUB"
+                    onClick={() => openLink('https://github.com/redcamel/RedGPU')}
+                    title="GitHub Repository"
+                />
+            </div>
         </div>
     );
 };
@@ -56,7 +61,7 @@ const rightSectionStyle: React.CSSProperties = {
 };
 
 const labelButtonStyle: React.CSSProperties = {
-    padding: '0 9px',
+    padding: '0 11px',
 };
 
 const dividerStyle: React.CSSProperties = {

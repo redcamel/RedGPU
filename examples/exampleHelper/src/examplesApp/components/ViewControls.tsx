@@ -11,7 +11,10 @@ const ViewControls: React.FC = () => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
 
     return (
-        <div style={containerStyle}>
+        <div style={{
+            ...containerStyle,
+            padding: isNarrow ? '4px 8px 4px 6px' : '4px 4px 4px 6px',
+        }}>
             <button
                 style={buttonStyle}
                 onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
@@ -24,7 +27,10 @@ const ViewControls: React.FC = () => {
             <div style={divider} />
 
             <button
-                style={langButtonStyle}
+                style={{
+                    ...langButtonStyle,
+                    padding: isNarrow ? '0 11px' : '0 13px 0 11px',
+                }}
                 onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
                 aria-label={`Switch to ${language === 'ko' ? 'English' : 'Korean'}`}
             >
@@ -34,12 +40,14 @@ const ViewControls: React.FC = () => {
             {isNarrow && (
                 <>
                     <div style={divider}/>
-                    <IconButton
-                        icon={<GitHubIcon color="#fff" size={18}/>}
-                        label="GITHUB"
-                        onClick={() => window.open('https://github.com/redcamel/RedGPU', '_blank')}
-                        title="GitHub Repository"
-                    />
+                    <div style={{display: 'flex', marginLeft: '2px'}}>
+                        <IconButton
+                            icon={<GitHubIcon color="#fff" size={18}/>}
+                            label="GITHUB"
+                            onClick={() => window.open('https://github.com/redcamel/RedGPU', '_blank')}
+                            title="GitHub Repository"
+                        />
+                    </div>
                 </>
             )}
         </div>
@@ -84,9 +92,9 @@ const langButtonStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '36px',
+    width: 'auto',
     height: '36px',
-    padding: 0,
+    padding: '0 11px',
     backgroundColor: 'transparent',
     border: 'none',
     borderRadius: '9999px',
