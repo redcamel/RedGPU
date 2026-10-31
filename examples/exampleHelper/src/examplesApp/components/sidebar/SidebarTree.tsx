@@ -23,7 +23,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                 const key = `${item.name}-${idx}`;
                 if (item.list) {
                     return (
-                        <div key={key} style={{marginLeft: depth * 12}}>
+                        <div key={key} style={{marginLeft: depth > 0 ? 10 : 0}}>
                             <div style={{
                                 ...groupTitleStyle,
                                 marginTop: (depth === 0 && idx === 0) ? 0 : '16px',
@@ -44,7 +44,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                         className="sidebar-item"
                         style={{
                             ...itemStyle,
-                            marginLeft: depth * 12,
+                            marginLeft: 4,
                             textDecoration: 'none',
                         }}
                     >
@@ -71,7 +71,7 @@ const groupTitleStyle: React.CSSProperties = {
 const itemStyle: React.CSSProperties = {
     fontSize: '12.5px',
     color: '#d8dae0',
-    padding: '5px 8px',
+    padding: '5px 6px',
     borderRadius: '6px',
     cursor: 'pointer',
     transition: 'color 0.15s, background-color 0.15s',
