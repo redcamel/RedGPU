@@ -12,8 +12,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Hello RedGPU',
                         path: '3d/helloWorld',
                         description: {
-                            ko: `RedGPU의 가장 기본적인 초기화 파이프라인을 보여주는 예제입니다.<br/>캔버스 생성 및 RedGPU.init()을 통한 컨텍스트 초기화부터 Scene, View3D, OrbitController 구성과 Renderer 렌더링 루프 시작까지의 핵심 흐름을 안내합니다.`,
-                            en: `Demonstrates the fundamental initialization pipeline of RedGPU.<br/>Covers the core setup flow from canvas creation and context initialization via RedGPU.init() to configuring Scene, View3D, OrbitController, and starting the Renderer loop.`
+                            ko: `RedGPU 컨텍스트 초기화부터 Scene, View3D, OrbitController 구성 및 렌더링 루프 시작까지의 기본 파이프라인 예제입니다.`,
+                            en: `Demonstrates the fundamental RedGPU initialization pipeline, from context setup to Scene, View3D, OrbitController, and the render loop.`
                         },
                     },
                     {
@@ -23,16 +23,16 @@ export const ExampleList: ExampleListType = [
                                 name: 'Single View3D',
                                 path: '3d/view/singleView',
                                 description: {
-                                    ko: `단일 View3D를 생성하고 Scene 및 OrbitController를 연결해 3D 공간을 렌더링하는 기본 예제입니다.<br/>월드 축(axis), 그리드(grid) 헬퍼 표시 및 View3D의 다양한 뷰포트 옵션을 실시간으로 테스트할 수 있습니다.`,
-                                    en: `Demonstrates how to create a single View3D and connect a Scene and OrbitController to render a 3D space.<br/>Provides real-time testing of world axis, grid helpers, and various View3D viewport options.`
+                                    ko: `단일 View3D에 Scene과 컨트롤러를 연결해 3D 공간을 렌더링하고, 축·그리드 헬퍼 및 뷰포트 옵션을 테스트하는 예제입니다.`,
+                                    en: `Renders a 3D space with a single View3D, Scene, and controller, with real-time controls for axis/grid helpers and viewport options.`
                                 },
                             },
                             {
                                 name: 'Multi View3D',
                                 path: '3d/view/multiView',
                                 description: {
-                                    ko: `하나의 캔버스에 여러 개의 독립된 View3D를 배치하고 제어하는 멀티 뷰 예제입니다.<br/>뷰별 배경 색상 구분과 다양한 크기·위치 지정 방식(setSize/setPosition 메서드, 개별 프로퍼티, '%' 및 'px' 단위)을 활용한 화면 분할 및 동적 레이아웃 제어를 보여줍니다.`,
-                                    en: `Demonstrates how to arrange and independently control multiple View3D instances on a single canvas.<br/>Shows split-screen and dynamic layout control using distinct scene background colors and various sizing/positioning methods (setSize/setPosition, individual properties, '%' and 'px' units).`
+                                    ko: `단일 캔버스에 여러 개의 독립된 View3D를 배치하고, 뷰별 크기·위치(px, %)와 배경색을 동적으로 제어하는 멀티 뷰 예제입니다.`,
+                                    en: `Arranges multiple independent View3D instances on a single canvas with dynamic split-screen sizing (px, %), positioning, and background colors.`
                                 },
                             }
                         ]
@@ -44,8 +44,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Scene',
                                 path: '3d/scene',
                                 description: {
-                                    ko: `3D 오브젝트와 조명을 담는 컨테이너인 Scene을 생성하고 구성하는 기본 예제입니다.<br/>배경 색상(backgroundColor) 및 투명도(alpha) 설정을 비롯한 Scene의 기본 옵션을 실시간으로 테스트할 수 있습니다.`,
-                                    en: `Demonstrates how to create and configure a Scene container for 3D objects and lights.<br/>Provides real-time testing of basic Scene options including background color and alpha transparency.`
+                                    ko: `3D 오브젝트와 조명을 담는 Scene 컨테이너를 생성하고 배경 색상 및 투명도 옵션을 테스트하는 기본 예제입니다.`,
+                                    en: `Creates a Scene container for 3D objects and lights, providing real-time controls for background color and alpha transparency.`
                                 },
                             }
                         ]
@@ -57,32 +57,32 @@ export const ExampleList: ExampleListType = [
                                 name: 'FreeController',
                                 path: '3d/controller/freeController',
                                 description: {
-                                    ko: `FreeController는 키보드(WASD/QERTFG)와 마우스/터치 입력을 사용하여 1인칭 카메라 제어를 제공합니다.<br/>3D 공간에서의 자유로운 이동, 회전 제어, 속도/가속도 조절 및 키 바인딩 설정 기능을 포함합니다.`,
-                                    en: `FreeController provides first-person camera control with keyboard (WASD/QERTFG) and mouse/touch input.<br/>Features include free movement in 3D space, rotation control, customizable speed/acceleration, and key binding configuration.`
+                                    ko: `키보드(WASD/QERTFG)와 마우스/터치 입력을 사용해 3D 공간을 자유롭게 이동·회전하는 1인칭 카메라 컨트롤러 예제입니다.`,
+                                    en: `First-person camera controller supporting free 3D movement and rotation via keyboard (WASD/QERTFG) and mouse/touch input.`
                                 },
                             },
                             {
                                 name: 'OrbitController',
                                 path: '3d/controller/orbitController',
                                 description: {
-                                    ko: `OrbitController는 중심점을 기준으로 회전하는 궤도형 카메라 제어를 제공합니다.<br/>마우스 드래그 회전, 휠 줌, 터치 핀치 줌, 중심점 위치 사용자 정의, 거리 제어 및 팬/틸트 제한 기능을 포함합니다.`,
-                                    en: `OrbitController provides orbital camera control that rotates around a center point.<br/>Features include mouse drag rotation, wheel zoom, touch pinch zoom, customizable center position, distance control, and pan/tilt limits.`
+                                    ko: `중심점을 기준으로 마우스 드래그 회전, 휠/핀치 줌, 팬·틸트 및 거리 제한을 제공하는 궤도형 카메라 컨트롤러 예제입니다.`,
+                                    en: `Orbital camera controller rotating around a center pivot with drag rotation, wheel/pinch zoom, and pan/tilt/distance limits.`
                                 },
                             },
                             {
                                 name: 'FollowController',
                                 path: '3d/controller/followController',
                                 description: {
-                                    ko: `FollowController는 타겟 메쉬를 따라다니는 3인칭 카메라 제어를 제공합니다.<br/> 부드러운 카메라 추적, 거리 및 높이 조절, 팬/틸트 제어, 타겟 회전 추적 및 휠/핀치 줌 기능을 포함합니다.<br/>일반적인 자유 시점 3인칭 게임보다는 카메라 자동 정렬이 필수적인 차량 레이싱, 비행 시뮬레이터, 3인칭 러너 게임 및 객체 추적 시나리오에 적합합니다.`,
-                                    en: `FollowController provides third-person camera control that follows a target mesh.<br/> Features include smooth camera following, customizable distance and height, pan/tilt control, target rotation tracking, and wheel/pinch zoom.<br/>Suitable for object tracking scenarios and genres requiring automatic camera alignment (e.g., racing, flight simulators, third-person runners) rather than general free-look third-person games.`
+                                    ko: `타겟 메쉬의 이동과 회전을 부드럽게 따라가는 3인칭 추적 카메라 컨트롤러 예제입니다.<br/>레이싱, 비행 시뮬레이터 등 카메라 자동 정렬이 필요한 객체 추적 시나리오에 적합합니다.`,
+                                    en: `Third-person camera controller that smoothly tracks a target mesh's movement and rotation.<br/>Ideal for racing, flight simulators, and object-tracking scenarios requiring automatic camera alignment.`
                                 },
                             },
                             {
                                 name: 'IsometricController',
                                 path: '3d/controller/isometricController',
                                 description: {
-                                    ko: `IsometricController는 아이소메트릭 뷰를 위한 고정 각도 직교 투영 카메라 제어를 제공합니다.<br/>타겟 메쉬 추적, 키보드(WASD) 및 마우스 이동, 휠/핀치 줌 제어, 카메라 각도 및 뷰 높이 사용자 정의 기능을 포함합니다.<br/>아이소메트릭 게임, 전략 게임 및 건축 시각화에 이상적입니다.`,
-                                    en: `IsometricController provides fixed-angle orthographic camera control for isometric views.<br/>Features include target mesh tracking, keyboard (WASD) and mouse movement, wheel/pinch zoom control, and customizable camera angle and view height.<br/>Ideal for isometric games, strategy games, and architectural visualization.`
+                                    ko: `고정 각도 직교 투영(Orthographic) 기반의 아이소메트릭 뷰 카메라 컨트롤러 예제입니다.<br/>타겟 추적, 키보드·마우스 이동 및 줌을 지원하여 전략 게임과 건축 시각화에 적합합니다.`,
+                                    en: `Fixed-angle orthographic camera controller designed for isometric views.<br/>Supports target tracking, keyboard/mouse panning, and zoom for strategy games and architectural visualization.`
                                 },
                             }
                         ]
@@ -221,8 +221,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Basic Mesh',
                                 path: '3d/mesh/basicMesh',
                                 description: {
-                                    ko: `이 코드는 기본 메쉬를 생성하고 위치, 크기, 회전, 재질 등 주요 속성을 실시간으로 조작하는 방법을 보여주는 샘플입니다. <br/>RedGPU를 사용하여 Box 메쉬를 생성하고 속성과 재질을 조정하는 방법을 보여줍니다.`,
-                                    en: `this code is a sample that shows how to create a basic mesh and how to manipulate its main properties (position, scale, rotation, material, etc.) in real time. <br/>This example shows how to create a Box mesh using RedGPU and how to adjust its properties and material.`
+                                    ko: `기본 Box 메쉬를 생성하고 위치, 크기, 회전 및 재질 속성을 실시간으로 조작하는 예제입니다.`,
+                                    en: `Creates a basic Box mesh and manipulates its position, scale, rotation, and material properties in real time.`
                                 },
                             },
                             {
@@ -245,8 +245,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Child Methods',
                                 path: '3d/mesh/childMethod',
                                 description: {
-                                    ko: `RedGPU를 사용한 자식 노드 관리 예제로, 자식 추가, 삭제, 인덱스 변경, 교체 및 자식 색상 무작위화 등을 통해 노드를 동적으로 제어하는 방법을 보여줍니다.`,
-                                    en: `An example of child node management using RedGPU, showing how to dynamically control nodes by adding, deleting, changing index, replacing, and randomizing color of children.`
+                                    ko: `자식 노드의 추가, 삭제, 인덱스 변경 및 교체를 통해 메쉬 계층을 동적으로 제어하는 예제입니다.`,
+                                    en: `Dynamically manages child nodes by adding, removing, reordering, and replacing children.`
                                 },
                             },
                             {
@@ -366,7 +366,7 @@ export const ExampleList: ExampleListType = [
                                 path: '3d/sprite/sprite3D',
                                 description: {
                                     ko: `Sprite3D 객체의 사용법을 보여주는 예제입니다.`,
-                                    en: `example of a Sprite3D object.`
+                                    en: `An example demonstrating the usage of a Sprite3D object.`
                                 },
                             },
                             {
@@ -382,7 +382,7 @@ export const ExampleList: ExampleListType = [
                                 path: '3d/sprite/spriteSheet3D',
                                 description: {
                                     ko: `SpriteSheet3D 객체의 사용법을 보여주는 예제입니다.`,
-                                    en: `example of a SpriteSheet3D object.`
+                                    en: `An example demonstrating the usage of a SpriteSheet3D object.`
                                 },
                             },
                             {
@@ -403,7 +403,7 @@ export const ExampleList: ExampleListType = [
                                 path: '3d/textField/textField3D',
                                 description: {
                                     ko: `TextField3D 객체의 사용법을 보여주는 예제입니다.`,
-                                    en: `example of a TextField3D object.`
+                                    en: `An example demonstrating the usage of a TextField3D object.`
                                 },
                             },
                             {
@@ -515,7 +515,7 @@ export const ExampleList: ExampleListType = [
                                 path: '3d/texture/maxAnisotropy',
                                 description: {
                                     ko: `텍스처의 비등방성 필터링(Anisotropy) 옵션을 보여주는 예제입니다.`,
-                                    en: `example showing the Anisotropy option for a texture.`
+                                    en: `An example showing the Anisotropy option for a texture.`
                                 },
                             },
 
@@ -537,7 +537,7 @@ export const ExampleList: ExampleListType = [
                                 name: 'Legacy (1st Gen Reference)',
                                 path: '3d/texture/ktx2/legacy',
                                 description: {
-                                    ko: `Khronos 1세대 구형 레퍼런스 KTX2 자산 전용 테스트 예제입니다. (파서 메타데이터 분석 기반 자동 판별)`,
+                                    ko: `Khronos 1세대 구형 레퍼런스 KTX2 자산의 메타데이터 자동 판별 및 렌더링 테스트 예제입니다.`,
                                     en: `Test example for Khronos 1st generation legacy reference KTX2 assets.`
                                 }
                             },
@@ -553,7 +553,7 @@ export const ExampleList: ExampleListType = [
                                 name: 'ASTC (Mobile / Apple Silicon Only)',
                                 path: '3d/texture/ktx2/astc',
                                 description: {
-                                    ko: `Apple Silicon(Mac/iOS) 및 Android GPU 전용 ASTC 텍스처 테스트 예제입니다. (Windows PC는 소프트웨어 Fallback 테스트)`,
+                                    ko: `Apple Silicon 및 Android GPU용 ASTC 압축 텍스처(PC 소프트웨어 폴백 포함) 테스트 예제입니다.`,
                                     en: `Test example for Apple Silicon (Mac/iOS) and Android GPU dedicated ASTC textures.`
                                 }
                             },
@@ -651,8 +651,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Transparent Sort',
                                 path: '3d/transparentSort',
                                 description: {
-                                    ko: `메쉬의 재질에 \`transparent\` 옵션을 적용하여 반투명 객체가 렌더링되는 순서를 확인하는 예제입니다. \`transparent\`를 사용하여 올바른 렌더링 결과를 확인할 수 있습니다.`,
-                                    en: ` example of how to apply the \`transparent\` option to the mesh's material to see the order in which translucent objects are rendered. You can use \`transparent\` to see the correct rendering results.`
+                                    ko: `재질의 \`transparent\` 옵션을 통해 반투명 객체들의 깊이 정렬 및 렌더링 순서를 확인하는 예제입니다.`,
+                                    en: `Demonstrates depth sorting and rendering order of translucent objects using the material's \`transparent\` option.`
                                 },
                             },
                         ]
@@ -863,16 +863,16 @@ export const ExampleList: ExampleListType = [
                                         name: 'Material Scattering (Aerial Perspective)',
                                         path: '3d/skyAtmosphere/scatteringTest',
                                         description: {
-                                            ko: `거리에 따른 대기 산란(공중 투시) 효과가 다양한 재질(Color, Phong, PBR 등)에 어떻게 적용되는지 활주로 레이아웃을 통해 직관적으로 비교합니다.`,
-                                            en: `Provides an intuitive comparison of how atmospheric scattering (Aerial Perspective) affects various materials (Color, Phong, PBR, etc.) along a distance runway.`
+                                            ko: `거리에 따른 대기 산란(공중 투시) 효과가 다양한 재질에 적용되는 모습을 비교하는 예제입니다.`,
+                                            en: `Compares how distance-based atmospheric scattering (Aerial Perspective) affects various materials.`
                                         },
                                     },
                                     {
                                         name: 'Atmosphere & IBL Harmony',
                                         path: '3d/skyAtmosphere/gltf',
                                         description: {
-                                            ko: `대기 산란, IBL 환경광, 스카이박스 배경이 유기적으로 조화되어 glTF PBR 모델에 물리적 사실감을 부여하는 통합 환경 시뮬레이션입니다.`,
-                                            en: `An integrated simulation showing how atmospheric scattering, IBL, and skybox work in harmony to provide physical realism to a glTF PBR model.`
+                                            ko: `대기 산란, IBL 환경광, 스카이박스가 조화되어 glTF PBR 모델에 사실감을 부여하는 통합 예제입니다.`,
+                                            en: `Integrates atmospheric scattering, IBL, and skybox to deliver realistic lighting on a glTF PBR model.`
                                         },
                                     },
 
@@ -935,8 +935,8 @@ export const ExampleList: ExampleListType = [
                                         name: 'Raycasting (Precision Picking)',
                                         path: '3d/interaction/mouseEvent/raycasting',
                                         description: {
-                                            ko: `이 예제는 복잡한 지오메트리(TorusKnot)에 대한 고정밀 레이캐스팅을 보여줍니다.<br/>버텍스 버퍼를 분석하여 정확한 교차 지점, 면 인덱스 및 로컬 좌표를 CPU에서 계산합니다.`,
-                                            en: `This example demonstrates high-precision raycasting on complex geometry (TorusKnot).<br/>It calculates the exact intersection point, face index, and local coordinates on the CPU by analyzing vertex buffers.`
+                                            ko: `복잡한 지오메트리의 정점 버퍼를 분석해 정확한 교차 지점, 면 인덱스 및 로컬 좌표를 검출하는 고정밀 레이캐스팅 예제입니다.`,
+                                            en: `Performs high-precision raycasting on complex geometry to detect exact intersection points, face indices, and local coordinates.`
                                         },
                                     },
                                 ]
@@ -991,8 +991,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Basic Terrain',
                                 path: '3d/landscape/basicTerrain',
                                 description: {
-                                    ko: `단일 16비트 글로벌 하이트맵(globalHeightmapUrl)으로 대규모 지형을 생성하고, 연속 LOD·지오모핑, 하이트맵 레이마칭 그림자(castHeightmapShadow) 및 디버그 모드를 제어하는 기본 예제입니다.`,
-                                    en: `Basic example creating a large-scale terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and debug modes.`
+                                    ko: `16비트 하이트맵 기반의 대규모 지형을 생성하고, 연속 LOD·지오모핑 및 하이트맵 그림자를 제어하는 기본 지형 예제입니다.`,
+                                    en: `Creates a large-scale 16-bit heightmap terrain with real-time controls for continuous LOD, geomorphing, and heightmap shadows.`
                                 }
                             },
                             {
@@ -1000,8 +1000,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Multi-Layer Splatting',
                                 path: '3d/landscape/multiLayerSplatting',
                                 description: {
-                                    ko: `RGBA 4채널 스플랫맵 가중치(weightTexture, weightChannel)를 기반으로 잔디·암석·자갈·낙엽 4종의 PBR 재질 레이어를 등록(addLayer)하고 스토캐스틱 타일링과 높이 블렌딩을 제어하는 예제입니다.`,
-                                    en: `Demonstrates registering (addLayer) and blending 4 PBR material layers (Grass, Rock, Gravel, Leave) driven by RGBA splatmap weights (weightTexture, weightChannel) with stochastic tiling and height blending.`
+                                    ko: `4채널 스플랫맵 가중치를 기반으로 4종의 지형 PBR 재질 레이어와 스토캐스틱 타일링·높이 블렌딩을 제어하는 예제입니다.`,
+                                    en: `Blends 4 terrain PBR material layers driven by RGBA splatmap weights with stochastic tiling and height blending.`
                                 }
                             },
                             {
@@ -1009,8 +1009,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Tile Streaming',
                                 path: '3d/landscape/tileStreaming',
                                 description: {
-                                    ko: `대규모 지형을 16x16(256개) 타일로 분할하여 카메라 이동에 따라 16비트 고해상도 하이트맵 타일을 실시간 비동기 스트리밍(tileUrlResolver, tileLoadingRadius)하고, 공간 그리드 및 가상 텍스처 디버거(debuggerManager)로 모니터링하는 예제입니다.`,
-                                    en: `Partitions a large-scale terrain into 16x16 (256) tiles to stream 16-bit high-resolution heightmap tiles asynchronously around the camera (tileUrlResolver, tileLoadingRadius), monitored in real time via debuggerManager.`
+                                    ko: `16×16 타일로 분할된 대규모 지형에서 카메라 이동에 맞춰 고해상도 하이트맵 타일을 실시간 비동기 스트리밍하는 예제입니다.`,
+                                    en: `Asynchronously streams 16-bit high-resolution heightmap tiles around the camera across a 16×16 tiled terrain.`
                                 }
                             },
                             {
@@ -1018,8 +1018,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Procedural Grass Field',
                                 path: '3d/landscape/proceduralGrass',
                                 description: {
-                                    ko: `지형의 스플랫 레이어 가중치(targetLayer)와 경사도를 기반으로 GPU 컴퓨트 셰이더에서 수만 개의 절차적 잔디 인스턴스를 실시간 베이킹·컬링(grassManager.addType)하고 Near/Far LOD 및 지형 색상 블렌딩을 제어하는 예제입니다.`,
-                                    en: `Procedurally bakes and culls tens of thousands of grass instances on the GPU based on terrain splat layer weights (targetLayer) and slope via grassManager.addType, featuring Near/Far LOD and ground color blending.`
+                                    ko: `지형 레이어 가중치와 경사도를 기반으로 GPU에서 수만 개의 절차적 잔디 인스턴스를 배치·컬링하고 LOD를 제어하는 예제입니다.`,
+                                    en: `Procedurally scatters and culls tens of thousands of GPU grass instances based on terrain layer weights and slope with LOD control.`
                                 }
                             },
                             {
@@ -1027,8 +1027,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Foliage & Impostors',
                                 path: '3d/landscape/foliageAndImpostors',
                                 description: {
-                                    ko: `지형의 스플랫 레이어 가중치를 기반으로 대규모 수목 식생을 절차적 배치(foliageManager.addType)하고, 3단계 메쉬 LOD(LOD0~LOD2)와 원거리 옥타헤드럴 임포스터(Octahedral Impostor) 및 전역 바람(windManager)을 연동하는 예제입니다.`,
-                                    en: `Procedurally scatters large-scale tree foliage based on terrain splat layer weights (foliageManager.addType), combining 3-stage mesh LODs (LOD0–LOD2), distant Octahedral Impostors, and global wind (windManager).`
+                                    ko: `지형 위에 대규모 수목 식생을 절차적 배치하고, 3단계 메쉬 LOD와 원거리 임포스터(Impostor) 및 바람 효과를 연동하는 예제입니다.`,
+                                    en: `Procedurally scatters large-scale tree foliage combining 3-stage mesh LODs, distant Octahedral Impostors, and global wind.`
                                 }
                             },
                             {
@@ -1036,8 +1036,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Open World Integration',
                                 path: '3d/landscape/openWorldIntegration',
                                 description: {
-                                    ko: `타일 스트리밍 지형(Landscape), 4채널 멀티레이어 PBR 스플랫, GPU 절차적 잔디(grassManager), 다단계 LOD 및 옥타헤드럴 임포스터 수목 식생(foliageManager), 그리고 지형 높이에 동기화(getHeightAt)되는 3D 캐릭터 컨트롤러를 결합한 오픈월드 통합 예제입니다.`,
-                                    en: `Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.`
+                                    ko: `타일 스트리밍 지형, 멀티레이어 PBR 스플랫, 절차적 잔디·수목 식생 및 지형 높이 동기화 캐릭터 컨트롤러를 결합한 오픈월드 예제입니다.`,
+                                    en: `Integrates tile-streaming terrain, multi-layer PBR splatting, GPU procedural grass and foliage, and a terrain-aligned character controller.`
                                 }
                             },
                             {
@@ -1045,8 +1045,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Landscape & Water System',
                                 path: '3d/landscape/landscapeAndWater',
                                 description: {
-                                    ko: `타일 스트리밍 지형(Landscape)의 계곡 분지와 호수 수체(Lake)를 결합(scene.addWater)하여 수위 조절, 듀얼 노멀 물결, 수중 굴절·코스틱스 및 캐릭터 보행 파동(enableWaterInteraction, interactionFollowTarget) 상호작용을 시연하는 예제입니다.`,
-                                    en: `Combines tile-streaming terrain (Landscape) valleys with a Lake water body (scene.addWater), featuring water level control, dual-normal waves, underwater refraction/caustics, and character walking ripple interactions (enableWaterInteraction, interactionFollowTarget).`
+                                    ko: `타일 스트리밍 지형과 호수(Lake)를 결합하여 수위 조절, 수중 굴절·코스틱스 및 캐릭터 보행 물결 상호작용을 시연하는 예제입니다.`,
+                                    en: `Combines tile-streaming terrain with a Lake water body, featuring water level control, underwater optics, and walking ripples.`
                                 }
                             }
                         ]
@@ -1064,8 +1064,8 @@ export const ExampleList: ExampleListType = [
                                         name: 'Basic Lake',
                                         path: '3d/water/lake/basicLake',
                                         description: {
-                                            ko: `Lake를 생성하여 씬에 등록(scene.addWater)하고, 수위(waterLevel)·너울 파동 및 기본 재질 속성(색상, 거칠기, 불투명도)을 실시간으로 테스트하는 기본 예제입니다.`,
-                                            en: `Basic example demonstrating how to create and register a Lake (scene.addWater) and adjust water level, swell waves, and core material properties in real time.`
+                                            ko: `씬에 호수(Lake)를 등록하고 수위, 너울 파동 및 기본 재질 속성을 실시간으로 제어하는 기본 예제입니다.`,
+                                            en: `Registers a Lake in the scene and controls water level, swell waves, and core material properties in real time.`
                                         }
                                     },
                                     {
@@ -1073,7 +1073,7 @@ export const ExampleList: ExampleListType = [
                                         name: 'Lake Material',
                                         path: '3d/water/lake/lakeMaterial',
                                         description: {
-                                            ko: `LakeMaterial의 듀얼 노멀 맵, 수중 굴절·감쇠, 커스틱(Caustics), 스크린 스페이스 반사(SSR) 및 디버그 뷰 등 상세 광학 속성을 제어하는 예제입니다.`,
+                                            ko: `듀얼 노멀 맵, 수중 굴절·감쇠, 코스틱스(Caustics) 및 SSR 반사 등 호수 재질의 광학 속성을 제어하는 예제입니다.`,
                                             en: `Controls LakeMaterial's advanced optical properties in real time, including dual normal maps, underwater refraction, extinction, caustics, SSR, and debug views.`
                                         }
                                     },
@@ -1082,8 +1082,8 @@ export const ExampleList: ExampleListType = [
                                         name: 'Object Interaction',
                                         path: '3d/water/lake/interaction',
                                         description: {
-                                            ko: `메쉬의 enableWaterInteraction 속성을 활성화하여, 상하 왕복 구체와 수평 공전 구체가 수면과 상호작용하며 일으키는 실시간 물결(Ripple)과 파동 간섭을 시연하는 예제입니다.`,
-                                            en: `Demonstrates real-time water ripples and wave interference by enabling enableWaterInteraction on vertically bobbing and horizontally orbiting spheres.`
+                                            ko: `움직이는 구체들이 수면과 상호작용하며 실시간으로 일으키는 물결(Ripple)과 파동 간섭을 시연하는 예제입니다.`,
+                                            en: `Demonstrates real-time water ripples and wave interference generated by moving spheres interacting with the water surface.`
                                         }
                                     },
                                     {
@@ -1091,8 +1091,8 @@ export const ExampleList: ExampleListType = [
                                         name: 'Character Walking',
                                         path: '3d/water/lake/characterWalking',
                                         description: {
-                                            ko: `Lake의 interactionFollowTarget 속성에 스키닝 캐릭터를 지정하여, 캐릭터 이동을 따라 파동 시뮬레이션 영역이 실시간 추적되며 보행 물결(Ripple)을 생성하는 예제입니다.`,
-                                            en: `Assigns a skinned character to Lake's interactionFollowTarget property so the wave simulation domain tracks the moving character and generates walking ripples in real time.`
+                                            ko: `스키닝 캐릭터의 이동을 실시간으로 추적하며 수면 위에 자연스러운 보행 물결(Ripple)을 생성하는 예제입니다.`,
+                                            en: `Tracks a moving skinned character in real time to generate natural walking ripples across the water surface.`
                                         }
                                     },
                                     {
@@ -1100,7 +1100,7 @@ export const ExampleList: ExampleListType = [
                                         name: 'Multi Lake',
                                         path: '3d/water/lake/multiLake',
                                         description: {
-                                            ko: `단일 씬 내에 서로 다른 수위(waterLevel), 위치, 크기 및 색상을 가진 여러 개의 독립된 Lake 수체를 동시에 배치하고 렌더링하는 예제입니다.`,
+                                            ko: `하나의 씬에 서로 다른 수위, 위치, 크기 및 색상을 가진 여러 개의 독립된 호수(Lake)를 동시에 렌더링하는 예제입니다.`,
                                             en: `Renders multiple independent Lake instances with distinct water levels, positions, sizes, and colors within a single scene.`
                                         }
                                     },
@@ -1109,7 +1109,7 @@ export const ExampleList: ExampleListType = [
                                         name: 'Lake with Landscape',
                                         path: '3d/water/lake/lakeWithLandscape',
                                         description: {
-                                            ko: `랜드스케이프(Landscape) 지형 및 식생 시스템과 Lake 수체를 결합하여 수변 경계 페이드, 수중 광학 효과, 캐릭터 물결 상호작용을 함께 보여주는 예제입니다.`,
+                                            ko: `지형 및 식생 시스템과 호수(Lake)를 결합하여 수변 깊이 페이드, 수중 광학 효과 및 보행 물결을 함께 시연하는 예제입니다.`,
                                             en: `Integrates Landscape terrain and foliage with an interactive Lake, showcasing shoreline depth fade, underwater optics, and character ripples.`
                                         }
                                     }
@@ -1219,8 +1219,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Multi Canvas',
                                 path: '3d/multiCanvas',
                                 description: {
-                                    ko: `독립적인 여러 개의 캔버스와 RedGPUContext 인스턴스를 사용하는 예제입니다.<br/>하나의 컨텍스트를 소멸(Destroy)시켜도 다른 활성 컨텍스트에 영향을 주지 않는 리소스 격리 기능을 검증합니다.`,
-                                    en: `This example demonstrates the usage of multiple canvases and RedGPUContext instances.<br/>It validates that one context can be destroyed without affecting the other active contexts, ensuring robust resource isolation.`
+                                    ko: `여러 개의 캔버스와 독립된 RedGPUContext를 생성하고, 개별 컨텍스트 소멸 시의 리소스 격리를 검증하는 예제입니다.`,
+                                    en: `Runs multiple independent canvases and RedGPUContext instances, verifying resource isolation when destroying individual contexts.`
                                 },
                             }
                         ]
@@ -1240,8 +1240,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Texture Encoding Test',
                         path: 'gltf/basic/textureEncodingTest',
                         description: {
-                            ko: `텍스처가 올바른 전달 함수(Transfer Function)로 샘플링되는지 테스트합니다. Base Color와 Emissive가 sRGB에서 올바르게 디코딩되는지 확인합니다.`,
-                            en: `Tests that textures are sampled with the correct transfer functions. Verifies base color and emissive textures are decoded from sRGB.`
+                            ko: `Base Color와 Emissive 텍스처가 sRGB 색공간에서 올바르게 디코딩 및 샘플링되는지 검증하는 예제입니다.`,
+                            en: `Verifies that Base Color and Emissive textures are properly decoded from sRGB and sampled with correct transfer functions.`
                         },
                     },
                     {
@@ -1519,16 +1519,16 @@ export const ExampleList: ExampleListType = [
                                 name: 'Motion Blending',
                                 path: 'gltf/animation/motionBlending',
                                 description: {
-                                    ko: `AnimStateMachine을 사용하여 여러 애니메이션 클립 간의 부드러운 모션 블렌딩(크로스페이드)을 구현하는 예제입니다.<br/>Idle, Walk, Run 상태 간의 전이 조건과 페이드 지속 시간을 실시간으로 조절할 수 있습니다.`,
-                                    en: `An example implementing smooth motion blending (crossfade) between multiple animation clips using AnimStateMachine.<br/>State transition conditions and fade duration between Idle, Walk, and Run states can be adjusted in real time.`
+                                    ko: `AnimStateMachine을 사용해 Idle, Walk, Run 애니메이션 클립 간의 부드러운 모션 블렌딩(크로스페이드)을 제어하는 예제입니다.`,
+                                    en: `Demonstrates smooth motion blending (crossfade) and state transitions between Idle, Walk, and Run clips using AnimStateMachine.`
                                 },
                             },
                             {
                                 name: 'Keyboard Character Control',
                                 path: 'gltf/animation/keyboardCharacterControl',
                                 description: {
-                                    ko: `키보드(WASD / 방향키)로 캐릭터를 이동시키고 Shift로 달리기 전환하는 3인칭 캐릭터 컨트롤 예제입니다.<br/>AnimStateMachine으로 Idle / Walk / Run 애니메이션이 자동 전환되며, OrbitController 카메라가 캐릭터를 추적합니다.`,
-                                    en: `A third-person character control example where you move with WASD/Arrow keys and sprint by holding Shift.<br/>AnimStateMachine automatically blends Idle, Walk, and Run animations, while OrbitController tracks the character.`
+                                    ko: `키보드(WASD/방향키, Shift 달리기) 입력에 따라 Idle·Walk·Run 애니메이션이 자동 전환되는 3인칭 캐릭터 컨트롤 예제입니다.`,
+                                    en: `Third-person character control example with WASD/Arrow movement, Shift sprinting, and automatic Idle/Walk/Run animation blending.`
                                 },
                             },
                         ]
@@ -1548,19 +1548,19 @@ export const ExampleList: ExampleListType = [
                                 name: 'High vertex load Skinning',
                                 path: 'gltf/animation/performance/highVertexLoadSkinning',
                                 description: {
-                                    ko: `많은 정점과 관절을 가진 모델에 대한 스키닝 성능을 측정하는 테스트를 수행합니다. 각 장치의 성능 한계를 확인하기 위해 FPS와 GPU/CPU 사용량을 모니터링합니다.`,
-                                    en: `perform tests to measure skinning performance for models with many vertices and joints. We monitor FPS and GPU/CPU utilization to determine performance limits for each device.`
+                                    ko: `많은 정점과 관절을 가진 고밀도 스키닝 모델을 다수 렌더링하여 장치의 스키닝 성능 한계를 측정하는 예제입니다.`,
+                                    en: `Benchmarks skinning performance limits by rendering numerous high-vertex, multi-joint skinned models.`
                                 },
                             },
                             {
                                 name: 'Morph target load Test',
                                 path: 'gltf/animation/performance/highMorphTarget',
                                 description: {
-                                    ko: `수백 개의 MorphStressTest 모델을 인스턴스화하여 모프 스트레스 테스트를 수행합니다.<br/>
-실시간 모프 타겟 스키닝 성능을 극한까지 벤치마킹합니다. 세 가지 애니메이션 중 가장 무거운 모프 타겟 애니메이션의 성능을 테스트합니다.<br/>
-각 장치의 성능 한계를 확인하세요.`,
-                                    en: `Perform morph stress tests by instantiating hundreds of MorphStressTest models.<br/>
-Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation.<br/>
+                                    ko: `수백 개의 고부하 모프 타겟 모델을 동시에 렌더링하여 실시간 모프 스키닝 성능을 벤치마킹하는 예제입니다.`,
+
+
+                                    en: `Benchmarks real-time morph target skinning performance by simultaneously rendering hundreds of MorphStressTest models.`
+
 Check performance limits on each device.`
                                 },
                             },

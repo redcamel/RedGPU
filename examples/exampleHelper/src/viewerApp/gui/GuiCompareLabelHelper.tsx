@@ -95,9 +95,9 @@ const GuiCompareLabelHelper: React.FC = () => {
             return {
                 ...baseStyle,
                 left: left + 12,
-                [isNormal ? 'bottom' : 'top']: isNormal
-                    ? (window.innerHeight - (top + height / 2) + 6)
-                    : (top + height / 2 + 6)
+                [isNormal ? 'top' : 'bottom']: isNormal
+                    ? (top + height / 2 + 6)
+                    : (window.innerHeight - (top + height / 2) + 6)
             };
         }
         return {

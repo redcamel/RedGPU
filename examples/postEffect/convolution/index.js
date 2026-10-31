@@ -54,10 +54,10 @@ RedGPU.init(
         const updateLayout = () => {
             const isPortrait = window.innerWidth < window.innerHeight;
             if (isPortrait) {
-                viewNormal.setSize('100%', '50%');
-                viewNormal.setPosition(0, 0);
                 viewEffect.setSize('100%', '50%');
-                viewEffect.setPosition(0, '50%');
+                viewEffect.setPosition(0, 0);
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, '50%');
             } else {
                 viewNormal.setSize('50%', '100%');
                 viewNormal.setPosition(0, 0);
