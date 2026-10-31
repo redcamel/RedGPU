@@ -58,7 +58,7 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                         href="https://github.com/redcamel/RedGPU"
                         target="_blank"
                         rel="noreferrer"
-                        style={footerLeftLinkStyle}
+                        style={{...footerLeftLinkStyle, width: '100%', justifyContent: 'space-between'}}
                     >
                         <span style={{color: '#b19898', fontSize: '12px', lineHeight: '1'}}>
                             This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
