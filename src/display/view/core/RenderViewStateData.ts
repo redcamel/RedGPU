@@ -297,6 +297,7 @@ class RenderViewStateData {
             useFrustumCulling,
             frustumPlanes,
             scene,
+            builtInEffectManager,
             postEffectManager,
             pickingManager,
             viewRenderTextureManager
@@ -344,6 +345,7 @@ class RenderViewStateData {
         try {
             this.usedVideoMemory = viewRenderTextureManager.videoMemorySize
                 + shadowManager.directionalShadowManager.videoMemorySize
+                + builtInEffectManager.videoMemorySize
                 + postEffectManager.videoMemorySize
                 + pickingManager.videoMemorySize;
         } catch (e) {

@@ -49,10 +49,12 @@ const postEffectGraph = `
 
 ## 1. Control Interface
 
-`View3D` provides two manager properties depending on the post-processing purpose, while actual pipeline execution and
+`View3D` provides three manager properties depending on the post-processing purpose, while actual pipeline execution and
 texture pooling (`PostEffectTexturePool`) are centrally managed by `PostEffectManager`.
 
-- **`view.postEffectManager` (`PostEffectManager`)**: Manages built-in effects (`useSSAO`, `useSSR`) and user effect
+- **`view.builtInEffectManager` (`BuiltInEffectManager`)**: Controls built-in effects (`useSSAO`, `useSSR`, `useDOF`,
+  `useBloom`, `autoExposure`) and their parameters.
+- **`view.postEffectManager` (`PostEffectManager`)**: Manages user effect
   chains (`addEffect`, `removeEffect`), and executes the entire post-processing pipeline.
 - **`view.toneMappingManager` (`ToneMappingManager`)**: Controls the tone mapping algorithm (`mode`), `contrast`, and
   `brightness` that map HDR data into the display output range (LDR).

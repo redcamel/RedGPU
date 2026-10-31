@@ -72,8 +72,8 @@ RedGPU.init(
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        viewEffect.postEffectManager.useDOF = true;
-        const effect = viewEffect.postEffectManager.dof;
+        viewEffect.builtInEffectManager.useDOF = true;
+        const effect = viewEffect.builtInEffectManager.dof;
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -260,7 +260,7 @@ const renderTestPane = (redGPUContext, targetView, effect, controller, cameraTra
         gui: (pane) => {
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            folder.addBinding(targetView.postEffectManager, 'useDOF').on('change', (v) => {
+            folder.addBinding(targetView.builtInEffectManager, 'useDOF').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
                 presetFolder.disabled = !v.value;
             });

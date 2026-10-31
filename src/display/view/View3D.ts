@@ -7,6 +7,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
 import DirectionalLight from "../../light/lights/DirectionalLight";
+import BuiltInEffectManager from "../../postEffect/builtIn/BuiltInEffectManager";
 import PostEffectManager from "../../postEffect/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
@@ -62,6 +63,7 @@ class View3D extends AView {
     #skyAtmosphere: SkyAtmosphere
     #ibl: IBL
     readonly #renderViewStateData: RenderViewStateData
+    #builtInEffectManager: BuiltInEffectManager
     #postEffectManager: PostEffectManager
     readonly #toneMappingManager: ToneMappingManager
     readonly #viewRenderTextureManager: ViewRenderTextureManager
@@ -117,6 +119,7 @@ class View3D extends AView {
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
         this.#hierarchicalZBuffer = new HierarchicalZBuffer(redGPUContext)
         this.#renderViewStateData = new RenderViewStateData(this)
+        this.#builtInEffectManager = new BuiltInEffectManager(this)
         this.#postEffectManager = new PostEffectManager(this)
         this.#toneMappingManager = new ToneMappingManager(redGPUContext)
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
@@ -238,6 +241,18 @@ class View3D extends AView {
      */
     get postEffectManager(): PostEffectManager {
         return this.#postEffectManager;
+    }
+
+    /**
+     * [KO] 빌트인 이펙트 매니저를 반환합니다.
+     * [EN] Returns the built-in effect manager.
+     *
+     * @returns
+     * [KO] `BuiltInEffectManager` 인스턴스
+     * [EN] `BuiltInEffectManager` instance
+     */
+    get builtInEffectManager(): BuiltInEffectManager {
+        return this.#builtInEffectManager;
     }
 
     set ibl(value: IBL) {
@@ -393,6 +408,8 @@ class View3D extends AView {
         }
 
 
+        this.#builtInEffectManager?.destroy()
+        this.#builtInEffectManager = null
         this.#postEffectManager?.destroy()
         this.#postEffectManager = null
 
@@ -541,7 +558,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'preExposure',
-                    value: this.postEffectManager.autoExposure.preExposure
+                    value: this.#builtInEffectManager.autoExposure.preExposure
                 },
             ]);
         }

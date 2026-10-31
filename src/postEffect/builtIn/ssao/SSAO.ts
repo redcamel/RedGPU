@@ -17,10 +17,10 @@ import SSAOBlend from "./ssao_blend/SSAOBlend";
  *
  * ### Example
  * ```typescript
- * // [KO] View3D의 postEffectManager를 통해 SSAO 활성화 및 설정 제어
- * // [EN] Enable and configure SSAO through View3D's postEffectManager
- * view.postEffectManager.useSSAO = true;
- * const ssao = view.postEffectManager.ssao;
+ * // [KO] View3D의 builtInEffectManager를 통해 SSAO 활성화 및 설정 제어
+ * // [EN] Enable and configure SSAO through View3D's builtInEffectManager
+ * view.builtInEffectManager.useSSAO = true;
+ * const ssao = view.builtInEffectManager.ssao;
  * ssao.radius = 0.5;
  * ssao.intensity = 1.5;
  * ```

@@ -19,8 +19,8 @@ import BloomUpsample from "./bloomUpsample/BloomUpsample";
  *
  * ### Example
  * ```typescript
- * view.postEffectManager.useBloom = true;
- * const bloom = view.postEffectManager.bloom;
+ * view.builtInEffectManager.useBloom = true;
+ * const bloom = view.builtInEffectManager.bloom;
  * bloom.setCinematic();
  * bloom.intensity = 0.8;
  * ```

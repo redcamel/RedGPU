@@ -55,10 +55,10 @@ interface SSR {
  *
  * ### Example
  * ```typescript
- * // [KO] View3D의 postEffectManager를 통해 SSR 활성화 및 설정 제어
- * // [EN] Enable and configure SSR through View3D's postEffectManager
- * view.postEffectManager.useSSR = true;
- * const ssr = view.postEffectManager.ssr;
+ * // [KO] View3D의 builtInEffectManager를 통해 SSR 활성화 및 설정 제어
+ * // [EN] Enable and configure SSR through View3D's builtInEffectManager
+ * view.builtInEffectManager.useSSR = true;
+ * const ssr = view.builtInEffectManager.ssr;
  * ssr.maxSteps = 128;
  * ssr.reflectionIntensity = 0.8;
  * ```

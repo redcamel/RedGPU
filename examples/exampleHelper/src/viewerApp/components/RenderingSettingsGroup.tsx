@@ -28,8 +28,8 @@ const RenderingSettingsGroup: React.FC = () => {
                 if (firstView.toneMappingManager) {
                     setToneMapping(firstView.toneMappingManager.mode);
                 }
-                if (firstView.postEffectManager) {
-                    setBloom(firstView.postEffectManager.useBloom ? 'NATURAL' : 'NONE');
+                if (firstView.builtInEffectManager) {
+                    setBloom(firstView.builtInEffectManager.useBloom ? 'NATURAL' : 'NONE');
                 }
             }
         }
@@ -63,13 +63,13 @@ const RenderingSettingsGroup: React.FC = () => {
         setBloom(value);
         if (redGPUContext) {
             redGPUContext.viewList.forEach((view: any) => {
-                const postEffectManager = view.postEffectManager;
-                if (postEffectManager) {
+                const builtInEffectManager = view.builtInEffectManager;
+                if (builtInEffectManager) {
                     if (value === 'NONE') {
-                        postEffectManager.useBloom = false;
+                        builtInEffectManager.useBloom = false;
                     } else {
-                        postEffectManager.useBloom = true;
-                        const bloomEffect = postEffectManager.bloom;
+                        builtInEffectManager.useBloom = true;
+                        const bloomEffect = builtInEffectManager.bloom;
                         if (bloomEffect) {
                             if (value === 'NATURAL') bloomEffect.setNatural();
                             else if (value === 'CINEMATIC') bloomEffect.setCinematic();

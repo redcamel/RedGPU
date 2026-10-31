@@ -142,7 +142,7 @@ class Renderer {
         viewList_renderPassDescriptorList.forEach((v, index) => {
             const targetView = redGPUContext.viewList[index];
             targetView.pickingManager?.checkEvents(targetView, time);
-            targetView.postEffectManager.autoExposure.resolveReadback();
+            targetView.builtInEffectManager.autoExposure.resolveReadback();
         });
     }
 

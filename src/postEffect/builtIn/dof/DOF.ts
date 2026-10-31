@@ -19,8 +19,8 @@ import DOFTileMaxCoC from "./dofTileMaxCoC/DOFTileMaxCoC";
  * [KO] 언리얼 엔진 5(`Diaphragm DOF`) 규격의 35mm 풀프레임 센서(`sensorSize = 24mm`) 기하광학 Thin-Lens 착란원(CoC), CoC-Aware 양방향 3단 밉체인(`Mip 0 ~ Mip 2`), 타일 최대 착란원 확장(`DOFTileMaxCoC`), 전/배경 Dual-Buffer 분리 정다각형 개더링, 및 풀해상도 Slight Out-of-Focus 8-Tap 직접 개더링·Recombine 기반의 차세대 물리 보케 피사계 심도(Physical Bokeh Depth of Field) 후처리 이펙트입니다.
  * [EN] Next-generation Physical Bokeh Depth of Field (DOF) post-processing effect matching Unreal Engine 5 (`Diaphragm DOF`), featuring 35mm full-frame sensor (`sensorSize = 24mm`) geometric Thin-Lens Circle of Confusion (CoC), CoC-Aware bilateral 3-level mip chain (`Mip 0 ~ Mip 2`), dilated Tile Max CoC (`DOFTileMaxCoC`), foreground/background Dual-Buffer polygonal gathering, and full-resolution Slight Out-of-Focus 8-Tap direct gathering & Recombine.
  *
- * [KO] `View3D`의 `PostEffectManager.useDOF`를 `true`로 설정하여 시스템 내부에서 자동 활성화하며, `view.postEffectManager.dof`를 통해 카메라 렌즈 파라미터 및 프리셋을 제어합니다.
- * [EN] Automatically activated by the system when setting `PostEffectManager.useDOF` of `View3D` to `true`, and camera lens parameters and presets are controlled via `view.postEffectManager.dof`.
+ * [KO] `View3D`의 `builtInEffectManager.useDOF`를 `true`로 설정하여 시스템 내부에서 자동 활성화하며, `view.builtInEffectManager.dof`를 통해 카메라 렌즈 파라미터 및 프리셋을 제어합니다.
+ * [EN] Automatically activated by the system when setting `builtInEffectManager.useDOF` of `View3D` to `true`, and camera lens parameters and presets are controlled via `view.builtInEffectManager.dof`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -29,10 +29,10 @@ import DOFTileMaxCoC from "./dofTileMaxCoC/DOFTileMaxCoC";
  *
  * ### Example
  * ```typescript
- * // [KO] View3D의 postEffectManager를 통해 DOF 활성화 및 프리셋 적용
- * // [EN] Enable DOF and apply a preset through View3D's postEffectManager
- * view.postEffectManager.useDOF = true;
- * view.postEffectManager.dof.setCinematic();
+ * // [KO] View3D의 builtInEffectManager를 통해 DOF 활성화 및 프리셋 적용
+ * // [EN] Enable DOF and apply a preset through View3D's builtInEffectManager
+ * view.builtInEffectManager.useDOF = true;
+ * view.builtInEffectManager.dof.setCinematic();
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/lens/dof/" style="width:100%; height:500px;"></iframe>

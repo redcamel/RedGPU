@@ -14,8 +14,8 @@ import RedGPUObject from "../../../base/RedGPUObject";
 
 
 /**
- * [KO] 컴퓨트 셰이더 기반 256-bin 로그 휘도 히스토그램 분석을 통해 자동 노출(Auto-Exposure)과 눈 적응(Eye Adaptation)을 수행하는 클래스입니다. `PostEffectManager` 내부에서 자동으로 생성됩니다.
- * [EN] Class that performs auto-exposure and eye adaptation via compute-shader-based 256-bin log-luminance histogram analysis. Automatically created inside `PostEffectManager`.
+ * [KO] 컴퓨트 셰이더 기반 256-bin 로그 휘도 히스토그램 분석을 통해 자동 노출(Auto-Exposure)과 눈 적응(Eye Adaptation)을 수행하는 클래스입니다. `BuiltInEffectManager` 내부에서 자동으로 생성됩니다.
+ * [EN] Class that performs auto-exposure and eye adaptation via compute-shader-based 256-bin log-luminance histogram analysis. Automatically created inside `BuiltInEffectManager`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -24,9 +24,9 @@ import RedGPUObject from "../../../base/RedGPUObject";
  *
  * ### Example
  * ```typescript
- * // [KO] View3D의 postEffectManager를 통해 접근
- * // [EN] Access via postEffectManager of View3D
- * const autoExposure = view.postEffectManager.autoExposure;
+ * // [KO] View3D의 builtInEffectManager를 통해 접근
+ * // [EN] Access via builtInEffectManager of View3D
+ * const autoExposure = view.builtInEffectManager.autoExposure;
  * autoExposure.exposureCompensation = 0.5;
  * autoExposure.meteringMode = RedGPU.Camera.Core.METERING_MODE.CENTER_WEIGHTED;
  * ```

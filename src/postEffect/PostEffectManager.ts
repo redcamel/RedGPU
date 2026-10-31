@@ -5,18 +5,16 @@ import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
-import {Bloom, DOF, SSAO, SSR} from "./builtIn";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
-import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
 import keepLog from "../utils/keepLog";
 
 /**
- * [KO] `View3D`의 HDR/LDR 후처리 파이프라인(SSAO, SSR, TAA, ToneMapping, FXAA 및 사용자 이펙트)을 통합 관리하는 클래스입니다.
- * [EN] Class that manages the HDR/LDR post-processing pipeline (SSAO, SSR, TAA, ToneMapping, FXAA, and user effects) of a `View3D`.
+ * [KO] `View3D`의 후처리 파이프라인과 사용자 후처리 이펙트 리스트를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages the post-processing pipeline and user post-processing effect list of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -46,15 +44,6 @@ class PostEffectManager extends RedGPUObject {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
-    #ssao: SSAO;
-    #useSSAO: boolean = false;
-    #ssr: SSR;
-    #useSSR: boolean = false;
-    #dof: DOF;
-    #useDOF: boolean = false;
-    #bloom: Bloom;
-    #useBloom: boolean = false;
-    #autoExposure: AutoExposure;
     #initialResult: IPostEffectResult = {texture: null as any, textureView: null as any};
 
     #gbufferBindGroupLayoutMSAA: GPUBindGroupLayout;
@@ -114,153 +103,6 @@ class PostEffectManager extends RedGPUObject {
      */
     get texturePool(): PostEffectTexturePool {
         return this.#texturePool;
-    }
-
-    /**
-     * [KO] 자동 노출(`AutoExposure`) 인스턴스를 반환합니다.
-     * [EN] Returns the `AutoExposure` instance.
-     *
-     * @returns
-     * [KO] `AutoExposure` 인스턴스
-     * [EN] `AutoExposure` instance
-     */
-    get autoExposure(): AutoExposure {
-        if (!this.#autoExposure) {
-            this.#autoExposure = new AutoExposure(this.#view);
-        }
-        return this.#autoExposure;
-    }
-
-    /**
-     * [KO] SSAO(Screen Space Ambient Occlusion) 활성화 여부입니다.
-     * [EN] Whether SSAO (Screen Space Ambient Occlusion) is enabled.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] SSAO 활성화 여부
-     * [EN] Whether SSAO is enabled
-     */
-    get useSSAO(): boolean {
-        return this.#useSSAO;
-    }
-
-    set useSSAO(value: boolean) {
-        this.#useSSAO = value;
-        this.#checkSSAO()
-    }
-
-    /**
-     * [KO] SSAO 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the SSAO effect instance.
-     *
-     * @returns
-     * [KO] `SSAO` 인스턴스
-     * [EN] `SSAO` instance
-     */
-    get ssao(): SSAO {
-        if (!this.#ssao) {
-            this.#ssao = new SSAO(this.#view.redGPUContext)
-        }
-        return this.#ssao;
-    }
-
-    /**
-     * [KO] SSR(Screen Space Reflection) 활성화 여부입니다.
-     * [EN] Whether SSR (Screen Space Reflection) is enabled.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] SSR 활성화 여부
-     * [EN] Whether SSR is enabled
-     */
-    get useSSR(): boolean {
-        return this.#useSSR;
-    }
-
-    set useSSR(value: boolean) {
-        this.#useSSR = value;
-        this.#checkSSR()
-    }
-
-    /**
-     * [KO] SSR 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the SSR effect instance.
-     *
-     * @returns
-     * [KO] `SSR` 인스턴스
-     * [EN] `SSR` instance
-     */
-    get ssr(): SSR {
-        if (!this.#ssr) {
-            this.#ssr = new SSR(this.#view.redGPUContext)
-        }
-        return this.#ssr;
-    }
-
-    /**
-     * [KO] DOF(Depth of Field) 활성화 여부입니다.
-     * [EN] Whether DOF (Depth of Field) is enabled.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] DOF 활성화 여부
-     * [EN] Whether DOF is enabled
-     */
-    get useDOF(): boolean {
-        return this.#useDOF;
-    }
-
-    set useDOF(value: boolean) {
-        this.#useDOF = value;
-        this.#checkDOF()
-    }
-
-    /**
-     * [KO] DOF 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the DOF effect instance.
-     *
-     * @returns
-     * [KO] `DOF` 인스턴스
-     * [EN] `DOF` instance
-     */
-    get dof(): DOF {
-        if (!this.#dof) {
-            this.#dof = new DOF(this.#view.redGPUContext)
-        }
-        return this.#dof;
-    }
-
-    /**
-     * [KO] Bloom 활성화 여부입니다.
-     * [EN] Whether Bloom is enabled.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] Bloom 활성화 여부
-     * [EN] Whether Bloom is enabled
-     */
-    get useBloom(): boolean {
-        return this.#useBloom;
-    }
-
-    set useBloom(value: boolean) {
-        this.#useBloom = value;
-        this.#checkBloom()
-    }
-
-    /**
-     * [KO] Bloom 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the Bloom effect instance.
-     *
-     * @returns
-     * [KO] `Bloom` 인스턴스
-     * [EN] `Bloom` instance
-     */
-    get bloom(): Bloom {
-        if (!this.#bloom) {
-            this.#bloom = new Bloom(this.#view.redGPUContext)
-        }
-        return this.#bloom;
     }
 
     /**
@@ -324,27 +166,6 @@ class PostEffectManager extends RedGPUObject {
             effect.destroy()
         })
         this.#postEffects = null
-
-        if (this.#ssao) {
-            this.#ssao.destroy();
-            this.#ssao = null;
-        }
-        if (this.#ssr) {
-            this.#ssr.destroy();
-            this.#ssr = null;
-        }
-        if (this.#dof) {
-            this.#dof.destroy();
-            this.#dof = null;
-        }
-        if (this.#bloom) {
-            this.#bloom.destroy();
-            this.#bloom = null;
-        }
-        if (this.#autoExposure) {
-            this.#autoExposure.destroy();
-            this.#autoExposure = null;
-        }
 
         this.#texturePool.clear();
         this.#texturePool = null
@@ -462,7 +283,7 @@ class PostEffectManager extends RedGPUObject {
 
     #renderHDRToLDR(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const {width, height} = sourceTextureInfo.texture;
-        const {redGPUContext, rawCamera, skyAtmosphere, toneMappingManager} = view;
+        const {redGPUContext, rawCamera, skyAtmosphere, builtInEffectManager, toneMappingManager} = view;
         const {antialiasingManager} = redGPUContext;
         const {useTAA} = antialiasingManager;
         const {useAutoExposure} = rawCamera;
@@ -472,11 +293,11 @@ class PostEffectManager extends RedGPUObject {
             currentTextureView = this.#applySingleEffect(skyAtmosphere, currentTextureView, width, height);
         }
 
-        if (this.#useSSAO) {
-            currentTextureView = this.#applySingleEffect(this.ssao, currentTextureView, width, height);
+        if (builtInEffectManager.useSSAO) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.ssao, currentTextureView, width, height);
         }
-        if (this.#useSSR) {
-            currentTextureView = this.#applySingleEffect(this.ssr, currentTextureView, width, height);
+        if (builtInEffectManager.useSSR) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.ssr, currentTextureView, width, height);
         }
 
         if (useTAA && view.constructor.name === 'View3D') {
@@ -484,13 +305,13 @@ class PostEffectManager extends RedGPUObject {
         }
 
         if (useAutoExposure) {
-            this.autoExposure.render(currentTextureView);
+            builtInEffectManager.autoExposure.render(currentTextureView);
         }
-        if (this.#useDOF) {
-            currentTextureView = this.#applySingleEffect(this.dof, currentTextureView, width, height);
+        if (builtInEffectManager.useDOF) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.dof, currentTextureView, width, height);
         }
-        if (this.#useBloom) {
-            currentTextureView = this.#applySingleEffect(this.bloom, currentTextureView, width, height);
+        if (builtInEffectManager.useBloom) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.bloom, currentTextureView, width, height);
         }
         currentTextureView = this.#applySingleEffect(toneMappingManager, currentTextureView, width, height);
         return currentTextureView;
@@ -632,30 +453,6 @@ class PostEffectManager extends RedGPUObject {
         }
     }
 
-    #checkSSAO() {
-        if (!this.#ssao && this.#useSSAO) {
-            this.#ssao = new SSAO(this.#view.redGPUContext)
-        }
-    }
-
-    #checkSSR() {
-        if (!this.#ssr && this.#useSSR) {
-            this.#ssr = new SSR(this.#view.redGPUContext)
-        }
-    }
-
-    #checkDOF() {
-        if (!this.#dof && this.#useDOF) {
-            this.#dof = new DOF(this.#view.redGPUContext)
-        }
-    }
-
-    #checkBloom() {
-        if (!this.#bloom && this.#useBloom) {
-            this.#bloom = new Bloom(this.#view.redGPUContext)
-        }
-    }
-
     #updateSystemUniforms() {
         const {
             inverseProjectionMatrix,
@@ -664,7 +461,8 @@ class PostEffectManager extends RedGPUObject {
             rawCamera,
             redGPUContext,
             renderViewStateData,
-            skyAtmosphere
+            skyAtmosphere,
+            builtInEffectManager
         } = this.#view;
         const {gpuDevice, antialiasingManager} = redGPUContext;
         const {viewMatrix} = rawCamera;
@@ -699,7 +497,7 @@ class PostEffectManager extends RedGPUObject {
         SystemUniformUpdater.updateSkyAtmosphere(skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32);
 
         updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-            {key: 'preExposure', value: this.autoExposure.preExposure},
+            {key: 'preExposure', value: builtInEffectManager.autoExposure.preExposure},
             {key: 'devicePixelRatio', value: devicePixelRatio}
         ]);
 

@@ -49,9 +49,11 @@ const postEffectGraph = `
 
 ## 1. 제어 인터페이스
 
-`View3D`는 후처리 목적에 따라 두 개의 매니저 속성을 제공하며, 실제 파이프라인 실행과 텍스처 풀링 (`PostEffectTexturePool`)은 `PostEffectManager`가 통합 관리합니다.
+`View3D`는 후처리 목적에 따라 세 개의 매니저 속성을 제공하며, 실제 파이프라인 실행과 텍스처 풀링 (`PostEffectTexturePool`)은 `PostEffectManager`가 통합 관리합니다.
 
-- **`view.postEffectManager` (`PostEffectManager`)**: 빌트인 이펙트 (`useSSAO`, `useSSR`) 활성화와 일반 이펙트 체인 (`addEffect`,
+- **`view.builtInEffectManager` (`BuiltInEffectManager`)**: 빌트인 이펙트 (`useSSAO`, `useSSR`, `useDOF`, `useBloom`,
+  `autoExposure`)의 활성화 및 세부 속성을 제어합니다.
+- **`view.postEffectManager` (`PostEffectManager`)**: 일반 이펙트 체인 (`addEffect`,
   `removeEffect`)을 관리하고 전체 후처리 파이프라인을 실행합니다.
 - **`view.toneMappingManager` (`ToneMappingManager`)**: HDR 데이터를 디스플레이 출력 범위 (LDR)로 변환하는 톤 매핑 알고리즘 (`mode`), 대비
   (`contrast`), 밝기 (`brightness`)를 제어합니다.

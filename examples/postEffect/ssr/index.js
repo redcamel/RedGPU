@@ -28,7 +28,7 @@ RedGPU.init(
 
         // [KO] SSR(실시간 화면 공간 반사) 활성화
         // [EN] Enable SSR (Screen Space Reflection)
-        view.postEffectManager.useSSR = true;
+        view.builtInEffectManager.useSSR = true;
         redGPUContext.addView(view);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -99,9 +99,9 @@ const renderTestPane = (redGPUContext, view) => {
         skybox: true,
         gui: (pane) => {
             const ssrFolder = pane.addFolder({title: 'PostEffect', expanded: true});
-            const ssr = view.postEffectManager.ssr;
+            const ssr = view.builtInEffectManager.ssr;
 
-            ssrFolder.addBinding(view.postEffectManager, 'useSSR').on('change', (v) => {
+            ssrFolder.addBinding(view.builtInEffectManager, 'useSSR').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
             });
 

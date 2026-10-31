@@ -142,7 +142,7 @@ abstract class ACamera extends BaseObject {
      */
     updateExposure(view?: View3D): void {
         if (view && this.#useAutoExposure) {
-            this.#ev100 = view.postEffectManager.autoExposure.currentAdaptedEV100;
+            this.#ev100 = view.builtInEffectManager.autoExposure.currentAdaptedEV100;
         } else {
             this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
         }

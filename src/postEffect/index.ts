@@ -1,8 +1,9 @@
 /**
- * [KO] 후처리 이펙트(색상 보정, 블러, 렌즈 효과, 환경 효과 등)와 `PostEffectManager`, 단일/다중 패스 코어 클래스를 제공합니다.
- * [EN] Provides post-processing effects (color adjustments, blur, lens effects, environmental effects, etc.), `PostEffectManager`, and single/multi-pass core classes.
+ * [KO] 후처리 이펙트(색상 보정, 블러, 렌즈 효과, 환경 효과 등)와 `PostEffectManager`, `BuiltInEffectManager`, 단일/다중 패스 코어 클래스를 제공합니다.
+ * [EN] Provides post-processing effects (color adjustments, blur, lens effects, environmental effects, etc.), `PostEffectManager`, `BuiltInEffectManager`, and single/multi-pass core classes.
  * @packageDocumentation
  */
+import BuiltInEffectManager from "./builtIn/BuiltInEffectManager";
 import BrightnessContrast from "./effects/adjustments/brightnessContrast/BrightnessContrast";
 import ColorBalance from "./effects/adjustments/colorBalance/ColorBalance";
 import ColorTemperatureTint from "./effects/adjustments/colorTemperatureTint/ColorTemperatureTint";
@@ -33,6 +34,7 @@ export * as BuiltIn from './builtIn'
 
 export {
     PostEffectManager,
+    BuiltInEffectManager,
     BrightnessContrast,
     ColorBalance,
     ColorTemperatureTint,

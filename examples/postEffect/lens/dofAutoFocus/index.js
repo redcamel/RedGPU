@@ -99,8 +99,8 @@ RedGPU.init(
         // [EN] Enable Physical Bokeh DOF and GPU-driven screen-center 9-Point Zone continuous auto-focus (useAutoFocus = true)
         //      - useAutoFocus = true: Meters the depth buffer at 9 points around screen center (UV 0.5, 0.5) on the GPU every frame,
         //        automatically tracking focus on the subject inside the center reticle during camera rotation, zoom, or panning.
-        view.postEffectManager.useDOF = true;
-        const effect = view.postEffectManager.dof;
+        view.builtInEffectManager.useDOF = true;
+        const effect = view.builtInEffectManager.dof;
         effect.setCinematic();
         effect.aperture = 1.4;
         effect.useAutoFocus = true;
@@ -112,7 +112,7 @@ RedGPU.init(
         const sceneState = setupAutoFocusScene(redGPUContext, scene);
 
         const updateReticleUI = () => {
-            if (!view.postEffectManager.useDOF) {
+            if (!view.builtInEffectManager.useDOF) {
                 viewfinder.style.display = 'none';
                 return;
             }
@@ -313,7 +313,7 @@ const renderTestPane = (redGPUContext, targetView, effect, sceneState, aimAtStag
         gui: (pane) => {
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            folder.addBinding(targetView.postEffectManager, 'useDOF').on('change', (v) => {
+            folder.addBinding(targetView.builtInEffectManager, 'useDOF').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
                 focusDistanceControl.disabled = !v.value || effect.useAutoFocus;
                 targetFolder.disabled = !v.value;
@@ -321,7 +321,7 @@ const renderTestPane = (redGPUContext, targetView, effect, sceneState, aimAtStag
             });
 
             const useAutoFocusControl = folder.addBinding(effect, 'useAutoFocus').on('change', (v) => {
-                focusDistanceControl.disabled = !targetView.postEffectManager.useDOF || v.value;
+                focusDistanceControl.disabled = !targetView.builtInEffectManager.useDOF || v.value;
                 updateReticleUI();
             });
 

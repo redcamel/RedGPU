@@ -55,22 +55,31 @@ redUnit.testGroup(
             });
         }, true);
 
-        runner.defineTest('Success Test: Lazy Loaded Effects (SSAO, SSR, AutoExposure)', (run) => {
-            setup(run, (ctx, manager) => {
-                const ssao = manager.ssao;
+        runner.defineTest('Success Test: BuiltInEffectManager Lazy Loaded Effects (SSAO, SSR, DOF, Bloom, AutoExposure)', (run) => {
+            setup(run, (ctx, manager, view) => {
+                const builtInEffectManager = view.builtInEffectManager;
+                const ssao = builtInEffectManager.ssao;
                 const checkSSAO = ssao instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
-                
-                const ssr = manager.ssr;
+
+                const ssr = builtInEffectManager.ssr;
                 const checkSSR = ssr instanceof RedGPU.PostEffect.Core.ASinglePassPostEffect;
-                
-                const ae = manager.autoExposure;
+
+                const dof = builtInEffectManager.dof;
+                const checkDOF = dof instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
+
+                const bloom = builtInEffectManager.bloom;
+                const checkBloom = bloom instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
+
+                const ae = builtInEffectManager.autoExposure;
                 const checkAE = ae instanceof RedGPU.Camera.Core.AutoExposure;
-                
-                manager.useSSAO = true;
-                manager.useSSR = true;
-                const checkToggles = manager.useSSAO === true && manager.useSSR === true;
-                
-                run(checkSSAO && checkSSR && checkAE && checkToggles);
+
+                builtInEffectManager.useSSAO = true;
+                builtInEffectManager.useSSR = true;
+                builtInEffectManager.useDOF = true;
+                builtInEffectManager.useBloom = true;
+                const checkToggles = builtInEffectManager.useSSAO === true && builtInEffectManager.useSSR === true && builtInEffectManager.useDOF === true && builtInEffectManager.useBloom === true;
+
+                run(checkSSAO && checkSSR && checkDOF && checkBloom && checkAE && checkToggles);
             });
         }, true);
 

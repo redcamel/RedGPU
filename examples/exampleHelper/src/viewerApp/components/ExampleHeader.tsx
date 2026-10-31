@@ -25,8 +25,8 @@ const ExampleHeader = () => {
         if (redGPUContext) {
             if (redGPUContext.viewList.length > 0) {
                 const firstView = redGPUContext.viewList[0];
-                if (firstView.postEffectManager) {
-                    setSSAO(firstView.postEffectManager.useSSAO);
+                if (firstView.builtInEffectManager) {
+                    setSSAO(firstView.builtInEffectManager.useSSAO);
                 }
             }
         }
@@ -37,8 +37,8 @@ const ExampleHeader = () => {
         setSSAO(nextValue);
         if (redGPUContext) {
             redGPUContext.viewList.forEach((view: any) => {
-                if (view.postEffectManager) {
-                    view.postEffectManager.useSSAO = nextValue;
+                if (view.builtInEffectManager) {
+                    view.builtInEffectManager.useSSAO = nextValue;
                 }
             });
         }

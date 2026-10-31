@@ -31,7 +31,7 @@ RedGPU.init(
 
         // [KO] SSAO 활성화
         // [EN] Enable SSAO
-        view.postEffectManager.useSSAO = true;
+        view.builtInEffectManager.useSSAO = true;
         redGPUContext.antialiasingManager.useTAA = true;
 
         new RedGPU.GLTFLoader(
@@ -61,9 +61,9 @@ const renderTestPane = (redGPUContext, view) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
             const ssaoFolder = pane.addFolder({title: 'PostEffect', expanded: true});
-            const ssao = view.postEffectManager.ssao;
+            const ssao = view.builtInEffectManager.ssao;
 
-            ssaoFolder.addBinding(view.postEffectManager, 'useSSAO').on('change', (v) => {
+            ssaoFolder.addBinding(view.builtInEffectManager, 'useSSAO').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
             });
 
