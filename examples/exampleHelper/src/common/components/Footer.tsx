@@ -17,32 +17,47 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
     const githubIcon = new URL(RELATIVE_PATH, import.meta.url).href;
     const [isLinkHovered, setIsLinkHovered] = useState(false);
 
-    // [KO] 1. 예제 목록 페이지(ExamplesApp: useSourceModal === false)에서는 Flex 영역 내 하단 플로팅 글래스 바로 렌더링하여 컨텐츠 침범 방지
+    // [KO] 1. 예제 목록 페이지(ExamplesApp: useSourceModal === false)
+    // - 비PC(isNarrow): 컨텐츠 영역 아래 독립된 Flex 하단 행으로 분리하여 컨텐츠 침범 방지
+    // - PC(!isNarrow): 좌측 사이드바 하단에 고정 플로팅하여 우측 본문 스크롤이 화면 끝까지 열리도록 처리
     if (!useSourceModal) {
         return (
-            <div style={{
+            <div style={isNarrow ? {
                 ...staticFooterContainerStyle,
-                margin: isNarrow ? '8px 10px 10px 10px' : '12px 20px 14px 20px',
-                padding: isNarrow ? '0 14px' : '0 20px',
+                height: '46px',
+                margin: '8px 16px 12px 16px',
+            } : {
+                position: 'fixed',
+                left: '20px',
+                bottom: '12px',
+                height: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                zIndex: 100,
+                pointerEvents: 'none',
             }}>
                 <a
                     href="https://github.com/redcamel/RedGPU"
                     target="_blank"
                     rel="noreferrer"
                     style={{
-                        ...footerLeftLinkStyle,
-                        opacity: isLinkHovered ? 1 : 0.88
+                        ...floatingFooterCapsuleStyle,
+                        opacity: isLinkHovered ? 1 : 0.9
                     }}
                     onMouseEnter={() => setIsLinkHovered(true)}
                     onMouseLeave={() => setIsLinkHovered(false)}
                 >
-                    <span style={{color: '#b19898', fontSize: '12.5px', letterSpacing: '0.02em'}}>
+                    <span style={{
+                        color: 'rgba(220, 212, 212, 0.92)',
+                        fontSize: isNarrow ? '12px' : '12.5px',
+                        letterSpacing: '0.02em',
+                        whiteSpace: 'nowrap',
+                        textShadow: '0 1px 4px rgba(0, 0, 0, 0.75)'
+                    }}>
                         This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                     </span>
-                    <span style={iconWrapperStyle}>
-                        <img src={githubIcon} width="18" height="18" alt="GitHub"/>
-                    </span>
                 </a>
+                {isNarrow && narrowSettings}
             </div>
         );
     }
@@ -110,15 +125,29 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
 
 // Styles
 const staticFooterContainerStyle: React.CSSProperties = {
-    height: '36px',
     backgroundColor: 'transparent',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 20px',
+    padding: 0,
     boxSizing: 'border-box',
     flexShrink: 0,
-    zIndex: 100
+    zIndex: 100,
+};
+
+const floatingFooterCapsuleStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    height: '100%',
+    padding: 0,
+    backgroundColor: 'transparent',
+    border: 'none',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: 'opacity 0.2s',
+    boxSizing: 'border-box',
+    pointerEvents: 'auto',
 };
 
 const titleContainerStyle: React.CSSProperties = {

@@ -60,21 +60,25 @@ export const ExampleListCard: React.FC<CardProps> = ({
 const listCardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => ({
     display: 'flex',
     alignItems: 'center',
-    padding: isNarrow ? '9px 12px' : '10px 16px',
-    backgroundColor: hovered ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-    borderRadius: '8px',
+    padding: isNarrow ? '8px 12px' : '8px 14px',
+    backgroundColor: hovered ? 'rgba(24, 24, 30, 0.82)' : 'rgba(18, 18, 20, 0.76)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: `1px solid ${hovered ? 'rgba(253, 180, 141, 0.45)' : 'rgba(255, 255, 255, 0.09)'}`,
+    borderRadius: '12px',
+    boxShadow: hovered ? '0 8px 24px rgba(0, 0, 0, 0.45)' : '0 4px 14px rgba(0, 0, 0, 0.25)',
     cursor: 'pointer',
-    transition: 'background-color 0.18s',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     gap: isNarrow ? '10px' : '16px',
 });
 
 const listThumbStyle: React.CSSProperties = {
-    width: '64px',
-    height: '36px',
-    borderRadius: '6px',
+    width: '68px',
+    height: '42px',
+    borderRadius: '8px',
     objectFit: 'cover',
     border: '1px solid rgba(255, 255, 255, 0.08)',
+    flexShrink: 0,
 };
 
 const listContentStyle: React.CSSProperties = {
@@ -92,15 +96,17 @@ const titleStyle: React.CSSProperties = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    flexShrink: 0,
 };
 
 const listDescStyle: React.CSSProperties = {
     fontSize: '12.5px',
-    color: '#8e8e98',
+    color: '#b0b0ba',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: '540px',
+    flex: 1,
+    minWidth: 0,
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {

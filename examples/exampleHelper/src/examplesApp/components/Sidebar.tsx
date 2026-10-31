@@ -12,9 +12,9 @@ const Sidebar: React.FC = () => {
     return (
         <aside style={{
             ...sidebarStyle,
-            margin: sidebarOpen ? '12px 0 0 20px' : '12px 0 0 0',
+            margin: sidebarOpen ? '12px 0 42px 20px' : '12px 0 42px 0',
             border: sidebarOpen ? '1px solid rgba(255, 255, 255, 0.1)' : '0',
-            boxShadow: sidebarOpen ? '0 10px 30px rgba(0, 0, 0, 0.45)' : 'none',
+            boxShadow: sidebarOpen ? '0 8px 24px rgba(0, 0, 0, 0.4)' : 'none',
             width: sidebarOpen ? '272px' : '0',
             opacity: sidebarOpen ? 1 : 0,
         }}>
@@ -26,10 +26,10 @@ const Sidebar: React.FC = () => {
 };
 
 const sidebarStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(12, 12, 16, 0.72)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    borderRadius: '16px',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    borderRadius: '18px',
     display: 'flex',
     flexDirection: 'column',
     transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -41,7 +41,7 @@ const sidebarStyle: React.CSSProperties = {
 const treeContainerStyle: React.CSSProperties = {
     flex: 1,
     overflowY: 'auto',
-    padding: '20px 16px 32px 18px',
+    padding: '16px 16px 32px 18px',
     minHeight: 0,
 };
 

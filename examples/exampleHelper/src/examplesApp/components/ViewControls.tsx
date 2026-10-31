@@ -1,34 +1,25 @@
 import React from 'react';
 import {useExamplesStore} from '../store/useExamplesStore';
+import {GitHubIcon} from '../../common/components/Icons';
+import IconButton from '../../common/components/basic/IconButton';
 
 const ViewControls: React.FC = () => {
     const viewMode = useExamplesStore(state => state.viewMode);
     const setViewMode = useExamplesStore(state => state.setViewMode);
     const language = useExamplesStore(state => state.language);
     const setLanguage = useExamplesStore(state => state.setLanguage);
+    const isNarrow = useExamplesStore(state => state.isNarrow);
 
     return (
         <div style={containerStyle}>
-            <div style={groupStyle}>
-                <button
-                    style={buttonStyle(viewMode === 'grid')}
-                    onClick={() => setViewMode('grid')}
-                    title="Grid View"
-                    aria-label="Grid View"
-                    aria-pressed={viewMode === 'grid'}
-                >
-                    ▤
-                </button>
-                <button
-                    style={buttonStyle(viewMode === 'list')}
-                    onClick={() => setViewMode('list')}
-                    title="List View"
-                    aria-label="List View"
-                    aria-pressed={viewMode === 'list'}
-                >
-                    ☰
-                </button>
-            </div>
+            <button
+                style={buttonStyle}
+                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                title={viewMode === 'grid' ? 'Grid View' : 'List View'}
+                aria-label={viewMode === 'grid' ? 'Grid View' : 'List View'}
+            >
+                {viewMode === 'grid' ? '▤' : '☰'}
+            </button>
 
             <div style={divider} />
 
@@ -37,8 +28,20 @@ const ViewControls: React.FC = () => {
                 onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
                 aria-label={`Switch to ${language === 'ko' ? 'English' : 'Korean'}`}
             >
-                {language === 'ko' ? 'KOREAN' : 'ENGLISH'}
+                {language === 'ko' ? 'KO' : 'EN'}
             </button>
+
+            {isNarrow && (
+                <>
+                    <div style={divider}/>
+                    <IconButton
+                        icon={<GitHubIcon color="#fff" size={18}/>}
+                        label="GITHUB"
+                        onClick={() => window.open('https://github.com/redcamel/RedGPU', '_blank')}
+                        title="GitHub Repository"
+                    />
+                </>
+            )}
         </div>
     );
 };
@@ -46,50 +49,51 @@ const ViewControls: React.FC = () => {
 const containerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-};
-
-const groupStyle: React.CSSProperties = {
-    display: 'flex',
-    backgroundColor: 'rgba(14, 14, 18, 0.68)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
+    height: '46px',
+    padding: '4px',
+    gap: '4px',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '9999px',
-    padding: '2px',
-    gap: '2px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+    boxSizing: 'border-box',
+    flexShrink: 0,
 };
 
-const buttonStyle = (active: boolean): React.CSSProperties => ({
-    width: '30px',
-    height: '24px',
+const buttonStyle: React.CSSProperties = {
+    width: '36px',
+    height: '36px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: active ? 'rgba(253, 180, 141, 0.18)' : 'transparent',
-    color: active ? '#fdb48d' : '#a0a0ab',
+    backgroundColor: 'transparent',
+    color: '#fdb48d',
     border: 'none',
+    outline: 'none',
     borderRadius: '9999px',
     cursor: 'pointer',
-    fontSize: '13px',
+    fontSize: '14px',
     transition: 'all 0.18s ease',
-});
+    padding: 0,
+    flexShrink: 0,
+};
 
 const langButtonStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '26px',
-    padding: '0 11px',
-    backgroundColor: 'rgba(14, 14, 18, 0.68)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    border: '1px solid rgba(253, 180, 141, 0.42)',
+    width: '36px',
+    height: '36px',
+    padding: 0,
+    backgroundColor: 'transparent',
+    border: 'none',
     borderRadius: '9999px',
     color: '#fdb48d',
-    fontSize: '10px',
-    fontWeight: 800,
-    letterSpacing: '0.06em',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    letterSpacing: '0.04em',
     cursor: 'pointer',
     transition: 'all 0.18s ease',
 };
@@ -98,6 +102,8 @@ const divider: React.CSSProperties = {
     width: '1px',
     height: '16px',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    margin: '0 2px',
+    flexShrink: 0,
 };
 
 export default ViewControls;

@@ -59,32 +59,37 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0, lcpCoun
 const sectionTitleStyle: React.CSSProperties = {
     fontSize: '25px',
     fontWeight: 700,
-    marginBottom: '26px',
+    lineHeight: 1.15,
+    marginTop: 0,
+    marginBottom: '18px',
     color: '#f8f9fa',
     borderLeft: '3px solid #fdb48d',
     paddingLeft: '16px',
     letterSpacing: '-0.02em',
+    textShadow: '0 2px 8px rgba(0, 0, 0, 0.75)',
 };
 
 const subSectionTitleStyle: React.CSSProperties = {
     fontSize: '17px',
     fontWeight: 600,
-    marginBottom: '18px',
+    marginTop: 0,
+    marginBottom: '16px',
     color: '#fdb48d',
-    opacity: 0.9,
+    opacity: 0.95,
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
     letterSpacing: '-0.01em',
+    textShadow: '0 2px 6px rgba(0, 0, 0, 0.75)',
 };
 
 const subSubSectionTitleStyle: React.CSSProperties = {
     fontSize: '12.5px',
     fontWeight: 700,
-    marginBottom: '14px',
+    marginTop: 0,
+    marginBottom: '12px',
     color: '#8e8e93',
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
+    letterSpacing: '0.04em',
 };
 
 const stackStyle: React.CSSProperties = {
@@ -99,9 +104,9 @@ const gridStyle = (mode: string, isNarrow: boolean): React.CSSProperties => {
     return {
         display: 'grid',
         gridTemplateColumns: isGrid
-            ? `repeat(auto-fill, minmax(${isNarrow ? '240px' : '280px'}, 1fr))`
+            ? `repeat(auto-fill, minmax(${isNarrow ? '230px' : '265px'}, 1fr))`
             : '1fr',
-        gap: isNarrow ? '16px' : '22px',
+        gap: isGrid ? (isNarrow ? '14px' : '18px') : '8px',
         marginBottom: '20px',
     };
 };

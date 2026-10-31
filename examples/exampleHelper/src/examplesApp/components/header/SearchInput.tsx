@@ -19,9 +19,9 @@ const SearchInput: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                     ...searchInputStyle,
-                    height: isNarrow ? '38px' : '44px',
+                    height: '46px',
                     borderColor: focused ? 'rgba(253, 180, 141, 0.55)' : 'rgba(255, 255, 255, 0.1)',
-                    backgroundColor: focused ? 'rgba(20, 20, 26, 0.85)' : 'rgba(14, 14, 18, 0.72)'
+                    backgroundColor: focused ? 'rgba(24, 24, 28, 0.9)' : 'rgba(18, 18, 20, 0.82)'
                 }}
             />
             {searchQuery && (
@@ -45,14 +45,14 @@ const searchContainer: React.CSSProperties = {
 
 const searchInputStyle: React.CSSProperties = {
     width: '100%',
-    height: '44px',
-    backgroundColor: 'rgba(14, 14, 18, 0.72)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
+    height: '46px',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '9999px',
     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    padding: '0 38px 0 18px',
+    padding: '0 40px 0 20px',
     color: '#f8f9fa',
     fontSize: '13.5px',
     fontFamily: 'inherit',

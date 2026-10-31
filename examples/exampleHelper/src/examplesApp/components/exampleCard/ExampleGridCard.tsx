@@ -55,18 +55,19 @@ export const ExampleGridCard: React.FC<CardProps> = ({
                     </div>
                 )}
             </div>
-            <div style={{...contentStyle, padding: isNarrow ? '13px 14px' : '16px 18px'}}>
+            <div style={{...contentStyle, padding: isNarrow ? '10px 8px 6px' : '11px 10px 7px'}}>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '7px',
+                    marginBottom: '4px',
                     gap: '8px'
                 }}>
-                    <div style={{...titleStyle, fontSize: isNarrow ? '13.5px' : '14.5px'}}>{item.name}</div>
+                    <div style={{...titleStyle, fontSize: isNarrow ? '13px' : '14px'}}>{item.name}</div>
                     {item.experimental && <span style={experimentalBadgeStyle}>EXP</span>}
                 </div>
-                <div style={{...descStyle, fontSize: isNarrow ? '11.5px' : '12.5px'}}
+                <div style={{...descStyle, fontSize: isNarrow ? '11.5px' : '12px'}}
+                     title={plainDescription}
                      dangerouslySetInnerHTML={{__html: description}}/>
             </div>
         </a>
@@ -74,23 +75,27 @@ export const ExampleGridCard: React.FC<CardProps> = ({
 };
 
 const cardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => ({
-    backgroundColor: '#121215',
-    border: `1px solid ${hovered ? 'rgba(253, 180, 141, 0.45)' : 'rgba(255, 255, 255, 0.08)'}`,
-    borderRadius: '14px',
+    backgroundColor: hovered ? 'rgba(22, 22, 28, 0.78)' : 'rgba(14, 14, 18, 0.68)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: `1px solid ${hovered ? 'rgba(253, 180, 141, 0.45)' : 'rgba(255, 255, 255, 0.09)'}`,
+    borderRadius: '16px',
+    padding: '6px',
     overflow: 'hidden',
     cursor: 'pointer',
     transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
     transform: (!isNarrow && hovered) ? 'translateY(-4px)' : 'none',
-    boxShadow: hovered ? '0 14px 34px rgba(0, 0, 0, 0.55)' : '0 4px 14px rgba(0, 0, 0, 0.25)',
+    boxShadow: hovered ? '0 14px 34px rgba(0, 0, 0, 0.55)' : '0 6px 20px rgba(0, 0, 0, 0.3)',
     width: '100%',
 });
 
 const thumbWrapperStyle: React.CSSProperties = {
     position: 'relative',
-    aspectRatio: '16 / 9',
+    aspectRatio: '16 / 10',
+    borderRadius: '11px',
     overflow: 'hidden',
     backgroundColor: '#09090b',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
 };
 
 const thumbStyle = (hovered: boolean): React.CSSProperties => ({
@@ -129,11 +134,11 @@ const viewButtonStyle: React.CSSProperties = {
 };
 
 const contentStyle: React.CSSProperties = {
-    padding: '16px 18px',
+    padding: '11px 10px 7px',
 };
 
 const titleStyle: React.CSSProperties = {
-    fontSize: '14.5px',
+    fontSize: '14px',
     fontWeight: 600,
     letterSpacing: '-0.01em',
     color: '#f8f9fa',
@@ -143,14 +148,12 @@ const titleStyle: React.CSSProperties = {
 };
 
 const descStyle: React.CSSProperties = {
-    fontSize: '12.5px',
+    fontSize: '12px',
     color: '#9898a2',
-    lineHeight: '1.55',
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical',
+    lineHeight: '1.4',
+    whiteSpace: 'nowrap',
     overflow: 'hidden',
-    height: '39px',
+    textOverflow: 'ellipsis',
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {

@@ -21,7 +21,7 @@ const Description = () => {
     if (!description) return null;
 
     const categoryLabel = currentExample.path
-        ? currentExample.path.split('/').slice(0, -1).join(' · ').replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase()
+        ? currentExample.path.split('/').slice(0, -1).join(' · ')
         : '';
 
     return (
@@ -167,7 +167,6 @@ const brandTagStyle: React.CSSProperties = {
     color: '#fdb48d',
     letterSpacing: '0.07em',
     lineHeight: '1',
-    textTransform: 'uppercase'
 };
 
 const eyebrowDotStyle: React.CSSProperties = {
@@ -187,7 +186,6 @@ const brandSubStyle: React.CSSProperties = {
     color: 'rgba(255, 255, 255, 0.72)',
     letterSpacing: '0.06em',
     lineHeight: '1',
-    textTransform: 'uppercase'
 };
 
 const eyebrowDividerStyle: React.CSSProperties = {
@@ -208,7 +206,6 @@ const eyebrowCategoryStyle: React.CSSProperties = {
     color: 'rgba(253, 180, 141, 0.92)',
     letterSpacing: '0.07em',
     lineHeight: '1',
-    textTransform: 'uppercase'
 };
 
 const titleRowStyle: React.CSSProperties = {

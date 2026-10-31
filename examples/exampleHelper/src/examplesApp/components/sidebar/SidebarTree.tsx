@@ -24,7 +24,12 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                 if (item.list) {
                     return (
                         <div key={key} style={{marginLeft: depth * 12}}>
-                            <div style={{...groupTitleStyle, display: 'flex', alignItems: 'center'}}>
+                            <div style={{
+                                ...groupTitleStyle,
+                                marginTop: (depth === 0 && idx === 0) ? 0 : '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                            }}>
                                 {item.name}
                                 {item.experimental && depth === 0 && (
                                     <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
@@ -60,10 +65,9 @@ const groupTitleStyle: React.CSSProperties = {
     fontSize: '10.5px',
     color: '#8e8e93',
     fontWeight: 700,
-    textTransform: 'uppercase',
     marginTop: '16px',
     marginBottom: '6px',
-    letterSpacing: '0.06em',
+    letterSpacing: '0.04em',
 };
 
 const itemStyle: React.CSSProperties = {

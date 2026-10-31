@@ -2,6 +2,7 @@ import React from 'react';
 import {useExamplesStore} from '../../store/useExamplesStore';
 import {GitHubIcon} from '../../../common/components/Icons';
 import IconButton from '../../../common/components/basic/IconButton';
+import LabelButton from '../../../common/components/basic/LabelButton';
 
 const HeaderActions: React.FC = () => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
@@ -10,27 +11,25 @@ const HeaderActions: React.FC = () => {
     const openLink = (url: string) => window.open(url, '_blank');
 
     return (
-        <div style={{
-            ...rightSection,
-            height: isNarrow ? '38px' : '44px',
-            padding: isNarrow ? '0 4px' : '0 6px',
-        }}>
+        <div style={rightSectionStyle}>
             {!isNarrow && (
                 <>
-                    <button style={pillButtonStyle} onClick={() => openLink('/RedGPU/manual/')}>
-                        MANUAL
-                    </button>
-                    <button
-                        style={pillButtonStyle}
+                    <LabelButton
+                        label="MANUAL"
+                        style={labelButtonStyle}
+                        onClick={() => openLink('/RedGPU/manual/')}
+                    />
+                    <div style={dividerStyle}/>
+                    <LabelButton
+                        label="API"
+                        style={labelButtonStyle}
                         onClick={() => openLink(`/RedGPU/manual/${language}/api/RedGPU-API/namespaces/RedGPU/README.html`)}
-                    >
-                        API
-                    </button>
+                    />
                     <div style={dividerStyle}/>
                 </>
             )}
             <IconButton
-                icon={<GitHubIcon color="#fff" size={isNarrow ? 17 : 18}/>}
+                icon={<GitHubIcon color="#fff" size={18}/>}
                 label="GITHUB"
                 onClick={() => openLink('https://github.com/redcamel/RedGPU')}
                 title="GitHub Repository"
@@ -39,17 +38,25 @@ const HeaderActions: React.FC = () => {
     );
 };
 
-const rightSection: React.CSSProperties = {
+const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
-    backgroundColor: 'rgba(14, 14, 18, 0.72)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
+    height: '46px',
+    flexShrink: 0,
+    padding: '4px',
+    gap: '4px',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '9999px',
     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    flexShrink: 0,
+    boxSizing: 'border-box',
+    pointerEvents: 'auto',
+};
+
+const labelButtonStyle: React.CSSProperties = {
+    padding: '0 9px',
 };
 
 const dividerStyle: React.CSSProperties = {
@@ -57,23 +64,7 @@ const dividerStyle: React.CSSProperties = {
     height: '16px',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     margin: '0 2px',
-};
-
-const pillButtonStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '32px',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    border: '1px solid rgba(255, 255, 255, 0.09)',
-    borderRadius: '9999px',
-    color: '#fdb48d',
-    fontSize: '11.5px',
-    fontWeight: 700,
-    letterSpacing: '0.04em',
-    cursor: 'pointer',
-    padding: '0 14px',
-    transition: 'all 0.18s ease',
+    flexShrink: 0,
 };
 
 export default HeaderActions;
