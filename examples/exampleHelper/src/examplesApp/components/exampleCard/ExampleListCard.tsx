@@ -60,6 +60,8 @@ export const ExampleListCard: React.FC<CardProps> = ({
 const listCardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => ({
     display: 'flex',
     alignItems: 'center',
+    width: '100%',
+    minWidth: 0,
     padding: isNarrow ? '8px 12px' : '8px 14px',
     backgroundColor: hovered ? 'rgba(24, 24, 30, 0.82)' : 'rgba(18, 18, 20, 0.76)',
     backdropFilter: 'blur(16px)',
@@ -92,6 +94,7 @@ const listContentStyle: React.CSSProperties = {
 const titleStyle: React.CSSProperties = {
     fontSize: '14px',
     fontWeight: 600,
+    lineHeight: '1.35',
     color: '#f8f9fa',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -101,6 +104,7 @@ const titleStyle: React.CSSProperties = {
 
 const listDescStyle: React.CSSProperties = {
     fontSize: '12.5px',
+    lineHeight: '1.5',
     color: '#b0b0ba',
     whiteSpace: 'nowrap',
     overflow: 'hidden',

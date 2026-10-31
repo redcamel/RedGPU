@@ -22,6 +22,7 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0, lcpCoun
             marginLeft: depth > 0 ? (isNarrow ? '0' : (depth === 1 ? '20px' : '14px')) : '0',
             borderLeft: (depth > 0 && !isNarrow) ? '1px solid rgba(255, 255, 255, 0.07)' : 'none',
             paddingLeft: depth > 0 ? (isNarrow ? '0' : '22px') : '0',
+            minWidth: 0,
         };
 
         return (
@@ -105,9 +106,10 @@ const gridStyle = (mode: string, isNarrow: boolean): React.CSSProperties => {
         display: 'grid',
         gridTemplateColumns: isGrid
             ? `repeat(auto-fill, minmax(${isNarrow ? '230px' : '265px'}, 1fr))`
-            : '1fr',
+            : 'minmax(0, 1fr)',
         gap: isGrid ? (isNarrow ? '14px' : '18px') : '8px',
         marginBottom: '20px',
+        minWidth: 0,
     };
 };
 
