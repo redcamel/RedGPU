@@ -2726,8 +2726,8 @@ export const ExampleList: ExampleListType = [
                         name: 'GLTF Physics',
                         path: 'physics/gltfPhysics',
                         description: {
-                            ko: `로드된 GLTF 모델의 복잡한 계층 구조와 메쉬 데이터를 분석하여 자동으로 물리 충돌체를 생성하는 방법을 테스트합니다.`,
-                            en: `Tests how to automatically generate physics colliders by analyzing the complex hierarchy and mesh data of a loaded GLTF model.`
+                            ko: `로드된 GLTF 모델의 메쉬 계층 구조를 분석하여 물리 충돌체를 자동 생성하는 예제입니다.`,
+                            en: `Automatically generates physics colliders by analyzing the mesh hierarchy of a loaded GLTF model.`
                         },
                     }
                 ]
@@ -2768,8 +2768,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Collision Filtering',
                         path: 'physics/collisionFiltering',
                         description: {
-                            ko: `Bitmask 기반의 충돌 그룹 설정을 통해 특정 객체들끼리만 선택적으로 충돌하도록 제어하는 고급 물리 기술을 구현합니다.`,
-                            en: `Implements advanced physics techniques to selectively control collisions between specific objects through Bitmask-based collision group settings.`
+                            ko: `비트마스크 충돌 그룹 설정을 통해 특정 객체들끼리만 선택적으로 충돌하도록 제어하는 예제입니다.`,
+                            en: `Selectively controls collisions between specific object groups using bitmask collision filtering.`
                         },
                     }
                 ]
@@ -2843,8 +2843,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Surface Velocity (Conveyor)',
                         path: 'physics/surfaceVelocity',
                         description: {
-                            ko: `컨베이어 벨트와 같이 표면이 움직이는 물체를 시뮬레이션합니다. 물체가 닿았을 때 특정 방향으로 힘을 가하여 이동시킵니다.`,
-                            en: `Simulates objects with moving surfaces like conveyor belts. Applies force to move objects in a specific direction when they make contact.`
+                            ko: `접촉한 물체에 일정 방향의 속도를 전달해 이동시키는 컨베이어 벨트 표면 물리 예제입니다.`,
+                            en: `Simulates conveyor belt surfaces that apply directional velocity to contacting physics objects.`
                         },
                     },
                     {
@@ -2852,8 +2852,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Buoyancy Basics',
                         path: 'physics/buoyancy',
                         description: {
-                            ko: `물속에서 물체가 떠오르는 부력과 유체 저항을 시뮬레이션합니다. 잠긴 깊이에 따라 상향 힘을 조절합니다.`,
-                            en: `Simulates buoyancy and fluid resistance for objects in water. Adjusts upward force based on submerged depth.`
+                            ko: `잠긴 깊이에 비례하는 상향 부력과 유체 저항을 통해 물에 뜨는 물체를 시뮬레이션하는 예제입니다.`,
+                            en: `Simulates floating objects in water using submerged depth-based buoyancy and fluid drag.`
                         },
                     },
                     {
@@ -2870,8 +2870,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Character Controller',
                         path: 'physics/characterController',
                         description: {
-                            ko: `Rapier 물리 엔진을 이용해 지면을 걷고 계단을 오르는 3인칭 캐릭터 이동을 구현합니다.<br/>반투명한 물리 충돌체 캡슐과 GLTF 캐릭터(Soldier) 모델링을 결합하여 동작 상태에 따른 런타임 애니메이션 블렌딩을 시연합니다.`,
-                            en: `Implements physics-based 3rd person character movement walking on the ground and climbing stairs using the Rapier physics engine.<br/>Integrates a translucent physical capsule collider with a GLTF character (Soldier) model, demonstrating runtime animation blending based on action states.`
+                            ko: `캡슐 물리 충돌체와 GLTF 캐릭터 애니메이션 블렌딩을 결합해 지면 보행 및 계단 이동을 구현하는 예제입니다.`,
+                            en: `Combines a capsule physics collider with GLTF character animation blending for walking and stair climbing.`
                         },
                     },
                     {
@@ -2903,8 +2903,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Physics Bowling',
                         path: 'physics/bowling',
                         description: {
-                            ko: `고속으로 이동하는 볼과 핀 사이의 충돌 및 연쇄 반응을 테스트합니다. CCD(Continuous Collision Detection) 기술이 적용되었습니다.`,
-                            en: `Tests collisions and chain reactions between a fast-moving ball and pins. CCD (Continuous Collision Detection) technology is applied.`
+                            ko: `연속 충돌 감지(CCD)를 적용해 고속으로 굴러가는 볼링공과 핀의 연쇄 충돌을 시뮬레이션하는 예제입니다.`,
+                            en: `Simulates high-speed bowling ball and pin chain collisions using Continuous Collision Detection (CCD).`
                         },
                     },
                     {
@@ -2921,8 +2921,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Ultimate Stress Test',
                         path: 'physics/stressTest',
                         description: {
-                            ko: `수천 개의 물리 객체를 동시에 시뮬레이션하여 엔진의 한계 성능을 테스트합니다. 휴면(Sleep) 모드 활성화를 통한 최적화 효과를 확인합니다.`,
-                            en: `Tests the engine's performance limits by simulating thousands of physics objects simultaneously. Demonstrates optimization through Sleep mode.`
+                            ko: `수천 개의 물리 객체를 동시에 시뮬레이션하며 휴면(Sleep) 모드를 통한 성능 최적화를 확인하는 스트레스 테스트 예제입니다.`,
+                            en: `Simulates thousands of physics objects simultaneously to stress-test performance and Sleep mode optimization.`
                         },
                     },
                 ]
