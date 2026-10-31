@@ -1,5 +1,6 @@
 import React from 'react';
 import {ExampleItem} from '../../../types/example';
+import {useExamplesStore} from '../../store/useExamplesStore';
 
 interface CardProps {
     item: ExampleItem;
@@ -21,6 +22,7 @@ export const ExampleGridCard: React.FC<CardProps> = ({
                                                          onMouseEnter,
                                                          onMouseLeave
 }) => {
+    const isCompact = useExamplesStore(state => state.isCompact);
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
 
@@ -40,7 +42,10 @@ export const ExampleGridCard: React.FC<CardProps> = ({
             onClick={() => {
             }}
         >
-            <div style={thumbWrapperStyle}>
+            <div style={{
+                ...thumbWrapperStyle,
+                aspectRatio: isCompact ? '8 / 3' : '16 / 10',
+            }}>
                 <img
                     src={thumbUrl}
                     style={thumbStyle(hovered)}
@@ -55,7 +60,10 @@ export const ExampleGridCard: React.FC<CardProps> = ({
                     </div>
                 )}
             </div>
-            <div style={{...contentStyle, padding: isNarrow ? '10px 8px 6px' : '11px 10px 7px'}}>
+            <div style={{
+                ...contentStyle,
+                padding: isCompact ? '8px 8px 4px' : (isNarrow ? '10px 8px 6px' : '11px 10px 7px')
+            }}>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
