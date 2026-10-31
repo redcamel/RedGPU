@@ -503,7 +503,7 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'Sampler SamplerAddressMode',
+                                name: 'Sampler AddressMode',
                                 path: '3d/texture/samplerAddressMode',
                                 description: {
                                     ko: `텍스처 샘플러의 AddressMode 옵션 조합을 보여주는 예제입니다.`,
@@ -511,7 +511,7 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'MaxAnisotropy',
+                                name: 'Max Anisotropy',
                                 path: '3d/texture/maxAnisotropy',
                                 description: {
                                     ko: `텍스처의 비등방성 필터링(Anisotropy) 옵션을 보여주는 예제입니다.`,
@@ -566,7 +566,7 @@ export const ExampleList: ExampleListType = [
                                 }
                             },
                             {
-                                name: 'ArrayCube3D (3D / Array / Cubemap)',
+                                name: 'Array / Cube / 3D (3D / Array / Cubemap)',
                                 path: '3d/texture/ktx2/arrayCube3d',
                                 description: {
                                     ko: `3D 볼륨 텍스처, 텍스처 어레이, 큐브맵, 스카이박스 최심화 KTX2 테스트 예제입니다.`,
@@ -706,7 +706,7 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'PointLight Performance(cluster)',
+                                name: 'PointLight Performance (Cluster)',
                                 path: '3d/light/pointLightPerformance',
                                 description: {
                                     ko: `PointLight는 클러스터 타일 렌더링을 지원합니다. 1024개의 포인트 라이트를 지원합니다.`,
@@ -714,7 +714,7 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'SpotLight Performance(cluster)',
+                                name: 'SpotLight Performance (Cluster)',
                                 path: '3d/light/spotLightPerformance',
                                 description: {
                                     ko: `SpotLight의 대량 렌더링 성능(클러스터링)을 테스트하는 예제입니다.`,
@@ -1237,7 +1237,7 @@ export const ExampleList: ExampleListType = [
                 name: 'Basic',
                 list: [
                     {
-                        name: 'TextureEncodingTest',
+                        name: 'Texture Encoding Test',
                         path: 'gltf/basic/textureEncodingTest',
                         description: {
                             ko: `텍스처가 올바른 전달 함수(Transfer Function)로 샘플링되는지 테스트합니다. Base Color와 Emissive가 sRGB에서 올바르게 디코딩되는지 확인합니다.`,
@@ -1245,7 +1245,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'TextureLinear InterpolationTest',
+                        name: 'Texture Linear Interpolation Test',
                         path: 'gltf/basic/textureLinearInterpolationTest',
                         description: {
                             ko: `sRGB 디코딩 후 선형 값에 대해 텍스처 선형 보간이 올바르게 수행되는지 테스트합니다.`,
@@ -1253,7 +1253,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'VertexColorTest',
+                        name: 'Vertex Color Test',
                         path: 'gltf/basic/vertexColorTest',
                         description: {
                             ko: `뷰어가 정점 색상(COLORS_0 속성)을 올바르게 지원하는지 테스트합니다.`,
@@ -1261,7 +1261,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'BoxVertexColors',
+                        name: 'Box Vertex Colors',
                         path: 'gltf/basic/boxVertexColors',
                         description: {
                             ko: `각 면에 정점 색상이 적용된 간단한 박스 모델입니다.`,
@@ -1269,7 +1269,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'OrientationTest',
+                        name: 'Orientation Test',
                         path: 'gltf/basic/orientationTest',
                         description: {
                             ko: `노드의 회전 및 방향(Quaternion) 처리가 올바른지 테스트합니다.`,
@@ -1277,7 +1277,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'TextureCoordinateTest',
+                        name: 'Texture Coordinate Test',
                         path: 'gltf/basic/textureCoordinateTest',
                         description: {
                             ko: `XYZ 위치(3D 공간 좌표)와 UV 위치(2D 텍스처 좌표) 간의 관계를 보여줍니다.`,
@@ -1285,7 +1285,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'AlphaBlendModeTest',
+                        name: 'Alpha Blend Mode Test',
                         path: 'gltf/basic/alphaBlendModeTest',
                         description: {
                             ko: `다양한 알파 모드(OPAQUE, BLEND, MASK)가 올바르게 렌더링되는지 테스트합니다.`,
@@ -1293,7 +1293,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'TextureSettingsTest',
+                        name: 'Texture Settings Test',
                         path: 'gltf/basic/textureSettingsTest',
                         description: {
                             ko: `텍스처 샘플링 설정(Wrap 모드, 필터링)을 테스트합니다.`,
@@ -1301,7 +1301,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'MultiUVTest',
+                        name: 'Multi UV Test',
                         path: 'gltf/basic/multiUVTest',
                         description: {
                             ko: `다중 텍스처 좌표 속성(예: 색상용 TEXCOORD_0, 기타 요소용 TEXCOORD_1)의 사용을 시연합니다.`,
@@ -1310,7 +1310,7 @@ export const ExampleList: ExampleListType = [
                     },
 
                     {
-                        name: 'MetalRoughSpheres',
+                        name: 'Metal Rough Spheres',
                         path: 'gltf/basic/metalRoughSpheres',
                         description: {
                             ko: `다양한 금속성(Metallic)과 거칠기(Roughness) 값을 가진 구체들을 통해 PBR 렌더링을 테스트합니다.`,
@@ -1318,7 +1318,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'MetalRoughSpheresNoTextures',
+                        name: 'Metal Rough Spheres No Textures',
                         path: 'gltf/basic/metalRoughSpheresNoTextures',
                         description: {
                             ko: `텍스처 없이 재질의 요소(Factor) 값만으로 금속성과 거칠기를 표현하는 테스트입니다.`,
@@ -1326,7 +1326,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'WaterBottle',
+                        name: 'Water Bottle',
                         path: 'gltf/basic/waterBottle',
                         description: {
                             ko: `Normal, Occlusion, Emissive 맵을 사용하는 기본적인 금속/거칠기(Metal/Roughness) PBR 물병 모델입니다.`,
@@ -1334,7 +1334,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'NormalTangentTest',
+                        name: 'Normal Tangent Test',
                         path: 'gltf/basic/normalTangentTest',
                         description: {
                             ko: `노멀 맵핑과 탄젠트 공간 계산의 정확성을 테스트합니다.`,
@@ -1342,7 +1342,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'NormalTangentMirrorTest',
+                        name: 'Normal Tangent Mirror Test',
                         path: 'gltf/basic/normalTangentMirrorTest',
                         description: {
                             ko: `미러링된 텍스처 좌표에서의 노멀 맵핑 처리를 테스트합니다.`,
@@ -1350,7 +1350,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'NegativeScaleTest',
+                        name: 'Negative Scale Test',
                         path: 'gltf/basic/negativeScaleTest',
                         description: {
                             ko: `음수 스케일(반전)이 적용된 노드의 렌더링을 테스트합니다.`,
@@ -1359,7 +1359,7 @@ export const ExampleList: ExampleListType = [
                     },
 
                     {
-                        name: 'EnvironmentTest',
+                        name: 'Environment Test',
                         path: 'gltf/basic/environmentTest',
                         description: {
                             ko: `금속 표면에서의 환경 맵 반사 효과를 테스트합니다.`,
@@ -1367,7 +1367,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'Generate normal vector test',
+                        name: 'Generate Normal Vector Test',
                         path: 'gltf/basic/generateNormalTest',
                         description: {
                             ko: `모델에 노멀 정보가 없을 때 자동으로 노멀 벡터를 생성하는 기능을 테스트합니다.`,
@@ -1380,14 +1380,14 @@ export const ExampleList: ExampleListType = [
                 name: 'Basic Compare',
                 list: [
                     {
-                        name: 'CompareBaseColor',
+                        name: 'Compare Base Color',
                         path: 'gltf/basic/compareBaseColor',
                         description: {
                             ko: `기본 색상(Base Color) 렌더링 결과를 비교합니다.`,
                             en: `Compares Base Color rendering results.`
                         },
                     }, {
-                        name: 'CompareAlphaCoverage',
+                        name: 'Compare Alpha Coverage',
                         path: 'gltf/basic/compareAlphaCoverage',
                         description: {
                             ko: `알파 커버리지(Alpha Coverage) 렌더링 결과를 비교합니다.`,
@@ -1395,7 +1395,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'CompareMetallic',
+                        name: 'Compare Metallic',
                         path: 'gltf/basic/compareMetallic',
                         description: {
                             ko: `금속성(Metallic) 렌더링 결과를 비교합니다.`,
@@ -1403,7 +1403,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'CompareNormal',
+                        name: 'Compare Normal',
                         path: 'gltf/basic/compareNormal',
                         description: {
                             ko: `노멀 맵(Normal Map) 렌더링 결과를 비교합니다.`,
@@ -1411,7 +1411,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'CompareRoughness',
+                        name: 'Compare Roughness',
                         path: 'gltf/basic/compareRoughness',
                         description: {
                             ko: `거칠기(Roughness) 렌더링 결과를 비교합니다.`,
@@ -1419,7 +1419,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'CompareAmbientOcclusion',
+                        name: 'Compare Ambient Occlusion',
                         path: 'gltf/basic/compareAmbientOcclusion',
                         description: {
                             ko: `앰비언트 오클루전(AO) 렌더링 결과를 비교합니다.`,
@@ -1440,7 +1440,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'SimpleSkin',
+                        name: 'Simple Skin',
                         path: 'gltf/animation/simpleSkin',
                         description: {
                             ko: `가장 기본적인 형태의 스키닝(Skinning) 애니메이션 예제입니다.`,
@@ -1448,7 +1448,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'SimpleMorph',
+                        name: 'Simple Morph',
                         path: 'gltf/animation/simpleMorph',
                         description: {
                             ko: `간단한 모프 타겟(Morph Target) 애니메이션 예제입니다.`,
@@ -1456,7 +1456,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'RiggedSimple',
+                        name: 'Rigged Simple',
                         path: 'gltf/animation/riggedSimple',
                         description: {
                             ko: `간단하게 리깅된 원통형 메쉬를 통해 스키닝 동작을 확인합니다.`,
@@ -1464,7 +1464,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'RiggedFigure',
+                        name: 'Rigged Figure',
                         path: 'gltf/animation/riggedFigure',
                         description: {
                             ko: `리깅된 인간형 캐릭터 모델의 애니메이션을 테스트합니다.`,
@@ -1472,7 +1472,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'InterpolationTest',
+                        name: 'Interpolation Test',
                         path: 'gltf/animation/interpolationTest',
                         description: {
                             ko: `애니메이션 보간 모드(Step, Linear, Cubic Spline)의 차이를 보여줍니다.`,
@@ -1480,7 +1480,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'CesiumMan & MilkTruck',
+                        name: 'Cesium Man & Milk Truck',
                         path: 'gltf/animation/cesiumMan',
                         description: {
                             ko: `스키닝된 CesiumMan과 애니메이션이 적용된 우유 트럭 모델입니다.`,
@@ -1489,7 +1489,7 @@ export const ExampleList: ExampleListType = [
                     },
 
                     {
-                        name: 'BrainStem',
+                        name: 'Brain Stem',
                         path: 'gltf/animation/brainStem',
                         description: {
                             ko: `복잡한 계층 구조와 스키닝을 가진 BrainStem 모델 애니메이션입니다.`,
@@ -1497,7 +1497,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'MorphStressTest',
+                        name: 'Morph Stress Test',
                         path: 'gltf/animation/morphStressTest',
                         description: {
                             ko: `다수의 활성 정점 속성(최대 18개)을 사용하여 모프 타겟 구현을 스트레스 테스트합니다.`,
@@ -1505,7 +1505,7 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'RecursiveSkeletons',
+                        name: 'Recursive Skeletons',
                         path: 'gltf/animation/recursiveSkeletons',
                         description: {
                             ko: `복잡한 스키닝 케이스(다른 스킨으로 메쉬 재사용, 단일 스켈레톤에 다중 스킨 바인딩)를 테스트합니다.`,
@@ -1574,7 +1574,7 @@ Check performance limits on each device.`
                 name: '3D Models',
                 list: [
                     {
-                        name: 'corset',
+                        name: 'Corset',
                         path: 'gltf/models/corset',
                         description: {
                             ko: `복잡한 형상과 텍스처를 가진 고해상도 코르셋 모델입니다.`,
@@ -1606,7 +1606,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
-                        name: 'texcooredNTest',
+                        name: 'Texcoord N Test',
                         path: 'gltf/models/texcooredNTest',
                         description: {
                             ko: `다중 텍스처 좌표 채널의 동작을 확인하는 테스트 모델입니다.`,
@@ -1614,7 +1614,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
-                        name: 'ABeautifulGame',
+                        name: 'A Beautiful Game',
                         path: 'gltf/models/aBeautifulGame',
                         extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
                         description: {
@@ -1631,7 +1631,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_anisotropy',
                         list: [
                             {
-                                name: 'CompareAnisotropy',
+                                name: 'Compare Anisotropy',
                                 path: 'gltf/gltfExtensions/anisotropy/compareAnisotropy',
                                 extensionList: ['KHR_materials_anisotropy'],
                                 description: {
@@ -1640,7 +1640,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'AnisotropyDiscTest',
+                                name: 'Anisotropy Disc Test',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyDiscTest',
                                 extensionList: ['KHR_materials_anisotropy'],
                                 description: {
@@ -1649,7 +1649,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'AnisotropyRotationTest',
+                                name: 'Anisotropy Rotation Test',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyRotationTest',
                                 extensionList: ['KHR_materials_anisotropy'],
                                 description: {
@@ -1658,7 +1658,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'AnisotropyStrengthTest',
+                                name: 'Anisotropy Strength Test',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyStrengthTest',
                                 extensionList: ['KHR_materials_anisotropy'],
                                 description: {
@@ -1667,7 +1667,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'AnisotropyBarnLamp',
+                                name: 'Anisotropy Barn Lamp',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyBarnLamp',
                                 extensionList: ['KHR_materials_anisotropy'],
                                 description: {
@@ -1681,7 +1681,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_iridescence',
                         list: [
                             {
-                                name: 'CompareIridescence',
+                                name: 'Compare Iridescence',
                                 path: 'gltf/gltfExtensions/iridescence/compareIridescence',
                                 extensionList: ['KHR_materials_iridescence'],
                                 description: {
@@ -1690,7 +1690,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'IridescenceDielectricSpheres',
+                                name: 'Iridescence Dielectric Spheres',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceDielectricSpheres',
                                 extensionList: ['KHR_materials_iridescence', 'KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
@@ -1699,7 +1699,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'IridescenceMetallicSpheres',
+                                name: 'Iridescence Metallic Spheres',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceMetallicSpheres',
                                 extensionList: ['KHR_materials_iridescence'],
                                 description: {
@@ -1708,7 +1708,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'IridescenceSuzanne',
+                                name: 'Iridescence Suzanne',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceSuzanne',
                                 extensionList: ['KHR_materials_iridescence'],
                                 description: {
@@ -1717,7 +1717,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'IridescenceLamp',
+                                name: 'Iridescence Lamp',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceLamp',
                                 extensionList: ['KHR_materials_iridescence', 'KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
@@ -1726,7 +1726,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'SunglassesKhronos',
+                                name: 'Sunglasses Khronos',
                                 path: 'gltf/gltfExtensions/iridescence/sunglassesKhronos',
                                 extensionList: ['KHR_materials_iridescence', 'KHR_materials_transmission'],
                                 description: {
@@ -1735,7 +1735,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'IridescentDishWithOlives',
+                                name: 'Iridescent Dish With Olives',
                                 path: 'gltf/gltfExtensions/iridescence/iridescentDishWithOlives',
                                 extensionList: ['KHR_materials_iridescence', 'KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior', 'KHR_materials_specular'],
                                 description: {
@@ -1749,7 +1749,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_clearcoat',
                         list: [
                             {
-                                name: 'CompareClearcoat',
+                                name: 'Compare Clearcoat',
                                 path: 'gltf/gltfExtensions/clearcoat/compareClearcoat',
                                 extensionList: ['KHR_materials_clearcoat'],
                                 description: {
@@ -1758,7 +1758,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'ClearCoatTest',
+                                name: 'ClearCoat Test',
                                 path: 'gltf/gltfExtensions/clearcoat/clearCoatTest',
                                 extensionList: ['KHR_materials_clearcoat'],
                                 description: {
@@ -1767,7 +1767,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'ClearcoatWicker',
+                                name: 'Clearcoat Wicker',
                                 path: 'gltf/gltfExtensions/clearcoat/clearcoatWicker',
                                 extensionList: ['KHR_materials_clearcoat'],
                                 description: {
@@ -1776,7 +1776,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'ClearCoatCarPaint',
+                                name: 'ClearCoat Car Paint',
                                 path: 'gltf/gltfExtensions/clearcoat/clearCoatCarPaint',
                                 extensionList: ['KHR_materials_clearcoat'],
                                 description: {
@@ -1792,7 +1792,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_dispersion',
                         list: [
                             {
-                                name: 'CompareDispersion',
+                                name: 'Compare Dispersion',
                                 path: 'gltf/gltfExtensions/dispersion/compareDispersion',
                                 extensionList: ['KHR_materials_dispersion', 'KHR_materials_transmission'],
                                 description: {
@@ -1801,7 +1801,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'DispersionTest',
+                                name: 'Dispersion Test',
                                 path: 'gltf/gltfExtensions/dispersion/dispersionTest',
                                 extensionList: ['KHR_materials_dispersion', 'KHR_materials_transmission'],
                                 description: {
@@ -1810,7 +1810,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'DragonDispersion',
+                                name: 'Dragon Dispersion',
                                 path: 'gltf/gltfExtensions/dispersion/dragonDispersion',
                                 extensionList: ['KHR_materials_dispersion', 'KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
@@ -1824,7 +1824,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_emissive_strength',
                         list: [
                             {
-                                name: 'CompareEmissiveStrength',
+                                name: 'Compare Emissive Strength',
                                 path: 'gltf/gltfExtensions/emissiveStrength/compareEmissiveStrength',
                                 extensionList: ['KHR_materials_emissive_strength'],
                                 description: {
@@ -1833,7 +1833,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'EmissiveStrengthTest',
+                                name: 'Emissive Strength Test',
                                 path: 'gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest',
                                 extensionList: ['KHR_materials_emissive_strength'],
                                 description: {
@@ -1847,7 +1847,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_sheen',
                         list: [
                             {
-                                name: 'CompareSheen',
+                                name: 'Compare Sheen',
                                 path: 'gltf/gltfExtensions/sheen/compareSheen',
                                 extensionList: ['KHR_materials_sheen'],
                                 description: {
@@ -1856,7 +1856,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'SheenTestGrid',
+                                name: 'Sheen Test Grid',
                                 path: 'gltf/gltfExtensions/sheen/sheenTestGrid',
                                 extensionList: ['KHR_materials_sheen'],
                                 description: {
@@ -1865,7 +1865,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'SheenCloth',
+                                name: 'Sheen Cloth',
                                 path: 'gltf/gltfExtensions/sheen/sheenCloth',
                                 extensionList: ['KHR_materials_sheen'],
                                 description: {
@@ -1874,7 +1874,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'SheenChair',
+                                name: 'Sheen Chair',
                                 path: 'gltf/gltfExtensions/sheen/sheenChair',
                                 extensionList: ['KHR_materials_sheen', 'KHR_materials_variants'],
                                 description: {
@@ -1883,7 +1883,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'GlamVelvetSofa',
+                                name: 'Glam Velvet Sofa',
                                 path: 'gltf/gltfExtensions/sheen/glamVelvetSofa',
                                 extensionList: ['KHR_materials_sheen', 'KHR_materials_specular', 'KHR_materials_variants'],
                                 description: {
@@ -1892,7 +1892,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'ChairDamaskPurplegold',
+                                name: 'Chair Damask Purplegold',
                                 path: 'gltf/gltfExtensions/sheen/chairDamaskPurplegold',
                                 extensionList: ['KHR_materials_sheen'],
                                 description: {
@@ -1901,7 +1901,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'SheenWoodLeatherSofa',
+                                name: 'Sheen Wood Leather Sofa',
                                 path: 'gltf/gltfExtensions/sheen/sheenWoodLeatherSofa',
                                 extensionList: ['KHR_materials_sheen'],
                                 description: {
@@ -1916,7 +1916,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_specular',
                         list: [
                             {
-                                name: 'CompareSpecular',
+                                name: 'Compare Specular',
                                 path: 'gltf/gltfExtensions/specular/compareSpecular',
                                 extensionList: ['KHR_materials_specular'],
                                 description: {
@@ -1925,7 +1925,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'SpecularTest',
+                                name: 'Specular Test',
                                 path: 'gltf/gltfExtensions/specular/specularTest',
                                 extensionList: ['KHR_materials_specular'],
                                 description: {
@@ -1934,7 +1934,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'SpecularSilkPouf',
+                                name: 'Specular Silk Pouf',
                                 path: 'gltf/gltfExtensions/specular/specularSilkPouf',
                                 extensionList: ['KHR_materials_specular'],
                                 description: {
@@ -1949,7 +1949,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_unlit',
                         list: [
                             {
-                                name: 'UnlitTest',
+                                name: 'Unlit Test',
                                 path: 'gltf/gltfExtensions/unlit/unlitTest',
                                 extensionList: ['KHR_materials_unlit'],
                                 description: {
@@ -1963,7 +1963,7 @@ Check performance limits on each device.`
                         name: 'KHR_texture_transform',
                         list: [
                             {
-                                name: 'TextureTransformTest',
+                                name: 'Texture Transform Test',
                                 path: 'gltf/gltfExtensions/textureTransform/textureTransformTest',
                                 extensionList: ['KHR_texture_transform'],
                                 description: {
@@ -1972,7 +1972,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'TextureTransformMultiTest',
+                                name: 'Texture Transform Multi Test',
                                 path: 'gltf/gltfExtensions/textureTransform/textureTransformMultiTest',
                                 extensionList: ['KHR_texture_transform'],
                                 description: {
@@ -1986,7 +1986,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_diffuseTransmission',
                         list: [
                             {
-                                name: 'DiffuseTransmissionTest',
+                                name: 'Diffuse Transmission Test',
                                 path: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTest',
                                 extensionList: ['KHR_materials_diffuseTransmission'],
                                 description: {
@@ -1995,7 +1995,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'DiffuseTransmissionTeacup',
+                                name: 'Diffuse Transmission Teacup',
                                 path: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup',
                                 extensionList: ['KHR_materials_diffuseTransmission'],
                                 description: {
@@ -2009,7 +2009,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_transmission',
                         list: [
                             {
-                                name: 'CompareTransmission',
+                                name: 'Compare Transmission',
                                 path: 'gltf/gltfExtensions/transmission/compareTransmission',
                                 extensionList: ['KHR_materials_transmission'],
                                 description: {
@@ -2018,7 +2018,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'TransmissionTest',
+                                name: 'Transmission Test',
                                 path: 'gltf/gltfExtensions/transmission/transmissionTest',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_ior'],
                                 description: {
@@ -2027,7 +2027,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'TransmissionRoughnessTest',
+                                name: 'Transmission Roughness Test',
                                 path: 'gltf/gltfExtensions/transmission/transmissionRoughnessTest',
                                 extensionList: ['KHR_materials_transmission'],
                                 description: {
@@ -2036,7 +2036,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'StainedGlassLamp',
+                                name: 'Stained Glass Lamp',
                                 path: 'gltf/gltfExtensions/transmission/stainedGlassLamp',
                                 extensionList: ['KHR_materials_transmission'],
                                 description: {
@@ -2045,7 +2045,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'ChronographWatch',
+                                name: 'Chronograph Watch',
                                 path: 'gltf/gltfExtensions/transmission/chronographWatch',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_variants'],
                                 description: {
@@ -2054,7 +2054,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'MosquitoInAmber',
+                                name: 'Mosquito In Amber',
                                 path: 'gltf/gltfExtensions/transmission/mosquitoInAmber',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
                                 description: {
@@ -2063,7 +2063,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'CommercialRefrigerator',
+                                name: 'Commercial Refrigerator',
                                 path: 'gltf/gltfExtensions/transmission/commercialRefrigerator',
                                 extensionList: ['KHR_materials_transmission'],
                                 description: {
@@ -2077,7 +2077,7 @@ Check performance limits on each device.`
                         name: 'KHR_materials_volume',
                         list: [
                             {
-                                name: 'CompareIor',
+                                name: 'Compare IOR',
                                 path: 'gltf/gltfExtensions/volume/compareIor',
                                 extensionList: ['KHR_materials_ior'],
                                 description: {
@@ -2086,7 +2086,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'IORTestGrid',
+                                name: 'IOR Test Grid',
                                 path: 'gltf/gltfExtensions/volume/IORTestGrid',
                                 extensionList: ['KHR_materials_ior'],
                                 description: {
@@ -2095,7 +2095,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'CompareVolume',
+                                name: 'Compare Volume',
                                 path: 'gltf/gltfExtensions/volume/compareVolume',
                                 extensionList: ['KHR_materials_volume'],
                                 description: {
@@ -2104,7 +2104,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'TransmissionThinwallTestGrid',
+                                name: 'Transmission Thinwall Test Grid',
                                 path: 'gltf/gltfExtensions/volume/transmissionThinwallTestGrid',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
@@ -2113,7 +2113,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'AttenuationTest',
+                                name: 'Attenuation Test',
                                 path: 'gltf/gltfExtensions/volume/attenuationTest',
                                 extensionList: ['KHR_materials_volume'],
                                 description: {
@@ -2122,7 +2122,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'GlassVaseFlowers',
+                                name: 'Glass Vase Flowers',
                                 path: 'gltf/gltfExtensions/volume/glassVaseFlowers',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
                                 description: {
@@ -2131,7 +2131,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'GlassBrokenWindow',
+                                name: 'Glass Broken Window',
                                 path: 'gltf/gltfExtensions/volume/glassBrokenWindow',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
                                 description: {
@@ -2140,7 +2140,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'GlassHurricaneCandleHolder',
+                                name: 'Glass Hurricane Candle Holder',
                                 path: 'gltf/gltfExtensions/volume/glassHurricaneCandleHolder',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
                                 description: {
@@ -2149,7 +2149,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'DragonAttenuation',
+                                name: 'Dragon Attenuation',
                                 path: 'gltf/gltfExtensions/volume/dragonAttenuation',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
@@ -2189,7 +2189,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'ColorBalance',
+                                name: 'Color Balance',
                                 path: 'postEffect/adjustments/colorBalance',
                                 description: {
                                     ko: `컬러 밸런스 색상 보정 효과 예제입니다.`,
@@ -2197,7 +2197,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'ColorTemperatureTint',
+                                name: 'Color Temperature Tint',
                                 path: 'postEffect/adjustments/colorTemperatureTint',
                                 description: {
                                     ko: `색온도 및 틴트 색상 보정 효과 예제입니다.`,
@@ -2206,7 +2206,7 @@ Check performance limits on each device.`
                             },
 
                             {
-                                name: 'BrightnessContrast',
+                                name: 'Brightness Contrast',
                                 path: 'postEffect/adjustments/brightnessContrast',
                                 description: {
                                     ko: `밝기 및 대비 색상 보정 효과 예제입니다.`,
@@ -2214,7 +2214,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'HueSaturation',
+                                name: 'Hue Saturation',
                                 path: 'postEffect/adjustments/hueSaturation',
                                 description: {
                                     ko: `색조 및 채도 색상 보정 효과 예제입니다.`,
@@ -2249,7 +2249,7 @@ Check performance limits on each device.`
                         name: 'Lens',
                         list: [
                             {
-                                name: 'LensDistortion',
+                                name: 'Lens Distortion',
                                 path: 'postEffect/lens/lensDistortion',
                                 description: {
                                     ko: `렌즈 왜곡 효과 예제입니다.`,
@@ -2257,7 +2257,7 @@ Check performance limits on each device.`
                                 }
                             },
                             {
-                                name: 'ChromaticAberration',
+                                name: 'Chromatic Aberration',
                                 path: 'postEffect/lens/chromaticAberration',
                                 description: {
                                     ko: `색수차 효과 예제입니다.`,
@@ -2265,7 +2265,7 @@ Check performance limits on each device.`
                                 }
                             },
                             {
-                                name: 'DepthOfField',
+                                name: 'Depth of Field',
                                 path: 'postEffect/lens/dof',
                                 description: {
                                     ko: `피사계 심도(DoF) 효과 예제입니다.`,
@@ -2273,7 +2273,7 @@ Check performance limits on each device.`
                                 }
                             },
                             {
-                                name: 'DepthOfField (Auto Focus)',
+                                name: 'Depth of Field (Auto Focus)',
                                 path: 'postEffect/lens/dofAutoFocus',
                                 description: {
                                     ko: `화면 중앙 9-Point Zone 깊이 버퍼를 실시간 측거하여 피사체 거리 변화에 따라 초점을 자동 추적(Rack Focus)하는 오토포커스(useAutoFocus) 예제입니다.`,
@@ -2310,7 +2310,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'BlurX',
+                                name: 'Blur X',
                                 path: 'postEffect/blur/blurX',
                                 description: {
                                     ko: `가로 방향 블러 효과 예제입니다.`,
@@ -2318,7 +2318,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'BlurY',
+                                name: 'Blur Y',
                                 path: 'postEffect/blur/blurY',
                                 description: {
                                     ko: `세로 방향 블러 효과 예제입니다.`,
@@ -2326,7 +2326,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'DirectionalBlur',
+                                name: 'Directional Blur',
                                 path: 'postEffect/blur/directionalBlur',
                                 description: {
                                     ko: `방향성 블러 효과 예제입니다.`,
@@ -2334,7 +2334,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'GaussianBlur',
+                                name: 'Gaussian Blur',
                                 path: 'postEffect/blur/gaussianBlur',
                                 description: {
                                     ko: `가우시안 블러 효과 예제입니다.`,
@@ -2342,7 +2342,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'RadialBlur',
+                                name: 'Radial Blur',
                                 path: 'postEffect/blur/radialBlur',
                                 description: {
                                     ko: `방사형 블러 효과 예제입니다.`,
@@ -2350,7 +2350,7 @@ Check performance limits on each device.`
                                 },
                             },
                             {
-                                name: 'ZoomBlur',
+                                name: 'Zoom Blur',
                                 path: 'postEffect/blur/zoomBlur',
                                 description: {
                                     ko: `줌 블러 효과 예제입니다.`,
@@ -2360,7 +2360,7 @@ Check performance limits on each device.`
                         ]
                     },
                     {
-                        name: 'FilmGrain',
+                        name: 'Film Grain',
                         path: 'postEffect/filmGrain',
                         description: {
                             ko: `필름 그레인 효과를 시연하는 예제입니다.`,
@@ -2410,7 +2410,7 @@ Check performance limits on each device.`
                                 }
                             },
                             {
-                                name: 'HeightFog',
+                                name: 'Height Fog',
 
                                 path: 'postEffect/fog/heightFog',
                                 description: {
