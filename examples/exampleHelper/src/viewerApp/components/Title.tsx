@@ -56,20 +56,27 @@ const Title = () => {
                     <button
                         style={{
                             ...buttonStyle,
-                            backgroundColor: isPrevHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
+                            ...(isNarrow ? narrowNavButtonStyle : {}),
+                            backgroundColor: isPrevHovered
+                                ? (isNarrow ? 'rgba(253, 180, 141, 0.22)' : 'rgba(255, 255, 255, 0.08)')
+                                : (isNarrow ? 'rgba(18, 18, 20, 0.78)' : 'transparent')
                         }}
                         onClick={() => navigate(prevExample.path!)}
                         title={`Previous Example : ${prevExample.name}`}
                         onMouseEnter={() => setIsPrevHovered(true)}
                         onMouseLeave={() => setIsPrevHovered(false)}
                     >
-                        <ChevronLeft color="#fdb48d"/>
+                        <ChevronLeft color="#fdb48d" size={isNarrow ? 18 : 16}/>
                     </button>
                 )}
 
                 <div style={{...contentBoxStyle, textAlign: isNarrow ? 'center' : 'left'}}>
                     <span
-                        style={{...titleValueStyle, maxWidth: isNarrow ? '100%' : '180px'}}
+                        style={{
+                            ...titleValueStyle,
+                            maxWidth: isNarrow ? '100%' : '180px',
+                            ...(isNarrow ? narrowTitleValueStyle : {})
+                        }}
                         title={currentExample ? currentExample.name : 'Example'}
                     >
                         {currentExample ? currentExample.name : 'Example'}
@@ -83,14 +90,17 @@ const Title = () => {
                     <button
                         style={{
                             ...buttonStyle,
-                            backgroundColor: isNextHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
+                            ...(isNarrow ? narrowNavButtonStyle : {}),
+                            backgroundColor: isNextHovered
+                                ? (isNarrow ? 'rgba(253, 180, 141, 0.22)' : 'rgba(255, 255, 255, 0.08)')
+                                : (isNarrow ? 'rgba(18, 18, 20, 0.78)' : 'transparent')
                         }}
                         onClick={() => navigate(nextExample.path!)}
                         title={`Next Example : ${nextExample.name}`}
                         onMouseEnter={() => setIsNextHovered(true)}
                         onMouseLeave={() => setIsNextHovered(false)}
                     >
-                        <ChevronRight color="#fdb48d"/>
+                        <ChevronRight color="#fdb48d" size={isNarrow ? 18 : 16}/>
                     </button>
                 )}
             </div>
@@ -152,6 +162,24 @@ const titleValueStyle: React.CSSProperties = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis'
+};
+
+const narrowTitleValueStyle: React.CSSProperties = {
+    fontSize: '15px',
+    color: '#f8f9fa',
+    fontWeight: 700,
+    padding: '2px 4px',
+    textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)'
+};
+
+const narrowNavButtonStyle: React.CSSProperties = {
+    width: '40px',
+    height: '40px',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    border: '1px solid rgba(253, 180, 141, 0.35)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45)',
+    boxSizing: 'border-box'
 };
 
 const buttonStyle: React.CSSProperties = {

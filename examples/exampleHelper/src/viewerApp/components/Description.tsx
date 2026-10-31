@@ -36,7 +36,8 @@ const Description = () => {
             <div
                 style={{
                     ...containerStyle,
-                    bottom: isNarrow ? '164px' : '32px',
+                    left: isNarrow ? '22px' : '20px',
+                    bottom: isNarrow ? '170px' : '32px',
                     right: isNarrow ? '20px' : '310px'
                 }}
             >
@@ -72,8 +73,8 @@ const Description = () => {
                         <div style={{
                             ...contentStyle,
                             fontSize: isNarrow ? '13px' : '14px',
-                            fontWeight: isNarrow ? 500 : 400,
-                            color: isNarrow ? 'rgba(255, 255, 255, 0.95)' : 'rgba(232, 235, 242, 0.86)'
+                            fontWeight: 400,
+                            color: 'rgba(220, 224, 232, 0.78)'
                         }}>
                             <span style={{verticalAlign: 'middle'}} dangerouslySetInnerHTML={{__html: description}}/>
                             <button

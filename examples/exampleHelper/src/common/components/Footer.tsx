@@ -64,27 +64,30 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
     // [KO] 2. 모바일 3D 뷰어(isNarrow && useSourceModal): 하단 통합 플로팅 독(Dock)
     if (isNarrow) {
         return (
-            <div style={narrowFooterContainerStyle}>
+            <div style={narrowFooterWrapperStyle}>
                 {narrowTitle && <div style={titleContainerStyle}>{narrowTitle}</div>}
-                {narrowSettings && (
-                    <div style={mobileSelectContainerStyle}>
-                        {narrowSettings}
+                <div style={narrowFooterContainerStyle}>
+                    {narrowSettings && (
+                        <div style={mobileSelectContainerStyle}>
+                            {narrowSettings}
+                        </div>
+                    )}
+                    <div style={narrowFooterBarStyle}>
+                        <a
+                            href="https://github.com/redcamel/RedGPU"
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{...footerLeftLinkStyle, width: '100%', justifyContent: 'space-between'}}
+                        >
+                            <span style={{color: '#b19898', fontSize: '12px', lineHeight: '1'}}>
+                                This project is maintained by <b
+                                style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
+                            </span>
+                            <span style={iconWrapperStyle}>
+                                <GitHubIcon color="#fff" size={20}/>
+                            </span>
+                        </a>
                     </div>
-                )}
-                <div style={narrowFooterBarStyle}>
-                    <a
-                        href="https://github.com/redcamel/RedGPU"
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{...footerLeftLinkStyle, width: '100%', justifyContent: 'space-between'}}
-                    >
-                        <span style={{color: '#b19898', fontSize: '12px', lineHeight: '1'}}>
-                            This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
-                        </span>
-                        <span style={iconWrapperStyle}>
-                            <GitHubIcon color="#fff" size={20}/>
-                        </span>
-                    </a>
                 </div>
             </div>
         );
@@ -156,10 +159,11 @@ const titleContainerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '46px',
-    padding: '5px 6px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    boxSizing: 'border-box'
+    height: '40px',
+    padding: 0,
+    backgroundColor: 'transparent',
+    boxSizing: 'border-box',
+    pointerEvents: 'auto'
 };
 
 const footerContainerStyle: React.CSSProperties = {
@@ -175,12 +179,19 @@ const footerContainerStyle: React.CSSProperties = {
     pointerEvents: 'none'
 };
 
-const narrowFooterContainerStyle: React.CSSProperties = {
+const narrowFooterWrapperStyle: React.CSSProperties = {
     position: 'fixed',
     bottom: '16px',
     left: '16px',
     right: '16px',
     zIndex: 10002,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    pointerEvents: 'none'
+};
+
+const narrowFooterContainerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: 'rgba(18, 18, 20, 0.84)',
