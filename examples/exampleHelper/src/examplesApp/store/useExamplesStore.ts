@@ -65,7 +65,18 @@ export const useExamplesStore = create<ExamplesState>((set, get) => ({
         get().saveState();
     },
     setSidebarOpen: (sidebarOpen) => set({sidebarOpen}),
-    setScrollPosition: (scrollPosition) => set({scrollPosition}),
+    setScrollPosition: (scrollPosition) => {
+        set({scrollPosition});
+        const saved = sessionStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                parsed.scrollPosition = scrollPosition;
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+            } catch (e) {
+            }
+        }
+    },
     setIsNarrow: (isNarrow) => set({isNarrow}),
     setIsCompact: (isCompact) => set({isCompact}),
     setHideManual: (hideManual) => set({hideManual}),

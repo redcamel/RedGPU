@@ -6,6 +6,7 @@ import IconToggleButton from '../../common/components/basic/IconToggleButton';
 import LabelButton from '../../common/components/basic/LabelButton';
 import RenderingSettingsGroup from '../../viewerApp/components/RenderingSettingsGroup';
 import Title from '../../viewerApp/components/Title';
+import {glassCircleIslandStyle, glassPillContainerStyle, verticalDividerStyle} from '../../common/styles/uiStyles';
 
 /**
  * [KO] 예제 헬퍼의 상단 네비게이션 바 컴포넌트입니다.
@@ -72,7 +73,7 @@ const ExampleHeader = () => {
                             <div style={leftSectionStyle}>
                                 <Title/>
                             </div>
-                            <div style={{...leftSectionStyle, flexShrink: 0}}>
+                            <div style={rightSectionStyle}>
                                 <LabelButton
                                     label="CODE"
                                     onClick={() => setShowSourceModal(!showSourceModal)}
@@ -86,7 +87,7 @@ const ExampleHeader = () => {
                     {!isNarrow && (
                         <>
                             <RenderingSettingsGroup/>
-                            <div style={dividerStyle}/>
+                            <div style={verticalDividerStyle}/>
                         </>
                     )}
                     <IconToggleButton
@@ -94,7 +95,7 @@ const ExampleHeader = () => {
                         onClick={handleSSAOChange}
                         isActive={ssao}
                     />
-                    <div style={dividerStyle}/>
+                    <div style={verticalDividerStyle}/>
                     {viewportActions.map((action) => (
                         <IconToggleButton
                             key={action.id}
@@ -106,7 +107,7 @@ const ExampleHeader = () => {
                     ))}
                     {settingAction && (
                         <>
-                            <div style={dividerStyle}/>
+                            <div style={verticalDividerStyle}/>
                             <IconToggleButton
                                 key={settingAction.id}
                                 icon={settingAction.icon}
@@ -155,63 +156,22 @@ const leftGroupStyle: React.CSSProperties = {
 };
 
 const circleIslandStyle: React.CSSProperties = {
+    ...glassCircleIslandStyle,
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '46px',
-    height: '46px',
     padding: 0,
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '50%',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    boxSizing: 'border-box',
-    flexShrink: 0,
-    pointerEvents: 'auto'
-};
-
-const leftSectionStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    height: '46px',
-    minWidth: 0,
-    padding: '4px',
-    gap: '4px',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '9999px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    boxSizing: 'border-box',
     pointerEvents: 'auto'
 };
 
 const rightSectionStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    height: '46px',
-    flexShrink: 0,
+    ...glassPillContainerStyle,
     padding: '4px',
-    gap: '4px',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '9999px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    boxSizing: 'border-box',
     pointerEvents: 'auto'
 };
 
-const dividerStyle: React.CSSProperties = {
-    width: '1px',
-    height: '16px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    margin: '0 2px',
-    flexShrink: 0
+const leftSectionStyle: React.CSSProperties = {
+    ...rightSectionStyle,
+    flexShrink: undefined,
+    minWidth: 0,
 };
 
 export default ExampleHeader;

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import {STORAGE_KEY, useExamplesStore} from '../store/useExamplesStore';
+import {useExamplesStore} from '../store/useExamplesStore';
 import CategoryNav from './CategoryNav';
 import ExampleGrid from './ExampleGrid';
 
@@ -35,30 +35,11 @@ const MainContent: React.FC = () => {
         if (scrollAreaRef.current) {
             scrollAreaRef.current.scrollTop = 0;
             setScrollPosition(0);
-            const saved = sessionStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    parsed.scrollPosition = 0;
-                    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-                } catch (e) {
-                }
-            }
         }
     }, [activeTab, searchQuery]);
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const newPos = e.currentTarget.scrollTop;
-        setScrollPosition(newPos);
-        const saved = sessionStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                parsed.scrollPosition = newPos;
-                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-            } catch (e) {
-            }
-        }
+        setScrollPosition(e.currentTarget.scrollTop);
     };
 
     return (

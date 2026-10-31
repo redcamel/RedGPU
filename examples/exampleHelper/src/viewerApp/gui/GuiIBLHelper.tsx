@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {hdrImages} from "../../data/hdrList";
-import {resolveExamplePath} from "../../utils/guiUtils";
+import {bindLuminance, createSourcePathMonitor, hdrOptions, resolveExamplePath} from "../../utils/guiUtils";
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
 
 /**
@@ -32,13 +32,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         };
 
         const pathInfo = {finalPath: ''};
-        let sourceBinding: any;
-
-        const updatePathInfo = (src: string | string[]) => {
-            const getFileName = (path: string) => path.split('/').pop() || path;
-            pathInfo.finalPath = Array.isArray(src) ? src.map(getFileName).join('\n') : getFileName(src);
-            if (sourceBinding) sourceBinding.refresh();
-        };
+        const {updatePathInfo, bindSourcePath} = createSourcePathMonitor(pathInfo);
 
         const updateIBL = (name: string) => {
             if (!settings.useIBL) return;
@@ -149,9 +143,8 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         // 2. IBL Controls
         const iblFolder = lightingFolder.addFolder({title: 'IBL Settings', expanded: true});
 
-        iblFolder.addBinding(settings, 'texture', {
-            options: hdrImages.reduce((acc, item) => ({...acc, [item.name]: item.name}), {}),
-        }).on('change', (ev: any) => updateIBL(ev.value));
+        iblFolder.addBinding(settings, 'texture', {options: hdrOptions})
+            .on('change', (ev: any) => updateIBL(ev.value));
 
         // [KO] intensityMultiplier 제어 [EN] Control intensityMultiplier
         iblFolder.addBinding(settings, 'intensityMultiplier', {min: 0, max: 5, step: 0.1})
@@ -160,24 +153,10 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
             });
 
         // [KO] luminance 제어 [EN] Control luminance
-        iblFolder.addBinding({
-            get luminance() {
-                return view.ibl ? view.ibl.luminance : 0;
-            },
-            set luminance(v) {
-                if (view.ibl) {
-                    view.ibl.luminance = v;
-                }
-            },
-        }, 'luminance', {min: 0, max: 100000, step: 100});
+        bindLuminance(iblFolder, () => view.ibl);
 
         // Source path display (Readonly)
-        sourceBinding = iblFolder.addBinding(pathInfo, 'finalPath', {
-            readonly: true,
-            label: 'source',
-            multiline: true,
-            rows: 2
-        });
+        bindSourcePath(iblFolder);
 
         // Initial setup
         syncLight(settings.useLight);

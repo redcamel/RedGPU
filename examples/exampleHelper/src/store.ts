@@ -43,6 +43,17 @@ export interface GuiConfig {
     gui?: (gui: any) => void;
 }
 
+export const hasGuiPanels = (config: GuiConfig | null) => !!(
+    config?.redGPUContext ||
+    config?.viewList ||
+    config?.scene ||
+    config?.directionalShadow ||
+    config?.ibl ||
+    config?.skybox ||
+    config?.globalWind ||
+    config?.gui
+);
+
 /**
  * [KO] ExampleHelper2의 상태 정의 인터페이스
  */
@@ -95,17 +106,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
         return {topBarRightActions: [...filtered, action]};
     }),
     setGuiConfig: (config: GuiConfig | null) => {
-        const hasPanels = !!(
-            config?.redGPUContext ||
-            config?.viewList ||
-            config?.scene ||
-            config?.directionalShadow ||
-            config?.ibl ||
-            config?.skybox ||
-            config?.globalWind ||
-            config?.gui
-        );
-        set({guiConfig: config, showSettingsPanel: hasPanels});
+        set({guiConfig: config, showSettingsPanel: hasGuiPanels(config)});
     },
     setIsNarrow: (value: boolean) => set({isNarrow: value}),
     updateLoadingState: (info: LoadingInfo) => set((state) => {

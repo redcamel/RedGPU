@@ -1,36 +1,23 @@
 import React from 'react';
-import {ExampleItem} from '../../../types/example';
 import {useExamplesStore} from '../../store/useExamplesStore';
-
-interface CardProps {
-    item: ExampleItem;
-    language: 'ko' | 'en';
-    hovered: boolean;
-    isNarrow: boolean;
-    isLCP: boolean;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
-}
+import {CardProps} from '../ExampleCard';
+import {expBadgePillStyle} from '../../../common/styles/uiStyles';
 
 export const ExampleGridCard: React.FC<CardProps> = ({
                                                          item,
-                                                         language,
                                                          hovered,
                                                          isNarrow,
                                                          isLCP,
+                                                         thumbUrl,
+                                                         description,
+                                                         plainDescription,
+                                                         imageAlt,
+                                                         imageTitle,
+                                                         href,
                                                          onMouseEnter,
                                                          onMouseLeave
 }) => {
     const isCompact = useExamplesStore(state => state.isCompact);
-    const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
-    const description = item.description ? (item.description[language] || item.description['en']) : '';
-
-    const plainDescription = description.replace(/<[^>]*>?/gm, '').trim();
-    const altSuffix = language === 'ko' ? 'RedGPU WebGPU 예제' : 'RedGPU WebGPU Example';
-    const imageAlt = `${item.name} - ${altSuffix}`;
-    const imageTitle = plainDescription || item.name;
-
-    const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
 
     return (
         <a
@@ -68,7 +55,7 @@ export const ExampleGridCard: React.FC<CardProps> = ({
                     gap: '8px'
                 }}>
                     <div style={{...titleStyle, fontSize: isNarrow ? '13px' : '14px'}}>{item.name}</div>
-                    {item.experimental && <span style={experimentalBadgeStyle}>EXP</span>}
+                    {item.experimental && <span style={expBadgePillStyle}>EXP</span>}
                 </div>
                 <div style={{...descStyle, fontSize: isNarrow ? '11.5px' : '12px'}}
                      title={plainDescription}
@@ -153,16 +140,4 @@ const descStyle: React.CSSProperties = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-};
-
-const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '9px',
-    backgroundColor: 'rgba(255, 90, 95, 0.16)',
-    color: '#ff7b80',
-    border: '1px solid rgba(255, 90, 95, 0.35)',
-    padding: '2px 7px',
-    borderRadius: '9999px',
-    fontWeight: 700,
-    lineHeight: '1.1',
-    flexShrink: 0,
 };

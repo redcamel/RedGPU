@@ -3,6 +3,7 @@ import {ExampleHelperState, useExampleHelperStore} from '../../store';
 import {getFlatExampleList} from "../../utils/exampleFinder";
 import {ExampleItem} from "../../types/example";
 import {ChevronLeft, ChevronRight} from '../../common/components/Icons';
+import {expBadgePillStyle} from '../../common/styles/uiStyles';
 
 const Title = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
@@ -132,16 +133,12 @@ const contentBoxStyle: React.CSSProperties = {
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {
+    ...expBadgePillStyle,
     fontSize: '10.5px',
-    backgroundColor: 'rgba(255, 90, 95, 0.16)',
     color: '#ff6b70',
-    border: '1px solid rgba(255, 90, 95, 0.35)',
-    padding: '2px 7px',
     borderRadius: '5px',
     fontWeight: 600,
-    lineHeight: '1.1',
     display: 'inline-block',
-    flexShrink: 0
 };
 
 const titleValueStyle: React.CSSProperties = {

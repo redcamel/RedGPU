@@ -2,8 +2,9 @@ import React from 'react';
 import {useExamplesStore} from '../store/useExamplesStore';
 import {GitHubIcon} from '../../common/components/Icons';
 import IconButton from '../../common/components/basic/IconButton';
+import {glassPillContainerStyle, verticalDividerStyle} from '../../common/styles/uiStyles';
 
-const ViewControls: React.FC = () => {
+export const ViewModeLangButtons: React.FC<{ inline?: boolean }> = ({inline = false}) => {
     const viewMode = useExamplesStore(state => state.viewMode);
     const setViewMode = useExamplesStore(state => state.setViewMode);
     const language = useExamplesStore(state => state.language);
@@ -12,10 +13,8 @@ const ViewControls: React.FC = () => {
     const hideFooterLang = useExamplesStore(state => state.hideFooterLang);
 
     return (
-        <div style={{
-            ...containerStyle,
-            padding: isNarrow ? '4px 8px 4px 6px' : '4px 4px 4px 6px',
-        }}>
+        <>
+            {inline && <div style={verticalDividerStyle}/>}
             <button
                 style={buttonStyle}
                 onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
@@ -24,15 +23,13 @@ const ViewControls: React.FC = () => {
             >
                 {viewMode === 'grid' ? '▤' : '☰'}
             </button>
-
-            {(!isNarrow || !hideFooterLang) && (
+            {(inline || !isNarrow || !hideFooterLang) && (
                 <>
-                    <div style={divider}/>
-
+                    <div style={verticalDividerStyle}/>
                     <button
                         style={{
                             ...langButtonStyle,
-                            padding: isNarrow ? '0 11px' : '0 13px 0 11px',
+                            padding: inline ? '0 14px 0 12px' : (isNarrow ? '0 11px' : '0 13px 0 11px'),
                         }}
                         onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
                         aria-label={`Switch to ${language === 'ko' ? 'English' : 'Korean'}`}
@@ -41,10 +38,22 @@ const ViewControls: React.FC = () => {
                     </button>
                 </>
             )}
+        </>
+    );
+};
 
+const ViewControls: React.FC = () => {
+    const isNarrow = useExamplesStore(state => state.isNarrow);
+
+    return (
+        <div style={{
+            ...glassPillContainerStyle,
+            padding: isNarrow ? '4px 8px 4px 6px' : '4px 4px 4px 6px',
+        }}>
+            <ViewModeLangButtons/>
             {isNarrow && (
                 <>
-                    <div style={divider}/>
+                    <div style={verticalDividerStyle}/>
                     <div style={{display: 'flex', marginLeft: '2px'}}>
                         <IconButton
                             icon={<GitHubIcon color="#fff" size={18}/>}
@@ -57,21 +66,6 @@ const ViewControls: React.FC = () => {
             )}
         </div>
     );
-};
-
-const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    height: '46px',
-    gap: '4px',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '9999px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    boxSizing: 'border-box',
-    flexShrink: 0,
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -100,6 +94,7 @@ const langButtonStyle: React.CSSProperties = {
     height: '36px',
     backgroundColor: 'transparent',
     border: 'none',
+    outline: 'none',
     borderRadius: '9999px',
     color: '#fdb48d',
     fontSize: '12px',
@@ -107,13 +102,6 @@ const langButtonStyle: React.CSSProperties = {
     letterSpacing: '0.04em',
     cursor: 'pointer',
     transition: 'all 0.18s ease',
-};
-
-const divider: React.CSSProperties = {
-    width: '1px',
-    height: '16px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    margin: '0 2px',
     flexShrink: 0,
 };
 

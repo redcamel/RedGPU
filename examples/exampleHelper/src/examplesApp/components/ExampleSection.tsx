@@ -2,7 +2,7 @@ import React from 'react';
 import {ExampleItem} from '../../types/example';
 import ExampleCard from './ExampleCard';
 import {useExamplesStore} from '../store/useExamplesStore';
-import {splitSectionItems} from '../utils/sectionHelpers';
+import {sectionStackStyle, splitSectionItems} from '../utils/sectionHelpers';
 
 interface ExampleSectionProps {
     item: ExampleItem;
@@ -44,7 +44,7 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0, lcpCoun
                 )}
 
                 {groupItems.length > 0 && (
-                    <div style={stackStyle}>
+                    <div style={sectionStackStyle}>
                         {groupItems.map((subItem, idx) => (
                             <ExampleSection key={subItem.name + idx} item={subItem} depth={depth + 1} lcpCounter={lcpCounter} />
                         ))}
@@ -88,13 +88,6 @@ const subSubSectionTitleStyle: React.CSSProperties = {
     marginBottom: '12px',
     color: '#8e8e93',
     letterSpacing: '0.04em',
-};
-
-const stackStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '32px',
-    marginBottom: '20px',
 };
 
 const gridStyle = (mode: string, isNarrow: boolean): React.CSSProperties => {

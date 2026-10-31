@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
-import {parseSize} from "../../utils/guiUtils";
+import {bindSizeDimensions} from "../../utils/guiUtils";
 import {addSceneControls} from "./GuiScene";
 
 /**
@@ -47,40 +47,8 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                 container.addBlade({view: 'separator'});
             }
             // Size & Position
-            const SIZE_DATA = {
-                width: parseSize(view.width).value,
-                widthUnit: parseSize(view.width).unit,
-                height: parseSize(view.height).value,
-                heightUnit: parseSize(view.height).unit,
-                x: parseSize(view.x).value,
-                xUnit: parseSize(view.x).unit,
-                y: parseSize(view.y).value,
-                yUnit: parseSize(view.y).unit,
-            };
-
             const sizeFolder = container.addFolder({title: 'Size & Position'});
-
-            const updateDim = (key: 'width' | 'height' | 'x' | 'y') => {
-                const unitKey = `${key}Unit` as keyof typeof SIZE_DATA;
-                const value = SIZE_DATA[key];
-                const unit = SIZE_DATA[unitKey];
-                (view as any)[key] = unit === 'number' ? value : `${value}${unit}`;
-            };
-
-            (['width', 'height', 'x', 'y'] as const).forEach((key) => {
-                const k = key;
-                const unitKey = `${k}Unit` as keyof typeof SIZE_DATA;
-                sizeFolder.addBinding(SIZE_DATA, k, {
-                    min: 0,
-                    max: SIZE_DATA[unitKey] === '%' ? 200 : 4096,
-                    step: 0.01
-                }).on('change', () => updateDim(k));
-
-                sizeFolder.addBinding(SIZE_DATA, unitKey, {
-                    label: `${k} Unit`,
-                    options: {'%': '%', 'px': 'px', 'number': 'number'}
-                }).on('change', () => updateDim(k));
-            });
+            bindSizeDimensions(sizeFolder, view, ['width', 'height', 'x', 'y'], true);
 
             // [KO] View에 소속된 Scene 설정 추가 (가장 마지막에 위치)
             if (view.scene) {

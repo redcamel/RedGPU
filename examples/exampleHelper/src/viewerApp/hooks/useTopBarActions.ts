@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {ExampleHelperState, hasGuiPanels, useExampleHelperStore} from '../../store';
 import {AxisIcon, DebugIcon, GridIcon, SettingIcon} from '../../common/components/Icons';
 
 /**
@@ -78,18 +78,7 @@ export const useTopBarActions = () => {
             });
 
             // SETTING Toggle
-            const hasPanels = !!(
-                guiConfig?.redGPUContext ||
-                guiConfig?.viewList ||
-                guiConfig?.scene ||
-                guiConfig?.directionalShadow ||
-                guiConfig?.ibl ||
-                guiConfig?.skybox ||
-                guiConfig?.globalWind ||
-                guiConfig?.gui
-            );
-
-            if (hasPanels) {
+            if (hasGuiPanels(guiConfig)) {
                 addTopBarRightAction({
                     id: 'setting-toggle',
                     label: 'SETTING',

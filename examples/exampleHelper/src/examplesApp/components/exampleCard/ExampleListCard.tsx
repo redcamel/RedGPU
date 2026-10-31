@@ -1,35 +1,20 @@
 import React from 'react';
-import {ExampleItem} from '../../../types/example';
-
-interface CardProps {
-    item: ExampleItem;
-    language: 'ko' | 'en';
-    hovered: boolean;
-    isNarrow: boolean;
-    isLCP: boolean;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
-}
+import {CardProps} from '../ExampleCard';
+import {expBadgePillStyle} from '../../../common/styles/uiStyles';
 
 export const ExampleListCard: React.FC<CardProps> = ({
                                                          item,
-                                                         language,
                                                          hovered,
                                                          isNarrow,
                                                          isLCP,
+                                                         thumbUrl,
+                                                         description,
+                                                         imageAlt,
+                                                         imageTitle,
+                                                         href,
                                                          onMouseEnter,
                                                          onMouseLeave
 }) => {
-    const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
-    const description = item.description ? (item.description[language] || item.description['en']) : '';
-
-    const plainDescription = description.replace(/<[^>]*>?/gm, '').trim();
-    const altSuffix = language === 'ko' ? 'RedGPU WebGPU 예제' : 'RedGPU WebGPU Example';
-    const imageAlt = `${item.name} - ${altSuffix}`;
-    const imageTitle = plainDescription || item.name;
-
-    const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
-
     return (
         <a
             href={href}
@@ -49,7 +34,7 @@ export const ExampleListCard: React.FC<CardProps> = ({
                 <div style={{...titleStyle, fontSize: isNarrow ? '12.5px' : '14px'}}>{item.name}</div>
                 {!isNarrow && <div style={listDescStyle} dangerouslySetInnerHTML={{__html: description}} />}
             </div>
-            {item.experimental && <span style={experimentalBadgeStyle}>EXP</span>}
+            {item.experimental && <span style={expBadgePillStyle}>EXP</span>}
         </a>
     );
 };
@@ -108,16 +93,4 @@ const listDescStyle: React.CSSProperties = {
     textOverflow: 'ellipsis',
     flex: 1,
     minWidth: 0,
-};
-
-const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '9px',
-    backgroundColor: 'rgba(255, 90, 95, 0.16)',
-    color: '#ff7b80',
-    border: '1px solid rgba(255, 90, 95, 0.35)',
-    padding: '2px 7px',
-    borderRadius: '9999px',
-    fontWeight: 700,
-    lineHeight: '1.1',
-    flexShrink: 0,
 };

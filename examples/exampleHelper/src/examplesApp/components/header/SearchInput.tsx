@@ -1,5 +1,6 @@
 import React from 'react';
 import {useExamplesStore} from '../../store/useExamplesStore';
+import {glassSurfaceStyle} from '../../../common/styles/uiStyles';
 
 const SearchInput: React.FC = () => {
     const searchQuery = useExamplesStore(state => state.searchQuery);
@@ -43,14 +44,10 @@ const searchContainer: React.CSSProperties = {
 };
 
 const searchInputStyle: React.CSSProperties = {
+    ...glassSurfaceStyle,
     width: '100%',
     height: '46px',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '9999px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
     padding: '0 40px 0 20px',
     color: '#f8f9fa',
     fontSize: '13.5px',

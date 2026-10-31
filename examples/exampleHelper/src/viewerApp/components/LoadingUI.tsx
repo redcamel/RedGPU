@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { useExampleHelperStore } from '../../store';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useExampleHelperStore} from '../../store';
 import '../styles/loading.css';
 
 /**
@@ -32,18 +32,12 @@ const LoadingUI: React.FC = () => {
         };
 
         Object.values(loadingStates).forEach((state) => {
-            if (state.model) {
-                t.model.loaded += state.model.loaded || 0;
-                t.model.total += state.model.total || 0;
-            }
-            if (state.buffers) {
-                t.buffers.loaded += state.buffers.loaded || 0;
-                t.buffers.total += state.buffers.total || 0;
-            }
-            if (state.textures) {
-                t.textures.loaded += state.textures.loaded || 0;
-                t.textures.total += state.textures.total || 0;
-            }
+            (['model', 'buffers', 'textures'] as const).forEach((key) => {
+                if (state[key]) {
+                    t[key].loaded += state[key]?.loaded || 0;
+                    t[key].total += state[key]?.total || 0;
+                }
+            });
         });
         return t;
     }, [loadingStates]);
@@ -99,69 +93,61 @@ const LoadingUI: React.FC = () => {
         >
             <div className="loading-ui-title">📦 Loading Resources...</div>
 
-            {/* Model Section */}
-            {totals.model.total > 0 && (
-                <div className="info-container-model loading-ui-info active">
-                    <div className="loading-ui-info-wrapper">
-                        <div className="loading-ui-info-title">model</div>
-                        <div className="loading-ui-info-detail">
-                            <span className="percent">{Math.floor(mRatio * 100)}%</span>
-                            <span className="size" style={{ marginLeft: '10px', opacity: 0.7 }}>
-                                {formatBytes(totals.model.loaded)} / {formatBytes(totals.model.total)}
-                            </span>
-                        </div>
-                        <div className="loading-ui-progress">
-                            <div className="bar" style={{ width: `${mRatio * 100}%` }}></div>
-                        </div>
-                        <div className="loading-ui-info-file">
-                            {Object.entries(loadingStates).map(([url, state]) => (
-                                state.model && state.model.total > 0 ? (
-                                    <div key={url} className="file">
-                                        <span>{url}</span>
-                                        <span>{formatBytes(state.model.total)}</span>
-                                    </div>
-                                ) : null
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Buffers Section */}
-            {totals.buffers.total > 0 && (
-                <div className="info-container-buffers loading-ui-info active">
-                    <div className="loading-ui-info-wrapper">
-                        <div className="loading-ui-info-title">buffers</div>
-                        <div className="loading-ui-info-detail">
-                            <span className="percent">{Math.floor(bRatio * 100)}%</span>
-                            <span className="count" style={{ marginLeft: '10px', opacity: 0.7 }}>
-                                {totals.buffers.loaded} / {totals.buffers.total}
-                            </span>
-                        </div>
-                        <div className="loading-ui-progress">
-                            <div className="bar" style={{ width: `${bRatio * 100}%` }}></div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Textures Section */}
-            {totals.textures.total > 0 && (
-                <div className="info-container-textures loading-ui-info active">
-                    <div className="loading-ui-info-wrapper">
-                        <div className="loading-ui-info-title">textures</div>
-                        <div className="loading-ui-info-detail">
-                            <span className="percent">{Math.floor(tRatio * 100)}%</span>
-                            <span className="count" style={{ marginLeft: '10px', opacity: 0.7 }}>
-                                {totals.textures.loaded} / {totals.textures.total}
-                            </span>
-                        </div>
-                        <div className="loading-ui-progress">
-                            <div className="bar" style={{ width: `${tRatio * 100}%` }}></div>
+            {([
+                {
+                    key: 'model',
+                    ratio: mRatio,
+                    loaded: formatBytes(totals.model.loaded),
+                    total: formatBytes(totals.model.total),
+                    unitClass: 'size',
+                    showFiles: true
+                },
+                {
+                    key: 'buffers',
+                    ratio: bRatio,
+                    loaded: totals.buffers.loaded,
+                    total: totals.buffers.total,
+                    unitClass: 'count',
+                    showFiles: false
+                },
+                {
+                    key: 'textures',
+                    ratio: tRatio,
+                    loaded: totals.textures.loaded,
+                    total: totals.textures.total,
+                    unitClass: 'count',
+                    showFiles: false
+                },
+            ] as const).map(({key, ratio, loaded, total, unitClass, showFiles}) => (
+                totals[key].total > 0 && (
+                    <div key={key} className={`info-container-${key} loading-ui-info active`}>
+                        <div className="loading-ui-info-wrapper">
+                            <div className="loading-ui-info-title">{key}</div>
+                            <div className="loading-ui-info-detail">
+                                <span className="percent">{Math.floor(ratio * 100)}%</span>
+                                <span className={unitClass} style={{marginLeft: '10px', opacity: 0.7}}>
+                                    {loaded} / {total}
+                                </span>
+                            </div>
+                            <div className="loading-ui-progress">
+                                <div className="bar" style={{width: `${ratio * 100}%`}}></div>
+                            </div>
+                            {showFiles && (
+                                <div className="loading-ui-info-file">
+                                    {Object.entries(loadingStates).map(([url, state]) => (
+                                        state.model && state.model.total > 0 ? (
+                                            <div key={url} className="file">
+                                                <span>{url}</span>
+                                                <span>{formatBytes(state.model.total)}</span>
+                                            </div>
+                                        ) : null
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            ))}
 
             {/* Total Progress Section */}
             {Object.keys(loadingStates).length >= 2 && (

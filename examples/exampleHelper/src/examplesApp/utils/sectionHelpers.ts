@@ -1,3 +1,4 @@
+import React from 'react';
 import {ExampleItem} from '../../types/example';
 
 /**
@@ -9,4 +10,11 @@ export const splitSectionItems = (items: ExampleItem[]) => {
         leafItems: items.filter(subItem => !subItem.list),
         groupItems: items.filter(subItem => !!subItem.list)
     };
+};
+
+export const sectionStackStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '32px',
+    marginBottom: '20px',
 };

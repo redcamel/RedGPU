@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
 import SelectBox from '../../common/components/basic/SelectBox';
 import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
+import {verticalDividerStyle} from '../../common/styles/uiStyles';
 
 /**
  * [KO] 톤 매핑 및 안티앨리어싱 설정을 포함하는 공통 선택 박스 그룹 컴포넌트입니다.
@@ -152,11 +153,7 @@ const RenderingSettingsGroup: React.FC = () => {
 };
 
 const dividerStyle: React.CSSProperties = {
-    width: '1px',
-    height: '16px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    margin: '0 2px',
-    flexShrink: 0,
+    ...verticalDividerStyle,
     alignSelf: 'center'
 };
 

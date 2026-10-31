@@ -1,5 +1,7 @@
 import React from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {expBadgePillStyle} from '../../common/styles/uiStyles';
+import {useMediaQuery} from '../../utils/useMediaQuery';
 
 /**
  * [KO] 예제 설명을 표시하는 컴포넌트입니다. 언어 토글 버튼을 통해 한국어/영어 설명을 전환할 수 있습니다.
@@ -10,14 +12,19 @@ const Description = () => {
     const language = useExampleHelperStore((state: ExampleHelperState) => state.language);
     const setLanguage = useExampleHelperStore((state: ExampleHelperState) => state.setLanguage);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
+    const isCompactMobile = useMediaQuery(640);
     const [isToggleHovered, setIsToggleHovered] = React.useState(false);
 
     if (!currentExample || !currentExample.description) {
         return null;
     }
 
-    const description = currentExample.description[language] || currentExample.description['en'] || '';
-    if (!description) return null;
+    const rawDescription = currentExample.description[language] || currentExample.description['en'] || '';
+    if (!rawDescription) return null;
+
+    const description = isCompactMobile
+        ? rawDescription
+        : rawDescription.replace(/\. +(?=[A-Za-z가-힣0-9('"`\[])/g, '.<br/>');
 
     const categoryLabel = currentExample.path
         ? currentExample.path.split('/').slice(0, -1).join(' · ')
@@ -30,13 +37,12 @@ const Description = () => {
                 style={{
                     ...containerStyle,
                     bottom: isNarrow ? '164px' : '32px',
-                    right: isNarrow ? '20px' : '270px'
+                    right: isNarrow ? '20px' : '310px'
                 }}
             >
                 <div style={{
                     ...editorialWrapperStyle,
                     gap: isNarrow ? '10px' : '12px',
-                    maxWidth: isNarrow ? 'none' : '840px'
                 }}>
                     <div style={accentBarStyle}/>
                     <div style={textColumnStyle}>
@@ -220,17 +226,15 @@ const titleStyle: React.CSSProperties = {
 };
 
 const experimentalBadgeStyle: React.CSSProperties = {
+    ...expBadgePillStyle,
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     height: '20px',
     fontSize: '10px',
     backgroundColor: 'rgba(255, 90, 95, 0.18)',
-    color: '#ff7b80',
     border: '1px solid rgba(255, 90, 95, 0.4)',
     padding: '0 8px',
-    borderRadius: '9999px',
-    fontWeight: 700,
     letterSpacing: '0.06em',
     lineHeight: '1',
     backdropFilter: 'blur(8px)',

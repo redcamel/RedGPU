@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {hdrImages} from "../../data/hdrList";
-import {resolveExamplePath} from "../../utils/guiUtils";
+import {bindLuminance, createSourcePathMonitor, hdrOptions, resolveExamplePath} from "../../utils/guiUtils";
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
 
 /**
@@ -29,13 +29,7 @@ const GuiSkyBoxHelper: React.FC<GuiSkyBoxHelperProps> = ({gui, view}) => {
         };
 
         const pathInfo = {finalPath: ''};
-        let sourceBinding: any;
-
-        const updatePathInfo = (src: string | string[]) => {
-            const getFileName = (path: string) => path.split('/').pop() || path;
-            pathInfo.finalPath = Array.isArray(src) ? src.map(getFileName).join('\n') : getFileName(src);
-            if (sourceBinding) sourceBinding.refresh();
-        };
+        const {updatePathInfo, bindSourcePath} = createSourcePathMonitor(pathInfo);
 
         const updateSkyBox = (name: string) => {
             if (!settings.useSkyBox) return;
@@ -83,9 +77,8 @@ const GuiSkyBoxHelper: React.FC<GuiSkyBoxHelperProps> = ({gui, view}) => {
 
         const settingsFolder = skyboxFolder.addFolder({title: 'SkyBox Settings', expanded: true});
 
-        settingsFolder.addBinding(settings, 'texture', {
-            options: hdrImages.reduce((acc, item) => ({...acc, [item.name]: item.name}), {}),
-        }).on('change', (ev: any) => updateSkyBox(ev.value));
+        settingsFolder.addBinding(settings, 'texture', {options: hdrOptions})
+            .on('change', (ev: any) => updateSkyBox(ev.value));
 
         settingsFolder.addBinding(settings, 'blur', {min: 0, max: 1, step: 0.01})
             .on('change', (ev: any) => {
@@ -102,21 +95,8 @@ const GuiSkyBoxHelper: React.FC<GuiSkyBoxHelperProps> = ({gui, view}) => {
                 if (view.skybox) view.skybox.opacity = ev.value;
             });
 
-        settingsFolder.addBinding({
-            get luminance() {
-                return view.skybox ? view.skybox.luminance : 0;
-            },
-            set luminance(v) {
-                if (view.skybox) view.skybox.luminance = v;
-            },
-        }, 'luminance', {min: 0, max: 100000, step: 100});
-
-        sourceBinding = settingsFolder.addBinding(pathInfo, 'finalPath', {
-            readonly: true,
-            label: 'source',
-            multiline: true,
-            rows: 2
-        });
+        bindLuminance(settingsFolder, () => view.skybox);
+        bindSourcePath(settingsFolder);
 
         // Initial setup
         updateSkyBox(settings.texture);

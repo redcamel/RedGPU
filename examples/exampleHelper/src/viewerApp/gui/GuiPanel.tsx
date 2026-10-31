@@ -47,32 +47,28 @@ const GuiPanel: React.FC = () => {
 
     if (!guiConfig) return null;
 
+    const firstView = redGPUContext?.viewList[0];
+
     return (
         <>
             <div ref={guiContainerRef} style={guiContainerStyle}/>
-            {guiInstance && guiConfig.redGPUContext && redGPUContext && (
-                <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext}/>
-            )}
-            {guiInstance && guiConfig.viewList && redGPUContext && (
-                <GuiViewList gui={guiInstance} redGPUContext={redGPUContext}/>
-            )}
-            {guiInstance && guiConfig.scene && redGPUContext && (
-                <GuiScene gui={guiInstance} scene={redGPUContext.viewList[0]?.scene}/>
-            )}
-            {guiInstance && guiConfig.directionalShadow && redGPUContext && redGPUContext.viewList[0]?.scene?.shadowManager?.directionalShadowManager && (
-                <GuiDirectionalShadowHelper gui={guiInstance}
-                                            directionalShadowManager={redGPUContext.viewList[0].scene.shadowManager.directionalShadowManager}/>
-            )}
-            {guiInstance && guiConfig.globalWind && redGPUContext && redGPUContext.viewList[0]?.scene?.windManager && (
-                <GuiGlobalWindHelper gui={guiInstance}
-                                     windManager={redGPUContext.viewList[0].scene.windManager}
-                                     expanded={typeof guiConfig.globalWind === 'object' ? guiConfig.globalWind.expanded : false}/>
-            )}
-            {guiInstance && guiConfig.ibl && redGPUContext && redGPUContext.viewList[0] && (
-                <GuiIBLHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>
-            )}
-            {guiInstance && guiConfig.skybox && redGPUContext && redGPUContext.viewList[0] && (
-                <GuiSkyBoxHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>
+            {guiInstance && redGPUContext && (
+                <>
+                    {guiConfig.redGPUContext && <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext}/>}
+                    {guiConfig.viewList && <GuiViewList gui={guiInstance} redGPUContext={redGPUContext}/>}
+                    {guiConfig.scene && <GuiScene gui={guiInstance} scene={firstView?.scene}/>}
+                    {guiConfig.directionalShadow && firstView?.scene?.shadowManager?.directionalShadowManager && (
+                        <GuiDirectionalShadowHelper gui={guiInstance}
+                                                    directionalShadowManager={firstView.scene.shadowManager.directionalShadowManager}/>
+                    )}
+                    {guiConfig.globalWind && firstView?.scene?.windManager && (
+                        <GuiGlobalWindHelper gui={guiInstance}
+                                             windManager={firstView.scene.windManager}
+                                             expanded={typeof guiConfig.globalWind === 'object' ? guiConfig.globalWind.expanded : false}/>
+                    )}
+                    {guiConfig.ibl && firstView && <GuiIBLHelper gui={guiInstance} view={firstView}/>}
+                    {guiConfig.skybox && firstView && <GuiSkyBoxHelper gui={guiInstance} view={firstView}/>}
+                </>
             )}
         </>
     );

@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {GitHubIcon} from './Icons';
+import {glassCircleIslandStyle} from '../styles/uiStyles';
 
 /**
  * [KO] 예제 헬퍼의 하단 푸터 컴포넌트입니다.
@@ -217,19 +218,7 @@ const leftCapsuleStyle: React.CSSProperties = {
 };
 
 const githubCircleIslandStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '46px',
-    height: '46px',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '50%',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-    boxSizing: 'border-box',
-    flexShrink: 0,
+    ...glassCircleIslandStyle,
     transition: 'background-color 0.18s',
 };
 

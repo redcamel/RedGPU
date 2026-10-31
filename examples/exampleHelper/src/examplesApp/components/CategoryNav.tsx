@@ -1,16 +1,14 @@
 import React from 'react';
 import {useExamplesStore} from '../store/useExamplesStore';
 import {ExampleList} from '../../data/exampleList';
+import {glassPillContainerStyle} from '../../common/styles/uiStyles';
+import {ViewModeLangButtons} from './ViewControls';
 
 const CategoryNav: React.FC = () => {
     const activeTab = useExamplesStore(state => state.activeTab);
     const setActiveTab = useExamplesStore(state => state.setActiveTab);
     const isNarrow = useExamplesStore(state => state.isNarrow);
     const isCompact = useExamplesStore(state => state.isCompact);
-    const viewMode = useExamplesStore(state => state.viewMode);
-    const setViewMode = useExamplesStore(state => state.setViewMode);
-    const language = useExamplesStore(state => state.language);
-    const setLanguage = useExamplesStore(state => state.setLanguage);
 
     return (
         <nav style={{
@@ -62,27 +60,7 @@ const CategoryNav: React.FC = () => {
                             </button>
                         );
                     })}
-                    {!isNarrow && (
-                        <>
-                            <div style={dividerStyle}/>
-                            <button
-                                style={controlButtonStyle}
-                                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                                title={viewMode === 'grid' ? 'Grid View' : 'List View'}
-                                aria-label={viewMode === 'grid' ? 'Grid View' : 'List View'}
-                            >
-                                {viewMode === 'grid' ? '▤' : '☰'}
-                            </button>
-                            <div style={dividerStyle}/>
-                            <button
-                                style={langButtonStyle}
-                                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-                                aria-label={`Switch to ${language === 'ko' ? 'English' : 'Korean'}`}
-                            >
-                                {language === 'ko' ? 'KO' : 'EN'}
-                            </button>
-                        </>
-                    )}
+                    {!isNarrow && <ViewModeLangButtons inline/>}
                 </div>
             </div>
         </nav>
@@ -90,21 +68,12 @@ const CategoryNav: React.FC = () => {
 };
 
 const navStyle: React.CSSProperties = {
+    ...glassPillContainerStyle,
     display: 'inline-flex',
-    alignItems: 'center',
     maxWidth: '100%',
     minWidth: 0,
-    height: '46px',
     padding: '4px',
-    backgroundColor: 'rgba(18, 18, 20, 0.82)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '9999px',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
     overflow: 'hidden',
-    boxSizing: 'border-box',
-    flexShrink: 0,
 };
 
 const containerStyle: React.CSSProperties = {
@@ -127,52 +96,6 @@ const tabButtonStyle: React.CSSProperties = {
     justifyContent: 'center',
     letterSpacing: '0.02em',
     boxSizing: 'border-box',
-    flexShrink: 0,
-};
-
-const dividerStyle: React.CSSProperties = {
-    width: '1px',
-    height: '16px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    margin: '0 2px',
-    flexShrink: 0,
-};
-
-const controlButtonStyle: React.CSSProperties = {
-    width: '36px',
-    height: '36px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-    color: '#fdb48d',
-    border: 'none',
-    outline: 'none',
-    borderRadius: '9999px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    transition: 'all 0.18s ease',
-    padding: 0,
-    flexShrink: 0,
-};
-
-const langButtonStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 'auto',
-    height: '36px',
-    padding: '0 14px 0 12px',
-    backgroundColor: 'transparent',
-    border: 'none',
-    outline: 'none',
-    borderRadius: '9999px',
-    color: '#fdb48d',
-    fontSize: '12px',
-    fontWeight: 'bold',
-    letterSpacing: '0.04em',
-    cursor: 'pointer',
-    transition: 'all 0.18s ease',
     flexShrink: 0,
 };
 
