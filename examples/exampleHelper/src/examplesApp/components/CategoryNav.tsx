@@ -6,15 +6,20 @@ const CategoryNav: React.FC = () => {
     const activeTab = useExamplesStore(state => state.activeTab);
     const setActiveTab = useExamplesStore(state => state.setActiveTab);
     const isNarrow = useExamplesStore(state => state.isNarrow);
+    const isCompact = useExamplesStore(state => state.isCompact);
     const viewMode = useExamplesStore(state => state.viewMode);
     const setViewMode = useExamplesStore(state => state.setViewMode);
     const language = useExamplesStore(state => state.language);
     const setLanguage = useExamplesStore(state => state.setLanguage);
 
     return (
-        <nav style={navStyle}>
+        <nav style={{
+            ...navStyle,
+            width: isCompact ? '100%' : 'fit-content',
+        }}>
             <div style={{
                 ...containerStyle,
+                width: isCompact ? '100%' : 'auto',
                 overflowX: isNarrow ? 'auto' : 'visible',
                 WebkitOverflowScrolling: 'touch',
                 scrollbarWidth: 'none',
@@ -30,6 +35,8 @@ const CategoryNav: React.FC = () => {
                 <div className="category-nav-container" style={{
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: isCompact ? 'space-between' : 'flex-start',
+                    width: isCompact ? '100%' : 'auto',
                     height: '100%',
                     padding: 0,
                     gap: '4px',
@@ -44,6 +51,7 @@ const CategoryNav: React.FC = () => {
                                 key={cat}
                                 style={{
                                     ...tabButtonStyle,
+                                    flex: isCompact ? '1 0 auto' : '0 0 auto',
                                     padding: isNarrow ? '0 12px' : '0 16px',
                                     color: isActive ? '#fdb48d' : '#a0a0ab',
                                     backgroundColor: isActive ? 'rgba(253, 180, 141, 0.16)' : 'transparent',

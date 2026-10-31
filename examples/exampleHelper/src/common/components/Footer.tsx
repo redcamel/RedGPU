@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {GitHubIcon} from './Icons';
 
 /**
  * [KO] 예제 헬퍼의 하단 푸터 컴포넌트입니다.
@@ -13,8 +14,6 @@ interface FooterProps {
 }
 
 const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = false, onShowSource}: FooterProps) => {
-    const RELATIVE_PATH = './assets/github.png';
-    const githubIcon = new URL(RELATIVE_PATH, import.meta.url).href;
     const [isLinkHovered, setIsLinkHovered] = useState(false);
 
     // [KO] 1. 예제 목록 페이지(ExamplesApp: useSourceModal === false)
@@ -83,7 +82,7 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                             This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                         </span>
                         <span style={iconWrapperStyle}>
-                            <img src={githubIcon} width="18" height="18" style={{display: 'block'}} alt="GitHub"/>
+                            <GitHubIcon color="#fff" size={20}/>
                         </span>
                     </a>
                 </div>
@@ -91,7 +90,7 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
         );
     }
 
-    // [KO] 3. 데스크톱 3D 뷰어: 하단 좌측 저작자/GitHub 투명 플로팅 텍스트 (우측 및 중앙 100% 개방)
+    // [KO] 3. 데스크톱 3D 뷰어: 하단 우측 저작자 텍스트 + 46x46 원형 글래스 GitHub 버튼
     return (
         <div style={footerContainerStyle}>
             <a
@@ -100,7 +99,7 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                 rel="noreferrer"
                 style={{
                     ...leftCapsuleStyle,
-                    opacity: isLinkHovered ? 1 : 0.85
+                    opacity: isLinkHovered ? 1 : 0.9
                 }}
                 onMouseEnter={() => setIsLinkHovered(true)}
                 onMouseLeave={() => setIsLinkHovered(false)}
@@ -115,8 +114,11 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = 
                 }}>
                     This project is maintained by <b style={{color: '#fdb48d', fontWeight: 700}}>RedCamel</b>
                 </span>
-                <span style={{...iconWrapperStyle, filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35))'}}>
-                    <img src={githubIcon} width="18" height="18" style={{display: 'block'}} alt="GitHub"/>
+                <span style={{
+                    ...githubCircleIslandStyle,
+                    backgroundColor: isLinkHovered ? 'rgba(32, 32, 36, 0.88)' : 'rgba(18, 18, 20, 0.82)',
+                }}>
+                    <GitHubIcon color="#fff" size={20}/>
                 </span>
             </a>
         </div>
@@ -165,7 +167,7 @@ const footerContainerStyle: React.CSSProperties = {
     bottom: '20px',
     left: '20px',
     right: '20px',
-    height: '24px',
+    height: '46px',
     zIndex: 10002,
     display: 'flex',
     alignItems: 'center',
@@ -200,19 +202,36 @@ const mobileSelectContainerStyle: React.CSSProperties = {
 };
 
 const leftCapsuleStyle: React.CSSProperties = {
-    height: '22px',
+    height: '46px',
     padding: 0,
     backgroundColor: 'transparent',
     border: 'none',
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '12px',
     lineHeight: '1',
     textDecoration: 'none',
     cursor: 'pointer',
     transition: 'opacity 0.2s',
     boxSizing: 'border-box',
     pointerEvents: 'auto'
+};
+
+const githubCircleIslandStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '46px',
+    height: '46px',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '50%',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+    boxSizing: 'border-box',
+    flexShrink: 0,
+    transition: 'background-color 0.18s',
 };
 
 const rightCapsuleStyle: React.CSSProperties = {
@@ -265,7 +284,7 @@ const narrowSourceButtonStyle: React.CSSProperties = {
 const iconWrapperStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
-    transform: 'translateY(-1.5px)',
+    justifyContent: 'center',
     opacity: 0.95,
     transition: 'opacity 0.2s'
 };
