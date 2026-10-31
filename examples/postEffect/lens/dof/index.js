@@ -92,8 +92,8 @@ RedGPU.init(
         canvas.addEventListener('wheel', cancelTransition, {passive: true});
 
         const updateLayout = () => {
-            const isNarrow = window.innerWidth <= 768;
-            if (isNarrow) {
+            const isPortrait = window.innerWidth < window.innerHeight;
+            if (isPortrait) {
                 viewNormal.setSize('100%', '50%');
                 viewNormal.setPosition(0, 0);
                 viewEffect.setSize('100%', '50%');

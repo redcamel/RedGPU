@@ -59,8 +59,8 @@ RedGPU.init(
         redGPUContext.addView(view2);
 
         const updateLayout = () => {
-            const isNarrow = window.innerWidth <= 768;
-            if (isNarrow) {
+            const isPortrait = window.innerWidth < window.innerHeight;
+            if (isPortrait) {
                 view.setSize('100%', '50%');
                 view.setPosition(0, 0);
                 view2.setSize('100%', '50%');

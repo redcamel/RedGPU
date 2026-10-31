@@ -8,7 +8,6 @@ import {useExampleHelperStore} from '../../store';
 const GuiCompareLabelHelper: React.FC = () => {
     const guiConfig = useExampleHelperStore((state) => state.guiConfig);
     const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
-    const isNarrow = useExampleHelperStore((state) => state.isNarrow);
     const [rect, setRect] = useState<DOMRect | null>(null);
 
     const updateContainerStyle = useCallback(() => {
@@ -68,6 +67,8 @@ const GuiCompareLabelHelper: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        minWidth: '84px',
+        boxSizing: 'border-box',
         padding: '7px 12px',
         backgroundColor: 'rgba(91, 82, 170, 0.85)',
         backdropFilter: 'blur(8px)',
@@ -80,7 +81,7 @@ const GuiCompareLabelHelper: React.FC = () => {
         fontWeight: 600,
         pointerEvents: 'none',
         lineHeight: 1,
-        zIndex: 10,
+        zIndex: 10002,
     };
 
     const getStyle = (isNormal: boolean): React.CSSProperties => {
@@ -88,8 +89,9 @@ const GuiCompareLabelHelper: React.FC = () => {
         const left = rect ? rect.left : 0;
         const width = rect ? rect.width : window.innerWidth;
         const height = rect ? rect.height : window.innerHeight;
+        const isPortrait = width < height;
 
-        if (isNarrow) {
+        if (isPortrait) {
             return {
                 ...baseStyle,
                 left: left + 12,
@@ -100,7 +102,7 @@ const GuiCompareLabelHelper: React.FC = () => {
         }
         return {
             ...baseStyle,
-            bottom: '16px',
+            bottom: '30px',
             left: left + width / 2,
             ...(isNormal ? {transform: 'translateX(calc(-100% - 6px))'} : {transform: 'translateX(6px)'})
         };
