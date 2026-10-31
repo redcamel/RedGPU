@@ -84,7 +84,7 @@ const MainContent: React.FC = () => {
                     marginTop: isNarrow ? ((isCompact && !searchQuery) ? '0' : '10px') : '12px',
                     padding: isNarrow
                         ? '8px 16px 24px 16px'
-                        : (sidebarOpen && !searchQuery ? '8px 20px 32px 16px' : '8px 20px 32px 20px')
+                        : (searchQuery ? '8px 20px 32px 20px' : (sidebarOpen ? '8px 20px 32px 16px' : '8px 20px 32px 36px'))
                 }}
             >
                 <ExampleGrid />

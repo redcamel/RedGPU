@@ -44,7 +44,6 @@ const CategoryNav: React.FC = () => {
                     {ExampleList.map(category => {
                         const cat = category.name;
                         const isActive = activeTab === cat;
-                        const isExperimental = category.experimental;
 
                         return (
                             <button
@@ -56,14 +55,10 @@ const CategoryNav: React.FC = () => {
                                     color: isActive ? '#fdb48d' : '#a0a0ab',
                                     backgroundColor: isActive ? 'rgba(253, 180, 141, 0.16)' : 'transparent',
                                     whiteSpace: 'nowrap',
-                                    gap: '6px'
                                 }}
                                 onClick={() => setActiveTab(cat)}
                             >
                                 {cat}
-                                {isExperimental && (
-                                    <span style={experimentalBadgeStyle}>EXP</span>
-                                )}
                             </button>
                         );
                     })}
@@ -181,18 +176,6 @@ const langButtonStyle: React.CSSProperties = {
     cursor: 'pointer',
     transition: 'all 0.18s ease',
     flexShrink: 0,
-};
-
-const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '9px',
-    backgroundColor: 'rgba(255, 90, 95, 0.16)',
-    color: '#ff7b80',
-    border: '1px solid rgba(255, 90, 95, 0.35)',
-    padding: '2px 6px',
-    borderRadius: '9999px',
-    fontWeight: 700,
-    lineHeight: '1',
-    display: 'inline-block'
 };
 
 export default CategoryNav;

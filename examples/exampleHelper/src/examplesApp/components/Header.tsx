@@ -11,7 +11,6 @@ const Header: React.FC = () => {
     const isCompact = useExamplesStore(state => state.isCompact);
     const searchQuery = useExamplesStore(state => state.searchQuery);
     const sidebarOpen = useExamplesStore(state => state.sidebarOpen);
-    const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
 
     if (isNarrow) {
         return (
@@ -43,16 +42,6 @@ const Header: React.FC = () => {
                     width: (!searchQuery && sidebarOpen) ? '272px' : 'auto',
                 }}>
                     <Logo/>
-                    {!searchQuery && (
-                        <button
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            style={toggleSidebarButton}
-                            title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-                            aria-label={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-                        >
-                            {sidebarOpen ? '◀' : '▶'}
-                        </button>
-                    )}
                 </div>
                 {!searchQuery && <CategoryNav/>}
             </div>
