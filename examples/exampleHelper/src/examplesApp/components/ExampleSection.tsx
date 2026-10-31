@@ -19,9 +19,9 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0, lcpCoun
 
         const responsiveSectionStyle: React.CSSProperties = {
             marginBottom: depth === 0 ? (isNarrow ? '56px' : '72px') : '36px',
-            marginLeft: depth > 0 ? (isNarrow ? (depth === 1 ? '12px' : '8px') : (depth === 1 ? '20px' : '14px')) : '0',
-            borderLeft: depth > 0 ? '1px solid rgba(255, 255, 255, 0.07)' : 'none',
-            paddingLeft: depth > 0 ? (isNarrow ? '14px' : '22px') : '0',
+            marginLeft: depth > 0 ? (isNarrow ? '0' : (depth === 1 ? '20px' : '14px')) : '0',
+            borderLeft: (depth > 0 && !isNarrow) ? '1px solid rgba(255, 255, 255, 0.07)' : 'none',
+            paddingLeft: depth > 0 ? (isNarrow ? '0' : '22px') : '0',
         };
 
         return (

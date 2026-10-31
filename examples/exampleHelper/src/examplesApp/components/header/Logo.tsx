@@ -14,7 +14,9 @@ const Logo: React.FC = () => {
                 whiteSpace: 'nowrap',
             }}>
                 <h1 style={{...titleStyle, fontSize: isNarrow ? '16px' : '18px', lineHeight: '1.2', margin: 0}}>
-                    RedGPU
+                    <a href="../" style={titleLinkStyle}>
+                        RedGPU
+                    </a>
                 </h1>
                 <span style={{
                     ...subTitleStyle,
@@ -37,6 +39,12 @@ const titleStyle: React.CSSProperties = {
     fontWeight: 'bold',
     letterSpacing: '0.02em',
     color: '#fff',
+};
+
+const titleLinkStyle: React.CSSProperties = {
+    color: 'inherit',
+    textDecoration: 'none',
+    cursor: 'pointer',
 };
 
 const subTitleStyle: React.CSSProperties = {
