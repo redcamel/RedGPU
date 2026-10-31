@@ -12,6 +12,7 @@ const RenderingSettingsGroup: React.FC = () => {
 
     const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
     const [toneMapping, setToneMapping] = useState<string>(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
+    const [bloom, setBloom] = useState<string>('NONE');
 
     useEffect(() => {
         if (redGPUContext) {
@@ -25,6 +26,9 @@ const RenderingSettingsGroup: React.FC = () => {
                 const firstView = redGPUContext.viewList[0];
                 if (firstView.toneMappingManager) {
                     setToneMapping(firstView.toneMappingManager.mode);
+                }
+                if (firstView.postEffectManager) {
+                    setBloom(firstView.postEffectManager.useBloom ? 'NATURAL' : 'NONE');
                 }
             }
         }
@@ -54,11 +58,44 @@ const RenderingSettingsGroup: React.FC = () => {
         }
     };
 
+    const handleBloomChange = (value: string) => {
+        setBloom(value);
+        if (redGPUContext) {
+            redGPUContext.viewList.forEach((view: any) => {
+                const postEffectManager = view.postEffectManager;
+                if (postEffectManager) {
+                    if (value === 'NONE') {
+                        postEffectManager.useBloom = false;
+                    } else {
+                        postEffectManager.useBloom = true;
+                        const bloomEffect = postEffectManager.bloom;
+                        if (bloomEffect) {
+                            if (value === 'NATURAL') bloomEffect.setNatural();
+                            else if (value === 'CINEMATIC') bloomEffect.setCinematic();
+                            else if (value === 'NEON_GLOW') bloomEffect.setNeonGlow();
+                            else if (value === 'DREAMY') bloomEffect.setDreamy();
+                            else if (value === 'SUBTLE') bloomEffect.setSubtle();
+                        }
+                    }
+                }
+            });
+        }
+    };
+
     const aaOptions = [
         {value: 'NONE', label: 'None'},
         {value: 'useMSAA', label: 'MSAA'},
         {value: 'useFXAA', label: 'FXAA'},
         {value: 'useTAA', label: 'TAA'},
+    ];
+
+    const bloomOptions = [
+        {value: 'NONE', label: 'None'},
+        {value: 'NATURAL', label: 'Natural'},
+        {value: 'CINEMATIC', label: 'Cinematic'},
+        {value: 'NEON_GLOW', label: 'Neon Glow'},
+        {value: 'DREAMY', label: 'Dreamy'},
+        {value: 'SUBTLE', label: 'Subtle'},
     ];
 
     const formatToneMappingLabel = (key: string) => {
@@ -87,7 +124,7 @@ const RenderingSettingsGroup: React.FC = () => {
                 label="Tone"
                 value={toneMapping}
                 options={tmOptions}
-                style={isNarrow ? {flex: 1.4, minWidth: 0} : undefined}
+                style={isNarrow ? {flex: 1.3, minWidth: 0} : undefined}
                 onChange={handleToneMappingChange}
             />
 
@@ -97,8 +134,18 @@ const RenderingSettingsGroup: React.FC = () => {
                 label="AA"
                 value={antialiasing}
                 options={aaOptions}
-                style={isNarrow ? {flex: 1, minWidth: 0} : undefined}
+                style={isNarrow ? {flex: 0.85, minWidth: 0} : undefined}
                 onChange={handleAntialiasingChange}
+            />
+
+            <div style={dividerStyle}/>
+
+            <SelectBox
+                label="Bloom"
+                value={bloom}
+                options={bloomOptions}
+                style={isNarrow ? {flex: 1.1, minWidth: 0} : undefined}
+                onChange={handleBloomChange}
             />
         </>
     );

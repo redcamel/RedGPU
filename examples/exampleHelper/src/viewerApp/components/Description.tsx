@@ -30,14 +30,18 @@ const Description = () => {
             <div
                 style={{
                     ...containerStyle,
-                    top: isNarrow ? '74px' : 'auto',
-                    bottom: isNarrow ? 'auto' : '20px',
-                    left: isNarrow ? '16px' : '20px',
-                    right: isNarrow ? '16px' : '270px'
+                    top: 'auto',
+                    bottom: isNarrow ? '164px' : '20px',
+                    left: isNarrow ? '20px' : '20px',
+                    right: isNarrow ? '20px' : '270px'
                 }}
             >
-                <div style={{...editorialWrapperStyle, maxWidth: isNarrow ? 'none' : '840px'}}>
-                    {!isNarrow && <div style={accentBarStyle}/>}
+                <div style={{
+                    ...editorialWrapperStyle,
+                    gap: isNarrow ? '10px' : '12px',
+                    maxWidth: isNarrow ? 'none' : '840px'
+                }}>
+                    <div style={accentBarStyle}/>
                     <div style={textColumnStyle}>
                         {!isNarrow && (
                             <>

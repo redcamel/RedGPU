@@ -202,7 +202,7 @@ const rightCapsuleStyle: React.CSSProperties = {
 const narrowFooterBarStyle: React.CSSProperties = {
     height: '42px',
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     padding: '0 18px',
     fontSize: '12px',
