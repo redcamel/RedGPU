@@ -1561,7 +1561,7 @@ export const ExampleList: ExampleListType = [
 
                                     en: `Benchmarks real-time morph target skinning performance by simultaneously rendering hundreds of MorphStressTest models.`
 
-Check performance limits on each device.`
+
                                 },
                             },
                         ]
@@ -1593,8 +1593,8 @@ Check performance limits on each device.`
                         name: 'Sponza',
                         path: 'gltf/models/sponza',
                         description: {
-                            ko: `조명 테스트에 널리 사용되는 건물 내부 모델입니다. 현대적인 PBR 파이프라인을 위해 고해상도 지오메트리로 리메이크되었습니다.`,
-                            en: `Building interior commonly used for testing lighting. Remade for modern PBR pipelines with high-resolution geometry.`
+                            ko: `현대적인 PBR 파이프라인과 조명·그림자 테스트에 널리 사용되는 고해상도 Sponza 건축물 내부 모델입니다.`,
+                            en: `High-resolution Sponza atrium model remade for modern PBR pipelines and lighting tests.`
                         },
                     },
                     {
@@ -2268,16 +2268,16 @@ Check performance limits on each device.`
                                 name: 'Depth of Field',
                                 path: 'postEffect/lens/dof',
                                 description: {
-                                    ko: `피사계 심도(DoF) 효과 예제입니다.`,
-                                    en: `Example of Depth of Field effect.`
+                                    ko: `물리 기반 카메라 렌즈 설정과 원형·다각형 보케(Bokeh) 및 7종 렌즈 프리셋을 시연하는 피사계 심도(DOF) 예제입니다.`,
+                                    en: `Demonstrates physically-based camera lens Depth of Field (DOF) with circular/polygonal bokeh and 7 lens presets.`
                                 }
                             },
                             {
                                 name: 'Depth of Field (Auto Focus)',
                                 path: 'postEffect/lens/dofAutoFocus',
                                 description: {
-                                    ko: `화면 중앙 9-Point Zone 깊이 버퍼를 실시간 측거하여 피사체 거리 변화에 따라 초점을 자동 추적(Rack Focus)하는 오토포커스(useAutoFocus) 예제입니다.`,
-                                    en: `Auto-Focus (useAutoFocus) example that meters the center 9-Point Zone depth buffer in real time for automatic subject focus tracking (Rack Focus).`
+                                    ko: `화면 중앙 9-Point Zone의 피사체 거리를 실시간 감지하여 초점을 자동으로 추적하는 오토포커스(useAutoFocus) 예제입니다.`,
+                                    en: `Demonstrates Continuous Auto-Focus (useAutoFocus) that tracks subject distance in real time via 9-Point Zone metering.`
                                 },
                             },
                             {
