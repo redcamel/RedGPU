@@ -38,7 +38,7 @@ class AToneMappingEffect extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     protected constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {isLdr: true});
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1, isLdr: true});
     }
 
 }

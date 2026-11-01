@@ -1,5 +1,3 @@
-#redgpu_include color.linearToSrgbVec3
-
 struct Uniforms {
     contrast: f32,
     brightness: f32,
@@ -62,8 +60,16 @@ fn acesFilmicHillToneMapping(color: vec3<f32>) -> vec3<f32> {
     ));
 }
 
+fn linearToSrgbTonemap(linearColor: vec3<f32>) -> vec3<f32> {
+    let s1 = sqrt(linearColor);
+    let s2 = sqrt(s1);
+    let s3 = sqrt(s2);
+    let srgb = 0.662002687 * s1 + 0.684122060 * s2 - 0.323583601 * s3 - 0.022541147 * linearColor;
+    return min(srgb, 12.92 * linearColor);
+}
+
 fn getFinalSRGB(toneMappedColor: vec3<f32>, contrast: f32, brightness: f32) -> vec3<f32> {
     let offset = 0.5 - 0.5 * contrast + brightness;
     let finalLinearRGB = saturate(toneMappedColor * contrast + offset);
-    return linearToSrgbVec3(finalLinearRGB);
+    return linearToSrgbTonemap(finalLinearRGB);
 }
