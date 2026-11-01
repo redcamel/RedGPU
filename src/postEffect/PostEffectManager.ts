@@ -324,6 +324,9 @@ class PostEffectManager extends RedGPUObject {
         const {useMSAA} = antialiasingManager;
 
         let currentTextureView = sourceTextureInfo;
+        if (builtInEffectManager.useLensDistortion) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.lensDistortion, currentTextureView, width, height);
+        }
         if (builtInEffectManager.useVignetting) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.vignetting, currentTextureView, width, height);
         }

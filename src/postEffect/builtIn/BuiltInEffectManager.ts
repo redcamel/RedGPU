@@ -5,13 +5,14 @@ import keepLog from "../../utils/keepLog";
 import Bloom from "./bloom/Bloom";
 import DOF from "./dof/DOF";
 import FilmGrain from "./filmGrain/FilmGrain";
+import LensDistortion from "./lensDistortion/LensDistortion";
 import SSAO from "./ssao/SSAO";
 import SSR from "./ssr/SSR";
 import Vignetting from "./vignetting/Vignetting";
 
 /**
- * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
- * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `Vignetting`, `FilmGrain`) of a `View3D`.
+ * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `LensDistortion`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `LensDistortion`, `Vignetting`, `FilmGrain`) of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -40,6 +41,8 @@ class BuiltInEffectManager extends RedGPUObject {
     #useDOF: boolean = false;
     #bloom: Bloom;
     #useBloom: boolean = false;
+    #lensDistortion: LensDistortion;
+    #useLensDistortion: boolean = false;
     #vignetting: Vignetting;
     #useVignetting: boolean = false;
     #filmGrain: FilmGrain;
@@ -221,6 +224,39 @@ class BuiltInEffectManager extends RedGPUObject {
     }
 
     /**
+     * [KO] LensDistortion 활성화 여부입니다.
+     * [EN] Whether LensDistortion is enabled.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] LensDistortion 활성화 여부
+     * [EN] Whether LensDistortion is enabled
+     */
+    get useLensDistortion(): boolean {
+        return this.#useLensDistortion;
+    }
+
+    set useLensDistortion(value: boolean) {
+        this.#useLensDistortion = value;
+        this.#checkLensDistortion();
+    }
+
+    /**
+     * [KO] LensDistortion 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the LensDistortion effect instance.
+     *
+     * @returns
+     * [KO] `LensDistortion` 인스턴스
+     * [EN] `LensDistortion` instance
+     */
+    get lensDistortion(): LensDistortion {
+        if (!this.#lensDistortion) {
+            this.#lensDistortion = new LensDistortion(this.#view.redGPUContext);
+        }
+        return this.#lensDistortion;
+    }
+
+    /**
      * [KO] Vignetting 활성화 여부입니다.
      * [EN] Whether Vignetting is enabled.
      *
@@ -308,6 +344,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssr) this.#ssr.clear();
         if (this.#dof) this.#dof.clear();
         if (this.#bloom) this.#bloom.clear();
+        if (this.#lensDistortion) this.#lensDistortion.clear();
         if (this.#vignetting) this.#vignetting.clear();
         if (this.#filmGrain) this.#filmGrain.clear();
     }
@@ -335,6 +372,10 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#bloom) {
             this.#bloom.destroy();
             this.#bloom = null;
+        }
+        if (this.#lensDistortion) {
+            this.#lensDistortion.destroy();
+            this.#lensDistortion = null;
         }
         if (this.#vignetting) {
             this.#vignetting.destroy();
@@ -375,6 +416,12 @@ class BuiltInEffectManager extends RedGPUObject {
         }
     }
 
+    #checkLensDistortion() {
+        if (!this.#lensDistortion && this.#useLensDistortion) {
+            this.#lensDistortion = new LensDistortion(this.#view.redGPUContext);
+        }
+    }
+
     #checkVignetting() {
         if (!this.#vignetting && this.#useVignetting) {
             this.#vignetting = new Vignetting(this.#view.redGPUContext);
@@ -393,6 +440,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssr) this.#videoMemorySize += this.#ssr.videoMemorySize;
         if (this.#dof) this.#videoMemorySize += this.#dof.videoMemorySize;
         if (this.#bloom) this.#videoMemorySize += this.#bloom.videoMemorySize;
+        if (this.#lensDistortion) this.#videoMemorySize += this.#lensDistortion.videoMemorySize;
         if (this.#vignetting) this.#videoMemorySize += this.#vignetting.videoMemorySize;
         if (this.#filmGrain) this.#videoMemorySize += this.#filmGrain.videoMemorySize;
     }

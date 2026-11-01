@@ -30,13 +30,13 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] LensDistortion 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create LensDistortion post effect and add it to the view
+        // [KO] BuiltInEffectManager를 통한 LensDistortion 활성화
+        // [EN] Enable LensDistortion via BuiltInEffectManager
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        const effect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
-        viewEffect.postEffectManager.addEffect(effect);
+        viewEffect.builtInEffectManager.useLensDistortion = true;
+        const effect = viewEffect.builtInEffectManager.lensDistortion;
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -89,23 +89,13 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             targetContainer: container
         },
         gui: (pane) => {
-            const config = {LensDistortion: true};
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            folder.addBinding(config, 'LensDistortion').on('change', (v) => {
-                if (v.value) {
-                    targetView.postEffectManager.addEffect(effect);
-                } else {
-                    targetView.postEffectManager.removeAllEffect();
-                }
-                controls.forEach((c) => c.disabled = !v.value);
+            folder.addBinding(targetView.builtInEffectManager, 'useLensDistortion').on('change', (v) => {
+                distortionControl.disabled = !v.value;
             });
 
-            const controls = [
-                folder.addBinding(effect, 'distortion', {min: -2, max: 2, step: 0.01}),
-                folder.addBinding(effect, 'centerX', {min: -500, max: 500}),
-                folder.addBinding(effect, 'centerY', {min: -500, max: 500})
-            ];
+            const distortionControl = folder.addBinding(effect, 'distortion', {min: -1, max: 1, step: 0.01});
         }
     });
 };
