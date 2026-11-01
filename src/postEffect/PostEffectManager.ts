@@ -290,6 +290,7 @@ class PostEffectManager extends RedGPUObject {
         const {
             useSSAO,
             useSSR,
+            useFog,
             useDOF,
             useBloom,
             useChromaticAberration,
@@ -308,6 +309,9 @@ class PostEffectManager extends RedGPUObject {
         }
         if (useSSR) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.ssr, currentTextureView, width, height);
+        }
+        if (useFog) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.fog, currentTextureView, width, height);
         }
 
         if (useTAA && view.constructor.name === 'View3D') {
