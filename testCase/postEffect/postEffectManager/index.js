@@ -71,7 +71,7 @@ redUnit.testGroup(
                 const checkBloom = bloom instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
 
                 const ae = builtInEffectManager.autoExposure;
-                const checkAE = ae instanceof RedGPU.Camera.Core.AutoExposure;
+                const checkAE = ae instanceof RedGPU.PostEffect.BuiltIn.AutoExposure;
 
                 builtInEffectManager.useSSAO = true;
                 builtInEffectManager.useSSR = true;

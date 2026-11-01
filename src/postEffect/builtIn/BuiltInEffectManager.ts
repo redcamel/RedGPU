@@ -1,5 +1,5 @@
 import RedGPUObject from "../../base/RedGPUObject";
-import AutoExposure from "../../camera/core/autoExposure/AutoExposure";
+import AutoExposure from "./autoExposure/AutoExposure";
 import View3D from "../../display/view/View3D";
 import keepLog from "../../utils/keepLog";
 import Bloom from "./bloom/Bloom";

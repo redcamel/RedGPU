@@ -2,7 +2,7 @@
  * [KO] 자동 노출(AutoExposure) 휘도 산출 시 사용되는 측광 모드 상수입니다.
  * [EN] Metering mode constants used when calculating luminance for auto exposure.
  *
- * @category Core
+ * @category PostEffect
  */
 const METERING_MODE = {
     /**
@@ -26,7 +26,7 @@ const METERING_MODE = {
  * [KO] `METERING_MODE`의 유니온 타입 정의입니다.
  * [EN] Union type definition of `METERING_MODE`.
  *
- * @category Core
+ * @category PostEffect
  */
 type METERING_MODE = typeof METERING_MODE[keyof typeof METERING_MODE];
 Object.freeze(METERING_MODE);

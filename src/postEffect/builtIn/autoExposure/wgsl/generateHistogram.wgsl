@@ -17,9 +17,9 @@ struct AutoExposureUniforms {
     invEv100Range: f32,
     width: f32,
     height: f32,
-    currentPreExposure: f32,
+    invPreExposure: f32,
     meteringMode: f32,
-    pad0: f32 // 16-byte tail alignment
+    invHeight: f32
 };
 @group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;
 
@@ -30,9 +30,7 @@ fn main(
     @builtin(global_invocation_id) global_id : vec3<u32>,
     @builtin(local_invocation_index) local_index : u32
 ) {
-    if (local_index < 256u) {
-        atomicStore(&localHistogram[local_index], 0u);
-    }
+    atomicStore(&localHistogram[local_index], 0u);
     workgroupBarrier();
 
     let coords = global_id.xy * 2u;
@@ -42,8 +40,7 @@ fn main(
         if (texel.a > 0.0) {
             let color = texel.rgb;
             let brightness = max(color.r, max(color.g, color.b));
-            let invPreExposure = 1.0 / max(uniforms.currentPreExposure, MIN_LUMINANCE);
-            let lum = brightness * invPreExposure;
+            let lum = brightness * uniforms.invPreExposure;
             
             if (lum > MIN_LUMINANCE) {
                 let ev100 = log2(lum) + 3.0;
@@ -52,9 +49,8 @@ fn main(
 
                 var weight = 1.0;
                 if (uniforms.meteringMode > 0.5) {
-                    let invHeight = 1.0 / uniforms.height;
                     let center = vec2<f32>(uniforms.width, uniforms.height) * 0.5;
-                    let delta = (vec2<f32>(coords) - center) * invHeight;
+                    let delta = (vec2<f32>(coords) - center) * uniforms.invHeight;
                     let dist = sqrt(dot(delta, delta));
 
                     if (uniforms.meteringMode < 1.5) {
@@ -74,10 +70,8 @@ fn main(
 
     workgroupBarrier();
 
-    if (local_index < 256u) {
-        let localCount = atomicLoad(&localHistogram[local_index]);
-        if (localCount > 0u) {
-            atomicAdd(&histogram[local_index], localCount);
-        }
+    let localCount = atomicLoad(&localHistogram[local_index]);
+    if (localCount > 0u) {
+        atomicAdd(&histogram[local_index], localCount);
     }
 }
