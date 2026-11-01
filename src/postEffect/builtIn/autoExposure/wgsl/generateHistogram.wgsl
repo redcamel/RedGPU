@@ -33,7 +33,7 @@ fn main(
     atomicStore(&localHistogram[local_index], 0u);
     workgroupBarrier();
 
-    let coords = global_id.xy * 2u;
+    let coords = global_id.xy * 4u;
     if (coords.x < u32(uniforms.width) && coords.y < u32(uniforms.height)) {
         let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
         

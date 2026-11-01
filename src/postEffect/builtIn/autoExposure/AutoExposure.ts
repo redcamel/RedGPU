@@ -385,8 +385,8 @@ class AutoExposure extends RedGPUObject {
         }
 
         this.#currentGenerateHistogramBindGroup0 = cachedBindGroup0;
-        this.#dispatchWorkgroupX = Math.ceil(width / 32);
-        this.#dispatchWorkgroupY = Math.ceil(height / 32);
+        this.#dispatchWorkgroupX = Math.ceil(width / 64);
+        this.#dispatchWorkgroupY = Math.ceil(height / 64);
 
         commandEncoderManager.addPostProcessComputePass('AutoExposure_GenerateHistogram_Pass', this.#executeGenerateHistogramPass);
         commandEncoderManager.addPostProcessComputePass('AutoExposure_EyeAdaptation_Pass', this.#executeEyeAdaptationPass);
