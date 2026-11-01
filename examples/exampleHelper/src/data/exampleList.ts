@@ -2167,7 +2167,116 @@ export const ExampleList: ExampleListType = [
         name: 'PostEffect',
         list: [
             {
-                name: 'Color Grading',
+                name: 'BuiltInEffect',
+                list: [
+                    {
+                        name: 'Screen Space',
+                        list: [
+                            {
+                                name: 'SSAO',
+                                path: 'postEffect/ssao',
+                                description: {
+                                    ko: `화면 공간 앰비언트 오클루전(SSAO) 효과를 시연하는 예제입니다.`,
+                                    en: `An example demonstrating Screen Space Ambient Occlusion (SSAO) effects.`
+                                }
+                            },
+                            {
+                                experimental: true,
+                                name: 'SSR',
+                                path: 'postEffect/ssr',
+                                description: {
+                                    ko: `화면 공간 반사(SSR) 효과를 시연하는 예제입니다.`,
+                                    en: `An example demonstrating Screen Space Reflection (SSR) effects.`
+                                }
+                            },
+                        ]
+                    },
+                    {
+                        name: 'Fog',
+                        list: [
+                            {
+                                name: 'Fog',
+                                path: 'postEffect/fog/fog',
+                                description: {
+                                    ko: `안개 효과를 시연하는 예제입니다.`,
+                                    en: `An example demonstrating fog effects.`
+                                }
+                            },
+                            {
+                                name: 'Height Fog',
+                                path: 'postEffect/fog/heightFog',
+                                description: {
+                                    ko: `높이 기반 안개 효과를 시연하는 예제입니다.`,
+                                    en: `An example demonstrating height-based fog effects.`
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        name: 'Camera & Lens',
+                        list: [
+                            {
+                                name: 'Depth of Field',
+                                path: 'postEffect/lens/dof',
+                                description: {
+                                    ko: `물리 기반 카메라 렌즈 설정과 원형·다각형 보케(Bokeh) 및 7종 렌즈 프리셋을 시연하는 피사계 심도(DOF) 예제입니다.`,
+                                    en: `Demonstrates physically-based camera lens Depth of Field (DOF) with circular/polygonal bokeh and 7 lens presets.`
+                                }
+                            },
+                            {
+                                name: 'Depth of Field (Auto Focus)',
+                                path: 'postEffect/lens/dofAutoFocus',
+                                description: {
+                                    ko: `화면 중앙 9-Point Zone의 피사체 거리를 실시간 감지하여 초점을 자동으로 추적하는 오토포커스(useAutoFocus) 예제입니다.`,
+                                    en: `Demonstrates Continuous Auto-Focus (useAutoFocus) that tracks subject distance in real time via 9-Point Zone metering.`
+                                },
+                            },
+                            {
+                                name: 'Bloom',
+                                path: 'postEffect/bloom',
+                                description: {
+                                    ko: `물리 기반 HDR 다단 Mip-Chain 블룸 효과를 시연하는 예제입니다.`,
+                                    en: `An example demonstrating physically-based HDR Mip-Chain Bloom effects.`
+                                },
+                            },
+                            {
+                                name: 'Chromatic Aberration',
+                                path: 'postEffect/lens/chromaticAberration',
+                                description: {
+                                    ko: `색수차 효과 예제입니다.`,
+                                    en: `Example of Chromatic Aberration effect.`
+                                }
+                            },
+                            {
+                                name: 'Lens Distortion',
+                                path: 'postEffect/lens/lensDistortion',
+                                description: {
+                                    ko: `렌즈 왜곡 효과 예제입니다.`,
+                                    en: `Example of Lens Distortion effect.`
+                                }
+                            },
+                            {
+                                name: 'Vignetting',
+                                path: 'postEffect/lens/vignetting',
+                                description: {
+                                    ko: `비네팅 효과 예제입니다.`,
+                                    en: `Example of Vignetting effect.`
+                                },
+                            },
+                            {
+                                name: 'Film Grain',
+                                path: 'postEffect/filmGrain',
+                                description: {
+                                    ko: `필름 그레인 효과를 시연하는 예제입니다.`,
+                                    en: `An example demonstrating film grain effects.`
+                                },
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: 'PostEffect',
                 list: [
                     {
                         name: 'Adjustments',
@@ -2204,7 +2313,6 @@ export const ExampleList: ExampleListType = [
                                     en: `Example of Color Temperature & Tint color adjustment effect.`
                                 },
                             },
-
                             {
                                 name: 'Brightness Contrast',
                                 path: 'postEffect/adjustments/brightnessContrast',
@@ -2237,66 +2345,7 @@ export const ExampleList: ExampleListType = [
                                     en: `Example of Vibrance color adjustment effect.`
                                 },
                             },
-
                         ]
-                    }
-                ]
-            },
-            {
-                name: 'Camera & Optics',
-                list: [
-                    {
-                        name: 'Lens',
-                        list: [
-                            {
-                                name: 'Lens Distortion',
-                                path: 'postEffect/lens/lensDistortion',
-                                description: {
-                                    ko: `렌즈 왜곡 효과 예제입니다.`,
-                                    en: `Example of Lens Distortion effect.`
-                                }
-                            },
-                            {
-                                name: 'Chromatic Aberration',
-                                path: 'postEffect/lens/chromaticAberration',
-                                description: {
-                                    ko: `색수차 효과 예제입니다.`,
-                                    en: `Example of Chromatic Aberration effect.`
-                                }
-                            },
-                            {
-                                name: 'Depth of Field',
-                                path: 'postEffect/lens/dof',
-                                description: {
-                                    ko: `물리 기반 카메라 렌즈 설정과 원형·다각형 보케(Bokeh) 및 7종 렌즈 프리셋을 시연하는 피사계 심도(DOF) 예제입니다.`,
-                                    en: `Demonstrates physically-based camera lens Depth of Field (DOF) with circular/polygonal bokeh and 7 lens presets.`
-                                }
-                            },
-                            {
-                                name: 'Depth of Field (Auto Focus)',
-                                path: 'postEffect/lens/dofAutoFocus',
-                                description: {
-                                    ko: `화면 중앙 9-Point Zone의 피사체 거리를 실시간 감지하여 초점을 자동으로 추적하는 오토포커스(useAutoFocus) 예제입니다.`,
-                                    en: `Demonstrates Continuous Auto-Focus (useAutoFocus) that tracks subject distance in real time via 9-Point Zone metering.`
-                                },
-                            },
-                            {
-                                name: 'Vignetting',
-                                path: 'postEffect/lens/vignetting',
-                                description: {
-                                    ko: `비네팅 효과 예제입니다.`,
-                                    en: `Example of Vignetting effect.`
-                                },
-                            },
-                        ]
-                    },
-                    {
-                        name: 'Bloom',
-                        path: 'postEffect/bloom',
-                        description: {
-                            ko: `물리 기반 HDR 다단 Mip-Chain 블룸 효과를 시연하는 예제입니다.`,
-                            en: `An example demonstrating physically-based HDR Mip-Chain Bloom effects.`
-                        },
                     },
                     {
                         name: 'Blur',
@@ -2360,86 +2409,25 @@ export const ExampleList: ExampleListType = [
                         ]
                     },
                     {
-                        name: 'Film Grain',
-                        path: 'postEffect/filmGrain',
-                        description: {
-                            ko: `필름 그레인 효과를 시연하는 예제입니다.`,
-                            en: `An example demonstrating film grain effects.`
-                        },
-                    }
-                ]
-            },
-            {
-                name: 'Screen-Space Rendering',
-                list: [
-                    {
-                        name: 'Screen Space Ambient Occlusion',
-                        list: [{
-                            name: 'SSAO',
-                            path: 'postEffect/ssao',
-                            description: {
-                                ko: `화면 공간 앰비언트 오클루전(SSAO) 효과를 시연하는 예제입니다.`,
-                                en: `An example demonstrating Screen Space Ambient Occlusion (SSAO) effects.`
-                            }
-                        },
-                        ]
-                    },
-                    {
-                        name: 'Screen Space Reflection',
-                        experimental: true,
-                        list: [{
-                            experimental: true,
-                            name: 'SSR',
-                            path: 'postEffect/ssr',
-                            description: {
-                                ko: `화면 공간 반사(SSR) 효과를 시연하는 예제입니다.`,
-                                en: `An example demonstrating Screen Space Reflection (SSR) effects.`
-                            }
-                        },
-                        ]
-                    },
-                    {
-                        name: 'Fog',
+                        name: 'Image Filters',
                         list: [
                             {
-                                name: 'Fog',
-                                path: 'postEffect/fog/fog',
+                                name: 'Sharpen',
+                                path: 'postEffect/sharpen',
                                 description: {
-                                    ko: `안개 효과를 시연하는 예제입니다.`,
-                                    en: `An example demonstrating fog effects.`
-                                }
+                                    ko: `선명도(Sharpen) 효과를 시연하는 예제입니다.`,
+                                    en: `An example demonstrating sharpen effects.`
+                                },
                             },
                             {
-                                name: 'Height Fog',
-
-                                path: 'postEffect/fog/heightFog',
+                                name: 'Convolution',
+                                path: 'postEffect/convolution',
                                 description: {
-                                    ko: `높이 기반 안개 효과를 시연하는 예제입니다.`,
-                                    en: `An example demonstrating height-based fog effects.`
-                                }
+                                    ko: `컨볼루션 필터 효과를 시연하는 예제입니다.`,
+                                    en: `An example demonstrating convolution filter effects.`
+                                },
                             }
                         ]
-                    }
-                ]
-            },
-            {
-                name: 'Image Filters',
-                list: [
-                    {
-                        name: 'Sharpen',
-                        path: 'postEffect/sharpen',
-                        description: {
-                            ko: `선명도(Sharpen) 효과를 시연하는 예제입니다.`,
-                            en: `An example demonstrating sharpen effects.`
-                        },
-                    },
-                    {
-                        name: 'Convolution',
-                        path: 'postEffect/convolution',
-                        description: {
-                            ko: `컨볼루션 필터 효과를 시연하는 예제입니다.`,
-                            en: `An example demonstrating convolution filter effects.`
-                        },
                     }
                 ]
             },
