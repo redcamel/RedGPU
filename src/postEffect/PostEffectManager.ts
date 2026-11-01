@@ -273,7 +273,7 @@ class PostEffectManager extends RedGPUObject {
         this.#updateSystemUniforms();
         this.#updateGbufferBindGroup();
 
-        let currentTextureView = this.#renderHDRToLDR(this.#view, this.#renderToStorageTexture(this.#view));
+        let currentTextureView = this.#renderBuiltIn(this.#view, this.#renderToStorageTexture(this.#view));
         currentTextureView = this.#renderLDRToScreen(this.#view, currentTextureView);
 
         this.#texturePool.releaseAll();
@@ -281,22 +281,32 @@ class PostEffectManager extends RedGPUObject {
         return currentTextureView;
     }
 
-    #renderHDRToLDR(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+    #renderBuiltIn(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const {width, height} = sourceTextureInfo.texture;
         const {redGPUContext, rawCamera, skyAtmosphere, builtInEffectManager, toneMappingManager} = view;
         const {antialiasingManager} = redGPUContext;
         const {useTAA} = antialiasingManager;
         const {useAutoExposure} = rawCamera;
+        const {
+            useSSAO,
+            useSSR,
+            useDOF,
+            useBloom,
+            useChromaticAberration,
+            useLensDistortion,
+            useVignetting,
+            useFilmGrain
+        } = builtInEffectManager;
 
         let currentTextureView = sourceTextureInfo;
         if (skyAtmosphere) {
             currentTextureView = this.#applySingleEffect(skyAtmosphere, currentTextureView, width, height);
         }
 
-        if (builtInEffectManager.useSSAO) {
+        if (useSSAO) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.ssao, currentTextureView, width, height);
         }
-        if (builtInEffectManager.useSSR) {
+        if (useSSR) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.ssr, currentTextureView, width, height);
         }
 
@@ -307,36 +317,36 @@ class PostEffectManager extends RedGPUObject {
         if (useAutoExposure) {
             builtInEffectManager.autoExposure.render(currentTextureView);
         }
-        if (builtInEffectManager.useDOF) {
+        if (useDOF) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.dof, currentTextureView, width, height);
         }
-        if (builtInEffectManager.useBloom) {
+        if (useBloom) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.bloom, currentTextureView, width, height);
         }
         currentTextureView = this.#applySingleEffect(toneMappingManager, currentTextureView, width, height);
+
+        if (useChromaticAberration) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.chromaticAberration, currentTextureView, width, height);
+        }
+        if (useLensDistortion) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.lensDistortion, currentTextureView, width, height);
+        }
+        if (useVignetting) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.vignetting, currentTextureView, width, height);
+        }
+        if (useFilmGrain) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.filmGrain, currentTextureView, width, height);
+        }
         return currentTextureView;
     }
 
     #renderLDRToScreen(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const {width, height} = sourceTextureInfo.texture;
-        const {viewRenderTextureManager, redGPUContext, builtInEffectManager, grid} = view;
+        const {viewRenderTextureManager, redGPUContext, grid} = view;
         const {antialiasingManager} = redGPUContext;
         const {useMSAA} = antialiasingManager;
 
         let currentTextureView = sourceTextureInfo;
-        if (builtInEffectManager.useChromaticAberration) {
-            currentTextureView = this.#applySingleEffect(builtInEffectManager.chromaticAberration, currentTextureView, width, height);
-        }
-        if (builtInEffectManager.useLensDistortion) {
-            currentTextureView = this.#applySingleEffect(builtInEffectManager.lensDistortion, currentTextureView, width, height);
-        }
-        if (builtInEffectManager.useVignetting) {
-            currentTextureView = this.#applySingleEffect(builtInEffectManager.vignetting, currentTextureView, width, height);
-        }
-        if (builtInEffectManager.useFilmGrain) {
-            currentTextureView = this.#applySingleEffect(builtInEffectManager.filmGrain, currentTextureView, width, height);
-        }
-
         const effects = this.#postEffects;
         for (let i = 0, len = effects.length; i < len; i++) {
             currentTextureView = this.#applySingleEffect(effects[i], currentTextureView, width, height);
