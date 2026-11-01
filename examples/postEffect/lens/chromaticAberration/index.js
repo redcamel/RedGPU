@@ -30,13 +30,13 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] ChromaticAberration 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create ChromaticAberration post effect and add it to the view
+        // [KO] ChromaticAberration 내장 이펙트 활성화
+        // [EN] Enable ChromaticAberration built-in effect
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        const effect = new RedGPU.PostEffect.ChromaticAberration(redGPUContext);
-        viewEffect.postEffectManager.addEffect(effect);
+        viewEffect.builtInEffectManager.useChromaticAberration = true;
+        const effect = viewEffect.builtInEffectManager.chromaticAberration;
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -89,23 +89,15 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             targetContainer: container
         },
         gui: (pane) => {
-            const config = {ChromaticAberration: true};
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            folder.addBinding(config, 'ChromaticAberration').on('change', (v) => {
-                if (v.value) {
-                    targetView.postEffectManager.addEffect(effect);
-                } else {
-                    targetView.postEffectManager.removeAllEffect();
-                }
+            folder.addBinding(targetView.builtInEffectManager, 'useChromaticAberration').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
             });
 
             const controls = [
-                folder.addBinding(effect, 'strength', {min: 0, max: 0.05, step: 0.001}),
-                folder.addBinding(effect, 'falloff', {min: 0, max: 5, step: 0.01}),
-                folder.addBinding(effect, 'centerX', {min: -500, max: 500}),
-                folder.addBinding(effect, 'centerY', {min: -500, max: 500})
+                folder.addBinding(effect, 'intensity', {min: 0, max: 1, step: 0.01}),
+                folder.addBinding(effect, 'startOffset', {min: 0, max: 1, step: 0.01})
             ];
         }
     });
