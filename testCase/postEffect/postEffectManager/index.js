@@ -55,7 +55,7 @@ redUnit.testGroup(
             });
         }, true);
 
-        runner.defineTest('Success Test: BuiltInEffectManager Lazy Loaded Effects (SSAO, SSR, Fog, DOF, Bloom, AutoExposure, ChromaticAberration, LensDistortion, Vignetting, FilmGrain)', (run) => {
+        runner.defineTest('Success Test: BuiltInEffectManager Lazy Loaded Effects (SSAO, SSR, Fog, HeightFog, DOF, Bloom, AutoExposure, ChromaticAberration, LensDistortion, Vignetting, FilmGrain)', (run) => {
             setup(run, (ctx, manager, view) => {
                 const builtInEffectManager = view.builtInEffectManager;
                 const ssao = builtInEffectManager.ssao;
@@ -66,6 +66,9 @@ redUnit.testGroup(
 
                 const fog = builtInEffectManager.fog;
                 const checkFog = fog instanceof RedGPU.PostEffect.BuiltIn.Fog;
+
+                const heightFog = builtInEffectManager.heightFog;
+                const checkHeightFog = heightFog instanceof RedGPU.PostEffect.BuiltIn.HeightFog;
 
                 const dof = builtInEffectManager.dof;
                 const checkDOF = dof instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
@@ -91,15 +94,16 @@ redUnit.testGroup(
                 builtInEffectManager.useSSAO = true;
                 builtInEffectManager.useSSR = true;
                 builtInEffectManager.useFog = true;
+                builtInEffectManager.useHeightFog = true;
                 builtInEffectManager.useDOF = true;
                 builtInEffectManager.useBloom = true;
                 builtInEffectManager.useChromaticAberration = true;
                 builtInEffectManager.useLensDistortion = true;
                 builtInEffectManager.useVignetting = true;
                 builtInEffectManager.useFilmGrain = true;
-                const checkToggles = builtInEffectManager.useSSAO === true && builtInEffectManager.useSSR === true && builtInEffectManager.useFog === true && builtInEffectManager.useDOF === true && builtInEffectManager.useBloom === true && builtInEffectManager.useChromaticAberration === true && builtInEffectManager.useLensDistortion === true && builtInEffectManager.useVignetting === true && builtInEffectManager.useFilmGrain === true;
+                const checkToggles = builtInEffectManager.useSSAO === true && builtInEffectManager.useSSR === true && builtInEffectManager.useFog === true && builtInEffectManager.useHeightFog === true && builtInEffectManager.useDOF === true && builtInEffectManager.useBloom === true && builtInEffectManager.useChromaticAberration === true && builtInEffectManager.useLensDistortion === true && builtInEffectManager.useVignetting === true && builtInEffectManager.useFilmGrain === true;
 
-                run(checkSSAO && checkSSR && checkFog && checkDOF && checkBloom && checkAE && checkChromaticAberration && checkLensDistortion && checkVignetting && checkFilmGrain && checkToggles);
+                run(checkSSAO && checkSSR && checkFog && checkHeightFog && checkDOF && checkBloom && checkAE && checkChromaticAberration && checkLensDistortion && checkVignetting && checkFilmGrain && checkToggles);
             });
         }, true);
 
