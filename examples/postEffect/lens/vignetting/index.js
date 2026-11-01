@@ -30,13 +30,13 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] Vignetting 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create Vignetting post effect and add it to the view
+        // [KO] BuiltInEffectManager를 통한 Vignetting 활성화
+        // [EN] Enable Vignetting via BuiltInEffectManager
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        const effect = new RedGPU.PostEffect.Vignetting(redGPUContext);
-        viewEffect.postEffectManager.addEffect(effect);
+        viewEffect.builtInEffectManager.useVignetting = true;
+        const effect = viewEffect.builtInEffectManager.vignetting;
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -89,24 +89,13 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             targetContainer: container
         },
         gui: (pane) => {
-            const config = {Vignetting: true};
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            folder.addBinding(config, 'Vignetting').on('change', (v) => {
-                if (v.value) {
-                    targetView.postEffectManager.addEffect(effect);
-                } else {
-                    targetView.postEffectManager.removeAllEffect();
-                }
-                controls.forEach((c) => c.disabled = !v.value);
+            folder.addBinding(targetView.builtInEffectManager, 'useVignetting').on('change', (v) => {
+                intensityControl.disabled = !v.value;
             });
 
-            const controls = [
-                folder.addBinding(effect, 'size', {min: 0, max: 1, step: 0.01}),
-                folder.addBinding(effect, 'smoothness', {min: 0, max: 1, step: 0.01}),
-                folder.addBinding(effect, 'centerX', {min: -500, max: 500, step: 1}),
-                folder.addBinding(effect, 'centerY', {min: -500, max: 500, step: 1})
-            ];
+            const intensityControl = folder.addBinding(effect, 'intensity', {min: 0, max: 1, step: 0.01});
         }
     });
 };

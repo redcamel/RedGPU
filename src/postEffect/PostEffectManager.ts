@@ -324,6 +324,9 @@ class PostEffectManager extends RedGPUObject {
         const {useMSAA} = antialiasingManager;
 
         let currentTextureView = sourceTextureInfo;
+        if (builtInEffectManager.useVignetting) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.vignetting, currentTextureView, width, height);
+        }
         if (builtInEffectManager.useFilmGrain) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.filmGrain, currentTextureView, width, height);
         }

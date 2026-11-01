@@ -7,10 +7,11 @@ import DOF from "./dof/DOF";
 import FilmGrain from "./filmGrain/FilmGrain";
 import SSAO from "./ssao/SSAO";
 import SSR from "./ssr/SSR";
+import Vignetting from "./vignetting/Vignetting";
 
 /**
- * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `FilmGrain`)를 통합 관리하는 클래스입니다.
- * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `FilmGrain`) of a `View3D`.
+ * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `Vignetting`, `FilmGrain`) of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -39,6 +40,8 @@ class BuiltInEffectManager extends RedGPUObject {
     #useDOF: boolean = false;
     #bloom: Bloom;
     #useBloom: boolean = false;
+    #vignetting: Vignetting;
+    #useVignetting: boolean = false;
     #filmGrain: FilmGrain;
     #useFilmGrain: boolean = false;
     #autoExposure: AutoExposure;
@@ -218,6 +221,39 @@ class BuiltInEffectManager extends RedGPUObject {
     }
 
     /**
+     * [KO] Vignetting 활성화 여부입니다.
+     * [EN] Whether Vignetting is enabled.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] Vignetting 활성화 여부
+     * [EN] Whether Vignetting is enabled
+     */
+    get useVignetting(): boolean {
+        return this.#useVignetting;
+    }
+
+    set useVignetting(value: boolean) {
+        this.#useVignetting = value;
+        this.#checkVignetting();
+    }
+
+    /**
+     * [KO] Vignetting 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the Vignetting effect instance.
+     *
+     * @returns
+     * [KO] `Vignetting` 인스턴스
+     * [EN] `Vignetting` instance
+     */
+    get vignetting(): Vignetting {
+        if (!this.#vignetting) {
+            this.#vignetting = new Vignetting(this.#view.redGPUContext);
+        }
+        return this.#vignetting;
+    }
+
+    /**
      * [KO] FilmGrain 활성화 여부입니다.
      * [EN] Whether FilmGrain is enabled.
      *
@@ -272,6 +308,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssr) this.#ssr.clear();
         if (this.#dof) this.#dof.clear();
         if (this.#bloom) this.#bloom.clear();
+        if (this.#vignetting) this.#vignetting.clear();
         if (this.#filmGrain) this.#filmGrain.clear();
     }
 
@@ -298,6 +335,10 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#bloom) {
             this.#bloom.destroy();
             this.#bloom = null;
+        }
+        if (this.#vignetting) {
+            this.#vignetting.destroy();
+            this.#vignetting = null;
         }
         if (this.#filmGrain) {
             this.#filmGrain.destroy();
@@ -334,6 +375,12 @@ class BuiltInEffectManager extends RedGPUObject {
         }
     }
 
+    #checkVignetting() {
+        if (!this.#vignetting && this.#useVignetting) {
+            this.#vignetting = new Vignetting(this.#view.redGPUContext);
+        }
+    }
+
     #checkFilmGrain() {
         if (!this.#filmGrain && this.#useFilmGrain) {
             this.#filmGrain = new FilmGrain(this.#view.redGPUContext);
@@ -346,6 +393,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssr) this.#videoMemorySize += this.#ssr.videoMemorySize;
         if (this.#dof) this.#videoMemorySize += this.#dof.videoMemorySize;
         if (this.#bloom) this.#videoMemorySize += this.#bloom.videoMemorySize;
+        if (this.#vignetting) this.#videoMemorySize += this.#vignetting.videoMemorySize;
         if (this.#filmGrain) this.#videoMemorySize += this.#filmGrain.videoMemorySize;
     }
 }
