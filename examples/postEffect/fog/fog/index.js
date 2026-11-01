@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Fog 예제
  * [EN] Fog example
  *
- * [KO] 포스트 이펙트를 사용하여 거리 기반 안개(Fog) 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply distance-based fog effects using post effects.
+ * [KO] 내장(Built-in) 포스트 이펙트를 사용하여 선형 HDR 공간에서 거리 기반 안개(Fog) 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply distance-based fog effects in Linear HDR space using the built-in post effect.
  */
 
 const canvas = document.createElement('canvas');
@@ -22,18 +22,21 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
 
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        // [KO] Fog 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create Fog post effect and add it to the view
-        const fogEffect = new RedGPU.PostEffect.Fog(redGPUContext);
+        // [KO] BuiltInEffectManager를 통한 거리 기반 안개(Fog) 활성화 및 파라미터 설정
+        // [KO] - useFog: 선형 HDR 파이프라인(SSAO/SSR 직후, DOF/Bloom/ToneMapping 이전)에서 거리 안개 활성화
+        // [KO] - farDistance: 안개가 최대 농도에 도달하는 원거리 기준점 설정 (기본 nearDistance: 5.0)
+        // [EN] Enable and configure distance-based Fog via BuiltInEffectManager
+        // [EN] - useFog: Enables distance fog in the Linear HDR pipeline (after SSAO/SSR, before DOF/Bloom/ToneMapping)
+        // [EN] - farDistance: Sets the far distance where fog reaches maximum density (default nearDistance: 5.0)
+        view.builtInEffectManager.useFog = true;
+        const fogEffect = view.builtInEffectManager.fog;
         fogEffect.farDistance = 30;
-        view.postEffectManager.addEffect(fogEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
@@ -96,23 +99,18 @@ const createTestScene = (redGPUContext, scene) => {
         scene.addChild(mesh);
     }
 
-    const groundPlane = new RedGPU.Primitive.Plane(redGPUContext, 100, 100, 1, 1);
-    const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#8FBC8F');
+    const groundPlane = new RedGPU.Primitive.Plane(redGPUContext, 200, 200, 1, 1);
+    const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#5a6e5a');
     const groundMesh = new RedGPU.Display.Mesh(redGPUContext, groundPlane, groundMaterial);
     groundMesh.rotationX = -90;
     groundMesh.y = -3;
-    groundMesh.alpha = 0.3;
     scene.addChild(groundMesh);
 };
 
 const renderTestPane = (redGPUContext, view, fogEffect) => {
     new RedGPUExampleHelper(redGPUContext, {
-        RedGPU,
-        ibl: true,
-        skybox: true,
         gui: (pane) => {
             const config = {
-                Fog: true,
                 fogColor: {
                     r: fogEffect.fogColor.r,
                     g: fogEffect.fogColor.g,
@@ -122,12 +120,7 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
 
             const fogFolder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            fogFolder.addBinding(config, 'Fog').on('change', (ev) => {
-                if (ev.value) {
-                    view.postEffectManager.addEffect(fogEffect);
-                } else {
-                    view.postEffectManager.removeAllEffect();
-                }
+            fogFolder.addBinding(view.builtInEffectManager, 'useFog').on('change', (ev) => {
                 controls.forEach((c) => c.disabled = !ev.value);
                 presetFolder.disabled = !ev.value;
             });
@@ -135,8 +128,8 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
             const controls = [
                 fogFolder.addBinding(fogEffect, 'fogType', {
                     options: {
-                        EXPONENTIAL: RedGPU.PostEffect.Fog.EXPONENTIAL,
-                        EXPONENTIAL_SQUARED: RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED
+                        EXPONENTIAL: RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL,
+                        EXPONENTIAL_SQUARED: RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL_SQUARED
                     }
                 }),
                 fogFolder.addBinding(fogEffect, 'density', {
@@ -164,7 +157,7 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
                         pane.refresh();
                     }
                 }),
-                fogFolder.addBinding(config, 'fogColor').on('change', (ev) => {
+                fogFolder.addBinding(config, 'fogColor', {picker: 'inline', view: 'color'}).on('change', (ev) => {
                     fogEffect.fogColor.setColorByRGB(
                         Math.floor(ev.value.r),
                         Math.floor(ev.value.g),
@@ -181,21 +174,23 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
                 fogEffect.nearDistance = near;
                 fogEffect.farDistance = far;
                 fogEffect.fogColor.setColorByRGB(color.r, color.g, color.b);
-                config.fogColor = color;
+                config.fogColor.r = color.r;
+                config.fogColor.g = color.g;
+                config.fogColor.b = color.b;
                 pane.refresh();
             };
 
             presetFolder.addButton({title: 'Light Mist'}).on('click', () => {
-                applyPreset(RedGPU.PostEffect.Fog.EXPONENTIAL, 0.05, 8, 50, {r: 230, g: 235, b: 255});
+                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.05, 8, 50, {r: 230, g: 235, b: 255});
             });
             presetFolder.addButton({title: 'Medium Fog'}).on('click', () => {
-                applyPreset(RedGPU.PostEffect.Fog.EXPONENTIAL, 0.15, 5, 35, {r: 200, g: 210, b: 230});
+                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.15, 5, 35, {r: 200, g: 210, b: 230});
             });
             presetFolder.addButton({title: 'Dense Fog'}).on('click', () => {
-                applyPreset(RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED, 0.25, 3, 25, {r: 180, g: 180, b: 200});
+                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL_SQUARED, 0.25, 3, 25, {r: 180, g: 180, b: 200});
             });
             presetFolder.addButton({title: 'Ocean Mist'}).on('click', () => {
-                applyPreset(RedGPU.PostEffect.Fog.EXPONENTIAL, 0.08, 10, 60, {r: 180, g: 200, b: 255});
+                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.08, 10, 60, {r: 180, g: 200, b: 255});
             });
         }
     });
