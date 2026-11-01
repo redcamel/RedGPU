@@ -319,11 +319,15 @@ class PostEffectManager extends RedGPUObject {
 
     #renderLDRToScreen(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const {width, height} = sourceTextureInfo.texture;
-        const {viewRenderTextureManager, redGPUContext, grid} = view;
+        const {viewRenderTextureManager, redGPUContext, builtInEffectManager, grid} = view;
         const {antialiasingManager} = redGPUContext;
         const {useMSAA} = antialiasingManager;
 
         let currentTextureView = sourceTextureInfo;
+        if (builtInEffectManager.useFilmGrain) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.filmGrain, currentTextureView, width, height);
+        }
+
         const effects = this.#postEffects;
         for (let i = 0, len = effects.length; i < len; i++) {
             currentTextureView = this.#applySingleEffect(effects[i], currentTextureView, width, height);

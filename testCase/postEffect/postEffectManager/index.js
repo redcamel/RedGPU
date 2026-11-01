@@ -55,7 +55,7 @@ redUnit.testGroup(
             });
         }, true);
 
-        runner.defineTest('Success Test: BuiltInEffectManager Lazy Loaded Effects (SSAO, SSR, DOF, Bloom, AutoExposure)', (run) => {
+        runner.defineTest('Success Test: BuiltInEffectManager Lazy Loaded Effects (SSAO, SSR, DOF, Bloom, AutoExposure, FilmGrain)', (run) => {
             setup(run, (ctx, manager, view) => {
                 const builtInEffectManager = view.builtInEffectManager;
                 const ssao = builtInEffectManager.ssao;
@@ -73,13 +73,17 @@ redUnit.testGroup(
                 const ae = builtInEffectManager.autoExposure;
                 const checkAE = ae instanceof RedGPU.PostEffect.BuiltIn.AutoExposure;
 
+                const filmGrain = builtInEffectManager.filmGrain;
+                const checkFilmGrain = filmGrain instanceof RedGPU.PostEffect.BuiltIn.FilmGrain;
+
                 builtInEffectManager.useSSAO = true;
                 builtInEffectManager.useSSR = true;
                 builtInEffectManager.useDOF = true;
                 builtInEffectManager.useBloom = true;
-                const checkToggles = builtInEffectManager.useSSAO === true && builtInEffectManager.useSSR === true && builtInEffectManager.useDOF === true && builtInEffectManager.useBloom === true;
+                builtInEffectManager.useFilmGrain = true;
+                const checkToggles = builtInEffectManager.useSSAO === true && builtInEffectManager.useSSR === true && builtInEffectManager.useDOF === true && builtInEffectManager.useBloom === true && builtInEffectManager.useFilmGrain === true;
 
-                run(checkSSAO && checkSSR && checkDOF && checkBloom && checkAE && checkToggles);
+                run(checkSSAO && checkSSR && checkDOF && checkBloom && checkAE && checkFilmGrain && checkToggles);
             });
         }, true);
 

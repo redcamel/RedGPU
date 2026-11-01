@@ -1,36 +1,36 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 
 
 const SUBTLE = {
-    filmGrainIntensity: 0.008,
-    filmGrainResponse: 1.5,
+    filmGrainIntensity: 0.03,
+    filmGrainResponse: 1.2,
     filmGrainScale: 1.2,
     coloredGrain: 0.05,
     grainSaturation: 0.1
 };
 const MEDIUM = {
-    filmGrainIntensity: 0.015,
-    filmGrainResponse: 1.2,
-    filmGrainScale: 1.8,
+    filmGrainIntensity: 0.06,
+    filmGrainResponse: 1.0,
+    filmGrainScale: 1.6,
     coloredGrain: 0.15,
     grainSaturation: 0.3
 };
 const HEAVY = {
-    filmGrainIntensity: 0.03,
-    filmGrainResponse: 1.0,
-    filmGrainScale: 2.5,
+    filmGrainIntensity: 0.10,
+    filmGrainResponse: 0.8,
+    filmGrainScale: 2.2,
     coloredGrain: 0.25,
     grainSaturation: 0.5
 };
 const VINTAGE = {
-    filmGrainIntensity: 0.06,
-    filmGrainResponse: 0.7,
-    filmGrainScale: 4.0,
+    filmGrainIntensity: 0.16,
+    filmGrainResponse: 0.6,
+    filmGrainScale: 3.0,
     coloredGrain: 0.6,
     grainSaturation: 0.8
 };
@@ -39,19 +39,19 @@ interface FilmGrain {
     /**
      * [KO] 그레인 입자 강도 (0 이상)
      * [EN] Grain particle intensity (0 or greater)
-     * @defaultValue 0.015
+     * @defaultValue 0.06
      */
     filmGrainIntensity: number;
     /**
      * [KO] 명도에 따른 그레인 반응 곡선 (0 이상)
      * [EN] Luminance-based grain response curve (0 or greater)
-     * @defaultValue 1.2
+     * @defaultValue 1.0
      */
     filmGrainResponse: number;
     /**
      * [KO] 그레인 입자 크기 스케일 (0 이상)
      * [EN] Grain particle size scale (0 or greater)
-     * @defaultValue 1.8
+     * @defaultValue 1.6
      */
     filmGrainScale: number;
     /**
@@ -72,17 +72,24 @@ interface FilmGrain {
  * [KO] 필름의 입자 질감을 시뮬레이션하는 필름 그레인 후처리 이펙트입니다.
  * [EN] Film Grain post-processing effect that simulates film grain texture.
  *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
  * ### Example
  * ```typescript
- * const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
- * effect.applyPreset(RedGPU.PostEffect.FilmGrain.MEDIUM);
- * view.postEffectManager.addEffect(effect);
+ * // [KO] View3D의 builtInEffectManager를 통해 FilmGrain 활성화 및 프리셋 적용
+ * // [EN] Enable FilmGrain and apply a preset through View3D's builtInEffectManager
+ * view.builtInEffectManager.useFilmGrain = true;
+ * const filmGrain = view.builtInEffectManager.filmGrain;
+ * filmGrain.applyPreset(RedGPU.PostEffect.BuiltIn.FilmGrain.MEDIUM);
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/filmGrain/" style="width:100%; height:500px;"></iframe>
  *
  * @see [FilmGrain example](/RedGPU/examples/postEffect/filmGrain/)
- * @category Visual Effects
+ * @category PostEffect
  */
 class FilmGrain extends ASinglePassPostEffect {
     /**
@@ -110,17 +117,12 @@ class FilmGrain extends ASinglePassPostEffect {
      * [KO] FilmGrain 인스턴스를 생성합니다.
      * [EN] Creates a FilmGrain instance.
      *
-     * ### Example
-     * ```typescript
-     * const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
-     * ```
-     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {isLdr: true});
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1, isLdr: true});
         this.init(
             redGPUContext,
             'POST_EFFECT_FILM_GRAIN',
@@ -134,8 +136,8 @@ class FilmGrain extends ASinglePassPostEffect {
      *
      * ### Example
      * ```typescript
-     * const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
-     * effect.applyPreset(RedGPU.PostEffect.FilmGrain.SUBTLE);
+     * view.builtInEffectManager.useFilmGrain = true;
+     * view.builtInEffectManager.filmGrain.applyPreset(RedGPU.PostEffect.BuiltIn.FilmGrain.SUBTLE);
      * ```
      *
      * @param preset -
@@ -149,8 +151,6 @@ class FilmGrain extends ASinglePassPostEffect {
         this.coloredGrain = preset.coloredGrain;
         this.grainSaturation = preset.grainSaturation;
     }
-
-
 }
 
 definePositiveNumber(FilmGrain, [
@@ -159,6 +159,6 @@ definePositiveNumber(FilmGrain, [
     {key: 'filmGrainScale', value: MEDIUM.filmGrainScale},
     {key: 'coloredGrain', value: MEDIUM.coloredGrain},
     {key: 'grainSaturation', value: MEDIUM.grainSaturation},
-])
+]);
 Object.freeze(FilmGrain);
 export default FilmGrain;

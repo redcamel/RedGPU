@@ -20,7 +20,6 @@ import GaussianBlur from "./effects/blur/GaussianBlur";
 import RadialBlur from "./effects/blur/radialBlur/RadialBlur";
 import ZoomBlur from "./effects/blur/zoomBlur/ZoomBlur";
 import Convolution from "./effects/convolution/Convolution";
-import FilmGrain from "./effects/filmGrain/FilmGrain";
 import Fog from "./effects/fog/fog/Fog";
 import HeightFog from "./effects/fog/heightFog/HeightFog";
 import ChromaticAberration from "./effects/lens/chromaticAberration/ChromaticAberration";
@@ -55,7 +54,6 @@ export {
     Vignetting,
     Fog,
     HeightFog,
-    FilmGrain,
     Sharpen,
     Convolution,
 }

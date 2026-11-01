@@ -4,12 +4,13 @@ import View3D from "../../display/view/View3D";
 import keepLog from "../../utils/keepLog";
 import Bloom from "./bloom/Bloom";
 import DOF from "./dof/DOF";
+import FilmGrain from "./filmGrain/FilmGrain";
 import SSAO from "./ssao/SSAO";
 import SSR from "./ssr/SSR";
 
 /**
- * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`)를 통합 관리하는 클래스입니다.
- * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`) of a `View3D`.
+ * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `FilmGrain`)를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `FilmGrain`) of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -38,6 +39,8 @@ class BuiltInEffectManager extends RedGPUObject {
     #useDOF: boolean = false;
     #bloom: Bloom;
     #useBloom: boolean = false;
+    #filmGrain: FilmGrain;
+    #useFilmGrain: boolean = false;
     #autoExposure: AutoExposure;
     #videoMemorySize: number = 0;
     #destroyed: boolean = false;
@@ -215,6 +218,39 @@ class BuiltInEffectManager extends RedGPUObject {
     }
 
     /**
+     * [KO] FilmGrain 활성화 여부입니다.
+     * [EN] Whether FilmGrain is enabled.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] FilmGrain 활성화 여부
+     * [EN] Whether FilmGrain is enabled
+     */
+    get useFilmGrain(): boolean {
+        return this.#useFilmGrain;
+    }
+
+    set useFilmGrain(value: boolean) {
+        this.#useFilmGrain = value;
+        this.#checkFilmGrain();
+    }
+
+    /**
+     * [KO] FilmGrain 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the FilmGrain effect instance.
+     *
+     * @returns
+     * [KO] `FilmGrain` 인스턴스
+     * [EN] `FilmGrain` instance
+     */
+    get filmGrain(): FilmGrain {
+        if (!this.#filmGrain) {
+            this.#filmGrain = new FilmGrain(this.#view.redGPUContext);
+        }
+        return this.#filmGrain;
+    }
+
+    /**
      * [KO] 생성된 모든 빌트인 이펙트들의 총 비디오 메모리 사용량(바이트)을 반환합니다.
      * [EN] Returns the total video memory usage (in bytes) of all initialized built-in effects.
      *
@@ -236,6 +272,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssr) this.#ssr.clear();
         if (this.#dof) this.#dof.clear();
         if (this.#bloom) this.#bloom.clear();
+        if (this.#filmGrain) this.#filmGrain.clear();
     }
 
     /**
@@ -261,6 +298,10 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#bloom) {
             this.#bloom.destroy();
             this.#bloom = null;
+        }
+        if (this.#filmGrain) {
+            this.#filmGrain.destroy();
+            this.#filmGrain = null;
         }
         if (this.#autoExposure) {
             this.#autoExposure.destroy();
@@ -293,12 +334,19 @@ class BuiltInEffectManager extends RedGPUObject {
         }
     }
 
+    #checkFilmGrain() {
+        if (!this.#filmGrain && this.#useFilmGrain) {
+            this.#filmGrain = new FilmGrain(this.#view.redGPUContext);
+        }
+    }
+
     #calcVideoMemory() {
         this.#videoMemorySize = 0;
         if (this.#ssao) this.#videoMemorySize += this.#ssao.videoMemorySize;
         if (this.#ssr) this.#videoMemorySize += this.#ssr.videoMemorySize;
         if (this.#dof) this.#videoMemorySize += this.#dof.videoMemorySize;
         if (this.#bloom) this.#videoMemorySize += this.#bloom.videoMemorySize;
+        if (this.#filmGrain) this.#videoMemorySize += this.#filmGrain.videoMemorySize;
     }
 }
 

@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=17929863338
  * [KO] Film Grain 예제
  * [EN] Film Grain example
  *
- * [KO] 포스트 이펙트를 사용하여 시네마틱 필름 그레인(Film Grain) 입자 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply cinematic film grain effects using post effects.
+ * [KO] 빌트인 포스트 이펙트를 사용하여 시네마틱 필름 그레인(Film Grain) 입자 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply cinematic film grain effects using the built-in post effect.
  */
 
 const container = document.createElement('div');
@@ -30,13 +30,13 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] FilmGrain 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create FilmGrain post effect and add it to the view
+        // [KO] BuiltInEffectManager를 통해 FilmGrain 활성화 및 인스턴스 참조 획득
+        // [EN] Enable FilmGrain and obtain instance reference via BuiltInEffectManager
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
-        viewEffect.postEffectManager.addEffect(effect);
+        viewEffect.builtInEffectManager.useFilmGrain = true;
+        const effect = viewEffect.builtInEffectManager.filmGrain;
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -89,15 +89,9 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             targetContainer: container
         },
         gui: (pane) => {
-            const config = {FilmGrain: true};
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
-            folder.addBinding(config, 'FilmGrain').on('change', (v) => {
-                if (v.value) {
-                    targetView.postEffectManager.addEffect(effect);
-                } else {
-                    targetView.postEffectManager.removeAllEffect();
-                }
+            folder.addBinding(targetView.builtInEffectManager, 'useFilmGrain').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
                 presetFolder.disabled = !v.value;
             });
@@ -116,10 +110,10 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                 pane.refresh();
             };
 
-            presetFolder.addButton({title: 'Subtle'}).on('click', () => applyPreset(RedGPU.PostEffect.FilmGrain.SUBTLE));
-            presetFolder.addButton({title: 'Medium'}).on('click', () => applyPreset(RedGPU.PostEffect.FilmGrain.MEDIUM));
-            presetFolder.addButton({title: 'Heavy'}).on('click', () => applyPreset(RedGPU.PostEffect.FilmGrain.HEAVY));
-            presetFolder.addButton({title: 'Vintage'}).on('click', () => applyPreset(RedGPU.PostEffect.FilmGrain.VINTAGE));
+            presetFolder.addButton({title: 'Subtle'}).on('click', () => applyPreset(RedGPU.PostEffect.BuiltIn.FilmGrain.SUBTLE));
+            presetFolder.addButton({title: 'Medium'}).on('click', () => applyPreset(RedGPU.PostEffect.BuiltIn.FilmGrain.MEDIUM));
+            presetFolder.addButton({title: 'Heavy'}).on('click', () => applyPreset(RedGPU.PostEffect.BuiltIn.FilmGrain.HEAVY));
+            presetFolder.addButton({title: 'Vintage'}).on('click', () => applyPreset(RedGPU.PostEffect.BuiltIn.FilmGrain.VINTAGE));
         }
     });
 };
