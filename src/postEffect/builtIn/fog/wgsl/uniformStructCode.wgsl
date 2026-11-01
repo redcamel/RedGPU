@@ -6,5 +6,5 @@ struct Uniforms {
     nearDistance: f32,
     farDistance: f32,
     fogColor: vec3<f32>,
-    padding1: f32,
+    maxOpacity: f32,
 };

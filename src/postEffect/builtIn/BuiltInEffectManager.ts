@@ -7,14 +7,15 @@ import ChromaticAberration from "./chromaticAberration/ChromaticAberration";
 import DOF from "./dof/DOF";
 import FilmGrain from "./filmGrain/FilmGrain";
 import Fog from "./fog/Fog";
+import HeightFog from "./heightFog/HeightFog";
 import LensDistortion from "./lensDistortion/LensDistortion";
 import SSAO from "./ssao/SSAO";
 import SSR from "./ssr/SSR";
 import Vignetting from "./vignetting/Vignetting";
 
 /**
- * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `Fog`, `DOF`, `Bloom`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
- * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `Fog`, `DOF`, `Bloom`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`) of a `View3D`.
+ * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `Fog`, `HeightFog`, `DOF`, `Bloom`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `Fog`, `HeightFog`, `DOF`, `Bloom`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`) of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -41,6 +42,8 @@ class BuiltInEffectManager extends RedGPUObject {
     #useSSR: boolean = false;
     #fog: Fog;
     #useFog: boolean = false;
+    #heightFog: HeightFog;
+    #useHeightFog: boolean = false;
     #dof: DOF;
     #useDOF: boolean = false;
     #bloom: Bloom;
@@ -194,6 +197,39 @@ class BuiltInEffectManager extends RedGPUObject {
             this.#fog = new Fog(this.#view.redGPUContext);
         }
         return this.#fog;
+    }
+
+    /**
+     * [KO] HeightFog 활성화 여부입니다.
+     * [EN] Whether HeightFog is enabled.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] HeightFog 활성화 여부
+     * [EN] Whether HeightFog is enabled
+     */
+    get useHeightFog(): boolean {
+        return this.#useHeightFog;
+    }
+
+    set useHeightFog(value: boolean) {
+        this.#useHeightFog = value;
+        this.#checkHeightFog();
+    }
+
+    /**
+     * [KO] HeightFog 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the HeightFog effect instance.
+     *
+     * @returns
+     * [KO] `HeightFog` 인스턴스
+     * [EN] `HeightFog` instance
+     */
+    get heightFog(): HeightFog {
+        if (!this.#heightFog) {
+            this.#heightFog = new HeightFog(this.#view.redGPUContext);
+        }
+        return this.#heightFog;
     }
 
     /**
@@ -415,6 +451,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssao) this.#ssao.clear();
         if (this.#ssr) this.#ssr.clear();
         if (this.#fog) this.#fog.clear();
+        if (this.#heightFog) this.#heightFog.clear();
         if (this.#dof) this.#dof.clear();
         if (this.#bloom) this.#bloom.clear();
         if (this.#chromaticAberration) this.#chromaticAberration.clear();
@@ -442,6 +479,10 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#fog) {
             this.#fog.destroy();
             this.#fog = null;
+        }
+        if (this.#heightFog) {
+            this.#heightFog.destroy();
+            this.#heightFog = null;
         }
         if (this.#dof) {
             this.#dof.destroy();
@@ -492,6 +533,12 @@ class BuiltInEffectManager extends RedGPUObject {
         }
     }
 
+    #checkHeightFog() {
+        if (!this.#heightFog && this.#useHeightFog) {
+            this.#heightFog = new HeightFog(this.#view.redGPUContext);
+        }
+    }
+
     #checkDOF() {
         if (!this.#dof && this.#useDOF) {
             this.#dof = new DOF(this.#view.redGPUContext);
@@ -533,6 +580,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssao) this.#videoMemorySize += this.#ssao.videoMemorySize;
         if (this.#ssr) this.#videoMemorySize += this.#ssr.videoMemorySize;
         if (this.#fog) this.#videoMemorySize += this.#fog.videoMemorySize;
+        if (this.#heightFog) this.#videoMemorySize += this.#heightFog.videoMemorySize;
         if (this.#dof) this.#videoMemorySize += this.#dof.videoMemorySize;
         if (this.#bloom) this.#videoMemorySize += this.#bloom.videoMemorySize;
         if (this.#chromaticAberration) this.#videoMemorySize += this.#chromaticAberration.videoMemorySize;

@@ -29,6 +29,12 @@ interface Fog {
      */
     farDistance: number;
     /**
+     * [KO] 안개 최대 불투명도 상한 (0 ~ 1)
+     * [EN] Maximum opacity cap of fog (0 ~ 1)
+     * @defaultValue 1
+     */
+    maxOpacity: number;
+    /**
      * [KO] 안개 계산 방식 (`Fog.EXPONENTIAL`: 0, `Fog.EXPONENTIAL_SQUARED`: 1)
      * [EN] Fog calculation type (`Fog.EXPONENTIAL`: 0, `Fog.EXPONENTIAL_SQUARED`: 1)
      * @defaultValue 0
@@ -99,6 +105,7 @@ class Fog extends ASinglePassPostEffect {
 
 definePositiveNumber(Fog, [
     {key: 'density', value: 0.03, min: 0, max: 1},
+    {key: 'maxOpacity', value: 1, min: 0, max: 1},
 ]);
 defineNumber(Fog, [
     {key: 'nearDistance', value: 5.0, min: 0},

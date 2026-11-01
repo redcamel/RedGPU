@@ -1,10 +1,11 @@
-// [KO] 1. 인덱스 계산 및 비활성(density <= 0) Early-out (depthTexture 로드 생략)
-// [EN] 1. Index calculation and early-out for zero density (skips depthTexture load)
+// [KO] 1. 인덱스 계산 및 비활성(density <= 0 또는 maxOpacity <= 0) Early-out (depthTexture 로드 생략)
+// [EN] 1. Index calculation and early-out for zero density or maxOpacity (skips depthTexture load)
 let coord = vec2<i32>(global_id.xy);
 let sceneColor = textureLoad(sourceTexture, coord, 0);
 
 let u_density = uniforms.density;
-if (u_density <= 0.0) {
+let u_maxOpacity = saturate(uniforms.maxOpacity);
+if (u_density <= 0.0 || u_maxOpacity <= 0.0) {
     textureStore(outputTexture, coord, sceneColor);
     return;
 }
@@ -32,8 +33,8 @@ if (camDistance <= u_near) {
     return;
 }
 
-// [KO] 4. 순수 Beer-Lambert 물리 거리 감쇠 (매직 넘버 제거)
-// [EN] 4. Pure Beer-Lambert physical distance attenuation (zero magic numbers)
+// [KO] 4. 순수 Beer-Lambert 물리 거리 감쇠 및 maxOpacity 상한 적용
+// [EN] 4. Pure Beer-Lambert physical distance attenuation and maxOpacity cap
 let opticalDepth = u_density * (camDistance - u_near);
 
 var fogFactor: f32;
@@ -46,8 +47,9 @@ if (uniforms.fogType == 0u) {
     // [EN] Exponential Squared Fog: T = exp(-(density * d)^2)
     fogFactor = exp(-(opticalDepth * opticalDepth));
 }
+let transmittance = max(saturate(fogFactor), 1.0 - u_maxOpacity);
 
 // [KO] 5. 선형 HDR 공간 최종 색상 합성 및 저장
 // [EN] 5. Final color composition in Linear HDR space and storage
-let finalColor = mix(uniforms.fogColor.rgb, sceneColor.rgb, saturate(fogFactor));
+let finalColor = mix(uniforms.fogColor.rgb, sceneColor.rgb, transmittance);
 textureStore(outputTexture, coord, vec4<f32>(finalColor, sceneColor.a));

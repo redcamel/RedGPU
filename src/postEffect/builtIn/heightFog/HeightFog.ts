@@ -1,0 +1,137 @@
+import ColorRGB from "../../../color/ColorRGB";
+import RedGPUContext from "../../../context/RedGPUContext";
+import defineColorRGB from "../../../defineProperty/funcs/color/defineColorRGB";
+import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+import defineUint from "../../../defineProperty/funcs/number/defineUint";
+import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
+import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
+
+interface HeightFog {
+    /**
+     * [KO] 안개 밀도 (0 ~ 5)
+     * [EN] Fog density (0 ~ 5)
+     * @defaultValue 0.02
+     */
+    density: number;
+    /**
+     * [KO] 안개 기준 높이 (월드 Y 좌표)
+     * [EN] Base height of fog (world Y coordinate)
+     * @defaultValue 0
+     */
+    baseHeight: number;
+    /**
+     * [KO] 고도에 따른 안개 밀도 감쇠율 (0.001 ~ 2)
+     * [EN] Fog density falloff rate by altitude (0.001 ~ 2)
+     * @defaultValue 0.2
+     */
+    falloff: number;
+    /**
+     * [KO] 안개 시작 거리 (0 이상)
+     * [EN] Fog start distance from camera (0 or greater)
+     * @defaultValue 0
+     */
+    nearDistance: number;
+    /**
+     * [KO] 안개 최대 적분 거리 (0.1 이상)
+     * [EN] Fog maximum integration distance (0.1 or greater)
+     * @defaultValue 50
+     */
+    farDistance: number;
+    /**
+     * [KO] 안개 최대 불투명도 상한 (0 ~ 1)
+     * [EN] Maximum opacity cap of fog (0 ~ 1)
+     * @defaultValue 1
+     */
+    maxOpacity: number;
+    /**
+     * [KO] 안개 계산 방식 (`HeightFog.EXPONENTIAL`: 0, `HeightFog.EXPONENTIAL_SQUARED`: 1)
+     * [EN] Fog calculation type (`HeightFog.EXPONENTIAL`: 0, `HeightFog.EXPONENTIAL_SQUARED`: 1)
+     * @defaultValue 0
+     */
+    fogType: number;
+    /**
+     * [KO] 안개 색상 객체 (`ColorRGB`)
+     * [EN] Fog color object (`ColorRGB`)
+     * @defaultValue '#c8d2ff'
+     */
+    fogColor: ColorRGB;
+}
+
+/**
+ * [KO] 3D 광선-고도 해석적 선적분(Analytical Ray-Height Line Integral)을 기반으로 선형 HDR 공간에서 고도별 안개를 시뮬레이션하는 내장(Built-in) 후처리 이펙트입니다.
+ * [EN] Height-based Fog built-in post-processing effect that simulates altitude-dependent fog in Linear HDR space using an Analytical 3D Ray-Height Line Integral.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 `BuiltInEffectManager`에 의해 내부적으로 자동 생성됩니다.<br/>`'new'` 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created internally by `BuiltInEffectManager`.<br/>Do not create an instance directly using the `'new'` keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * view.builtInEffectManager.useHeightFog = true;
+ * const heightFog = view.builtInEffectManager.heightFog;
+ * heightFog.fogType = RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL;
+ * heightFog.density = 0.02;
+ * heightFog.baseHeight = 0.0;
+ * heightFog.falloff = 0.2;
+ * heightFog.nearDistance = 0.0;
+ * heightFog.farDistance = 50.0;
+ * heightFog.fogColor.setColorByRGB(200, 210, 255);
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/fog/heightFog/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [HeightFog example](/RedGPU/examples/postEffect/fog/heightFog/)
+ * @category PostEffect
+ */
+class HeightFog extends ASinglePassPostEffect {
+    /**
+     * [KO] 지수(Exponential) 안개 타입 (`0`)
+     * [EN] Exponential fog type (`0`)
+     */
+    static EXPONENTIAL = 0;
+    /**
+     * [KO] 지수제곱(Exponential Squared) 안개 타입 (`1`)
+     * [EN] Exponential Squared fog type (`1`)
+     */
+    static EXPONENTIAL_SQUARED = 1;
+
+    /**
+     * [KO] HeightFog 인스턴스를 생성합니다. (내부 시스템 전용)
+     * [EN] Creates a HeightFog instance. (Internal system use only)
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1, isLdr: false});
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_HEIGHT_FOG',
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+        );
+    }
+}
+
+definePositiveNumber(HeightFog, [
+    {key: 'density', value: 0.02, min: 0, max: 5},
+    {key: 'falloff', value: 0.2, min: 0.001, max: 2},
+    {key: 'maxOpacity', value: 1, min: 0, max: 1},
+]);
+defineNumber(HeightFog, [
+    {key: 'baseHeight', value: 0},
+    {key: 'nearDistance', value: 0, min: 0},
+    {key: 'farDistance', value: 50, min: 0.1},
+]);
+defineUint(HeightFog, [
+    {key: 'fogType', value: HeightFog.EXPONENTIAL, max: 1},
+]);
+defineColorRGB(HeightFog, [
+    {key: 'fogColor', value: '#c8d2ff'},
+]);
+Object.freeze(HeightFog);
+export default HeightFog;
