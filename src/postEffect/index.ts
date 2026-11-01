@@ -22,7 +22,6 @@ import ZoomBlur from "./effects/blur/zoomBlur/ZoomBlur";
 import Convolution from "./effects/convolution/Convolution";
 import Fog from "./effects/fog/fog/Fog";
 import HeightFog from "./effects/fog/heightFog/HeightFog";
-import ChromaticAberration from "./effects/lens/chromaticAberration/ChromaticAberration";
 import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
 
@@ -47,7 +46,6 @@ export {
     GaussianBlur,
     RadialBlur,
     ZoomBlur,
-    ChromaticAberration,
     Fog,
     HeightFog,
     Sharpen,

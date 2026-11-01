@@ -3,6 +3,7 @@ import AutoExposure from "./autoExposure/AutoExposure";
 import View3D from "../../display/view/View3D";
 import keepLog from "../../utils/keepLog";
 import Bloom from "./bloom/Bloom";
+import ChromaticAberration from "./chromaticAberration/ChromaticAberration";
 import DOF from "./dof/DOF";
 import FilmGrain from "./filmGrain/FilmGrain";
 import LensDistortion from "./lensDistortion/LensDistortion";
@@ -11,8 +12,8 @@ import SSR from "./ssr/SSR";
 import Vignetting from "./vignetting/Vignetting";
 
 /**
- * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `LensDistortion`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
- * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `LensDistortion`, `Vignetting`, `FilmGrain`) of a `View3D`.
+ * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `DOF`, `Bloom`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`) of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -41,6 +42,8 @@ class BuiltInEffectManager extends RedGPUObject {
     #useDOF: boolean = false;
     #bloom: Bloom;
     #useBloom: boolean = false;
+    #chromaticAberration: ChromaticAberration;
+    #useChromaticAberration: boolean = false;
     #lensDistortion: LensDistortion;
     #useLensDistortion: boolean = false;
     #vignetting: Vignetting;
@@ -224,6 +227,39 @@ class BuiltInEffectManager extends RedGPUObject {
     }
 
     /**
+     * [KO] ChromaticAberration 활성화 여부입니다.
+     * [EN] Whether ChromaticAberration is enabled.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] ChromaticAberration 활성화 여부
+     * [EN] Whether ChromaticAberration is enabled
+     */
+    get useChromaticAberration(): boolean {
+        return this.#useChromaticAberration;
+    }
+
+    set useChromaticAberration(value: boolean) {
+        this.#useChromaticAberration = value;
+        this.#checkChromaticAberration();
+    }
+
+    /**
+     * [KO] ChromaticAberration 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the ChromaticAberration effect instance.
+     *
+     * @returns
+     * [KO] `ChromaticAberration` 인스턴스
+     * [EN] `ChromaticAberration` instance
+     */
+    get chromaticAberration(): ChromaticAberration {
+        if (!this.#chromaticAberration) {
+            this.#chromaticAberration = new ChromaticAberration(this.#view.redGPUContext);
+        }
+        return this.#chromaticAberration;
+    }
+
+    /**
      * [KO] LensDistortion 활성화 여부입니다.
      * [EN] Whether LensDistortion is enabled.
      *
@@ -344,6 +380,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssr) this.#ssr.clear();
         if (this.#dof) this.#dof.clear();
         if (this.#bloom) this.#bloom.clear();
+        if (this.#chromaticAberration) this.#chromaticAberration.clear();
         if (this.#lensDistortion) this.#lensDistortion.clear();
         if (this.#vignetting) this.#vignetting.clear();
         if (this.#filmGrain) this.#filmGrain.clear();
@@ -372,6 +409,10 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#bloom) {
             this.#bloom.destroy();
             this.#bloom = null;
+        }
+        if (this.#chromaticAberration) {
+            this.#chromaticAberration.destroy();
+            this.#chromaticAberration = null;
         }
         if (this.#lensDistortion) {
             this.#lensDistortion.destroy();
@@ -416,6 +457,12 @@ class BuiltInEffectManager extends RedGPUObject {
         }
     }
 
+    #checkChromaticAberration() {
+        if (!this.#chromaticAberration && this.#useChromaticAberration) {
+            this.#chromaticAberration = new ChromaticAberration(this.#view.redGPUContext);
+        }
+    }
+
     #checkLensDistortion() {
         if (!this.#lensDistortion && this.#useLensDistortion) {
             this.#lensDistortion = new LensDistortion(this.#view.redGPUContext);
@@ -440,6 +487,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#ssr) this.#videoMemorySize += this.#ssr.videoMemorySize;
         if (this.#dof) this.#videoMemorySize += this.#dof.videoMemorySize;
         if (this.#bloom) this.#videoMemorySize += this.#bloom.videoMemorySize;
+        if (this.#chromaticAberration) this.#videoMemorySize += this.#chromaticAberration.videoMemorySize;
         if (this.#lensDistortion) this.#videoMemorySize += this.#lensDistortion.videoMemorySize;
         if (this.#vignetting) this.#videoMemorySize += this.#vignetting.videoMemorySize;
         if (this.#filmGrain) this.#videoMemorySize += this.#filmGrain.videoMemorySize;
