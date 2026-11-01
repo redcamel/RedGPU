@@ -134,7 +134,7 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
                 }),
                 fogFolder.addBinding(fogEffect, 'density', {
                     min: 0,
-                    max: 1,
+                    max: 0.3,
                     step: 0.001
                 }),
                 fogFolder.addBinding(fogEffect, 'nearDistance', {
@@ -181,16 +181,16 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
             };
 
             presetFolder.addButton({title: 'Light Mist'}).on('click', () => {
-                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.05, 8, 50, {r: 230, g: 235, b: 255});
+                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.015, 8, 50, {r: 230, g: 235, b: 255});
             });
             presetFolder.addButton({title: 'Medium Fog'}).on('click', () => {
-                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.15, 5, 35, {r: 200, g: 210, b: 230});
+                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.04, 5, 35, {r: 200, g: 210, b: 230});
             });
             presetFolder.addButton({title: 'Dense Fog'}).on('click', () => {
-                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL_SQUARED, 0.25, 3, 25, {r: 180, g: 180, b: 200});
+                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL_SQUARED, 0.06, 3, 25, {r: 180, g: 180, b: 200});
             });
             presetFolder.addButton({title: 'Ocean Mist'}).on('click', () => {
-                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.08, 10, 60, {r: 180, g: 200, b: 255});
+                applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.02, 10, 60, {r: 180, g: 200, b: 255});
             });
         }
     });
