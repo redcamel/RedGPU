@@ -1,4 +1,3 @@
-
 struct GlobalFragmentStructBuiltIn {
     // basic
     opacity: f32,
@@ -20,7 +19,6 @@ struct GlobalFragmentStructBuiltIn {
     normalScale:f32,
     displacementScale:f32,
     //
-    useSSR:u32,
     metallic:f32,
     roughness:f32,
     //

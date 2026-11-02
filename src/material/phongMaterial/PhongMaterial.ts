@@ -5,7 +5,6 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
-import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import defineColorRGB from "../../defineProperty/funcs/color/defineColorRGB";
@@ -116,11 +115,6 @@ interface PhongMaterial {
      * [EN] Roughness value (0.0 to 1.0, default: `0`)
      */
     roughness: number
-    /**
-     * [KO] 스크린 스페이스 리플렉션(SSR) 사용 여부
-     * [EN] Whether to use Screen Space Reflection (SSR)
-     */
-    useSSR: number;
     /**
      * [KO] 변위(Displacement) 맵 변형 스케일 (기본값: `1`)
      * [EN] Displacement map deformation scale (default: `1`)
@@ -242,9 +236,6 @@ defineTexture(PhongMaterial, [
     {key: 'normalTexture'},
     {key: 'specularTexture'},
     {key: 'displacementTexture'},
-])
-defineBoolean(PhongMaterial, [
-    {key: 'useSSR', value: false}
 ])
 definePositiveNumber(PhongMaterial, [
     {key: 'metallic', value: 0, min: 0, max: 1},

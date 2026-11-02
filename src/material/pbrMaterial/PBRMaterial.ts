@@ -1015,8 +1015,7 @@ defineBoolean(PBRMaterial, [
     {key: 'useVertexColor', value: false},
     {key: 'useVertexTangent', value: false},
     {key: 'isFoliage', value: false},
-    {key: 'useKHR_materials_unlit', value: false},
-    {key: 'useSSR', value: true}
+    {key: 'useKHR_materials_unlit', value: false}
 ])
 Object.defineProperty(PBRMaterial.prototype, 'isPBRMaterial', {
     value: true,
