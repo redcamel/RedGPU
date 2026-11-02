@@ -1,126 +1,193 @@
 /**
- * [KO] SSAO(Screen Space Ambient Occlusion) 계산을 위한 컴퓨팅 셰이더입니다. (Half-Res 최적화)
- * [EN] Compute shader for SSAO (Screen Space Ambient Occlusion) calculation. (Half-Res Optimized)
+ * [KO] GTAO (Ground Truth Ambient Occlusion) 지평선 코사인 적분 및 데이터 패킹 컴퓨트 셰이더 (Full-Res 1:1)
+ * [EN] GTAO (Ground Truth Ambient Occlusion) horizon cosine integration and data packing compute shader (Full-Res 1:1)
  */
 {
-    // [KO] 1. 초기화 및 입력 데이터 추출 (Half-Res 그리드)
-    // [EN] 1. Initialization and input data extraction (Half-Res Grid)
     let screenCoord = vec2<i32>(global_id.xy);
     let texSize     = vec2<i32>(postEffectOutputDimensions);
 
-    // 화면 경계 검사
     if (screenCoord.x >= texSize.x || screenCoord.y >= texSize.y) { return; }
 
-    let uv = (vec2<f32>(screenCoord) + 0.5) / vec2<f32>(texSize);
-    let fullDepthDims = vec2<f32>(textureDimensions(depthTexture));
-    let fullCoord = clamp(vec2<i32>(uv * fullDepthDims), vec2<i32>(0), vec2<i32>(fullDepthDims) - vec2<i32>(1));
+    let dimsF        = vec2<f32>(texSize);
+    let invDims      = 1.0 / dimsF;
+    let uv           = (vec2<f32>(screenCoord) + 0.5) * invDims;
+    let maxFullCoord = texSize - vec2<i32>(1);
 
-    let depth = textureLoad(depthTexture, fullCoord, 0);
+    let depth = textureLoad(depthTexture, screenCoord, 0);
 
-    // 배경(깊이 없음) 처리: 차폐 없음(1.0) 반환
-    if (depth < 0.001) {
-        textureStore(outputTexture, screenCoord, vec4<f32>(1.0, 1.0, 1.0, 1.0));
+    // [KO] 1. 배경 하늘(Standard-Z depth == 1.0) 조기 종료
+    // [EN] 1. Early exit for background sky (Standard-Z depth == 1.0)
+    if (depth >= 1.0) {
+        textureStore(outputTexture, screenCoord, vec4<f32>(1.0, 0.0, 0.0, 0.0));
         return;
     }
 
-    let normalData = textureLoad(gBufferNormalTexture, fullCoord, 0);
+    // [KO] 2. 역투영 행렬 성분을 이용한 무행렬 고속 선형 깊이 및 뷰 좌표 복원
+    // [EN] 2. Matrix-free fast linear depth and view position reconstruction using inverseProjectionMatrix components
+    let invP          = systemUniforms.projection.inverseProjectionMatrix;
+    let invFocalLen   = vec2<f32>(invP[0][0], invP[1][1]);
+    let invJitter     = vec2<f32>(invP[3][0], invP[3][1]);
+    let zParams       = vec4<f32>(invP[2][2], invP[3][2], invP[2][3], invP[3][3]);
+    let centerLinearZ = depthToLinearZ(depth, zParams);
 
-    // 유효하지 않은 노말 데이터 처리
-    if (length(normalData.rgb) < 0.001) {
-        textureStore(outputTexture, screenCoord, vec4<f32>(1.0, 1.0, 1.0, 1.0));
+    let normalData  = textureLoad(gBufferNormalTexture, screenCoord, 0);
+    let maxFadeDist = uniforms.fadeDistanceStart + uniforms.fadeDistanceRange;
+
+    if (dot(normalData.rgb, normalData.rgb) == 0.0 || centerLinearZ >= maxFadeDist) {
+        textureStore(outputTexture, screenCoord, vec4<f32>(1.0, 0.0, 0.0, 0.0));
         return;
     }
 
-    // [KO] 2. 뷰 공간(View Space) 데이터 복원
-    // [EN] 2. Restore View Space data
-    let viewPos      = getViewPositionFromDepth(uv, depth, systemUniforms.projection.inverseProjectionMatrix);
-    let viewNormal   = getViewNormalFromGNormalBuffer(normalData.rgb, systemUniforms.camera.viewMatrix);
-    let distToCamera = -viewPos.z;
+    let viewPos    = reconstructViewPos(uv, centerLinearZ, invFocalLen, invJitter);
+    let viewNormal = getViewNormalFromGNormalBuffer(normalData.rgb, systemUniforms.camera.viewMatrix);
+    let viewDir    = normalize(-viewPos);
+    let octNormal  = octEncode(viewNormal);
 
-    // [KO] 3. 거리 기반 적응형 반경(Adaptive Radius) 계산
-    // [EN] 3. Calculate distance-based Adaptive Radius
-    let depthScale = distToCamera * 0.1;
-    let adaptiveRadius = uniforms.radius * (1.0 + depthScale);
+    // [KO] 2-1. 단측 최소 차분(Min-Abs One-Sided Difference)으로 기하 탄젠트 평면의 깊이 편미분(dZx, dZy) 산출
+    //           (동일 평면이나 배면 지오메트리가 기울어진 노멀맵을 자기 차폐시키는 현상 원천 차단)
+    // [EN] 2-1. Compute depth partial derivatives (dZx, dZy) of the geometric tangent plane via min-abs one-sided differences
+    let dLeft    = textureLoad(depthTexture, max(screenCoord - vec2<i32>(1, 0), vec2<i32>(0)), 0);
+    let dRight   = textureLoad(depthTexture, min(screenCoord + vec2<i32>(1, 0), maxFullCoord), 0);
+    let dUp      = textureLoad(depthTexture, max(screenCoord - vec2<i32>(0, 1), vec2<i32>(0)), 0);
+    let dDown    = textureLoad(depthTexture, min(screenCoord + vec2<i32>(0, 1), maxFullCoord), 0);
 
-    // [KO] 4. TBN 매트릭스 생성 (노이즈 기반의 로컬 좌표계 구성)
-    // [EN] 4. Generate TBN matrix (noise-based local coordinate system)
-    let noiseVec  = getNoiseVec(vec2<f32>(screenCoord));
-    let tbn       = getTBN(viewNormal, noiseVec);
+    let diffXNeg = centerLinearZ - depthToLinearZ(dLeft, zParams);
+    let diffXPos = depthToLinearZ(dRight, zParams) - centerLinearZ;
+    let dZx      = select(diffXPos, diffXNeg, abs(diffXNeg) < abs(diffXPos));
 
-    // [KO] 5. 샘플 커널 정의 (8개 샘플 포인트)
-    // [EN] 5. Define sample kernel (8 sample points)
-    let samples = array<vec3<f32>, 8>(
-        vec3<f32>(0.04, 0.03, 0.08),    vec3<f32>(-0.04, 0.04, 0.08),
-        vec3<f32>(0.10, -0.08, 0.18),   vec3<f32>(-0.09, -0.10, 0.18),
-        vec3<f32>(0.18, 0.15, 0.30),    vec3<f32>(-0.17, 0.18, 0.30),
-        vec3<f32>(0.28, -0.25, 0.45),   vec3<f32>(-0.27, -0.28, 0.45)
-    );
+    let diffYNeg = centerLinearZ - depthToLinearZ(dUp, zParams);
+    let diffYPos = depthToLinearZ(dDown, zParams) - centerLinearZ;
+    let dZy      = select(diffYPos, diffYNeg, abs(diffYNeg) < abs(diffYPos));
 
-    // [KO] 6. 차폐도(Occlusion) 계산 루프
-    // [EN] 6. Occlusion calculation loop
-    var totalOcclusion = 0.0;
+    // [KO] 평면 자기 차폐(Self-Occlusion) 방지를 위한 지평선 코사인 바이어스
+    // [EN] Horizon cosine bias to prevent flat surface self-occlusion
+    let horizonBias = uniforms.bias * (1.0 + centerLinearZ * uniforms.biasDistanceScale);
 
-    for (var i = 0u; i < 8u; i++) {
-        // 샘플 포인트의 뷰 공간 위치 계산
-        let sampleOffset  = tbn * samples[i];
-        let sampleDir     = normalize(sampleOffset);
-        let sampleViewPos = viewPos + sampleOffset * adaptiveRadius;
+    // [KO] 3. 투영 행렬 기반 정확한 월드 반경 -> 화면 픽셀 반경 변환
+    // [EN] 3. Exact world radius to screen pixel radius projection based on projection matrix
+    let proj        = systemUniforms.projection.noneJitterProjectionMatrix;
+    let focalLenY   = abs(proj[1][1]) * 0.5 * dimsF.y;
+    let worldRadius = uniforms.radius;
+    let invRadiusSq = 1.0 / (worldRadius * worldRadius);
+    let radiusPx    = (worldRadius * focalLenY) / centerLinearZ;
 
-        // 투영 행렬을 통해 샘플 좌표를 UV 평면으로 변환
-        let clipPos  = systemUniforms.projection.projectionMatrix * vec4<f32>(sampleViewPos, 1.0);
-        let sampleUV = (clipPos.xy / clipPos.w) * vec2<f32>(0.5, -0.5) + 0.5;
+    // [KO] 4. Jimenez (2016) Section 3.3의 정확한 4x4 직교 층화 순열 (Stratified Spatial Noise)
+    // [EN] 4. Exact 4x4 orthogonal stratified permutation from Jimenez (2016) Section 3.3
+    let ux         = u32(screenCoord.x);
+    let uy         = u32(screenCoord.y);
+    let noiseDir   = f32((((ux + uy) & 3u) << 2u) | (ux & 3u)) * (1.0 / 16.0);
+    let stepJitter = (f32((uy - ux) & 3u) + 0.5) * 0.25;
 
-        // UV 경계 검사
-        if (sampleUV.x < 0.0 || sampleUV.x > 1.0 || sampleUV.y < 0.0 || sampleUV.y > 1.0) {
-            continue;
-        }
+    let numSlices = 2u;
+    let numSteps  = 4u;
+    var visibilitySum = 0.0;
+    var weightSum     = 0.0;
 
-        // 해당 샘플 위치의 실제 깊이 값 복원
-        let sampleCoord = clamp(vec2<i32>(sampleUV * fullDepthDims), vec2<i32>(0), vec2<i32>(fullDepthDims) - vec2<i32>(1));
-        let realDepth   = textureLoad(depthTexture, sampleCoord, 0);
+    // [KO] 5. 2D 화면 공간 지평선 탐색 및 코사인 가중 반구 적분 (GTAO)
+    // [EN] 5. 2D screen-space horizon search and cosine-weighted hemisphere integration (GTAO)
+    for (var s = 0u; s < numSlices; s++) {
+        let phi    = ((f32(s) + noiseDir) / f32(numSlices)) * PI;
+        let cosPhi = cos(phi);
+        let sinPhi = sin(phi);
 
-        if (realDepth < 0.001) { continue; }
+        // 뷰 공간(Y-Up) 슬라이스 벡터와 화면 픽셀(Y-Down) 스텝 방향 부호 일치
+        let sliceDirView = vec3<f32>(cosPhi, sinPhi, 0.0);
+        let sliceDirPx   = vec2<f32>(cosPhi, -sinPhi);
 
-        let realViewPos = getViewPositionFromDepth(sampleUV, realDepth, systemUniforms.projection.inverseProjectionMatrix);
+        let planeNormal   = normalize(cross(sliceDirView, viewDir));
+        let orthoTangent  = cross(viewDir, planeNormal);
+        let projNormal    = viewNormal - planeNormal * dot(viewNormal, planeNormal);
+        let projNormalLen = length(projNormal);
 
-        // [KO] 자기 차폐 방지를 위한 적응형 바이어스 계산
-        // [EN] Calculate adaptive bias to prevent self-occlusion
-        let adaptiveBias = uniforms.bias * (1.0 + distToCamera * uniforms.biasDistanceScale);
-        let deltaZ = realViewPos.z - sampleViewPos.z;
+        let cosN  = clamp(dot(projNormal, viewDir) / max(projNormalLen, 1e-5), -1.0, 1.0);
+        let signN = select(-1.0, 1.0, dot(projNormal, orthoTangent) >= 0.0);
+        let n     = signN * acos(cosN);
+        let sinN  = sin(n);
 
-        // [KO] 차폐 판정 (범위 내에 실제 지형이 있을 경우)
-        // [EN] Occlusion test (if real terrain is within range)
-        if (deltaZ > adaptiveBias && deltaZ < adaptiveRadius * 1.5) {
-            let sampleDist = length(viewPos - realViewPos);
+        let minHorizCos1 = cos(clamp(n + GTAO_HALF_PI, 0.0, PI));
+        let minHorizCos2 = cos(clamp(GTAO_HALF_PI - n, 0.0, PI));
+        var maxCos1      = minHorizCos1;
+        var maxCos2      = minHorizCos2;
 
-            // [KO] 거리에 따른 감쇠 및 법선 각도 가중치 적용
-            // [EN] Apply distance falloff and normal angle weighting
-            if (sampleDist < adaptiveRadius * 1.5) {
-                let angleWeight = pow(max(0.0, dot(viewNormal, sampleDir)), 2.0);
-                let distFalloff = 1.0 - smoothstep(0.0, adaptiveRadius * 1.5, sampleDist);
+        for (var step = 0u; step < numSteps; step++) {
+            let stepRatio  = (f32(step) + stepJitter) / f32(numSteps);
+            let stepPx     = max(1.0, stepRatio * stepRatio * radiusPx);
+            let pixelDelta = vec2<i32>(round(sliceDirPx * stepPx));
+            let deltaPlane = dZx * f32(pixelDelta.x) + dZy * f32(pixelDelta.y);
 
-                totalOcclusion += angleWeight * distFalloff;
+            // + 방향 지평선 탐색 (h1)
+            let coord1 = screenCoord + pixelDelta;
+            if (coord1.x >= 0 && coord1.x <= maxFullCoord.x && coord1.y >= 0 && coord1.y <= maxFullCoord.y) {
+                let d1 = textureLoad(depthTexture, coord1, 0);
+                if (d1 < 1.0) {
+                    let linZ1   = depthToLinearZ(d1, zParams);
+                    let planeZ1 = centerLinearZ + deltaPlane;
+                    if (linZ1 < planeZ1 && planeZ1 > 0.0) {
+                        let uv1         = (vec2<f32>(coord1) + 0.5) * invDims;
+                        let pos1        = reconstructViewPos(uv1, linZ1, invFocalLen, invJitter);
+                        let delta1      = pos1 - viewPos;
+                        let distSq1     = dot(delta1, delta1);
+                        let planePos1   = reconstructViewPos(uv1, planeZ1, invFocalLen, invJitter);
+                        let planeDelta1 = planePos1 - viewPos;
+                        let planeDistSq1 = dot(planeDelta1, planeDelta1);
+                        if (distSq1 > 0.0 && planeDistSq1 > 0.0) {
+                            let cosH1      = dot(delta1, viewDir) * inverseSqrt(distSq1);
+                            let planeCosH1 = dot(planeDelta1, viewDir) * inverseSqrt(planeDistSq1);
+                            if (cosH1 - planeCosH1 > horizonBias) {
+                                let falloff1 = saturate(1.0 - distSq1 * invRadiusSq);
+                                maxCos1      = max(maxCos1, mix(minHorizCos1, cosH1 - horizonBias, falloff1));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // - 방향 지평선 탐색 (h2)
+            let coord2 = screenCoord - pixelDelta;
+            if (coord2.x >= 0 && coord2.x <= maxFullCoord.x && coord2.y >= 0 && coord2.y <= maxFullCoord.y) {
+                let d2 = textureLoad(depthTexture, coord2, 0);
+                if (d2 < 1.0) {
+                    let linZ2   = depthToLinearZ(d2, zParams);
+                    let planeZ2 = centerLinearZ - deltaPlane;
+                    if (linZ2 < planeZ2 && planeZ2 > 0.0) {
+                        let uv2         = (vec2<f32>(coord2) + 0.5) * invDims;
+                        let pos2        = reconstructViewPos(uv2, linZ2, invFocalLen, invJitter);
+                        let delta2      = pos2 - viewPos;
+                        let distSq2     = dot(delta2, delta2);
+                        let planePos2   = reconstructViewPos(uv2, planeZ2, invFocalLen, invJitter);
+                        let planeDelta2 = planePos2 - viewPos;
+                        let planeDistSq2 = dot(planeDelta2, planeDelta2);
+                        if (distSq2 > 0.0 && planeDistSq2 > 0.0) {
+                            let cosH2      = dot(delta2, viewDir) * inverseSqrt(distSq2);
+                            let planeCosH2 = dot(planeDelta2, viewDir) * inverseSqrt(planeDistSq2);
+                            if (cosH2 - planeCosH2 > horizonBias) {
+                                let falloff2 = saturate(1.0 - distSq2 * invRadiusSq);
+                                maxCos2      = max(maxCos2, mix(minHorizCos2, cosH2 - horizonBias, falloff2));
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        let h1 = n + clamp(acos(clamp(maxCos1, -1.0, 1.0)) - n, -GTAO_HALF_PI, GTAO_HALF_PI);
+        let h2 = n + clamp(-acos(clamp(maxCos2, -1.0, 1.0)) - n, -GTAO_HALF_PI, GTAO_HALF_PI);
+
+        let unoccludedWeight = projNormalLen * max(cosN + n * sinN, 1e-4);
+        let sliceVis         = projNormalLen * integrateArcCosWeight(h1, h2, n, cosN, sinN);
+        visibilitySum       += clamp(sliceVis, 0.0, unoccludedWeight);
+        weightSum           += unoccludedWeight;
     }
 
-    // [KO] 7. AO 강도 및 거리 기반 페이드 적용
-    // [EN] 7. Apply AO intensity and distance-based fade
-    let ao = (totalOcclusion / 8.0) * uniforms.intensity;
+    // [KO] 6. 비차폐 반구 적분량 기준 정규화 후 원거리 페이드, 강도(Intensity), 대비(Contrast) 적용
+    // [EN] 6. Normalize by unoccluded hemisphere integral, then apply distance fade, intensity, and contrast
+    let rawVisibility = select(1.0, visibilitySum / weightSum, weightSum > 1e-5);
+    let occlusion     = (1.0 - rawVisibility) * uniforms.intensity;
+    let distanceFade  = smoothstep(maxFadeDist, uniforms.fadeDistanceStart, centerLinearZ);
+    var finalAO       = saturate(1.0 - occlusion * distanceFade);
+    finalAO           = pow(finalAO, uniforms.contrast);
 
-    // 먼 거리에서 AO가 급격히 끊기지 않도록 부드럽게 제거
-    let distanceFade = smoothstep(
-        uniforms.fadeDistanceStart + uniforms.fadeDistanceRange,
-        uniforms.fadeDistanceStart,
-        distToCamera
-    );
-
-    // [KO] 최종 AO 계산 및 대비(Contrast) 조절
-    // [EN] Final AO calculation and contrast adjustment
-    var finalAO = saturate(1.0 - (ao * distanceFade));
-    finalAO = pow(finalAO, uniforms.contrast);
-
-    // [KO] 8. 순수 AO 값 버퍼 출력 (1.0: 차폐 없음, 0.0: 완전 차폐)
-    // [EN] 8. Pure AO value buffer output (1.0: no occlusion, 0.0: fully occluded)
-    textureStore(outputTexture, screenCoord, vec4<f32>(finalAO, finalAO, finalAO, 1.0));
+    // [KO] 7. (Visibility, LinearDepth, OctNormal.xy) 4채널 패킹 출력
+    // [EN] 7. Output packed 4-channel (Visibility, LinearDepth, OctNormal.xy)
+    textureStore(outputTexture, screenCoord, vec4<f32>(finalAO, centerLinearZ, octNormal.x, octNormal.y));
 }

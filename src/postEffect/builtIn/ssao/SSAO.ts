@@ -2,13 +2,13 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import {IPostEffectResult} from "../../core/types";
-import GaussianBlur from "../../effects/blur/GaussianBlur";
 import SSAO_AO from "./ssao_ao/SSAO_AO";
+import SSAODenoise from "./ssao_denoise/SSAODenoise";
 import SSAOBlend from "./ssao_blend/SSAOBlend";
 
 /**
- * [KO] 깊이(Depth)와 법선(Normal) 버퍼를 기반으로 주변광 차폐(Ambient Occlusion) 음영을 생성하는 SSAO 후처리 이펙트입니다.
- * [EN] SSAO post-processing effect that generates ambient occlusion shadows based on depth and normal buffers.
+ * [KO] Ground Truth Ambient Occlusion (GTAO), Edge-Stopping Bilateral Denoiser, 및 Multi-Bounce를 기반으로 고품질 화면 공간 주변광 차폐 음영을 생성하는 SSAO 후처리 이펙트입니다.
+ * [EN] SSAO post-processing effect that generates high-quality screen-space ambient occlusion shadows based on Ground Truth Ambient Occlusion (GTAO), Edge-Stopping Bilateral Denoiser, and Multi-Bounce.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -23,6 +23,7 @@ import SSAOBlend from "./ssao_blend/SSAOBlend";
  * const ssao = view.builtInEffectManager.ssao;
  * ssao.radius = 0.5;
  * ssao.intensity = 1.5;
+ * ssao.useMultiBounce = true;
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/ssao/" style="width:100%; height:500px;"></iframe>
@@ -32,7 +33,7 @@ import SSAOBlend from "./ssao_blend/SSAOBlend";
  */
 class SSAO extends AMultiPassPostEffect {
     #effect_ao: SSAO_AO
-    #effect_blur: GaussianBlur
+    #effect_denoise: SSAODenoise
     #effect_blend: SSAOBlend
 
 
@@ -49,24 +50,23 @@ class SSAO extends AMultiPassPostEffect {
             redGPUContext,
             [
                 new SSAO_AO(redGPUContext),
-                new GaussianBlur(redGPUContext, {isLdr: false}),
+                new SSAODenoise(redGPUContext),
                 new SSAOBlend(redGPUContext),
             ],
         );
         this.#effect_ao = this.passList[0] as SSAO_AO
-        this.#effect_blur = this.passList[1] as GaussianBlur
-        this.#effect_blur.size = 1.5
+        this.#effect_denoise = this.passList[1] as SSAODenoise
         this.#effect_blend = this.passList[2] as SSAOBlend
     }
 
     /**
-     * [KO] AO 노이즈 억제를 위한 가우시안 블러 패스 사용 여부를 반환하거나 설정합니다.
-     * [EN] Returns or sets whether the Gaussian blur pass is used to suppress AO noise.
+     * [KO] 깊이·법선 경계를 보존하는 Edge-Stopping Bilateral 디노이저 패스 사용 여부를 반환하거나 설정합니다.
+     * [EN] Returns or sets whether the Edge-Stopping Bilateral denoiser pass that preserves depth and normal edges is used.
      *
      * @defaultValue true
      * @returns
-     * [KO] 블러 사용 여부
-     * [EN] Whether blur is used
+     * [KO] 디노이저 블러 사용 여부
+     * [EN] Whether denoiser blur is used
      */
     get useBlur(): boolean {
         return this.#effect_ao.useBlur;
@@ -77,10 +77,27 @@ class SSAO extends AMultiPassPostEffect {
     }
 
     /**
+     * [KO] 알베도 색감을 보존하는 GTAO 다중 반사(Multi-Bounce) 적용 여부를 반환하거나 설정합니다.
+     * [EN] Returns or sets whether GTAO Multi-Bounce, which preserves albedo color saturation in occluded creases, is applied.
+     *
+     * @defaultValue true
+     * @returns
+     * [KO] 다중 반사 적용 여부
+     * [EN] Whether Multi-Bounce is applied
+     */
+    get useMultiBounce(): boolean {
+        return this.#effect_blend.useMultiBounce;
+    }
+
+    set useMultiBounce(value: boolean) {
+        this.#effect_blend.useMultiBounce = value;
+    }
+
+    /**
      * [KO] 차폐를 계산할 월드 단위 샘플링 반경(0.01 ~ 5.0)을 반환하거나 설정합니다.
      * [EN] Returns or sets the sampling radius in world units (0.01 ~ 5.0) for occlusion calculation.
      *
-     * @defaultValue 0.25
+     * @defaultValue 0.5
      * @returns
      * [KO] 샘플링 반경
      * [EN] Sampling radius
@@ -97,7 +114,7 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] AO 음영의 강도(0 ~ 10)를 반환하거나 설정합니다.
      * [EN] Returns or sets the intensity (0 ~ 10) of the AO shadow.
      *
-     * @defaultValue 1
+     * @defaultValue 1.0
      * @returns
      * [KO] AO 강도
      * [EN] AO intensity
@@ -114,7 +131,7 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] 자기 차폐(Self-occlusion) 현상을 방지하기 위한 깊이 바이어스 값(0.0 ~ 0.1)을 반환하거나 설정합니다.
      * [EN] Returns or sets the depth bias value (0.0 ~ 0.1) to prevent self-occlusion artifacts.
      *
-     * @defaultValue 0.02
+     * @defaultValue 0.01
      * @returns
      * [KO] 깊이 바이어스
      * [EN] Depth bias
@@ -131,7 +148,7 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] 카메라 거리에 비례하여 적용되는 바이어스 스케일 계수(0.0 ~ 0.5)를 반환하거나 설정합니다.
      * [EN] Returns or sets the bias scale factor (0.0 ~ 0.5) applied proportionally to camera distance.
      *
-     * @defaultValue 0.02
+     * @defaultValue 0.01
      * @returns
      * [KO] 거리별 바이어스 스케일
      * [EN] Bias distance scale
@@ -165,7 +182,7 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] AO 효과가 완전히 사라지기까지의 페이드 거리 구간 길이(1.0 ~ 100.0)를 반환하거나 설정합니다.
      * [EN] Returns or sets the fade distance range (1.0 ~ 100.0) over which the AO effect completely fades out.
      *
-     * @defaultValue 20.0
+     * @defaultValue 50.0
      * @returns
      * [KO] 페이드 거리 범위
      * [EN] Fade distance range
@@ -182,7 +199,7 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] AO 음영의 대비(0.5 ~ 4.0)를 반환하거나 설정합니다.
      * [EN] Returns or sets the contrast (0.5 ~ 4.0) of the AO shadow.
      *
-     * @defaultValue 1.5
+     * @defaultValue 1.0
      * @returns
      * [KO] 대비 값
      * [EN] Contrast value
@@ -218,23 +235,21 @@ class SSAO extends AMultiPassPostEffect {
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;
-        const downW = Math.max(1, (width * 0.5) | 0);
-        const downH = Math.max(1, (height * 0.5) | 0);
 
         const aoResult = this.#effect_ao.render(
-            view, downW, downH, sourceTextureInfo
+            view, width, height, sourceTextureInfo
         );
 
         if (this.useBlur) {
-            const blurResult = this.#effect_blur.render(
-                view, downW, downH, aoResult
+            const denoiseResult = this.#effect_denoise.render(
+                view, width, height, aoResult
             );
             pool.release(aoResult.texture);
 
             const blendResult = this.#effect_blend.render(
-                view, width, height, sourceTextureInfo, blurResult
+                view, width, height, sourceTextureInfo, denoiseResult
             );
-            pool.release(blurResult.texture);
+            pool.release(denoiseResult.texture);
 
             return blendResult;
         } else {

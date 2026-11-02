@@ -17,31 +17,31 @@ interface SSAO_AO {
     /**
      * [KO] AO 대비 (0.5 ~ 4.0)
      * [EN] AO contrast (0.5 ~ 4.0)
-     * @defaultValue 1.5
+     * @defaultValue 1.0
      */
     contrast: number;
     /**
      * [KO] 샘플링 반경 (단위: 월드 거리, 0.01 ~ 5.0)
      * [EN] Sampling radius in world units (0.01 ~ 5.0)
-     * @defaultValue 0.25
+     * @defaultValue 0.5
      */
     radius: number;
     /**
      * [KO] AO 효과 강도 (0 ~ 10)
      * [EN] AO effect intensity (0 ~ 10)
-     * @defaultValue 1
+     * @defaultValue 1.0
      */
     intensity: number;
     /**
      * [KO] 자기 차폐 방지용 깊이 바이어스 값 (0.0 ~ 0.1)
      * [EN] Depth bias value to prevent self-occlusion (0.0 ~ 0.1)
-     * @defaultValue 0.02
+     * @defaultValue 0.01
      */
     bias: number;
     /**
      * [KO] 거리에 따른 바이어스 가중치 (0.0 ~ 0.5)
      * [EN] Distance-based bias scale (0.0 ~ 0.5)
-     * @defaultValue 0.02
+     * @defaultValue 0.01
      */
     biasDistanceScale: number;
     /**
@@ -53,14 +53,14 @@ interface SSAO_AO {
     /**
      * [KO] AO 페이드 거리 범위 (1.0 ~ 100.0)
      * [EN] AO fade distance range (1.0 ~ 100.0)
-     * @defaultValue 20.0
+     * @defaultValue 50.0
      */
     fadeDistanceRange: number;
 }
 
 /**
- * [KO] 뷰 공간에서 반구(Hemisphere) 샘플링을 통해 화면 공간 주변광 차폐(SSAO) 값을 계산하는 내부 후처리 패스입니다.
- * [EN] Internal post-processing pass that calculates Screen Space Ambient Occlusion (SSAO) via hemisphere sampling in view space.
+ * [KO] 2D 화면 공간 지평선 탐색(GTAO)을 통해 주변광 차폐(Visibility)와 선형 깊이·법선 데이터를 패킹하는 내부 후처리 패스입니다.
+ * [EN] Internal post-processing pass that computes Ground Truth Ambient Occlusion (GTAO) via 2D screen-space horizon search and packs visibility, linear depth, and normal data.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -81,7 +81,7 @@ class SSAO_AO extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1, isLdr: false});
 
         this.init(
             redGPUContext,
@@ -97,13 +97,13 @@ defineBoolean(SSAO_AO, [
     {key: 'useBlur', value: true}
 ])
 definePositiveNumber(SSAO_AO, [
-    {key: 'contrast', value: 1.5, min: 0.5, max: 4.0},
-    {key: 'radius', value: 0.25, min: 0.01, max: 5.0},
-    {key: 'intensity', value: 1, min: 0, max: 10},
-    {key: 'bias', value: 0.02, min: 0.0, max: 0.1},
-    {key: 'biasDistanceScale', value: 0.02, min: 0.0, max: 0.5},
+    {key: 'contrast', value: 1.0, min: 0.5, max: 4.0},
+    {key: 'radius', value: 0.5, min: 0.01, max: 5.0},
+    {key: 'intensity', value: 1.0, min: 0, max: 10},
+    {key: 'bias', value: 0.01, min: 0.0, max: 0.1},
+    {key: 'biasDistanceScale', value: 0.01, min: 0.0, max: 0.5},
     {key: 'fadeDistanceStart', value: 30.0, min: 1.0, max: 200.0},
-    {key: 'fadeDistanceRange', value: 20.0, min: 1.0, max: 100.0},
+    {key: 'fadeDistanceRange', value: 50.0, min: 1.0, max: 100.0},
 ])
 Object.freeze(SSAO_AO);
 export default SSAO_AO;
