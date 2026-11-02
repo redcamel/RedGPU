@@ -16,7 +16,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 3;
+        controller.distance = 4.5;
         controller.tilt = -15;
 
         const scene = new RedGPU.Display.Scene();
@@ -37,17 +37,43 @@ RedGPU.init(
         const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 32, 16);
         const orangeMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
         orangeMaterial.color.setColorByHEX('#af532e');
-        orangeMaterial.useSSR = true;
         orangeMaterial.metallic = 0.1;
 
         const floatingSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, orangeMaterial);
         floatingSphere.x = -1.5;
         scene.addChild(floatingSphere);
 
+        // [KO] ColorMaterial 테스트 메시
+        // [EN] ColorMaterial test mesh
+        const colorBoxGeometry = new RedGPU.Primitive.Box(redGPUContext, 0.7, 0.7, 0.7);
+        const colorMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#00d2ff');
+        const colorMesh = new RedGPU.Display.Mesh(redGPUContext, colorBoxGeometry, colorMaterial);
+        colorMesh.setPosition(-1.5, -0.4, 1.5);
+        scene.addChild(colorMesh);
+
+        // [KO] BitmapMaterial 테스트 메시
+        // [EN] BitmapMaterial test mesh
+        const bitmapBoxGeometry = new RedGPU.Primitive.Box(redGPUContext, 0.7, 0.7, 0.7);
+        const bitmapTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../assets/UV_Grid_Sm.jpg');
+        const bitmapMaterial = new RedGPU.Material.BitmapMaterial(redGPUContext, bitmapTexture);
+        const bitmapMesh = new RedGPU.Display.Mesh(redGPUContext, bitmapBoxGeometry, bitmapMaterial);
+        bitmapMesh.setPosition(1.5, -0.4, 1.5);
+        scene.addChild(bitmapMesh);
+
+        // [KO] TextField3D 테스트 객체
+        // [EN] TextField3D test object
+        const textField3D = new RedGPU.Display.TextField3D(redGPUContext, 'SSR Reflection');
+        textField3D.color = '#ffffff';
+        textField3D.background = 'rgba(20, 30, 50, 0.85)';
+        textField3D.padding = 12;
+        textField3D.borderRadius = 8;
+        textField3D.worldSize = 0.45;
+        textField3D.setPosition(0, -0.35, 1.5);
+        scene.addChild(textField3D);
+
         const groundGeometry = new RedGPU.Primitive.Ground(redGPUContext, 100, 100);
         const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
         groundMaterial.color.setColorByHEX('#7a5d4a');
-        groundMaterial.useSSR = true;
         groundMaterial.metallic = 0.5;
 
         const ground = new RedGPU.Display.Mesh(redGPUContext, groundGeometry, groundMaterial);
@@ -60,6 +86,8 @@ RedGPU.init(
         renderer.start(redGPUContext, (time) => {
             floatingSphere.rotationY += 0.02;
             floatingSphere.y = Math.sin(time * 0.002) * 0.5;
+            colorMesh.rotationY += 0.015;
+            bitmapMesh.rotationY -= 0.015;
         });
 
         renderTestPane(redGPUContext, view);
