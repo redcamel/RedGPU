@@ -67,7 +67,7 @@ if (uniforms.haloIntensity > 0.0) {
         if (all(haloSampleUV > vec2<f32>(0.0)) && all(haloSampleUV < vec2<f32>(1.0))) {
             let haloCol = sampleCauchyDispersion(haloSampleUV, aspectDir, caStrength, srcTexelSize, threshold, knee);
             let sinThetaSq = rSq / (1.0 + rSq);
-            let haloCoating = evaluateThinFilmReflectance(0.530, sinThetaSq);
+            let haloCoating = evaluateThinFilmReflectance(0.265, sinThetaSq);
             flareColor += haloCol * haloCoating * (haloWindow * uniforms.haloIntensity * 0.35);
         }
     }

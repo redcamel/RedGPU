@@ -24,7 +24,7 @@ if (uniforms.sunActive == 1u) {
         let depthDim = textureDimensions(depthTexture);
         let depthDimF = vec2<f32>(depthDim);
         let projScaleY = abs(systemUniforms.projection.noneJitterProjectionMatrix[1][1]);
-        let projectedSunRadius = SOLAR_ANGULAR_RADIUS * projScaleY;
+        let projectedSunRadius = SOLAR_ANGULAR_RADIUS * 0.5 * projScaleY;
 
         var visibleSamples = 0.0;
         for (var k = 0u; k < 9u; k = k + 1u) {
@@ -45,12 +45,14 @@ if (uniforms.sunActive == 1u) {
             if (sunDir.y <= -SOLAR_ANGULAR_RADIUS) {
                 sunTransmittance = 0.0;
             } else {
-                // Kasten-Young relative optical air mass & Rayleigh (lambda^-4) Beer-Lambert atmospheric transmittance
+                // Kasten-Young relative optical air mass & physical Beer-Lambert atmospheric transmittance from SkyAtmosphere
+                let atmo = systemUniforms.skyAtmosphere;
                 let sinAlt = max(sunDir.y, 0.0);
                 let airMass = 1.0 / (sinAlt + 0.025 * exp(-11.0 * sinAlt));
-                let rayleighBeta = vec3<f32>(0.049, 0.112, 0.215);
-                let beerLambertAtmo = exp(-rayleighBeta * airMass);
-                let cloudOpticalDepth = systemUniforms.skyAtmosphere.cloudCoverage * systemUniforms.skyAtmosphere.cloudDensity * 2.5;
+                let zenithOpticalDepth = atmo.rayleighScattering * atmo.rayleighExponentialDistribution
+                    + (atmo.mieScattering + atmo.mieAbsorption) * atmo.mieExponentialDistribution;
+                let beerLambertAtmo = exp(-zenithOpticalDepth * airMass);
+                let cloudOpticalDepth = atmo.cloudCoverage * atmo.cloudDensity * 2.5;
                 sunTransmittance *= exp(-cloudOpticalDepth);
                 solarIrradiance *= beerLambertAtmo;
             }
@@ -63,13 +65,13 @@ if (uniforms.sunActive == 1u) {
             let blades = max(uniforms.bladeCount, 4.0);
 
             // 1. Finite-Aperture Polychromatic Fraunhofer Diffraction & Spencer-CIE Glare PSF
-            // With SkyAtmosphere active, atmospheric Mie scattering already renders the physical forward-scattering aureole,
-            // so cieGlarePsf is disabled (0.0) to prevent double glare while full Fraunhofer spikes (1.0) are preserved.
             if (uniforms.starburstIntensity > 0.0) {
                 let hasSkyAtmo = systemUniforms.useSkyAtmosphere == 1u;
-                let spatialCoherence = select(0.18, 1.0, hasSkyAtmo);
-                let glareWeight = select(0.18, 0.0, hasSkyAtmo);
-                let babinetEdgeGain = (1.0 + 3.0 * sunTransmittance * (1.0 - sunTransmittance)) * spatialCoherence;
+                // Polygonal aperture deviation from a perfect circle (sagitta ratio: 1 - cos(pi / N))
+                // plus Babinet's edge diffraction gain (4 * T * (1 - T)) when partially occluded by scene geometry
+                let polygonalDeviation = 1.0 - cos(PI / blades);
+                let babinetEdgeGain = polygonalDeviation + 4.0 * sunTransmittance * (1.0 - sunTransmittance) * (1.0 - polygonalDeviation);
+                let glareWeight = select(polygonalDeviation, 0.0, hasSkyAtmo);
                 let psfStarburst = evaluateFraunhoferStarburst(dSun, rSun, blades, camRot, babinetEdgeGain, glareWeight);
                 flareRGB += solarIrradiance * (psfStarburst * uniforms.starburstIntensity * sunTransmittance);
             }
@@ -80,7 +82,7 @@ if (uniforms.sunActive == 1u) {
                 let sigmaX = SOLAR_ANGULAR_RADIUS * 32.0;
                 let lsfY = (sigmaY * sigmaY) / (dSun.y * dSun.y + sigmaY * sigmaY);
                 let lsfX = (sigmaX * sigmaX) / (dSun.x * dSun.x + sigmaX * sigmaX);
-                let anamorphicCoating = evaluateThinFilmReflectance(0.480, (dSun.x * dSun.x) / (1.0 + dSun.x * dSun.x));
+                let anamorphicCoating = evaluateThinFilmReflectance(0.240, (dSun.x * dSun.x) / (1.0 + dSun.x * dSun.x));
                 flareRGB += solarIrradiance * anamorphicCoating * (lsfY * lsfX * uniforms.anamorphicIntensity * sunTransmittance);
             }
 

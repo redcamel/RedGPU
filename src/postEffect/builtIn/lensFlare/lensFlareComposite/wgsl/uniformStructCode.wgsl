@@ -142,21 +142,22 @@ fn evaluateFraunhoferStarburst(
     let qPerp = rSun * sin(dTheta);
     let qPara = rSun * cos(dTheta);
 
-    // 1. Transverse profile: solar disk radius R_sun convolved with aperture vertex angular spread sin(pi / N)
+    // 1. Transverse profile: 2nd moment (Abel projection standard deviation R_sun / 2) of a uniform solar disk
+    //    convolved with aperture edge angular spread
     let sinHalfBlade = sin(PI / blades);
-    let rSunDiskSq = SOLAR_ANGULAR_RADIUS * SOLAR_ANGULAR_RADIUS;
-    let edgeAngularSpread = SOLAR_ANGULAR_RADIUS * sinHalfBlade * qPara;
-    let sigmaPerpSq = rSunDiskSq + edgeAngularSpread * edgeAngularSpread;
+    let sigma0 = SOLAR_ANGULAR_RADIUS * 0.5;
+    let edgeAngularSpread = sigma0 * sinHalfBlade * qPara;
+    let sigmaPerpSq = sigma0 * sigma0 + edgeAngularSpread * edgeAngularSpread;
     let lorentzianTransverse = sigmaPerpSq / (qPerp * qPerp + sigmaPerpSq);
 
-    // 2. Longitudinal profile: 2D regular N-gon vertex Fourier transform decay along the edge normal,
-    //    scaled by the 2D polygonal vertex diffraction gain R_c = R_sun / sin^2(pi / N)
-    let qc = SOLAR_ANGULAR_RADIUS / max(sinHalfBlade * sinHalfBlade, 1e-4);
+    // 2. Longitudinal profile: 2D regular N-gon boundary diffraction wave (Maggi-Rubinowicz inverse-square law q_para^-2),
+    //    scaled by the geometric aperture edge projection R_c = R_sun / sin(pi / N)
+    let qc = SOLAR_ANGULAR_RADIUS / max(sinHalfBlade, 1e-4);
     let qcSq = qc * qc;
-    let invParaLen = inverseSqrt(qPara * qPara + qcSq);
-    let fourierLongitudinal = (qcSq * qc) * (invParaLen * invParaLen * invParaLen);
+    let fourierLongitudinal = qcSq / (qPara * qPara + qcSq);
 
     // 3. Azimuthal sector overlap normalization at the exact solar disk boundary (R_sun)
+    let rSunDiskSq = SOLAR_ANGULAR_RADIUS * SOLAR_ANGULAR_RADIUS;
     let coreTransition = (qPara * qPara) / (qPara * qPara + rSunDiskSq);
     let primarySpike = lorentzianTransverse * fourierLongitudinal * coreTransition;
 
