@@ -53,11 +53,11 @@
 
     let diffXNeg = centerLinearZ - depthToLinearZ(dLeft, zParams);
     let diffXPos = depthToLinearZ(dRight, zParams) - centerLinearZ;
-    let dZx      = select(diffXPos, diffXNeg, abs(diffXNeg) < abs(diffXPos));
+    let dZx      = select(0.0, select(diffXPos, diffXNeg, abs(diffXNeg) < abs(diffXPos)), diffXNeg * diffXPos > 0.0);
 
     let diffYNeg = centerLinearZ - depthToLinearZ(dUp, zParams);
     let diffYPos = depthToLinearZ(dDown, zParams) - centerLinearZ;
-    let dZy      = select(diffYPos, diffYNeg, abs(diffYNeg) < abs(diffYPos));
+    let dZy      = select(0.0, select(diffYPos, diffYNeg, abs(diffYNeg) < abs(diffYPos)), diffYNeg * diffYPos > 0.0);
 
     // [KO] 평면 자기 차폐(Self-Occlusion) 방지를 위한 지평선 코사인 바이어스
     // [EN] Horizon cosine bias to prevent flat surface self-occlusion
@@ -111,7 +111,7 @@
 
         for (var step = 0u; step < numSteps; step++) {
             let stepRatio  = (f32(step) + stepJitter) / f32(numSteps);
-            let stepPx     = max(1.0, stepRatio * stepRatio * radiusPx);
+            let stepPx     = max(1.0, stepRatio * radiusPx);
             let pixelDelta = vec2<i32>(round(sliceDirPx * stepPx));
             let deltaPlane = dZx * f32(pixelDelta.x) + dZy * f32(pixelDelta.y);
 
