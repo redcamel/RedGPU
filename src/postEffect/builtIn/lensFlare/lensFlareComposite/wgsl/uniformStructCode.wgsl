@@ -63,7 +63,7 @@ fn evaluateThinFilmReflectance(opdUm: f32, sinThetaSq: f32) -> vec3<f32> {
     let cosThetaT = sqrt(max(1.0 - sinThetaSq / nfSq, 0.0));
     let phase = (PI * opdUm * cosThetaT) / WAVELENGTHS_UM;
     let interference = cos(phase);
-    return vec3<f32>(0.35) + vec3<f32>(0.65) * (interference * interference);
+    return vec3<f32>(0.42) + vec3<f32>(0.58) * (interference * interference);
 }
 
 // Analytical Normal CDF (Bowling 2009): integral of 1D Gaussian PSF over signed boundary distance d
@@ -83,7 +83,8 @@ fn sdCurvedRegularPolygon(p: vec2<f32>, radius: f32, blades: f32, camRot: f32) -
     let cosHalf = cos(halfSector);
     let tanHalf = tan(halfSector);
     let apothem = radius * cosHalf;
-    let rCorner = apothem * 0.22;
+    // Exact geometric sagitta of circular iris for N blades: s = R * (1 - cos(pi / N))
+    let rCorner = radius * (1.0 - cosHalf);
     let apothemCore = max(apothem - rCorner, 1e-5);
     let halfSideCore = apothemCore * tanHalf;
 
@@ -94,7 +95,7 @@ fn sdCurvedRegularPolygon(p: vec2<f32>, radius: f32, blades: f32, camRot: f32) -
     return select(dx, length(vec2<f32>(dx, dy)), dy > 0.0) - rCorner;
 }
 
-// Physical paraxial aperture projection convolved with Gaussian PSF, Entrance/Exit pupil intersection, and Cauchy dispersion
+// Physical paraxial aperture projection convolved with Defocus Gaussian PSF, Entrance/Exit pupil intersection, and Cauchy dispersion
 fn evaluatePhysicalGhostPupil(
     p: vec2<f32>,
     pupilRadius: f32,
@@ -117,12 +118,12 @@ fn evaluatePhysicalGhostPupil(
 
     // Seidel 4th-order spherical aberration wavefront phase energy redistribution across the exit pupil
     let rhoSq = min(dot(p, p) / max(pupilRadius * pupilRadius, 1e-6), 1.0);
-    let seidelCaustic = 0.72 + 0.28 * (rhoSq * rhoSq);
+    let seidelCaustic = 0.78 + 0.22 * (rhoSq * rhoSq);
 
     return vec3<f32>(transR, transG, transB) * (barrelTransmittance * seidelCaustic);
 }
 
-// Polychromatic Fraunhofer polygonal edge diffraction + Spencer-CIE forward-scattering glare PSF
+// Finite-aperture polychromatic Fraunhofer diffraction + Spencer-CIE forward-scattering glare PSF
 fn evaluateFraunhoferStarburst(
     dSun: vec2<f32>,
     rSun: f32,
@@ -140,26 +141,27 @@ fn evaluateFraunhoferStarburst(
     let qPerp = rSun * sin(dTheta);
     let qPara = rSun * cos(dTheta);
 
-    // Polychromatic integral of sinc^2(pi D q_perp / lambda) convolved with finite solar angular radius
-    let sigma0 = 0.00055;
-    let sigmaPerpSq = sigma0 * sigma0 + (SOLAR_ANGULAR_RADIUS * qPara) * (SOLAR_ANGULAR_RADIUS * qPara);
+    // Finite-aperture angular diffraction spread convolved with solar angular diameter (2 * SOLAR_ANGULAR_RADIUS)
+    let sigma0 = SOLAR_ANGULAR_RADIUS * 0.35;
+    let angularSpread = SOLAR_ANGULAR_RADIUS * 2.0;
+    let sigmaPerpSq = sigma0 * sigma0 + (angularSpread * qPara) * (angularSpread * qPara);
     let lorentzianTransverse = sigmaPerpSq / (qPerp * qPerp + sigmaPerpSq);
 
     // Asymptotic 2D polygonal Fourier transform decay along edge normal: (q_c / sqrt(q_para^2 + q_c^2))^3
-    let qc = 0.065;
+    let qc = SOLAR_ANGULAR_RADIUS * 14.0;
     let qcSq = qc * qc;
     let invParaLen = inverseSqrt(qPara * qPara + qcSq);
     let fourierLongitudinal = (qcSq * qc) * (invParaLen * invParaLen * invParaLen);
-    let coreZeroing = (qPara * qPara) / (qPara * qPara + SOLAR_ANGULAR_RADIUS * SOLAR_ANGULAR_RADIUS);
-    let primarySpike = lorentzianTransverse * fourierLongitudinal * coreZeroing;
+    let coreTransition = (qPara * qPara) / (qPara * qPara + (SOLAR_ANGULAR_RADIUS * 2.0) * (SOLAR_ANGULAR_RADIUS * 2.0));
+    let primarySpike = lorentzianTransverse * fourierLongitudinal * coreTransition;
 
     // Spencer-CIE small-angle forward scattering glare PSF: (sigma_s / sqrt(r^2 + sigma_s^2))^3
-    let sigmaGlare = 0.045;
+    let sigmaGlare = SOLAR_ANGULAR_RADIUS * 10.0;
     let sigmaGlareSq = sigmaGlare * sigmaGlare;
     let invGlareLen = inverseSqrt(rSun * rSun + sigmaGlareSq);
     let cieGlarePsf = (sigmaGlareSq * sigmaGlare) * (invGlareLen * invGlareLen * invGlareLen);
 
-    return cieGlarePsf * 0.45 + primarySpike * edgeDiffractionGain * 0.85;
+    return cieGlarePsf * 0.65 + primarySpike * edgeDiffractionGain * 0.75;
 }
 
 fn hash12(p: vec2<f32>) -> f32 {

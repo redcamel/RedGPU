@@ -22,8 +22,8 @@ if (uniforms.ghostIntensity > 0.0 && ghostCount > 0u) {
 
     for (var i = 0u; i < ghostCount; i = i + 1u) {
         let s = (f32(i) + 0.5) * invCount;
-        // Paraxial inverse magnification alpha_i > 0 across optical center (maps opposite quadrant without center singularity)
-        let invMag = (0.42 + 1.85 * s) * invSpacing;
+        let weylPhase = fract(f32(i + 1u) * GOLDEN_CONJUGATE);
+        let invMag = (0.50 + 2.00 * s) * invSpacing;
         let sampleUV = centerUV - fromCenter * invMag;
 
         if (all(sampleUV > vec2<f32>(0.0)) && all(sampleUV < vec2<f32>(1.0))) {
@@ -31,22 +31,22 @@ if (uniforms.ghostIntensity > 0.0 && ghostCount > 0u) {
             let rSq = dot(offsetFromCenter, offsetFromCenter);
             let radialDist = sqrt(rSq);
             let cos4Weight = evaluateCos4Vignette(radialDist * 1.41421356);
-            let pupilWindow = clamp(1.0 - rSq * 1.8, 0.0, 1.0);
+            let pupilWindow = clamp(1.0 - rSq * 2.0, 0.0, 1.0);
             let radialWeight = cos4Weight * pupilWindow * pupilWindow;
 
             if (radialWeight > 1e-4) {
                 let radialDir = select(vec2<f32>(0.0), offsetFromCenter / radialDist, radialDist > 1e-5);
                 let sampleCol = sampleCauchyDispersion(sampleUV, radialDir, caStrength, srcTexelSize, threshold, knee);
-                let opdUm = 0.240 + s * 0.480;
+                let opdUm = 0.240 + weylPhase * 0.420;
                 let sinThetaSq = rSq / (1.0 + rSq);
                 let coatingReflectance = evaluateThinFilmReflectance(opdUm, sinThetaSq);
-                // 2D Jacobian area-conservation weight: invMag^2 / (1 + invMag^2)
+                // Exact 2D Jacobian area-conservation weight: invMag^2 / (1 + invMag^2)
                 let jacobianWeight = (invMag * invMag) / (1.0 + invMag * invMag);
                 ssGhosts += sampleCol * coatingReflectance * (radialWeight * jacobianWeight);
             }
         }
     }
-    flareColor += ssGhosts * (uniforms.ghostIntensity * invCount * 0.85);
+    flareColor += ssGhosts * (uniforms.ghostIntensity * invCount);
 }
 
 if (uniforms.haloIntensity > 0.0) {
