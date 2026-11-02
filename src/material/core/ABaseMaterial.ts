@@ -72,11 +72,20 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Flag indicating whether the pipeline needs updating
      */
     dirtyPipeline: boolean = false
+    #transparent: boolean = false
+
     /**
-     * [KO] 머티리얼 투명 렌더링 활성화 여부
-     * [EN] Whether transparent rendering is enabled for the material
+     * [KO] 머티리얼 투명 렌더링 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether transparent rendering is enabled for the material.
      */
-    transparent: boolean = false
+    get transparent(): boolean {
+        return this.#transparent;
+    }
+
+    set transparent(value: boolean) {
+        this.#transparent = value;
+        this.dirtyPipeline = true;
+    }
     readonly #blendColorState: BlendState
     readonly #blendAlphaState: BlendState
     #writeMaskState: GPUFlagsConstant = GPUColorWrite.ALL
@@ -428,6 +437,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Configured GPUFragmentState object
      */
     getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
+        const gBufferWriteMask = ((this.#transparent || this['alphaBlend'] === 2) && !this.use2PathRender) ? 0 : this.writeMaskState;
         return {
             module: this.gpuRenderInfo.fragmentShaderModule,
             entryPoint,
@@ -443,12 +453,12 @@ abstract class ABaseMaterial extends ResourceBase {
                 {
                     format: navigator.gpu.getPreferredCanvasFormat(),
                     blend: undefined,
-                    writeMask: this.writeMaskState,
+                    writeMask: gBufferWriteMask,
                 },
                 {
                     format: 'rg16float',
                     blend: undefined,
-                    writeMask: this.writeMaskState,
+                    writeMask: gBufferWriteMask,
                 },
             ]
         }
