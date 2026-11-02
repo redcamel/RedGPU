@@ -52,6 +52,7 @@ const postEffectGraph = `
 `View3D`는 후처리 목적에 따라 세 개의 매니저 속성을 제공하며, 실제 파이프라인 실행과 텍스처 풀링 (`PostEffectTexturePool`)은 `PostEffectManager`가 통합 관리합니다.
 
 - **`view.builtInEffectManager` (`BuiltInEffectManager`)**: 빌트인 이펙트 (`useSSAO`, `useSSR`, `useDOF`, `useBloom`,
+  `useLensFlare`,
   `autoExposure`)의 활성화 및 세부 속성을 제어합니다.
 - **`view.postEffectManager` (`PostEffectManager`)**: 일반 이펙트 체인 (`addEffect`,
   `removeEffect`)을 관리하고 전체 후처리 파이프라인을 실행합니다.
@@ -92,6 +93,8 @@ const postEffectGraph = `
 - [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/ssr/)
 - [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/lens/dof/)
 - [블룸 (Bloom)](/RedGPU/examples/postEffect/bloom/)
+- [렌즈 플레어 (SkyAtmosphere)](/RedGPU/examples/postEffect/lens/lensFlareSkyAtmosphere/)
+- [렌즈 플레어 (SkyBox)](/RedGPU/examples/postEffect/lens/lensFlareSkyBox/)
 
 ---
 

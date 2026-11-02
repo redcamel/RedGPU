@@ -63,14 +63,15 @@ if (uniforms.sunActive == 1u) {
             let blades = max(uniforms.bladeCount, 4.0);
 
             // 1. Finite-Aperture Polychromatic Fraunhofer Diffraction & Spencer-CIE Glare PSF
-            // Without SkyAtmosphere (no physical solar disk in skybox), apply partial spatial coherence attenuation
+            // With SkyAtmosphere active, atmospheric Mie scattering already renders the physical forward-scattering aureole,
+            // so cieGlarePsf is disabled (0.0) to prevent double glare while full Fraunhofer spikes (1.0) are preserved.
             if (uniforms.starburstIntensity > 0.0) {
                 let hasSkyAtmo = systemUniforms.useSkyAtmosphere == 1u;
                 let spatialCoherence = select(0.18, 1.0, hasSkyAtmo);
-                let glareWeight = select(0.25, 1.0, hasSkyAtmo);
+                let glareWeight = select(0.18, 0.0, hasSkyAtmo);
                 let babinetEdgeGain = (1.0 + 3.0 * sunTransmittance * (1.0 - sunTransmittance)) * spatialCoherence;
-                let psfStarburst = evaluateFraunhoferStarburst(dSun, rSun, blades, camRot, babinetEdgeGain);
-                flareRGB += solarIrradiance * (psfStarburst * uniforms.starburstIntensity * sunTransmittance * glareWeight);
+                let psfStarburst = evaluateFraunhoferStarburst(dSun, rSun, blades, camRot, babinetEdgeGain, glareWeight);
+                flareRGB += solarIrradiance * (psfStarburst * uniforms.starburstIntensity * sunTransmittance);
             }
 
             // 2. Cylindrical Anamorphic Astigmatism Line-Spread Function (Lorentzian LSF)

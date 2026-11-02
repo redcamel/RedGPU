@@ -129,7 +129,8 @@ fn evaluateFraunhoferStarburst(
     rSun: f32,
     blades: f32,
     camRot: f32,
-    edgeDiffractionGain: f32
+    edgeDiffractionGain: f32,
+    glareWeight: f32
 ) -> f32 {
     let isEven = (u32(blades) & 1u) == 0u;
     let spikeCount = select(blades * 2.0, blades, isEven);
@@ -161,7 +162,7 @@ fn evaluateFraunhoferStarburst(
     let invGlareLen = inverseSqrt(rSun * rSun + sigmaGlareSq);
     let cieGlarePsf = (sigmaGlareSq * sigmaGlare) * (invGlareLen * invGlareLen * invGlareLen);
 
-    return cieGlarePsf * 0.65 + primarySpike * edgeDiffractionGain * 0.75;
+    return cieGlarePsf * glareWeight + primarySpike * edgeDiffractionGain * 0.75;
 }
 
 fn hash12(p: vec2<f32>) -> f32 {

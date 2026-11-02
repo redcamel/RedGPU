@@ -7,9 +7,10 @@ order: 4
 
 Built-in Effects are integrated screen-space lighting effects executed in the HDR stage prior to tone mapping, utilizing
 the 3D scene's G-Buffer (depth and normal buffers). Instead of manually instantiating effects and registering them via
-`addEffect()`, you can enable them directly using boolean properties (`useSSAO`, `useSSR`, `useDOF`, `useBloom`) on
+`addEffect()`, you can enable them directly using boolean properties (`useSSAO`, `useSSR`, `useDOF`, `useBloom`,
+`useLensFlare`) on
 `view.builtInEffectManager`
-and fine-tune parameters through the built-in instances (`ssao`, `ssr`, `dof`, `bloom`).
+and fine-tune parameters through the built-in instances (`ssao`, `ssr`, `dof`, `bloom`, `lensFlare`).
 
 ---
 

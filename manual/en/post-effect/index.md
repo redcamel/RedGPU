@@ -53,7 +53,7 @@ const postEffectGraph = `
 texture pooling (`PostEffectTexturePool`) are centrally managed by `PostEffectManager`.
 
 - **`view.builtInEffectManager` (`BuiltInEffectManager`)**: Controls built-in effects (`useSSAO`, `useSSR`, `useDOF`,
-  `useBloom`, `autoExposure`) and their parameters.
+  `useBloom`, `useLensFlare`, `autoExposure`) and their parameters.
 - **`view.postEffectManager` (`PostEffectManager`)**: Manages user effect
   chains (`addEffect`, `removeEffect`), and executes the entire post-processing pipeline.
 - **`view.toneMappingManager` (`ToneMappingManager`)**: Controls the tone mapping algorithm (`mode`), `contrast`, and
@@ -98,6 +98,8 @@ texture pooling (`PostEffectTexturePool`) are centrally managed by `PostEffectMa
 - [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/ssr/)
 - [Depth of Field (DoF)](/RedGPU/examples/postEffect/lens/dof/)
 - [Bloom](/RedGPU/examples/postEffect/bloom/)
+- [Lens Flare (SkyAtmosphere)](/RedGPU/examples/postEffect/lens/lensFlareSkyAtmosphere/)
+- [Lens Flare (SkyBox)](/RedGPU/examples/postEffect/lens/lensFlareSkyBox/)
 
 ---
 

@@ -36,6 +36,16 @@ fn extractBrightHighlight(uv: vec2<f32>, texelSize: vec2<f32>, threshold: f32, k
         return vec3<f32>(0.0);
     }
 
+    // When SkyAtmosphere is active, Pass 3 analytically evaluates the solar disk flare;
+    // exclude background sky pixels (depth >= 0.9999) here to prevent duplicate screen-space solar ghosts/halos.
+    if (systemUniforms.useSkyAtmosphere == 1u) {
+        let depthDim = textureDimensions(depthTexture);
+        let depthCoord = min(vec2<u32>(uv * vec2<f32>(depthDim)), depthDim - vec2<u32>(1u));
+        if (textureLoad(depthTexture, depthCoord, 0) >= 0.9999) {
+            return vec3<f32>(0.0);
+        }
+    }
+
     // 4-Tap Karis-weighted bilinear downsample (suppresses subpixel specular fireflies)
     let halfTexel = texelSize * 0.5;
     let c0 = textureSampleLevel(sourceTexture, basicSampler, uv + vec2<f32>(-halfTexel.x, -halfTexel.y), 0.0).rgb;

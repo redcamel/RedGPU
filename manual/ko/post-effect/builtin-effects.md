@@ -6,8 +6,9 @@ order: 4
 # 빌트인 이펙트
 
 빌트인 이펙트 (Built-in Effects)는 3D 씬의 G-Buffer (깊이·노말 버퍼)를 활용하여 톤 매핑 이전의 HDR 단계에서 실행되는 내장 공간 광원 효과입니다. 일반 이펙트처럼 인스턴스를 직접
-생성하여 `addEffect()`로 등록하는 대신, `view.builtInEffectManager`의 불리언 속성 (`useSSAO`, `useSSR`, `useDOF`, `useBloom`)으로 즉시 활성화하고
-내장 인스턴스 (`ssao`, `ssr`, `dof`, `bloom`)를
+생성하여 `addEffect()`로 등록하는 대신, `view.builtInEffectManager`의 불리언 속성 (`useSSAO`, `useSSR`, `useDOF`, `useBloom`,
+`useLensFlare`)으로 즉시 활성화하고
+내장 인스턴스 (`ssao`, `ssr`, `dof`, `bloom`, `lensFlare`)를
 통해 세부 옵션을 조절합니다.
 
 ---

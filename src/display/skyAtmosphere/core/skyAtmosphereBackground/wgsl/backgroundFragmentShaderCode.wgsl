@@ -34,7 +34,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let tEarth = getRaySphereIntersection(camPos, viewDir, groundRadius);
     let isGroundHit = groundRadius > 0.0 && tEarth > 0.0;
 
-    let sunDir = uniforms.sunDirection;
+    let sunDir = normalize(uniforms.sunDirection);
 
     var baseRadiance: vec3<f32>;
     var skyTransmittance: f32 = 1.0;
@@ -68,7 +68,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
         let viewSunCos = dot(viewDir, sunDir);
         let skyTransVec = vec3<f32>(skyTransmittance);
         let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, skyTransVec);
-        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, skyTransVec);
+        let sunDisk = getSunDiskRadianceUnit(viewDir, sunDir, uniforms.sunSize, uniforms.sunLimbDarkening, skyTransVec);
         addedRadiance = mieGlow + sunDisk;
     }
 
