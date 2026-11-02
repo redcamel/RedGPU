@@ -9,13 +9,14 @@ import FilmGrain from "./filmGrain/FilmGrain";
 import Fog from "./fog/Fog";
 import HeightFog from "./heightFog/HeightFog";
 import LensDistortion from "./lensDistortion/LensDistortion";
+import LensFlare from "./lensFlare/LensFlare";
 import SSAO from "./ssao/SSAO";
 import SSR from "./ssr/SSR";
 import Vignetting from "./vignetting/Vignetting";
 
 /**
- * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `Fog`, `HeightFog`, `DOF`, `Bloom`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
- * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `Fog`, `HeightFog`, `DOF`, `Bloom`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`) of a `View3D`.
+ * [KO] `View3D`의 시스템 내장(Built-in) 후처리 이펙트(`SSAO`, `SSR`, `Fog`, `HeightFog`, `DOF`, `Bloom`, `LensFlare`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`)를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages built-in post-processing effects (`SSAO`, `SSR`, `Fog`, `HeightFog`, `DOF`, `Bloom`, `LensFlare`, `AutoExposure`, `ChromaticAberration`, `LensDistortion`, `Vignetting`, `FilmGrain`) of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -48,6 +49,8 @@ class BuiltInEffectManager extends RedGPUObject {
     #useDOF: boolean = false;
     #bloom: Bloom;
     #useBloom: boolean = false;
+    #lensFlare: LensFlare;
+    #useLensFlare: boolean = false;
     #chromaticAberration: ChromaticAberration;
     #useChromaticAberration: boolean = false;
     #lensDistortion: LensDistortion;
@@ -299,6 +302,39 @@ class BuiltInEffectManager extends RedGPUObject {
     }
 
     /**
+     * [KO] LensFlare 활성화 여부입니다.
+     * [EN] Whether LensFlare is enabled.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] LensFlare 활성화 여부
+     * [EN] Whether LensFlare is enabled
+     */
+    get useLensFlare(): boolean {
+        return this.#useLensFlare;
+    }
+
+    set useLensFlare(value: boolean) {
+        this.#useLensFlare = value;
+        this.#checkLensFlare();
+    }
+
+    /**
+     * [KO] LensFlare 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the LensFlare effect instance.
+     *
+     * @returns
+     * [KO] `LensFlare` 인스턴스
+     * [EN] `LensFlare` instance
+     */
+    get lensFlare(): LensFlare {
+        if (!this.#lensFlare) {
+            this.#lensFlare = new LensFlare(this.#view.redGPUContext);
+        }
+        return this.#lensFlare;
+    }
+
+    /**
      * [KO] ChromaticAberration 활성화 여부입니다.
      * [EN] Whether ChromaticAberration is enabled.
      *
@@ -454,6 +490,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#heightFog) this.#heightFog.clear();
         if (this.#dof) this.#dof.clear();
         if (this.#bloom) this.#bloom.clear();
+        if (this.#lensFlare) this.#lensFlare.clear();
         if (this.#chromaticAberration) this.#chromaticAberration.clear();
         if (this.#lensDistortion) this.#lensDistortion.clear();
         if (this.#vignetting) this.#vignetting.clear();
@@ -491,6 +528,10 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#bloom) {
             this.#bloom.destroy();
             this.#bloom = null;
+        }
+        if (this.#lensFlare) {
+            this.#lensFlare.destroy();
+            this.#lensFlare = null;
         }
         if (this.#chromaticAberration) {
             this.#chromaticAberration.destroy();
@@ -551,6 +592,12 @@ class BuiltInEffectManager extends RedGPUObject {
         }
     }
 
+    #checkLensFlare() {
+        if (!this.#lensFlare && this.#useLensFlare) {
+            this.#lensFlare = new LensFlare(this.#view.redGPUContext);
+        }
+    }
+
     #checkChromaticAberration() {
         if (!this.#chromaticAberration && this.#useChromaticAberration) {
             this.#chromaticAberration = new ChromaticAberration(this.#view.redGPUContext);
@@ -583,6 +630,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#heightFog) this.#videoMemorySize += this.#heightFog.videoMemorySize;
         if (this.#dof) this.#videoMemorySize += this.#dof.videoMemorySize;
         if (this.#bloom) this.#videoMemorySize += this.#bloom.videoMemorySize;
+        if (this.#lensFlare) this.#videoMemorySize += this.#lensFlare.videoMemorySize;
         if (this.#chromaticAberration) this.#videoMemorySize += this.#chromaticAberration.videoMemorySize;
         if (this.#lensDistortion) this.#videoMemorySize += this.#lensDistortion.videoMemorySize;
         if (this.#vignetting) this.#videoMemorySize += this.#vignetting.videoMemorySize;

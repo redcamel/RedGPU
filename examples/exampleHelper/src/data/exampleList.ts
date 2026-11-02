@@ -2240,6 +2240,22 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
+                                name: 'Lens Flare',
+                                path: 'postEffect/lens/lensFlare',
+                                description: {
+                                    ko: `화면 공간 HDR 하이라이트 고스트/할로와 태양 깊이 차폐 기반 다각형 조리개 보케·스타버스트·아나모픽 스트릭을 결합한 하이브리드 렌즈 플레어 예제입니다.`,
+                                    en: `An example demonstrating the hybrid Lens Flare effect combining screen-space HDR ghosts/halos with depth-occluded sun polygonal bokeh, starbursts, and anamorphic streaks.`
+                                },
+                            },
+                            {
+                                name: 'Lens Flare (SkyBox)',
+                                path: 'postEffect/lens/lensFlareSkyBox',
+                                description: {
+                                    ko: `SkyAtmosphere 없이 일반 HDR IBL SkyBox 및 PBR 환경에서 동작하는 렌즈 플레어 예제입니다.`,
+                                    en: `An example demonstrating the Lens Flare effect in a standard HDR IBL SkyBox and PBR environment without SkyAtmosphere.`
+                                },
+                            },
+                            {
                                 name: 'Chromatic Aberration',
                                 path: 'postEffect/lens/chromaticAberration',
                                 description: {

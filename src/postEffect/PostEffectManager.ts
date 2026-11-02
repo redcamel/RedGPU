@@ -294,6 +294,7 @@ class PostEffectManager extends RedGPUObject {
             useHeightFog,
             useDOF,
             useBloom,
+            useLensFlare,
             useChromaticAberration,
             useLensDistortion,
             useVignetting,
@@ -330,6 +331,9 @@ class PostEffectManager extends RedGPUObject {
         }
         if (useBloom) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.bloom, currentTextureView, width, height);
+        }
+        if (useLensFlare) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.lensFlare, currentTextureView, width, height);
         }
         currentTextureView = this.#applySingleEffect(toneMappingManager, currentTextureView, width, height);
 

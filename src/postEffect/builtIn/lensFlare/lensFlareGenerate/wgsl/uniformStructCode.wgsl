@@ -1,0 +1,79 @@
+struct Uniforms {
+    threshold: f32,
+    ghostCount: u32,
+    ghostSpacing: f32,
+    ghostIntensity: f32,
+    haloRadius: f32,
+    haloThickness: f32,
+    haloIntensity: f32,
+    chromaticAberration: f32,
+};
+
+const PI: f32 = 3.141592653589793;
+const LUMA_REC709: vec3<f32> = vec3<f32>(0.2126, 0.7152, 0.0722);
+// Visible spectrum wavelengths in micrometers (650nm, 530nm, 450nm)
+const WAVELENGTHS_UM: vec3<f32> = vec3<f32>(0.650, 0.530, 0.450);
+// Normalized Cauchy dispersion deltas: (1 / lambda^2 - 1 / lambda_G^2) / (1 / lambda_B^2 - 1 / lambda_R^2)
+const CAUCHY_DISPERSION: vec3<f32> = vec3<f32>(-0.464, 0.0, 0.536);
+
+// Airy thin-film single-layer MgF2 coating (n_f = 1.38) spectral reflectance
+fn evaluateThinFilmReflectance(opdUm: f32, sinThetaSq: f32) -> vec3<f32> {
+    let nfSq = 1.9044; // 1.38^2
+    let cosThetaT = sqrt(max(1.0 - sinThetaSq / nfSq, 0.0));
+    let phase = (PI * opdUm * cosThetaT) / WAVELENGTHS_UM;
+    let interference = cos(phase);
+    return vec3<f32>(0.35) + vec3<f32>(0.65) * (interference * interference);
+}
+
+// Cosine-fourth law of off-axis optical illumination: cos^4(theta) = 1 / (1 + (r / f)^2)^2
+fn evaluateCos4Vignette(radialDist: f32) -> f32 {
+    let tanThetaSq = radialDist * radialDist;
+    let invSecSq = 1.0 / (1.0 + tanThetaSq);
+    return invSecSq * invSecSq;
+}
+
+fn extractBrightHighlight(uv: vec2<f32>, texelSize: vec2<f32>, threshold: f32, knee: f32) -> vec3<f32> {
+    if (any(uv <= vec2<f32>(0.0)) || any(uv >= vec2<f32>(1.0))) {
+        return vec3<f32>(0.0);
+    }
+
+    // 4-Tap Karis-weighted bilinear downsample (suppresses subpixel specular fireflies)
+    let halfTexel = texelSize * 0.5;
+    let c0 = textureSampleLevel(sourceTexture, basicSampler, uv + vec2<f32>(-halfTexel.x, -halfTexel.y), 0.0).rgb;
+    let c1 = textureSampleLevel(sourceTexture, basicSampler, uv + vec2<f32>( halfTexel.x, -halfTexel.y), 0.0).rgb;
+    let c2 = textureSampleLevel(sourceTexture, basicSampler, uv + vec2<f32>(-halfTexel.x,  halfTexel.y), 0.0).rgb;
+    let c3 = textureSampleLevel(sourceTexture, basicSampler, uv + vec2<f32>( halfTexel.x,  halfTexel.y), 0.0).rgb;
+
+    let w0 = 1.0 / (1.0 + dot(c0, LUMA_REC709));
+    let w1 = 1.0 / (1.0 + dot(c1, LUMA_REC709));
+    let w2 = 1.0 / (1.0 + dot(c2, LUMA_REC709));
+    let w3 = 1.0 / (1.0 + dot(c3, LUMA_REC709));
+    let c = (c0 * w0 + c1 * w1 + c2 * w2 + c3 * w3) / max(w0 + w1 + w2 + w3, 1e-6);
+
+    // Exact C1-continuous quadratic soft-knee luminance extraction
+    let luma = dot(c, LUMA_REC709);
+    let soft = clamp(luma - threshold + knee, 0.0, 2.0 * knee);
+    let quadratic = (soft * soft) / max(4.0 * knee, 1e-6);
+    let extractedLuma = max(quadratic, luma - threshold);
+    let scale = extractedLuma / max(luma, 1e-6);
+
+    // Reinhard radiometric highlight compression to preserve finite energy integral
+    let radiance = c * scale;
+    return radiance / (vec3<f32>(1.0) + dot(radiance, LUMA_REC709) * 0.04);
+}
+
+fn sampleCauchyDispersion(
+    uv: vec2<f32>,
+    radialVec: vec2<f32>,
+    caStrength: f32,
+    texelSize: vec2<f32>,
+    threshold: f32,
+    knee: f32
+) -> vec3<f32> {
+    let shiftR = radialVec * (caStrength * CAUCHY_DISPERSION.r);
+    let shiftB = radialVec * (caStrength * CAUCHY_DISPERSION.b);
+    let r = extractBrightHighlight(uv + shiftR, texelSize, threshold, knee).r;
+    let g = extractBrightHighlight(uv,          texelSize, threshold, knee).g;
+    let b = extractBrightHighlight(uv + shiftB, texelSize, threshold, knee).b;
+    return vec3<f32>(r, g, b);
+}
