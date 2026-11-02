@@ -69,6 +69,7 @@ const renderTestPane = (redGPUContext, view) => {
 
             const controls = [
                 ssaoFolder.addBinding(ssao, 'useBlur'),
+                ssaoFolder.addBinding(ssao, 'useMultiBounce'),
                 ssaoFolder.addBinding(ssao, 'radius', {min: 0.01, max: 5.0, step: 0.01}),
                 ssaoFolder.addBinding(ssao, 'intensity', {min: 0.0, max: 10.0, step: 0.1}),
                 ssaoFolder.addBinding(ssao, 'bias', {min: 0.0, max: 0.1, step: 0.001}),
