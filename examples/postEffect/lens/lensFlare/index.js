@@ -19,16 +19,16 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 4.2;
-        controller.tilt = 8;
-        controller.pan = 18;
+        controller.distance = 3.8;
+        controller.tilt = -2;
+        controller.pan = 38;
         controller.speedDistance = 0.15;
 
         const scene = new RedGPU.Display.Scene();
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 14;
-        directionalLight.azimuth = -162;
+        directionalLight.elevation = 14.5;
+        directionalLight.azimuth = -142.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');

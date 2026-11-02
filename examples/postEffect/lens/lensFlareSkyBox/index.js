@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] LensFlare (IBL SkyBox) 예제
  * [EN] LensFlare (IBL SkyBox) example
  *
- * [KO] SkyAtmosphere 없이 일반 HDR IBL SkyBox 및 에미시브/PBR 메쉬 환경에서 화면 공간 HDR 하이라이트와 주광원 연동으로 동작하는 렌즈 플레어(Lens Flare) 후처리 효과를 시연합니다.
- * [EN] Demonstrates the Lens Flare post-processing effect operating with screen-space HDR highlights and directional light integration in a standard HDR IBL SkyBox and emissive/PBR mesh environment without SkyAtmosphere.
+ * [KO] SkyAtmosphere 없이 일반 HDR IBL SkyBox 및 DirectionalLight/PBR 메쉬 환경에서 화면 공간 HDR 하이라이트와 주광원 경로 해석으로 동작하는 렌즈 플레어(Lens Flare) 후처리 효과를 시연합니다.
+ * [EN] Demonstrates the Lens Flare post-processing effect operating via screen-space HDR highlights and directional light optical path evaluation in a standard HDR IBL SkyBox and PBR mesh environment without SkyAtmosphere.
  */
 
 const container = document.createElement('div');
@@ -19,17 +19,17 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 4.2;
-        controller.tilt = 8;
-        controller.pan = 18;
+        controller.distance = 3.8;
+        controller.tilt = -2;
+        controller.pan = 38;
         controller.speedDistance = 0.15;
 
         const scene = new RedGPU.Display.Scene();
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 14;
-        directionalLight.azimuth = -162;
+        directionalLight.elevation = 14.5;
+        directionalLight.azimuth = -142.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -37,8 +37,8 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] SkyAtmosphere 없이 IBL SkyBox 환경에서 HDR LensFlare 빌트인 이펙트 활성화
-        // [EN] Enable HDR LensFlare built-in effect in an IBL SkyBox environment without SkyAtmosphere
+        // [KO] SkyAtmosphere 없이 IBL SkyBox + DirectionalLight 환경에서 HDR LensFlare 빌트인 이펙트 활성화
+        // [EN] Enable HDR LensFlare built-in effect in an IBL SkyBox + DirectionalLight environment without SkyAtmosphere
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
