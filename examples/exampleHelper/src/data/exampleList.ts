@@ -2240,11 +2240,11 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'Lens Flare',
-                                path: 'postEffect/lens/lensFlare',
+                                name: 'Lens Flare (SkyAtmosphere)',
+                                path: 'postEffect/lens/lensFlareSkyAtmosphere',
                                 description: {
-                                    ko: `화면 공간 HDR 하이라이트 고스트/할로와 태양 깊이 차폐 기반 다각형 조리개 보케·스타버스트·아나모픽 스트릭을 결합한 하이브리드 렌즈 플레어 예제입니다.`,
-                                    en: `An example demonstrating the hybrid Lens Flare effect combining screen-space HDR ghosts/halos with depth-occluded sun polygonal bokeh, starbursts, and anamorphic streaks.`
+                                    ko: `SkyAtmosphere 환경에서 화면 공간 HDR 하이라이트 고스트/할로와 태양 깊이 차폐 기반 다각형 조리개 보케·스타버스트·아나모픽 스트릭을 결합한 하이브리드 렌즈 플레어 예제입니다.`,
+                                    en: `An example demonstrating the hybrid Lens Flare effect combining screen-space HDR ghosts/halos with depth-occluded sun polygonal bokeh, starbursts, and anamorphic streaks in a SkyAtmosphere environment.`
                                 },
                             },
                             {

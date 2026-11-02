@@ -9,7 +9,7 @@ interface LensFlareGenerate {
     /**
      * [KO] 화면 공간 HDR 하이라이트 추출 임계값 (0.1 ~ 20.0)
      * [EN] Screen-space HDR highlight extraction threshold (0.1 ~ 20.0)
-     * @defaultValue 2.0
+     * @defaultValue 1.8
      */
     threshold: number;
     /**
@@ -21,37 +21,37 @@ interface LensFlareGenerate {
     /**
      * [KO] 광학 축을 따른 고스트 간격 배율 (0.05 ~ 1.0)
      * [EN] Ghost spacing multiplier along the optical axis (0.05 ~ 1.0)
-     * @defaultValue 0.35
+     * @defaultValue 0.34
      */
     ghostSpacing: number;
     /**
      * [KO] 다중 고스트 밝기 강도 (0.0 ~ 5.0)
      * [EN] Multi-ghost brightness intensity (0.0 ~ 5.0)
-     * @defaultValue 1.0
+     * @defaultValue 1.15
      */
     ghostIntensity: number;
     /**
      * [KO] 프레넬 할로 링 반경 (0.1 ~ 0.9)
      * [EN] Fresnel halo ring radius (0.1 ~ 0.9)
-     * @defaultValue 0.45
+     * @defaultValue 0.46
      */
     haloRadius: number;
     /**
      * [KO] 프레넬 할로 링 두께 (0.02 ~ 0.5)
      * [EN] Fresnel halo ring thickness (0.02 ~ 0.5)
-     * @defaultValue 0.15
+     * @defaultValue 0.16
      */
     haloThickness: number;
     /**
      * [KO] 프레넬 할로 링 밝기 강도 (0.0 ~ 5.0)
      * [EN] Fresnel halo ring brightness intensity (0.0 ~ 5.0)
-     * @defaultValue 0.5
+     * @defaultValue 0.65
      */
     haloIntensity: number;
     /**
      * [KO] 고스트 및 할로 가장자리 색수차 분리 강도 (0.0 ~ 0.1)
      * [EN] Chromatic aberration dispersion strength at ghost/halo edges (0.0 ~ 0.1)
-     * @defaultValue 0.01
+     * @defaultValue 0.015
      */
     chromaticAberration: number;
 }
@@ -87,14 +87,14 @@ class LensFlareGenerate extends ASinglePassPostEffect {
 }
 
 definePositiveNumber(LensFlareGenerate, [
-    {key: 'threshold', value: 2.0, min: 0.1, max: 20.0},
+    {key: 'threshold', value: 1.8, min: 0.1, max: 20.0},
     {key: 'ghostCount', value: 8, min: 0, max: 12},
-    {key: 'ghostSpacing', value: 0.35, min: 0.05, max: 1.0},
-    {key: 'ghostIntensity', value: 1.0, min: 0.0, max: 5.0},
-    {key: 'haloRadius', value: 0.45, min: 0.1, max: 0.9},
-    {key: 'haloThickness', value: 0.15, min: 0.02, max: 0.5},
-    {key: 'haloIntensity', value: 0.5, min: 0.0, max: 5.0},
-    {key: 'chromaticAberration', value: 0.01, min: 0.0, max: 0.1},
+    {key: 'ghostSpacing', value: 0.34, min: 0.05, max: 1.0},
+    {key: 'ghostIntensity', value: 1.15, min: 0.0, max: 5.0},
+    {key: 'haloRadius', value: 0.46, min: 0.1, max: 0.9},
+    {key: 'haloThickness', value: 0.16, min: 0.02, max: 0.5},
+    {key: 'haloIntensity', value: 0.65, min: 0.0, max: 5.0},
+    {key: 'chromaticAberration', value: 0.015, min: 0.0, max: 0.1},
 ]);
 Object.freeze(LensFlareGenerate);
 export default LensFlareGenerate;

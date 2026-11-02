@@ -2,11 +2,11 @@ import * as RedGPU from "../../../../dist/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986333865";
 
 /**
- * [KO] LensFlare 예제
- * [EN] LensFlare example
+ * [KO] LensFlare (SkyAtmosphere) 예제
+ * [EN] LensFlare (SkyAtmosphere) example
  *
- * [KO] 화면 공간 HDR 하이라이트 고스트/할로와 태양 깊이 차폐 기반 다각형 조리개 보케·회절 스타버스트·아나모픽 스트릭을 결합한 하이브리드 렌즈 플레어(Lens Flare) 후처리 효과를 시연합니다.
- * [EN] Demonstrates the hybrid Lens Flare post-processing effect combining screen-space HDR highlight ghosts/halos with depth-occluded sun polygonal aperture bokeh, diffraction starbursts, and anamorphic streaks.
+ * [KO] SkyAtmosphere 대기 산란 환경에서 화면 공간 HDR 하이라이트 고스트/할로와 태양 깊이 차폐 기반 다각형 조리개 보케·회절 스타버스트·아나모픽 스트릭을 결합한 하이브리드 렌즈 플레어(Lens Flare) 후처리 효과를 시연합니다.
+ * [EN] Demonstrates the hybrid Lens Flare post-processing effect combining screen-space HDR highlight ghosts/halos with depth-occluded sun polygonal aperture bokeh, diffraction starbursts, and anamorphic streaks in a SkyAtmosphere environment.
  */
 
 const container = document.createElement('div');
@@ -160,8 +160,8 @@ const renderTestPane = (
                 });
             };
 
-            addPresetButton('Natural', 'setNatural');
             addPresetButton('Cinematic', 'setCinematic');
+            addPresetButton('Natural', 'setNatural');
             addPresetButton('Anamorphic', 'setAnamorphic');
             addPresetButton('Solar Max', 'setSolarMax');
             addPresetButton('Subtle', 'setSubtle');

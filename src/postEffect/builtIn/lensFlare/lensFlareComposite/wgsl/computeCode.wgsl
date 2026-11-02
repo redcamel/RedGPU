@@ -62,22 +62,15 @@ if (uniforms.sunActive == 1u) {
             let camRot = atan2(systemUniforms.camera.viewMatrix[0][1], systemUniforms.camera.viewMatrix[0][0]) * 0.5;
             let blades = max(uniforms.bladeCount, 4.0);
 
-            // When SkyAtmosphere is absent, synthesize the physical Gaussian solar core & inner aureole at sunUV
-            if (systemUniforms.useSkyAtmosphere == 0u) {
-                let coreSigma = SOLAR_ANGULAR_RADIUS * 2.4;
-                let gaussianDisk = exp(-(rSun * rSun) / (2.0 * coreSigma * coreSigma)) * 2.4;
-                let aureoleSigma = 0.024;
-                let aureoleSigmaSq = aureoleSigma * aureoleSigma;
-                let invAureole = inverseSqrt(rSun * rSun + aureoleSigmaSq);
-                let innerAureole = (aureoleSigmaSq * aureoleSigma) * (invAureole * invAureole * invAureole) * 0.65;
-                flareRGB += solarIrradiance * ((gaussianDisk + innerAureole) * sunTransmittance);
-            }
-
             // 1. Finite-Aperture Polychromatic Fraunhofer Diffraction & Spencer-CIE Glare PSF
+            // Without SkyAtmosphere (no physical solar disk in skybox), apply partial spatial coherence attenuation
             if (uniforms.starburstIntensity > 0.0) {
-                let babinetEdgeGain = 1.0 + 3.0 * sunTransmittance * (1.0 - sunTransmittance);
+                let hasSkyAtmo = systemUniforms.useSkyAtmosphere == 1u;
+                let spatialCoherence = select(0.18, 1.0, hasSkyAtmo);
+                let glareWeight = select(0.25, 1.0, hasSkyAtmo);
+                let babinetEdgeGain = (1.0 + 3.0 * sunTransmittance * (1.0 - sunTransmittance)) * spatialCoherence;
                 let psfStarburst = evaluateFraunhoferStarburst(dSun, rSun, blades, camRot, babinetEdgeGain);
-                flareRGB += solarIrradiance * (psfStarburst * uniforms.starburstIntensity * sunTransmittance);
+                flareRGB += solarIrradiance * (psfStarburst * uniforms.starburstIntensity * sunTransmittance * glareWeight);
             }
 
             // 2. Cylindrical Anamorphic Astigmatism Line-Spread Function (Lorentzian LSF)

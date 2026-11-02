@@ -11,13 +11,13 @@ interface LensFlareComposite {
     /**
      * [KO] 전체 렌즈 플레어 합성 강도 (0.0 ~ 10.0)
      * [EN] Overall lens flare composition intensity (0.0 ~ 10.0)
-     * @defaultValue 1.0
+     * @defaultValue 1.1
      */
     intensity: number;
     /**
      * [KO] 카메라 렌즈 표면 미세 먼지 산란 마스크 강도 (0.0 ~ 2.0)
      * [EN] Camera lens surface micro-dust scattering mask intensity (0.0 ~ 2.0)
-     * @defaultValue 0.2
+     * @defaultValue 0.25
      */
     lensDirtIntensity: number;
     /**
@@ -29,19 +29,19 @@ interface LensFlareComposite {
     /**
      * [KO] 광학 축을 따른 고스트 간격 배율 (0.05 ~ 1.0)
      * [EN] Ghost spacing multiplier along the optical axis (0.05 ~ 1.0)
-     * @defaultValue 0.35
+     * @defaultValue 0.34
      */
     ghostSpacing: number;
     /**
      * [KO] 다중 고스트 밝기 강도 (0.0 ~ 5.0)
      * [EN] Multi-ghost brightness intensity (0.0 ~ 5.0)
-     * @defaultValue 1.0
+     * @defaultValue 1.15
      */
     ghostIntensity: number;
     /**
      * [KO] 고스트 및 할로 가장자리 색수차 분리 강도 (0.0 ~ 0.1)
      * [EN] Chromatic aberration dispersion strength at ghost/halo edges (0.0 ~ 0.1)
-     * @defaultValue 0.01
+     * @defaultValue 0.015
      */
     chromaticAberration: number;
     /**
@@ -53,7 +53,7 @@ interface LensFlareComposite {
     /**
      * [KO] 태양/주광원 회절 빛갈라짐(Starburst) 강도 (0.0 ~ 5.0)
      * [EN] Sun/primary light diffraction starburst intensity (0.0 ~ 5.0)
-     * @defaultValue 0.8
+     * @defaultValue 1.0
      */
     starburstIntensity: number;
     /**
@@ -65,13 +65,13 @@ interface LensFlareComposite {
     /**
      * [KO] 프레넬 할로 링 반경 (0.1 ~ 0.9)
      * [EN] Fresnel halo ring radius (0.1 ~ 0.9)
-     * @defaultValue 0.45
+     * @defaultValue 0.46
      */
     haloRadius: number;
     /**
      * [KO] 프레넬 할로 링 밝기 강도 (0.0 ~ 5.0)
      * [EN] Fresnel halo ring brightness intensity (0.0 ~ 5.0)
-     * @defaultValue 0.5
+     * @defaultValue 0.65
      */
     haloIntensity: number;
 }
@@ -213,17 +213,17 @@ class LensFlareComposite extends ASinglePassPostEffect {
 }
 
 definePositiveNumber(LensFlareComposite, [
-    {key: 'intensity', value: 1.0, min: 0.0, max: 10.0},
-    {key: 'lensDirtIntensity', value: 0.2, min: 0.0, max: 2.0},
+    {key: 'intensity', value: 1.1, min: 0.0, max: 10.0},
+    {key: 'lensDirtIntensity', value: 0.25, min: 0.0, max: 2.0},
     {key: 'ghostCount', value: 8, min: 0, max: 12},
-    {key: 'ghostSpacing', value: 0.35, min: 0.05, max: 1.0},
-    {key: 'ghostIntensity', value: 1.0, min: 0.0, max: 5.0},
-    {key: 'chromaticAberration', value: 0.01, min: 0.0, max: 0.1},
+    {key: 'ghostSpacing', value: 0.34, min: 0.05, max: 1.0},
+    {key: 'ghostIntensity', value: 1.15, min: 0.0, max: 5.0},
+    {key: 'chromaticAberration', value: 0.015, min: 0.0, max: 0.1},
     {key: 'bladeCount', value: 8, min: 4, max: 12},
-    {key: 'starburstIntensity', value: 0.8, min: 0.0, max: 5.0},
+    {key: 'starburstIntensity', value: 1.0, min: 0.0, max: 5.0},
     {key: 'anamorphicIntensity', value: 0.0, min: 0.0, max: 5.0},
-    {key: 'haloRadius', value: 0.45, min: 0.1, max: 0.9},
-    {key: 'haloIntensity', value: 0.5, min: 0.0, max: 5.0},
+    {key: 'haloRadius', value: 0.46, min: 0.1, max: 0.9},
+    {key: 'haloIntensity', value: 0.65, min: 0.0, max: 5.0},
 ]);
 Object.freeze(LensFlareComposite);
 export default LensFlareComposite;

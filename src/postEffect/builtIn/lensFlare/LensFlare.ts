@@ -24,9 +24,10 @@ import LensFlareGenerate from "./lensFlareGenerate/LensFlareGenerate";
  * lensFlare.intensity = 1.2;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/lensFlare/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/lensFlareSkyAtmosphere/" style="width:100%; height:500px;"></iframe>
  *
- * @see [LensFlare example](/RedGPU/examples/postEffect/lens/lensFlare/)
+ * @see [LensFlare (SkyAtmosphere) example](/RedGPU/examples/postEffect/lens/lensFlareSkyAtmosphere/)
+ * @see [LensFlare (SkyBox) example](/RedGPU/examples/postEffect/lens/lensFlareSkyBox/)
  * @category PostEffect
  */
 class LensFlare extends AMultiPassPostEffect {
@@ -60,14 +61,14 @@ class LensFlare extends AMultiPassPostEffect {
         this.#effect_blur = blurPass;
         this.#effect_composite = compositePass;
 
-        this.setNatural();
+        this.setCinematic();
     }
 
     /**
      * [KO] 전체 렌즈 플레어 최종 합성 강도(0.0 ~ 10.0)를 반환하거나 설정합니다.
      * [EN] Returns or sets the overall lens flare final composition intensity (0.0 ~ 10.0).
      *
-     * @defaultValue 1.0
+     * @defaultValue 1.1
      * @returns
      * [KO] 렌즈 플레어 합성 강도
      * [EN] Lens flare composition intensity
@@ -84,7 +85,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 화면 공간 HDR 하이라이트 추출이 시작되는 선형 휘도 임계값(0.1 ~ 20.0)을 반환하거나 설정합니다.
      * [EN] Returns or sets the linear luminance threshold (0.1 ~ 20.0) where screen-space HDR highlight extraction begins.
      *
-     * @defaultValue 2.0
+     * @defaultValue 1.8
      * @returns
      * [KO] 선형 HDR 휘도 임계값
      * [EN] Linear HDR luminance threshold
@@ -120,7 +121,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 화면 중심 광학 축을 따라 배치되는 고스트 간격 배율(0.05 ~ 1.0)을 반환하거나 설정합니다.
      * [EN] Returns or sets the ghost spacing multiplier (0.05 ~ 1.0) along the screen-center optical axis.
      *
-     * @defaultValue 0.35
+     * @defaultValue 0.34
      * @returns
      * [KO] 고스트 간격 배율
      * [EN] Ghost spacing multiplier
@@ -138,7 +139,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 다중 반사 고스트의 밝기 강도(0.0 ~ 5.0)를 반환하거나 설정합니다.
      * [EN] Returns or sets the brightness intensity (0.0 ~ 5.0) of multi-reflection ghosts.
      *
-     * @defaultValue 1.0
+     * @defaultValue 1.15
      * @returns
      * [KO] 고스트 밝기 강도
      * [EN] Ghost brightness intensity
@@ -156,7 +157,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 프레넬 할로 링(Fresnel Halo Ring)의 반경(0.1 ~ 0.9)을 반환하거나 설정합니다.
      * [EN] Returns or sets the radius (0.1 ~ 0.9) of the Fresnel halo ring.
      *
-     * @defaultValue 0.45
+     * @defaultValue 0.46
      * @returns
      * [KO] 할로 링 반경
      * [EN] Halo ring radius
@@ -174,7 +175,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 프레넬 할로 링의 두께(0.02 ~ 0.5)를 반환하거나 설정합니다.
      * [EN] Returns or sets the thickness (0.02 ~ 0.5) of the Fresnel halo ring.
      *
-     * @defaultValue 0.15
+     * @defaultValue 0.16
      * @returns
      * [KO] 할로 링 두께
      * [EN] Halo ring thickness
@@ -191,7 +192,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 프레넬 할로 링의 밝기 강도(0.0 ~ 5.0)를 반환하거나 설정합니다.
      * [EN] Returns or sets the brightness intensity (0.0 ~ 5.0) of the Fresnel halo ring.
      *
-     * @defaultValue 0.5
+     * @defaultValue 0.65
      * @returns
      * [KO] 할로 링 밝기 강도
      * [EN] Halo ring brightness intensity
@@ -209,7 +210,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 고스트 및 할로 가장자리의 방사형 색수차(Chromatic Dispersion) 분리 강도(0.0 ~ 0.1)를 반환하거나 설정합니다.
      * [EN] Returns or sets the radial chromatic aberration dispersion strength (0.0 ~ 0.1) at ghost and halo edges.
      *
-     * @defaultValue 0.01
+     * @defaultValue 0.015
      * @returns
      * [KO] 색수차 분리 강도
      * [EN] Chromatic aberration strength
@@ -244,7 +245,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 태양/주광원의 조리개 회절 빛갈라짐(Starburst) 강도(0.0 ~ 5.0)를 반환하거나 설정합니다.
      * [EN] Returns or sets the aperture diffraction starburst intensity (0.0 ~ 5.0) of the sun/primary light.
      *
-     * @defaultValue 0.8
+     * @defaultValue 1.0
      * @returns
      * [KO] 스타버스트 강도
      * [EN] Starburst intensity
@@ -278,7 +279,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 카메라 렌즈 표면 미세 먼지 산란 마스크 강도(0.0 ~ 2.0)를 반환하거나 설정합니다.
      * [EN] Returns or sets the camera lens surface micro-dust scattering mask intensity (0.0 ~ 2.0).
      *
-     * @defaultValue 0.2
+     * @defaultValue 0.25
      * @returns
      * [KO] 렌즈 먼지 산란 강도
      * [EN] Lens dirt scattering intensity
@@ -295,7 +296,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [KO] 화면 공간 플레어 소프트닝 가우시안 블러 반경(1 ~ 64)을 반환하거나 설정합니다.
      * [EN] Returns or sets the screen-space flare softening Gaussian blur radius (1 ~ 64).
      *
-     * @defaultValue 12
+     * @defaultValue 14
      * @returns
      * [KO] 블러 반경
      * [EN] Blur radius

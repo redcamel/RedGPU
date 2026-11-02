@@ -125,8 +125,8 @@ const renderTestPane = (redGPUContext, targetView, effect, directionalLight, con
                 });
             };
 
-            addPresetButton('Natural', 'setNatural');
             addPresetButton('Cinematic', 'setCinematic');
+            addPresetButton('Natural', 'setNatural');
             addPresetButton('Anamorphic', 'setAnamorphic');
             addPresetButton('Solar Max', 'setSolarMax');
             addPresetButton('Subtle', 'setSubtle');
