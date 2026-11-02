@@ -394,13 +394,13 @@ fn main(inputData: InputData) -> OutputFragment {
             let atmH = u_atmo.atmosphereHeight;
             let skyIntensity = u_atmo.sunIntensity;
             let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
-            let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+            let atmoMipCount = f32(textureNumLevels(skyAtmosphere_skyLightLUTTextureArray) - 1);
             let atmoMipLevel = roughness * atmoMipCount;
-            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
+            let specSkyScat = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, R, 0, atmoMipLevel).rgb * skyIntensity * preExposure;
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
 
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
+            let skyIrradiance = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, N, 1, 3.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
@@ -433,7 +433,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let u_atmo = systemUniforms.skyAtmosphere;
             let skyIntensity = u_atmo.sunIntensity;
             let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-            let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * skyIntensity * preExposure;
+            let backSkyScat = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, prefilterTextureSampler, -N, 0, 0.0).rgb * skyIntensity * preExposure;
             backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
         }
         let transmittedIBL = backScatteringColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric);

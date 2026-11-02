@@ -265,9 +265,6 @@ class Renderer {
 
     #renderPassViewBasicLayer(view: View3D, renderPassDescriptor: GPURenderPassDescriptor) {
         const {renderViewStateData, skybox, skyAtmosphere, axis, redGPUContext, scene} = view
-        if (skyAtmosphere) {
-            skyAtmosphere.update(view)
-        }
         redGPUContext.commandEncoderManager.addMainRenderPass(renderPassDescriptor, (viewRenderPassEncoder) => {
             updateViewportAndScissor(view, viewRenderPassEncoder, 'DEFAULT')
 

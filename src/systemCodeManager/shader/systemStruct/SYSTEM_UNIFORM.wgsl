@@ -51,8 +51,8 @@ struct SystemUniform {
 @group(0) @binding(13) var atmosphereSampler: sampler;
 @group(0) @binding(14) var transmittanceTexture: texture_2d<f32>;
 
-@group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
-@group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
+@group(0) @binding(15) var skyAtmosphere_skyLightLUTTextureArray: texture_cube_array<f32>;
+
 
 #redgpu_include systemStruct.globalVertexStruct;
 @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;

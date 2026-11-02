@@ -34,6 +34,7 @@ let temp = mat4.create()
 let temp2 = mat4.create()
 let temp3 = mat4.create()
 
+
 /**
  * [KO] 3D 렌더링을 위한 뷰 클래스입니다.
  * [EN] View class for 3D rendering.
@@ -71,6 +72,8 @@ class View3D extends AView {
     #shadowDepthSampler: GPUSampler
     #basicSampler: GPUSampler
     #basicPackedSampler: GPUSampler
+    #emptySkyAtmosphereCubeArrayTexture: GPUTexture
+    #emptySkyAtmosphereCubeArrayView: GPUTextureView
 
     #prevIBL_prefilterTexture: DirectCubeTexture
     #prevIBL_irradianceTexture: DirectCubeTexture
@@ -422,6 +425,12 @@ class View3D extends AView {
             this.skybox = null;
         }
 
+        if (this.#emptySkyAtmosphereCubeArrayTexture) {
+            this.#emptySkyAtmosphereCubeArrayTexture.destroy();
+            this.#emptySkyAtmosphereCubeArrayTexture = null;
+            this.#emptySkyAtmosphereCubeArrayView = null;
+        }
+
         keepLog(`🧹 ${this.name} destroy 완료`)
     }
 
@@ -442,6 +451,14 @@ class View3D extends AView {
         shadowManager.update(redGPUContext)
         const {directionalShadowManager} = shadowManager
 
+        if (skyAtmosphere) {
+            skyAtmosphere.updateUniformParams(this);
+        }
+        this.#updateSystemUniform();
+        if (skyAtmosphere) {
+            skyAtmosphere.updateLUTs(this);
+        }
+
         const ibl_prefilterTexture = ibl?.prefilterTexture?.gpuTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture
         const shadowDepthTextureView = directionalShadowManager.shadowDepthTextureView
@@ -452,8 +469,7 @@ class View3D extends AView {
             let needResetBindGroup = true
             let prevInfo = this.#prevInfoList[key]
 
-            const skyAtmosphereReflectionLUT = skyAtmosphere?.reflectionLUT;
-            const skyAtmosphereIrradianceLUT = skyAtmosphere?.irradianceLUT;
+            const skyAtmosphereSkyLightLUTTextureArray = skyAtmosphere?.skyLightLUTTextureArray;
 
             const globalSSAOVertexGPUBuffer = redGPUContext.globalVertexSSBO.gpuBuffer;
             const globalSSAOFragmentGPUBuffer = redGPUContext.globalFragmentSSBO_PBR.gpuBuffer;
@@ -463,10 +479,8 @@ class View3D extends AView {
                 needResetBindGroup = (
                     prevInfo.ibl !== ibl ||
                     prevInfo.skyAtmosphere !== skyAtmosphere ||
-                    prevInfo.skyAtmosphereReflectionLUT !== skyAtmosphereReflectionLUT ||
-                    prevInfo.skyAtmosphereReflectionLUTRevision !== skyAtmosphereReflectionLUT?.revision ||
-                    prevInfo.skyAtmosphereIrradianceLUT !== skyAtmosphereIrradianceLUT ||
-                    prevInfo.skyAtmosphereIrradianceLUTRevision !== skyAtmosphereIrradianceLUT?.revision ||
+                    prevInfo.skyAtmosphereSkyLightLUTTextureArray !== skyAtmosphereSkyLightLUTTextureArray ||
+                    prevInfo.skyAtmosphereSkyLightLUTTextureArrayRevision !== skyAtmosphereSkyLightLUTTextureArray?.revision ||
                     prevInfo.ibl_prefilterTexture !== ibl_prefilterTexture ||
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
@@ -484,10 +498,8 @@ class View3D extends AView {
             this.#prevInfoList[key] = {
                 ibl,
                 skyAtmosphere,
-                skyAtmosphereReflectionLUT,
-                skyAtmosphereReflectionLUTRevision: skyAtmosphereReflectionLUT?.revision,
-                skyAtmosphereIrradianceLUT,
-                skyAtmosphereIrradianceLUTRevision: skyAtmosphereIrradianceLUT?.revision,
+                skyAtmosphereSkyLightLUTTextureArray,
+                skyAtmosphereSkyLightLUTTextureArrayRevision: skyAtmosphereSkyLightLUTTextureArray?.revision,
                 ibl_prefilterTexture,
                 ibl_irradianceTexture,
                 renderPath1ResultTextureView,
@@ -499,8 +511,6 @@ class View3D extends AView {
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
         }
-
-        this.#updateSystemUniform();
     }
 
     #updateSystemUniform() {
@@ -653,11 +663,12 @@ class View3D extends AView {
                 },
                 {
                     binding: 15,
-                    resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.irradianceLUT, this.skyAtmosphere?.irradianceLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
-                },
-                {
-                    binding: 16,
-                    resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.reflectionLUT, this.skyAtmosphere?.reflectionLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                    resource: this.skyAtmosphere?.skyLightLUTTextureArray?.gpuTexture
+                        ? resourceManager.getGPUResourceCubeTextureView(
+                            this.skyAtmosphere.skyLightLUTTextureArray,
+                            {dimension: 'cube-array'}
+                        )
+                        : this.#emptySkyAtmosphereCubeArrayView
                 },
                 {
                     binding: 17,
@@ -756,6 +767,13 @@ class View3D extends AView {
             addressModeU: GPU_ADDRESS_MODE.REPEAT,
             addressModeV: GPU_ADDRESS_MODE.REPEAT
         }).gpuSampler
+        this.#emptySkyAtmosphereCubeArrayTexture = this.redGPUContext.gpuDevice.createTexture({
+            size: {width: 1, height: 1, depthOrArrayLayers: 6},
+            format: 'rgba8unorm',
+            usage: GPUTextureUsage.TEXTURE_BINDING,
+            label: 'VIEW3D_EMPTY_SKY_ATMOSPHERE_CUBE_ARRAY_TEXTURE',
+        });
+        this.#emptySkyAtmosphereCubeArrayView = this.#emptySkyAtmosphereCubeArrayTexture.createView({dimension: 'cube-array'});
     }
 }
 

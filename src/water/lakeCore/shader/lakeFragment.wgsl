@@ -537,13 +537,13 @@ fn main(inputData: InputData) -> OutputFragment {
     }
     if (u_useSkyAtmosphere) {
         let u_atmo = systemUniforms.skyAtmosphere;
-        let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+        let atmoMipCount = f32(textureNumLevels(skyAtmosphere_skyLightLUTTextureArray) - 1);
         let maxAllowedAtmoMip = min(atmoMipCount * 0.25, 2.0);
         let atmoMipLevel = clamp(effectiveRoughnessIBL * atmoMipCount, 0.0, maxAllowedAtmoMip);
-        let atmoColor = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * u_atmo.sunIntensity * preExposure;
+        let atmoColor = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, R, 0, atmoMipLevel).rgb * u_atmo.sunIntensity * preExposure;
         rawSkyReflection = rawSkyReflection + atmoColor;
 
-        let atmoIrradiance = textureSample(atmosphereIrradianceLUT, atmosphereSampler, worldNormal).rgb * u_atmo.sunIntensity * preExposure;
+        let atmoIrradiance = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, worldNormal, 1, 3.0).rgb * u_atmo.sunIntensity * preExposure;
         skyDiffuseIrradiance = skyDiffuseIrradiance + atmoIrradiance;
     }
 

@@ -1234,8 +1234,8 @@ class ResourceManager extends RedGPUObject {
                         {binding: 12, visibility: GPUShaderStage.FRAGMENT, texture: {}},
                         {binding: 13, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
                         {binding: 14, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                        {binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
-                        {binding: 16, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
+                        {binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube-array"}},
+
                         {
                             binding: 17,
                             visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,

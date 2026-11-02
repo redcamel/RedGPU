@@ -298,7 +298,7 @@ fn main(inputData:InputData) -> OutputFragment {
         let u_atmo = systemUniforms.skyAtmosphere;
         let skyIntensity = u_atmo.sunIntensity;
         let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, N.y, u_atmo.atmosphereHeight);
-        let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity;
+        let skyIrradiance = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, N, 1, 3.0).rgb * skyIntensity;
         ambientContribution = (ambientContribution * diffTrans) + (albedo * skyIrradiance);
     }
     
