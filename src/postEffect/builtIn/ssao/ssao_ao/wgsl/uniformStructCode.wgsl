@@ -3,7 +3,7 @@
 #redgpu_include math.PI2
 #redgpu_include math.reconstruct.getViewNormalFromGNormalBuffer
 
-const GTAO_HALF_PI: f32 = 1.5707963267948966;
+const GTAO_HALF_PI: f32 = PI * 0.5;
 
 struct Uniforms {
     radius: f32,
@@ -40,7 +40,7 @@ fn reconstructViewPos(uv: vec2<f32>, linearZ: f32, invFocalLen: vec2<f32>, invJi
  * [EN] Encodes a 3D unit normal vector into 2-channel ([-1, 1]^2) octahedral coordinates.
  */
 fn octEncode(n: vec3<f32>) -> vec2<f32> {
-    let invL1 = 1.0 / max(abs(n.x) + abs(n.y) + abs(n.z), 1e-6);
+    let invL1 = 1.0 / (abs(n.x) + abs(n.y) + abs(n.z));
     let p = n.xy * invL1;
     let wrapped = (1.0 - abs(p.yx)) * select(vec2<f32>(-1.0), vec2<f32>(1.0), p >= vec2<f32>(0.0));
     return select(p, wrapped, n.z < 0.0);

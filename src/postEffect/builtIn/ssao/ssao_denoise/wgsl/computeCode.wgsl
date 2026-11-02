@@ -83,7 +83,7 @@
             // 1차 테일러 탄젠트 평면 예측 깊이: Z_plane(dx, dy) = Z_c + dZx * dx + dZy * dy
             let expectedLinZ = centerLinZ + dZx * f32(dx) + dZy * f32(dy);
             let planeError   = abs(sampleLinZ - expectedLinZ);
-            let depthWeight  = saturate(1.0 - planeError / max(1e-6, planeToleranceZ));
+            let depthWeight  = saturate(1.0 - planeError / planeToleranceZ);
 
             let sOct = sampleData.ba;
             var sN   = vec3<f32>(sOct.x, sOct.y, 1.0 - abs(sOct.x) - abs(sOct.y));
