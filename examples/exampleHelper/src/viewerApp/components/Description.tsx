@@ -119,7 +119,8 @@ const containerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    pointerEvents: 'none'
+    pointerEvents: 'none',
+    userSelect: 'none'
 };
 
 const editorialWrapperStyle: React.CSSProperties = {
@@ -128,7 +129,7 @@ const editorialWrapperStyle: React.CSSProperties = {
     alignItems: 'stretch',
     padding: 0,
     backgroundColor: 'transparent',
-    pointerEvents: 'auto'
+    pointerEvents: 'none'
 };
 
 const accentBarStyle: React.CSSProperties = {
@@ -272,7 +273,8 @@ const toggleButtonStyle: React.CSSProperties = {
     cursor: 'pointer',
     borderRadius: '9999px',
     flexShrink: 0,
-    transition: 'all 0.18s ease'
+    transition: 'all 0.18s ease',
+    pointerEvents: 'auto'
 };
 
 export default Description;
