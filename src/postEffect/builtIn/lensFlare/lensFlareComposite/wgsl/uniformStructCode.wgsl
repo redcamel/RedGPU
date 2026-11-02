@@ -142,27 +142,31 @@ fn evaluateFraunhoferStarburst(
     let qPerp = rSun * sin(dTheta);
     let qPara = rSun * cos(dTheta);
 
-    // Finite-aperture angular diffraction spread convolved with solar angular diameter (2 * SOLAR_ANGULAR_RADIUS)
-    let sigma0 = SOLAR_ANGULAR_RADIUS * 0.35;
-    let angularSpread = SOLAR_ANGULAR_RADIUS * 2.0;
-    let sigmaPerpSq = sigma0 * sigma0 + (angularSpread * qPara) * (angularSpread * qPara);
+    // 1. Transverse profile: solar disk radius R_sun convolved with aperture vertex angular spread sin(pi / N)
+    let sinHalfBlade = sin(PI / blades);
+    let rSunDiskSq = SOLAR_ANGULAR_RADIUS * SOLAR_ANGULAR_RADIUS;
+    let edgeAngularSpread = SOLAR_ANGULAR_RADIUS * sinHalfBlade * qPara;
+    let sigmaPerpSq = rSunDiskSq + edgeAngularSpread * edgeAngularSpread;
     let lorentzianTransverse = sigmaPerpSq / (qPerp * qPerp + sigmaPerpSq);
 
-    // Asymptotic 2D polygonal Fourier transform decay along edge normal: (q_c / sqrt(q_para^2 + q_c^2))^3
-    let qc = SOLAR_ANGULAR_RADIUS * 14.0;
+    // 2. Longitudinal profile: 2D regular N-gon vertex Fourier transform decay along the edge normal,
+    //    scaled by the 2D polygonal vertex diffraction gain R_c = R_sun / sin^2(pi / N)
+    let qc = SOLAR_ANGULAR_RADIUS / max(sinHalfBlade * sinHalfBlade, 1e-4);
     let qcSq = qc * qc;
     let invParaLen = inverseSqrt(qPara * qPara + qcSq);
     let fourierLongitudinal = (qcSq * qc) * (invParaLen * invParaLen * invParaLen);
-    let coreTransition = (qPara * qPara) / (qPara * qPara + (SOLAR_ANGULAR_RADIUS * 2.0) * (SOLAR_ANGULAR_RADIUS * 2.0));
+
+    // 3. Azimuthal sector overlap normalization at the exact solar disk boundary (R_sun)
+    let coreTransition = (qPara * qPara) / (qPara * qPara + rSunDiskSq);
     let primarySpike = lorentzianTransverse * fourierLongitudinal * coreTransition;
 
     // Spencer-CIE small-angle forward scattering glare PSF: (sigma_s / sqrt(r^2 + sigma_s^2))^3
-    let sigmaGlare = SOLAR_ANGULAR_RADIUS * 10.0;
+    let sigmaGlare = qc;
     let sigmaGlareSq = sigmaGlare * sigmaGlare;
     let invGlareLen = inverseSqrt(rSun * rSun + sigmaGlareSq);
     let cieGlarePsf = (sigmaGlareSq * sigmaGlare) * (invGlareLen * invGlareLen * invGlareLen);
 
-    return cieGlarePsf * glareWeight + primarySpike * edgeDiffractionGain * 0.75;
+    return cieGlarePsf * glareWeight + primarySpike * edgeDiffractionGain;
 }
 
 fn hash12(p: vec2<f32>) -> f32 {
