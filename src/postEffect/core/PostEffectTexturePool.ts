@@ -253,8 +253,12 @@ class PostEffectTexturePool extends RedGPUObject {
             texture = list.shift()!;
         } else {
             this.#allocationCount++;
-            const baseUsage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST;
-            const usage = useStorage ? (baseUsage | GPUTextureUsage.STORAGE_BINDING) : baseUsage;
+            const renderTargetUsage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING;
+            const usage = useStorage
+                ? (renderTargetUsage | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING)
+                : format === 'rgba8unorm'
+                    ? renderTargetUsage
+                    : (renderTargetUsage | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST);
             texture = resourceManager.createManagedTexture({
                 size: {width, height},
                 format,

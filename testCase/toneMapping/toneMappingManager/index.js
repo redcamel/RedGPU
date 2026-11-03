@@ -48,7 +48,7 @@ redUnit.testGroup(
             setup(run, (ctx, manager) => {
                 manager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.LINEAR;
                 const effect = manager.toneMapping;
-                const checkInstance = effect instanceof RedGPU.PostEffect.Core.ASinglePassPostEffect;
+                const checkInstance = Boolean(effect && effect.isInstanceofPostEffect);
                 const checkMode = manager.mode === RedGPU.ToneMapping.TONE_MAPPING_MODE.LINEAR;
                 run(checkInstance && checkMode);
             });

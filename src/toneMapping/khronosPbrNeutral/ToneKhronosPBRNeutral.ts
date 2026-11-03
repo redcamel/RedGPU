@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./computeCode.wgsl"
 import uniformStructCode from "../core/uniformStructCode.wgsl"
 import AToneMappingEffect from "../core/AToneMappingEffect";
@@ -39,7 +38,8 @@ class ToneKhronosPBRNeutral extends AToneMappingEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_TONE_MAPPING_KHRONOS_PBR_NEUTRAL',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
+            computeCode,
+            uniformStructCode
         );
     }
 }
