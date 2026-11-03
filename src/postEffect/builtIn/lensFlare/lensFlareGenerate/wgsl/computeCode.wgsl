@@ -1,4 +1,6 @@
+let index = vec2<u32>(global_id.xy);
 let outDim = vec2<f32>(postEffectOutputDimensions);
+let uv = (vec2<f32>(index) + 0.5) / outDim;
 let aspect = outDim.x / max(outDim.y, 1.0);
 let srcTexelSize = 1.0 / vec2<f32>(textureDimensions(sourceTexture));
 
@@ -71,4 +73,4 @@ if (uniforms.haloIntensity > 0.0) {
     }
 }
 
-return vec4<f32>(flareColor, 1.0);
+textureStore(outputTexture, index, vec4<f32>(flareColor, 1.0));

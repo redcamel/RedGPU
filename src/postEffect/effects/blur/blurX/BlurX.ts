@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 import View3D from "../../../../display/view/View3D";
-import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
-import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
+import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
-import fragmentCode from "./wgsl/fragmentCode.wgsl";
+import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface BlurX {
@@ -32,7 +32,7 @@ interface BlurX {
  * @see [BlurX example](/RedGPU/examples/postEffect/blur/blurX/)
  * @category Blur
  */
-class BlurX extends ASingleRenderPassPostEffect {
+class BlurX extends ASinglePassPostEffect {
 
     /**
      * [KO] BlurX 인스턴스를 생성합니다.
@@ -52,11 +52,16 @@ class BlurX extends ASingleRenderPassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext, options?: { isLdr?: boolean }) {
         const isLdr = options?.isLdr ?? true;
-        super(redGPUContext, {isLdr, inPlace: false});
+        super(redGPUContext, {
+            workSizeX: 16,
+            workSizeY: 16,
+            workSizeZ: 1,
+            isLdr
+        });
         this.init(
             redGPUContext,
             'POST_EFFECT_BLUR_X',
-            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode)
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 

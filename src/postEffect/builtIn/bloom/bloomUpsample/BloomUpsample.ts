@@ -38,7 +38,6 @@ class BloomUpsample extends ASingleRenderPassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {
-            inPlace: true,
             blendState: {
                 color: {
                     srcFactor: 'src-alpha',

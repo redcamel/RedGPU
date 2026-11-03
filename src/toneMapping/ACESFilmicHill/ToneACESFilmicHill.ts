@@ -39,7 +39,7 @@ class ToneACESFilmicHill extends AToneMappingEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_TONE_MAPPING_ACES_FILMIC_HILL',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
     }
 }

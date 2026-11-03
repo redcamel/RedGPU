@@ -46,6 +46,26 @@ class PostEffectManager extends RedGPUObject {
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
     #initialResult: IPostEffectResult = {texture: null as any, textureView: null as any};
+    #projectionInfo: {
+        projectionMatrix: mat4;
+        projectionViewMatrix: mat4;
+        noneJitterProjectionMatrix: mat4;
+        noneJitterProjectionViewMatrix: mat4;
+        inverseProjectionMatrix: mat4;
+        inverseProjectionViewMatrix: mat4;
+        prevNoneJitterProjectionViewMatrix: mat4;
+    } = {
+        projectionMatrix: null,
+        projectionViewMatrix: null,
+        noneJitterProjectionMatrix: null,
+        noneJitterProjectionViewMatrix: null,
+        inverseProjectionMatrix: null,
+        inverseProjectionViewMatrix: null,
+        prevNoneJitterProjectionViewMatrix: null
+    };
+    #preExposureEntry = {key: 'preExposure', value: 1};
+    #devicePixelRatioEntry = {key: 'devicePixelRatio', value: 1};
+    #systemExtraEntries = [this.#preExposureEntry, this.#devicePixelRatioEntry];
 
     #gbufferBindGroupLayoutMSAA: GPUBindGroupLayout;
     #gbufferBindGroupLayoutNonMSAA: GPUBindGroupLayout;
@@ -520,16 +540,17 @@ class PostEffectManager extends RedGPUObject {
 
         SystemUniformUpdater.updateTime(renderViewStateData, time.members, this.#uniformDataF32, this.#uniformDataU32);
 
+        const projectionInfo = this.#projectionInfo;
+        projectionInfo.projectionMatrix = projectionMatrix;
+        projectionInfo.projectionViewMatrix = projectionViewMatrix;
+        projectionInfo.noneJitterProjectionMatrix = noneJitterProjectionMatrix;
+        projectionInfo.noneJitterProjectionViewMatrix = noneJitterProjectionViewMatrix;
+        projectionInfo.inverseProjectionMatrix = inverseProjectionMatrix;
+        projectionInfo.inverseProjectionViewMatrix = mat4.invert(temp3, projectionViewMatrix);
+        projectionInfo.prevNoneJitterProjectionViewMatrix = antialiasingManager.useTAA ? this.#view.taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix;
+
         SystemUniformUpdater.updateProjection(
-            {
-                projectionMatrix,
-                projectionViewMatrix,
-                noneJitterProjectionMatrix,
-                noneJitterProjectionViewMatrix,
-                inverseProjectionMatrix,
-                inverseProjectionViewMatrix: mat4.invert(temp3, projectionViewMatrix),
-                prevNoneJitterProjectionViewMatrix: antialiasingManager.useTAA ? this.#view.taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix
-            },
+            projectionInfo,
             projection.members,
             this.#uniformDataF32,
             this.#uniformDataU32
@@ -537,10 +558,9 @@ class PostEffectManager extends RedGPUObject {
 
         SystemUniformUpdater.updateSkyAtmosphere(skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32);
 
-        updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-            {key: 'preExposure', value: builtInEffectManager.autoExposure.preExposure},
-            {key: 'devicePixelRatio', value: devicePixelRatio}
-        ]);
+        this.#preExposureEntry.value = builtInEffectManager.autoExposure.preExposure;
+        this.#devicePixelRatioEntry.value = devicePixelRatio;
+        updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, this.#systemExtraEntries);
 
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
     }
@@ -563,9 +583,10 @@ class PostEffectManager extends RedGPUObject {
         if (this.#texturePool) {
             this.#videoMemorySize += this.#texturePool.videoMemorySize;
         }
-        this.#postEffects.forEach(effect => {
-            this.#videoMemorySize += effect.videoMemorySize
-        })
+        const postEffects = this.#postEffects;
+        for (let i = 0, len = postEffects.length; i < len; i++) {
+            this.#videoMemorySize += postEffects[i].videoMemorySize;
+        }
     }
 
     #renderToStorageTexture(view: View3D): IPostEffectResult {

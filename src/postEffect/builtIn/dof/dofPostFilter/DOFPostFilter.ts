@@ -23,7 +23,7 @@ class DOFPostFilter extends ASinglePassPostEffect {
     #passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND;
 
     constructor(redGPUContext: RedGPUContext, passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND) {
-        super(redGPUContext);
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.#passMode = passMode;
         this.init(
             redGPUContext,

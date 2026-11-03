@@ -1,3 +1,6 @@
+let index = vec2<u32>(global_id.xy);
+let outDim = vec2<f32>(postEffectOutputDimensions);
+let uv = (vec2<f32>(index) + 0.5) / outDim;
 let texelSize = 1.0 / vec2<f32>(textureDimensions(sourceTexture));
 
 let dx = texelSize.x;
@@ -45,4 +48,4 @@ let w4 = karisWeight(box4) * 0.125;
 let totalWeight = max(w0 + w1 + w2 + w3 + w4, 1e-5);
 let outColor = (box0 * w0 + box1 * w1 + box2 * w2 + box3 * w3 + box4 * w4) / totalWeight;
 
-return vec4<f32>(outColor, 1.0);
+textureStore(outputTexture, index, vec4<f32>(outColor, 1.0));

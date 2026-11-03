@@ -109,7 +109,6 @@ class LensFlareComposite extends ASingleRenderPassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {
-            inPlace: true,
             blendState: {
                 color: {
                     srcFactor: 'one',

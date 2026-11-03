@@ -35,7 +35,6 @@ class SkyAtmospherePostEffect extends ASingleRenderPassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext, skyAtmosphere: SkyAtmosphere) {
         super(redGPUContext, {
-            inPlace: true,
             blendState: {
                 color: {
                     srcFactor: 'one',

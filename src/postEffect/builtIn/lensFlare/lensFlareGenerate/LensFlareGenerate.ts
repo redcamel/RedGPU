@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
-import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
-import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
-import fragmentCode from "./wgsl/fragmentCode.wgsl";
+import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface LensFlareGenerate {
@@ -67,7 +67,7 @@ interface LensFlareGenerate {
  *
  * @category PostEffect
  */
-class LensFlareGenerate extends ASingleRenderPassPostEffect {
+class LensFlareGenerate extends ASinglePassPostEffect {
     /**
      * [KO] `LensFlareGenerate` 인스턴스를 생성합니다.
      * [EN] Creates a `LensFlareGenerate` instance.
@@ -77,11 +77,16 @@ class LensFlareGenerate extends ASingleRenderPassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {inPlace: false});
+        super(redGPUContext, {
+            workSizeX: 8,
+            workSizeY: 8,
+            workSizeZ: 1,
+            isLdr: false
+        });
         this.init(
             redGPUContext,
             'POST_EFFECT_LENS_FLARE_GENERATE',
-            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode)
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 }

@@ -32,17 +32,16 @@ interface ASinglePassPostEffect {
  */
 abstract class ASinglePassPostEffect extends RedGPUObject {
     #isLdr: boolean = false
+    #useGroup2: boolean = true
     #computeShaderMSAA: GPUShaderModule
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
     #computeBindGroupLayout1: GPUBindGroupLayout
     #outputBindGroupLayout: GPUBindGroupLayout
-    #computeBindGroup0List_swap0: GPUBindGroup
-    #computeBindGroup0List_swap1: GPUBindGroup
+    #computeBindGroup0: GPUBindGroup
     #computeBindGroup1: GPUBindGroup
     #outputBindGroup: GPUBindGroup
-    #computeBindGroupEntries0_swap0: GPUBindGroupEntry[]
-    #computeBindGroupEntries0_swap1: GPUBindGroupEntry[]
+    #computeBindGroupEntries0: GPUBindGroupEntry[]
     #computeBindGroupEntries1: GPUBindGroupEntry[]
     #outputBindGroupEntries: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
@@ -53,6 +52,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #systemUniformsInfo
     #storageInfo
     #name: string
+    #passLabel: string
     #SHADER_INFO_MSAA
     #SHADER_INFO_NON_MSAA
     #prevWidth: number = 0
@@ -68,6 +68,9 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #bindGroupCache0 = new Map<string, GPUBindGroup>();
     #bindGroupCache1: GPUBindGroup;
     #bindGroupCache3 = new Map<number, GPUBindGroup>();
+    #currentGbufferBindGroup: GPUBindGroup = null
+    #currentDispatchX: number = 1
+    #currentDispatchY: number = 1
     #destroyed: boolean = false
 
     /**
@@ -262,8 +265,12 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#systemUniformsInfo = null
         this.#storageInfo = null
         this.#name = null
+        this.#passLabel = null
         this.#SHADER_INFO_MSAA = null
         this.#SHADER_INFO_NON_MSAA = null
+        this.#computePipeline = null
+        this.#computePipelineMSAA = null
+        this.#computePipelineNonMSAA = null
     }
 
     /**
@@ -285,18 +292,28 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         nonMsaa: string
     }) {
         this.#name = this.#isLdr ? `${name}_LDR` : name;
+        this.#passLabel = `ASinglePassPostEffect_${this.#name}_ComputePass`;
         const {resourceManager} = redGPUContext;
 
-        this.#computeShaderMSAA = resourceManager.createGPUShaderModule(`${this.#name}_MSAA`, {code: computeCodes.msaa});
-        this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${this.#name}_NonMSAA`, {code: computeCodes.nonMsaa});
-
-        this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${this.#name}_MSAA`, computeCodes.msaa);
-        this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, computeCodes.nonMsaa);
+        if (computeCodes.msaa === computeCodes.nonMsaa) {
+            const sharedShader = resourceManager.createGPUShaderModule(this.#name, {code: computeCodes.nonMsaa});
+            const sharedShaderInfo = resourceManager.wgslParser.parse(this.#name, computeCodes.nonMsaa);
+            this.#computeShaderMSAA = sharedShader;
+            this.#computeShaderNonMSAA = sharedShader;
+            this.#SHADER_INFO_MSAA = sharedShaderInfo;
+            this.#SHADER_INFO_NON_MSAA = sharedShaderInfo;
+        } else {
+            this.#computeShaderMSAA = resourceManager.createGPUShaderModule(`${this.#name}_MSAA`, {code: computeCodes.msaa});
+            this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${this.#name}_NonMSAA`, {code: computeCodes.nonMsaa});
+            this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${this.#name}_MSAA`, computeCodes.msaa);
+            this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, computeCodes.nonMsaa);
+        }
 
         const {storage, uniforms} = this.#SHADER_INFO_MSAA;
         this.#storageInfo = storage;
         this.#uniformsInfo = uniforms.uniforms;
         this.#systemUniformsInfo = uniforms.systemUniforms;
+        this.#useGroup2 = Boolean(this.#systemUniformsInfo);
 
         if (this.#uniformsInfo) {
             const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength);
@@ -362,7 +379,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
 
         this.#updateBindGroups(sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
 
-        this.#execute(view, width, height, view.postEffectManager.gbufferBindGroup);
+        this.#execute(width, height, this.#useGroup2 ? view.postEffectManager.gbufferBindGroup : null);
 
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
@@ -401,22 +418,29 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         return id;
     }
 
-    #execute(view: View3D, width: number, height: number, gbufferBindGroup: GPUBindGroup) {
-        const {commandEncoderManager} = this;
-        const {renderViewStateData} = view;
+    #executeComputePass = (computePassEncoder: GPUComputePassEncoder): void => {
+        computePassEncoder.setPipeline(this.#computePipeline);
 
-        commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
-            computePassEncoder.setPipeline(this.#computePipeline);
-
-            const bg0 = renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0;
-            if (bg0) computePassEncoder.setBindGroup(0, bg0);
-
-            if (this.#computeBindGroup1) computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
-            if (gbufferBindGroup) computePassEncoder.setBindGroup(2, gbufferBindGroup);
+        if (this.#computeBindGroup0) computePassEncoder.setBindGroup(0, this.#computeBindGroup0);
+        if (this.#computeBindGroup1) computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
+        if (this.#useGroup2) {
+            if (this.#currentGbufferBindGroup) computePassEncoder.setBindGroup(2, this.#currentGbufferBindGroup);
             if (this.#outputBindGroup) computePassEncoder.setBindGroup(3, this.#outputBindGroup);
+        } else {
+            if (this.#outputBindGroup) computePassEncoder.setBindGroup(2, this.#outputBindGroup);
+        }
 
-            computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
-        });
+        computePassEncoder.dispatchWorkgroups(this.#currentDispatchX, this.#currentDispatchY);
+    };
+
+    #execute(width: number, height: number, gbufferBindGroup: GPUBindGroup) {
+        this.#currentGbufferBindGroup = gbufferBindGroup;
+        this.#currentDispatchX = Math.ceil(width / this.WORK_SIZE_X);
+        this.#currentDispatchY = Math.ceil(height / this.WORK_SIZE_Y);
+
+        this.commandEncoderManager.addPostProcessComputePass(this.#passLabel, this.#executeComputePass);
+
+        this.#currentGbufferBindGroup = null;
     }
 
     #checkAndCreatePipeline(view: View3D, useMSAA: boolean, gpuDevice: GPUDevice) {
@@ -429,10 +453,11 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         const {resourceManager} = this;
         const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
         const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
+        const outputGroupIndex = this.#useGroup2 ? 3 : 2;
 
         const layout0Name = `${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`;
         const layout1Name = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
-        const layout3Name = `${this.#name}_BIND_GROUP_LAYOUT_3_USE_MSAA_${useMSAA}`;
+        const layoutOutputName = `${this.#name}_BIND_GROUP_LAYOUT_${outputGroupIndex}_USE_MSAA_${useMSAA}`;
 
         this.#computeBindGroupLayout0 = resourceManager.getGPUBindGroupLayout(layout0Name) ||
             resourceManager.createBindGroupLayout(layout0Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0, useMSAA));
@@ -440,18 +465,27 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#computeBindGroupLayout1 = resourceManager.getGPUBindGroupLayout(layout1Name) ||
             resourceManager.createBindGroupLayout(layout1Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA));
 
-        this.#outputBindGroupLayout = resourceManager.getGPUBindGroupLayout(layout3Name) ||
-            resourceManager.createBindGroupLayout(layout3Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 3, useMSAA));
+        this.#outputBindGroupLayout = resourceManager.getGPUBindGroupLayout(layoutOutputName) ||
+            resourceManager.createBindGroupLayout(layoutOutputName, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, outputGroupIndex, useMSAA));
+
+        const bindGroupLayouts: GPUBindGroupLayout[] = this.#useGroup2
+            ? [
+                this.#computeBindGroupLayout0,
+                this.#computeBindGroupLayout1,
+                view.postEffectManager.gbufferBindGroupLayout,
+                this.#outputBindGroupLayout
+            ]
+            : [
+                this.#computeBindGroupLayout0,
+                this.#computeBindGroupLayout1,
+                this.#outputBindGroupLayout
+            ];
 
         const pipeline = gpuDevice.createComputePipeline({
             label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
             layout: gpuDevice.createPipelineLayout({
-                bindGroupLayouts: [
-                    this.#computeBindGroupLayout0,
-                    this.#computeBindGroupLayout1,
-                    view.postEffectManager.gbufferBindGroupLayout,
-                    this.#outputBindGroupLayout
-                ]
+                label: `${this.#name}_PIPELINE_LAYOUT_USE_MSAA_${useMSAA}`,
+                bindGroupLayouts
             }),
             compute: {module: currentShader, entryPoint: 'main'}
         });
@@ -476,24 +510,18 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
                 group0Key += this.#getResourceId(sourceTextureInfoList[i].texture);
             }
         }
-        const cachedBG0_swap0 = this.#bindGroupCache0.get(`${group0Key}_swap0`);
-        const cachedBG0_swap1 = this.#bindGroupCache0.get(`${group0Key}_swap1`);
-        if (cachedBG0_swap0 && cachedBG0_swap1) {
-            this.#computeBindGroup0List_swap0 = cachedBG0_swap0;
-            this.#computeBindGroup0List_swap1 = cachedBG0_swap1;
-
+        const cachedBG0 = this.#bindGroupCache0.get(group0Key);
+        if (cachedBG0) {
+            this.#computeBindGroup0 = cachedBG0;
         } else {
-            this.#computeBindGroupEntries0_swap0 = [];
-            this.#computeBindGroupEntries0_swap1 = [];
-
+            this.#computeBindGroupEntries0 = [];
 
             for (const k in storage) {
                 const {binding, name, group} = storage[k];
                 if (group === 0 && name !== 'outputTexture') {
                     const resource = sourceTextureInfoList[binding]?.textureView;
                     if (resource) {
-                        this.#computeBindGroupEntries0_swap0.push({binding, resource});
-                        this.#computeBindGroupEntries0_swap1.push({binding, resource});
+                        this.#computeBindGroupEntries0.push({binding, resource});
                     }
                 }
             }
@@ -502,26 +530,18 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
                 if (group === 0) {
                     const resource = sourceTextureInfoList[binding]?.textureView;
                     if (resource) {
-                        this.#computeBindGroupEntries0_swap0.push({binding, resource});
-                        this.#computeBindGroupEntries0_swap1.push({binding, resource});
+                        this.#computeBindGroupEntries0.push({binding, resource});
                     }
                 }
             }
 
-            this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
-                label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
+            this.#computeBindGroup0 = gpuDevice.createBindGroup({
+                label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}`,
                 layout: this.#computeBindGroupLayout0,
-                entries: this.#computeBindGroupEntries0_swap0
+                entries: this.#computeBindGroupEntries0
             });
 
-            this.#computeBindGroup0List_swap1 = gpuDevice.createBindGroup({
-                label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP1`,
-                layout: this.#computeBindGroupLayout0,
-                entries: this.#computeBindGroupEntries0_swap1
-            });
-
-            this.#bindGroupCache0.set(`${group0Key}_swap0`, this.#computeBindGroup0List_swap0);
-            this.#bindGroupCache0.set(`${group0Key}_swap1`, this.#computeBindGroup0List_swap1);
+            this.#bindGroupCache0.set(group0Key, this.#computeBindGroup0);
         }
 
         if (this.#bindGroupCache1) {
@@ -554,9 +574,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         if (this.#bindGroupCache3.has(outputTextureId)) {
             this.#outputBindGroup = this.#bindGroupCache3.get(outputTextureId);
         } else {
+            const outputGroupIndex = this.#useGroup2 ? 3 : 2;
             this.#outputBindGroupEntries = [{binding: 0, resource: targetOutputView}];
             this.#outputBindGroup = gpuDevice.createBindGroup({
-                label: `${this.#name}_BIND_GROUP_3_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_BIND_GROUP_${outputGroupIndex}_USE_MSAA_${useMSAA}`,
                 layout: this.#outputBindGroupLayout,
                 entries: this.#outputBindGroupEntries
             });

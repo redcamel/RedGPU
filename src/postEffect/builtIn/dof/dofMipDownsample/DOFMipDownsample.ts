@@ -18,11 +18,11 @@ import computeCode from "./wgsl/computeCode.wgsl";
  */
 class DOFMipDownsample extends ASinglePassPostEffect {
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_MIP_DOWNSAMPLE',
-            createBasicPostEffectCode(this, computeCode, '')
+            createBasicPostEffectCode(this, computeCode, '', undefined, true, false)
         );
     }
 

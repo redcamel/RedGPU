@@ -132,9 +132,10 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
 
     #calcVideoMemory() {
         this.#videoMemorySize = 0;
-        this.#passList.forEach(effect => {
-            this.#videoMemorySize += effect.videoMemorySize;
-        });
+        const passList = this.#passList;
+        for (let i = 0, len = passList.length; i < len; i++) {
+            this.#videoMemorySize += passList[i].videoMemorySize;
+        }
     }
 }
 

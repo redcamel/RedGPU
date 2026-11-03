@@ -47,7 +47,9 @@ class SSAOBlend extends ASinglePassPostEffect {
                 [
                     {name: 'sourceTexture0'},
                     {name: 'sourceTexture1'}
-                ]
+                ],
+                true,
+                false
             )
         );
     }

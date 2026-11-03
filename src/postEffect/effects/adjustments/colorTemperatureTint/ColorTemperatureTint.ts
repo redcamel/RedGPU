@@ -65,7 +65,6 @@ class ColorTemperatureTint extends ASingleRenderPassPostEffect {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {
             isLdr: true,
-            inPlace: true,
             blendState: {
                 color: {
                     srcFactor: 'dst',

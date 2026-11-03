@@ -51,7 +51,7 @@ class Invert extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_INVERT',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
     }
 

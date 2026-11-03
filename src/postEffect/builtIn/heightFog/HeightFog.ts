@@ -112,7 +112,6 @@ class HeightFog extends ASingleRenderPassPostEffect {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {
             isLdr: false,
-            inPlace: true,
             blendState: {
                 color: {
                     srcFactor: 'src-alpha',

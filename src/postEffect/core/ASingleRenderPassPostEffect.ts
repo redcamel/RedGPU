@@ -23,11 +23,8 @@ interface ASingleRenderPassPostEffect {
 }
 
 /**
- * [KO] 단일 렌더 패스(Render Pass, Full-Screen Triangle + Fragment Shader)로 동작하는 후처리 이펙트의 추상 기본 클래스입니다.
- * [EN] Abstract base class for post-processing effects that execute in a single render pass (Full-Screen Triangle + Fragment Shader).
- *
- * [KO] 새 렌더 타겟을 할당하는 Out-of-Place 모드(`inPlace: false`)와 기존 컬러 버퍼에 ROP 하드웨어 블렌더로 직접 합성하는 In-Place 모드(`inPlace: true` + `blendState`)를 모두 지원합니다.
- * [EN] Supports both Out-of-Place mode (`inPlace: false`), which allocates a new render target, and In-Place mode (`inPlace: true` + `blendState`), which composites directly onto the existing color buffer using the ROP hardware blender.
+ * [KO] 기존 컬러 버퍼 위에 단일 In-Place 렌더 패스(Full-Screen Triangle + Fragment Shader + ROP 하드웨어 블렌딩)로 직접 합성하는 후처리 이펙트의 추상 기본 클래스입니다.
+ * [EN] Abstract base class for post-processing effects that composite directly onto the existing color buffer in a single In-Place render pass (Full-Screen Triangle + Fragment Shader + ROP hardware blending).
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -38,7 +35,6 @@ interface ASingleRenderPassPostEffect {
  */
 abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     #isLdr: boolean = false
-    #inPlace: boolean = false
     #blendState: GPUBlendState
     #useGroup2: boolean = true
     #renderShaderMSAA: GPUShaderModule
@@ -89,28 +85,26 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param options -
-     * [KO] 초기화 옵션 (`isLdr`, `inPlace`, `blendState`)
-     * [EN] Initialization options (`isLdr`, `inPlace`, `blendState`)
+     * [KO] 초기화 옵션 (`isLdr`, `blendState`)
+     * [EN] Initialization options (`isLdr`, `blendState`)
      */
     protected constructor(
         redGPUContext: RedGPUContext,
         options?: {
             isLdr?: boolean;
-            inPlace?: boolean;
             blendState?: GPUBlendState;
         }
     ) {
         super(redGPUContext)
         if (options) {
-            const {isLdr, inPlace, blendState} = options;
+            const {isLdr, blendState} = options;
             if (isLdr !== undefined) this.#isLdr = isLdr;
-            if (inPlace !== undefined) this.#inPlace = inPlace;
             if (blendState !== undefined) this.#blendState = blendState;
         }
         this.#colorAttachment = {
             view: null,
             clearValue: {r: 0, g: 0, b: 0, a: 0},
-            loadOp: this.#inPlace ? GPU_LOAD_OP.LOAD : GPU_LOAD_OP.CLEAR,
+            loadOp: GPU_LOAD_OP.LOAD,
             storeOp: GPU_STORE_OP.STORE
         };
         this.#renderPassDescriptor = {
@@ -130,26 +124,6 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
      */
     get isLdr(): boolean {
         return this.#isLdr
-    }
-
-    /**
-     * [KO] 기존 소스 렌더 타겟 위에 직접 렌더링하는 In-Place 모드 여부를 반환하거나 설정합니다.
-     * [EN] Gets or sets whether the pass renders directly onto the source render target in In-Place mode.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] In-Place 렌더링 여부
-     * [EN] Whether In-Place rendering is enabled
-     */
-    get inPlace(): boolean {
-        return this.#inPlace
-    }
-
-    set inPlace(value: boolean) {
-        const nextValue = Boolean(value);
-        if (this.#inPlace === nextValue) return;
-        this.#inPlace = nextValue;
-        this.#colorAttachment.loadOp = nextValue ? GPU_LOAD_OP.LOAD : GPU_LOAD_OP.CLEAR;
     }
 
     /**
@@ -312,11 +286,19 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         this.#renderPassDescriptor.label = `ASingleRenderPassPostEffect_${this.#name}_RenderPass`;
         const {resourceManager} = redGPUContext;
 
-        this.#renderShaderMSAA = resourceManager.createGPUShaderModule(`${this.#name}_MSAA`, {code: shaderCodes.msaa});
-        this.#renderShaderNonMSAA = resourceManager.createGPUShaderModule(`${this.#name}_NonMSAA`, {code: shaderCodes.nonMsaa});
-
-        this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${this.#name}_MSAA`, shaderCodes.msaa);
-        this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, shaderCodes.nonMsaa);
+        if (shaderCodes.msaa === shaderCodes.nonMsaa) {
+            const sharedShader = resourceManager.createGPUShaderModule(this.#name, {code: shaderCodes.nonMsaa});
+            const sharedShaderInfo = resourceManager.wgslParser.parse(this.#name, shaderCodes.nonMsaa);
+            this.#renderShaderMSAA = sharedShader;
+            this.#renderShaderNonMSAA = sharedShader;
+            this.#SHADER_INFO_MSAA = sharedShaderInfo;
+            this.#SHADER_INFO_NON_MSAA = sharedShaderInfo;
+        } else {
+            this.#renderShaderMSAA = resourceManager.createGPUShaderModule(`${this.#name}_MSAA`, {code: shaderCodes.msaa});
+            this.#renderShaderNonMSAA = resourceManager.createGPUShaderModule(`${this.#name}_NonMSAA`, {code: shaderCodes.nonMsaa});
+            this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${this.#name}_MSAA`, shaderCodes.msaa);
+            this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, shaderCodes.nonMsaa);
+        }
 
         const {storage, uniforms} = this.#SHADER_INFO_MSAA;
         this.#storageInfo = storage;
@@ -347,8 +329,8 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] Out-of-Place 또는 In-Place 모드로 렌더 패스를 실행하고 결과 텍스처 정보를 반환합니다.
-     * [EN] Executes the render pass in Out-of-Place or In-Place mode and returns the result texture information.
+     * [KO] 입력 컬러 버퍼 위에 In-Place 렌더 패스를 실행하고 결과 텍스처 정보를 반환합니다.
+     * [EN] Executes the In-Place render pass onto the input color buffer and returns the result texture information.
      *
      * @param view -
      * [KO] 대상 `View3D` 인스턴스
@@ -360,8 +342,8 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
      * [KO] 렌더링 높이 (단위: 픽셀)
      * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
-     * [KO] 입력 소스 텍스처 정보 목록
-     * [EN] List of input source texture information
+     * [KO] 입력 소스 텍스처 정보 목록 (`sourceTextureInfo[0]`은 합성 대상 컬러 버퍼, 이후 항목은 보조 샘플링 텍스처)
+     * [EN] List of input source texture information (`sourceTextureInfo[0]` is the target color buffer, subsequent items are auxiliary sampled textures)
      * @returns
      * [KO] 렌더링 결과 텍스처 및 뷰 (`IPostEffectResult`)
      * [EN] Rendering result texture and view (`IPostEffectResult`)
@@ -373,23 +355,19 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         let result: IPostEffectResult;
         let targetFormat: GPUTextureFormat = this.#isLdr ? 'rgba8unorm' : 'rgba16float';
 
-        if (this.#inPlace && sourceTextureInfo.length > 0 && sourceTextureInfo[0]?.texture) {
-            const primarySource = sourceTextureInfo[0];
-            const srcTexture = primarySource.texture;
-            targetFormat = srcTexture.format || targetFormat;
+        const primarySource = sourceTextureInfo[0];
+        const srcTexture = primarySource.texture;
+        targetFormat = srcTexture.format || targetFormat;
 
-            if (srcTexture.usage & GPUTextureUsage.RENDER_ATTACHMENT) {
-                result = primarySource;
-            } else {
-                result = view.postEffectManager.texturePool.allocResult(width, height, targetFormat, false);
-                this.#copySrcInfo.texture = srcTexture;
-                this.#copyDstInfo.texture = result.texture;
-                this.#copyExtent.width = width;
-                this.#copyExtent.height = height;
-                this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#executeCopyTexture);
-            }
+        if (srcTexture.usage & GPUTextureUsage.RENDER_ATTACHMENT) {
+            result = primarySource;
         } else {
             result = view.postEffectManager.texturePool.allocResult(width, height, targetFormat, false);
+            this.#copySrcInfo.texture = srcTexture;
+            this.#copyDstInfo.texture = result.texture;
+            this.#copyExtent.width = width;
+            this.#copyExtent.height = height;
+            this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#executeCopyTexture);
         }
 
         this.#outputTexture = result.texture;
@@ -466,7 +444,6 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
 
     #execute(gbufferBindGroup: GPUBindGroup) {
         this.#colorAttachment.view = this.#outputTextureView;
-        this.#colorAttachment.loadOp = this.#inPlace ? GPU_LOAD_OP.LOAD : GPU_LOAD_OP.CLEAR;
         this.#currentGbufferBindGroup = gbufferBindGroup;
 
         this.commandEncoderManager.addPostProcessRenderPass(
@@ -550,7 +527,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
 
     #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], useMSAA: boolean, gpuDevice: GPUDevice) {
         const {storage, textures} = this.shaderInfo;
-        const sourceOffset = this.#inPlace ? 1 : 0;
+        const sourceOffset = 1;
         const sourceCount = sourceTextureInfoList.length;
 
         let group0Key: string;
