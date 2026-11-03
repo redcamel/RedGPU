@@ -69,7 +69,7 @@ class BRDFGenerator extends RedGPUObject {
         this.#brdfLUTTexture = resourceManager.createManagedTexture({
             size: [size, size],
             format: format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
             label: 'BRDF_LUT_Texture'
         });
 
