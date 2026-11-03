@@ -3,6 +3,14 @@
 #redgpu_include depth.getLinearizeDepth
 #redgpu_include math.EPSILON
 
+const WORKGROUP_TILE_SIZE: i32 = 8;
+const NEIGHBORHOOD_RADIUS: i32 = 1;
+const NEIGHBORHOOD_AXIS_COUNT: i32 = NEIGHBORHOOD_RADIUS * 2 + 1;
+const NEIGHBORHOOD_SAMPLE_COUNT: i32 = NEIGHBORHOOD_AXIS_COUNT * NEIGHBORHOOD_AXIS_COUNT;
+const SHARED_TILE_SIDE: i32 = WORKGROUP_TILE_SIZE + NEIGHBORHOOD_RADIUS * 2;
+const SHARED_TILE_TEXEL_COUNT: i32 = SHARED_TILE_SIDE * SHARED_TILE_SIDE;
+const WORKGROUP_THREAD_COUNT: i32 = WORKGROUP_TILE_SIZE * WORKGROUP_TILE_SIZE;
+
 // TAA uniform buffer layout (16-byte aligned)
 struct Uniforms {
     currJitterOffset: vec2<f32>,
@@ -22,12 +30,6 @@ struct NeighborhoodStats {
     pad0: f32, // 16-byte tail alignment
 };
 
-struct SampledColor {
-    rgb: vec3<f32>,
-    ycocg: vec3<f32>,
-    alpha: f32,
-};
-
 // Evaluates depth continuity confidence between current and reprojected depth to detect disocclusion
 fn get_geometric_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let currLinear = getLinearizeDepth(currDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
@@ -38,37 +40,42 @@ fn get_geometric_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     return 1.0 - saturate((depthDiff - tolerance * 0.5) / (tolerance * 1.5));
 }
 
-// 10x10 workgroup shared memory (8x8 active tile + 1-pixel halo border)
-var<workgroup> s_color : array<array<vec4<f32>, 10>, 10>;
-var<workgroup> s_depth : array<array<f32, 10>, 10>;
+// Workgroup shared memory (active tile + halo border) and precomputed Gaussian reconstruction weights
+var<workgroup> s_color : array<array<vec4<f32>, SHARED_TILE_SIDE>, SHARED_TILE_SIDE>;
+var<workgroup> s_depth : array<array<f32, SHARED_TILE_SIDE>, SHARED_TILE_SIDE>;
+var<workgroup> s_gaussWeights : array<f32, NEIGHBORHOOD_SAMPLE_COUNT>;
 
 // Computes 3x3 YCoCg mean, standard deviation, and min/max bounds from workgroup shared memory
 fn calculate_neighborhood_stats_ycocg_lds(localCoord: vec2<i32>) -> NeighborhoodStats {
-    var m1 = vec3<f32>(0.0);
-    var m2 = vec3<f32>(0.0);
-    var minC = vec3<f32>(1e5);
-    var maxC = vec3<f32>(-1e5);
-    var sumAlpha = 0.0;
-    var minA = 1e5;
-    var maxA = -1e5;
+    let firstRGBA = s_color[localCoord.y - NEIGHBORHOOD_RADIUS][localCoord.x - NEIGHBORHOOD_RADIUS];
+    let firstYCoCg = rgbToYCoCg(firstRGBA.rgb);
+    let firstAlpha = firstRGBA.a;
 
-    for (var y: i32 = -1; y <= 1; y++) {
-        for (var x: i32 = -1; x <= 1; x++) {
-            let sampleRGBA = s_color[localCoord.y + y][localCoord.x + x];
-            let colorYCoCg = rgbToYCoCg(sampleRGBA.rgb);
-            let alpha = sampleRGBA.a;
+    var m1 = firstYCoCg;
+    var m2 = firstYCoCg * firstYCoCg;
+    var minC = firstYCoCg;
+    var maxC = firstYCoCg;
+    var sumAlpha = firstAlpha;
+    var minA = firstAlpha;
+    var maxA = firstAlpha;
 
-            m1 += colorYCoCg;
-            m2 += colorYCoCg * colorYCoCg;
-            minC = min(minC, colorYCoCg);
-            maxC = max(maxC, colorYCoCg);
-            sumAlpha += alpha;
-            minA = min(minA, alpha);
-            maxA = max(maxA, alpha);
-        }
+    for (var idx: i32 = 1; idx < NEIGHBORHOOD_SAMPLE_COUNT; idx++) {
+        let x = (idx % NEIGHBORHOOD_AXIS_COUNT) - NEIGHBORHOOD_RADIUS;
+        let y = (idx / NEIGHBORHOOD_AXIS_COUNT) - NEIGHBORHOOD_RADIUS;
+        let sampleRGBA = s_color[localCoord.y + y][localCoord.x + x];
+        let colorYCoCg = rgbToYCoCg(sampleRGBA.rgb);
+        let alpha = sampleRGBA.a;
+
+        m1 += colorYCoCg;
+        m2 += colorYCoCg * colorYCoCg;
+        minC = min(minC, colorYCoCg);
+        maxC = max(maxC, colorYCoCg);
+        sumAlpha += alpha;
+        minA = min(minA, alpha);
+        maxA = max(maxA, alpha);
     }
 
-    let sampleCount = 9.0;
+    let sampleCount = f32(NEIGHBORHOOD_SAMPLE_COUNT);
     var stats: NeighborhoodStats;
     stats.mean = m1 / sampleCount;
     stats.stdDev = sqrt(max((m2 / sampleCount) - (stats.mean * stats.mean), vec3<f32>(0.0)));
@@ -82,17 +89,17 @@ fn calculate_neighborhood_stats_ycocg_lds(localCoord: vec2<i32>) -> Neighborhood
     return stats;
 }
 
-// Reconstructs unjittered current pixel color using a 3x3 sub-pixel Gaussian filter in shared memory
-fn reconstruct_current_color_ycocg_lds(localCoord: vec2<i32>, jitterOffsetPix: vec2<f32>) -> SampledColor {
+// Reconstructs unjittered current pixel RGBA using precomputed 3x3 sub-pixel Gaussian weights in shared memory
+fn reconstruct_current_color_lds(localCoord: vec2<i32>) -> vec4<f32> {
     var sumRGB = vec3<f32>(0.0);
     var sumAlpha = 0.0;
     var sumWeight = 0.0;
+    var weightIdx: i32 = 0;
 
-    for (var y: i32 = -1; y <= 1; y++) {
-        for (var x: i32 = -1; x <= 1; x++) {
-            let delta = vec2<f32>(f32(x), f32(y)) + jitterOffsetPix;
-            let distSq = dot(delta, delta);
-            let w = exp(-4.85 * distSq);
+    for (var y: i32 = -NEIGHBORHOOD_RADIUS; y <= NEIGHBORHOOD_RADIUS; y++) {
+        for (var x: i32 = -NEIGHBORHOOD_RADIUS; x <= NEIGHBORHOOD_RADIUS; x++) {
+            let w = s_gaussWeights[weightIdx];
+            weightIdx++;
 
             let sampleRGBA = s_color[localCoord.y + y][localCoord.x + x];
             sumRGB += sampleRGBA.rgb * w;
@@ -102,11 +109,7 @@ fn reconstruct_current_color_ycocg_lds(localCoord: vec2<i32>, jitterOffsetPix: v
     }
 
     let invW = 1.0 / max(sumWeight, EPSILON);
-    var result: SampledColor;
-    result.rgb = sumRGB * invW;
-    result.ycocg = rgbToYCoCg(result.rgb);
-    result.alpha = sumAlpha * invW;
-    return result;
+    return vec4<f32>(sumRGB * invW, sumAlpha * invW);
 }
 
 // Measures luminance discrepancy between neighborhood mean and clipped history luminance
@@ -117,7 +120,7 @@ fn get_color_discrepancy_weight(stats: NeighborhoodStats, historyLuminance: f32)
 }
 
 // 5-tap bicubic Catmull-Rom history sampler to minimize reprojection resampling blur
-fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> SampledColor {
+fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> vec4<f32> {
     let samplePos = uv * texSize;
     let texPos1 = floor(samplePos - 0.5) + 0.5;
     let f = samplePos - texPos1;
@@ -157,12 +160,8 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
         sumW += w;
     }
 
-    var result: SampledColor;
     let invSumW = 1.0 / max(sumW, EPSILON);
-    result.rgb = sumRGB * invSumW;
-    result.ycocg = rgbToYCoCg(result.rgb);
-    result.alpha = sumAlpha * invSumW;
-    return result;
+    return vec4<f32>(sumRGB * invSumW, sumAlpha * invSumW);
 }
 
 // Computes local screen-space velocity variance across 4-cardinal neighbors to detect motion boundaries
