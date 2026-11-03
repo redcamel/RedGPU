@@ -242,7 +242,7 @@ class LakeCapturePass extends RedGPUObject {
 
         this.#depthTexture = gpuDevice.createTexture({
             size: [this.textureSize, this.textureSize, 1],
-            format: 'depth24plus',
+            format: 'depth32float',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'LakeInteraction_CaptureDepthTexture'
         });
@@ -381,7 +381,7 @@ class LakeCapturePass extends RedGPUObject {
                 cullMode: 'none'
             },
             depthStencil: {
-                format: 'depth24plus',
+                format: 'depth32float',
                 depthWriteEnabled: true,
                 depthCompare: 'less-equal'
             },
@@ -427,7 +427,7 @@ class LakeCapturePass extends RedGPUObject {
                 cullMode: 'none'
             },
             depthStencil: {
-                format: 'depth24plus',
+                format: 'depth32float',
                 depthWriteEnabled: true,
                 depthCompare: 'less-equal'
             },

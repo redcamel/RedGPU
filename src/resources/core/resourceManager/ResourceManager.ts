@@ -1171,7 +1171,7 @@ class ResourceManager extends RedGPUObject {
 
             const emptyDepthTexture = gpuDevice.createTexture({
                 size: {width: 1, height: 1, depthOrArrayLayers: 1},
-                format: 'depth24plus',
+                format: 'depth32float',
                 usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
                 label: 'EMPTY_DEPTH_TEXTURE',
             });

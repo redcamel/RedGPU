@@ -270,7 +270,7 @@ function bakeFoliageImpostor(
         const depthGPUTexture = gpuDevice.createTexture({
             label: `Foliage_Impostor_DepthTexture_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
-            format: 'depth24plus',
+            format: 'depth32float',
             usage: RENDER_ATTACHMENT,
         });
 
@@ -728,7 +728,7 @@ function getOrCreateBakePipeline(redGPUContext: RedGPUContext, unit: FoliageRend
                 cullMode: 'none',
             },
             depthStencil: {
-                format: 'depth24plus',
+                format: 'depth32float',
                 depthWriteEnabled: true,
                 depthCompare: 'less-equal',
             }
