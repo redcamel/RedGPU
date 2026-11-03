@@ -1,10 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import View3D from "../../../../display/view/View3D";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface Grayscale {
     /**
@@ -12,7 +13,7 @@ interface Grayscale {
      * [EN] Grayscale effect application intensity (0 ~ 1)
      * @defaultValue 1
      */
-    amount: number
+    amount: number;
 }
 
 /**
@@ -53,10 +54,15 @@ class Grayscale extends ASinglePassPostEffect {
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
+
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.amount <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 definePositiveNumber(Grayscale, [
     {key: 'amount', value: 1, min: 0, max: 1}
-])
-Object.freeze(Grayscale)
-export default Grayscale
+]);
+Object.freeze(Grayscale);
+export default Grayscale;

@@ -1,12 +1,13 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineUint from "../../../../defineProperty/funcs/number/defineUint";
+import View3D from "../../../../display/view/View3D";
 import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
-import defineUint from "../../../../defineProperty/funcs/number/defineUint";
-
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface DirectionalBlur {
     /**
@@ -14,13 +15,13 @@ interface DirectionalBlur {
      * [EN] Blur strength (0 or greater)
      * @defaultValue 15
      */
-    amount: number,
+    amount: number;
     /**
      * [KO] 샘플링 횟수 (1 ~ 100)
      * [EN] Number of samples (1 ~ 100)
      * @defaultValue 16
      */
-    sampleCount: number
+    sampleCount: number;
 }
 
 /**
@@ -43,7 +44,7 @@ interface DirectionalBlur {
  */
 class DirectionalBlur extends ASinglePassPostEffect {
 
-    #angle: number = 0
+    #angle: number = 0;
 
     /**
      * [KO] DirectionalBlur 인스턴스를 생성합니다.
@@ -81,26 +82,30 @@ class DirectionalBlur extends ASinglePassPostEffect {
     }
 
     set angle(value: number) {
-        validateNumber(value)
+        validateNumber(value);
         this.#angle = value % 360;
         this.#updateDirection();
     }
 
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.amount <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 
     #updateDirection() {
         const radians = this.#angle * Math.PI / 180;
         const directionX = Math.cos(radians);
         const directionY = Math.sin(radians);
-        this.updateUniform('directionX', directionX)
-        this.updateUniform('directionY', directionY)
+        this.updateUniform('directionX', directionX);
+        this.updateUniform('directionY', directionY);
     }
 }
 
 definePositiveNumber(DirectionalBlur, [
     {key: 'amount', value: 15}
-])
+]);
 defineUint(DirectionalBlur, [
     {key: 'sampleCount', value: 16, min: 1, max: 100}
-])
-Object.freeze(DirectionalBlur)
-export default DirectionalBlur
+]);
+Object.freeze(DirectionalBlur);
+export default DirectionalBlur;

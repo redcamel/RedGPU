@@ -1,9 +1,9 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
-import computeCode from "./wgsl/computeCode.wgsl";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
@@ -27,7 +27,7 @@ interface BloomUpsample {
  *
  * @category Visual Effects
  */
-class BloomUpsample extends ASinglePassPostEffect {
+class BloomUpsample extends ASingleRenderPassPostEffect {
     /**
      * [KO] BloomUpsample 인스턴스를 생성합니다.
      * [EN] Creates a BloomUpsample instance.
@@ -37,16 +37,29 @@ class BloomUpsample extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, {
+            inPlace: true,
+            blendState: {
+                color: {
+                    srcFactor: 'src-alpha',
+                    dstFactor: 'one-minus-src-alpha',
+                    operation: 'add'
+                },
+                alpha: {
+                    srcFactor: 'zero',
+                    dstFactor: 'one',
+                    operation: 'add'
+                }
+            }
+        });
         this.init(
             redGPUContext,
             'POST_EFFECT_BLOOM_UPSAMPLE',
-            createBasicPostEffectCode(
+            createBasicRenderPassPostEffectCode(
                 this,
-                computeCode,
+                fragmentCode,
                 uniformStructCode,
                 [
-                    {name: 'highMipTexture'},
                     {name: 'lowMipTexture'}
                 ]
             )

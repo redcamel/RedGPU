@@ -4,6 +4,7 @@ import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
+import ASingleRenderPassPostEffect from "./core/ASingleRenderPassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
@@ -33,7 +34,7 @@ import keepLog from "../utils/keepLog";
  */
 class PostEffectManager extends RedGPUObject {
     #view: View3D
-    #postEffects: Array<ASinglePassPostEffect | AMultiPassPostEffect> = []
+    #postEffects: Array<ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect> = []
     #texturePool: PostEffectTexturePool
 
     #prevWidth: number = 0
@@ -134,10 +135,10 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Returns the array of registered user post-processing effects.
      *
      * @returns
-     * [KO] 후처리 이펙트 배열 (`Array<ASinglePassPostEffect | AMultiPassPostEffect>`)
-     * [EN] Array of post-processing effects (`Array<ASinglePassPostEffect | AMultiPassPostEffect>`)
+     * [KO] 후처리 이펙트 배열 (`Array<ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
+     * [EN] Array of post-processing effects (`Array<ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
      */
-    get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
+    get effectList(): Array<ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect> {
         return this.#postEffects;
     }
 
@@ -189,7 +190,7 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 추가할 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance to add
      */
-    addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    addEffect(v: ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect) {
         if (!v.isLdr) {
             console.warn(`[PostEffectManager] ${v.constructor.name} is not an LDR effect (isLdr: false).`);
         }
@@ -207,7 +208,7 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 해당 인덱스의 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance at the specified index
      */
-    getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
+    getEffectAt(index: number): ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
     }
 
@@ -219,7 +220,7 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 제거할 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance to remove
      */
-    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    removeEffect(v: ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect) {
         const index = this.#postEffects.indexOf(v);
         if (index > -1) {
             v.clear();
@@ -395,7 +396,11 @@ class PostEffectManager extends RedGPUObject {
         height: number
     ): IPostEffectResult {
         const nextTextureView = effect.render(this.#view, width, height, currentTextureView);
-        if (currentTextureView && currentTextureView.texture) {
+        if (
+            currentTextureView &&
+            currentTextureView.texture &&
+            currentTextureView.texture !== nextTextureView?.texture
+        ) {
             this.#texturePool.release(currentTextureView.texture);
         }
         return nextTextureView;
@@ -403,22 +408,23 @@ class PostEffectManager extends RedGPUObject {
 
     #initGBufferLayouts() {
         const {gpuDevice} = this.#view.redGPUContext;
+        const sharedVisibility = GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT;
 
         const getEntries = (useMSAA: boolean): GPUBindGroupLayoutEntry[] => [
             {
                 binding: 0,
-                visibility: GPUShaderStage.COMPUTE,
+                visibility: sharedVisibility,
                 texture: {sampleType: 'depth', multisampled: useMSAA}
             },
-            {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
-            {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {}},
+            {binding: 1, visibility: sharedVisibility, texture: {}},
+            {binding: 2, visibility: sharedVisibility, texture: {}},
             {
                 binding: 3,
-                visibility: GPUShaderStage.COMPUTE,
+                visibility: sharedVisibility,
                 texture: {sampleType: 'depth', multisampled: useMSAA}
             },
-            {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-            {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {}}
+            {binding: 4, visibility: sharedVisibility, buffer: {type: 'uniform'}},
+            {binding: 5, visibility: sharedVisibility, sampler: {}}
         ];
 
         this.#gbufferBindGroupLayoutMSAA = gpuDevice.createBindGroupLayout({

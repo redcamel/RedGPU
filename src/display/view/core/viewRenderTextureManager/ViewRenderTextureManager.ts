@@ -60,7 +60,7 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
 }> = {
     [GBUFFER_TYPE.COLOR]: {
         format: 'rgba16float',
-        usage: BASIC_USAGE | GPUTextureUsage.STORAGE_BINDING,
+        usage: BASIC_USAGE,
         withResolve: true,
         useMipmap: false
     },

@@ -1,14 +1,7 @@
-let id = global_id.xy;
-let size = textureDimensions(outputTexture);
-if (id.x >= size.x || id.y >= size.y) { return; }
-
-let uv = (vec2<f32>(id) + 0.5) / vec2<f32>(size);
-let sceneColor = textureLoad(sourceTexture, id).rgb;
-
-let rawDepth = fetchDepth(id);
+let rawDepth = fetchDepth(fragCoord);
 if (rawDepth >= 1.0) {
-    textureStore(outputTexture, id, vec4<f32>(sceneColor, 1.0));
-    return;
+    discard;
+    return vec4<f32>(0.0);
 }
 
 // [KO] 1. 화면 픽셀의 뷰 공간 광선 비율과 월드 공간 시선 방향을 계산합니다.
@@ -68,9 +61,7 @@ if (getPlanetShadowMask(camPos, sunDir, groundRadius) > 0.0) {
     addedRadiance = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, transVec);
 }
 
-// [KO] 4. 원본 씬 색상에 대기 투과율 감쇠와 누적 산란광을 합성하여 출력 텍스처에 기록합니다.
-// [EN] 4. Composite atmospheric transmittance attenuation and accumulated scattering onto the scene color and write to outputTexture.
+// [KO] 4. 하드웨어 ROP 블렌더(ONE + SRC_ALPHA)로 원본 씬 색상에 대기 투과율 감쇠와 누적 산란광을 합성합니다.
+// [EN] 4. Composite atmospheric transmittance attenuation and accumulated scattering onto the scene color via hardware ROP blending (ONE + SRC_ALPHA).
 let totalScattering = (baseScattering + addedRadiance) * (uniforms.sunIntensity * systemUniforms.preExposure);
-let finalColor = sceneColor * saturate(sceneBlendingTrans) + totalScattering;
-
-textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));
+return vec4<f32>(totalScattering, saturate(sceneBlendingTrans));

@@ -168,12 +168,20 @@ class PostEffectTexturePool extends RedGPUObject {
      * @param format -
      * [KO] 텍스처 포맷
      * [EN] Texture format
+     * @param useStorage -
+     * [KO] `GPUTextureUsage.STORAGE_BINDING` 포함 여부 (`false` 설정 시 렌더 패스 타겟의 하드웨어 DCC 압축 유지)
+     * [EN] Whether to include `GPUTextureUsage.STORAGE_BINDING` (set to `false` to preserve hardware DCC compression on render pass targets)
      * @returns
      * [KO] 할당된 텍스처 및 뷰 결과 객체 (`IPostEffectResult`)
      * [EN] Allocated texture and view result object (`IPostEffectResult`)
      */
-    allocResult(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): IPostEffectResult {
-        const texture = this.#alloc(width, height, format);
+    allocResult(
+        width: number,
+        height: number,
+        format: GPUTextureFormat = 'rgba16float',
+        useStorage: boolean = true
+    ): IPostEffectResult {
+        const texture = this.#alloc(width, height, format, useStorage);
         return this.#textureToResult.get(texture)!;
     }
 
@@ -225,10 +233,15 @@ class PostEffectTexturePool extends RedGPUObject {
         this.#requestCount = 0;
     }
 
-    #alloc(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): GPUTexture {
+    #alloc(
+        width: number,
+        height: number,
+        format: GPUTextureFormat = 'rgba16float',
+        useStorage: boolean = true
+    ): GPUTexture {
         const {resourceManager} = this
         this.#requestCount++;
-        const key = `${width}x${height}_${format}`;
+        const key = `${width}x${height}_${format}_${useStorage ? 'S' : 'R'}`;
         let list = this.#pool.get(key);
         if (!list) {
             list = [];
@@ -240,10 +253,12 @@ class PostEffectTexturePool extends RedGPUObject {
             texture = list.shift()!;
         } else {
             this.#allocationCount++;
+            const baseUsage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST;
+            const usage = useStorage ? (baseUsage | GPUTextureUsage.STORAGE_BINDING) : baseUsage;
             texture = resourceManager.createManagedTexture({
                 size: {width, height},
                 format,
-                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+                usage,
                 label: `PostEffectTexturePool_${key}`
             });
             this.#videoMemorySize += calculateTextureByteSize(texture);

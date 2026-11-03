@@ -1,9 +1,11 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+import View3D from "../../../display/view/View3D";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+import {IPostEffectResult} from "../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface SSR {
     /**
@@ -86,6 +88,11 @@ class SSR extends ASinglePassPostEffect {
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
+
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.reflectionIntensity <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 definePositiveNumber(SSR, [
@@ -95,6 +102,6 @@ definePositiveNumber(SSR, [
     {key: 'reflectionIntensity', value: 1, min: 0.0, max: 10},
     {key: 'fadeDistance', value: 12.0, min: 1.0, max: 100.0},
     {key: 'edgeFade', value: 0.15, min: 0.0, max: 0.5}
-])
+]);
 Object.freeze(SSR);
 export default SSR;

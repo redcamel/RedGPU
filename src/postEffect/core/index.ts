@@ -5,14 +5,18 @@
  */
 import AMultiPassPostEffect from "./AMultiPassPostEffect";
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
+import ASingleRenderPassPostEffect from "./ASingleRenderPassPostEffect";
 import createBasicPostEffectCode from "./createBasicPostEffectCode";
+import createBasicRenderPassPostEffectCode from "./createBasicRenderPassPostEffectCode";
 import {IPostEffectResult, IPostEffectSourceConfig} from "./types";
 import PostEffectTexturePool from "./PostEffectTexturePool";
 
 export {
     AMultiPassPostEffect,
     ASinglePassPostEffect,
+    ASingleRenderPassPostEffect,
     createBasicPostEffectCode,
+    createBasicRenderPassPostEffectCode,
     IPostEffectResult,
     IPostEffectSourceConfig,
     PostEffectTexturePool

@@ -1,7 +1,9 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl";
+import View3D from "../../../display/view/View3D";
+import ASingleRenderPassPostEffect from "../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../core/createBasicRenderPassPostEffectCode";
+import {IPostEffectResult} from "../../core/types";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 
@@ -37,7 +39,7 @@ interface Vignetting {
  * @see [Vignetting example](/RedGPU/examples/postEffect/lens/vignetting/)
  * @category PostEffect
  */
-class Vignetting extends ASinglePassPostEffect {
+class Vignetting extends ASingleRenderPassPostEffect {
 
     /**
      * [KO] Vignetting 인스턴스를 생성합니다.
@@ -48,12 +50,52 @@ class Vignetting extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1, isLdr: true});
+        super(redGPUContext, {
+            isLdr: true,
+            inPlace: true,
+            blendState: {
+                color: {
+                    srcFactor: 'dst',
+                    dstFactor: 'zero',
+                    operation: 'add'
+                },
+                alpha: {
+                    srcFactor: 'zero',
+                    dstFactor: 'one',
+                    operation: 'add'
+                }
+            }
+        });
         this.init(
             redGPUContext,
             'POST_EFFECT_VIGNETTING',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode, undefined, false)
         );
+    }
+
+    /**
+     * [KO] 비네팅 후처리 이펙트를 렌더링합니다.
+     * [EN] Renders the vignetting post-processing effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 렌더링 결과 (`IPostEffectResult`)
+     * [EN] Rendering result (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.intensity <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
     }
 
 }

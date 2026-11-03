@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
+import {IPostEffectResult} from "../../core/types";
 import BlurX from "./blurX/BlurX";
 import BlurY from "./blurY/BlurY";
 
@@ -20,7 +22,7 @@ import BlurY from "./blurY/BlurY";
  * @category Blur
  */
 class GaussianBlur extends AMultiPassPostEffect {
-    #size: number = 32
+    #size: number = 32;
 
     /**
      * [KO] GaussianBlur 인스턴스를 생성합니다.
@@ -35,12 +37,10 @@ class GaussianBlur extends AMultiPassPostEffect {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param options -
-     * [KO] 가우시안 블러 생성 옵션. 기본값은 LDR(`isLdr: true`, `rgba8unorm`)이며, HDR 빌트인 패스(`SSAO` 등) 내부에서 사용될 경우를 대비해 `isLdr: false`(`rgba16float`) 설정을 열어둡니다.
-     * [EN] Gaussian blur creation options. Defaults to LDR (`isLdr: true`, `rgba8unorm`), and exposes `isLdr: false` (`rgba16float`) in case it is used inside an HDR built-in pass (e.g., `SSAO`).
+     * [KO] 가우시안 블러 생성 옵션. 기본값은 LDR(`isLdr: true`, `rgba8unorm`)이며, HDR 빌트인 패스(`LensFlare` 등) 내부에서 사용될 경우를 대비해 `isLdr: false`(`rgba16float`) 설정을 열어둡니다.
+     * [EN] Gaussian blur creation options. Defaults to LDR (`isLdr: true`, `rgba8unorm`), and exposes `isLdr: false` (`rgba16float`) in case it is used inside an HDR built-in pass (e.g., `LensFlare`).
      */
     constructor(redGPUContext: RedGPUContext, options?: { isLdr?: boolean }) {
-        // [KO] HDR 패스(SSAO 등) 내부에서 재사용될 경우를 대비해 isLdr 옵션을 열어둠 (기본값: true)
-        // [EN] Expose isLdr option in case it is reused inside an HDR pass (e.g., SSAO) (default: true)
         const isLdr = options?.isLdr ?? true;
         super(
             redGPUContext,
@@ -50,7 +50,7 @@ class GaussianBlur extends AMultiPassPostEffect {
             ],
             isLdr
         );
-        this.size = this.size
+        this.size = this.size;
     }
 
     /**
@@ -68,9 +68,14 @@ class GaussianBlur extends AMultiPassPostEffect {
 
     set size(value: number) {
         this.#size = value;
-        this.passList.forEach((v: BlurX | BlurY) => v.size = value)
+        this.passList.forEach((v: BlurX | BlurY) => v.size = value);
+    }
+
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.#size <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 
-Object.freeze(GaussianBlur)
-export default GaussianBlur
+Object.freeze(GaussianBlur);
+export default GaussianBlur;

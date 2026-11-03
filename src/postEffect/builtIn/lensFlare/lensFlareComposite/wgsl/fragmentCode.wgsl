@@ -1,10 +1,7 @@
-let index = global_id.xy;
 let outDim = vec2<f32>(postEffectOutputDimensions);
-let uv = (vec2<f32>(index) + 0.5) / outDim;
 let aspect = outDim.x / max(outDim.y, 1.0);
 let flareTexelSize = 1.0 / vec2<f32>(textureDimensions(flareTexture));
 
-let baseColor = textureLoad(sourceTexture, index, 0);
 var flareRGB = sampleTent9Tap(flareTexture, uv, flareTexelSize);
 
 let centerUV = vec2<f32>(0.5, 0.5);
@@ -175,5 +172,10 @@ if (uniforms.lensDirtIntensity > 0.0) {
     flareRGB *= 1.0 + mieScatter * uniforms.lensDirtIntensity;
 }
 
-let finalRGB = baseColor.rgb + flareRGB * uniforms.intensity;
-textureStore(outputTexture, index, vec4<f32>(finalRGB, baseColor.a));
+let addedFlare = flareRGB * uniforms.intensity;
+if (all(addedFlare <= vec3<f32>(1e-5))) {
+    discard;
+    return vec4<f32>(0.0);
+}
+
+return vec4<f32>(addedFlare, 0.0);

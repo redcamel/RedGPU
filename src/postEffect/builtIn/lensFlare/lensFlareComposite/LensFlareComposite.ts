@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
-import computeCode from "./wgsl/computeCode.wgsl";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface LensFlareComposite {
@@ -87,7 +87,7 @@ interface LensFlareComposite {
  *
  * @category PostEffect
  */
-class LensFlareComposite extends ASinglePassPostEffect {
+class LensFlareComposite extends ASingleRenderPassPostEffect {
     #prevSunDirX: number = 0;
     #prevSunDirY: number = 1;
     #prevSunDirZ: number = 0;
@@ -108,16 +108,29 @@ class LensFlareComposite extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, {
+            inPlace: true,
+            blendState: {
+                color: {
+                    srcFactor: 'one',
+                    dstFactor: 'one',
+                    operation: 'add'
+                },
+                alpha: {
+                    srcFactor: 'zero',
+                    dstFactor: 'one',
+                    operation: 'add'
+                }
+            }
+        });
         this.init(
             redGPUContext,
             'POST_EFFECT_LENS_FLARE_COMPOSITE',
-            createBasicPostEffectCode(
+            createBasicRenderPassPostEffectCode(
                 this,
-                computeCode,
+                fragmentCode,
                 uniformStructCode,
                 [
-                    {name: 'sourceTexture'},
                     {name: 'flareTexture'}
                 ]
             )

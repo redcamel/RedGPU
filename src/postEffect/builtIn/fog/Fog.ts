@@ -1,12 +1,14 @@
 import ColorRGB from "../../../color/ColorRGB";
 import RedGPUContext from "../../../context/RedGPUContext";
+import View3D from "../../../display/view/View3D";
 import defineColorRGB from "../../../defineProperty/funcs/color/defineColorRGB";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 import defineUint from "../../../defineProperty/funcs/number/defineUint";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl";
+import ASingleRenderPassPostEffect from "../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../core/createBasicRenderPassPostEffectCode";
+import {IPostEffectResult} from "../../core/types";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface Fog {
@@ -73,7 +75,7 @@ interface Fog {
  * @see [Fog example](/RedGPU/examples/postEffect/fog/fog/)
  * @category PostEffect
  */
-class Fog extends ASinglePassPostEffect {
+class Fog extends ASingleRenderPassPostEffect {
     /**
      * [KO] 지수(Exponential) 안개 타입 (`0`)
      * [EN] Exponential fog type (`0`)
@@ -94,12 +96,52 @@ class Fog extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1, isLdr: false});
+        super(redGPUContext, {
+            isLdr: false,
+            inPlace: true,
+            blendState: {
+                color: {
+                    srcFactor: 'src-alpha',
+                    dstFactor: 'one-minus-src-alpha',
+                    operation: 'add'
+                },
+                alpha: {
+                    srcFactor: 'zero',
+                    dstFactor: 'one',
+                    operation: 'add'
+                }
+            }
+        });
         this.init(
             redGPUContext,
             'POST_EFFECT_FOG',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode)
         );
+    }
+
+    /**
+     * [KO] 거리 기반 안개 후처리 이펙트를 렌더링합니다.
+     * [EN] Renders the distance-based fog post-processing effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 렌더링 결과 (`IPostEffectResult`)
+     * [EN] Rendering result (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.density <= 0 || this.maxOpacity <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 

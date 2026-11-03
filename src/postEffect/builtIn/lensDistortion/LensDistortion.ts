@@ -1,6 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import View3D from "../../../display/view/View3D";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import {IPostEffectResult} from "../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
@@ -53,6 +55,31 @@ class LensDistortion extends ASinglePassPostEffect {
             'POST_EFFECT_LENS_DISTORTION',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
+    }
+
+    /**
+     * [KO] 렌즈 왜곡 후처리 이펙트를 렌더링합니다.
+     * [EN] Renders the lens distortion post-processing effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 렌더링 결과 (`IPostEffectResult`)
+     * [EN] Rendering result (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (Math.abs(this.distortion) <= 1e-6) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 

@@ -436,6 +436,7 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Final HDR texture information with lens flare composited (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.intensity <= 0) return sourceTextureInfo;
         this.#syncSunFromView(view);
 
         const pool = view.postEffectManager.texturePool;

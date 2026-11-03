@@ -1,0 +1,640 @@
+import RedGPUObject from "../../base/RedGPUObject";
+import ColorRGB from "../../color/ColorRGB";
+import ColorRGBA from "../../color/ColorRGBA";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import RedGPUContext from "../../context/RedGPUContext";
+import View3D from "../../display/view/View3D";
+import GPU_LOAD_OP from "../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../gpuConst/GPU_STORE_OP";
+import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
+import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
+import {IPostEffectResult} from "./types";
+
+const resourceIdMap = new WeakMap<GPUTexture, number>();
+let nextResourceId = 0;
+
+interface ASingleRenderPassPostEffect {
+    /**
+     * [KO] 후처리 이펙트 인스턴스 여부
+     * [EN] Whether the instance is a post-processing effect
+     * @defaultValue true
+     */
+    isInstanceofPostEffect: boolean
+}
+
+/**
+ * [KO] 단일 렌더 패스(Render Pass, Full-Screen Triangle + Fragment Shader)로 동작하는 후처리 이펙트의 추상 기본 클래스입니다.
+ * [EN] Abstract base class for post-processing effects that execute in a single render pass (Full-Screen Triangle + Fragment Shader).
+ *
+ * [KO] 새 렌더 타겟을 할당하는 Out-of-Place 모드(`inPlace: false`)와 기존 컬러 버퍼에 ROP 하드웨어 블렌더로 직접 합성하는 In-Place 모드(`inPlace: true` + `blendState`)를 모두 지원합니다.
+ * [EN] Supports both Out-of-Place mode (`inPlace: false`), which allocates a new render target, and In-Place mode (`inPlace: true` + `blendState`), which composites directly onto the existing color buffer using the ROP hardware blender.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category PostEffect
+ */
+abstract class ASingleRenderPassPostEffect extends RedGPUObject {
+    #isLdr: boolean = false
+    #inPlace: boolean = false
+    #blendState: GPUBlendState
+    #useGroup2: boolean = true
+    #renderShaderMSAA: GPUShaderModule
+    #renderShaderNonMSAA: GPUShaderModule
+    #fragmentBindGroupLayout0: GPUBindGroupLayout
+    #fragmentBindGroupLayout1: GPUBindGroupLayout
+    #fragmentBindGroup0: GPUBindGroup
+    #fragmentBindGroup1: GPUBindGroup
+    #fragmentBindGroupEntries0: GPUBindGroupEntry[]
+    #fragmentBindGroupEntries1: GPUBindGroupEntry[]
+    #renderPipeline: GPURenderPipeline
+    #renderPipelineMSAA: GPURenderPipeline
+    #renderPipelineNonMSAA: GPURenderPipeline
+    #prevTargetFormat: GPUTextureFormat
+    #uniformBuffer: UniformBuffer
+    #uniformsInfo
+    #systemUniformsInfo
+    #storageInfo
+    #name: string
+    #SHADER_INFO_MSAA
+    #SHADER_INFO_NON_MSAA
+    #prevWidth: number = 0
+    #prevHeight: number = 0
+    #outputTexture: GPUTexture
+    #outputTextureView: GPUTextureView
+    #videoMemorySize: number = 0
+    #prevMSAA: boolean
+    #prevMSAAID: string
+    #bindGroupCache0 = new Map<string, GPUBindGroup>();
+    #bindGroupCache1: GPUBindGroup;
+    #colorAttachment: GPURenderPassColorAttachment;
+    #renderPassDescriptor: GPURenderPassDescriptor;
+    #currentGbufferBindGroup: GPUBindGroup = null;
+    #copySrcInfo: { texture: GPUTexture } = {texture: null};
+    #copyDstInfo: { texture: GPUTexture } = {texture: null};
+    #copyExtent: { width: number; height: number; depthOrArrayLayers: number } = {
+        width: 1,
+        height: 1,
+        depthOrArrayLayers: 1
+    };
+    #destroyed: boolean = false
+
+    /**
+     * [KO] ASingleRenderPassPostEffect 인스턴스를 생성합니다.
+     * [EN] Creates an ASingleRenderPassPostEffect instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param options -
+     * [KO] 초기화 옵션 (`isLdr`, `inPlace`, `blendState`)
+     * [EN] Initialization options (`isLdr`, `inPlace`, `blendState`)
+     */
+    protected constructor(
+        redGPUContext: RedGPUContext,
+        options?: {
+            isLdr?: boolean;
+            inPlace?: boolean;
+            blendState?: GPUBlendState;
+        }
+    ) {
+        super(redGPUContext)
+        if (options) {
+            const {isLdr, inPlace, blendState} = options;
+            if (isLdr !== undefined) this.#isLdr = isLdr;
+            if (inPlace !== undefined) this.#inPlace = inPlace;
+            if (blendState !== undefined) this.#blendState = blendState;
+        }
+        this.#colorAttachment = {
+            view: null,
+            clearValue: {r: 0, g: 0, b: 0, a: 0},
+            loadOp: this.#inPlace ? GPU_LOAD_OP.LOAD : GPU_LOAD_OP.CLEAR,
+            storeOp: GPU_STORE_OP.STORE
+        };
+        this.#renderPassDescriptor = {
+            label: 'ASingleRenderPassPostEffect_RenderPass',
+            colorAttachments: [this.#colorAttachment]
+        };
+    }
+
+    /**
+     * [KO] 톤매핑 이후 LDR(Low Dynamic Range) 공간에서 동작하는지 여부를 반환합니다.
+     * [EN] Returns whether the effect operates in LDR (Low Dynamic Range) space after tone mapping.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] LDR 공간 동작 여부
+     * [EN] Whether the effect operates in LDR space
+     */
+    get isLdr(): boolean {
+        return this.#isLdr
+    }
+
+    /**
+     * [KO] 기존 소스 렌더 타겟 위에 직접 렌더링하는 In-Place 모드 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether the pass renders directly onto the source render target in In-Place mode.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] In-Place 렌더링 여부
+     * [EN] Whether In-Place rendering is enabled
+     */
+    get inPlace(): boolean {
+        return this.#inPlace
+    }
+
+    set inPlace(value: boolean) {
+        const nextValue = Boolean(value);
+        if (this.#inPlace === nextValue) return;
+        this.#inPlace = nextValue;
+        this.#colorAttachment.loadOp = nextValue ? GPU_LOAD_OP.LOAD : GPU_LOAD_OP.CLEAR;
+    }
+
+    /**
+     * [KO] 렌더 파이프라인의 하드웨어 블렌딩 상태(`GPUBlendState`)를 반환하거나 설정합니다.
+     * [EN] Gets or sets the hardware blend state (`GPUBlendState`) of the render pipeline.
+     *
+     * @returns
+     * [KO] 하드웨어 블렌딩 상태
+     * [EN] Hardware blend state
+     */
+    get blendState(): GPUBlendState {
+        return this.#blendState;
+    }
+
+    set blendState(value: GPUBlendState) {
+        if (this.#blendState === value) return;
+        this.#blendState = value;
+        this.#renderPipelineMSAA = null;
+        this.#renderPipelineNonMSAA = null;
+        this.#renderPipeline = null;
+    }
+
+    /**
+     * [KO] 이펙트 고유 버퍼의 비디오 메모리 사용량(바이트)을 반환합니다.
+     * [EN] Returns the video memory usage (in bytes) of the effect's dedicated buffer.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (단위: 바이트)
+     * [EN] Video memory usage (unit: bytes)
+     */
+    get videoMemorySize(): number {
+        return this.#videoMemorySize
+    }
+
+    /**
+     * [KO] 파싱된 셰이더의 스토리지 바인딩 구조 정보를 반환합니다.
+     * [EN] Returns the parsed shader's storage binding structure information.
+     *
+     * @returns
+     * [KO] 스토리지 바인딩 구조 정보
+     * [EN] Storage binding structure information
+     */
+    get storageInfo() {
+        return this.#storageInfo
+    }
+
+    /**
+     * [KO] 현재 MSAA 상태에 대응하는 WGSL 셰이더 파싱 정보를 반환합니다.
+     * [EN] Returns the WGSL shader parsing information corresponding to the current MSAA state.
+     *
+     * @returns
+     * [KO] WGSL 셰이더 파싱 정보
+     * [EN] WGSL shader parsing information
+     */
+    get shaderInfo() {
+        return this.antialiasingManager.useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
+    }
+
+    /**
+     * [KO] 이펙트 전용 유니폼 버퍼를 반환합니다.
+     * [EN] Returns the effect-specific uniform buffer.
+     *
+     * @returns
+     * [KO] `UniformBuffer` 인스턴스
+     * [EN] `UniformBuffer` instance
+     */
+    get uniformBuffer(): UniformBuffer {
+        return this.#uniformBuffer;
+    }
+
+    /**
+     * [KO] 이펙트 전용 유니폼 구조체 정보를 반환합니다.
+     * [EN] Returns the effect-specific uniform struct information.
+     *
+     * @returns
+     * [KO] 유니폼 구조체 정보
+     * [EN] Uniform struct information
+     */
+    get uniformsInfo() {
+        return this.#uniformsInfo
+    }
+
+    /**
+     * [KO] 시스템 공용 유니폼 구조체 정보를 반환합니다.
+     * [EN] Returns the system common uniform struct information.
+     *
+     * @returns
+     * [KO] 시스템 유니폼 구조체 정보
+     * [EN] System uniform struct information
+     */
+    get systemUniformsInfo() {
+        return this.#systemUniformsInfo
+    }
+
+    /**
+     * [KO] 현재 패스에 할당된 출력 텍스처 뷰를 반환합니다.
+     * [EN] Returns the output texture view allocated to the current pass.
+     *
+     * @returns
+     * [KO] 출력 `GPUTextureView`
+     * [EN] Output `GPUTextureView`
+     */
+    get outputTextureView(): GPUTextureView {
+        return this.#outputTextureView;
+    }
+
+    /**
+     * [KO] 캐시된 바인드 그룹 및 출력 텍스처 참조를 초기화합니다.
+     * [EN] Clears cached bind groups and output texture references.
+     */
+    clear() {
+        this.#outputTexture = null;
+        this.#outputTextureView = null;
+        this.#bindGroupCache0.clear();
+        this.#bindGroupCache1 = null;
+        this.#copySrcInfo.texture = null;
+        this.#copyDstInfo.texture = null;
+    }
+
+    /**
+     * [KO] 이펙트의 유니폼 버퍼와 캐시 리소스를 파기합니다.
+     * [EN] Destroys the effect's uniform buffer and cached resources.
+     */
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+        this.clear()
+        this.#uniformBuffer?.destroy()
+        this.#uniformBuffer = null
+        this.#uniformsInfo = null
+        this.#systemUniformsInfo = null
+        this.#storageInfo = null
+        this.#name = null
+        this.#SHADER_INFO_MSAA = null
+        this.#SHADER_INFO_NON_MSAA = null
+        this.#renderPipeline = null
+        this.#renderPipelineMSAA = null
+        this.#renderPipelineNonMSAA = null
+    }
+
+    /**
+     * [KO] MSAA/Non-MSAA 렌더 셰이더 모듈과 유니폼 버퍼를 생성하여 이펙트를 초기화합니다.
+     * [EN] Initializes the effect by creating MSAA/Non-MSAA render shader modules and the uniform buffer.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param name -
+     * [KO] 이펙트 식별 이름
+     * [EN] Effect identifier name
+     * @param shaderCodes -
+     * [KO] MSAA 및 Non-MSAA용 렌더 셰이더 코드 객체
+     * [EN] Render shader code object for MSAA and Non-MSAA
+     */
+    init(redGPUContext: RedGPUContext, name: string, shaderCodes: {
+        msaa: string,
+        nonMsaa: string
+    }) {
+        this.#name = this.#isLdr ? `${name}_LDR` : name;
+        this.#renderPassDescriptor.label = `ASingleRenderPassPostEffect_${this.#name}_RenderPass`;
+        const {resourceManager} = redGPUContext;
+
+        this.#renderShaderMSAA = resourceManager.createGPUShaderModule(`${this.#name}_MSAA`, {code: shaderCodes.msaa});
+        this.#renderShaderNonMSAA = resourceManager.createGPUShaderModule(`${this.#name}_NonMSAA`, {code: shaderCodes.nonMsaa});
+
+        this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${this.#name}_MSAA`, shaderCodes.msaa);
+        this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, shaderCodes.nonMsaa);
+
+        const {storage, uniforms} = this.#SHADER_INFO_MSAA;
+        this.#storageInfo = storage;
+        this.#uniformsInfo = uniforms.uniforms;
+        this.#systemUniformsInfo = uniforms.systemUniforms;
+        this.#useGroup2 = Boolean(this.#systemUniformsInfo);
+
+        if (this.#uniformsInfo) {
+            const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength);
+            this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, `${this.constructor.name}_UniformBuffer`);
+        }
+
+        {
+            const {members} = this.#uniformsInfo || {}
+            if (members) {
+                for (const k in members) {
+                    const property = this[k];
+                    if (property instanceof ColorRGBA) {
+                        this.uniformBuffer.writeOnlyBuffer(members[k], property.rgbaNormalLinear);
+                    } else if (property instanceof ColorRGB) {
+                        this.uniformBuffer.writeOnlyBuffer(members[k], property.rgbNormalLinear);
+                    } else {
+                        this.uniformBuffer.writeOnlyBuffer(members[k], property);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * [KO] Out-of-Place 또는 In-Place 모드로 렌더 패스를 실행하고 결과 텍스처 정보를 반환합니다.
+     * [EN] Executes the render pass in Out-of-Place or In-Place mode and returns the result texture information.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보 목록
+     * [EN] List of input source texture information
+     * @returns
+     * [KO] 렌더링 결과 텍스처 및 뷰 (`IPostEffectResult`)
+     * [EN] Rendering result texture and view (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, ...sourceTextureInfo: IPostEffectResult[]): IPostEffectResult {
+        const {gpuDevice, antialiasingManager} = this;
+        const {useMSAA, msaaID} = antialiasingManager;
+
+        let result: IPostEffectResult;
+        let targetFormat: GPUTextureFormat = this.#isLdr ? 'rgba8unorm' : 'rgba16float';
+
+        if (this.#inPlace && sourceTextureInfo.length > 0 && sourceTextureInfo[0]?.texture) {
+            const primarySource = sourceTextureInfo[0];
+            const srcTexture = primarySource.texture;
+            targetFormat = srcTexture.format || targetFormat;
+
+            if (srcTexture.usage & GPUTextureUsage.RENDER_ATTACHMENT) {
+                result = primarySource;
+            } else {
+                result = view.postEffectManager.texturePool.allocResult(width, height, targetFormat, false);
+                this.#copySrcInfo.texture = srcTexture;
+                this.#copyDstInfo.texture = result.texture;
+                this.#copyExtent.width = width;
+                this.#copyExtent.height = height;
+                this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#executeCopyTexture);
+            }
+        } else {
+            result = view.postEffectManager.texturePool.allocResult(width, height, targetFormat, false);
+        }
+
+        this.#outputTexture = result.texture;
+        this.#outputTextureView = result.textureView;
+
+        const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
+        const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
+
+        if (dimensionsChanged || msaaChanged) {
+            this.#bindGroupCache0.clear();
+            this.#bindGroupCache1 = null;
+        }
+
+        this.#checkAndCreatePipeline(view, useMSAA, targetFormat, gpuDevice);
+
+        this.#updateBindGroups(sourceTextureInfo, useMSAA, gpuDevice);
+
+        this.#execute(this.#useGroup2 ? view.postEffectManager.gbufferBindGroup : null);
+
+        this.#prevMSAA = useMSAA;
+        this.#prevMSAAID = msaaID;
+        this.#prevWidth = width;
+        this.#prevHeight = height;
+        this.#calcVideoMemory();
+
+        return result;
+    }
+
+    /**
+     * [KO] 지정된 유니폼 멤버의 값을 유니폼 버퍼에 기록합니다.
+     * [EN] Writes the value of the specified uniform member to the uniform buffer.
+     *
+     * @param key -
+     * [KO] 유니폼 멤버 키 이름
+     * [EN] Uniform member key name
+     * @param value -
+     * [KO] 기록할 값
+     * [EN] Value to write
+     */
+    updateUniform(key: string, value: number | number[] | boolean) {
+        const memberInfo = this.uniformsInfo?.members[key];
+        if (memberInfo) {
+            this.uniformBuffer.writeOnlyBuffer(memberInfo, value);
+        }
+    }
+
+    #getResourceId(resource: GPUTexture): number {
+        if (!resource) return 0;
+        let id = resourceIdMap.get(resource);
+        if (id === undefined) {
+            id = nextResourceId++;
+            resourceIdMap.set(resource, id);
+        }
+        return id;
+    }
+
+    #executeCopyTexture = (encoder: GPUCommandEncoder): void => {
+        if (this.#copySrcInfo.texture && this.#copyDstInfo.texture) {
+            encoder.copyTextureToTexture(this.#copySrcInfo, this.#copyDstInfo, this.#copyExtent);
+        }
+    };
+
+    #executeRenderPass = (renderPassEncoder: GPURenderPassEncoder): void => {
+        renderPassEncoder.setPipeline(this.#renderPipeline);
+
+        if (this.#fragmentBindGroup0) renderPassEncoder.setBindGroup(0, this.#fragmentBindGroup0);
+        if (this.#fragmentBindGroup1) renderPassEncoder.setBindGroup(1, this.#fragmentBindGroup1);
+        if (this.#useGroup2 && this.#currentGbufferBindGroup) {
+            renderPassEncoder.setBindGroup(2, this.#currentGbufferBindGroup);
+        }
+
+        renderPassEncoder.draw(3, 1, 0, 0);
+    };
+
+    #execute(gbufferBindGroup: GPUBindGroup) {
+        this.#colorAttachment.view = this.#outputTextureView;
+        this.#colorAttachment.loadOp = this.#inPlace ? GPU_LOAD_OP.LOAD : GPU_LOAD_OP.CLEAR;
+        this.#currentGbufferBindGroup = gbufferBindGroup;
+
+        this.commandEncoderManager.addPostProcessRenderPass(
+            this.#renderPassDescriptor,
+            this.#executeRenderPass
+        );
+
+        this.#currentGbufferBindGroup = null;
+    }
+
+    #checkAndCreatePipeline(view: View3D, useMSAA: boolean, targetFormat: GPUTextureFormat, gpuDevice: GPUDevice) {
+        if (this.#prevTargetFormat !== targetFormat) {
+            this.#renderPipelineMSAA = null;
+            this.#renderPipelineNonMSAA = null;
+            this.#prevTargetFormat = targetFormat;
+        }
+
+        const cachedPipeline = useMSAA ? this.#renderPipelineMSAA : this.#renderPipelineNonMSAA;
+        if (cachedPipeline) {
+            this.#renderPipeline = cachedPipeline;
+            return;
+        }
+
+        const {resourceManager} = this;
+        const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
+        const currentShader = useMSAA ? this.#renderShaderMSAA : this.#renderShaderNonMSAA;
+
+        const layout0Name = `${this.#name}_FRAGMENT_BGL_0_USE_MSAA_${useMSAA}`;
+        const layout1Name = `${this.#name}_FRAGMENT_BGL_1_USE_MSAA_${useMSAA}`;
+
+        this.#fragmentBindGroupLayout0 = resourceManager.getGPUBindGroupLayout(layout0Name) ||
+            resourceManager.createBindGroupLayout(layout0Name, getFragmentBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0));
+
+        this.#fragmentBindGroupLayout1 = resourceManager.getGPUBindGroupLayout(layout1Name) ||
+            resourceManager.createBindGroupLayout(layout1Name, getFragmentBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1));
+
+        const colorTarget: GPUColorTargetState = {
+            format: targetFormat
+        };
+        if (this.#blendState) {
+            colorTarget.blend = this.#blendState;
+        }
+
+        const bindGroupLayouts: GPUBindGroupLayout[] = this.#useGroup2
+            ? [
+                this.#fragmentBindGroupLayout0,
+                this.#fragmentBindGroupLayout1,
+                view.postEffectManager.gbufferBindGroupLayout
+            ]
+            : [
+                this.#fragmentBindGroupLayout0,
+                this.#fragmentBindGroupLayout1
+            ];
+
+        const pipeline = gpuDevice.createRenderPipeline({
+            label: `${this.#name}_RENDER_PIPELINE_USE_MSAA_${useMSAA}_${targetFormat}`,
+            layout: gpuDevice.createPipelineLayout({
+                label: `${this.#name}_PIPELINE_LAYOUT_USE_MSAA_${useMSAA}`,
+                bindGroupLayouts
+            }),
+            vertex: {
+                module: currentShader,
+                entryPoint: 'vs_main'
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: 'none'
+            },
+            fragment: {
+                module: currentShader,
+                entryPoint: 'fs_main',
+                targets: [colorTarget]
+            }
+        });
+
+        if (useMSAA) this.#renderPipelineMSAA = pipeline;
+        else this.#renderPipelineNonMSAA = pipeline;
+
+        this.#renderPipeline = pipeline;
+    }
+
+    #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], useMSAA: boolean, gpuDevice: GPUDevice) {
+        const {storage, textures} = this.shaderInfo;
+        const sourceOffset = this.#inPlace ? 1 : 0;
+        const sourceCount = sourceTextureInfoList.length;
+
+        let group0Key: string;
+        if (sourceCount <= sourceOffset) {
+            group0Key = 'empty';
+        } else if (sourceCount - sourceOffset === 1) {
+            group0Key = `${this.#getResourceId(sourceTextureInfoList[sourceOffset]?.texture)}`;
+        } else {
+            group0Key = '';
+            for (let i = sourceOffset; i < sourceCount; i++) {
+                if (i > sourceOffset) group0Key += '_';
+                group0Key += this.#getResourceId(sourceTextureInfoList[i]?.texture);
+            }
+        }
+
+        const cachedBG0 = this.#bindGroupCache0.get(group0Key);
+        if (cachedBG0) {
+            this.#fragmentBindGroup0 = cachedBG0;
+        } else {
+            this.#fragmentBindGroupEntries0 = [];
+
+            for (const k in storage) {
+                const {binding, group} = storage[k];
+                if (group === 0) {
+                    const resource = sourceTextureInfoList[binding + sourceOffset]?.textureView;
+                    if (resource) {
+                        this.#fragmentBindGroupEntries0.push({binding, resource});
+                    }
+                }
+            }
+            for (let i = 0, len = textures.length; i < len; i++) {
+                const {binding, group} = textures[i];
+                if (group === 0) {
+                    const resource = sourceTextureInfoList[binding + sourceOffset]?.textureView;
+                    if (resource) {
+                        this.#fragmentBindGroupEntries0.push({binding, resource});
+                    }
+                }
+            }
+
+            this.#fragmentBindGroup0 = gpuDevice.createBindGroup({
+                label: `${this.#name}_FRAGMENT_BG_0_USE_MSAA_${useMSAA}`,
+                layout: this.#fragmentBindGroupLayout0,
+                entries: this.#fragmentBindGroupEntries0
+            });
+
+            this.#bindGroupCache0.set(group0Key, this.#fragmentBindGroup0);
+        }
+
+        if (this.#bindGroupCache1) {
+            this.#fragmentBindGroup1 = this.#bindGroupCache1;
+        } else if (this.#uniformBuffer && this.uniformsInfo) {
+            this.#fragmentBindGroupEntries1 = [{
+                binding: 0,
+                resource: {
+                    buffer: this.#uniformBuffer.gpuBuffer,
+                    offset: 0,
+                    size: this.#uniformBuffer.size
+                },
+            }];
+            this.#fragmentBindGroup1 = gpuDevice.createBindGroup({
+                label: `${this.#name}_FRAGMENT_BG_1_USE_MSAA_${useMSAA}`,
+                layout: this.#fragmentBindGroupLayout1,
+                entries: this.#fragmentBindGroupEntries1
+            });
+            this.#bindGroupCache1 = this.#fragmentBindGroup1;
+        } else {
+            this.#fragmentBindGroup1 = gpuDevice.createBindGroup({
+                label: `${this.#name}_FRAGMENT_BG_1_EMPTY_USE_MSAA_${useMSAA}`,
+                layout: this.#fragmentBindGroupLayout1,
+                entries: []
+            });
+            this.#bindGroupCache1 = this.#fragmentBindGroup1;
+        }
+    }
+
+    #calcVideoMemory() {
+        this.#videoMemorySize = this.#uniformBuffer ? this.#uniformBuffer.size : 0;
+    }
+}
+
+Object.defineProperty(ASingleRenderPassPostEffect.prototype, 'isInstanceofPostEffect', {
+    value: true,
+    writable: false
+});
+Object.freeze(ASingleRenderPassPostEffect)
+export default ASingleRenderPassPostEffect

@@ -1,10 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import View3D from "../../../../display/view/View3D";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
-
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface Vibrance {
     /**
@@ -12,13 +13,13 @@ interface Vibrance {
      * [EN] Vibrance adjustment value (-100 ~ 100)
      * @defaultValue 0
      */
-    vibrance: number
+    vibrance: number;
     /**
      * [KO] 채도 조절 값 (-100 ~ 100)
      * [EN] Saturation adjustment value (-100 ~ 100)
      * @defaultValue 0
      */
-    saturation: number
+    saturation: number;
 }
 
 /**
@@ -62,12 +63,16 @@ class Vibrance extends ASinglePassPostEffect {
         );
     }
 
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.vibrance === 0 && this.saturation === 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 defineNumber(Vibrance, [
     {key: 'vibrance', value: 0, min: -100, max: 100},
     {key: 'saturation', value: 0, min: -100, max: 100}
-])
+]);
 
-Object.freeze(Vibrance)
-export default Vibrance
+Object.freeze(Vibrance);
+export default Vibrance;

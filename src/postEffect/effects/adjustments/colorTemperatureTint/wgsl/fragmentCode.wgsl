@@ -1,15 +1,14 @@
-// [KO] 1. 인덱스 및 컬러 로드
-// [EN] 1. Load index and color
-let index = global_id.xy;
-var color: vec4<f32> = textureLoad(sourceTexture, index, 0);
+let amount = uniforms.amount;
+if (amount <= 0.0) {
+    discard;
+    return vec4<f32>(1.0);
+}
 
 let temp = uniforms.temperature;
 var tempRGB: vec3<f32>;
 
-// [KO] 2. 캘빈(Kelvin) 온도에 따른 RGB 색상 보정치 근사 계산
-// [EN] 2. Approximate RGB color correction values based on Kelvin temperature
-// [KO] 미첼 채리티(Mitchell Charity)의 알고리즘을 기반으로 구현되었습니다.
-// [EN] Implemented based on Mitchell Charity's algorithm.
+// [KO] 1. 캘빈(Kelvin) 온도에 따른 RGB 색상 보정치 근사 계산 (Mitchell Charity 알고리즘)
+// [EN] 1. Approximate RGB color correction values based on Kelvin temperature (Mitchell Charity's algorithm)
 
 // RED 채널 계산
 if (temp <= 6600.0) {
@@ -38,10 +37,9 @@ if (temp >= 6600.0) {
     tempRGB.b = clamp(0.543206789 * log(t) - 1.19625408, 0.0, 1.0);
 }
 
-// [KO] 3. 색온도 중립화 및 틴트(Tint) 적용
-// [EN] 3. Color temperature neutralization and Tint application
-let neutralTemp: vec3<f32> = vec3<f32>(1.0, 1.0, 1.0);
-let tempAdjust: vec3<f32> = tempRGB / neutralTemp;
+// [KO] 2. 색온도 중립화 및 틴트(Tint) 적용
+// [EN] 2. Color temperature neutralization and Tint application
+let tempAdjust: vec3<f32> = tempRGB;
 
 let tintValue = uniforms.tint * 0.01;
 var tintRGB: vec3<f32>;
@@ -56,14 +54,14 @@ if (tintValue >= 0.0) {
     tintRGB = vec3<f32>(1.0, 1.0 - mag * 0.2, 1.0);
 }
 
-// [KO] 4. 최종 보정치 합성 및 강도(Amount) 적용
-// [EN] 4. Combine final correction and apply Amount
+// [KO] 3. 최종 보정치 합성 및 강도(Amount) 적용 (ROP Multiplicative Blend: dst.rgb * finalAdjust)
+// [EN] 3. Combine final correction and apply Amount (ROP Multiplicative Blend: dst.rgb * finalAdjust)
 let colorAdjust = tempAdjust * tintRGB;
-let finalAdjust = mix(vec3<f32>(1.0), colorAdjust, uniforms.amount);
+let finalAdjust = clamp(mix(vec3<f32>(1.0), colorAdjust, amount), vec3<f32>(0.0), vec3<f32>(1.0));
 
-color = vec4<f32>(color.rgb * finalAdjust, color.a);
+if (all(finalAdjust >= vec3<f32>(0.9999))) {
+    discard;
+    return vec4<f32>(1.0);
+}
 
-// [KO] 5. 결과 저장 (안전한 LDR 범위 클램핑)
-// [EN] 5. Store result (Safe LDR range clamping)
-color = vec4<f32>(clamp(color.rgb, vec3<f32>(0.0), vec3<f32>(1.0)), color.a);
-textureStore(outputTexture, index, color);
+return vec4<f32>(finalAdjust, 1.0);

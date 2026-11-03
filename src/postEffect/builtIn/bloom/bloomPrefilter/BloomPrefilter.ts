@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl";
+import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
@@ -37,7 +37,7 @@ interface BloomPrefilter {
  *
  * @category Visual Effects
  */
-class BloomPrefilter extends ASinglePassPostEffect {
+class BloomPrefilter extends ASingleRenderPassPostEffect {
     /**
      * [KO] BloomPrefilter 인스턴스를 생성합니다.
      * [EN] Creates a BloomPrefilter instance.
@@ -51,7 +51,7 @@ class BloomPrefilter extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_BLOOM_PREFILTER',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode)
         );
     }
 }

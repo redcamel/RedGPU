@@ -1,10 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import View3D from "../../../../display/view/View3D";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
-
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface HueSaturation {
     /**
@@ -12,13 +13,13 @@ interface HueSaturation {
      * [EN] Hue rotation value (unit: degrees, -180 ~ 180)
      * @defaultValue 0
      */
-    hue: number
+    hue: number;
     /**
      * [KO] 채도 조절 값 (-100 ~ 100)
      * [EN] Saturation adjustment value (-100 ~ 100)
      * @defaultValue 0
      */
-    saturation: number
+    saturation: number;
 }
 
 /**
@@ -62,11 +63,15 @@ class HueSaturation extends ASinglePassPostEffect {
         );
     }
 
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.hue === 0 && this.saturation === 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 defineNumber(HueSaturation, [
     {key: 'hue', value: 0, min: -180, max: 180},
     {key: 'saturation', value: 0, min: -100, max: 100}
-])
-Object.freeze(HueSaturation)
-export default HueSaturation
+]);
+Object.freeze(HueSaturation);
+export default HueSaturation;

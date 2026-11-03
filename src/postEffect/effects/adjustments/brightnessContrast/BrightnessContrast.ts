@@ -1,10 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import View3D from "../../../../display/view/View3D";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
-
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface BrightnessContrast {
     /**
@@ -12,13 +13,13 @@ interface BrightnessContrast {
      * [EN] Brightness adjustment value (-150 ~ 150)
      * @defaultValue 0
      */
-    brightness: number,
+    brightness: number;
     /**
      * [KO] 대비 조절 값 (-50 ~ 100)
      * [EN] Contrast adjustment value (-50 ~ 100)
      * @defaultValue 0
      */
-    contrast: number
+    contrast: number;
 }
 
 /**
@@ -60,6 +61,11 @@ class BrightnessContrast extends ASinglePassPostEffect {
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
+
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.brightness === 0 && this.contrast === 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 defineNumber(BrightnessContrast,
@@ -67,7 +73,7 @@ defineNumber(BrightnessContrast,
         {key: 'brightness', value: 0, min: -150, max: 150},
         {key: 'contrast', value: 0, min: -50, max: 100}
     ]
-)
+);
 
-Object.freeze(BrightnessContrast)
-export default BrightnessContrast
+Object.freeze(BrightnessContrast);
+export default BrightnessContrast;

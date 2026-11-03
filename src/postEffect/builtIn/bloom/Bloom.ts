@@ -278,6 +278,8 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Final HDR texture information with bloom composited (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.intensity <= 0) return sourceTextureInfo;
+
         const pool = view.postEffectManager.texturePool;
 
         const w0 = Math.max(1, width >> 1);
@@ -298,24 +300,20 @@ class Bloom extends AMultiPassPostEffect {
         const mip3 = this.#effect_downsample2.render(view, w3, h3, mip2);
         const mip4 = this.#effect_downsample3.render(view, w4, h4, mip3);
 
-        // 2. Progressive 9-Tap Tent Upsample Chain (1/32 -> 1/16 -> 1/8 -> 1/4 -> 1/2)
+        // 2. Progressive 9-Tap Tent Upsample Chain (In-Place onto mip3 -> mip2 -> mip1 -> mip0)
         const up3 = this.#effect_upsample3.render(view, w3, h3, mip3, mip4);
-        pool.release(mip3.texture);
         pool.release(mip4.texture);
 
         const up2 = this.#effect_upsample2.render(view, w2, h2, mip2, up3);
-        pool.release(mip2.texture);
         pool.release(up3.texture);
 
         const up1 = this.#effect_upsample1.render(view, w1, h1, mip1, up2);
-        pool.release(mip1.texture);
         pool.release(up2.texture);
 
         const up0 = this.#effect_upsample0.render(view, w0, h0, mip0, up1);
-        pool.release(mip0.texture);
         pool.release(up1.texture);
 
-        // 3. Final Full-Res HDR Composite
+        // 3. Final Full-Res HDR Composite (In-Place onto sourceTextureInfo)
         const compositeResult = this.#effect_composite.render(view, width, height, sourceTextureInfo, up0);
         pool.release(up0.texture);
 

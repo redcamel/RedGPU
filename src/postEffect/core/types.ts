@@ -35,4 +35,10 @@ export interface IPostEffectSourceConfig {
      * @defaultValue true
      */
     isSampled?: boolean;
+    /**
+     * [KO] 명시적 WGSL 텍스처 타입 (예: `'texture_2d<f32>'`, `'texture_3d<f32>'`)
+     * [EN] Explicit WGSL texture type (e.g., `'texture_2d<f32>'`, `'texture_3d<f32>'`)
+     * @defaultValue 'texture_2d<f32>'
+     */
+    textureType?: string;
 }

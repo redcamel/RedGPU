@@ -234,6 +234,7 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Post-effect result with SSAO composited (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
+        if (this.intensity <= 0) return sourceTextureInfo;
         const pool = view.postEffectManager.texturePool;
 
         const aoResult = this.#effect_ao.render(

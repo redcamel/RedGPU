@@ -1,12 +1,13 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineUint from "../../../../defineProperty/funcs/number/defineUint";
+import View3D from "../../../../display/view/View3D";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
-import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
-import defineUint from "../../../../defineProperty/funcs/number/defineUint";
-
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface RadialBlur {
     /**
@@ -14,25 +15,25 @@ interface RadialBlur {
      * [EN] Blur strength (0 or greater)
      * @defaultValue 50
      */
-    amount: number
+    amount: number;
     /**
      * [KO] 블러 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙)
      * [EN] Blur center X offset (unit: pixels, 0 = screen center)
      * @defaultValue 0
      */
-    centerX: number
+    centerX: number;
     /**
      * [KO] 블러 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙)
      * [EN] Blur center Y offset (unit: pixels, 0 = screen center)
      * @defaultValue 0
      */
-    centerY: number
+    centerY: number;
     /**
      * [KO] 샘플링 횟수 (2 ~ 100)
      * [EN] Number of samples (2 ~ 100)
      * @defaultValue 16
      */
-    sampleCount: number
+    sampleCount: number;
 }
 
 /**
@@ -76,18 +77,21 @@ class RadialBlur extends ASinglePassPostEffect {
         );
     }
 
-
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.amount <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 definePositiveNumber(RadialBlur, [
     {key: 'amount', value: 50}
-])
+]);
 defineNumber(RadialBlur, [
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},
-])
+]);
 defineUint(RadialBlur, [
     {key: 'sampleCount', value: 16, min: 2, max: 100},
-])
-Object.freeze(RadialBlur)
-export default RadialBlur
+]);
+Object.freeze(RadialBlur);
+export default RadialBlur;

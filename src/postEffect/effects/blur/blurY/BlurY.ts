@@ -1,9 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import View3D from "../../../../display/view/View3D";
+import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
+import {IPostEffectResult} from "../../../core/types";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface BlurY {
     /**
@@ -11,7 +13,7 @@ interface BlurY {
      * [EN] Blur strength (unit: pixels, 0 ~ 512)
      * @defaultValue 32
      */
-    size: number
+    size: number;
 }
 
 /**
@@ -30,7 +32,7 @@ interface BlurY {
  * @see [BlurY example](/RedGPU/examples/postEffect/blur/blurY/)
  * @category Blur
  */
-class BlurY extends ASinglePassPostEffect {
+class BlurY extends ASingleRenderPassPostEffect {
 
     /**
      * [KO] BlurY 인스턴스를 생성합니다.
@@ -45,25 +47,27 @@ class BlurY extends ASinglePassPostEffect {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param options -
-     * [KO] 블러 생성 옵션. 기본값은 LDR(`isLdr: true`, `rgba8unorm`)이며, HDR 빌트인 패스(`SSAO` 등) 내부에서 사용될 경우를 대비해 `isLdr: false`(`rgba16float`) 설정을 열어둡니다.
-     * [EN] Blur creation options. Defaults to LDR (`isLdr: true`, `rgba8unorm`), and exposes `isLdr: false` (`rgba16float`) in case it is used inside an HDR built-in pass (e.g., `SSAO`).
+     * [KO] 블러 생성 옵션. 기본값은 LDR(`isLdr: true`, `rgba8unorm`)이며, HDR 빌트인 패스(`LensFlare` 등) 내부에서 사용될 경우를 대비해 `isLdr: false`(`rgba16float`) 설정을 열어둡니다.
+     * [EN] Blur creation options. Defaults to LDR (`isLdr: true`, `rgba8unorm`), and exposes `isLdr: false` (`rgba16float`) in case it is used inside an HDR built-in pass (e.g., `LensFlare`).
      */
     constructor(redGPUContext: RedGPUContext, options?: { isLdr?: boolean }) {
-        // [KO] HDR 패스(SSAO 등) 내부에서 재사용될 경우를 대비해 isLdr 옵션을 열어둠 (기본값: true)
-        // [EN] Expose isLdr option in case it is reused inside an HDR pass (e.g., SSAO) (default: true)
         const isLdr = options?.isLdr ?? true;
-        super(redGPUContext, {isLdr});
+        super(redGPUContext, {isLdr, inPlace: false});
         this.init(
             redGPUContext,
             'POST_EFFECT_BLUR_Y',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode)
         );
+    }
 
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.size <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 
 definePositiveNumber(BlurY, [
     {key: 'size', value: 32, min: 0, max: 512}
-])
-Object.freeze(BlurY)
-export default BlurY
+]);
+Object.freeze(BlurY);
+export default BlurY;

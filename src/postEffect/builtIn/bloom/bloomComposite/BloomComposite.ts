@@ -3,10 +3,10 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import defineColorRGB from "../../../../defineProperty/funcs/color/defineColorRGB";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
-import computeCode from "./wgsl/computeCode.wgsl";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface BloomComposite {
@@ -35,7 +35,7 @@ interface BloomComposite {
  *
  * @category Visual Effects
  */
-class BloomComposite extends ASinglePassPostEffect {
+class BloomComposite extends ASingleRenderPassPostEffect {
     /**
      * [KO] BloomComposite 인스턴스를 생성합니다.
      * [EN] Creates a BloomComposite instance.
@@ -45,16 +45,29 @@ class BloomComposite extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, {
+            inPlace: true,
+            blendState: {
+                color: {
+                    srcFactor: 'one',
+                    dstFactor: 'one',
+                    operation: 'add'
+                },
+                alpha: {
+                    srcFactor: 'zero',
+                    dstFactor: 'one',
+                    operation: 'add'
+                }
+            }
+        });
         this.init(
             redGPUContext,
             'POST_EFFECT_BLOOM_COMPOSITE',
-            createBasicPostEffectCode(
+            createBasicRenderPassPostEffectCode(
                 this,
-                computeCode,
+                fragmentCode,
                 uniformStructCode,
                 [
-                    {name: 'sourceTexture'},
                     {name: 'bloomTexture'}
                 ]
             )

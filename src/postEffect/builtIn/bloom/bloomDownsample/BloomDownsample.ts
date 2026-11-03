@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl";
+import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
 
 /**
  * [KO] 13-Tap Dual-Grid 등방성 커널을 사용하여 이전 단계의 블룸 밉 텍스처를 1/2 해상도로 다운샘플링하는 내부 패스입니다.
@@ -14,7 +14,7 @@ import computeCode from "./wgsl/computeCode.wgsl";
  *
  * @category Visual Effects
  */
-class BloomDownsample extends ASinglePassPostEffect {
+class BloomDownsample extends ASingleRenderPassPostEffect {
     /**
      * [KO] BloomDownsample 인스턴스를 생성합니다.
      * [EN] Creates a BloomDownsample instance.
@@ -28,7 +28,7 @@ class BloomDownsample extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_BLOOM_DOWNSAMPLE',
-            createBasicPostEffectCode(this, computeCode)
+            createBasicRenderPassPostEffectCode(this, fragmentCode)
         );
     }
 }

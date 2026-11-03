@@ -1,11 +1,12 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
-
+import View3D from "../../../../display/view/View3D";
+import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../../core/createBasicRenderPassPostEffectCode";
+import {IPostEffectResult} from "../../../core/types";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface ColorTemperatureTint {
     /**
@@ -46,7 +47,7 @@ interface ColorTemperatureTint {
  * @see [ColorTemperatureTint example](/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/)
  * @category Adjustments
  */
-class ColorTemperatureTint extends ASinglePassPostEffect {
+class ColorTemperatureTint extends ASingleRenderPassPostEffect {
 
     /**
      * [KO] ColorTemperatureTint 인스턴스를 생성합니다.
@@ -62,11 +63,26 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {isLdr: true});
+        super(redGPUContext, {
+            isLdr: true,
+            inPlace: true,
+            blendState: {
+                color: {
+                    srcFactor: 'dst',
+                    dstFactor: 'zero',
+                    operation: 'add'
+                },
+                alpha: {
+                    srcFactor: 'zero',
+                    dstFactor: 'one',
+                    operation: 'add'
+                }
+            }
+        });
         this.init(
             redGPUContext,
             'POST_EFFECT_COLOR_TEMPERATURE_TINT',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode, undefined, false)
         );
 
         this.temperature = 6500;
@@ -136,14 +152,19 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
         this.temperature = 9000;
         this.tint = 15;
     }
+
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.amount <= 0 || (this.temperature === 6500 && this.tint === 0)) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 definePositiveNumber(ColorTemperatureTint, [
     {key: 'temperature', value: 6500, min: 1000, max: 20000},
     {key: 'amount', value: 1, min: 0, max: 1},
-])
+]);
 defineNumber(ColorTemperatureTint, [
     {key: 'tint', value: 0, min: -100, max: 100},
-])
-Object.freeze(ColorTemperatureTint)
-export default ColorTemperatureTint
+]);
+Object.freeze(ColorTemperatureTint);
+export default ColorTemperatureTint;
