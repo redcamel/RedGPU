@@ -89,7 +89,7 @@ class IrradianceGenerator extends RedGPUObject {
         const irradianceGPUTexture = resourceManager.createManagedTexture({
             size: [size, size, 6],
             format: format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
             dimension: '2d',
             mipLevelCount: 1,
             label: `Irradiance_Map_Texture_${createUUID()}`
