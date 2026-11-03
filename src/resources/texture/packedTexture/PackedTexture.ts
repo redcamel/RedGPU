@@ -242,7 +242,7 @@ class PackedTexture extends RedGPUObject {
         const textureDescriptor: GPUTextureDescriptor = {
             size: [width, height, 1],
             format: 'rgba8unorm',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
             label: label || `PACK_TEXTURE_${createUUID()}`,
             mipLevelCount: getMipLevelCount(width, height)
         };
