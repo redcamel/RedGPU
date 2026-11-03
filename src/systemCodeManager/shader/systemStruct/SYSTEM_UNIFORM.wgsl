@@ -16,6 +16,7 @@ struct SystemUniform {
 	  projection: Projection,
 	  time: Time,
 	  resolution:vec2<f32>,
+	  pickingOffset:vec2<f32>,
       //
       camera:Camera,
 	  usePrefilterTexture:u32,

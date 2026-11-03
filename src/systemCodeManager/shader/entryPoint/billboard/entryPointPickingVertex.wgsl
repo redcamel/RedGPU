@@ -64,6 +64,10 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
         }
     }
 
+    output.position = vec4<f32>(
+        (output.position.xy - systemUniforms.pickingOffset * output.position.w) * u_resolution,
+        output.position.zw
+    );
     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
     return output;
 }

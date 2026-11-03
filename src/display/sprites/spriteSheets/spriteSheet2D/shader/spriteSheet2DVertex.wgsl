@@ -109,7 +109,11 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
 
     let viewPos = u_viewMatrix * u_modelMatrix * vec4<f32>(inputData.position, 1.0);
-    output.position = u_projectionMatrix * viewPos;
+    let clipPos = u_projectionMatrix * viewPos;
+    output.position = vec4<f32>(
+        (clipPos.xy - systemUniforms.pickingOffset * clipPos.w) * systemUniforms.resolution,
+        clipPos.zw
+    );
 
     // [KO] 피킹 ID 할당
     // [EN] Assign picking ID

@@ -170,7 +170,11 @@ fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     let position = globalVertexData.matrixList.modelMatrix * vec4<f32>(skinnedPosData.position, 1.0);
     let relPos = position.xyz - systemUniforms.camera.cameraPosition;
     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-    output.position = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
+    let clipPos = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
+    output.position = vec4<f32>(
+        (clipPos.xy - systemUniforms.pickingOffset * clipPos.w) * systemUniforms.resolution,
+        clipPos.zw
+    );
     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
 
     return output;

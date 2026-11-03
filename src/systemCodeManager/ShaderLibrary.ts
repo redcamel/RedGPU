@@ -2144,7 +2144,11 @@ export namespace EntryPointLibrary {
          *     let position = u_modelMatrix * vec4<f32>(input_position, 1.0);
          *     let relPos = position.xyz - u_camera.cameraPosition;
          *     let viewPos = (u_viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-         *     output.position = u_projectionMatrix * vec4<f32>(viewPos, 1.0);
+         *     let clipPos = u_projectionMatrix * vec4<f32>(viewPos, 1.0);
+         *     output.position = vec4<f32>(
+         *         (clipPos.xy - systemUniforms.pickingOffset * clipPos.w) * systemUniforms.resolution,
+         *         clipPos.zw
+         *     );
          *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
@@ -2300,7 +2304,11 @@ export namespace EntryPointLibrary {
          *             output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
          *         }
          *     }
-         * 
+         *
+         *     output.position = vec4<f32>(
+         *         (output.position.xy - systemUniforms.pickingOffset * output.position.w) * u_resolution,
+         *         output.position.zw
+         *     );
          *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
@@ -2929,6 +2937,7 @@ export namespace ShaderLibrary {
      * 	  projection: Projection,
      * 	  time: Time,
      * 	  resolution:vec2<f32>,
+     *      pickingOffset:vec2<f32>,
      *       //
      *       camera:Camera,
      * 	  usePrefilterTexture:u32,

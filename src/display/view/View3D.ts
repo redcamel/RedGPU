@@ -553,8 +553,18 @@ class View3D extends AView {
                 this.#uniformDataU32
             )
 
+            const {pixelRectArray} = this;
+            const width = pixelRectArray[2];
+            const height = pixelRectArray[3];
+            const combinedScale = window.devicePixelRatio * redGPUContext.renderScale;
+            const physicalX = width > 0 ? Math.max(0, Math.min(width - 1, Math.floor(this.pickingManager.mouseX * combinedScale))) : 0;
+            const physicalY = height > 0 ? Math.max(0, Math.min(height - 1, Math.floor(this.pickingManager.mouseY * combinedScale))) : 0;
+            const pickingOffsetX = width > 0 ? ((physicalX + 0.5) / width) * 2.0 - 1.0 : 0.0;
+            const pickingOffsetY = height > 0 ? 1.0 - ((physicalY + 0.5) / height) * 2.0 : 0.0;
+
             updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-                {key: 'resolution', value: [this.pixelRectObject.width, this.pixelRectObject.height]},
+                {key: 'resolution', value: [width, height]},
+                {key: 'pickingOffset', value: [pickingOffsetX, pickingOffsetY]},
                 {key: 'usePrefilterTexture', value: this.ibl?.prefilterTexture?.gpuTexture ? 1 : 0},
                 {key: 'isView3D', value: this.constructor === View3D ? 1 : 0},
                 {key: 'directionalLightCount', value: lightManager.directionalLightCount},

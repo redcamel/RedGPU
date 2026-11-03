@@ -303,8 +303,7 @@ class PickingManager extends RedGPUObject {
         const {redGPUContext} = view
         const {resourceManager} = redGPUContext
 
-        if (this.#pickingGPUTexture?.width !== this.#view.pixelRectObject.width || this.#pickingGPUTexture?.height !== this.#view.pixelRectObject.height) {
-            this.destroy()
+        if (!this.#pickingGPUTexture) {
             this.#pickingGPUTexture = this.#createTexture(
                 'picking',
                 navigator.gpu.getPreferredCanvasFormat(),
@@ -350,7 +349,7 @@ class PickingManager extends RedGPUObject {
         }
 
         commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, mainRenderEncoder => {
-            const textureView = {texture: this.#pickingGPUTexture, origin: {x: physicalX, y: physicalY, z: 0}};
+            const textureView = {texture: this.#pickingGPUTexture, origin: {x: 0, y: 0, z: 0}};
             const bufferView = {buffer: this.#readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
             const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
             mainRenderEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
@@ -366,11 +365,11 @@ class PickingManager extends RedGPUObject {
     #createTexture(label: string, format: GPUTextureFormat, usage: GPUTextureUsageFlags): GPUTexture {
         const {resourceManager} = this
         return resourceManager.createManagedTexture({
-            size: [this.#view.pixelRectObject.width, this.#view.pixelRectObject.height, 1],
+            size: [1, 1, 1],
             usage,
             format,
             sampleCount: 1,
-            label: `${this.#view.name}_${label}_${this.#view.pixelRectObject.width}x${this.#view.pixelRectObject.height}`,
+            label: `${this.#view.name}_${label}_1x1`,
         });
     }
 
