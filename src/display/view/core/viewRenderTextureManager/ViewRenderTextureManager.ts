@@ -50,7 +50,8 @@ type GBufferInfo = {
      */
     resolveTextureDescriptor?: GPUTextureDescriptor,
 }
-const BASIC_USAGE = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+const COLOR_USAGE = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+const GBUFFER_USAGE = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
 
 const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
     format?: GPUTextureFormat,
@@ -60,21 +61,21 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
 }> = {
     [GBUFFER_TYPE.COLOR]: {
         format: 'rgba16float',
-        usage: BASIC_USAGE,
+        usage: COLOR_USAGE,
         withResolve: true,
         useMipmap: false
     },
-    [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rg16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
-    [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE, withResolve: true, useMipmap: false},
+    [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rg16float', usage: GBUFFER_USAGE, withResolve: true, useMipmap: false},
+    [GBUFFER_TYPE.NORMAL]: {usage: GBUFFER_USAGE, withResolve: true, useMipmap: false},
     [GBUFFER_TYPE.RENDER_PATH1_RESULT]: {
         format: 'rgba16float',
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
         withResolve: false,
         useMipmap: true
     },
     [GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT]: {
         format: 'depth32float',
-        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC,
+        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
         withResolve: false,
         useMipmap: false
     }
@@ -465,12 +466,18 @@ class ViewRenderTextureManager extends RedGPUObject {
 
         const {name} = this.#view
         const sampleCount = (type === GBUFFER_TYPE.RENDER_PATH1_RESULT || type === GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT) ? 1 : (useMSAA && mipLevelCount === 1 ? 4 : 1);
+        let mainUsage = usage;
+        if (withResolve && sampleCount > 1) {
+            mainUsage = GPUTextureUsage.RENDER_ATTACHMENT;
+        } else if (type === GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT && useMSAA) {
+            mainUsage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING;
+        }
         const textureDescriptor = {
             size: this.#targetTextureSize,
             sampleCount,
             label: `${name}_${type}_texture_${this.#targetTextureSizeString}`,
             format: format,
-            usage: sampleCount > 1 ? (usage & ~GPUTextureUsage.STORAGE_BINDING) : usage,
+            usage: mainUsage,
             mipLevelCount,
         }
         const newTexture = resourceManager.createManagedTexture(textureDescriptor)
@@ -508,7 +515,10 @@ class ViewRenderTextureManager extends RedGPUObject {
     #createDepthTexture(type: GBUFFER_INNER_TYPE): void {
         this.#destroyGBuffer(type)
         keepLog(`새 텍스처 생성 중: ${type}`)
-        const usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+        const {useMSAA} = this.antialiasingManager
+        const usage = useMSAA
+            ? (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING)
+            : (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC)
         this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, 'depth32float', usage, false))
     }
 
