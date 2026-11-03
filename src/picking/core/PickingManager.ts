@@ -216,7 +216,7 @@ class PickingManager extends RedGPUObject {
                     view: this.pickingDepthGPUTextureView,
                     depthClearValue: 1.0,
                     depthLoadOp: GPU_LOAD_OP.CLEAR,
-                    depthStoreOp: GPU_STORE_OP.STORE,
+                    depthStoreOp: GPU_STORE_OP.DISCARD,
                 },
             };
             redGPUContext.commandEncoderManager.addMainRenderPass(this.pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
@@ -305,9 +305,17 @@ class PickingManager extends RedGPUObject {
 
         if (this.#pickingGPUTexture?.width !== this.#view.pixelRectObject.width || this.#pickingGPUTexture?.height !== this.#view.pixelRectObject.height) {
             this.destroy()
-            this.#pickingGPUTexture = this.#createTexture('picking', navigator.gpu.getPreferredCanvasFormat())
+            this.#pickingGPUTexture = this.#createTexture(
+                'picking',
+                navigator.gpu.getPreferredCanvasFormat(),
+                GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+            )
             this.#pickingGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingGPUTexture)
-            this.#pickingDepthGPUTexture = this.#createTexture('pickingDepth', 'depth32float')
+            this.#pickingDepthGPUTexture = this.#createTexture(
+                'pickingDepth',
+                'depth32float',
+                GPUTextureUsage.RENDER_ATTACHMENT
+            )
             this.#pickingDepthGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingDepthGPUTexture)
             this.#calcVideoMemory()
         }
@@ -355,11 +363,11 @@ class PickingManager extends RedGPUObject {
         this.#videoMemorySize = calculateTextureByteSize(texture) + calculateTextureByteSize(this.#pickingDepthGPUTexture)
     }
 
-    #createTexture(label: string, format: GPUTextureFormat): GPUTexture {
+    #createTexture(label: string, format: GPUTextureFormat, usage: GPUTextureUsageFlags): GPUTexture {
         const {resourceManager} = this
         return resourceManager.createManagedTexture({
             size: [this.#view.pixelRectObject.width, this.#view.pixelRectObject.height, 1],
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
+            usage,
             format,
             sampleCount: 1,
             label: `${this.#view.name}_${label}_${this.#view.pixelRectObject.width}x${this.#view.pixelRectObject.height}`,
