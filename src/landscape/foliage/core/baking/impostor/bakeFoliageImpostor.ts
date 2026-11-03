@@ -763,7 +763,7 @@ function executeDilation(
         label: 'Foliage_Impostor_Dilation_PingPongTexture_B',
         size: [width, height, 1],
         format: 'rgba8unorm',
-        usage: pingPongUsage
+        usage: TEXTURE_BINDING | STORAGE_BINDING
     });
 
     const steps = [1, 2, 4, 8];

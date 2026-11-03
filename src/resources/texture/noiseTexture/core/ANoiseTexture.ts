@@ -394,7 +394,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
             size: {width: width, height: height},
             format: 'rgba16float',
             mipLevelCount: this.mipLevelCount,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | (this.mipLevelCount > 1 ? GPUTextureUsage.RENDER_ATTACHMENT : 0),
             label: this.cacheKey,
         };
         const storageTexture = redGPUContext.gpuDevice.createTexture(this.#textureDescriptor);
