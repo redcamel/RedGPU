@@ -239,7 +239,7 @@ class TAA extends ASinglePassPostEffect {
                 const texture = resourceManager.createManagedTexture({
                     size: {width, height},
                     format: 'rgba16float',
-                    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+                    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
                     label: `TAA_HistoryTexture_${i}_${width}x${height}`
                 });
                 const textureView = resourceManager.getGPUResourceBitmapTextureView(texture, {
