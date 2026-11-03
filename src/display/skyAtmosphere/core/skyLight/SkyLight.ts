@@ -160,7 +160,7 @@ class SkyLight extends ASkyAtmosphereLUTGenerator {
             label: 'SkyLight_Reflection_Source_CubeTexture',
             size: [this.width, this.height, 6],
             format: 'rgba16float',
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
             mipLevelCount: mipLevelCount,
             dimension: '2d'
         };
@@ -170,7 +170,7 @@ class SkyLight extends ASkyAtmosphereLUTGenerator {
             label: 'SkyLight_Irradiance_Source_CubeTexture',
             size: [this.width, this.height, 6],
             format: 'rgba16float',
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
             mipLevelCount: mipLevelCount,
             dimension: '2d'
         };
@@ -180,7 +180,7 @@ class SkyLight extends ASkyAtmosphereLUTGenerator {
             label: 'SkyAtmosphere_Irradiance_LUT',
             size: [32, 32, 6],
             format: 'rgba16float',
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
             mipLevelCount: 1,
             dimension: '2d'
         });
@@ -189,7 +189,7 @@ class SkyLight extends ASkyAtmosphereLUTGenerator {
             label: 'SkyAtmosphere_SkyLight_CubeArray_Texture',
             size: [this.width, this.height, 12],
             format: 'rgba16float',
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
             mipLevelCount: mipLevelCount,
             dimension: '2d'
         });
