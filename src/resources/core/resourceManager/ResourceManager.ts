@@ -1112,7 +1112,7 @@ class ResourceManager extends RedGPUObject {
             const emptyBitmapTexture = gpuDevice.createTexture({
                 size: {width: 1, height: 1, depthOrArrayLayers: 1},
                 format: 'rgba8unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING,
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
                 label: 'EMPTY_BITMAP_TEXTURE',
             });
             this.#emptyBitmapTextureView = emptyBitmapTexture.createView({label: emptyBitmapTexture.label});
@@ -1143,7 +1143,7 @@ class ResourceManager extends RedGPUObject {
             const emptyCubeTexture = gpuDevice.createTexture({
                 size: {width: 1, height: 1, depthOrArrayLayers: 6},
                 format: 'rgba8unorm',
-                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
                 label: 'EMPTY_CUBE_TEXTURE',
             });
             this.#emptyCubeTextureView = emptyCubeTexture.createView(CubeTexture.defaultViewDescriptor);
@@ -1161,7 +1161,7 @@ class ResourceManager extends RedGPUObject {
                 size: {width: 1, height: 1, depthOrArrayLayers: 1},
                 dimension: '3d',
                 format: 'rgba8unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                usage: GPUTextureUsage.TEXTURE_BINDING,
                 label: 'EMPTY_TEXTURE_3D',
             });
             this.#emptyTexture3DView = emptyTexture3D.createView({
