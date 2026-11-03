@@ -191,7 +191,7 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
             size: [this.#width, this.#height, this.#depth],
             dimension: is3D ? '3d' : '2d',
             format: format,
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING
         });
     }
 
