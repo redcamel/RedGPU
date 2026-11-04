@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import {IPostEffectResult} from "./types";
 import RedGPUObject from "../../base/RedGPUObject";
+import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 
 /**
  * [KO] 후처리 과정에서 생성되는 임시 텍스처를 재사용하여 비디오 메모리 점유율과 할당 오버헤드를 줄이는 텍스처 풀 클래스입니다.
@@ -238,6 +239,8 @@ class PostEffectTexturePool extends RedGPUObject {
         format: GPUTextureFormat = 'rgba16float',
         useStorage: boolean = true
     ): GPUTexture {
+        validateUintRange(width, 1);
+        validateUintRange(height, 1);
         const {resourceManager} = this
         this.#requestCount++;
         const key = `${width}x${height}_${format}_${useStorage ? 'S' : 'R'}`;

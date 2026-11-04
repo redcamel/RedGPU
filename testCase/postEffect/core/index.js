@@ -26,12 +26,12 @@ redUnit.testGroup(
             try {
                 const mockEffect = { WORK_SIZE_X: 16, WORK_SIZE_Y: 16, WORK_SIZE_Z: 1 };
                 const configs = [
-                    { name: 'tex1', isSampled: true },
-                    { name: 'tex2', isSampled: false }
+                    {name: 'tex1'},
+                    {name: 'tex2', textureType: 'texture_3d<f32>'}
                 ];
                 const codes = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;', '', configs);
                 const hasTex1 = codes.nonMsaa.includes('var tex1 : texture_2d<f32>;');
-                const hasTex2 = codes.nonMsaa.includes('var tex2 : texture_storage_2d<rgba16float, read>;');
+                const hasTex2 = codes.nonMsaa.includes('var tex2 : texture_3d<f32>;');
                 run(hasTex1 && hasTex2);
             } catch (e) { run(false, e); }
         }, true);

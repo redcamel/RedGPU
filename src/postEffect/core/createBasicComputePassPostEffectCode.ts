@@ -21,14 +21,8 @@ const createCode = (
     const items = Array.isArray(sourceTextureConfigs) ? sourceTextureConfigs : [sourceTextureConfigs];
     for (let i = 0, len = items.length; i < len; i++) {
         const item = items[i];
-        const name = item.name;
-        const isSampled = item.isSampled !== undefined ? item.isSampled : true;
-
-        if (isSampled) {
-            sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_2d<f32>;\n`;
-        } else {
-            sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_storage_2d<rgba16float, read>;\n`;
-        }
+        const textureType = item.textureType || 'texture_2d<f32>';
+        sourceTextures += `@group(0) @binding(${i}) var ${item.name} : ${textureType};\n`;
     }
     const needsBasicSampler = !useSystemUniforms && (/\bbasicSampler\b/.test(code) || /\bbasicSampler\b/.test(uniformStruct));
     if (needsBasicSampler) {
