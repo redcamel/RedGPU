@@ -8,10 +8,6 @@ let centerUV = (vec2<f32>(index) + 0.5) * invSize;
 // [KO] DPR을 반영하여 물리적 해상도에 맞는 블러 크기 계산
 // [EN] Scale blur size by DPR to match physical resolution
 let blurSize = uniforms.size * systemUniforms.devicePixelRatio;
-if (blurSize <= 0.0) {
-    textureStore(outputTexture, index, textureSampleLevel(sourceTexture, basicSampler, centerUV, 0.0));
-    return;
-}
 
 // [KO] 2. 업계 표준 1D 분리형 가우시안 블러 수행 (X축)
 // [EN] 2. Industry standard 1D Separable Gaussian Blur execution (X-axis)

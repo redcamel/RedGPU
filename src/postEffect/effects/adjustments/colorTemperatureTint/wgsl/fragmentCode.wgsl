@@ -1,9 +1,4 @@
 let amount = uniforms.amount;
-if (amount <= 0.0) {
-    discard;
-    return vec4<f32>(1.0);
-}
-
 let temp = uniforms.temperature;
 var tempRGB: vec3<f32>;
 

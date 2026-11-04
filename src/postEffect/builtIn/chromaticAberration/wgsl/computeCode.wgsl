@@ -1,11 +1,9 @@
-// [KO] 1. 중심 픽셀 Green/Alpha 통합 로드 및 비활성/빈 배경 Early-out (픽셀당 텍스처 조회 4회 -> 3회 절감)
-// [EN] 1. Load center texel Green/Alpha once and early-out for zero intensity or empty background (4 -> 3 texture fetches)
+// [KO] 1. 중심 픽셀 Green/Alpha 통합 로드 및 빈 배경 Early-out (픽셀당 텍스처 조회 4회 -> 3회 절감)
+// [EN] 1. Load center texel Green/Alpha once and early-out for empty background (4 -> 3 texture fetches)
 let index = global_id.xy;
 let centerTexel = textureLoad(sourceTexture, index, 0);
 
-let intensity = uniforms.intensity;
-let startOffset = uniforms.startOffset;
-if (intensity <= 0.0 || startOffset >= 1.0 || centerTexel.a == 0.0) {
+if (centerTexel.a == 0.0) {
     textureStore(outputTexture, index, centerTexel);
     return;
 }
@@ -24,11 +22,13 @@ let r = length(coord);
 
 // [KO] 3. 언리얼 엔진 StartOffset 보호 영역 검사 및 C1 연속(t^2) 색수차 오프셋 산출
 // [EN] 3. Unreal Engine StartOffset protection check and C1 continuous (t^2) chromatic aberration offset
+let startOffset = uniforms.startOffset;
 if (r <= startOffset) {
     textureStore(outputTexture, index, centerTexel);
     return;
 }
 
+let intensity = uniforms.intensity;
 let t = saturate((r - startOffset) / (1.0 - startOffset));
 let mask = t * t;
 let shift = offset * (mask * intensity * 0.05);

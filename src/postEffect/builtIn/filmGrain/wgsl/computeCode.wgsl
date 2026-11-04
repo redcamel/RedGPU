@@ -1,10 +1,9 @@
-// [KO] 1. 기초 데이터 로드 및 조기 종료 조건 확인
-// [EN] 1. Load basic data and check early exit conditions
+// [KO] 1. 기초 데이터 로드 및 빈 배경 조기 종료 확인
+// [EN] 1. Load basic data and check empty background early exit
 let index = vec2<i32>(global_id.xy);
 let originalColor = textureLoad(sourceTexture, index, 0);
 
-let filmGrainIntensity_value = uniforms.filmGrainIntensity;
-if (filmGrainIntensity_value <= 0.0 || originalColor.a == 0.0) {
+if (originalColor.a == 0.0) {
     textureStore(outputTexture, index, originalColor);
     return;
 }
@@ -33,7 +32,7 @@ let finalMask = mix(0.25, 1.0, shadowToe) * highlightRollOff;
 
 // [KO] 5. 입자 강도 적용 및 최종 합성
 // [EN] 5. Apply grain intensity and final composition
-let intensity = filmGrainIntensity_value * finalMask;
+let intensity = uniforms.filmGrainIntensity * finalMask;
 let finalColor = fma(grain, vec3<f32>(intensity), originalColor.rgb);
 
 // [KO] 6. 결과 출력 (Saturate를 통한 안전한 색상 범위 보장)
