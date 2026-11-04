@@ -176,8 +176,9 @@ class FinalRender {
     render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]): void {
         const {sizeManager, antialiasingManager, commandEncoderManager} = redGPUContext
         const {msaaID} = antialiasingManager
-        const {pixelRectObject: canvasPixelRectObject} = sizeManager
-        const {width: canvasW, height: canvasH} = canvasPixelRectObject
+        const canvasPixelRectArray = sizeManager.pixelRectArray
+        const canvasW = canvasPixelRectArray[2]
+        const canvasH = canvasPixelRectArray[3]
 
         if (canvasW === 0 || canvasH === 0) return
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
@@ -330,7 +331,11 @@ class FinalRender {
             const gpuTextureView = (temp?.postEffectView || temp?.pickingView || temp?.resolveTarget || temp?.view) as GPUTextureView
             const hasPostEffectView = Boolean(temp?.postEffectView) && !temp?.pickingView
             const targetView = viewList[index]
-            const {x: viewX, y: viewY, width: viewW, height: viewH} = targetView.pixelRectObject
+            const viewPixelRectArray = targetView.pixelRectArray
+            const viewX = viewPixelRectArray[0]
+            const viewY = viewPixelRectArray[1]
+            const viewW = viewPixelRectArray[2]
+            const viewH = viewPixelRectArray[3]
 
             this.#validateViewGpuDetails(redGPUContext, index)
             const vertexUniformBuffer: UniformBuffer = this.#vertexUniformBuffers[index]
