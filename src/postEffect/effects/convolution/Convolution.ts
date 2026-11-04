@@ -95,6 +95,7 @@ class Convolution extends ASingleComputePassPostEffect {
             'POST_EFFECT_CONVOLUTION',
             createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
+        this.kernel = this.#kernel;
     }
 
     /**

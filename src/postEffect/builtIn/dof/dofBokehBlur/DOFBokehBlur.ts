@@ -73,13 +73,6 @@ class DOFBokehBlur extends ASingleComputePassPostEffect {
         return this.#passMode;
     }
 
-    set passMode(value: number) {
-        validateUintRange(value, DOF_CONFIG.PASS_MODE.BACKGROUND, DOF_CONFIG.PASS_MODE.FOREGROUND);
-        if (this.#passMode === value) return;
-        this.#passMode = value;
-        this.updateUniform('passMode', value);
-    }
-
     render(
         view: View3D,
         width: number,

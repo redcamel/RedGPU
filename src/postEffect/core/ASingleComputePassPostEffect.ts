@@ -257,6 +257,7 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
             if (members) {
                 for (const k in members) {
                     const property = this[k];
+                    if (property === undefined) continue;
                     if (property instanceof ColorRGBA) {
                         this.uniformBuffer.writeOnlyBuffer(members[k], property.rgbaNormalLinear);
                     } else if (property instanceof ColorRGB) {

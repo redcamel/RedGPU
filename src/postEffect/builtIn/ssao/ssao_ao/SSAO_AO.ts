@@ -3,17 +3,10 @@ import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEf
 import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
 
 interface SSAO_AO {
-    /**
-     * [KO] 가우시안 블러 사용 여부
-     * [EN] Whether to use Gaussian blur
-     * @defaultValue true
-     */
-    useBlur: boolean;
     /**
      * [KO] AO 대비 (0.5 ~ 4.0)
      * [EN] AO contrast (0.5 ~ 4.0)
@@ -93,9 +86,6 @@ class SSAO_AO extends ASingleComputePassPostEffect {
 
 }
 
-defineBoolean(SSAO_AO, [
-    {key: 'useBlur', value: true}
-])
 definePositiveNumber(SSAO_AO, [
     {key: 'contrast', value: 1.0, min: 0.5, max: 4.0},
     {key: 'radius', value: 0.5, min: 0.01, max: 5.0},

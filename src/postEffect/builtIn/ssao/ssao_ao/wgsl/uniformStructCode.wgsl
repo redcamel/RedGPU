@@ -13,7 +13,7 @@ struct Uniforms {
     fadeDistanceStart: f32,
     fadeDistanceRange: f32,
     contrast: f32,
-    useBlur: u32,
+    pad0: f32, // 16-byte tail alignment
 }
 
 /**

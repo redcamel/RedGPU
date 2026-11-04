@@ -35,6 +35,7 @@ class SSAO extends AMultiPassPostEffect {
     #effect_ao: SSAO_AO
     #effect_denoise: SSAODenoise
     #effect_blend: SSAOBlend
+    #useBlur: boolean = true
 
 
     /**
@@ -69,11 +70,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Whether denoiser blur is used
      */
     get useBlur(): boolean {
-        return this.#effect_ao.useBlur;
+        return this.#useBlur;
     }
 
     set useBlur(value: boolean) {
-        this.#effect_ao.useBlur = value;
+        this.#useBlur = Boolean(value);
     }
 
     /**

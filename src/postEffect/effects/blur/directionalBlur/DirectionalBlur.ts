@@ -66,6 +66,7 @@ class DirectionalBlur extends ASingleComputePassPostEffect {
             'POST_EFFECT_DIRECTIONAL_BLUR',
             createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
         );
+        this.#updateDirection();
     }
 
     /**

@@ -282,18 +282,10 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Final rendering result texture information (`IPostEffectResult`)
      */
     render(): IPostEffectResult {
-        const {redGPUContext} = this.#view;
-        const {antialiasingManager} = redGPUContext
-        const {msaaID} = antialiasingManager;
-
-        if (this.#prevMSAAID_for_gbuffer !== msaaID) {
-            this.#texturePool.clear();
-        }
-
         this.#updateSystemUniforms();
         this.#updateGbufferBindGroup();
 
-        let currentTextureView = this.#renderBuiltIn(this.#view, this.#renderToStorageTexture(this.#view));
+        let currentTextureView = this.#renderBuiltIn(this.#view, this.#prepareInitialSourceTexture(this.#view));
         currentTextureView = this.#renderLDRToScreen(this.#view, currentTextureView);
 
         this.#texturePool.releaseAll();
@@ -589,7 +581,7 @@ class PostEffectManager extends RedGPUObject {
         }
     }
 
-    #renderToStorageTexture(view: View3D): IPostEffectResult {
+    #prepareInitialSourceTexture(view: View3D): IPostEffectResult {
         const {redGPUContext, viewRenderTextureManager} = view;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {antialiasingManager} = redGPUContext;

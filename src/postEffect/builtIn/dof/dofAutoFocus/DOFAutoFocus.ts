@@ -1,10 +1,8 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
 import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
-import {IPostEffectResult} from "../../../core/types";
 import DOF_CONFIG from "../DOF_CONFIG";
 import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
@@ -61,15 +59,6 @@ class DOFAutoFocus extends ASingleComputePassPostEffect {
         if (this.#historyMode === value) return;
         this.#historyMode = value;
         this.updateUniform('historyMode', value);
-    }
-
-    render(
-        view: View3D,
-        width: number,
-        height: number,
-        prevFocusTextureInfo: IPostEffectResult
-    ): IPostEffectResult {
-        return super.render(view, width, height, prevFocusTextureInfo);
     }
 }
 

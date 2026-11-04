@@ -117,8 +117,8 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 렌더 파이프라인의 하드웨어 블렌딩 상태(`GPUBlendState`)를 반환하거나 설정합니다.
-     * [EN] Gets or sets the hardware blend state (`GPUBlendState`) of the render pipeline.
+     * [KO] 렌더 파이프라인의 하드웨어 블렌딩 상태(`GPUBlendState`)를 반환합니다.
+     * [EN] Returns the hardware blend state (`GPUBlendState`) of the render pipeline.
      *
      * @returns
      * [KO] 하드웨어 블렌딩 상태
@@ -126,12 +126,6 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
      */
     get blendState(): GPUBlendState {
         return this.#blendState;
-    }
-
-    set blendState(value: GPUBlendState) {
-        if (this.#blendState === value) return;
-        this.#blendState = value;
-        this.#renderPipeline = null;
     }
 
     /**
@@ -246,6 +240,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
             if (members) {
                 for (const k in members) {
                     const property = this[k];
+                    if (property === undefined) continue;
                     if (property instanceof ColorRGBA) {
                         this.uniformBuffer.writeOnlyBuffer(members[k], property.rgbaNormalLinear);
                     } else if (property instanceof ColorRGB) {

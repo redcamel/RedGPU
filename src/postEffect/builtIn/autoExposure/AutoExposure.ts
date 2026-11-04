@@ -302,18 +302,6 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 적응된 EV100 값이 기록되는 GPU `StorageBuffer` 인스턴스를 반환합니다.
-     * [EN] Returns the GPU `StorageBuffer` instance storing the adapted EV100 value.
-     *
-     * @returns
-     * [KO] 적응된 EV100 `StorageBuffer`
-     * [EN] Adapted EV100 `StorageBuffer`
-     */
-    get adaptedLuminanceBuffer(): StorageBuffer {
-        return this.#adaptedEV100Buffer;
-    }
-
-    /**
      * [KO] 소스 컬러 텍스처의 로그 휘도 히스토그램 생성 및 눈 적응 컴퓨트 패스를 기록합니다.
      * [EN] Records the log-luminance histogram generation and eye adaptation compute passes for the source color texture.
      *

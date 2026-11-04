@@ -1,9 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import View3D from "../../../../display/view/View3D";
-import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
 import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
-import {IPostEffectResult} from "../../../core/types";
 import DOF_CONFIG from "../DOF_CONFIG";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -43,22 +40,6 @@ class DOFPostFilter extends ASingleComputePassPostEffect {
 
     get passMode(): number {
         return this.#passMode;
-    }
-
-    set passMode(value: number) {
-        validateUintRange(value, DOF_CONFIG.PASS_MODE.BACKGROUND, DOF_CONFIG.PASS_MODE.FOREGROUND);
-        if (this.#passMode === value) return;
-        this.#passMode = value;
-        this.updateUniform('passMode', value);
-    }
-
-    render(
-        view: View3D,
-        width: number,
-        height: number,
-        bokehTextureInfo: IPostEffectResult
-    ): IPostEffectResult {
-        return super.render(view, width, height, bokehTextureInfo);
     }
 }
 

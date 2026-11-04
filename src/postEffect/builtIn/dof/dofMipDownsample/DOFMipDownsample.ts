@@ -1,8 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import View3D from "../../../../display/view/View3D";
 import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
 import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
-import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 
 /**
@@ -24,15 +22,6 @@ class DOFMipDownsample extends ASingleComputePassPostEffect {
             'POST_EFFECT_DOF_MIP_DOWNSAMPLE',
             createBasicComputePassPostEffectCode(this, computeCode, '', undefined, true, false)
         );
-    }
-
-    render(
-        view: View3D,
-        width: number,
-        height: number,
-        sourceMipTextureInfo: IPostEffectResult
-    ): IPostEffectResult {
-        return super.render(view, width, height, sourceMipTextureInfo);
     }
 }
 
