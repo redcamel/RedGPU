@@ -9,7 +9,6 @@ import eyeAdaptationCode from "./wgsl/eyeAdaptation.wgsl";
 import METERING_MODE from "./METERING_MODE";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import copyGPUBuffer from "../../../utils/copyGPUBuffer";
-import GBUFFER_TYPE from "../../../display/view/core/GBUFFER_TYPE";
 import RedGPUObject from "../../../base/RedGPUObject";
 
 
@@ -311,9 +310,9 @@ class AutoExposure extends RedGPUObject {
      */
     render(sourceTextureInfo: IPostEffectResult) {
         const {gpuDevice, commandEncoderManager} = this;
-        const {viewRenderTextureManager, rawCamera, renderViewStateData} = this.#view;
-        const colorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {width, height} = colorTexture;
+        const {rawCamera, renderViewStateData} = this.#view;
+        const sourceTexture = sourceTextureInfo.texture;
+        const {width, height} = sourceTexture;
         const {deltaTime} = renderViewStateData;
 
         if (this.#isExposureParamsDirty) {
@@ -359,7 +358,6 @@ class AutoExposure extends RedGPUObject {
             this.#prevHeight = height;
         }
 
-        const sourceTexture = sourceTextureInfo.texture;
         let cachedBindGroup0 = this.#generateHistogramBindGroup0Cache.get(sourceTexture);
         if (!cachedBindGroup0) {
             cachedBindGroup0 = gpuDevice.createBindGroup({
