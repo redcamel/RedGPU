@@ -37,6 +37,17 @@ const BIND_GROUP_INDEX = 0
 const BINDING_SAMPLER = 0
 const BINDING_TEXTURE = 1
 const BINDING_UNIFORMS = 2
+const BUFFER_OFFSET_ZERO = 0
+
+const RECT_INDEX_X = 0
+const RECT_INDEX_Y = 1
+const RECT_INDEX_W = 2
+const RECT_INDEX_H = 3
+
+const RGBA_INDEX_R = 0
+const RGBA_INDEX_G = 1
+const RGBA_INDEX_B = 2
+const RGBA_INDEX_A = 3
 
 const QUAD_VERTEX_COUNT = 6
 const INSTANCE_COUNT = 1
@@ -50,10 +61,14 @@ const VIEWPORT_MAX_DEPTH = 1
 const NDC_FULL_SPAN = 2.0
 const NDC_HALF_SCALE = 0.5
 const NDC_ORIGIN_OFFSET = 1.0
+const OPAQUE_ALPHA_THRESHOLD = 1.0
+const DEFAULT_BG_CHANNEL_VALUE = 1.0
 
 const AA_MODE_NONE = 0
 const AA_MODE_FXAA = 1
 const AA_MODE_CAS = 2
+const AA_MODE_COUNT = 3
+const CAS_PEAK_NUMERATOR = -1.0
 const CAS_PEAK_BASE = 8.0
 const CAS_PEAK_SHARPNESS_SCALE = 3.0
 
@@ -187,8 +202,8 @@ class FinalRender {
         const {sizeManager, antialiasingManager, commandEncoderManager} = redGPUContext
         const {msaaID} = antialiasingManager
         const canvasPixelRectArray = sizeManager.pixelRectArray
-        const canvasW = canvasPixelRectArray[2]
-        const canvasH = canvasPixelRectArray[3]
+        const canvasW = canvasPixelRectArray[RECT_INDEX_W]
+        const canvasH = canvasPixelRectArray[RECT_INDEX_H]
 
         if (canvasW === 0 || canvasH === 0) return
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
@@ -253,10 +268,10 @@ class FinalRender {
         const {gpuDevice, antialiasingManager} = redGPUContext
         const {backgroundColor, useBackgroundColor} = scene
         const redGPUContextRGBANormal = redGPUContext.backgroundColor.rgbaNormal
-        const cA = redGPUContextRGBANormal[3]
-        const cR = redGPUContextRGBANormal[0] * cA
-        const cG = redGPUContextRGBANormal[1] * cA
-        const cB = redGPUContextRGBANormal[2] * cA
+        const cA = redGPUContextRGBANormal[RGBA_INDEX_A]
+        const cR = redGPUContextRGBANormal[RGBA_INDEX_R] * cA
+        const cG = redGPUContextRGBANormal[RGBA_INDEX_G] * cA
+        const cB = redGPUContextRGBANormal[RGBA_INDEX_B] * cA
 
         let outR = cR
         let outG = cG
@@ -264,11 +279,11 @@ class FinalRender {
         let outA = cA
         if (useBackgroundColor) {
             const sceneRGBANormal = backgroundColor.rgbaNormal
-            const sA = sceneRGBANormal[3]
-            const invSA = 1 - sA
-            outR = sceneRGBANormal[0] * sA + cR * invSA
-            outG = sceneRGBANormal[1] * sA + cG * invSA
-            outB = sceneRGBANormal[2] * sA + cB * invSA
+            const sA = sceneRGBANormal[RGBA_INDEX_A]
+            const invSA = OPAQUE_ALPHA_THRESHOLD - sA
+            outR = sceneRGBANormal[RGBA_INDEX_R] * sA + cR * invSA
+            outG = sceneRGBANormal[RGBA_INDEX_G] * sA + cG * invSA
+            outB = sceneRGBANormal[RGBA_INDEX_B] * sA + cB * invSA
             outA = sA + cA * invSA
         }
 
@@ -290,10 +305,13 @@ class FinalRender {
                 const {sharpness} = view.taa
                 if (sharpness > 0) {
                     aaMode = AA_MODE_CAS
-                    casPeak = -1.0 / (CAS_PEAK_BASE - CAS_PEAK_SHARPNESS_SCALE * sharpness)
+                    casPeak = CAS_PEAK_NUMERATOR / (CAS_PEAK_BASE - CAS_PEAK_SHARPNESS_SCALE * sharpness)
                 }
             }
         }
+
+        const isOpaque = outA >= OPAQUE_ALPHA_THRESHOLD
+        const pipelineKey = isOpaque ? aaMode : aaMode + AA_MODE_COUNT
 
         const prevData = this.#fragmentBufferPrevData[index]
         if (
@@ -310,7 +328,7 @@ class FinalRender {
             prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD] === edgeThreshold &&
             prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN] === edgeThresholdMin
         ) {
-            return aaMode
+            return pipelineKey
         }
 
         prevData[UNIFORM_INDEX_NDC_SCALE_X] = ndcScaleX
@@ -340,8 +358,8 @@ class FinalRender {
         f32[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD] = edgeThreshold
         f32[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN] = edgeThresholdMin
 
-        gpuDevice.queue.writeBuffer(this.#fragmentBuffer[index], 0, f32 as BufferSource)
-        return aaMode
+        gpuDevice.queue.writeBuffer(this.#fragmentBuffer[index], BUFFER_OFFSET_ZERO, f32 as BufferSource)
+        return pipelineKey
     }
 
     #renderViewList(
@@ -365,10 +383,10 @@ class FinalRender {
             const hasPostEffectView = Boolean(temp?.postEffectView) && !temp?.pickingView
             const targetView = viewList[index]
             const viewPixelRectArray = targetView.pixelRectArray
-            const viewX = viewPixelRectArray[0]
-            const viewY = viewPixelRectArray[1]
-            const viewW = viewPixelRectArray[2]
-            const viewH = viewPixelRectArray[3]
+            const viewX = viewPixelRectArray[RECT_INDEX_X]
+            const viewY = viewPixelRectArray[RECT_INDEX_Y]
+            const viewW = viewPixelRectArray[RECT_INDEX_W]
+            const viewH = viewPixelRectArray[RECT_INDEX_H]
 
             this.#validateViewGpuDetails(redGPUContext, index)
 
@@ -387,7 +405,7 @@ class FinalRender {
                         {
                             binding: BINDING_UNIFORMS, resource: {
                                 buffer: this.#fragmentBuffer[index],
-                                offset: 0,
+                                offset: BUFFER_OFFSET_ZERO,
                                 size: this.#fragmentBuffer[index].size
                             }
                         }
@@ -397,7 +415,7 @@ class FinalRender {
                 this.#fragmentBindGroupCache[index].set(gpuTextureView, fragmentBindGroup);
             }
 
-            const aaMode = this.#updateFinalViewUniforms(
+            const pipelineKey = this.#updateFinalViewUniforms(
                 targetView,
                 index,
                 hasPostEffectView,
@@ -409,7 +427,7 @@ class FinalRender {
                 invCanvasH2,
                 canvasH
             )
-            const pipeline = this.#getPipeline(redGPUContext, aaMode)
+            const pipeline = this.#getPipeline(redGPUContext, pipelineKey)
             if (currentPipeline !== pipeline) {
                 finalRenderPassEnc.setPipeline(pipeline)
                 currentPipeline = pipeline
@@ -450,8 +468,8 @@ class FinalRender {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             })
             this.#fragmentBufferData[index] = new Float32Array(UNIFORM_FLOAT_COUNT)
-            this.#fragmentBufferData[index][UNIFORM_INDEX_BG_R] = 1
-            this.#fragmentBufferData[index][UNIFORM_INDEX_BG_A] = 1
+            this.#fragmentBufferData[index][UNIFORM_INDEX_BG_R] = DEFAULT_BG_CHANNEL_VALUE
+            this.#fragmentBufferData[index][UNIFORM_INDEX_BG_A] = DEFAULT_BG_CHANNEL_VALUE
             const prevData = new Float64Array(UNIFORM_FLOAT_COUNT)
             prevData.fill(NaN)
             this.#fragmentBufferPrevData[index] = prevData
@@ -464,10 +482,12 @@ class FinalRender {
         return this.#renderPassDescriptor
     }
 
-    #getPipeline(redGPUContext: RedGPUContext, aaMode: number): GPURenderPipeline {
-        let pipeline = this.#pipelines[aaMode]
+    #getPipeline(redGPUContext: RedGPUContext, pipelineKey: number): GPURenderPipeline {
+        let pipeline = this.#pipelines[pipelineKey]
         if (!pipeline) {
             const {gpuDevice, resourceManager} = redGPUContext
+            const isOpaque = pipelineKey < AA_MODE_COUNT
+            const aaMode = isOpaque ? pipelineKey : pipelineKey - AA_MODE_COUNT
             const entryPoint = FRAGMENT_ENTRY_POINTS[aaMode]
             const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(
                 PIPELINE_LAYOUT_LABEL,
@@ -477,34 +497,36 @@ class FinalRender {
                     ]
                 }
             );
+            const targetFormat = navigator.gpu.getPreferredCanvasFormat()
+            const targetState: GPUColorTargetState = isOpaque
+                ? {format: targetFormat}
+                : {
+                    format: targetFormat,
+                    blend: {
+                        color: {
+                            srcFactor: GPU_BLEND_FACTOR.SRC_ALPHA,
+                            dstFactor: GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA,
+                            operation: GPU_BLEND_OPERATION.ADD
+                        },
+                        alpha: {
+                            srcFactor: GPU_BLEND_FACTOR.SRC_ALPHA,
+                            dstFactor: GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA,
+                            operation: GPU_BLEND_OPERATION.ADD
+                        }
+                    }
+                }
             const pipelineDesc: GPURenderPipelineDescriptor = {
-                label: `${PIPELINE_DESCRIPTOR_LABEL}_${entryPoint}`,
+                label: `${PIPELINE_DESCRIPTOR_LABEL}_${entryPoint}_${isOpaque ? 'OPAQUE' : 'BLEND'}`,
                 layout: pipelineLayout,
                 vertex: this.#vertexState,
                 fragment: {
                     module: this.#fragmentShader,
                     entryPoint,
-                    targets: [
-                        {
-                            format: navigator.gpu.getPreferredCanvasFormat(),
-                            blend: {
-                                color: {
-                                    srcFactor: GPU_BLEND_FACTOR.SRC_ALPHA,
-                                    dstFactor: GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA,
-                                    operation: GPU_BLEND_OPERATION.ADD
-                                },
-                                alpha: {
-                                    srcFactor: GPU_BLEND_FACTOR.SRC_ALPHA,
-                                    dstFactor: GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA,
-                                    operation: GPU_BLEND_OPERATION.ADD
-                                }
-                            }
-                        }
-                    ]
+                    targets: [targetState]
                 }
             }
             pipeline = gpuDevice.createRenderPipeline(pipelineDesc)
-            this.#pipelines[aaMode] = pipeline
+            this.#pipelines[pipelineKey] = pipeline
         }
         return pipeline
     }
