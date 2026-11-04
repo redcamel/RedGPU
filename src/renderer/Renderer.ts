@@ -5,8 +5,7 @@ import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import FinalRender, {FinalRenderPassColorAttachment} from "./finalRender/FinalRender";
 import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
-import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
-import renderBasicLayer from "./renderLayers/renderBasicLayer";
+import sortTransparentObjects from "../math/sortTransparentObjects";
 import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinning";
 import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
@@ -177,18 +176,7 @@ class Renderer {
             globalFragmentSSBO_BuiltIn,
             globalFragmentSSBO_PBR
         } = redGPUContext
-        const {
-            colorAttachment,
-            depthStencilAttachment,
-            gBufferNormalTextureAttachment,
-            gBufferMotionVectorTextureAttachment
-        } = this.#createAttachmentsForView(view)
-
-        const renderPassDescriptor: GPURenderPassDescriptor = {
-            label: `${view.name} Basic Render Pass`,
-            colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
-            depthStencilAttachment,
-        }
+        let renderPassDescriptor: GPURenderPassDescriptor
 
         if (pixelRectObject.width && pixelRectObject.height) {
             const {scene} = view
@@ -196,10 +184,6 @@ class Renderer {
 
             view.clusterLightManager.updateClusterLights();
 
-            {
-                const drawBufferManager = redGPUContext.drawBufferManager
-                drawBufferManager.flushAllCommands(renderViewStateData)
-            }
             {
                 if (renderViewStateData.numFixedSteps > 0) {
                     const {scene} = view
@@ -223,6 +207,21 @@ class Renderer {
             const renderPath1DepthResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT);
             view.update(renderPath1ResultTextureView, renderPath1DepthResultTextureView);
 
+            this.#collectSceneRenderBundles(view);
+
+            const {
+                colorAttachment,
+                depthStencilAttachment,
+                gBufferNormalTextureAttachment,
+                gBufferMotionVectorTextureAttachment
+            } = this.#createAttachmentsForView(view)
+
+            renderPassDescriptor = {
+                label: `${view.name} Basic Render Pass`,
+                colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
+                depthStencilAttachment,
+            }
+
             if (scene.lightManager.directionalLightCount > 0) {
                 shadowManager.render(view);
             }
@@ -243,6 +242,19 @@ class Renderer {
             this.#renderPassViewBasicLayer(view, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, renderPassDescriptor, depthStencilAttachment)
             pickingManager.render(view)
+        } else {
+            const {
+                colorAttachment,
+                depthStencilAttachment,
+                gBufferNormalTextureAttachment,
+                gBufferMotionVectorTextureAttachment
+            } = this.#createAttachmentsForView(view)
+
+            renderPassDescriptor = {
+                label: `${view.name} Basic Render Pass`,
+                colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
+                depthStencilAttachment,
+            }
         }
 
         {
@@ -263,8 +275,25 @@ class Renderer {
         }
     }
 
+    /**
+     * [KO] 렌더 패스 생성 전 씬 계층(Axis 및 자식 객체)을 순회하여 레이어별 렌더 번들, 그림자 캐스팅 목록을 수집하고 Indirect 드로우 버퍼를 플러시합니다.
+     * [EN] Traverses the scene hierarchy (Axis and child objects) before render pass creation to collect per-layer render bundles and shadow casting lists, then flushes the indirect draw buffer.
+     */
+    #collectSceneRenderBundles(view: View3D) {
+        const {redGPUContext, renderViewStateData, scene, axis} = view;
+        if (axis) axis.render(renderViewStateData);
+        scene.shadowManager?.directionalShadowManager?.resetCastingList();
+        const {children} = scene;
+        let i = 0;
+        const len = children.length;
+        for (i; i < len; i++) {
+            children[i].render(renderViewStateData);
+        }
+        redGPUContext.drawBufferManager.flushAllCommands(renderViewStateData);
+    }
+
     #renderPassViewBasicLayer(view: View3D, renderPassDescriptor: GPURenderPassDescriptor) {
-        const {renderViewStateData, skybox, skyAtmosphere, axis, redGPUContext, scene} = view
+        const {renderViewStateData, skybox, skyAtmosphere, redGPUContext, scene} = view
         redGPUContext.commandEncoderManager.addMainRenderPass(renderPassDescriptor, (viewRenderPassEncoder) => {
             updateViewportAndScissor(view, viewRenderPassEncoder, 'DEFAULT')
 
@@ -275,9 +304,8 @@ class Renderer {
             const grassManager = landscape?.grassManager;
 
             landscape?.render(view, viewRenderPassEncoder);
-            if (axis) axis.render(renderViewStateData);
-            scene.shadowManager?.directionalShadowManager?.resetCastingList();
-            renderBasicLayer(view, viewRenderPassEncoder);
+            // #collectSceneRenderBundles(view)에서 사전 수집된 기본(불투명) 레이어 렌더 번들 일괄 실행
+            viewRenderPassEncoder.executeBundles(renderViewStateData.renderBundleResults.bundleListBasicList);
 
             foliageManager?.render(view, viewRenderPassEncoder);
             grassManager?.render(view, viewRenderPassEncoder);
@@ -285,7 +313,21 @@ class Renderer {
             if (skybox) skybox.render(renderViewStateData)
             if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
 
-            renderAlphaLayer(view, viewRenderPassEncoder)
+            // 알파 블렌드, 투명(카메라 거리 기준 정렬), 파티클 레이어 렌더 번들 순차 실행
+            const {
+                bundleListAlphaLayer,
+                bundleListTransparentLayer,
+                bundleListParticleLayer
+            } = renderViewStateData.renderBundleResults
+            if (bundleListAlphaLayer.length) {
+                viewRenderPassEncoder.executeBundles(bundleListAlphaLayer);
+            }
+            if (bundleListTransparentLayer.length) {
+                viewRenderPassEncoder.executeBundles(sortTransparentObjects(view.rawCamera, bundleListTransparentLayer));
+            }
+            if (bundleListParticleLayer.length) {
+                viewRenderPassEncoder.executeBundles(bundleListParticleLayer);
+            }
         });
     }
 
@@ -324,7 +366,8 @@ class Renderer {
                 label: `${view.name} 2Path Render Pass`,
                 colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({
                     ...v,
-                    loadOp: GPU_LOAD_OP.LOAD
+                    loadOp: v.storeOp === GPU_STORE_OP.DISCARD ? GPU_LOAD_OP.CLEAR : GPU_LOAD_OP.LOAD,
+                    storeOp: useMSAA ? GPU_STORE_OP.DISCARD : v.storeOp
                 })),
                 depthStencilAttachment: {
                     ...depthStencilAttachment,
@@ -349,9 +392,23 @@ class Renderer {
 
 
     #createAttachmentsForView(view: View3D) {
-        const {redGPUContext, viewRenderTextureManager} = view
+        const {redGPUContext, viewRenderTextureManager, builtInEffectManager, renderViewStateData} = view
         const {antialiasingManager} = redGPUContext
-        const {useMSAA} = antialiasingManager
+        const {useMSAA, useTAA} = antialiasingManager
+
+        const needNormal = Boolean(builtInEffectManager?.useSSAO || builtInEffectManager?.useSSR);
+        const needMotionVector = Boolean(useTAA || builtInEffectManager?.useDOF);
+        const has2PathRender = renderViewStateData.renderBundleResults.bundleListRender2PathLayer.length > 0;
+
+        const colorStoreOp = useMSAA
+            ? (has2PathRender ? GPU_STORE_OP.STORE : GPU_STORE_OP.DISCARD)
+            : GPU_STORE_OP.STORE;
+        const normalStoreOp = !needNormal
+            ? GPU_STORE_OP.DISCARD
+            : (useMSAA ? (has2PathRender ? GPU_STORE_OP.STORE : GPU_STORE_OP.DISCARD) : GPU_STORE_OP.STORE);
+        const motionStoreOp = !needMotionVector
+            ? GPU_STORE_OP.DISCARD
+            : (useMSAA ? (has2PathRender ? GPU_STORE_OP.STORE : GPU_STORE_OP.DISCARD) : GPU_STORE_OP.STORE);
 
         const depthTextureView = viewRenderTextureManager.depthTextureView;
 
@@ -363,7 +420,7 @@ class Renderer {
             view: gBufferColorTextureView,
             clearValue: {r: 0, g: 0, b: 0, a: 0},
             loadOp: GPU_LOAD_OP.CLEAR,
-            storeOp: GPU_STORE_OP.STORE
+            storeOp: colorStoreOp
         }
         const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
             view: depthTextureView,
@@ -375,18 +432,22 @@ class Renderer {
             view: gBufferNormalTextureView,
             clearValue: {r: 0, g: 0, b: 0, a: 0},
             loadOp: GPU_LOAD_OP.CLEAR,
-            storeOp: GPU_STORE_OP.STORE
+            storeOp: normalStoreOp
         }
         const gBufferMotionVectorTextureAttachment: GPURenderPassColorAttachment = {
             view: gBufferMotionVectorTextureView,
             clearValue: {r: 0, g: 0, b: 0, a: 0},
             loadOp: GPU_LOAD_OP.CLEAR,
-            storeOp: GPU_STORE_OP.STORE
+            storeOp: motionStoreOp
         }
         if (useMSAA) {
             colorAttachment.resolveTarget = viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR);
-            gBufferNormalTextureAttachment.resolveTarget = viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL);
-            gBufferMotionVectorTextureAttachment.resolveTarget = viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR);
+            if (needNormal) {
+                gBufferNormalTextureAttachment.resolveTarget = viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL);
+            }
+            if (needMotionVector) {
+                gBufferMotionVectorTextureAttachment.resolveTarget = viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR);
+            }
         }
         return {
             colorAttachment,

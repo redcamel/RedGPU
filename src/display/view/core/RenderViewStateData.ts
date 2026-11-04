@@ -330,6 +330,7 @@ class RenderViewStateData {
         renderBundleResults.bundleListParticleLayer.length = 0;
         renderBundleResults.bundleListRender2PathLayer.length = 0;
         renderBundleResults.bundleListBasicList.length = 0;
+        this.currentRenderPassEncoder = null;
         this.skinList.length = 0;
         this.animationList.length = 0;
         this.isScene2DMode = view.camera instanceof Camera2D;
