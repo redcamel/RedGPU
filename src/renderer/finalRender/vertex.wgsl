@@ -15,11 +15,7 @@ struct VertexOutput {
     @location(0) fragUV: vec2<f32>,
 };
 
-const QUAD_VERTEX_COUNT: u32 = 6u;
-const CLIP_Z: f32 = 0.0;
-const CLIP_W: f32 = 1.0;
-
-const POS: array<vec2<f32>, QUAD_VERTEX_COUNT> = array<vec2<f32>, QUAD_VERTEX_COUNT>(
+const POS: array<vec2<f32>, 6> = array<vec2<f32>, 6>(
     vec2<f32>( 1.0,  1.0),
     vec2<f32>( 1.0, -1.0),
     vec2<f32>(-1.0, -1.0),
@@ -28,7 +24,7 @@ const POS: array<vec2<f32>, QUAD_VERTEX_COUNT> = array<vec2<f32>, QUAD_VERTEX_CO
     vec2<f32>(-1.0,  1.0),
 );
 
-const UV: array<vec2<f32>, QUAD_VERTEX_COUNT> = array<vec2<f32>, QUAD_VERTEX_COUNT>(
+const UV: array<vec2<f32>, 6> = array<vec2<f32>, 6>(
     vec2<f32>(1.0, 0.0),
     vec2<f32>(1.0, 1.0),
     vec2<f32>(0.0, 1.0),
@@ -41,7 +37,7 @@ const UV: array<vec2<f32>, QUAD_VERTEX_COUNT> = array<vec2<f32>, QUAD_VERTEX_COU
 fn main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
     var output: VertexOutput;
     let ndcPos = POS[vertexIndex] * uniforms.ndcScaleOffset.xy + uniforms.ndcScaleOffset.zw;
-    output.position = vec4<f32>(ndcPos, CLIP_Z, CLIP_W);
+    output.position = vec4<f32>(ndcPos, 0.0, 1.0);
     output.fragUV = UV[vertexIndex];
     return output;
 }
