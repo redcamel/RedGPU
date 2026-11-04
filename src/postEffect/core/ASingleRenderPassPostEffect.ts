@@ -37,8 +37,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     #isLdr: boolean = false
     #blendState: GPUBlendState
     #useGroup2: boolean = true
-    #renderShaderMSAA: GPUShaderModule
-    #renderShaderNonMSAA: GPUShaderModule
+    #renderShader: GPUShaderModule
     #fragmentBindGroupLayout0: GPUBindGroupLayout
     #fragmentBindGroupLayout1: GPUBindGroupLayout
     #fragmentBindGroup0: GPUBindGroup
@@ -46,19 +45,14 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     #fragmentBindGroupEntries0: GPUBindGroupEntry[]
     #fragmentBindGroupEntries1: GPUBindGroupEntry[]
     #renderPipeline: GPURenderPipeline
-    #renderPipelineMSAA: GPURenderPipeline
-    #renderPipelineNonMSAA: GPURenderPipeline
     #prevTargetFormat: GPUTextureFormat
     #uniformBuffer: UniformBuffer
     #uniformsInfo
     #name: string
-    #SHADER_INFO_MSAA
-    #SHADER_INFO_NON_MSAA
+    #shaderInfo
     #prevWidth: number = 0
     #prevHeight: number = 0
     #videoMemorySize: number = 0
-    #prevMSAA: boolean
-    #prevMSAAID: string
     #bindGroupCache0 = new Map<string, GPUBindGroup>();
     #bindGroupCache1: GPUBindGroup;
     #colorAttachment: GPURenderPassColorAttachment;
@@ -137,8 +131,6 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     set blendState(value: GPUBlendState) {
         if (this.#blendState === value) return;
         this.#blendState = value;
-        this.#renderPipelineMSAA = null;
-        this.#renderPipelineNonMSAA = null;
         this.#renderPipeline = null;
     }
 
@@ -155,15 +147,15 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 MSAA 상태에 대응하는 WGSL 셰이더 파싱 정보를 반환합니다.
-     * [EN] Returns the WGSL shader parsing information corresponding to the current MSAA state.
+     * [KO] WGSL 셰이더 파싱 정보를 반환합니다.
+     * [EN] Returns the WGSL shader parsing information.
      *
      * @returns
      * [KO] WGSL 셰이더 파싱 정보
      * [EN] WGSL shader parsing information
      */
     get shaderInfo() {
-        return this.antialiasingManager.useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
+        return this.#shaderInfo;
     }
 
     /**
@@ -213,16 +205,14 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         this.#uniformBuffer = null
         this.#uniformsInfo = null
         this.#name = null
-        this.#SHADER_INFO_MSAA = null
-        this.#SHADER_INFO_NON_MSAA = null
+        this.#shaderInfo = null
+        this.#renderShader = null
         this.#renderPipeline = null
-        this.#renderPipelineMSAA = null
-        this.#renderPipelineNonMSAA = null
     }
 
     /**
-     * [KO] MSAA/Non-MSAA 렌더 셰이더 모듈과 유니폼 버퍼를 생성하여 이펙트를 초기화합니다.
-     * [EN] Initializes the effect by creating MSAA/Non-MSAA render shader modules and the uniform buffer.
+     * [KO] 렌더 셰이더 모듈과 유니폼 버퍼를 생성하여 이펙트를 초기화합니다.
+     * [EN] Initializes the effect by creating the render shader module and the uniform buffer.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -230,33 +220,19 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
      * @param name -
      * [KO] 이펙트 식별 이름
      * [EN] Effect identifier name
-     * @param shaderCodes -
-     * [KO] MSAA 및 Non-MSAA용 렌더 셰이더 코드 객체
-     * [EN] Render shader code object for MSAA and Non-MSAA
+     * @param shaderCode -
+     * [KO] 렌더 셰이더 WGSL 코드 문자열
+     * [EN] Render shader WGSL code string
      */
-    init(redGPUContext: RedGPUContext, name: string, shaderCodes: {
-        msaa: string,
-        nonMsaa: string
-    }) {
+    init(redGPUContext: RedGPUContext, name: string, shaderCode: string) {
         this.#name = this.#isLdr ? `${name}_LDR` : name;
         this.#renderPassDescriptor.label = `ASingleRenderPassPostEffect_${this.#name}_RenderPass`;
         const {resourceManager} = redGPUContext;
 
-        if (shaderCodes.msaa === shaderCodes.nonMsaa) {
-            const sharedShader = resourceManager.createGPUShaderModule(this.#name, {code: shaderCodes.nonMsaa});
-            const sharedShaderInfo = resourceManager.wgslParser.parse(this.#name, shaderCodes.nonMsaa);
-            this.#renderShaderMSAA = sharedShader;
-            this.#renderShaderNonMSAA = sharedShader;
-            this.#SHADER_INFO_MSAA = sharedShaderInfo;
-            this.#SHADER_INFO_NON_MSAA = sharedShaderInfo;
-        } else {
-            this.#renderShaderMSAA = resourceManager.createGPUShaderModule(`${this.#name}_MSAA`, {code: shaderCodes.msaa});
-            this.#renderShaderNonMSAA = resourceManager.createGPUShaderModule(`${this.#name}_NonMSAA`, {code: shaderCodes.nonMsaa});
-            this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${this.#name}_MSAA`, shaderCodes.msaa);
-            this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, shaderCodes.nonMsaa);
-        }
+        this.#renderShader = resourceManager.createGPUShaderModule(this.#name, {code: shaderCode});
+        this.#shaderInfo = resourceManager.wgslParser.parse(this.#name, shaderCode);
 
-        const {uniforms} = this.#SHADER_INFO_MSAA;
+        const {uniforms} = this.#shaderInfo;
         this.#uniformsInfo = uniforms.uniforms;
         this.#useGroup2 = Boolean(uniforms.systemUniforms);
 
@@ -303,9 +279,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
      * [EN] Rendering result texture and view (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: IPostEffectResult[]): IPostEffectResult {
-        const {gpuDevice, antialiasingManager} = this;
-        const useMSAA = this.#useGroup2 ? antialiasingManager.useMSAA : false;
-        const msaaID = this.#useGroup2 ? antialiasingManager.msaaID : '';
+        const {gpuDevice} = this;
 
         let result: IPostEffectResult;
         let targetFormat: GPUTextureFormat = this.#isLdr ? 'rgba8unorm' : 'rgba16float';
@@ -325,22 +299,16 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
             this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#executeCopyTexture);
         }
 
-        const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
-        const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
-
-        if (dimensionsChanged || msaaChanged) {
+        if (this.#prevWidth !== width || this.#prevHeight !== height) {
             this.#bindGroupCache0.clear();
-            this.#bindGroupCache1 = null;
         }
 
-        this.#checkAndCreatePipeline(view, useMSAA, targetFormat, gpuDevice);
+        this.#checkAndCreatePipeline(view, targetFormat, gpuDevice);
 
-        this.#updateBindGroups(sourceTextureInfo, useMSAA, gpuDevice);
+        this.#updateBindGroups(sourceTextureInfo, gpuDevice);
 
         this.#execute(result.textureView, this.#useGroup2 ? view.postEffectManager.gbufferBindGroup : null);
 
-        this.#prevMSAA = useMSAA;
-        this.#prevMSAAID = msaaID;
         this.#prevWidth = width;
         this.#prevHeight = height;
         this.#calcVideoMemory();
@@ -406,25 +374,19 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         this.#currentGbufferBindGroup = null;
     }
 
-    #checkAndCreatePipeline(view: View3D, useMSAA: boolean, targetFormat: GPUTextureFormat, gpuDevice: GPUDevice) {
+    #checkAndCreatePipeline(view: View3D, targetFormat: GPUTextureFormat, gpuDevice: GPUDevice) {
         if (this.#prevTargetFormat !== targetFormat) {
-            this.#renderPipelineMSAA = null;
-            this.#renderPipelineNonMSAA = null;
+            this.#renderPipeline = null;
             this.#prevTargetFormat = targetFormat;
         }
 
-        const cachedPipeline = useMSAA ? this.#renderPipelineMSAA : this.#renderPipelineNonMSAA;
-        if (cachedPipeline) {
-            this.#renderPipeline = cachedPipeline;
-            return;
-        }
+        if (this.#renderPipeline) return;
 
         const {resourceManager} = this;
-        const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
-        const currentShader = useMSAA ? this.#renderShaderMSAA : this.#renderShaderNonMSAA;
+        const currentShaderInfo = this.#shaderInfo;
 
-        const layout0Name = `${this.#name}_FRAGMENT_BGL_0_USE_MSAA_${useMSAA}`;
-        const layout1Name = `${this.#name}_FRAGMENT_BGL_1_USE_MSAA_${useMSAA}`;
+        const layout0Name = `${this.#name}_FRAGMENT_BGL_0`;
+        const layout1Name = `${this.#name}_FRAGMENT_BGL_1`;
 
         this.#fragmentBindGroupLayout0 = resourceManager.getGPUBindGroupLayout(layout0Name) ||
             resourceManager.createBindGroupLayout(layout0Name, getFragmentBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0));
@@ -450,14 +412,14 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
                 this.#fragmentBindGroupLayout1
             ];
 
-        const pipeline = gpuDevice.createRenderPipeline({
-            label: `${this.#name}_RENDER_PIPELINE_USE_MSAA_${useMSAA}_${targetFormat}`,
+        this.#renderPipeline = gpuDevice.createRenderPipeline({
+            label: `${this.#name}_RENDER_PIPELINE_${targetFormat}`,
             layout: gpuDevice.createPipelineLayout({
-                label: `${this.#name}_PIPELINE_LAYOUT_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_PIPELINE_LAYOUT`,
                 bindGroupLayouts
             }),
             vertex: {
-                module: currentShader,
+                module: this.#renderShader,
                 entryPoint: 'vs_main'
             },
             primitive: {
@@ -465,20 +427,15 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
                 cullMode: 'none'
             },
             fragment: {
-                module: currentShader,
+                module: this.#renderShader,
                 entryPoint: 'fs_main',
                 targets: [colorTarget]
             }
         });
-
-        if (useMSAA) this.#renderPipelineMSAA = pipeline;
-        else this.#renderPipelineNonMSAA = pipeline;
-
-        this.#renderPipeline = pipeline;
     }
 
-    #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], useMSAA: boolean, gpuDevice: GPUDevice) {
-        const {textures, samplers} = this.shaderInfo;
+    #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], gpuDevice: GPUDevice) {
+        const {textures, samplers} = this.#shaderInfo;
         const sourceOffset = 1;
         const sourceCount = sourceTextureInfoList.length;
 
@@ -523,7 +480,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
             }
 
             this.#fragmentBindGroup0 = gpuDevice.createBindGroup({
-                label: `${this.#name}_FRAGMENT_BG_0_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_FRAGMENT_BG_0`,
                 layout: this.#fragmentBindGroupLayout0,
                 entries: this.#fragmentBindGroupEntries0
             });
@@ -543,14 +500,14 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
                 },
             }];
             this.#fragmentBindGroup1 = gpuDevice.createBindGroup({
-                label: `${this.#name}_FRAGMENT_BG_1_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_FRAGMENT_BG_1`,
                 layout: this.#fragmentBindGroupLayout1,
                 entries: this.#fragmentBindGroupEntries1
             });
             this.#bindGroupCache1 = this.#fragmentBindGroup1;
         } else {
             this.#fragmentBindGroup1 = gpuDevice.createBindGroup({
-                label: `${this.#name}_FRAGMENT_BG_1_EMPTY_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_FRAGMENT_BG_1_EMPTY`,
                 layout: this.#fragmentBindGroupLayout1,
                 entries: []
             });

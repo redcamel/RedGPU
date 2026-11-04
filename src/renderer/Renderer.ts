@@ -378,16 +378,30 @@ class Renderer {
                 renderPassEncoder.executeBundles(renderViewStateData.renderBundleResults.bundleListRender2PathLayer);
             });
 
-            if (useMSAA && view.grid) {
+            if (useMSAA && this.#needSingleSampleDepthResolve(view)) {
                 commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
                     view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
                 });
             }
-        } else if (useMSAA && view.grid) {
+        } else if (useMSAA && this.#needSingleSampleDepthResolve(view)) {
             commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
                 view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
             });
         }
+    }
+
+    #needSingleSampleDepthResolve(view: View3D): boolean {
+        const {builtInEffectManager} = view;
+        return Boolean(
+            view.grid ||
+            view.skyAtmosphere ||
+            builtInEffectManager?.useSSAO ||
+            builtInEffectManager?.useSSR ||
+            builtInEffectManager?.useFog ||
+            builtInEffectManager?.useHeightFog ||
+            builtInEffectManager?.useDOF ||
+            builtInEffectManager?.useLensFlare
+        );
     }
 
 

@@ -2,18 +2,46 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import ASingleComputePassPostEffect from "./ASingleComputePassPostEffect";
 import {IPostEffectSourceConfig} from "./types";
 
-const createCode = (
+/**
+ * [KO] 단일 컴퓨트 패스 후처리 이펙트용 WGSL 컴퓨트 셰이더 코드를 생성합니다.
+ * [EN] Generates WGSL compute shader code for a single compute-pass post-processing effect.
+ *
+ * [KO] 입력 소스 텍스처(Group 0), 이펙트 유니폼(Group 1), 시스템 공용 유니폼 및 G-Buffer(Group 2, 선택), 출력 스토리지 텍스처(`useSystemUniforms`가 `true`일 때 Group 3, `false`일 때 Group 2) 바인딩과 화면 경계 검사(`earlyExit`)를 자동으로 구성합니다.
+ * [EN] Automatically configures bindings for input source textures (Group 0), effect uniforms (Group 1), system uniforms and G-Buffer (Group 2, optional), output storage texture (Group 3 when `useSystemUniforms` is `true`, Group 2 when `false`), and boundary early-exit checks (`earlyExit`).
+ *
+ * @param effect -
+ * [KO] 대상 `ASingleComputePassPostEffect` 인스턴스
+ * [EN] Target `ASingleComputePassPostEffect` instance
+ * @param code -
+ * [KO] `main` 함수 내부에 삽입할 WGSL 연산 코드
+ * [EN] WGSL computation code to insert inside the `main` function
+ * @param uniformStruct -
+ * [KO] 이펙트 전용 `Uniforms` 구조체 정의 문자열
+ * [EN] Effect-specific `Uniforms` struct definition string
+ * @param sourceTextureConfigs -
+ * [KO] 입력 소스 텍스처 바인딩 설정
+ * [EN] Input source texture binding configuration
+ * @param earlyExit -
+ * [KO] 출력 해상도 경계 밖 스레드 즉시 종료 여부 (워크그룹 배리어 사용 시 `false`)
+ * [EN] Whether to immediately terminate threads outside output resolution bounds (set `false` when using workgroup barriers)
+ * @param useSystemUniforms -
+ * [KO] 시스템 유니폼 및 G-Buffer(Group 2) 바인딩 포함 여부
+ * [EN] Whether to include system uniforms and G-Buffer (Group 2) bindings
+ * @returns
+ * [KO] 완성된 WGSL 컴퓨트 셰이더 코드 문자열 (`string`)
+ * [EN] Generated WGSL compute shader code string (`string`)
+ * @category PostEffect
+ */
+const createBasicComputePassPostEffectCode = (
     effect: ASingleComputePassPostEffect,
     code: string,
     uniformStruct: string = '',
-    useMSAA: boolean = false,
     sourceTextureConfigs: IPostEffectSourceConfig | IPostEffectSourceConfig[] = {name: 'sourceTexture'},
     earlyExit: boolean = true,
     useSystemUniforms: boolean = true
-) => {
+): string => {
     const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z, isLdr} = effect;
     const outputFormat = isLdr ? 'rgba8unorm' : 'rgba16float';
-    const postEffectSystemUniform = useMSAA ? ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM_MSAA : ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM;
     const outputGroupIndex = useSystemUniforms ? 3 : 2;
     const hasUniformStruct = /\bstruct\s+Uniforms\b/.test(uniformStruct);
 
@@ -43,7 +71,7 @@ const createCode = (
         
         ${hasUniformStruct ? '@group(1) @binding(0) var<uniform> uniforms: Uniforms;' : ''}
         
-        ${useSystemUniforms ? postEffectSystemUniform : ''}
+        ${useSystemUniforms ? ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM : ''}
         
         @group(${outputGroupIndex}) @binding(0) var outputTexture : texture_storage_2d<${outputFormat}, write>;
         
@@ -59,49 +87,5 @@ const createCode = (
         }
   `;
 };
-
-/**
- * [KO] 단일 컴퓨트 패스 후처리 이펙트용 MSAA/Non-MSAA WGSL 컴퓨트 셰이더 코드를 생성합니다.
- * [EN] Generates MSAA and Non-MSAA WGSL compute shader codes for a single compute-pass post-processing effect.
- *
- * [KO] 입력 소스 텍스처(Group 0), 이펙트 유니폼(Group 1), 시스템 공용 유니폼 및 G-Buffer(Group 2, 선택), 출력 스토리지 텍스처(`useSystemUniforms`가 `true`일 때 Group 3, `false`일 때 Group 2) 바인딩과 화면 경계 검사(`earlyExit`)를 자동으로 구성합니다.
- * [EN] Automatically configures bindings for input source textures (Group 0), effect uniforms (Group 1), system uniforms and G-Buffer (Group 2, optional), output storage texture (Group 3 when `useSystemUniforms` is `true`, Group 2 when `false`), and boundary early-exit checks (`earlyExit`).
- *
- * @param effect -
- * [KO] 대상 `ASingleComputePassPostEffect` 인스턴스
- * [EN] Target `ASingleComputePassPostEffect` instance
- * @param code -
- * [KO] `main` 함수 내부에 삽입할 WGSL 연산 코드
- * [EN] WGSL computation code to insert inside the `main` function
- * @param uniformStruct -
- * [KO] 이펙트 전용 `Uniforms` 구조체 정의 문자열
- * [EN] Effect-specific `Uniforms` struct definition string
- * @param sourceTextureConfigs -
- * [KO] 입력 소스 텍스처 바인딩 설정
- * [EN] Input source texture binding configuration
- * @param earlyExit -
- * [KO] 출력 해상도 경계 밖 스레드 즉시 종료 여부 (워크그룹 배리어 사용 시 `false`)
- * [EN] Whether to immediately terminate threads outside output resolution bounds (set `false` when using workgroup barriers)
- * @param useSystemUniforms -
- * [KO] 시스템 유니폼 및 G-Buffer(Group 2) 바인딩 포함 여부
- * [EN] Whether to include system uniforms and G-Buffer (Group 2) bindings
- * @returns
- * [KO] MSAA 및 Non-MSAA용 WGSL 코드 객체 (`{ msaa: string, nonMsaa: string }`)
- * [EN] WGSL code object for MSAA and Non-MSAA (`{ msaa: string, nonMsaa: string }`)
- * @category PostEffect
- */
-const createBasicComputePassPostEffectCode = (
-    effect: ASingleComputePassPostEffect,
-    code: string,
-    uniformStruct: string = '',
-    sourceTextureConfigs: IPostEffectSourceConfig | IPostEffectSourceConfig[] = {name: 'sourceTexture'},
-    earlyExit: boolean = true,
-    useSystemUniforms: boolean = true
-) => {
-    return {
-        msaa: createCode(effect, code, uniformStruct, true, sourceTextureConfigs, earlyExit, useSystemUniforms),
-        nonMsaa: createCode(effect, code, uniformStruct, false, sourceTextureConfigs, earlyExit, useSystemUniforms)
-    }
-}
-Object.freeze(createBasicComputePassPostEffectCode)
-export default createBasicComputePassPostEffectCode
+Object.freeze(createBasicComputePassPostEffectCode);
+export default createBasicComputePassPostEffectCode;

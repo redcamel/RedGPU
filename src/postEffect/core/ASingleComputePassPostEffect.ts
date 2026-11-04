@@ -33,8 +33,7 @@ interface ASingleComputePassPostEffect {
 abstract class ASingleComputePassPostEffect extends RedGPUObject {
     #isLdr: boolean = false
     #useGroup2: boolean = true
-    #computeShaderMSAA: GPUShaderModule
-    #computeShaderNonMSAA: GPUShaderModule
+    #computeShader: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
     #computeBindGroupLayout1: GPUBindGroupLayout
     #outputBindGroupLayout: GPUBindGroupLayout
@@ -45,22 +44,17 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
     #computeBindGroupEntries1: GPUBindGroupEntry[]
     #outputBindGroupEntries: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
-    #computePipelineMSAA: GPUComputePipeline
-    #computePipelineNonMSAA: GPUComputePipeline
     #uniformBuffer: UniformBuffer
     #uniformsInfo
     #name: string
     #passLabel: string
-    #SHADER_INFO_MSAA
-    #SHADER_INFO_NON_MSAA
+    #shaderInfo
     #prevWidth: number = 0
     #prevHeight: number = 0
     #WORK_SIZE_X: number = 16
     #WORK_SIZE_Y: number = 16
     #WORK_SIZE_Z: number = 1
     #videoMemorySize: number = 0
-    #prevMSAA: boolean
-    #prevMSAAID: string
     #bindGroupCache0 = new Map<string, GPUBindGroup>();
     #bindGroupCache1: GPUBindGroup;
     #bindGroupCache3 = new Map<number, GPUBindGroup>();
@@ -125,15 +119,15 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 MSAA 상태에 대응하는 WGSL 셰이더 파싱 정보를 반환합니다.
-     * [EN] Returns the WGSL shader parsing information corresponding to the current MSAA state.
+     * [KO] WGSL 셰이더 파싱 정보를 반환합니다.
+     * [EN] Returns the WGSL shader parsing information.
      *
      * @returns
      * [KO] WGSL 셰이더 파싱 정보
      * [EN] WGSL shader parsing information
      */
     get shaderInfo() {
-        return this.antialiasingManager.useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
+        return this.#shaderInfo;
     }
 
     /**
@@ -222,16 +216,14 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
         this.#uniformsInfo = null
         this.#name = null
         this.#passLabel = null
-        this.#SHADER_INFO_MSAA = null
-        this.#SHADER_INFO_NON_MSAA = null
+        this.#shaderInfo = null
+        this.#computeShader = null
         this.#computePipeline = null
-        this.#computePipelineMSAA = null
-        this.#computePipelineNonMSAA = null
     }
 
     /**
-     * [KO] MSAA/Non-MSAA 컴퓨트 셰이더 모듈과 유니폼 버퍼를 생성하여 이펙트를 초기화합니다.
-     * [EN] Initializes the effect by creating MSAA/Non-MSAA compute shader modules and the uniform buffer.
+     * [KO] 컴퓨트 셰이더 모듈과 유니폼 버퍼를 생성하여 이펙트를 초기화합니다.
+     * [EN] Initializes the effect by creating the compute shader module and the uniform buffer.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -239,33 +231,19 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
      * @param name -
      * [KO] 이펙트 식별 이름
      * [EN] Effect identifier name
-     * @param computeCodes -
-     * [KO] MSAA 및 Non-MSAA용 컴퓨트 셰이더 코드 객체
-     * [EN] Compute shader code object for MSAA and Non-MSAA
+     * @param computeCode -
+     * [KO] 컴퓨트 셰이더 WGSL 코드 문자열
+     * [EN] Compute shader WGSL code string
      */
-    init(redGPUContext: RedGPUContext, name: string, computeCodes: {
-        msaa: string,
-        nonMsaa: string
-    }) {
+    init(redGPUContext: RedGPUContext, name: string, computeCode: string) {
         this.#name = this.#isLdr ? `${name}_LDR` : name;
         this.#passLabel = `ASingleComputePassPostEffect_${this.#name}_ComputePass`;
         const {resourceManager} = redGPUContext;
 
-        if (computeCodes.msaa === computeCodes.nonMsaa) {
-            const sharedShader = resourceManager.createGPUShaderModule(this.#name, {code: computeCodes.nonMsaa});
-            const sharedShaderInfo = resourceManager.wgslParser.parse(this.#name, computeCodes.nonMsaa);
-            this.#computeShaderMSAA = sharedShader;
-            this.#computeShaderNonMSAA = sharedShader;
-            this.#SHADER_INFO_MSAA = sharedShaderInfo;
-            this.#SHADER_INFO_NON_MSAA = sharedShaderInfo;
-        } else {
-            this.#computeShaderMSAA = resourceManager.createGPUShaderModule(`${this.#name}_MSAA`, {code: computeCodes.msaa});
-            this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${this.#name}_NonMSAA`, {code: computeCodes.nonMsaa});
-            this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${this.#name}_MSAA`, computeCodes.msaa);
-            this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, computeCodes.nonMsaa);
-        }
+        this.#computeShader = resourceManager.createGPUShaderModule(this.#name, {code: computeCode});
+        this.#shaderInfo = resourceManager.wgslParser.parse(this.#name, computeCode);
 
-        const {uniforms} = this.#SHADER_INFO_MSAA;
+        const {uniforms} = this.#shaderInfo;
         this.#uniformsInfo = uniforms.uniforms;
         this.#useGroup2 = Boolean(uniforms.systemUniforms);
 
@@ -365,27 +343,19 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
         result: IPostEffectResult,
         ...sourceTextureInfo: IPostEffectResult[]
     ): IPostEffectResult {
-        const {gpuDevice, antialiasingManager} = this;
-        const useMSAA = this.#useGroup2 ? antialiasingManager.useMSAA : false;
-        const msaaID = this.#useGroup2 ? antialiasingManager.msaaID : '';
+        const {gpuDevice} = this;
 
-        const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
-        const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
-
-        if (dimensionsChanged || msaaChanged) {
+        if (this.#prevWidth !== width || this.#prevHeight !== height) {
             this.#bindGroupCache0.clear();
-            this.#bindGroupCache1 = null;
             this.#bindGroupCache3.clear();
         }
 
-        this.#checkAndCreatePipeline(view, useMSAA, gpuDevice);
+        this.#checkAndCreatePipeline(view, gpuDevice);
 
-        this.#updateBindGroups(sourceTextureInfo, result, useMSAA, gpuDevice);
+        this.#updateBindGroups(sourceTextureInfo, result, gpuDevice);
 
         this.#execute(width, height, this.#useGroup2 ? view.postEffectManager.gbufferBindGroup : null);
 
-        this.#prevMSAA = useMSAA;
-        this.#prevMSAAID = msaaID;
         this.#prevWidth = width;
         this.#prevHeight = height;
         this.#calcVideoMemory();
@@ -428,30 +398,25 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
         this.#currentGbufferBindGroup = null;
     }
 
-    #checkAndCreatePipeline(view: View3D, useMSAA: boolean, gpuDevice: GPUDevice) {
-        const cachedPipeline = useMSAA ? this.#computePipelineMSAA : this.#computePipelineNonMSAA;
-        if (cachedPipeline) {
-            this.#computePipeline = cachedPipeline;
-            return;
-        }
+    #checkAndCreatePipeline(view: View3D, gpuDevice: GPUDevice) {
+        if (this.#computePipeline) return;
 
         const {resourceManager} = this;
-        const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
-        const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
+        const currentShaderInfo = this.#shaderInfo;
         const outputGroupIndex = this.#useGroup2 ? 3 : 2;
 
-        const layout0Name = `${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`;
-        const layout1Name = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
-        const layoutOutputName = `${this.#name}_BIND_GROUP_LAYOUT_${outputGroupIndex}_USE_MSAA_${useMSAA}`;
+        const layout0Name = `${this.#name}_BIND_GROUP_LAYOUT_0`;
+        const layout1Name = `${this.#name}_BIND_GROUP_LAYOUT_1`;
+        const layoutOutputName = `${this.#name}_BIND_GROUP_LAYOUT_${outputGroupIndex}`;
 
         this.#computeBindGroupLayout0 = resourceManager.getGPUBindGroupLayout(layout0Name) ||
-            resourceManager.createBindGroupLayout(layout0Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0, useMSAA));
+            resourceManager.createBindGroupLayout(layout0Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0));
 
         this.#computeBindGroupLayout1 = resourceManager.getGPUBindGroupLayout(layout1Name) ||
-            resourceManager.createBindGroupLayout(layout1Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA));
+            resourceManager.createBindGroupLayout(layout1Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1));
 
         this.#outputBindGroupLayout = resourceManager.getGPUBindGroupLayout(layoutOutputName) ||
-            resourceManager.createBindGroupLayout(layoutOutputName, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, outputGroupIndex, useMSAA));
+            resourceManager.createBindGroupLayout(layoutOutputName, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, outputGroupIndex));
 
         const bindGroupLayouts: GPUBindGroupLayout[] = this.#useGroup2
             ? [
@@ -466,23 +431,18 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
                 this.#outputBindGroupLayout
             ];
 
-        const pipeline = gpuDevice.createComputePipeline({
-            label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
+        this.#computePipeline = gpuDevice.createComputePipeline({
+            label: `${this.#name}_COMPUTE_PIPELINE`,
             layout: gpuDevice.createPipelineLayout({
-                label: `${this.#name}_PIPELINE_LAYOUT_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_PIPELINE_LAYOUT`,
                 bindGroupLayouts
             }),
-            compute: {module: currentShader, entryPoint: 'main'}
+            compute: {module: this.#computeShader, entryPoint: 'main'}
         });
-
-        if (useMSAA) this.#computePipelineMSAA = pipeline;
-        else this.#computePipelineNonMSAA = pipeline;
-
-        this.#computePipeline = pipeline;
     }
 
-    #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], targetOutputResult: IPostEffectResult, useMSAA: boolean, gpuDevice: GPUDevice) {
-        const {textures, samplers} = this.shaderInfo;
+    #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], targetOutputResult: IPostEffectResult, gpuDevice: GPUDevice) {
+        const {textures, samplers} = this.#shaderInfo;
 
         let group0Key: string;
         const sourceCount = sourceTextureInfoList.length;
@@ -523,7 +483,7 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
             }
 
             this.#computeBindGroup0 = gpuDevice.createBindGroup({
-                label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_BIND_GROUP_0`,
                 layout: this.#computeBindGroupLayout0,
                 entries: this.#computeBindGroupEntries0
             });
@@ -543,14 +503,14 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
                 },
             }];
             this.#computeBindGroup1 = gpuDevice.createBindGroup({
-                label: `${this.#name}_BIND_GROUP_1_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_BIND_GROUP_1`,
                 layout: this.#computeBindGroupLayout1,
                 entries: this.#computeBindGroupEntries1
             });
             this.#bindGroupCache1 = this.#computeBindGroup1;
         } else {
             this.#computeBindGroup1 = gpuDevice.createBindGroup({
-                label: `${this.#name}_BIND_GROUP_1_EMPTY_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_BIND_GROUP_1_EMPTY`,
                 layout: this.#computeBindGroupLayout1,
                 entries: []
             });
@@ -564,7 +524,7 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
             const outputGroupIndex = this.#useGroup2 ? 3 : 2;
             this.#outputBindGroupEntries = [{binding: 0, resource: targetOutputResult.textureView}];
             this.#outputBindGroup = gpuDevice.createBindGroup({
-                label: `${this.#name}_BIND_GROUP_${outputGroupIndex}_USE_MSAA_${useMSAA}`,
+                label: `${this.#name}_BIND_GROUP_${outputGroupIndex}`,
                 layout: this.#outputBindGroupLayout,
                 entries: this.#outputBindGroupEntries
             });

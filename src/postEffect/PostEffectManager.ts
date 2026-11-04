@@ -67,8 +67,7 @@ class PostEffectManager extends RedGPUObject {
     #devicePixelRatioEntry = {key: 'devicePixelRatio', value: 1};
     #systemExtraEntries = [this.#preExposureEntry, this.#devicePixelRatioEntry];
 
-    #gbufferBindGroupLayoutMSAA: GPUBindGroupLayout;
-    #gbufferBindGroupLayoutNonMSAA: GPUBindGroupLayout;
+    #gbufferBindGroupLayout: GPUBindGroupLayout;
     #gbufferBindGroup_swap0: GPUBindGroup;
     #gbufferBindGroup_swap1: GPUBindGroup;
     #prevMSAAID_for_gbuffer: string;
@@ -91,15 +90,15 @@ class PostEffectManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 MSAA 상태에 맞는 공유 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
-     * [EN] Returns the shared G-Buffer bind group layout matching the current MSAA state.
+     * [KO] 공유 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
+     * [EN] Returns the shared G-Buffer bind group layout.
      *
      * @returns
      * [KO] G-Buffer `GPUBindGroupLayout`
      * [EN] G-Buffer `GPUBindGroupLayout`
      */
     get gbufferBindGroupLayout(): GPUBindGroupLayout {
-        return this.antialiasingManager.useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
+        return this.#gbufferBindGroupLayout;
     }
 
     /**
@@ -430,30 +429,24 @@ class PostEffectManager extends RedGPUObject {
         const {gpuDevice} = this.#view.redGPUContext;
         const sharedVisibility = GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT;
 
-        const getEntries = (useMSAA: boolean): GPUBindGroupLayoutEntry[] => [
-            {
-                binding: 0,
-                visibility: sharedVisibility,
-                texture: {sampleType: 'depth', multisampled: useMSAA}
-            },
-            {binding: 1, visibility: sharedVisibility, texture: {}},
-            {binding: 2, visibility: sharedVisibility, texture: {}},
-            {
-                binding: 3,
-                visibility: sharedVisibility,
-                texture: {sampleType: 'depth', multisampled: useMSAA}
-            },
-            {binding: 4, visibility: sharedVisibility, buffer: {type: 'uniform'}},
-            {binding: 5, visibility: sharedVisibility, sampler: {}}
-        ];
-
-        this.#gbufferBindGroupLayoutMSAA = gpuDevice.createBindGroupLayout({
-            label: 'PostEffect_Shared_GBuffer_BGL_MSAA',
-            entries: getEntries(true)
-        });
-        this.#gbufferBindGroupLayoutNonMSAA = gpuDevice.createBindGroupLayout({
-            label: 'PostEffect_Shared_GBuffer_BGL_NonMSAA',
-            entries: getEntries(false)
+        this.#gbufferBindGroupLayout = gpuDevice.createBindGroupLayout({
+            label: 'PostEffect_Shared_GBuffer_BGL',
+            entries: [
+                {
+                    binding: 0,
+                    visibility: sharedVisibility,
+                    texture: {sampleType: 'depth', multisampled: false}
+                },
+                {binding: 1, visibility: sharedVisibility, texture: {}},
+                {binding: 2, visibility: sharedVisibility, texture: {}},
+                {
+                    binding: 3,
+                    visibility: sharedVisibility,
+                    texture: {sampleType: 'depth', multisampled: false}
+                },
+                {binding: 4, visibility: sharedVisibility, buffer: {type: 'uniform'}},
+                {binding: 5, visibility: sharedVisibility, sampler: {}}
+            ]
         });
     }
 
@@ -469,8 +462,12 @@ class PostEffectManager extends RedGPUObject {
         const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
 
         if (msaaChanged || dimensionsChanged) {
-            const depthView0 = viewRenderTextureManager.depthTextureView;
-            const depthView1 = viewRenderTextureManager.prevDepthTextureView;
+            const depthView0 = useMSAA
+                ? viewRenderTextureManager.renderPath1DepthResultTextureView
+                : viewRenderTextureManager.depthTextureView;
+            const depthView1 = useMSAA
+                ? viewRenderTextureManager.renderPath1DepthResultTextureView
+                : viewRenderTextureManager.prevDepthTextureView;
 
             const normalView = useMSAA
                 ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
@@ -496,7 +493,7 @@ class PostEffectManager extends RedGPUObject {
                 {binding: 5, resource: basicSampler}
             ];
 
-            const layout = useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
+            const layout = this.#gbufferBindGroupLayout;
 
             this.#gbufferBindGroup_swap0 = gpuDevice.createBindGroup({
                 label: 'PostEffect_Shared_GBuffer_BG_Swap0',

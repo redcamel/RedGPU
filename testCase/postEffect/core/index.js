@@ -9,16 +9,16 @@ redUnit.testGroup(
         runner.defineTest('Success Test: Basic code generation', (run) => {
             try {
                 const mockEffect = { WORK_SIZE_X: 16, WORK_SIZE_Y: 16, WORK_SIZE_Z: 1 };
-                const codes = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;');
-                run(typeof codes.msaa === 'string' && typeof codes.nonMsaa === 'string');
+                const code = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;');
+                run(typeof code === 'string' && code.length > 0);
             } catch (e) { run(false, e); }
         }, true);
 
         runner.defineTest('Success Test: Workgroup size reflection', (run) => {
             try {
                 const mockEffect = { WORK_SIZE_X: 8, WORK_SIZE_Y: 4, WORK_SIZE_Z: 2 };
-                const codes = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;');
-                run(codes.msaa.includes('@workgroup_size(8, 4, 2)'));
+                const code = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;');
+                run(code.includes('@workgroup_size(8, 4, 2)'));
             } catch (e) { run(false, e); }
         }, true);
 
@@ -29,9 +29,9 @@ redUnit.testGroup(
                     {name: 'tex1'},
                     {name: 'tex2', textureType: 'texture_3d<f32>'}
                 ];
-                const codes = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;', '', configs);
-                const hasTex1 = codes.nonMsaa.includes('var tex1 : texture_2d<f32>;');
-                const hasTex2 = codes.nonMsaa.includes('var tex2 : texture_3d<f32>;');
+                const code = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;', '', configs);
+                const hasTex1 = code.includes('var tex1 : texture_2d<f32>;');
+                const hasTex2 = code.includes('var tex2 : texture_3d<f32>;');
                 run(hasTex1 && hasTex2);
             } catch (e) { run(false, e); }
         }, true);
