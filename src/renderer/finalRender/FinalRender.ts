@@ -1,15 +1,10 @@
-import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import GPU_BLEND_FACTOR from "../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_BLEND_OPERATION from "../../gpuConst/GPU_BLEND_OPERATION";
 import GPU_LOAD_OP from "../../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../../gpuConst/GPU_STORE_OP";
-import {
-    getFragmentBindGroupLayoutDescriptorFromShaderInfo,
-    getVertexBindGroupLayoutDescriptorFromShaderInfo
-} from "../../material/core";
-import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
+import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../material/core";
 import Sampler from "../../resources/sampler/Sampler";
 
 import fragmentModuleSource from './fragment.wgsl'
@@ -18,14 +13,45 @@ import vertexModuleSource from './vertex.wgsl'
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_FINAL_RENDER'
 const FRAGMENT_SHADER_MODULE_NAME = 'FRAGMENT_MODULE_FINAL_RENDER'
-const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_FINAL_RENDER'
+const BIND_GROUP_LAYOUT_NAME = 'FINAL_RENDER_BIND_GROUP_LAYOUT'
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_FINAL_RENDER'
 const PIPELINE_LAYOUT_LABEL = 'FINAL_RENDER_PIPELINE_LAYOUT'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_FINAL_RENDER'
-const FRAGMENT_UNIFORM_BUFFER_BYTE_SIZE = 48
-const ORTHO_NEAR = -1000
-const ORTHO_FAR = 1000
+
+const FRAGMENT_UNIFORM_BUFFER_BYTE_SIZE = 64
+const UNIFORM_PREV_DATA_COUNT = 13
+const UNIFORM_INDEX_NDC_SCALE_X = 0
+const UNIFORM_INDEX_NDC_SCALE_Y = 1
+const UNIFORM_INDEX_NDC_OFFSET_X = 2
+const UNIFORM_INDEX_NDC_OFFSET_Y = 3
+const UNIFORM_INDEX_BG_R = 4
+const UNIFORM_INDEX_BG_G = 5
+const UNIFORM_INDEX_BG_B = 6
+const UNIFORM_INDEX_BG_A = 7
+const UNIFORM_INDEX_AA_MODE = 8
+const UNIFORM_INDEX_CAS_PEAK = 9
+const UNIFORM_INDEX_FXAA_SUBPIX = 10
+const UNIFORM_INDEX_FXAA_EDGE_THRESHOLD = 11
+const UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN = 12
+
+const BIND_GROUP_INDEX = 0
+const BINDING_SAMPLER = 0
+const BINDING_TEXTURE = 1
+const BINDING_UNIFORMS = 2
+
 const QUAD_VERTEX_COUNT = 6
+const INSTANCE_COUNT = 1
+const FIRST_VERTEX = 0
+const FIRST_INSTANCE = 0
+const VIEWPORT_ORIGIN_X = 0
+const VIEWPORT_ORIGIN_Y = 0
+const VIEWPORT_MIN_DEPTH = 0
+const VIEWPORT_MAX_DEPTH = 1
+
+const NDC_FULL_SPAN = 2.0
+const NDC_HALF_SCALE = 0.5
+const NDC_ORIGIN_OFFSET = 1.0
+
 const AA_MODE_NONE = 0
 const AA_MODE_FXAA = 1
 const AA_MODE_CAS = 2
@@ -72,10 +98,6 @@ export interface FinalRenderPassColorAttachment extends GPURenderPassColorAttach
  * @category Renderer
  */
 class FinalRender {
-    #vertexUniformBuffers: UniformBuffer[] = []
-    #vertexUniformBindGroups: GPUBindGroup[] = []
-    #vertexUniformPrevRects: Float64Array[] = []
-    #vertexBindGroupLayout: GPUBindGroupLayout = null
     #vertexShader: GPUShaderModule = null
     #vertexState: GPUVertexState = null
     #fragmentBindGroupLayout: GPUBindGroupLayout = null
@@ -87,13 +109,9 @@ class FinalRender {
     #fragmentBufferData: Float32Array[] = []
     #fragmentBufferUintData: Uint32Array[] = []
     #fragmentBufferPrevData: Float64Array[] = []
-    #projectionMatrix: mat4 = mat4.create()
-    #tempScaleVec: [number, number, number] = [0, 0, 1]
-    #tempTranslateVec: [number, number, number] = [0, 0, 0]
     #lastUpdateMSAAID: string = null
     #VERTEX_SHADER_INFO: any = null
     #FRAGMENT_SHADER_INFO: any = null
-    #VERTEX_UNIFORM_STRUCT: any = null
     #colorAttachment: GPURenderPassColorAttachment = {
         view: null,
         clearValue: CLEAR_COLOR_TRANSPARENT,
@@ -125,16 +143,6 @@ class FinalRender {
     destroy(): void {
         this.#FRAGMENT_SHADER_INFO = null
         this.#VERTEX_SHADER_INFO = null
-        this.#VERTEX_UNIFORM_STRUCT = null
-        this.#vertexUniformBuffers.forEach(buffer => {
-            if (buffer) {
-                if (typeof buffer.destroy === 'function') buffer.destroy();
-                else if (buffer.gpuBuffer) buffer.gpuBuffer.destroy();
-            }
-        });
-        this.#vertexUniformBuffers = [];
-        this.#vertexUniformBindGroups = [];
-        this.#vertexUniformPrevRects = [];
 
         this.#fragmentBuffer.forEach(buffer => {
             if (buffer) buffer.destroy();
@@ -149,7 +157,6 @@ class FinalRender {
         this.#pipeline = null;
         this.#vertexState = null;
 
-        this.#vertexBindGroupLayout = null;
         this.#fragmentBindGroupLayout = null;
         this.#sampler = null;
         this.#lastUpdateMSAAID = null;
@@ -205,9 +212,9 @@ class FinalRender {
         const canvasH = this.#currentCanvasH
         const dirtyMSAA = this.#currentDirtyMSAA
 
-        finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
-        finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
-        if (!this.#vertexBindGroupLayout || dirtyMSAA) {
+        finalRenderPassEnc.setViewport(VIEWPORT_ORIGIN_X, VIEWPORT_ORIGIN_Y, canvasW, canvasH, VIEWPORT_MIN_DEPTH, VIEWPORT_MAX_DEPTH);
+        finalRenderPassEnc.setScissorRect(VIEWPORT_ORIGIN_X, VIEWPORT_ORIGIN_Y, canvasW, canvasH);
+        if (!this.#fragmentBindGroupLayout || dirtyMSAA) {
             this.#initGPUDetails(redGPUContext);
             this.#fragmentBindGroupCache.length = 0;
         }
@@ -220,7 +227,25 @@ class FinalRender {
         )
     }
 
-    #updateFinalViewBackgroundColor(view: View3D, index: number, hasPostEffectView: boolean) {
+    #updateFinalViewUniforms(
+        view: View3D,
+        index: number,
+        hasPostEffectView: boolean,
+        viewX: number,
+        viewY: number,
+        viewW: number,
+        viewH: number,
+        invCanvasW2: number,
+        invCanvasH2: number,
+        canvasH: number
+    ) {
+        const halfViewW = viewW * NDC_HALF_SCALE
+        const halfViewH = viewH * NDC_HALF_SCALE
+        const ndcScaleX = invCanvasW2 * halfViewW
+        const ndcScaleY = invCanvasH2 * halfViewH
+        const ndcOffsetX = invCanvasW2 * (halfViewW + viewX) - NDC_ORIGIN_OFFSET
+        const ndcOffsetY = invCanvasH2 * (canvasH - halfViewH - viewY) - NDC_ORIGIN_OFFSET
+
         const {scene, redGPUContext} = view
         const {gpuDevice, antialiasingManager} = redGPUContext
         const {backgroundColor, useBackgroundColor} = scene
@@ -269,40 +294,52 @@ class FinalRender {
 
         const prevData = this.#fragmentBufferPrevData[index]
         if (
-            prevData[0] === outR &&
-            prevData[1] === outG &&
-            prevData[2] === outB &&
-            prevData[3] === outA &&
-            prevData[4] === aaMode &&
-            prevData[5] === casPeak &&
-            prevData[6] === subpix &&
-            prevData[7] === edgeThreshold &&
-            prevData[8] === edgeThresholdMin
+            prevData[UNIFORM_INDEX_NDC_SCALE_X] === ndcScaleX &&
+            prevData[UNIFORM_INDEX_NDC_SCALE_Y] === ndcScaleY &&
+            prevData[UNIFORM_INDEX_NDC_OFFSET_X] === ndcOffsetX &&
+            prevData[UNIFORM_INDEX_NDC_OFFSET_Y] === ndcOffsetY &&
+            prevData[UNIFORM_INDEX_BG_R] === outR &&
+            prevData[UNIFORM_INDEX_BG_G] === outG &&
+            prevData[UNIFORM_INDEX_BG_B] === outB &&
+            prevData[UNIFORM_INDEX_BG_A] === outA &&
+            prevData[UNIFORM_INDEX_AA_MODE] === aaMode &&
+            prevData[UNIFORM_INDEX_CAS_PEAK] === casPeak &&
+            prevData[UNIFORM_INDEX_FXAA_SUBPIX] === subpix &&
+            prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD] === edgeThreshold &&
+            prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN] === edgeThresholdMin
         ) {
             return
         }
 
-        prevData[0] = outR
-        prevData[1] = outG
-        prevData[2] = outB
-        prevData[3] = outA
-        prevData[4] = aaMode
-        prevData[5] = casPeak
-        prevData[6] = subpix
-        prevData[7] = edgeThreshold
-        prevData[8] = edgeThresholdMin
+        prevData[UNIFORM_INDEX_NDC_SCALE_X] = ndcScaleX
+        prevData[UNIFORM_INDEX_NDC_SCALE_Y] = ndcScaleY
+        prevData[UNIFORM_INDEX_NDC_OFFSET_X] = ndcOffsetX
+        prevData[UNIFORM_INDEX_NDC_OFFSET_Y] = ndcOffsetY
+        prevData[UNIFORM_INDEX_BG_R] = outR
+        prevData[UNIFORM_INDEX_BG_G] = outG
+        prevData[UNIFORM_INDEX_BG_B] = outB
+        prevData[UNIFORM_INDEX_BG_A] = outA
+        prevData[UNIFORM_INDEX_AA_MODE] = aaMode
+        prevData[UNIFORM_INDEX_CAS_PEAK] = casPeak
+        prevData[UNIFORM_INDEX_FXAA_SUBPIX] = subpix
+        prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD] = edgeThreshold
+        prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN] = edgeThresholdMin
 
         const f32 = this.#fragmentBufferData[index]
         const u32 = this.#fragmentBufferUintData[index]
-        f32[0] = outR
-        f32[1] = outG
-        f32[2] = outB
-        f32[3] = outA
-        u32[4] = aaMode
-        f32[5] = casPeak
-        f32[6] = subpix
-        f32[7] = edgeThreshold
-        f32[8] = edgeThresholdMin
+        f32[UNIFORM_INDEX_NDC_SCALE_X] = ndcScaleX
+        f32[UNIFORM_INDEX_NDC_SCALE_Y] = ndcScaleY
+        f32[UNIFORM_INDEX_NDC_OFFSET_X] = ndcOffsetX
+        f32[UNIFORM_INDEX_NDC_OFFSET_Y] = ndcOffsetY
+        f32[UNIFORM_INDEX_BG_R] = outR
+        f32[UNIFORM_INDEX_BG_G] = outG
+        f32[UNIFORM_INDEX_BG_B] = outB
+        f32[UNIFORM_INDEX_BG_A] = outA
+        u32[UNIFORM_INDEX_AA_MODE] = aaMode
+        f32[UNIFORM_INDEX_CAS_PEAK] = casPeak
+        f32[UNIFORM_INDEX_FXAA_SUBPIX] = subpix
+        f32[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD] = edgeThreshold
+        f32[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN] = edgeThresholdMin
 
         gpuDevice.queue.writeBuffer(this.#fragmentBuffer[index], 0, f32 as BufferSource)
     }
@@ -318,10 +355,8 @@ class FinalRender {
         if (len === 0) return
 
         const {gpuDevice, viewList} = redGPUContext
-        const projectionMatrix = this.#projectionMatrix
-        const scaleVec = this.#tempScaleVec
-        const translateVec = this.#tempTranslateVec
-        const modelMatrixUniformOffset = this.#VERTEX_UNIFORM_STRUCT.members.modelMatrix.uniformOffset
+        const invCanvasW2 = NDC_FULL_SPAN / canvasW
+        const invCanvasH2 = NDC_FULL_SPAN / canvasH
 
         finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext, dirtyMSAA))
 
@@ -338,42 +373,6 @@ class FinalRender {
             const viewH = viewPixelRectArray[3]
 
             this.#validateViewGpuDetails(redGPUContext, index)
-            const vertexUniformBuffer: UniformBuffer = this.#vertexUniformBuffers[index]
-            const vertexUniformBindGroup: GPUBindGroup = this.#vertexUniformBindGroups[index]
-            const prevRect = this.#vertexUniformPrevRects[index]
-
-            if (
-                prevRect[0] !== viewX ||
-                prevRect[1] !== viewY ||
-                prevRect[2] !== viewW ||
-                prevRect[3] !== viewH ||
-                prevRect[4] !== canvasW ||
-                prevRect[5] !== canvasH
-            ) {
-                prevRect[0] = viewX
-                prevRect[1] = viewY
-                prevRect[2] = viewW
-                prevRect[3] = viewH
-                prevRect[4] = canvasW
-                prevRect[5] = canvasH
-
-                mat4.ortho(projectionMatrix, 0., 1., 0., 1., ORTHO_NEAR, ORTHO_FAR);
-                scaleVec[0] = 1 / canvasW
-                scaleVec[1] = 1 / canvasH
-                mat4.scale(projectionMatrix, projectionMatrix, scaleVec);
-                translateVec[0] = viewW / 2 + viewX
-                translateVec[1] = canvasH - viewH / 2 - viewY
-                mat4.translate(projectionMatrix, projectionMatrix, translateVec);
-                scaleVec[0] = viewW / 2
-                scaleVec[1] = viewH / 2
-                mat4.scale(projectionMatrix, projectionMatrix, scaleVec);
-
-                gpuDevice.queue.writeBuffer(
-                    vertexUniformBuffer.gpuBuffer,
-                    modelMatrixUniformOffset,
-                    projectionMatrix as Float32Array as BufferSource
-                )
-            }
 
             if (!this.#fragmentBindGroupCache[index]) {
                 this.#fragmentBindGroupCache[index] = new WeakMap();
@@ -385,10 +384,10 @@ class FinalRender {
                     layout: this.#fragmentBindGroupLayout,
                     label: FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,
                     entries: [
-                        {binding: 0, resource: this.#sampler.gpuSampler},
-                        {binding: 1, resource: gpuTextureView},
+                        {binding: BINDING_SAMPLER, resource: this.#sampler.gpuSampler},
+                        {binding: BINDING_TEXTURE, resource: gpuTextureView},
                         {
-                            binding: 2, resource: {
+                            binding: BINDING_UNIFORMS, resource: {
                                 buffer: this.#fragmentBuffer[index],
                                 offset: 0,
                                 size: this.#fragmentBuffer[index].size
@@ -400,10 +399,20 @@ class FinalRender {
                 this.#fragmentBindGroupCache[index].set(gpuTextureView, fragmentBindGroup);
             }
 
-            this.#updateFinalViewBackgroundColor(targetView, index, hasPostEffectView)
-            finalRenderPassEnc.setBindGroup(0, vertexUniformBindGroup);
-            finalRenderPassEnc.setBindGroup(1, fragmentBindGroup)
-            finalRenderPassEnc.draw(QUAD_VERTEX_COUNT, 1, 0, 0);
+            this.#updateFinalViewUniforms(
+                targetView,
+                index,
+                hasPostEffectView,
+                viewX,
+                viewY,
+                viewW,
+                viewH,
+                invCanvasW2,
+                invCanvasH2,
+                canvasH
+            )
+            finalRenderPassEnc.setBindGroup(BIND_GROUP_INDEX, fragmentBindGroup)
+            finalRenderPassEnc.draw(QUAD_VERTEX_COUNT, INSTANCE_COUNT, FIRST_VERTEX, FIRST_INSTANCE);
         }
     }
 
@@ -411,17 +420,18 @@ class FinalRender {
         const {resourceManager} = redGPUContext
         this.#VERTEX_SHADER_INFO = resourceManager.wgslParser.parse('FINAL_RENDER_VERTEX', vertexModuleSource)
         this.#FRAGMENT_SHADER_INFO = resourceManager.wgslParser.parse('FINAL_RENDER_FRAGMENT', fragmentModuleSource)
-        this.#VERTEX_UNIFORM_STRUCT = this.#VERTEX_SHADER_INFO.uniforms.vertexUniforms
-        this.#vertexBindGroupLayout = resourceManager.createBindGroupLayout(
-            'FINAL_RENDER_VERTEX_BIND_GROUP_LAYOUT',
-            getVertexBindGroupLayoutDescriptorFromShaderInfo(this.#VERTEX_SHADER_INFO, 0)
-        )
         this.#vertexShader = resourceManager.createGPUShaderModule(VERTEX_SHADER_MODULE_NAME, {code: vertexModuleSource})
         this.#vertexState = {module: this.#vertexShader, entryPoint: 'main'}
         this.#fragmentShader = resourceManager.createGPUShaderModule(FRAGMENT_SHADER_MODULE_NAME, {code: fragmentModuleSource})
         this.#fragmentBindGroupLayout = resourceManager.createBindGroupLayout(
-            'FINAL_RENDER_BIND_GROUP_LAYOUT',
-            getFragmentBindGroupLayoutDescriptorFromShaderInfo(this.#FRAGMENT_SHADER_INFO, 1)
+            BIND_GROUP_LAYOUT_NAME,
+            getUnionBindGroupLayoutDescriptorFromShaderInfos(
+                [
+                    {shaderInfo: this.#VERTEX_SHADER_INFO, visibility: GPUShaderStage.VERTEX},
+                    {shaderInfo: this.#FRAGMENT_SHADER_INFO, visibility: GPUShaderStage.FRAGMENT}
+                ],
+                BIND_GROUP_INDEX
+            )
         )
         if (!this.#sampler) {
             this.#sampler = new Sampler(redGPUContext, {minFilter: 'linear'})
@@ -430,28 +440,6 @@ class FinalRender {
 
     #validateViewGpuDetails(redGPUContext: RedGPUContext, index: number) {
         const {gpuDevice} = redGPUContext
-        if (!this.#vertexUniformBuffers[index]) {
-            const vertexUniformData = new ArrayBuffer(this.#VERTEX_UNIFORM_STRUCT.arrayBufferByteLength)
-            const tVUniformBuffer: UniformBuffer = this.#vertexUniformBuffers[index] = new UniformBuffer(
-                redGPUContext,
-                vertexUniformData,
-                `FinalRender_View(${index})_VertexUniform`
-            )
-            const vertexBindGroupDesc: GPUBindGroupDescriptor = {
-                layout: this.#vertexBindGroupLayout,
-                label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
-                entries: [{
-                    binding: 0,
-                    resource: {
-                        buffer: tVUniformBuffer.gpuBuffer,
-                        offset: 0,
-                        size: tVUniformBuffer.size
-                    },
-                }]
-            }
-            this.#vertexUniformBindGroups[index] = gpuDevice.createBindGroup(vertexBindGroupDesc)
-            this.#vertexUniformPrevRects[index] = new Float64Array([NaN, NaN, NaN, NaN, NaN, NaN])
-        }
         if (!this.#fragmentBuffer[index]) {
             this.#fragmentBuffer[index] = gpuDevice.createBuffer({
                 label: `FINAL_RENDER_FRAGMENT_BUFFER_${index}`,
@@ -461,9 +449,11 @@ class FinalRender {
             const buffer = new ArrayBuffer(FRAGMENT_UNIFORM_BUFFER_BYTE_SIZE)
             this.#fragmentBufferData[index] = new Float32Array(buffer)
             this.#fragmentBufferUintData[index] = new Uint32Array(buffer)
-            this.#fragmentBufferData[index][0] = 1
-            this.#fragmentBufferData[index][3] = 1
-            this.#fragmentBufferPrevData[index] = new Float64Array([NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN])
+            this.#fragmentBufferData[index][UNIFORM_INDEX_BG_R] = 1
+            this.#fragmentBufferData[index][UNIFORM_INDEX_BG_A] = 1
+            const prevData = new Float64Array(UNIFORM_PREV_DATA_COUNT)
+            prevData.fill(NaN)
+            this.#fragmentBufferPrevData[index] = prevData
         }
     }
 
@@ -480,7 +470,6 @@ class FinalRender {
                 PIPELINE_LAYOUT_LABEL,
                 {
                     bindGroupLayouts: [
-                        this.#vertexBindGroupLayout,
                         this.#fragmentBindGroupLayout
                     ]
                 }

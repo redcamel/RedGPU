@@ -1,6 +1,7 @@
 #redgpu_include color.getLuminance
 
 struct Uniforms {
+    ndcScaleOffset: vec4<f32>,
     backgroundColor: vec4<f32>,
     aaMode: u32,
     casPeak: f32,
@@ -12,13 +13,13 @@ struct Uniforms {
     pad2: f32, // 16-byte tail alignment
 }
 
-@group(1) @binding(0)
-var _sampler: sampler;
+@group(0) @binding(0)
+var sourceSampler: sampler;
 
-@group(1) @binding(1)
-var _texture: texture_2d<f32>;
+@group(0) @binding(1)
+var sourceTexture: texture_2d<f32>;
 
-@group(1) @binding(2)
+@group(0) @binding(2)
 var<uniform> uniforms : Uniforms;
 
 const AA_MODE_NONE: u32 = 0u;
@@ -42,11 +43,11 @@ fn applyCAS(pixelCoord: vec2<i32>, maxCoord: vec2<i32>) -> vec4<f32> {
     let xW = max(pixelCoord.x - 1, 0);
     let xE = min(pixelCoord.x + 1, maxCoord.x);
 
-    let b = textureLoad(_texture, vec2<i32>(pixelCoord.x, yN), 0).rgb;
-    let d = textureLoad(_texture, vec2<i32>(xW, pixelCoord.y), 0).rgb;
-    let e = textureLoad(_texture, pixelCoord, 0);
-    let f = textureLoad(_texture, vec2<i32>(xE, pixelCoord.y), 0).rgb;
-    let h = textureLoad(_texture, vec2<i32>(pixelCoord.x, yS), 0).rgb;
+    let b = textureLoad(sourceTexture, vec2<i32>(pixelCoord.x, yN), 0).rgb;
+    let d = textureLoad(sourceTexture, vec2<i32>(xW, pixelCoord.y), 0).rgb;
+    let e = textureLoad(sourceTexture, pixelCoord, 0);
+    let f = textureLoad(sourceTexture, vec2<i32>(xE, pixelCoord.y), 0).rgb;
+    let h = textureLoad(sourceTexture, vec2<i32>(pixelCoord.x, yS), 0).rgb;
 
     let minRGB = min(min(min(d, e.rgb), min(f, b)), h);
     let maxRGB = max(max(max(d, e.rgb), max(f, b)), h);
@@ -69,20 +70,20 @@ fn applyCAS(pixelCoord: vec2<i32>, maxCoord: vec2<i32>) -> vec4<f32> {
     return vec4<f32>(saturate(sharpRGB), e.a);
 }
 
-fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>, maxCoord: vec2<i32>) -> vec4<f32> {
-    let yN = max(i_index.y - 1, 0);
-    let yS = min(i_index.y + 1, maxCoord.y);
-    let xW = max(i_index.x - 1, 0);
-    let xE = min(i_index.x + 1, maxCoord.x);
+fn applyFXAA(uvM: vec2<f32>, pixelCoord: vec2<i32>, dims: vec2<u32>, maxCoord: vec2<i32>) -> vec4<f32> {
+    let yN = max(pixelCoord.y - 1, 0);
+    let yS = min(pixelCoord.y + 1, maxCoord.y);
+    let xW = max(pixelCoord.x - 1, 0);
+    let xE = min(pixelCoord.x + 1, maxCoord.x);
 
     // 1. Sample center and 4-cardinal neighbors (N, S, W, E) to evaluate local contrast
-    let colorM4 = textureLoad(_texture, i_index, 0);
+    let colorM4 = textureLoad(sourceTexture, pixelCoord, 0);
     let lumaM = getLuminance(colorM4.rgb);
 
-    let lumaN = getLuminance(textureLoad(_texture, vec2<i32>(i_index.x, yN), 0).rgb);
-    let lumaS = getLuminance(textureLoad(_texture, vec2<i32>(i_index.x, yS), 0).rgb);
-    let lumaW = getLuminance(textureLoad(_texture, vec2<i32>(xW, i_index.y), 0).rgb);
-    let lumaE = getLuminance(textureLoad(_texture, vec2<i32>(xE, i_index.y), 0).rgb);
+    let lumaN = getLuminance(textureLoad(sourceTexture, vec2<i32>(pixelCoord.x, yN), 0).rgb);
+    let lumaS = getLuminance(textureLoad(sourceTexture, vec2<i32>(pixelCoord.x, yS), 0).rgb);
+    let lumaW = getLuminance(textureLoad(sourceTexture, vec2<i32>(xW, pixelCoord.y), 0).rgb);
+    let lumaE = getLuminance(textureLoad(sourceTexture, vec2<i32>(xE, pixelCoord.y), 0).rgb);
 
     let lumaMin = min(lumaM, min(min(lumaN, lumaS), min(lumaW, lumaE)));
     let lumaMax = max(lumaM, max(max(lumaN, lumaS), max(lumaW, lumaE)));
@@ -96,10 +97,10 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>, maxCoord: vec2
     let invDims = 1.0 / vec2<f32>(dims);
 
     // 2. Sample 4-diagonal neighbors (NW, NE, SW, SE) and determine edge orientation (Horizontal vs Vertical)
-    let lumaNW = getLuminance(textureLoad(_texture, vec2<i32>(xW, yN), 0).rgb);
-    let lumaNE = getLuminance(textureLoad(_texture, vec2<i32>(xE, yN), 0).rgb);
-    let lumaSW = getLuminance(textureLoad(_texture, vec2<i32>(xW, yS), 0).rgb);
-    let lumaSE = getLuminance(textureLoad(_texture, vec2<i32>(xE, yS), 0).rgb);
+    let lumaNW = getLuminance(textureLoad(sourceTexture, vec2<i32>(xW, yN), 0).rgb);
+    let lumaNE = getLuminance(textureLoad(sourceTexture, vec2<i32>(xE, yN), 0).rgb);
+    let lumaSW = getLuminance(textureLoad(sourceTexture, vec2<i32>(xW, yS), 0).rgb);
+    let lumaSE = getLuminance(textureLoad(sourceTexture, vec2<i32>(xE, yS), 0).rgb);
 
     let lumaNS = lumaN + lumaS;
     let lumaWE = lumaW + lumaE;
@@ -146,11 +147,11 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>, maxCoord: vec2
 
     for (var i = 0u; i < FXAA_SEARCH_STEPS; i++) {
         if (!doneP) {
-            lumaEndP = getLuminance(textureSampleLevel(_texture, _sampler, uvP, 0.0).rgb) - lumaLocalAverage;
+            lumaEndP = getLuminance(textureSampleLevel(sourceTexture, sourceSampler, uvP, 0.0).rgb) - lumaLocalAverage;
             doneP = abs(lumaEndP) >= gradientScaled;
         }
         if (!doneN) {
-            lumaEndN = getLuminance(textureSampleLevel(_texture, _sampler, uvN, 0.0).rgb) - lumaLocalAverage;
+            lumaEndN = getLuminance(textureSampleLevel(sourceTexture, sourceSampler, uvN, 0.0).rgb) - lumaLocalAverage;
             doneN = abs(lumaEndN) >= gradientScaled;
         }
         if (doneP && doneN) {
@@ -184,7 +185,7 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>, maxCoord: vec2
     let finalBlend = max(edgeBlend, subpixBlend);
     let finalOffset = stepLength * finalBlend;
     let finalUv = uvM + select(vec2<f32>(finalOffset, 0.0), vec2<f32>(0.0, finalOffset), isHorizontal);
-    let finalColor4 = textureSampleLevel(_texture, _sampler, finalUv, 0.0);
+    let finalColor4 = textureSampleLevel(sourceTexture, sourceSampler, finalUv, 0.0);
 
     return finalColor4;
 }
@@ -193,7 +194,7 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>, maxCoord: vec2
 fn main(@location(0) fragUV : vec2<f32>) -> @location(0) vec4<f32> {
     var viewColor: vec4<f32>;
     if (uniforms.aaMode != AA_MODE_NONE) {
-        let dims = textureDimensions(_texture);
+        let dims = textureDimensions(sourceTexture);
         let maxCoord = vec2<i32>(dims) - vec2<i32>(1);
         let pixelCoord = clamp(vec2<i32>(fragUV * vec2<f32>(dims)), vec2<i32>(0), maxCoord);
         if (uniforms.aaMode == AA_MODE_CAS) {
@@ -202,7 +203,7 @@ fn main(@location(0) fragUV : vec2<f32>) -> @location(0) vec4<f32> {
             viewColor = applyFXAA(fragUV, pixelCoord, dims, maxCoord);
         }
     } else {
-        viewColor = textureSampleLevel(_texture, _sampler, fragUV, 0.0);
+        viewColor = textureSampleLevel(sourceTexture, sourceSampler, fragUV, 0.0);
     }
 
     let invViewAlpha = 1.0 - viewColor.a;
