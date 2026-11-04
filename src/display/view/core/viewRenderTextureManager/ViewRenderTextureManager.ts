@@ -580,7 +580,15 @@ class ViewRenderTextureManager extends RedGPUObject {
                 @fragment
                 fn fs_main(@builtin(position) pos: vec4<f32>) -> @builtin(frag_depth) f32 {
                     let coord = vec2<i32>(pos.xy);
-                    return textureLoad(srcDepth, coord, 0);
+                    let d0 = textureLoad(srcDepth, coord, 0);
+                    let d1 = textureLoad(srcDepth, coord, 1);
+                    let d2 = textureLoad(srcDepth, coord, 2);
+                    let d3 = textureLoad(srcDepth, coord, 3);
+                    let minDepth = min(min(d0, d1), min(d2, d3));
+                    if (minDepth >= 1.0) {
+                        discard;
+                    }
+                    return minDepth;
                 }
             `
         });
