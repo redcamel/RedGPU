@@ -1,10 +1,6 @@
 // [KO] 1. 인덱스 계산 및 원본 컬러/패킹된 AO 데이터 로드 (1:1 Full-Res 직결)
 // [EN] 1. Index calculation and load original color / packed AO data (1:1 Full-Res direct)
-let index    = vec2<i32>(global_id.xy);
-let fullDims = vec2<i32>(postEffectOutputDimensions);
-if (index.x >= fullDims.x || index.y >= fullDims.y) {
-    return;
-}
+let index = vec2<i32>(global_id.xy);
 
 let diffuse = textureLoad(sourceTexture0, index, 0);
 let aoData  = textureLoad(sourceTexture1, index, 0).rg;
