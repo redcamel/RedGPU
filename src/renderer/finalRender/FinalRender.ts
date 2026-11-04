@@ -18,8 +18,8 @@ const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_FINA
 const PIPELINE_LAYOUT_LABEL = 'FINAL_RENDER_PIPELINE_LAYOUT'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_FINAL_RENDER'
 
-const FRAGMENT_UNIFORM_BUFFER_BYTE_SIZE = 64
-const UNIFORM_PREV_DATA_COUNT = 13
+const FRAGMENT_UNIFORM_BUFFER_BYTE_SIZE = 48
+const UNIFORM_FLOAT_COUNT = 12
 const UNIFORM_INDEX_NDC_SCALE_X = 0
 const UNIFORM_INDEX_NDC_SCALE_Y = 1
 const UNIFORM_INDEX_NDC_OFFSET_X = 2
@@ -28,11 +28,10 @@ const UNIFORM_INDEX_BG_R = 4
 const UNIFORM_INDEX_BG_G = 5
 const UNIFORM_INDEX_BG_B = 6
 const UNIFORM_INDEX_BG_A = 7
-const UNIFORM_INDEX_AA_MODE = 8
-const UNIFORM_INDEX_CAS_PEAK = 9
-const UNIFORM_INDEX_FXAA_SUBPIX = 10
-const UNIFORM_INDEX_FXAA_EDGE_THRESHOLD = 11
-const UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN = 12
+const UNIFORM_INDEX_CAS_PEAK = 8
+const UNIFORM_INDEX_FXAA_SUBPIX = 9
+const UNIFORM_INDEX_FXAA_EDGE_THRESHOLD = 10
+const UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN = 11
 
 const BIND_GROUP_INDEX = 0
 const BINDING_SAMPLER = 0
@@ -57,6 +56,12 @@ const AA_MODE_FXAA = 1
 const AA_MODE_CAS = 2
 const CAS_PEAK_BASE = 8.0
 const CAS_PEAK_SHARPNESS_SCALE = 3.0
+
+const FRAGMENT_ENTRY_POINTS = Object.freeze([
+    'mainNone',
+    'mainFXAA',
+    'mainCAS',
+])
 
 const FINAL_RENDER_TEXTURE_VIEW_DESCRIPTOR: GPUTextureViewDescriptor = Object.freeze({
     label: 'FINAL_RENDER',
@@ -103,11 +108,10 @@ class FinalRender {
     #fragmentBindGroupLayout: GPUBindGroupLayout = null
     #fragmentShader: GPUShaderModule = null
     #fragmentBindGroupCache: WeakMap<GPUTextureView, GPUBindGroup>[] = []
-    #pipeline: GPURenderPipeline = null
+    #pipelines: GPURenderPipeline[] = []
     #sampler: Sampler = null
     #fragmentBuffer: GPUBuffer[] = []
     #fragmentBufferData: Float32Array[] = []
-    #fragmentBufferUintData: Uint32Array[] = []
     #fragmentBufferPrevData: Float64Array[] = []
     #lastUpdateMSAAID: string = null
     #VERTEX_SHADER_INFO: any = null
@@ -149,12 +153,11 @@ class FinalRender {
         });
         this.#fragmentBuffer = [];
         this.#fragmentBufferData = [];
-        this.#fragmentBufferUintData = [];
         this.#fragmentBufferPrevData = [];
 
         this.#vertexShader = null;
         this.#fragmentShader = null;
-        this.#pipeline = null;
+        this.#pipelines = [];
         this.#vertexState = null;
 
         this.#fragmentBindGroupLayout = null;
@@ -217,13 +220,13 @@ class FinalRender {
         if (!this.#fragmentBindGroupLayout || dirtyMSAA) {
             this.#initGPUDetails(redGPUContext);
             this.#fragmentBindGroupCache.length = 0;
+            this.#pipelines.length = 0;
         }
         this.#renderViewList(
             redGPUContext,
             finalRenderPassEnc,
             viewList_renderPassDescriptorList,
-            canvasW, canvasH,
-            dirtyMSAA
+            canvasW, canvasH
         )
     }
 
@@ -238,7 +241,7 @@ class FinalRender {
         invCanvasW2: number,
         invCanvasH2: number,
         canvasH: number
-    ) {
+    ): number {
         const halfViewW = viewW * NDC_HALF_SCALE
         const halfViewH = viewH * NDC_HALF_SCALE
         const ndcScaleX = invCanvasW2 * halfViewW
@@ -302,13 +305,12 @@ class FinalRender {
             prevData[UNIFORM_INDEX_BG_G] === outG &&
             prevData[UNIFORM_INDEX_BG_B] === outB &&
             prevData[UNIFORM_INDEX_BG_A] === outA &&
-            prevData[UNIFORM_INDEX_AA_MODE] === aaMode &&
             prevData[UNIFORM_INDEX_CAS_PEAK] === casPeak &&
             prevData[UNIFORM_INDEX_FXAA_SUBPIX] === subpix &&
             prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD] === edgeThreshold &&
             prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN] === edgeThresholdMin
         ) {
-            return
+            return aaMode
         }
 
         prevData[UNIFORM_INDEX_NDC_SCALE_X] = ndcScaleX
@@ -319,14 +321,12 @@ class FinalRender {
         prevData[UNIFORM_INDEX_BG_G] = outG
         prevData[UNIFORM_INDEX_BG_B] = outB
         prevData[UNIFORM_INDEX_BG_A] = outA
-        prevData[UNIFORM_INDEX_AA_MODE] = aaMode
         prevData[UNIFORM_INDEX_CAS_PEAK] = casPeak
         prevData[UNIFORM_INDEX_FXAA_SUBPIX] = subpix
         prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD] = edgeThreshold
         prevData[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN] = edgeThresholdMin
 
         const f32 = this.#fragmentBufferData[index]
-        const u32 = this.#fragmentBufferUintData[index]
         f32[UNIFORM_INDEX_NDC_SCALE_X] = ndcScaleX
         f32[UNIFORM_INDEX_NDC_SCALE_Y] = ndcScaleY
         f32[UNIFORM_INDEX_NDC_OFFSET_X] = ndcOffsetX
@@ -335,21 +335,20 @@ class FinalRender {
         f32[UNIFORM_INDEX_BG_G] = outG
         f32[UNIFORM_INDEX_BG_B] = outB
         f32[UNIFORM_INDEX_BG_A] = outA
-        u32[UNIFORM_INDEX_AA_MODE] = aaMode
         f32[UNIFORM_INDEX_CAS_PEAK] = casPeak
         f32[UNIFORM_INDEX_FXAA_SUBPIX] = subpix
         f32[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD] = edgeThreshold
         f32[UNIFORM_INDEX_FXAA_EDGE_THRESHOLD_MIN] = edgeThresholdMin
 
         gpuDevice.queue.writeBuffer(this.#fragmentBuffer[index], 0, f32 as BufferSource)
+        return aaMode
     }
 
     #renderViewList(
         redGPUContext: RedGPUContext,
         finalRenderPassEnc: GPURenderPassEncoder,
         viewList_renderPassDescriptorList: GPURenderPassDescriptor[],
-        canvasW: number, canvasH: number,
-        dirtyMSAA: boolean
+        canvasW: number, canvasH: number
     ) {
         const len = viewList_renderPassDescriptorList.length
         if (len === 0) return
@@ -357,8 +356,7 @@ class FinalRender {
         const {gpuDevice, viewList} = redGPUContext
         const invCanvasW2 = NDC_FULL_SPAN / canvasW
         const invCanvasH2 = NDC_FULL_SPAN / canvasH
-
-        finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext, dirtyMSAA))
+        let currentPipeline: GPURenderPipeline = null
 
         for (let index = 0; index < len; index++) {
             const renderPassDesc = viewList_renderPassDescriptorList[index]
@@ -399,7 +397,7 @@ class FinalRender {
                 this.#fragmentBindGroupCache[index].set(gpuTextureView, fragmentBindGroup);
             }
 
-            this.#updateFinalViewUniforms(
+            const aaMode = this.#updateFinalViewUniforms(
                 targetView,
                 index,
                 hasPostEffectView,
@@ -411,6 +409,11 @@ class FinalRender {
                 invCanvasH2,
                 canvasH
             )
+            const pipeline = this.#getPipeline(redGPUContext, aaMode)
+            if (currentPipeline !== pipeline) {
+                finalRenderPassEnc.setPipeline(pipeline)
+                currentPipeline = pipeline
+            }
             finalRenderPassEnc.setBindGroup(BIND_GROUP_INDEX, fragmentBindGroup)
             finalRenderPassEnc.draw(QUAD_VERTEX_COUNT, INSTANCE_COUNT, FIRST_VERTEX, FIRST_INSTANCE);
         }
@@ -446,12 +449,10 @@ class FinalRender {
                 size: FRAGMENT_UNIFORM_BUFFER_BYTE_SIZE,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             })
-            const buffer = new ArrayBuffer(FRAGMENT_UNIFORM_BUFFER_BYTE_SIZE)
-            this.#fragmentBufferData[index] = new Float32Array(buffer)
-            this.#fragmentBufferUintData[index] = new Uint32Array(buffer)
+            this.#fragmentBufferData[index] = new Float32Array(UNIFORM_FLOAT_COUNT)
             this.#fragmentBufferData[index][UNIFORM_INDEX_BG_R] = 1
             this.#fragmentBufferData[index][UNIFORM_INDEX_BG_A] = 1
-            const prevData = new Float64Array(UNIFORM_PREV_DATA_COUNT)
+            const prevData = new Float64Array(UNIFORM_FLOAT_COUNT)
             prevData.fill(NaN)
             this.#fragmentBufferPrevData[index] = prevData
         }
@@ -463,9 +464,11 @@ class FinalRender {
         return this.#renderPassDescriptor
     }
 
-    #getPipeline(redGPUContext: RedGPUContext, dirtyMSAA: boolean) {
-        if (!this.#pipeline || dirtyMSAA) {
+    #getPipeline(redGPUContext: RedGPUContext, aaMode: number): GPURenderPipeline {
+        let pipeline = this.#pipelines[aaMode]
+        if (!pipeline) {
             const {gpuDevice, resourceManager} = redGPUContext
+            const entryPoint = FRAGMENT_ENTRY_POINTS[aaMode]
             const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(
                 PIPELINE_LAYOUT_LABEL,
                 {
@@ -475,12 +478,12 @@ class FinalRender {
                 }
             );
             const pipelineDesc: GPURenderPipelineDescriptor = {
-                label: PIPELINE_DESCRIPTOR_LABEL,
+                label: `${PIPELINE_DESCRIPTOR_LABEL}_${entryPoint}`,
                 layout: pipelineLayout,
                 vertex: this.#vertexState,
                 fragment: {
                     module: this.#fragmentShader,
-                    entryPoint: 'main',
+                    entryPoint,
                     targets: [
                         {
                             format: navigator.gpu.getPreferredCanvasFormat(),
@@ -500,9 +503,10 @@ class FinalRender {
                     ]
                 }
             }
-            this.#pipeline = gpuDevice.createRenderPipeline(pipelineDesc)
+            pipeline = gpuDevice.createRenderPipeline(pipelineDesc)
+            this.#pipelines[aaMode] = pipeline
         }
-        return this.#pipeline
+        return pipeline
     }
 }
 

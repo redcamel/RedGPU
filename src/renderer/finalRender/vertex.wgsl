@@ -1,14 +1,10 @@
 struct Uniforms {
     ndcScaleOffset: vec4<f32>,
     backgroundColor: vec4<f32>,
-    aaMode: u32,
     casPeak: f32,
     subpix: f32,
     edgeThreshold: f32,
     edgeThresholdMin: f32,
-    pad0: f32,
-    pad1: f32,
-    pad2: f32,
 };
 
 @group(0) @binding(2)

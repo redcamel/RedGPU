@@ -3,15 +3,11 @@
 struct Uniforms {
     ndcScaleOffset: vec4<f32>,
     backgroundColor: vec4<f32>,
-    aaMode: u32,
     casPeak: f32,
     subpix: f32,
     edgeThreshold: f32,
     edgeThresholdMin: f32,
-    pad0: f32, // 16-byte tail alignment
-    pad1: f32, // 16-byte tail alignment
-    pad2: f32, // 16-byte tail alignment
-}
+};
 
 @group(0) @binding(0)
 var sourceSampler: sampler;
@@ -20,10 +16,7 @@ var sourceSampler: sampler;
 var sourceTexture: texture_2d<f32>;
 
 @group(0) @binding(2)
-var<uniform> uniforms : Uniforms;
-
-const AA_MODE_NONE: u32 = 0u;
-const AA_MODE_CAS: u32 = 2u;
+var<uniform> uniforms: Uniforms;
 
 const CAS_MIN_MAX_RGB_EPSILON: f32 = 0.0001;
 const CAS_NEIGHBOR_COUNT: f32 = 4.0;
@@ -190,22 +183,31 @@ fn applyFXAA(uvM: vec2<f32>, pixelCoord: vec2<i32>, dims: vec2<u32>, maxCoord: v
     return finalColor4;
 }
 
-@fragment
-fn main(@location(0) fragUV : vec2<f32>) -> @location(0) vec4<f32> {
-    var viewColor: vec4<f32>;
-    if (uniforms.aaMode != AA_MODE_NONE) {
-        let dims = textureDimensions(sourceTexture);
-        let maxCoord = vec2<i32>(dims) - vec2<i32>(1);
-        let pixelCoord = clamp(vec2<i32>(fragUV * vec2<f32>(dims)), vec2<i32>(0), maxCoord);
-        if (uniforms.aaMode == AA_MODE_CAS) {
-            viewColor = applyCAS(pixelCoord, maxCoord);
-        } else {
-            viewColor = applyFXAA(fragUV, pixelCoord, dims, maxCoord);
-        }
-    } else {
-        viewColor = textureSampleLevel(sourceTexture, sourceSampler, fragUV, 0.0);
-    }
-
+fn compositeBackground(viewColor: vec4<f32>) -> vec4<f32> {
     let invViewAlpha = 1.0 - viewColor.a;
     return viewColor + uniforms.backgroundColor * invViewAlpha;
+}
+
+@fragment
+fn mainNone(@location(0) fragUV: vec2<f32>) -> @location(0) vec4<f32> {
+    let viewColor = textureSampleLevel(sourceTexture, sourceSampler, fragUV, 0.0);
+    return compositeBackground(viewColor);
+}
+
+@fragment
+fn mainCAS(@location(0) fragUV: vec2<f32>) -> @location(0) vec4<f32> {
+    let dims = textureDimensions(sourceTexture);
+    let maxCoord = vec2<i32>(dims) - vec2<i32>(1);
+    let pixelCoord = clamp(vec2<i32>(fragUV * vec2<f32>(dims)), vec2<i32>(0), maxCoord);
+    let viewColor = applyCAS(pixelCoord, maxCoord);
+    return compositeBackground(viewColor);
+}
+
+@fragment
+fn mainFXAA(@location(0) fragUV: vec2<f32>) -> @location(0) vec4<f32> {
+    let dims = textureDimensions(sourceTexture);
+    let maxCoord = vec2<i32>(dims) - vec2<i32>(1);
+    let pixelCoord = clamp(vec2<i32>(fragUV * vec2<f32>(dims)), vec2<i32>(0), maxCoord);
+    let viewColor = applyFXAA(fragUV, pixelCoord, dims, maxCoord);
+    return compositeBackground(viewColor);
 }
