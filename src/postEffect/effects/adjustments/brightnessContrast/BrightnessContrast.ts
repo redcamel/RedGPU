@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 import View3D from "../../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -39,7 +39,7 @@ interface BrightnessContrast {
  * @see [BrightnessContrast example](/RedGPU/examples/postEffect/adjustments/brightnessContrast/)
  * @category Adjustments
  */
-class BrightnessContrast extends ASinglePassPostEffect {
+class BrightnessContrast extends ASingleComputePassPostEffect {
     /**
      * [KO] BrightnessContrast 인스턴스를 생성합니다.
      * [EN] Creates a BrightnessContrast instance.
@@ -58,7 +58,7 @@ class BrightnessContrast extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_BRIGHTNESS_CONTRAST',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
     }
 

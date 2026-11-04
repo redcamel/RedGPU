@@ -3,8 +3,8 @@ import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 import defineUint from "../../../../defineProperty/funcs/number/defineUint";
 import View3D from "../../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -55,7 +55,7 @@ interface ZoomBlur {
  * @see [ZoomBlur example](/RedGPU/examples/postEffect/blur/zoomBlur/)
  * @category Blur
  */
-class ZoomBlur extends ASinglePassPostEffect {
+class ZoomBlur extends ASingleComputePassPostEffect {
 
     /**
      * [KO] ZoomBlur 인스턴스를 생성합니다.
@@ -75,7 +75,7 @@ class ZoomBlur extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_ZOOM_BLUR',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 

@@ -3,8 +3,8 @@ import definePositiveNumber from "../../../../defineProperty/funcs/number/define
 import defineUint from "../../../../defineProperty/funcs/number/defineUint";
 import View3D from "../../../../display/view/View3D";
 import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -42,7 +42,7 @@ interface DirectionalBlur {
  * @see [DirectionalBlur example](/RedGPU/examples/postEffect/blur/directionalBlur/)
  * @category Blur
  */
-class DirectionalBlur extends ASinglePassPostEffect {
+class DirectionalBlur extends ASingleComputePassPostEffect {
 
     #angle: number = 0;
 
@@ -64,7 +64,7 @@ class DirectionalBlur extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_DIRECTIONAL_BLUR',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 

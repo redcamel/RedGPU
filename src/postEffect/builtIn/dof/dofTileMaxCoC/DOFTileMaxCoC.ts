@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl";
 
 /**
@@ -14,13 +14,13 @@ import computeCode from "./wgsl/computeCode.wgsl";
  *
  * @category PostEffect
  */
-class DOFTileMaxCoC extends ASinglePassPostEffect {
+class DOFTileMaxCoC extends ASingleComputePassPostEffect {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_TILE_MAX_COC',
-            createBasicPostEffectCode(this, computeCode, '')
+            createBasicComputePassPostEffectCode(this, computeCode, '')
         );
     }
 }

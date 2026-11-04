@@ -60,7 +60,8 @@ class BloomUpsample extends ASingleRenderPassPostEffect {
                 uniformStructCode,
                 [
                     {name: 'lowMipTexture'}
-                ]
+                ],
+                false
             )
         );
     }

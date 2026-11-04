@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import DOF_CONFIG from "../DOF_CONFIG";
 import computeCode from "./wgsl/computeCode.wgsl";
@@ -19,7 +19,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  *
  * @category PostEffect
  */
-class DOFPostFilter extends ASinglePassPostEffect {
+class DOFPostFilter extends ASingleComputePassPostEffect {
     #passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND;
 
     constructor(redGPUContext: RedGPUContext, passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND) {
@@ -28,13 +28,15 @@ class DOFPostFilter extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             `POST_EFFECT_DOF_POST_FILTER_MODE_${passMode}`,
-            createBasicPostEffectCode(
+            createBasicComputePassPostEffectCode(
                 this,
                 computeCode,
                 uniformStructCode,
                 [
                     {name: 'bokehTexture'}
-                ]
+                ],
+                true,
+                false
             )
         );
     }

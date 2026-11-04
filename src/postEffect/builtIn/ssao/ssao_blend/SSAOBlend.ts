@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -26,7 +26,7 @@ interface SSAOBlend {
  * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
  * @category PostEffect
  */
-class SSAOBlend extends ASinglePassPostEffect {
+class SSAOBlend extends ASingleComputePassPostEffect {
     /**
      * [KO] SSAOBlend 인스턴스를 생성합니다.
      * [EN] Creates an SSAOBlend instance.
@@ -40,7 +40,7 @@ class SSAOBlend extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_SSAO_BLEND',
-            createBasicPostEffectCode(
+            createBasicComputePassPostEffectCode(
                 this,
                 computeCode,
                 uniformStructCode,

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -46,7 +46,7 @@ const EMBOSS = ([
  * @see [Convolution example](/RedGPU/examples/postEffect/convolution/)
  * @category PostEffect
  */
-class Convolution extends ASinglePassPostEffect {
+class Convolution extends ASingleComputePassPostEffect {
     /**
      * [KO] 원본 유지 기본 커널
      * [EN] Default identity kernel
@@ -93,7 +93,7 @@ class Convolution extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_CONVOLUTION',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
     }
 

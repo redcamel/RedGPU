@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
@@ -70,7 +70,7 @@ interface SSAO_AO {
  * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
  * @category PostEffect
  */
-class SSAO_AO extends ASinglePassPostEffect {
+class SSAO_AO extends ASingleComputePassPostEffect {
 
     /**
      * [KO] SSAO_AO 인스턴스를 생성합니다.
@@ -86,7 +86,7 @@ class SSAO_AO extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_SSAO',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
         );
 
     }

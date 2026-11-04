@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -93,7 +93,7 @@ interface FilmGrain {
  * @see [FilmGrain example](/RedGPU/examples/postEffect/filmGrain/)
  * @category PostEffect
  */
-class FilmGrain extends ASinglePassPostEffect {
+class FilmGrain extends ASingleComputePassPostEffect {
     /**
      * [KO] 미세한 질감 프리셋
      * [EN] Subtle texture preset
@@ -128,7 +128,7 @@ class FilmGrain extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_FILM_GRAIN',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 

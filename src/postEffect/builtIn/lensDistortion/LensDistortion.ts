@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -39,7 +39,7 @@ interface LensDistortion {
  * @see [LensDistortion example](/RedGPU/examples/postEffect/lens/lensDistortion/)
  * @category PostEffect
  */
-class LensDistortion extends ASinglePassPostEffect {
+class LensDistortion extends ASingleComputePassPostEffect {
     /**
      * [KO] LensDistortion 인스턴스를 생성합니다.
      * [EN] Creates a LensDistortion instance.
@@ -53,7 +53,7 @@ class LensDistortion extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_LENS_DISTORTION',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
     }
 

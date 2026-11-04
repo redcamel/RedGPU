@@ -1,9 +1,9 @@
 import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
-import ASinglePassPostEffect from "./ASinglePassPostEffect";
+import ASingleComputePassPostEffect from "./ASingleComputePassPostEffect";
 import {IPostEffectSourceConfig} from "./types";
 
 const createCode = (
-    effect: ASinglePassPostEffect,
+    effect: ASingleComputePassPostEffect,
     code: string,
     uniformStruct: string = '',
     useMSAA: boolean = false,
@@ -29,6 +29,10 @@ const createCode = (
         } else {
             sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_storage_2d<rgba16float, read>;\n`;
         }
+    }
+    const needsBasicSampler = !useSystemUniforms && (/\bbasicSampler\b/.test(code) || /\bbasicSampler\b/.test(uniformStruct));
+    if (needsBasicSampler) {
+        sourceTextures += `@group(0) @binding(${items.length}) var basicSampler : sampler;\n`;
     }
 
     const earlyExitCheck = earlyExit
@@ -63,15 +67,15 @@ const createCode = (
 };
 
 /**
- * [KO] 단일 패스 후처리 이펙트용 MSAA/Non-MSAA WGSL 컴퓨트 셰이더 코드를 생성합니다.
- * [EN] Generates MSAA and Non-MSAA WGSL compute shader codes for a single-pass post-processing effect.
+ * [KO] 단일 컴퓨트 패스 후처리 이펙트용 MSAA/Non-MSAA WGSL 컴퓨트 셰이더 코드를 생성합니다.
+ * [EN] Generates MSAA and Non-MSAA WGSL compute shader codes for a single compute-pass post-processing effect.
  *
  * [KO] 입력 소스 텍스처(Group 0), 이펙트 유니폼(Group 1), 시스템 공용 유니폼 및 G-Buffer(Group 2, 선택), 출력 스토리지 텍스처(`useSystemUniforms`가 `true`일 때 Group 3, `false`일 때 Group 2) 바인딩과 화면 경계 검사(`earlyExit`)를 자동으로 구성합니다.
  * [EN] Automatically configures bindings for input source textures (Group 0), effect uniforms (Group 1), system uniforms and G-Buffer (Group 2, optional), output storage texture (Group 3 when `useSystemUniforms` is `true`, Group 2 when `false`), and boundary early-exit checks (`earlyExit`).
  *
  * @param effect -
- * [KO] 대상 `ASinglePassPostEffect` 인스턴스
- * [EN] Target `ASinglePassPostEffect` instance
+ * [KO] 대상 `ASingleComputePassPostEffect` 인스턴스
+ * [EN] Target `ASingleComputePassPostEffect` instance
  * @param code -
  * [KO] `main` 함수 내부에 삽입할 WGSL 연산 코드
  * [EN] WGSL computation code to insert inside the `main` function
@@ -92,8 +96,8 @@ const createCode = (
  * [EN] WGSL code object for MSAA and Non-MSAA (`{ msaa: string, nonMsaa: string }`)
  * @category PostEffect
  */
-const createBasicPostEffectCode = (
-    effect: ASinglePassPostEffect,
+const createBasicComputePassPostEffectCode = (
+    effect: ASingleComputePassPostEffect,
     code: string,
     uniformStruct: string = '',
     sourceTextureConfigs: IPostEffectSourceConfig | IPostEffectSourceConfig[] = {name: 'sourceTexture'},
@@ -105,5 +109,5 @@ const createBasicPostEffectCode = (
         nonMsaa: createCode(effect, code, uniformStruct, false, sourceTextureConfigs, earlyExit, useSystemUniforms)
     }
 }
-Object.freeze(createBasicPostEffectCode)
-export default createBasicPostEffectCode
+Object.freeze(createBasicComputePassPostEffectCode)
+export default createBasicComputePassPostEffectCode

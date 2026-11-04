@@ -1,9 +1,9 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
+import ASingleComputePassPostEffect from "../../postEffect/core/ASingleComputePassPostEffect";
 import {IPostEffectResult} from "../../postEffect/core/types";
-import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
+import createBasicComputePassPostEffectCode from "../../postEffect/core/createBasicComputePassPostEffectCode";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
@@ -31,7 +31,7 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
  *
  * @category Antialiasing
  */
-class TAA extends ASinglePassPostEffect {
+class TAA extends ASingleComputePassPostEffect {
     #historyTextures: [GPUTexture, GPUTexture] = [null, null];
     #historyTextureViews: [GPUTextureView, GPUTextureView] = [null, null];
     #historyResults: [IPostEffectResult, IPostEffectResult] = [null, null];
@@ -42,7 +42,6 @@ class TAA extends ASinglePassPostEffect {
     #videoMemorySize: number = 0;
     #prevWidth: number = 0;
     #prevHeight: number = 0;
-    #targetAllocResult: IPostEffectResult = null;
 
     /**
      * [KO] `TAA` 인스턴스를 초기화합니다.
@@ -57,7 +56,7 @@ class TAA extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_TAA',
-            createBasicPostEffectCode(
+            createBasicComputePassPostEffectCode(
                 this,
                 computeCode,
                 uniformStructCode,
@@ -129,19 +128,7 @@ class TAA extends ASinglePassPostEffect {
         const historyInfo = this.#historyResults[readIndex];
         const targetOutputResult = this.#historyResults[writeIndex];
 
-        const pool = view.postEffectManager.texturePool;
-        const originalAlloc = pool.allocResult;
-
-        this.#targetAllocResult = targetOutputResult;
-        pool.allocResult = this.#hookedAllocResult;
-
-        let result: IPostEffectResult;
-        try {
-            result = super.render(view, width, height, sourceTextureInfo, historyInfo);
-        } finally {
-            pool.allocResult = originalAlloc;
-            this.#targetAllocResult = null;
-        }
+        const result = this.executePass(view, width, height, targetOutputResult, sourceTextureInfo, historyInfo);
 
         this.#historyIndex = writeIndex;
 
@@ -218,8 +205,6 @@ class TAA extends ASinglePassPostEffect {
         this.#historyIndex = 0;
         this.#frameIndex = 0;
     }
-
-    #hookedAllocResult: (width: number, height: number, format?: GPUTextureFormat) => IPostEffectResult = () => this.#targetAllocResult;
 
     /**
      * [KO] TAA 인스턴스와 모든 GPU 리소스를 영구 파기합니다.

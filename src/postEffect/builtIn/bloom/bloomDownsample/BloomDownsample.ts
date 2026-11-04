@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl";
 
 /**
@@ -14,7 +14,7 @@ import computeCode from "./wgsl/computeCode.wgsl";
  *
  * @category Visual Effects
  */
-class BloomDownsample extends ASinglePassPostEffect {
+class BloomDownsample extends ASingleComputePassPostEffect {
     /**
      * [KO] BloomDownsample 인스턴스를 생성합니다.
      * [EN] Creates a BloomDownsample instance.
@@ -33,7 +33,7 @@ class BloomDownsample extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_BLOOM_DOWNSAMPLE',
-            createBasicPostEffectCode(this, computeCode)
+            createBasicComputePassPostEffectCode(this, computeCode, '', undefined, true, false)
         );
     }
 }

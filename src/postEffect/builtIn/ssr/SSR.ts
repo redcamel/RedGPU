@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 import View3D from "../../../display/view/View3D";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -70,7 +70,7 @@ interface SSR {
  * @see [SSR example](/RedGPU/examples/postEffect/ssr/)
  * @category PostEffect
  */
-class SSR extends ASinglePassPostEffect {
+class SSR extends ASingleComputePassPostEffect {
 
     /**
      * [KO] SSR 인스턴스를 생성합니다.
@@ -85,7 +85,7 @@ class SSR extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_SSR',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 

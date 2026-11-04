@@ -495,6 +495,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#lensDistortion) this.#lensDistortion.clear();
         if (this.#vignetting) this.#vignetting.clear();
         if (this.#filmGrain) this.#filmGrain.clear();
+        if (this.#autoExposure) this.#autoExposure.clear();
     }
 
     /**
@@ -635,6 +636,7 @@ class BuiltInEffectManager extends RedGPUObject {
         if (this.#lensDistortion) this.#videoMemorySize += this.#lensDistortion.videoMemorySize;
         if (this.#vignetting) this.#videoMemorySize += this.#vignetting.videoMemorySize;
         if (this.#filmGrain) this.#videoMemorySize += this.#filmGrain.videoMemorySize;
+        if (this.#autoExposure) this.#videoMemorySize += this.#autoExposure.videoMemorySize;
     }
 }
 

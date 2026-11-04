@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 
@@ -16,13 +16,13 @@ import computeCode from "./wgsl/computeCode.wgsl";
  *
  * @category PostEffect
  */
-class DOFMipDownsample extends ASinglePassPostEffect {
+class DOFMipDownsample extends ASingleComputePassPostEffect {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_MIP_DOWNSAMPLE',
-            createBasicPostEffectCode(this, computeCode, '', undefined, true, false)
+            createBasicComputePassPostEffectCode(this, computeCode, '', undefined, true, false)
         );
     }
 

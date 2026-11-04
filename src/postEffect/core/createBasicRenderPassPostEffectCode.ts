@@ -24,6 +24,10 @@ const createCode = (
         const textureType = item.textureType || 'texture_2d<f32>';
         sourceTextures += `@group(0) @binding(${i}) var ${item.name} : ${textureType};\n`;
     }
+    const needsBasicSampler = !useSystemUniforms && (/\bbasicSampler\b/.test(code) || /\bbasicSampler\b/.test(uniformStruct));
+    if (needsBasicSampler) {
+        sourceTextures += `@group(0) @binding(${items.length}) var basicSampler : sampler;\n`;
+    }
 
     const hasUniformStruct = /\bstruct\s+Uniforms\b/.test(uniformStruct);
     const needsDimensions = /\bpostEffectOutputDimensions\b/.test(code) || /\bpostEffectOutputDimensions\b/.test(uniformStruct);

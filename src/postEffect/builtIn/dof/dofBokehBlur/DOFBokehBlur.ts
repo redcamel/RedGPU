@@ -2,8 +2,8 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import DOF_CONFIG from "../DOF_CONFIG";
 import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
@@ -21,7 +21,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  *
  * @category PostEffect
  */
-class DOFBokehBlur extends ASinglePassPostEffect {
+class DOFBokehBlur extends ASingleComputePassPostEffect {
     #bokehBrightness: number = DOF_CONFIG.DEFAULT_BOKEH_BRIGHTNESS;
     #bladeCount: number = DOF_CONFIG.DEFAULT_BLADE_COUNT;
     #passMode: number = DOF_CONFIG.PASS_MODE.BACKGROUND;
@@ -32,7 +32,7 @@ class DOFBokehBlur extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             `POST_EFFECT_DOF_BOKEH_BLUR_MODE_${passMode}`,
-            createBasicPostEffectCode(
+            createBasicComputePassPostEffectCode(
                 this,
                 computeCode,
                 `${dofOpticsCommon}\n${uniformStructCode}`,

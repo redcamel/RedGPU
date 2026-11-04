@@ -2,8 +2,8 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import DOF_CONFIG from "../DOF_CONFIG";
 import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
@@ -21,7 +21,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  *
  * @category PostEffect
  */
-class DOFComposite extends ASinglePassPostEffect {
+class DOFComposite extends ASingleComputePassPostEffect {
     #focusDistance: number = DOF_CONFIG.DEFAULT_FOCUS_DISTANCE;
     #aperture: number = DOF_CONFIG.DEFAULT_APERTURE;
     #focalLength: number = DOF_CONFIG.DEFAULT_FOCAL_LENGTH;
@@ -41,7 +41,7 @@ class DOFComposite extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_COMPOSITE',
-            createBasicPostEffectCode(
+            createBasicComputePassPostEffectCode(
                 this,
                 computeCode,
                 `${dofOpticsCommon}\n${uniformStructCode}`,

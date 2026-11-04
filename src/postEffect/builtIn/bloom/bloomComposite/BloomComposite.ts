@@ -68,7 +68,8 @@ class BloomComposite extends ASingleRenderPassPostEffect {
                 uniformStructCode,
                 [
                     {name: 'bloomTexture'}
-                ]
+                ],
+                false
             )
         );
     }

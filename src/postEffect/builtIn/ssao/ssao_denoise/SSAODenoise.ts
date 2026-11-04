@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl";
 
 /**
@@ -15,7 +15,7 @@ import computeCode from "./wgsl/computeCode.wgsl";
  * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
  * @category PostEffect
  */
-class SSAODenoise extends ASinglePassPostEffect {
+class SSAODenoise extends ASingleComputePassPostEffect {
     /**
      * [KO] SSAODenoise 인스턴스를 생성합니다.
      * [EN] Creates an SSAODenoise instance.
@@ -29,7 +29,7 @@ class SSAODenoise extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_SSAO_DENOISE',
-            createBasicPostEffectCode(this, computeCode)
+            createBasicComputePassPostEffectCode(this, computeCode)
         );
     }
 }

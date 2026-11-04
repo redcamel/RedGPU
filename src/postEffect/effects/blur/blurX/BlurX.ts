@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 import View3D from "../../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -32,7 +32,7 @@ interface BlurX {
  * @see [BlurX example](/RedGPU/examples/postEffect/blur/blurX/)
  * @category Blur
  */
-class BlurX extends ASinglePassPostEffect {
+class BlurX extends ASingleComputePassPostEffect {
 
     /**
      * [KO] BlurX 인스턴스를 생성합니다.
@@ -61,7 +61,7 @@ class BlurX extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_BLUR_X',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 

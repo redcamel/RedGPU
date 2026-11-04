@@ -26,7 +26,6 @@ class PostEffectTexturePool extends RedGPUObject {
     #pool: Map<string, GPUTexture[]> = new Map();
     #activeTextures: Set<GPUTexture> = new Set();
     #textureToKey: WeakMap<GPUTexture, string> = new WeakMap();
-    #textureToView: WeakMap<GPUTexture, GPUTextureView> = new WeakMap();
     #textureToResult: WeakMap<GPUTexture, IPostEffectResult> = new WeakMap();
     #videoMemorySize: number = 0;
 
@@ -269,7 +268,6 @@ class PostEffectTexturePool extends RedGPUObject {
 
             const textureView = resourceManager.getGPUResourceBitmapTextureView(texture);
             this.#textureToKey.set(texture, key);
-            this.#textureToView.set(texture, textureView);
             this.#textureToResult.set(texture, {texture, textureView});
         }
         this.#activeTextures.add(texture);

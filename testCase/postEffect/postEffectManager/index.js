@@ -62,7 +62,7 @@ redUnit.testGroup(
                 const checkSSAO = ssao instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
 
                 const ssr = builtInEffectManager.ssr;
-                const checkSSR = ssr instanceof RedGPU.PostEffect.Core.ASinglePassPostEffect;
+                const checkSSR = ssr instanceof RedGPU.PostEffect.Core.ASingleComputePassPostEffect;
 
                 const fog = builtInEffectManager.fog;
                 const checkFog = fog instanceof RedGPU.PostEffect.BuiltIn.Fog;

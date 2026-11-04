@@ -51,15 +51,11 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     #prevTargetFormat: GPUTextureFormat
     #uniformBuffer: UniformBuffer
     #uniformsInfo
-    #systemUniformsInfo
-    #storageInfo
     #name: string
     #SHADER_INFO_MSAA
     #SHADER_INFO_NON_MSAA
     #prevWidth: number = 0
     #prevHeight: number = 0
-    #outputTexture: GPUTexture
-    #outputTextureView: GPUTextureView
     #videoMemorySize: number = 0
     #prevMSAA: boolean
     #prevMSAAID: string
@@ -159,18 +155,6 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 파싱된 셰이더의 스토리지 바인딩 구조 정보를 반환합니다.
-     * [EN] Returns the parsed shader's storage binding structure information.
-     *
-     * @returns
-     * [KO] 스토리지 바인딩 구조 정보
-     * [EN] Storage binding structure information
-     */
-    get storageInfo() {
-        return this.#storageInfo
-    }
-
-    /**
      * [KO] 현재 MSAA 상태에 대응하는 WGSL 셰이더 파싱 정보를 반환합니다.
      * [EN] Returns the WGSL shader parsing information corresponding to the current MSAA state.
      *
@@ -207,36 +191,10 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 시스템 공용 유니폼 구조체 정보를 반환합니다.
-     * [EN] Returns the system common uniform struct information.
-     *
-     * @returns
-     * [KO] 시스템 유니폼 구조체 정보
-     * [EN] System uniform struct information
-     */
-    get systemUniformsInfo() {
-        return this.#systemUniformsInfo
-    }
-
-    /**
-     * [KO] 현재 패스에 할당된 출력 텍스처 뷰를 반환합니다.
-     * [EN] Returns the output texture view allocated to the current pass.
-     *
-     * @returns
-     * [KO] 출력 `GPUTextureView`
-     * [EN] Output `GPUTextureView`
-     */
-    get outputTextureView(): GPUTextureView {
-        return this.#outputTextureView;
-    }
-
-    /**
      * [KO] 캐시된 바인드 그룹 및 출력 텍스처 참조를 초기화합니다.
      * [EN] Clears cached bind groups and output texture references.
      */
     clear() {
-        this.#outputTexture = null;
-        this.#outputTextureView = null;
         this.#bindGroupCache0.clear();
         this.#bindGroupCache1 = null;
         this.#copySrcInfo.texture = null;
@@ -254,8 +212,6 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         this.#uniformBuffer?.destroy()
         this.#uniformBuffer = null
         this.#uniformsInfo = null
-        this.#systemUniformsInfo = null
-        this.#storageInfo = null
         this.#name = null
         this.#SHADER_INFO_MSAA = null
         this.#SHADER_INFO_NON_MSAA = null
@@ -300,11 +256,9 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
             this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${this.#name}_NonMSAA`, shaderCodes.nonMsaa);
         }
 
-        const {storage, uniforms} = this.#SHADER_INFO_MSAA;
-        this.#storageInfo = storage;
+        const {uniforms} = this.#SHADER_INFO_MSAA;
         this.#uniformsInfo = uniforms.uniforms;
-        this.#systemUniformsInfo = uniforms.systemUniforms;
-        this.#useGroup2 = Boolean(this.#systemUniformsInfo);
+        this.#useGroup2 = Boolean(uniforms.systemUniforms);
 
         if (this.#uniformsInfo) {
             const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength);
@@ -350,7 +304,8 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
      */
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: IPostEffectResult[]): IPostEffectResult {
         const {gpuDevice, antialiasingManager} = this;
-        const {useMSAA, msaaID} = antialiasingManager;
+        const useMSAA = this.#useGroup2 ? antialiasingManager.useMSAA : false;
+        const msaaID = this.#useGroup2 ? antialiasingManager.msaaID : '';
 
         let result: IPostEffectResult;
         let targetFormat: GPUTextureFormat = this.#isLdr ? 'rgba8unorm' : 'rgba16float';
@@ -370,9 +325,6 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
             this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#executeCopyTexture);
         }
 
-        this.#outputTexture = result.texture;
-        this.#outputTextureView = result.textureView;
-
         const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
 
@@ -385,7 +337,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
 
         this.#updateBindGroups(sourceTextureInfo, useMSAA, gpuDevice);
 
-        this.#execute(this.#useGroup2 ? view.postEffectManager.gbufferBindGroup : null);
+        this.#execute(result.textureView, this.#useGroup2 ? view.postEffectManager.gbufferBindGroup : null);
 
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
@@ -442,8 +394,8 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         renderPassEncoder.draw(3, 1, 0, 0);
     };
 
-    #execute(gbufferBindGroup: GPUBindGroup) {
-        this.#colorAttachment.view = this.#outputTextureView;
+    #execute(targetOutputView: GPUTextureView, gbufferBindGroup: GPUBindGroup) {
+        this.#colorAttachment.view = targetOutputView;
         this.#currentGbufferBindGroup = gbufferBindGroup;
 
         this.commandEncoderManager.addPostProcessRenderPass(
@@ -526,7 +478,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     }
 
     #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], useMSAA: boolean, gpuDevice: GPUDevice) {
-        const {storage, textures} = this.shaderInfo;
+        const {textures, samplers} = this.shaderInfo;
         const sourceOffset = 1;
         const sourceCount = sourceTextureInfoList.length;
 
@@ -549,8 +501,8 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         } else {
             this.#fragmentBindGroupEntries0 = [];
 
-            for (const k in storage) {
-                const {binding, group} = storage[k];
+            for (let i = 0, len = textures.length; i < len; i++) {
+                const {binding, group} = textures[i];
                 if (group === 0) {
                     const resource = sourceTextureInfoList[binding + sourceOffset]?.textureView;
                     if (resource) {
@@ -558,12 +510,14 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
                     }
                 }
             }
-            for (let i = 0, len = textures.length; i < len; i++) {
-                const {binding, group} = textures[i];
-                if (group === 0) {
-                    const resource = sourceTextureInfoList[binding + sourceOffset]?.textureView;
-                    if (resource) {
-                        this.#fragmentBindGroupEntries0.push({binding, resource});
+            if (samplers) {
+                for (let i = 0, len = samplers.length; i < len; i++) {
+                    const {binding, group} = samplers[i];
+                    if (group === 0) {
+                        this.#fragmentBindGroupEntries0.push({
+                            binding,
+                            resource: this.redGPUContext.resourceManager.basicSampler.gpuSampler
+                        });
                     }
                 }
             }

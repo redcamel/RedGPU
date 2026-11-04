@@ -2,8 +2,8 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
 import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 import View3D from "../../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -92,7 +92,7 @@ interface ColorBalance {
  * @see [ColorBalance example](/RedGPU/examples/postEffect/adjustments/colorBalance/)
  * @category Adjustments
  */
-class ColorBalance extends ASinglePassPostEffect {
+class ColorBalance extends ASingleComputePassPostEffect {
 
     /**
      * [KO] ColorBalance 인스턴스를 생성합니다.
@@ -112,7 +112,7 @@ class ColorBalance extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_COLOR_BALANCE',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
     }
 

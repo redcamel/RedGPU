@@ -4,12 +4,12 @@ import * as RedGPU from "../../../dist/index.js";
 const redUnit = new RedUnit('RedGPU - PostEffect Core');
 
 redUnit.testGroup(
-    'RedGPU.PostEffect.Core.createBasicPostEffectCode',
+    'RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode',
     (runner) => {
         runner.defineTest('Success Test: Basic code generation', (run) => {
             try {
                 const mockEffect = { WORK_SIZE_X: 16, WORK_SIZE_Y: 16, WORK_SIZE_Z: 1 };
-                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;');
+                const codes = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;');
                 run(typeof codes.msaa === 'string' && typeof codes.nonMsaa === 'string');
             } catch (e) { run(false, e); }
         }, true);
@@ -17,7 +17,7 @@ redUnit.testGroup(
         runner.defineTest('Success Test: Workgroup size reflection', (run) => {
             try {
                 const mockEffect = { WORK_SIZE_X: 8, WORK_SIZE_Y: 4, WORK_SIZE_Z: 2 };
-                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;');
+                const codes = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;');
                 run(codes.msaa.includes('@workgroup_size(8, 4, 2)'));
             } catch (e) { run(false, e); }
         }, true);
@@ -29,7 +29,7 @@ redUnit.testGroup(
                     { name: 'tex1', isSampled: true },
                     { name: 'tex2', isSampled: false }
                 ];
-                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;', '', configs);
+                const codes = RedGPU.PostEffect.Core.createBasicComputePassPostEffectCode(mockEffect, 'return;', '', configs);
                 const hasTex1 = codes.nonMsaa.includes('var tex1 : texture_2d<f32>;');
                 const hasTex2 = codes.nonMsaa.includes('var tex2 : texture_storage_2d<rgba16float, read>;');
                 run(hasTex1 && hasTex2);
@@ -39,9 +39,9 @@ redUnit.testGroup(
 );
 
 redUnit.testGroup(
-    'RedGPU.PostEffect.Core.ASinglePassPostEffect',
+    'RedGPU.PostEffect.Core.ASingleComputePassPostEffect',
     (runner) => {
-        class MockSinglePass extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
+        class MockSinglePass extends RedGPU.PostEffect.Core.ASingleComputePassPostEffect {
             constructor(ctx, options) {
                 super(ctx, options);
             }
@@ -98,7 +98,7 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.PostEffect.Core.AMultiPassPostEffect',
     (runner) => {
-        class Single extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
+        class Single extends RedGPU.PostEffect.Core.ASingleComputePassPostEffect {
             constructor(ctx) { super(ctx); }
         }
         class Multi extends RedGPU.PostEffect.Core.AMultiPassPostEffect {

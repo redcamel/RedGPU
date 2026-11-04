@@ -3,7 +3,7 @@ import RedGPUObject from "../base/RedGPUObject";
 import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
-import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
+import ASingleComputePassPostEffect from "./core/ASingleComputePassPostEffect";
 import ASingleRenderPassPostEffect from "./core/ASingleRenderPassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
@@ -34,7 +34,7 @@ import keepLog from "../utils/keepLog";
  */
 class PostEffectManager extends RedGPUObject {
     #view: View3D
-    #postEffects: Array<ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect> = []
+    #postEffects: Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect> = []
     #texturePool: PostEffectTexturePool
 
     #prevWidth: number = 0
@@ -155,10 +155,10 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Returns the array of registered user post-processing effects.
      *
      * @returns
-     * [KO] 후처리 이펙트 배열 (`Array<ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
-     * [EN] Array of post-processing effects (`Array<ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
+     * [KO] 후처리 이펙트 배열 (`Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
+     * [EN] Array of post-processing effects (`Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
      */
-    get effectList(): Array<ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect> {
+    get effectList(): Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect> {
         return this.#postEffects;
     }
 
@@ -210,7 +210,7 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 추가할 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance to add
      */
-    addEffect(v: ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect) {
+    addEffect(v: ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect) {
         if (!v.isLdr) {
             console.warn(`[PostEffectManager] ${v.constructor.name} is not an LDR effect (isLdr: false).`);
         }
@@ -228,7 +228,7 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 해당 인덱스의 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance at the specified index
      */
-    getEffectAt(index: number): ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect {
+    getEffectAt(index: number): ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
     }
 
@@ -240,7 +240,7 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 제거할 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance to remove
      */
-    removeEffect(v: ASinglePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect) {
+    removeEffect(v: ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect) {
         const index = this.#postEffects.indexOf(v);
         if (index > -1) {
             v.clear();
@@ -580,6 +580,9 @@ class PostEffectManager extends RedGPUObject {
 
     #calcVideoMemory() {
         this.#videoMemorySize = 0;
+        if (this.#postEffectSystemUniformBuffer) {
+            this.#videoMemorySize += this.#postEffectSystemUniformBuffer.videoMemorySize;
+        }
         if (this.#texturePool) {
             this.#videoMemorySize += this.#texturePool.videoMemorySize;
         }

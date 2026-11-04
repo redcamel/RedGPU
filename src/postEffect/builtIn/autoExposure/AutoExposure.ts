@@ -421,6 +421,34 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
+     * [KO] 할당된 GPU 버퍼들의 총 비디오 메모리 사용량(바이트)을 반환합니다.
+     * [EN] Returns the total video memory usage (in bytes) of the allocated GPU buffers.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (단위: 바이트)
+     * [EN] Video memory usage (unit: bytes)
+     */
+    get videoMemorySize(): number {
+        let size = 0;
+        if (this.#adaptedEV100Buffer) size += this.#adaptedEV100Buffer.videoMemorySize;
+        if (this.#histogramBuffer) size += this.#histogramBuffer.videoMemorySize;
+        if (this.#uniformBuffer) size += this.#uniformBuffer.videoMemorySize;
+        if (this.#readBuffer) size += this.#readBuffer.size;
+        return size;
+    }
+
+    /**
+     * [KO] 캐시된 소스 텍스처 바인드 그룹을 비웁니다.
+     * [EN] Clears cached source texture bind groups.
+     */
+    clear() {
+        this.#generateHistogramBindGroup0Cache = new WeakMap();
+        this.#currentGenerateHistogramBindGroup0 = null;
+        this.#prevWidth = 0;
+        this.#prevHeight = 0;
+    }
+
+    /**
      * [KO] 할당된 GPU 버퍼 및 컴퓨트 파이프라인 리소스를 모두 해제합니다.
      * [EN] Releases all allocated GPU buffers and compute pipeline resources.
      */
