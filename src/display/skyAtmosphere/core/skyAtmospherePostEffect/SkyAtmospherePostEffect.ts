@@ -78,7 +78,6 @@ class SkyAtmospherePostEffect extends ASingleRenderPassPostEffect {
             redGPUContext,
             'POST_EFFECT_SKY_ATMOSPHERE',
             createBasicRenderPassPostEffectCode(
-                this,
                 code,
                 uniformStruct,
                 [

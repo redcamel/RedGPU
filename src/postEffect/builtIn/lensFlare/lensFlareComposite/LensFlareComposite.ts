@@ -126,7 +126,6 @@ class LensFlareComposite extends ASingleRenderPassPostEffect {
             redGPUContext,
             'POST_EFFECT_LENS_FLARE_COMPOSITE',
             createBasicRenderPassPostEffectCode(
-                this,
                 fragmentCode,
                 uniformStructCode,
                 [

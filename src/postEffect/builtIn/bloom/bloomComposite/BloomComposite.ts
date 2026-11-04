@@ -63,7 +63,6 @@ class BloomComposite extends ASingleRenderPassPostEffect {
             redGPUContext,
             'POST_EFFECT_BLOOM_COMPOSITE',
             createBasicRenderPassPostEffectCode(
-                this,
                 fragmentCode,
                 uniformStructCode,
                 [

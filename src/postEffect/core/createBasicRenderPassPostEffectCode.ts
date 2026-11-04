@@ -1,5 +1,4 @@
 import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
-import ASingleRenderPassPostEffect from "./ASingleRenderPassPostEffect";
 import {IPostEffectSourceConfig} from "./types";
 
 /**
@@ -9,9 +8,6 @@ import {IPostEffectSourceConfig} from "./types";
  * [KO] 버텍스 버퍼 없는 3-버텍스 풀스크린 삼각형(`vs_main`), 보조 입력 텍스처(Group 0), 이펙트 유니폼(Group 1), 시스템 공용 유니폼 및 G-Buffer(Group 2) 바인딩과 프래그먼트 엔트리(`fs_main`)를 자동으로 구성합니다. 기존 컬러 버퍼에 In-Place로 합성하므로 기본 `sourceTexture` 바인딩을 생략하여 WebGPU Read-Write Hazard를 원천 방지합니다.
  * [EN] Automatically configures a bufferless 3-vertex fullscreen triangle (`vs_main`), bindings for auxiliary input textures (Group 0), effect uniforms (Group 1), system uniforms and G-Buffer (Group 2), and the fragment entry point (`fs_main`). Because it composites In-Place onto the existing color buffer, it omits the default `sourceTexture` binding to prevent WebGPU Read-Write Hazards.
  *
- * @param effect -
- * [KO] 대상 `ASingleRenderPassPostEffect` 인스턴스
- * [EN] Target `ASingleRenderPassPostEffect` instance
  * @param code -
  * [KO] `fs_main` 함수 내부에 삽입할 WGSL 프래그먼트 연산 코드 (`return vec4<f32>(...);` 반환 필수)
  * [EN] WGSL fragment computation code to insert inside `fs_main` (must return `vec4<f32>(...)`)
@@ -30,7 +26,6 @@ import {IPostEffectSourceConfig} from "./types";
  * @category PostEffect
  */
 const createBasicRenderPassPostEffectCode = (
-    effect: ASingleRenderPassPostEffect,
     code: string,
     uniformStruct: string = '',
     sourceTextureConfigs?: IPostEffectSourceConfig | IPostEffectSourceConfig[],

@@ -114,7 +114,7 @@ class Fog extends ASingleRenderPassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_FOG',
-            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode)
+            createBasicRenderPassPostEffectCode(fragmentCode, uniformStructCode)
         );
     }
 

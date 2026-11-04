@@ -55,7 +55,6 @@ class BloomUpsample extends ASingleRenderPassPostEffect {
             redGPUContext,
             'POST_EFFECT_BLOOM_UPSAMPLE',
             createBasicRenderPassPostEffectCode(
-                this,
                 fragmentCode,
                 uniformStructCode,
                 [

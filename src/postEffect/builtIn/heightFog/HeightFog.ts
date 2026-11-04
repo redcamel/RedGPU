@@ -128,7 +128,7 @@ class HeightFog extends ASingleRenderPassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_HEIGHT_FOG',
-            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode)
+            createBasicRenderPassPostEffectCode(fragmentCode, uniformStructCode)
         );
     }
 

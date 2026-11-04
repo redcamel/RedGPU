@@ -68,7 +68,7 @@ class Vignetting extends ASingleRenderPassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_VIGNETTING',
-            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode, undefined, false)
+            createBasicRenderPassPostEffectCode(fragmentCode, uniformStructCode, undefined, false)
         );
     }
 

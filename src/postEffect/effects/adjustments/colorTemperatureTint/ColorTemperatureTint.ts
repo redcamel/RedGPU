@@ -81,7 +81,7 @@ class ColorTemperatureTint extends ASingleRenderPassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_COLOR_TEMPERATURE_TINT',
-            createBasicRenderPassPostEffectCode(this, fragmentCode, uniformStructCode, undefined, false)
+            createBasicRenderPassPostEffectCode(fragmentCode, uniformStructCode, undefined, false)
         );
 
         this.temperature = 6500;
