@@ -42,8 +42,6 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
     #fragmentBindGroupLayout1: GPUBindGroupLayout
     #fragmentBindGroup0: GPUBindGroup
     #fragmentBindGroup1: GPUBindGroup
-    #fragmentBindGroupEntries0: GPUBindGroupEntry[]
-    #fragmentBindGroupEntries1: GPUBindGroupEntry[]
     #renderPipeline: GPURenderPipeline
     #prevTargetFormat: GPUTextureFormat
     #uniformBuffer: UniformBuffer
@@ -451,14 +449,14 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         if (cachedBG0) {
             this.#fragmentBindGroup0 = cachedBG0;
         } else {
-            this.#fragmentBindGroupEntries0 = [];
+            const fragmentBindGroupEntries0: GPUBindGroupEntry[] = [];
 
             for (let i = 0, len = textures.length; i < len; i++) {
                 const {binding, group} = textures[i];
                 if (group === 0) {
                     const resource = sourceTextureInfoList[binding + sourceOffset]?.textureView;
                     if (resource) {
-                        this.#fragmentBindGroupEntries0.push({binding, resource});
+                        fragmentBindGroupEntries0.push({binding, resource});
                     }
                 }
             }
@@ -466,7 +464,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
                 for (let i = 0, len = samplers.length; i < len; i++) {
                     const {binding, group} = samplers[i];
                     if (group === 0) {
-                        this.#fragmentBindGroupEntries0.push({
+                        fragmentBindGroupEntries0.push({
                             binding,
                             resource: this.redGPUContext.resourceManager.basicSampler.gpuSampler
                         });
@@ -477,7 +475,7 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
             this.#fragmentBindGroup0 = gpuDevice.createBindGroup({
                 label: `${this.#name}_FRAGMENT_BG_0`,
                 layout: this.#fragmentBindGroupLayout0,
-                entries: this.#fragmentBindGroupEntries0
+                entries: fragmentBindGroupEntries0
             });
 
             this.#bindGroupCache0.set(group0Key, this.#fragmentBindGroup0);
@@ -486,18 +484,17 @@ abstract class ASingleRenderPassPostEffect extends RedGPUObject {
         if (this.#bindGroupCache1) {
             this.#fragmentBindGroup1 = this.#bindGroupCache1;
         } else if (this.#uniformBuffer && this.uniformsInfo) {
-            this.#fragmentBindGroupEntries1 = [{
-                binding: 0,
-                resource: {
-                    buffer: this.#uniformBuffer.gpuBuffer,
-                    offset: 0,
-                    size: this.#uniformBuffer.size
-                },
-            }];
             this.#fragmentBindGroup1 = gpuDevice.createBindGroup({
                 label: `${this.#name}_FRAGMENT_BG_1`,
                 layout: this.#fragmentBindGroupLayout1,
-                entries: this.#fragmentBindGroupEntries1
+                entries: [{
+                    binding: 0,
+                    resource: {
+                        buffer: this.#uniformBuffer.gpuBuffer,
+                        offset: 0,
+                        size: this.#uniformBuffer.size
+                    },
+                }]
             });
             this.#bindGroupCache1 = this.#fragmentBindGroup1;
         } else {

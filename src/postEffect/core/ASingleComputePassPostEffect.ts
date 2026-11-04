@@ -40,9 +40,6 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
     #computeBindGroup0: GPUBindGroup
     #computeBindGroup1: GPUBindGroup
     #outputBindGroup: GPUBindGroup
-    #computeBindGroupEntries0: GPUBindGroupEntry[]
-    #computeBindGroupEntries1: GPUBindGroupEntry[]
-    #outputBindGroupEntries: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
     #uniformBuffer: UniformBuffer
     #uniformsInfo
@@ -460,14 +457,14 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
         if (cachedBG0) {
             this.#computeBindGroup0 = cachedBG0;
         } else {
-            this.#computeBindGroupEntries0 = [];
+            const computeBindGroupEntries0: GPUBindGroupEntry[] = [];
 
             for (let i = 0, len = textures.length; i < len; i++) {
                 const {binding, group} = textures[i];
                 if (group === 0) {
                     const resource = sourceTextureInfoList[binding]?.textureView;
                     if (resource) {
-                        this.#computeBindGroupEntries0.push({binding, resource});
+                        computeBindGroupEntries0.push({binding, resource});
                     }
                 }
             }
@@ -475,7 +472,7 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
                 for (let i = 0, len = samplers.length; i < len; i++) {
                     const {binding, group} = samplers[i];
                     if (group === 0) {
-                        this.#computeBindGroupEntries0.push({
+                        computeBindGroupEntries0.push({
                             binding,
                             resource: this.redGPUContext.resourceManager.basicSampler.gpuSampler
                         });
@@ -486,7 +483,7 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
             this.#computeBindGroup0 = gpuDevice.createBindGroup({
                 label: `${this.#name}_BIND_GROUP_0`,
                 layout: this.#computeBindGroupLayout0,
-                entries: this.#computeBindGroupEntries0
+                entries: computeBindGroupEntries0
             });
 
             this.#bindGroupCache0.set(group0Key, this.#computeBindGroup0);
@@ -495,18 +492,17 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
         if (this.#bindGroupCache1) {
             this.#computeBindGroup1 = this.#bindGroupCache1;
         } else if (this.#uniformBuffer && this.uniformsInfo) {
-            this.#computeBindGroupEntries1 = [{
-                binding: 0,
-                resource: {
-                    buffer: this.#uniformBuffer.gpuBuffer,
-                    offset: 0,
-                    size: this.#uniformBuffer.size
-                },
-            }];
             this.#computeBindGroup1 = gpuDevice.createBindGroup({
                 label: `${this.#name}_BIND_GROUP_1`,
                 layout: this.#computeBindGroupLayout1,
-                entries: this.#computeBindGroupEntries1
+                entries: [{
+                    binding: 0,
+                    resource: {
+                        buffer: this.#uniformBuffer.gpuBuffer,
+                        offset: 0,
+                        size: this.#uniformBuffer.size
+                    },
+                }]
             });
             this.#bindGroupCache1 = this.#computeBindGroup1;
         } else {
@@ -523,11 +519,10 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
             this.#outputBindGroup = this.#bindGroupCache3.get(outputTextureId);
         } else {
             const outputGroupIndex = this.#useGroup2 ? 3 : 2;
-            this.#outputBindGroupEntries = [{binding: 0, resource: targetOutputResult.textureView}];
             this.#outputBindGroup = gpuDevice.createBindGroup({
                 label: `${this.#name}_BIND_GROUP_${outputGroupIndex}`,
                 layout: this.#outputBindGroupLayout,
-                entries: this.#outputBindGroupEntries
+                entries: [{binding: 0, resource: targetOutputResult.textureView}]
             });
             this.#bindGroupCache3.set(outputTextureId, this.#outputBindGroup);
         }
