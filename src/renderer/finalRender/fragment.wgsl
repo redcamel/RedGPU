@@ -7,9 +7,9 @@ struct Uniforms {
     subpix: f32,
     edgeThreshold: f32,
     edgeThresholdMin: f32,
-    _pad0: f32,
-    _pad1: f32,
-    _pad2: f32,
+    pad0: f32, // 16-byte tail alignment
+    pad1: f32, // 16-byte tail alignment
+    pad2: f32, // 16-byte tail alignment
 }
 
 @group(1) @binding(0)
@@ -21,33 +21,47 @@ var _texture: texture_2d<f32>;
 @group(1) @binding(2)
 var<uniform> uniforms : Uniforms;
 
+const AA_MODE_NONE: u32 = 0u;
+const AA_MODE_CAS: u32 = 2u;
+
+const CAS_MIN_MAX_RGB_EPSILON: f32 = 0.0001;
+const CAS_NEIGHBOR_COUNT: f32 = 4.0;
+
+const FXAA_SEARCH_STEPS: u32 = 12u;
+const FXAA_GRADIENT_SCALE: f32 = 0.25;
+const FXAA_HALF_STEP: f32 = 0.5;
+const FXAA_SUBPIX_TENT_WEIGHT_INV: f32 = 1.0 / 12.0;
+
 const FXAA_QUALITY: array<f32, 12> = array<f32, 12>(
     1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0
 );
 
-fn fetchColor4(coord: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
-    let clampedCoord = clamp(coord, vec2<i32>(0), vec2<i32>(dims) - vec2<i32>(1));
-    return textureLoad(_texture, clampedCoord, 0);
-}
+fn applyCAS(pixelCoord: vec2<i32>, maxCoord: vec2<i32>) -> vec4<f32> {
+    let yN = max(pixelCoord.y - 1, 0);
+    let yS = min(pixelCoord.y + 1, maxCoord.y);
+    let xW = max(pixelCoord.x - 1, 0);
+    let xE = min(pixelCoord.x + 1, maxCoord.x);
 
-fn applyCAS(pixelCoord: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
-    let maxCoord = vec2<i32>(dims) - vec2<i32>(1);
-
-    let b = textureLoad(_texture, clamp(pixelCoord + vec2<i32>(0, -1), vec2<i32>(0), maxCoord), 0).rgb;
-    let d = textureLoad(_texture, clamp(pixelCoord + vec2<i32>(-1, 0), vec2<i32>(0), maxCoord), 0).rgb;
+    let b = textureLoad(_texture, vec2<i32>(pixelCoord.x, yN), 0).rgb;
+    let d = textureLoad(_texture, vec2<i32>(xW, pixelCoord.y), 0).rgb;
     let e = textureLoad(_texture, pixelCoord, 0);
-    let f = textureLoad(_texture, clamp(pixelCoord + vec2<i32>(1, 0), vec2<i32>(0), maxCoord), 0).rgb;
-    let h = textureLoad(_texture, clamp(pixelCoord + vec2<i32>(0, 1), vec2<i32>(0), maxCoord), 0).rgb;
+    let f = textureLoad(_texture, vec2<i32>(xE, pixelCoord.y), 0).rgb;
+    let h = textureLoad(_texture, vec2<i32>(pixelCoord.x, yS), 0).rgb;
 
     let minRGB = min(min(min(d, e.rgb), min(f, b)), h);
     let maxRGB = max(max(max(d, e.rgb), max(f, b)), h);
+    let peakMinRGB = min(minRGB, vec3<f32>(1.0) - maxRGB);
 
-    let rcpMRGB = 1.0 / max(maxRGB, vec3<f32>(0.0001));
-    let ampRGB = saturate(min(minRGB, 1.0 - maxRGB) * rcpMRGB);
+    if (all(peakMinRGB <= vec3<f32>(0.0))) {
+        return e;
+    }
+
+    let rcpMRGB = 1.0 / max(maxRGB, vec3<f32>(CAS_MIN_MAX_RGB_EPSILON));
+    let ampRGB = saturate(peakMinRGB * rcpMRGB);
     let weightRGB = sqrt(ampRGB);
 
     let wRGB = weightRGB * uniforms.casPeak;
-    let rcpWeightRGB = 1.0 / (1.0 + 4.0 * wRGB);
+    let rcpWeightRGB = 1.0 / (vec3<f32>(1.0) + CAS_NEIGHBOR_COUNT * wRGB);
 
     let window = b + d + f + h;
     let sharpRGB = (e.rgb + window * wRGB) * rcpWeightRGB;
@@ -55,17 +69,20 @@ fn applyCAS(pixelCoord: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     return vec4<f32>(saturate(sharpRGB), e.a);
 }
 
-fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
-    let invDims = 1.0 / vec2<f32>(dims);
+fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>, maxCoord: vec2<i32>) -> vec4<f32> {
+    let yN = max(i_index.y - 1, 0);
+    let yS = min(i_index.y + 1, maxCoord.y);
+    let xW = max(i_index.x - 1, 0);
+    let xE = min(i_index.x + 1, maxCoord.x);
 
     // 1. Sample center and 4-cardinal neighbors (N, S, W, E) to evaluate local contrast
     let colorM4 = textureLoad(_texture, i_index, 0);
     let lumaM = getLuminance(colorM4.rgb);
 
-    let lumaN = getLuminance(fetchColor4(i_index + vec2<i32>(0, -1), dims).rgb);
-    let lumaS = getLuminance(fetchColor4(i_index + vec2<i32>(0, 1), dims).rgb);
-    let lumaW = getLuminance(fetchColor4(i_index + vec2<i32>(-1, 0), dims).rgb);
-    let lumaE = getLuminance(fetchColor4(i_index + vec2<i32>(1, 0), dims).rgb);
+    let lumaN = getLuminance(textureLoad(_texture, vec2<i32>(i_index.x, yN), 0).rgb);
+    let lumaS = getLuminance(textureLoad(_texture, vec2<i32>(i_index.x, yS), 0).rgb);
+    let lumaW = getLuminance(textureLoad(_texture, vec2<i32>(xW, i_index.y), 0).rgb);
+    let lumaE = getLuminance(textureLoad(_texture, vec2<i32>(xE, i_index.y), 0).rgb);
 
     let lumaMin = min(lumaM, min(min(lumaN, lumaS), min(lumaW, lumaE)));
     let lumaMax = max(lumaM, max(max(lumaN, lumaS), max(lumaW, lumaE)));
@@ -76,11 +93,13 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
         return colorM4;
     }
 
+    let invDims = 1.0 / vec2<f32>(dims);
+
     // 2. Sample 4-diagonal neighbors (NW, NE, SW, SE) and determine edge orientation (Horizontal vs Vertical)
-    let lumaNW = getLuminance(fetchColor4(i_index + vec2<i32>(-1, -1), dims).rgb);
-    let lumaNE = getLuminance(fetchColor4(i_index + vec2<i32>(1, -1), dims).rgb);
-    let lumaSW = getLuminance(fetchColor4(i_index + vec2<i32>(-1, 1), dims).rgb);
-    let lumaSE = getLuminance(fetchColor4(i_index + vec2<i32>(1, 1), dims).rgb);
+    let lumaNW = getLuminance(textureLoad(_texture, vec2<i32>(xW, yN), 0).rgb);
+    let lumaNE = getLuminance(textureLoad(_texture, vec2<i32>(xE, yN), 0).rgb);
+    let lumaSW = getLuminance(textureLoad(_texture, vec2<i32>(xW, yS), 0).rgb);
+    let lumaSE = getLuminance(textureLoad(_texture, vec2<i32>(xE, yS), 0).rgb);
 
     let lumaNS = lumaN + lumaS;
     let lumaWE = lumaW + lumaE;
@@ -99,24 +118,20 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     let gradient1 = luma1 - lumaM;
     let gradient2 = luma2 - lumaM;
 
-    let is1Steepest = abs(gradient1) >= abs(gradient2);
-    let gradientScaled = 0.25 * max(abs(gradient1), abs(gradient2));
+    let absGradient1 = abs(gradient1);
+    let absGradient2 = abs(gradient2);
+    let is1Steepest = absGradient1 >= absGradient2;
+    let gradientScaled = FXAA_GRADIENT_SCALE * max(absGradient1, absGradient2);
 
-    var stepLength = select(invDims.x, invDims.y, isHorizontal);
-    var lumaLocalAverage = 0.0;
-
-    if (is1Steepest) {
-        stepLength = -stepLength;
-        lumaLocalAverage = 0.5 * (luma1 + lumaM);
-    } else {
-        lumaLocalAverage = 0.5 * (luma2 + lumaM);
-    }
+    let baseStepLength = select(invDims.x, invDims.y, isHorizontal);
+    let stepLength = select(baseStepLength, -baseStepLength, is1Steepest);
+    let lumaLocalAverage = FXAA_HALF_STEP * (select(luma2, luma1, is1Steepest) + lumaM);
 
     var currentUv = uvM;
     if (isHorizontal) {
-        currentUv.y += stepLength * 0.5;
+        currentUv.y += stepLength * FXAA_HALF_STEP;
     } else {
-        currentUv.x += stepLength * 0.5;
+        currentUv.x += stepLength * FXAA_HALF_STEP;
     }
 
     // 4. Search along both directions of the edge using 12-step FXAA 3.11 quality acceleration schedule
@@ -129,24 +144,24 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     var doneP = false;
     var doneN = false;
 
-    for (var i = 0; i < 12; i++) {
-        let stepSize = FXAA_QUALITY[i];
+    for (var i = 0u; i < FXAA_SEARCH_STEPS; i++) {
         if (!doneP) {
             lumaEndP = getLuminance(textureSampleLevel(_texture, _sampler, uvP, 0.0).rgb) - lumaLocalAverage;
             doneP = abs(lumaEndP) >= gradientScaled;
-            if (!doneP) {
-                uvP += uvOffset * stepSize;
-            }
         }
         if (!doneN) {
             lumaEndN = getLuminance(textureSampleLevel(_texture, _sampler, uvN, 0.0).rgb) - lumaLocalAverage;
             doneN = abs(lumaEndN) >= gradientScaled;
-            if (!doneN) {
-                uvN -= uvOffset * stepSize;
-            }
         }
         if (doneP && doneN) {
             break;
+        }
+        let stepOffset = uvOffset * FXAA_QUALITY[i];
+        if (!doneP) {
+            uvP += stepOffset;
+        }
+        if (!doneN) {
+            uvN -= stepOffset;
         }
     }
 
@@ -158,16 +173,17 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     let lumaEnd = select(lumaEndP, lumaEndN, isDirectionN);
     let isLumaCenterSmaller = lumaM < lumaLocalAverage;
     let correctVariation = (lumaEnd < 0.0) != isLumaCenterSmaller;
-    let edgeBlend = select(0.0, 0.5 - distMin / (distP + distN), correctVariation);
+    let edgeBlend = select(0.0, FXAA_HALF_STEP - distMin / (distP + distN), correctVariation);
 
     // 6. Compute 3x3 tent-weighted sub-pixel anti-aliasing weight and perform final bilinear sample
     let lumaL = (lumaNS + lumaWE) * 2.0 + lumaNWSW + lumaNESE;
-    let subpixFilter = saturate(abs(lumaL * (1.0 / 12.0) - lumaM) / range);
+    let subpixFilter = saturate(abs(lumaL * FXAA_SUBPIX_TENT_WEIGHT_INV - lumaM) / range);
     let subpixF = smoothstep(0.0, 1.0, subpixFilter);
     let subpixBlend = subpixF * subpixF * uniforms.subpix;
 
     let finalBlend = max(edgeBlend, subpixBlend);
-    let finalUv = uvM + select(vec2<f32>(stepLength * finalBlend, 0.0), vec2<f32>(0.0, stepLength * finalBlend), isHorizontal);
+    let finalOffset = stepLength * finalBlend;
+    let finalUv = uvM + select(vec2<f32>(finalOffset, 0.0), vec2<f32>(0.0, finalOffset), isHorizontal);
     let finalColor4 = textureSampleLevel(_texture, _sampler, finalUv, 0.0);
 
     return finalColor4;
@@ -176,24 +192,19 @@ fn applyFXAA(uvM: vec2<f32>, i_index: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
 @fragment
 fn main(@location(0) fragUV : vec2<f32>) -> @location(0) vec4<f32> {
     var viewColor: vec4<f32>;
-    if (uniforms.aaMode != 0u) {
+    if (uniforms.aaMode != AA_MODE_NONE) {
         let dims = textureDimensions(_texture);
-        let pixelCoord = clamp(vec2<i32>(fragUV * vec2<f32>(dims)), vec2<i32>(0), vec2<i32>(dims) - vec2<i32>(1));
-        if (uniforms.aaMode == 2u) {
-            viewColor = applyCAS(pixelCoord, dims);
+        let maxCoord = vec2<i32>(dims) - vec2<i32>(1);
+        let pixelCoord = clamp(vec2<i32>(fragUV * vec2<f32>(dims)), vec2<i32>(0), maxCoord);
+        if (uniforms.aaMode == AA_MODE_CAS) {
+            viewColor = applyCAS(pixelCoord, maxCoord);
         } else {
-            viewColor = applyFXAA(fragUV, pixelCoord, dims);
+            viewColor = applyFXAA(fragUV, pixelCoord, dims, maxCoord);
         }
     } else {
         viewColor = textureSampleLevel(_texture, _sampler, fragUV, 0.0);
     }
 
-    let backgroundColor = uniforms.backgroundColor;
-
-    let blendedColor = vec4<f32>(
-        viewColor.rgb + backgroundColor.rgb * (1.0 - viewColor.a),
-        viewColor.a + backgroundColor.a * (1.0 - viewColor.a)
-    );
-
-    return blendedColor;
+    let invViewAlpha = 1.0 - viewColor.a;
+    return viewColor + uniforms.backgroundColor * invViewAlpha;
 }
