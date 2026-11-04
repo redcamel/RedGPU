@@ -210,6 +210,7 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
         this.clear()
         this.#uniformBuffer?.destroy()
         this.#uniformBuffer = null
+        this.#videoMemorySize = 0
         this.#uniformsInfo = null
         this.#name = null
         this.#passLabel = null
@@ -247,6 +248,7 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
         if (this.#uniformsInfo) {
             const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength);
             this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, `${this.constructor.name}_UniformBuffer`);
+            this.#videoMemorySize = this.#uniformBuffer.size;
         }
 
         {
@@ -356,7 +358,6 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
 
         this.#prevWidth = width;
         this.#prevHeight = height;
-        this.#calcVideoMemory();
 
         return result;
     }
@@ -527,10 +528,6 @@ abstract class ASingleComputePassPostEffect extends RedGPUObject {
             this.#bindGroupCache3.set(outputTextureId, this.#outputBindGroup);
         }
 
-    }
-
-    #calcVideoMemory() {
-        this.#videoMemorySize = this.#uniformBuffer ? this.#uniformBuffer.size : 0;
     }
 
 }
