@@ -3,7 +3,6 @@
 let index = global_id.xy;
 var color: vec4<f32> = textureLoad(sourceTexture, index, 0);
 
-let originalColor = color;
 let luminance = getLuminance(color.rgb);
 
 // [KO] 2. 표준 채도(Saturation) 보정

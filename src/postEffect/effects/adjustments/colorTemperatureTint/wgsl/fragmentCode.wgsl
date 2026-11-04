@@ -37,10 +37,8 @@ if (temp >= 6600.0) {
     tempRGB.b = clamp(0.543206789 * log(t) - 1.19625408, 0.0, 1.0);
 }
 
-// [KO] 2. 색온도 중립화 및 틴트(Tint) 적용
-// [EN] 2. Color temperature neutralization and Tint application
-let tempAdjust: vec3<f32> = tempRGB;
-
+// [KO] 2. 틴트(Tint) 적용
+// [EN] 2. Tint application
 let tintValue = uniforms.tint * 0.01;
 var tintRGB: vec3<f32>;
 if (tintValue >= 0.0) {
@@ -56,7 +54,7 @@ if (tintValue >= 0.0) {
 
 // [KO] 3. 최종 보정치 합성 및 강도(Amount) 적용 (ROP Multiplicative Blend: dst.rgb * finalAdjust)
 // [EN] 3. Combine final correction and apply Amount (ROP Multiplicative Blend: dst.rgb * finalAdjust)
-let colorAdjust = tempAdjust * tintRGB;
+let colorAdjust = tempRGB * tintRGB;
 let finalAdjust = clamp(mix(vec3<f32>(1.0), colorAdjust, amount), vec3<f32>(0.0), vec3<f32>(1.0));
 
 if (all(finalAdjust >= vec3<f32>(0.9999))) {

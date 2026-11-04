@@ -1,6 +1,4 @@
-#redgpu_include math.getInterleavedGradientNoise
 #redgpu_include math.PI
-#redgpu_include math.PI2
 #redgpu_include math.reconstruct.getViewNormalFromGNormalBuffer
 
 const GTAO_HALF_PI: f32 = PI * 0.5;
