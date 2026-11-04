@@ -515,9 +515,9 @@ class View3D extends AView {
 
     #updateSystemUniform() {
         const {
-            inverseProjectionMatrix,
             noneJitterProjectionMatrix,
             projectionMatrix,
+            inverseProjectionMatrix,
             rawCamera,
         } = this;
         rawCamera.updateExposure(this);

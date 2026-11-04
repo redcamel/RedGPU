@@ -105,6 +105,6 @@ fn main(input : VertexOutput) -> FragmentOutput {
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-    output.motionVector = vec2<f32>(0.0, 0.0);
+    output.motionVector = vec2<f32>(100.0, 100.0);
     return output;
 }

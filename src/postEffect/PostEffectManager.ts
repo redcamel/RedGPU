@@ -516,9 +516,9 @@ class PostEffectManager extends RedGPUObject {
 
     #updateSystemUniforms() {
         const {
-            inverseProjectionMatrix,
-            projectionMatrix,
             noneJitterProjectionMatrix,
+            projectionMatrix,
+            inverseProjectionMatrix,
             rawCamera,
             redGPUContext,
             renderViewStateData,
