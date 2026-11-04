@@ -1,4 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import GPU_LOAD_OP from "../../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../../gpuConst/GPU_STORE_OP";
 import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
 import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
@@ -290,8 +292,8 @@ class PackedTexture extends RedGPUObject {
                         dimension: '2d',
                         label: `${packedTexture.label}_RENDER_TARGET`
                     }),
-                    loadOp: 'clear',
-                    storeOp: 'store',
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE,
                     clearValue: [0, 0, 0, 0],
                 },
             ],

@@ -2,6 +2,8 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import Mesh from "../../../display/mesh/Mesh";
+import GPU_LOAD_OP from "../../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../../gpuConst/GPU_STORE_OP";
 import vertexShaderCode from "./shader/lakeCapturePenetration.wgsl";
 import vertexShaderSkinnedCode from "./shader/lakeCapturePenetrationSkinned.wgsl";
 import {LakeActiveMeshEntry} from "./LakeInteractionManager";
@@ -252,14 +254,14 @@ class LakeCapturePass extends RedGPUObject {
             colorAttachments: [{
                 view: this.captureTextureView,
                 clearValue: {r: 0, g: 0, b: 0, a: 0},
-                loadOp: 'clear',
-                storeOp: 'store'
+                loadOp: GPU_LOAD_OP.CLEAR,
+                storeOp: GPU_STORE_OP.STORE
             }],
             depthStencilAttachment: {
                 view: this.#depthTextureView,
                 depthClearValue: 1.0,
-                depthLoadOp: 'clear',
-                depthStoreOp: 'discard'
+                depthLoadOp: GPU_LOAD_OP.CLEAR,
+                depthStoreOp: GPU_STORE_OP.DISCARD
             },
             label: 'LakeCapture_RenderPass'
         };

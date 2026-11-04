@@ -1,4 +1,6 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
+import GPU_LOAD_OP from "../../../../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../../../../gpuConst/GPU_STORE_OP";
 import brdfShaderCode from "./brdfShaderCode.wgsl";
 import RedGPUObject from "../../../../../base/RedGPUObject";
 
@@ -105,9 +107,9 @@ class BRDFGenerator extends RedGPUObject {
                 colorAttachments: [
                     {
                         view: this.#brdfLUTTexture.createView(),
-                        loadOp: 'clear',
+                        loadOp: GPU_LOAD_OP.CLEAR,
                         clearValue: {r: 0, g: 0, b: 0, a: 1},
-                        storeOp: 'store'
+                        storeOp: GPU_STORE_OP.STORE
                     }
                 ]
             },

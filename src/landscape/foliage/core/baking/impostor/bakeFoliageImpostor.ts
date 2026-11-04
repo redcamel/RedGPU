@@ -1,6 +1,8 @@
 import "../../../../core/shader/library/LandscapeShaderLibrary";
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
+import GPU_LOAD_OP from "../../../../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../../../../gpuConst/GPU_STORE_OP";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import type FoliageRenderUnit from "../../FoliageRenderUnit";
 import impostorBakeVertexWGSL from "./impostorBakeVertex.wgsl";
@@ -514,27 +516,27 @@ function bakeFoliageImpostor(
                 {
                     view: bakedGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 0, g: 0, b: 0, a: 0},
-                    loadOp: 'clear',
-                    storeOp: 'store',
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE,
                 },
                 {
                     view: bakedNormalGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 0.5, g: 1.0, b: 0.5, a: 0},
-                    loadOp: 'clear',
-                    storeOp: 'store',
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE,
                 },
                 {
                     view: bakedORMGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 1.0, g: 1.0, b: 0.0, a: 0.0},
-                    loadOp: 'clear',
-                    storeOp: 'store',
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE,
                 },
             ],
             depthStencilAttachment: {
                 view: depthGPUTexture.createView(),
                 depthClearValue: 1.0,
-                depthLoadOp: 'clear',
-                depthStoreOp: 'discard',
+                depthLoadOp: GPU_LOAD_OP.CLEAR,
+                depthStoreOp: GPU_STORE_OP.DISCARD,
             },
         });
 

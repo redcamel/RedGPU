@@ -1,5 +1,7 @@
 import ColorRGBA from "../color/ColorRGBA";
 import RedGPUContext from "../context/RedGPUContext";
+import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import AUVTransformBaseMaterial from "../material/core/AUVTransformBaseMaterial";
 import Sampler from "../resources/sampler/Sampler";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
@@ -629,8 +631,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                             const passEncoder = commandEncoder.beginRenderPass({
                                 colorAttachments: [{
                                     view: dstView,
-                                    loadOp: 'clear',
-                                    storeOp: 'store',
+                                    loadOp: GPU_LOAD_OP.CLEAR,
+                                    storeOp: GPU_STORE_OP.STORE,
                                     clearValue: {r: 0, g: 0, b: 0, a: 1}
                                 }]
                             });
