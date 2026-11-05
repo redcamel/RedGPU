@@ -9,18 +9,21 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         // Setup camera or controller
-        const controller = new RedGPU.Camera.FreeController(redGPUContext);
-
-        controller.moveSpeed = 20
-        controller.tilt = 15
-        controller.y = 1
-        controller.pan = 90
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.tilt = 15;
+        controller.pan = 90;
+        controller.centerY = 1;
+        controller.distance = 5;
+        controller.speedDistance = 0.5;
 
         // Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
         view.builtInEffectManager.useBloom = true;
+
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         // Load GLTF model
         const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf';

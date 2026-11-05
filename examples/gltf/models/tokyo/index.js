@@ -19,6 +19,9 @@ RedGPU.init(
         redGPUContext.addView(view);
         view.builtInEffectManager.useBloom = true;
 
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         // Load GLTF model
         const MODEL_URL = 'https://redcamel.github.io/RedGL-Examples-test/asset/glTF/tokyo/scene.gltf'
         loadGLTF(view, MODEL_URL);

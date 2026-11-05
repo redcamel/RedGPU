@@ -1606,14 +1606,6 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'Texcoord N Test',
-                        path: 'gltf/models/texcooredNTest',
-                        description: {
-                            ko: `다중 텍스처 좌표 채널의 동작을 확인하는 테스트 모델입니다.`,
-                            en: `Test model verifying the behavior of multiple texture coordinate channels.`
-                        },
-                    },
-                    {
                         name: 'A Beautiful Game',
                         path: 'gltf/models/aBeautifulGame',
                         extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
