@@ -88,9 +88,9 @@ interface FilmGrain {
  * filmGrain.applyPreset(RedGPU.PostEffect.BuiltIn.FilmGrain.MEDIUM);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/filmGrain/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/filmGrain/" style="width:100%; height:500px;"></iframe>
  *
- * @see [FilmGrain example](/RedGPU/examples/postEffect/filmGrain/)
+ * @see [FilmGrain example](/RedGPU/examples/postEffect/builtIn/lens/filmGrain/)
  * @category PostEffect
  */
 class FilmGrain extends ASingleComputePassPostEffect {

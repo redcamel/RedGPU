@@ -60,7 +60,7 @@ interface SSAO_AO {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
+ * @see [SSAO example](/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/)
  * @category PostEffect
  */
 class SSAO_AO extends ASingleComputePassPostEffect {

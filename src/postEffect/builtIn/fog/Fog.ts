@@ -70,9 +70,9 @@ interface Fog {
  * fog.fogColor.setColorByRGB(200, 210, 255);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/fog/fog/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/fog/fog/" style="width:100%; height:500px;"></iframe>
  *
- * @see [Fog example](/RedGPU/examples/postEffect/fog/fog/)
+ * @see [Fog example](/RedGPU/examples/postEffect/builtIn/fog/fog/)
  * @category PostEffect
  */
 class Fog extends ASingleRenderPassPostEffect {

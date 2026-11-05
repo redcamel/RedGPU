@@ -30,7 +30,7 @@ ssao.contrast = 1.5;    // 음영 대비 (기본값: 1.5)
 ssao.useBlur = true;    // 노이즈 제거용 가우시안 블러 사용 여부 (기본값: true)
 ```
 
-<iframe src="/RedGPU/examples/postEffect/ssao/" style="width:100%; height:500px;"></iframe>
+<iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/" style="width:100%; height:500px;"></iframe>
 
 ---
 
@@ -56,14 +56,14 @@ ssr.maxDistance = 15.0;        // 최대 반사 추적 거리 (기본값: 15.0)
 ssr.maxSteps = 64;             // 레이 마칭 스텝 수 (기본값: 64)
 ```
 
-<iframe src="/RedGPU/examples/postEffect/ssr/" style="width:100%; height:500px;"></iframe>
+<iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/" style="width:100%; height:500px;"></iframe>
 
 ---
 
 ## 관련 예제
 
-- [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/ssao/)
-- [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/ssr/)
+- [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/)
+- [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/)
 
 ---
 

@@ -31,7 +31,7 @@ ssao.contrast = 1.5;    // Shadow contrast (default: 1.5)
 ssao.useBlur = true;    // Whether to apply Gaussian blur for noise reduction (default: true)
 ```
 
-<iframe src="/RedGPU/examples/postEffect/ssao/" style="width:100%; height:500px;"></iframe>
+<iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/" style="width:100%; height:500px;"></iframe>
 
 ---
 
@@ -58,14 +58,14 @@ ssr.maxDistance = 15.0;        // Maximum reflection tracking distance (default:
 ssr.maxSteps = 64;             // Ray marching step count (default: 64)
 ```
 
-<iframe src="/RedGPU/examples/postEffect/ssr/" style="width:100%; height:500px;"></iframe>
+<iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/" style="width:100%; height:500px;"></iframe>
 
 ---
 
 ## Related Examples
 
-- [SSAO (Screen Space Ambient Occlusion)](/RedGPU/examples/postEffect/ssao/)
-- [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/ssr/)
+- [SSAO (Screen Space Ambient Occlusion)](/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/)
+- [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/)
 
 ---
 

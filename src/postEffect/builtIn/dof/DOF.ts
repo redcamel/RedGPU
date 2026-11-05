@@ -35,10 +35,10 @@ import DOFTileMaxCoC from "./dofTileMaxCoC/DOFTileMaxCoC";
  * view.builtInEffectManager.dof.setCinematic();
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/dof/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/dof/" style="width:100%; height:500px;"></iframe>
  *
- * @see [DOF example](/RedGPU/examples/postEffect/lens/dof/)
- * @see [DOF Auto Focus example](/RedGPU/examples/postEffect/lens/dofAutoFocus/)
+ * @see [DOF example](/RedGPU/examples/postEffect/builtIn/lens/dof/)
+ * @see [DOF Auto Focus example](/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/)
  * @category PostEffect
  */
 class DOF extends AMultiPassPostEffect {

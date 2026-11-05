@@ -24,10 +24,10 @@ import LensFlareGenerate from "./lensFlareGenerate/LensFlareGenerate";
  * lensFlare.intensity = 1.2;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/lensFlareSkyAtmosphere/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyAtmosphere/" style="width:100%; height:500px;"></iframe>
  *
- * @see [LensFlare (SkyAtmosphere) example](/RedGPU/examples/postEffect/lens/lensFlareSkyAtmosphere/)
- * @see [LensFlare (SkyBox) example](/RedGPU/examples/postEffect/lens/lensFlareSkyBox/)
+ * @see [LensFlare (SkyAtmosphere) example](/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyAtmosphere/)
+ * @see [LensFlare (SkyBox) example](/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyBox/)
  * @category PostEffect
  */
 class LensFlare extends AMultiPassPostEffect {

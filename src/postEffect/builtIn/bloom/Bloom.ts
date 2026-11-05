@@ -25,9 +25,9 @@ import BloomUpsample from "./bloomUpsample/BloomUpsample";
  * bloom.intensity = 0.8;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/bloom/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/bloom/" style="width:100%; height:500px;"></iframe>
  *
- * @see [Bloom example](/RedGPU/examples/postEffect/bloom/)
+ * @see [Bloom example](/RedGPU/examples/postEffect/builtIn/lens/bloom/)
  * @category Visual Effects
  */
 class Bloom extends AMultiPassPostEffect {

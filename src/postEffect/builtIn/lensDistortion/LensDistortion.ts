@@ -34,9 +34,9 @@ interface LensDistortion {
  * view.builtInEffectManager.lensDistortion.distortion = 0.2;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/lensDistortion/" style="width:100%; height:500px;"></iframe>
  *
- * @see [LensDistortion example](/RedGPU/examples/postEffect/lens/lensDistortion/)
+ * @see [LensDistortion example](/RedGPU/examples/postEffect/builtIn/lens/lensDistortion/)
  * @category PostEffect
  */
 class LensDistortion extends ASingleComputePassPostEffect {

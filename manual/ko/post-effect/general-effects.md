@@ -71,9 +71,9 @@ view.postEffectManager.removeAllEffect();
 
 - [명도·대비 (Brightness & Contrast)](/RedGPU/examples/postEffect/adjustments/brightnessContrast/)
 - [가우시안 블러 (Gaussian Blur)](/RedGPU/examples/postEffect/blur/gaussianBlur/)
-- [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/lens/dof/)
-- [색수차 (Chromatic Aberration)](/RedGPU/examples/postEffect/lens/chromaticAberration/)
-- [고도 안개 (Height Fog)](/RedGPU/examples/postEffect/fog/heightFog/)
+- [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/builtIn/lens/dof/)
+- [색수차 (Chromatic Aberration)](/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/)
+- [고도 안개 (Height Fog)](/RedGPU/examples/postEffect/builtIn/fog/heightFog/)
 
 ---
 

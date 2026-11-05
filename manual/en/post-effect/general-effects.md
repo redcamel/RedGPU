@@ -73,9 +73,9 @@ All general effects are located under the `RedGPU.PostEffect` namespace.
 
 - [Brightness & Contrast](/RedGPU/examples/postEffect/adjustments/brightnessContrast/)
 - [Gaussian Blur](/RedGPU/examples/postEffect/blur/gaussianBlur/)
-- [Depth of Field (DoF)](/RedGPU/examples/postEffect/lens/dof/)
-- [Chromatic Aberration](/RedGPU/examples/postEffect/lens/chromaticAberration/)
-- [Height Fog](/RedGPU/examples/postEffect/fog/heightFog/)
+- [Depth of Field (DoF)](/RedGPU/examples/postEffect/builtIn/lens/dof/)
+- [Chromatic Aberration](/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/)
+- [Height Fog](/RedGPU/examples/postEffect/builtIn/fog/heightFog/)
 
 ---
 

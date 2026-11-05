@@ -42,9 +42,9 @@ interface ChromaticAberration {
  * chromaticAberration.startOffset = 0.2;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/chromaticAberration/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/" style="width:100%; height:500px;"></iframe>
  *
- * @see [ChromaticAberration example](/RedGPU/examples/postEffect/lens/chromaticAberration/)
+ * @see [ChromaticAberration example](/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/)
  * @category PostEffect
  */
 class ChromaticAberration extends ASingleComputePassPostEffect {

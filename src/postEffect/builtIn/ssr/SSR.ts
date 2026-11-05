@@ -65,9 +65,9 @@ interface SSR {
  * ssr.reflectionIntensity = 0.8;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/ssr/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/" style="width:100%; height:500px;"></iframe>
  *
- * @see [SSR example](/RedGPU/examples/postEffect/ssr/)
+ * @see [SSR example](/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/)
  * @category PostEffect
  */
 class SSR extends ASingleComputePassPostEffect {

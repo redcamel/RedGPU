@@ -89,12 +89,12 @@ const postEffectGraph = `
 
 ## 관련 예제
 
-- [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/ssao/)
-- [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/ssr/)
-- [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/lens/dof/)
-- [블룸 (Bloom)](/RedGPU/examples/postEffect/bloom/)
-- [렌즈 플레어 (SkyAtmosphere)](/RedGPU/examples/postEffect/lens/lensFlareSkyAtmosphere/)
-- [렌즈 플레어 (SkyBox)](/RedGPU/examples/postEffect/lens/lensFlareSkyBox/)
+- [SSAO (화면 공간 주변광 차폐)](/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/)
+- [SSR (화면 공간 반사)](/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/)
+- [피사계 심도 (Depth of Field)](/RedGPU/examples/postEffect/builtIn/lens/dof/)
+- [블룸 (Bloom)](/RedGPU/examples/postEffect/builtIn/lens/bloom/)
+- [렌즈 플레어 (SkyAtmosphere)](/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyAtmosphere/)
+- [렌즈 플레어 (SkyBox)](/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyBox/)
 
 ---
 

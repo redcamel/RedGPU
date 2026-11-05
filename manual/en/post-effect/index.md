@@ -94,12 +94,12 @@ texture pooling (`PostEffectTexturePool`) are centrally managed by `PostEffectMa
 
 ## Related Examples
 
-- [SSAO (Screen Space Ambient Occlusion)](/RedGPU/examples/postEffect/ssao/)
-- [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/ssr/)
-- [Depth of Field (DoF)](/RedGPU/examples/postEffect/lens/dof/)
-- [Bloom](/RedGPU/examples/postEffect/bloom/)
-- [Lens Flare (SkyAtmosphere)](/RedGPU/examples/postEffect/lens/lensFlareSkyAtmosphere/)
-- [Lens Flare (SkyBox)](/RedGPU/examples/postEffect/lens/lensFlareSkyBox/)
+- [SSAO (Screen Space Ambient Occlusion)](/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/)
+- [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/)
+- [Depth of Field (DoF)](/RedGPU/examples/postEffect/builtIn/lens/dof/)
+- [Bloom](/RedGPU/examples/postEffect/builtIn/lens/bloom/)
+- [Lens Flare (SkyAtmosphere)](/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyAtmosphere/)
+- [Lens Flare (SkyBox)](/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyBox/)
 
 ---
 

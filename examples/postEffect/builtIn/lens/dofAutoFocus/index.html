@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="../../../../assets/css/example.css" rel="stylesheet">
+    <style>
+        .af-viewfinder {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            width: 72px;
+            height: 72px;
+            transform: translate(-50%, -50%);
+            border-radius: 6px;
+            pointer-events: none;
+            z-index: 10;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .af-viewfinder::before,
+        .af-viewfinder::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: background-color 0.2s ease;
+        }
+
+        .af-viewfinder::before {
+            width: 14px;
+            height: 1.5px;
+        }
+
+        .af-viewfinder::after {
+            width: 1.5px;
+            height: 14px;
+        }
+
+        .af-viewfinder.is-af {
+            border: 1.5px solid rgba(0, 225, 65, 0.9);
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 225, 65, 0.18);
+        }
+
+        .af-viewfinder.is-af::before,
+        .af-viewfinder.is-af::after {
+            background: rgba(0, 225, 65, 0.95);
+        }
+
+        .af-viewfinder.is-mf {
+            border: 1.5px dashed rgba(255, 145, 0, 0.9);
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
+        }
+
+        .af-viewfinder.is-mf::before,
+        .af-viewfinder.is-mf::after {
+            background: rgba(255, 145, 0, 0.95);
+        }
+
+        .af-zone-dots {
+            position: absolute;
+            inset: 14px;
+            border: 1px dotted rgba(255, 255, 255, 0.28);
+            border-radius: 3px;
+        }
+
+        .af-viewfinder-label {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 3px 9px;
+            font-family: monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            background: rgba(10, 12, 16, 0.88);
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .af-viewfinder.is-af .af-viewfinder-label {
+            color: #00e141;
+            border: 1px solid rgba(0, 225, 65, 0.55);
+        }
+
+        .af-viewfinder.is-mf .af-viewfinder-label {
+            color: #ff9100;
+            border: 1px solid rgba(255, 145, 0, 0.55);
+        }
+    </style>
+    <script src="index.js" type="module"></script>
+</head>
+<body>
+</body>
+</html>
