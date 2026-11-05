@@ -26,6 +26,10 @@ RedGPU.init(
         view.builtInEffectManager.useBloom = true;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
+        directionalLight.lux = 30000;
+        directionalLight.elevation = 3.4;
+        directionalLight.azimuth = 147.5;
+        directionalLight.color.setColorByHEX('#ffa973');
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const ibl = new RedGPU.Resource.IBL(view.redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');

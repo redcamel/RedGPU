@@ -34,7 +34,16 @@ const RenderingSettingsGroup: React.FC = () => {
                     setToneMapping(lastView.toneMappingManager.mode);
                 }
                 if (lastView.builtInEffectManager) {
-                    setBloom(lastView.builtInEffectManager.useBloom ? 'NATURAL' : 'NONE');
+                    if (!lastView.builtInEffectManager.useBloom) {
+                        setBloom('NONE');
+                    } else {
+                        const bloomEffect = lastView.builtInEffectManager.bloom;
+                        if (bloomEffect?.threshold === 0.8) setBloom('CINEMATIC');
+                        else if (bloomEffect?.intensity === 1.6) setBloom('NEON_GLOW');
+                        else if (bloomEffect?.threshold === 0.6) setBloom('DREAMY');
+                        else if (bloomEffect?.threshold === 1.4) setBloom('SUBTLE');
+                        else setBloom('NATURAL');
+                    }
                 }
             }
         }
