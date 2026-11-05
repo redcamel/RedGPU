@@ -26,6 +26,9 @@ RedGPU.init(
         redGPUContext.addView(view);
         view.builtInEffectManager.useBloom = true;
 
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         // Load GLTF model
         const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareAlphaCoverage/glTF-Binary/CompareAlphaCoverage.glb';
         loadGLTF(view, MODEL_URL);
@@ -63,7 +66,6 @@ const loadGLTF = (view, url) => {
             const mesh = result.resultMesh
             scene.addChild(mesh)
             RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
-
         },
         RedGPUExampleHelper.loadingProgressInfoHandler
     );

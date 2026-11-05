@@ -63,7 +63,6 @@ const loadGLTF = (view, url) => {
             const mesh = result.resultMesh
             scene.addChild(mesh)
             RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
-
         },
         RedGPUExampleHelper.loadingProgressInfoHandler
     );
