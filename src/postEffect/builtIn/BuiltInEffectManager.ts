@@ -118,7 +118,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useSSAO(value: boolean) {
         this.#useSSAO = value;
-        this.#checkSSAO();
+        if (value && !this.#ssao) {
+            this.#ssao = new SSAO(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -151,7 +153,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useSSR(value: boolean) {
         this.#useSSR = value;
-        this.#checkSSR();
+        if (value && !this.#ssr) {
+            this.#ssr = new SSR(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -184,7 +188,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useFog(value: boolean) {
         this.#useFog = value;
-        this.#checkFog();
+        if (value && !this.#fog) {
+            this.#fog = new Fog(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -217,7 +223,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useHeightFog(value: boolean) {
         this.#useHeightFog = value;
-        this.#checkHeightFog();
+        if (value && !this.#heightFog) {
+            this.#heightFog = new HeightFog(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -250,7 +258,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useDOF(value: boolean) {
         this.#useDOF = value;
-        this.#checkDOF();
+        if (value && !this.#dof) {
+            this.#dof = new DOF(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -283,7 +293,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useBloom(value: boolean) {
         this.#useBloom = value;
-        this.#checkBloom();
+        if (value && !this.#bloom) {
+            this.#bloom = new Bloom(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -316,7 +328,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useLensFlare(value: boolean) {
         this.#useLensFlare = value;
-        this.#checkLensFlare();
+        if (value && !this.#lensFlare) {
+            this.#lensFlare = new LensFlare(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -349,7 +363,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useChromaticAberration(value: boolean) {
         this.#useChromaticAberration = value;
-        this.#checkChromaticAberration();
+        if (value && !this.#chromaticAberration) {
+            this.#chromaticAberration = new ChromaticAberration(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -382,7 +398,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useLensDistortion(value: boolean) {
         this.#useLensDistortion = value;
-        this.#checkLensDistortion();
+        if (value && !this.#lensDistortion) {
+            this.#lensDistortion = new LensDistortion(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -415,7 +433,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useVignetting(value: boolean) {
         this.#useVignetting = value;
-        this.#checkVignetting();
+        if (value && !this.#vignetting) {
+            this.#vignetting = new Vignetting(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -448,7 +468,9 @@ class BuiltInEffectManager extends RedGPUObject {
 
     set useFilmGrain(value: boolean) {
         this.#useFilmGrain = value;
-        this.#checkFilmGrain();
+        if (value && !this.#filmGrain) {
+            this.#filmGrain = new FilmGrain(this.#view.redGPUContext);
+        }
     }
 
     /**
@@ -555,72 +577,6 @@ class BuiltInEffectManager extends RedGPUObject {
             this.#autoExposure = null;
         }
         keepLog(`🧹 ${this.#view.name} BuiltInEffectManager destroy 완료`);
-    }
-
-    #checkSSAO() {
-        if (!this.#ssao && this.#useSSAO) {
-            this.#ssao = new SSAO(this.#view.redGPUContext);
-        }
-    }
-
-    #checkSSR() {
-        if (!this.#ssr && this.#useSSR) {
-            this.#ssr = new SSR(this.#view.redGPUContext);
-        }
-    }
-
-    #checkFog() {
-        if (!this.#fog && this.#useFog) {
-            this.#fog = new Fog(this.#view.redGPUContext);
-        }
-    }
-
-    #checkHeightFog() {
-        if (!this.#heightFog && this.#useHeightFog) {
-            this.#heightFog = new HeightFog(this.#view.redGPUContext);
-        }
-    }
-
-    #checkDOF() {
-        if (!this.#dof && this.#useDOF) {
-            this.#dof = new DOF(this.#view.redGPUContext);
-        }
-    }
-
-    #checkBloom() {
-        if (!this.#bloom && this.#useBloom) {
-            this.#bloom = new Bloom(this.#view.redGPUContext);
-        }
-    }
-
-    #checkLensFlare() {
-        if (!this.#lensFlare && this.#useLensFlare) {
-            this.#lensFlare = new LensFlare(this.#view.redGPUContext);
-        }
-    }
-
-    #checkChromaticAberration() {
-        if (!this.#chromaticAberration && this.#useChromaticAberration) {
-            this.#chromaticAberration = new ChromaticAberration(this.#view.redGPUContext);
-        }
-    }
-
-    #checkLensDistortion() {
-        if (!this.#lensDistortion && this.#useLensDistortion) {
-            this.#lensDistortion = new LensDistortion(this.#view.redGPUContext);
-        }
-    }
-
-    #checkVignetting() {
-        if (!this.#vignetting && this.#useVignetting) {
-            this.#vignetting = new Vignetting(this.#view.redGPUContext);
-        }
-    }
-
-    #checkFilmGrain() {
-        if (!this.#filmGrain && this.#useFilmGrain) {
-            this.#filmGrain = new FilmGrain(this.#view.redGPUContext);
-        }
     }
 
     #calcVideoMemory() {
