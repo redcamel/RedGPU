@@ -9,7 +9,7 @@ struct Uniforms {
     chromaticAberration: f32,
 };
 
-const PI: f32 = 3.141592653589793;
+#redgpu_include math.PI
 const GOLDEN_CONJUGATE: f32 = 0.618033988749895;
 const LUMA_REC709: vec3<f32> = vec3<f32>(0.2126, 0.7152, 0.0722);
 const WAVELENGTHS_UM: vec3<f32> = vec3<f32>(0.650, 0.530, 0.450);

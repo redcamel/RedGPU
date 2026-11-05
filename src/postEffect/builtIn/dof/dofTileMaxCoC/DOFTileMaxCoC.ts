@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
 import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
+import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 
 /**
@@ -20,7 +21,7 @@ class DOFTileMaxCoC extends ASingleComputePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_TILE_MAX_COC',
-            createBasicComputePassPostEffectCode(this, computeCode, '')
+            createBasicComputePassPostEffectCode(this, computeCode, dofOpticsCommon)
         );
     }
 }

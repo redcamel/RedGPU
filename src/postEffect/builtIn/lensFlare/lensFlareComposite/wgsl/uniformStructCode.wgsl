@@ -1,3 +1,6 @@
+#redgpu_include math.PI
+#redgpu_include math.PI2
+
 struct Uniforms {
     sunDirection: vec3<f32>,
     sunActive: u32,
@@ -14,10 +17,9 @@ struct Uniforms {
     anamorphicIntensity: f32,
     haloRadius: f32,
     haloIntensity: f32,
+    pad0: f32,
 };
 
-const PI: f32 = 3.141592653589793;
-const PI2: f32 = 6.283185307179586;
 const GOLDEN_CONJUGATE: f32 = 0.618033988749895;
 const SOLAR_ANGULAR_RADIUS: f32 = 0.00465; // Physical solar angular radius in radians (~0.266 deg)
 const WAVELENGTHS_UM: vec3<f32> = vec3<f32>(0.650, 0.530, 0.450);

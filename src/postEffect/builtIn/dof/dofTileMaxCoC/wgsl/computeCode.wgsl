@@ -1,5 +1,4 @@
 const SEARCH_STEP: i32 = 2;
-const DOF_MAX_COC_FULL_PX: f32 = 36.0;
 
 let tileIndex = vec2<i32>(global_id.xy);
 let tileDims = vec2<i32>(postEffectOutputDimensions);
@@ -10,9 +9,8 @@ let tileSpan = max(vec2<i32>(ceil(vec2<f32>(halfDims) / max(vec2<f32>(tileDims),
 let tileOrigin = tileIndex * tileSpan;
 let tileMaxLocal = vec2<f32>(max(tileSpan - vec2<i32>(1), vec2<i32>(0)));
 
-let dpr = clamp(systemUniforms.devicePixelRatio, 1.0, 2.0);
 let tileInterpMargin = 0.5 * f32(max(tileSpan.x, tileSpan.y));
-let maxHalfCoC = 0.5 * DOF_MAX_COC_FULL_PX * dpr + tileInterpMargin;
+let maxHalfCoC = computeAutoMaxHalfCoC(systemUniforms.devicePixelRatio) + tileInterpMargin;
 let maxHalfCoCSq = maxHalfCoC * maxHalfCoC;
 let searchRadius = i32(ceil(maxHalfCoC / f32(SEARCH_STEP))) * SEARCH_STEP;
 

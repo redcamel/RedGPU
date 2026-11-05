@@ -13,6 +13,8 @@ struct Uniforms {
     reflectionIntensity: f32,
     fadeDistance: f32,
     edgeFade: f32,
+    pad0: f32,
+    pad1: f32,
 }
 
 /**
