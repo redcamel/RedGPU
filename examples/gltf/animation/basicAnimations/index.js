@@ -1,5 +1,6 @@
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../dist/index.js?t=1792986333865";
+
 /**
  * [KO] Basic Animations 예제
  * [EN] Basic Animations example
@@ -20,6 +21,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         const glbUrls = [
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnimatedCube/glTF/AnimatedCube.gltf',

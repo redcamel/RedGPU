@@ -23,6 +23,7 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         const ibl = new RedGPU.Resource.IBL(view.redGPUContext, '../../../../assets/hdr/Cannon_Exterior.hdr',25000);
         const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);

@@ -1622,6 +1622,15 @@ export const ExampleList: ExampleListType = [
                             en: `A chess set demonstrating transmission and volume.`
                         },
                     },
+                    {
+                        name: 'USD Shader Ball',
+                        path: 'gltf/models/usdShaderBallForGltf',
+                        extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
+                        description: {
+                            ko: `투과(Transmission)와 볼륨(Volume) 등 고급 PBR 재질 속성을 검증하기 위한 표준 USD 셰이더 볼 모델입니다.`,
+                            en: `Standard USD Shader Ball model designed to showcase and test advanced PBR material properties including transmission and volume.`
+                        },
+                    },
                 ]
             },
             {

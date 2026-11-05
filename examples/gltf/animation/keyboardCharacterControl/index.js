@@ -52,6 +52,7 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         // ── GLTF 로드 ────────────────────────
         loadCharacter(redGPUContext, scene, view);

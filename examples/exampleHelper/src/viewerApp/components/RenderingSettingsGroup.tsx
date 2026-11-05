@@ -34,7 +34,7 @@ const RenderingSettingsGroup: React.FC = () => {
                     setToneMapping(lastView.toneMappingManager.mode);
                 }
                 if (lastView.builtInEffectManager) {
-                    setBloom(lastView.builtInEffectManager.useBloom ? 'CINEMATIC' : 'NONE');
+                    setBloom(lastView.builtInEffectManager.useBloom ? 'NATURAL' : 'NONE');
                 }
             }
         }

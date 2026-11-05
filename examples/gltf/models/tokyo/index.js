@@ -17,6 +17,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         // Load GLTF model
         const MODEL_URL = 'https://redcamel.github.io/RedGL-Examples-test/asset/glTF/tokyo/scene.gltf'

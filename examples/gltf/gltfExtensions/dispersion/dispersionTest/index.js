@@ -1,5 +1,6 @@
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
+
 /**
  * [KO] Dispersion Test 예제
  * [EN] Dispersion Test example
@@ -23,6 +24,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         // Load GLTF model
         const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DispersionTest/glTF-Binary/DispersionTest.glb';
