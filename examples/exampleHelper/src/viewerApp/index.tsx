@@ -28,6 +28,14 @@ class RedGPUExampleHelper {
         useExampleHelperStore.getState().updateLoadingState(info);
     };
 
+    static setShowCompareLabel(value: boolean): void {
+        useExampleHelperStore.getState().setShowCompareLabel(value);
+    }
+
+    public setShowCompareLabel(value: boolean): void {
+        useExampleHelperStore.getState().setShowCompareLabel(value);
+    }
+
     /**
      * [KO] 메쉬가 화면 중앙에 꽉 차도록 카메라 거리를 자동으로 조절합니다.
      * [EN] Automatically adjusts the camera distance so that the mesh fills the screen center.

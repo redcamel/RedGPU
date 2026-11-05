@@ -64,6 +64,7 @@ export interface ExampleHelperState {
     language: 'ko' | 'en';
     showSourceModal: boolean;
     showSettingsPanel: boolean;
+    showCompareLabel: boolean;
     topBarRightActions: TopBarAction[];
     guiConfig: GuiConfig | null;
     isNarrow: boolean;
@@ -74,6 +75,7 @@ export interface ExampleHelperState {
     setLanguage: (value: 'ko' | 'en') => void;
     setShowSourceModal: (value: boolean) => void;
     setShowSettingsPanel: (value: boolean) => void;
+    setShowCompareLabel: (value: boolean) => void;
     addTopBarRightAction: (action: TopBarAction) => void;
     setGuiConfig: (config: GuiConfig | null) => void;
     setIsNarrow: (value: boolean) => void;
@@ -91,6 +93,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     language: (typeof navigator !== 'undefined' && navigator.language.startsWith('ko')) ? 'ko' : 'en',
     showSourceModal: false,
     showSettingsPanel: false,
+    showCompareLabel: true,
     topBarRightActions: [],
     guiConfig: null,
     isNarrow: typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
@@ -101,12 +104,13 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     setLanguage: (value: 'ko' | 'en') => set({language: value}),
     setShowSourceModal: (value: boolean) => set({showSourceModal: value}),
     setShowSettingsPanel: (value: boolean) => set({showSettingsPanel: value}),
+    setShowCompareLabel: (value: boolean) => set({showCompareLabel: value}),
     addTopBarRightAction: (action) => set((state) => {
         const filtered = state.topBarRightActions.filter(a => a.id !== action.id);
         return {topBarRightActions: [...filtered, action]};
     }),
     setGuiConfig: (config: GuiConfig | null) => {
-        set({guiConfig: config, showSettingsPanel: hasGuiPanels(config)});
+        set({guiConfig: config, showSettingsPanel: hasGuiPanels(config), showCompareLabel: true});
     },
     setIsNarrow: (value: boolean) => set({isNarrow: value}),
     updateLoadingState: (info: LoadingInfo) => set((state) => {

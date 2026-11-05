@@ -28,6 +28,18 @@ const GuiPanel: React.FC = () => {
             pane.registerPlugin(EssentialsPlugin);
             setGuiInstance(pane);
 
+            // [KO] compareLabel 설정 시 최상단에 단독 뷰 보기 토글 자동 생성
+            if (guiConfig.compareLabel) {
+                const compareConfig = {
+                    postEffectViewOnly: !useExampleHelperStore.getState().showCompareLabel
+                };
+                (pane as any).addBinding(compareConfig, 'postEffectViewOnly', {
+                    label: `${guiConfig.compareLabel.title || 'PostEffect'} View Only`
+                }).on('change', (v: any) => {
+                    useExampleHelperStore.getState().setShowCompareLabel(!v.value);
+                });
+            }
+
             // [KO] 외부에서 정의한 커스텀 GUI 추가
             if (guiConfig.gui) {
                 try {

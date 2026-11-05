@@ -40,7 +40,7 @@ RedGPU.init(
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(directionalLight);
+        // scene.lightManager.addDirectionalLight(directionalLight);
 
         new RedGPU.GLTFLoader(
             redGPUContext,

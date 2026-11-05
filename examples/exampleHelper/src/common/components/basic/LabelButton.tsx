@@ -28,11 +28,18 @@ const LabelButton: React.FC<LabelButtonProps> = ({label, icon, isActive = true, 
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {icon && <span style={{display: 'flex', alignItems: 'center', opacity: isActive ? 1 : 0.4}}>{icon}</span>}
+            {icon && <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isActive ? 1 : 0.4
+            }}>{icon}</span>}
             <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
                 opacity: isActive ? 1 : 0.4,
                 fontSize: '13px',
-                lineHeight: '1.1',
+                lineHeight: 1,
                 color: '#fdb48d',
                 fontWeight: 'bold',
                 transition: 'opacity 0.2s'

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
-import {HomeIcon} from '../../common/components/Icons';
+import {CodeIcon, HomeIcon} from '../../common/components/Icons';
 import IconButton from '../../common/components/basic/IconButton';
 import IconToggleButton from '../../common/components/basic/IconToggleButton';
 import LabelButton from '../../common/components/basic/LabelButton';
@@ -75,6 +75,7 @@ const ExampleHeader = () => {
                             </div>
                             <div style={rightSectionStyle}>
                                 <LabelButton
+                                    icon={<CodeIcon color="#fdb48d" size={18}/>}
                                     label="CODE"
                                     onClick={() => setShowSourceModal(!showSourceModal)}
                                 />

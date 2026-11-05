@@ -1,5 +1,6 @@
-import React, {useCallback, useEffect, useLayoutEffect, useState} from 'react';
+import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useExampleHelperStore} from '../../store';
+import View3D from "@redgpu/src/display/view/View3D";
 
 /**
  * [KO] 뷰 비교를 위한 레이블을 표시하는 컴포넌트입니다.
@@ -8,7 +9,55 @@ import {useExampleHelperStore} from '../../store';
 const GuiCompareLabelHelper: React.FC = () => {
     const guiConfig = useExampleHelperStore((state) => state.guiConfig);
     const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
+    const showCompareLabel = useExampleHelperStore((state) => state.showCompareLabel);
     const [rect, setRect] = useState<DOMRect | null>(null);
+    const compareViewsRef = useRef<{ viewNormal: View3D; viewEffect: View3D } | null>(null);
+
+    useEffect(() => {
+        if (redGPUContext && guiConfig?.compareLabel && redGPUContext.viewList.length >= 2) {
+            compareViewsRef.current = {
+                viewNormal: redGPUContext.viewList[0],
+                viewEffect: redGPUContext.viewList[1]
+            };
+        } else if (!redGPUContext || !guiConfig?.compareLabel) {
+            compareViewsRef.current = null;
+        }
+    }, [redGPUContext, guiConfig?.compareLabel]);
+
+    const syncCompareViewLayout = useCallback(() => {
+        if (!redGPUContext || !guiConfig?.compareLabel || !compareViewsRef.current) return;
+        const {viewNormal, viewEffect} = compareViewsRef.current;
+
+        if (!showCompareLabel) {
+            if (redGPUContext.viewList.includes(viewNormal)) {
+                redGPUContext.removeView(viewNormal);
+            }
+            viewEffect.setSize('100%', '100%');
+            viewEffect.setPosition(0, 0);
+        } else {
+            if (!redGPUContext.viewList.includes(viewNormal)) {
+                redGPUContext.removeView(viewEffect);
+                redGPUContext.addView(viewNormal);
+                redGPUContext.addView(viewEffect);
+            }
+            const isPortrait = window.innerWidth < window.innerHeight;
+            if (isPortrait) {
+                viewEffect.setSize('100%', '50%');
+                viewEffect.setPosition(0, 0);
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, '50%');
+            } else {
+                viewNormal.setSize('50%', '100%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('50%', '100%');
+                viewEffect.setPosition('50%', 0);
+            }
+        }
+    }, [redGPUContext, guiConfig?.compareLabel, showCompareLabel]);
+
+    useEffect(() => {
+        syncCompareViewLayout();
+    }, [syncCompareViewLayout]);
 
     const updateContainerStyle = useCallback(() => {
         const container = guiConfig?.compareLabel?.targetContainer;
@@ -27,7 +76,8 @@ const GuiCompareLabelHelper: React.FC = () => {
         } else {
             setRect(null);
         }
-    }, [guiConfig?.compareLabel?.targetContainer]);
+        syncCompareViewLayout();
+    }, [guiConfig?.compareLabel?.targetContainer, syncCompareViewLayout]);
 
     useLayoutEffect(() => {
         updateContainerStyle();
@@ -58,7 +108,7 @@ const GuiCompareLabelHelper: React.FC = () => {
         };
     }, [updateContainerStyle, guiConfig?.compareLabel?.targetContainer]);
 
-    if (!guiConfig?.compareLabel || !redGPUContext) return null;
+    if (!guiConfig?.compareLabel || !redGPUContext || !showCompareLabel) return null;
 
     const {title, normalTitle = 'Normal'} = guiConfig.compareLabel;
 
