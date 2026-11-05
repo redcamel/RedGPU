@@ -1,5 +1,8 @@
 struct Uniforms {
     useMultiBounce: u32,
+    pad0: u32,
+    pad1: u32,
+    pad2: u32,
 }
 
 /**
