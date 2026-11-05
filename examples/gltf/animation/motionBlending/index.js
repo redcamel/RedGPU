@@ -12,9 +12,9 @@ RedGPU.init(
     (redGPUContext) => {
         // 카메라 및 뷰 세팅
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.tilt = -15;
-        controller.distance = 4;
-        controller.panY = 1.0;
+        controller.tilt = 5;
+        controller.pan = 110;
+        controller.distance = 3;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -55,8 +55,10 @@ const loadGLTF = (view, url) => {
         url,
         (loader) => {
             const mesh = loader.resultMesh;
+            mesh.rotationY = view.camera.pan + 180 + 45;
             scene.addChild(mesh);
             RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view);
+            view.camera.distance = 2.3;
 
             // 모델에 담긴 애니메이션 클립 목록 조회
             const clips = loader.parsingResult.animations;

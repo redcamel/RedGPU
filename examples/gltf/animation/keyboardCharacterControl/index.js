@@ -45,8 +45,9 @@ RedGPU.init(
 
         // ── OrbitController ─────────────────
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 5;
-        controller.tilt = -15;
+        controller.tilt = 5;
+        controller.pan = 110;
+        controller.distance = 4;
 
         // ── View ─────────────────────────────
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -89,12 +90,14 @@ function loadCharacter(redGPUContext, scene, view) {
         (loader) => {
             console.log(loader)
             const mesh = loader.resultMesh;
+            mesh.rotationY = view.camera.pan + 180 + 45;
 
             // character(빈 Mesh) 의 자식으로 추가
             scene.addChild(mesh);
             view.camera.centerX = mesh.x;
-            view.camera.centerY = mesh.y;
+            view.camera.centerY = mesh.y + 1.0;
             view.camera.centerZ = mesh.z;
+            view.camera.distance = 4;
 
             // 캐릭터 컨트롤러 생성
             characterController = new RedGPU.Charactor.SimpleCharacterController(
@@ -219,19 +222,6 @@ function renderTestPane(redGPUContext, view) {
                     }
                 }
             };
-
-            // 카메라 설정
-            const {camera} = view;
-            if (camera) {
-                const camFolder = pane.addFolder({title: '📷 Camera'});
-                const camConfig = {distance: 5};
-
-                camFolder.addBinding(camConfig, 'distance', {
-                    min: 2, max: 15, step: 0.5, label: 'Distance'
-                }).on('change', ev => {
-                    camera.distance = ev.value;
-                });
-            }
         },
         ibl: true,
         skybox: true,
