@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Fog 예제
  * [EN] Fog example
  *
- * [KO] 내장(Built-in) 포스트 이펙트를 사용하여 선형 HDR 공간에서 거리 기반 안개(Fog) 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply distance-based fog effects in Linear HDR space using the built-in post effect.
+ * [KO] 거리 기반 안개(Fog) 이펙트를 사용하여 원근감 있는 대기 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply a distance-based fog effect for atmospheric depth.
  */
 
 const canvas = document.createElement('canvas');
@@ -21,22 +21,18 @@ RedGPU.init(
         controller.tilt = -10;
 
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        // [KO] BuiltInEffectManager를 통한 거리 기반 안개(Fog) 활성화 및 파라미터 설정
-        // [KO] - useFog: 선형 HDR 파이프라인(SSAO/SSR 직후, DOF/Bloom/ToneMapping 이전)에서 거리 안개 활성화
-        // [KO] - farDistance: 안개가 최대 농도에 도달하는 원거리 기준점 설정 (기본 nearDistance: 5.0)
-        // [EN] Enable and configure distance-based Fog via BuiltInEffectManager
-        // [EN] - useFog: Enables distance fog in the Linear HDR pipeline (after SSAO/SSR, before DOF/Bloom/ToneMapping)
-        // [EN] - farDistance: Sets the far distance where fog reaches maximum density (default nearDistance: 5.0)
+        // [KO] Fog 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable Fog effect and reference instance
         view.builtInEffectManager.useFog = true;
-        const fogEffect = view.builtInEffectManager.fog;
-        fogEffect.farDistance = 30;
+        const effect = view.builtInEffectManager.fog;
+        effect.farDistance = 30;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
@@ -47,7 +43,7 @@ RedGPU.init(
         renderer.start(redGPUContext, (time) => {
         });
 
-        renderTestPane(redGPUContext, view, fogEffect);
+        renderTestPane(redGPUContext, view, effect);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -119,7 +115,6 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
             };
 
             const fogFolder = pane.addFolder({title: 'PostEffect', expanded: true});
-
             fogFolder.addBinding(view.builtInEffectManager, 'useFog').on('change', (ev) => {
                 controls.forEach((c) => c.disabled = !ev.value);
                 presetFolder.disabled = !ev.value;
@@ -172,7 +167,6 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
             ];
 
             const presetFolder = fogFolder.addFolder({title: 'Presets', expanded: true});
-
             const applyPreset = (type, density, near, far, maxOpacity, color) => {
                 fogEffect.fogType = type;
                 fogEffect.density = density;
@@ -185,7 +179,6 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
                 config.fogColor.b = color.b;
                 pane.refresh();
             };
-
             presetFolder.addButton({title: 'Light Mist'}).on('click', () => {
                 applyPreset(RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL, 0.015, 8, 50, 1, {r: 230, g: 235, b: 255});
             });

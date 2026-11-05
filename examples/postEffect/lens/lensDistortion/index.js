@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Lens Distortion 예제
  * [EN] Lens Distortion example
  *
- * [KO] 렌즈 왜곡(Lens Distortion) 포스트 이펙트를 사용하여 배럴/핀쿠션 왜곡 효과를 시연합니다.
- * [EN] Demonstrates barrel and pincushion distortion effects using the Lens Distortion post effect.
+ * [KO] 렌즈 왜곡(Lens Distortion) 이펙트를 사용하여 배럴/핀쿠션 왜곡 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply barrel and pincushion distortion using Lens Distortion.
  */
 
 const container = document.createElement('div');
@@ -18,37 +18,38 @@ container.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 4;
-        controller.tilt = 0;
-        controller.speedDistance = 0.1;
+        const controller = new RedGPU.Camera.FreeController(redGPUContext);
+        controller.y = 1;
+        controller.tilt = 15;
+        controller.pan = 90;
+        controller.moveSpeed = 5;
 
         const scene = new RedGPU.Display.Scene();
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr', 60000);
 
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
-        viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, ibl.luminance);
         redGPUContext.addView(viewNormal);
 
-        // [KO] BuiltInEffectManager를 통한 LensDistortion 활성화
-        // [EN] Enable LensDistortion via BuiltInEffectManager
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
-        viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        viewEffect.builtInEffectManager.useLensDistortion = true;
-        const effect = viewEffect.builtInEffectManager.lensDistortion;
+        viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, ibl.luminance);
         redGPUContext.addView(viewEffect);
 
-        const directionalLight = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(directionalLight);
+        // [KO] LensDistortion 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable LensDistortion effect and reference instance
+        viewEffect.builtInEffectManager.useLensDistortion = true;
+        const effect = viewEffect.builtInEffectManager.lensDistortion;
+        effect.distortion = 1;
 
         new RedGPU.GLTFLoader(
             redGPUContext,
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
-            (v) => {
-                scene.addChild(v.resultMesh);
-            }
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf',
+            (result) => {
+                scene.addChild(result.resultMesh);
+            },
+            RedGPUExampleHelper.loadingProgressInfoHandler
         );
 
         const updateLayout = () => {

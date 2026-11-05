@@ -125,6 +125,8 @@ class DOF extends AMultiPassPostEffect {
         this.#postFilterBgPass = postFilterBgPass;
         this.#postFilterFgPass = postFilterFgPass;
         this.#compositePass = compositePass;
+
+        this.setCinematic();
     }
 
     /**

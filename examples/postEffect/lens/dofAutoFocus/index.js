@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17930065
  * [KO] Depth of Field - Auto Focus (DOF 자동 초점) 예제
  * [EN] Depth of Field - Auto Focus (DOF Auto-Focus) example
  *
- * [KO] 화면 정중앙(9-Point Zone) 깊이 버퍼를 GPU에서 실시간 측거하여 시선 이동 및 카메라 줌·회전에 따라 뷰파인더 중앙 피사체에 자동으로 초점을 맞추는 `dof.useAutoFocus` 기능을 시연합니다.
- * [EN] Demonstrates `dof.useAutoFocus`, which meters the center screen (9-Point Zone) depth buffer on the GPU in real time to automatically track focus on whatever subject is inside the center viewfinder reticle during camera panning, orbiting, and zooming.
+ * [KO] 화면 중앙의 피사체 거리를 실시간 감지하여 자동으로 초점을 맞추는 `dof.useAutoFocus` 기능을 시연합니다.
+ * [EN] Demonstrates `dof.useAutoFocus`, which automatically tracks focus on the subject at the center of the screen in real time.
  */
 
 const STAGE_TARGETS = [
@@ -81,8 +81,6 @@ RedGPU.init(
         controller.centerZ = initialStage.z;
         controller.distance = initialStage.distance;
         controller.speedDistance = 0.4;
-        controller.distanceInterpolation = 0.0001;
-        controller.rotationInterpolation = 0.0001;
         controller.pan = initialStage.pan;
         controller.tilt = initialStage.tilt;
 
@@ -92,106 +90,24 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        redGPUContext.addView(view);
 
-        // [KO] 물리 보케 DOF 및 GPU 기반 화면 중앙 9-Point Zone 연속 자동 초점(useAutoFocus = true) 활성화
-        //      - useAutoFocus = true: 매 프레임 화면 정중앙(UV 0.5, 0.5 주변 9개 측거점)의 깊이 버퍼를 GPU에서 실시간 계측하여
-        //        카메라 회전·줌·이동 시 별도의 focusDistance 수동 계산 없이 중앙 레티클 내 피사체에 자동으로 초점을 추종합니다.
-        // [EN] Enable Physical Bokeh DOF and GPU-driven screen-center 9-Point Zone continuous auto-focus (useAutoFocus = true)
-        //      - useAutoFocus = true: Meters the depth buffer at 9 points around screen center (UV 0.5, 0.5) on the GPU every frame,
-        //        automatically tracking focus on the subject inside the center reticle during camera rotation, zoom, or panning.
+        // [KO] DOF 및 자동 초점(useAutoFocus) 활성화
+        // [EN] Enable DOF and auto-focus (useAutoFocus)
         view.builtInEffectManager.useDOF = true;
         const effect = view.builtInEffectManager.dof;
-        effect.setCinematic();
-        effect.aperture = 1.4;
         effect.useAutoFocus = true;
-        redGPUContext.addView(view);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const sceneState = setupAutoFocusScene(redGPUContext, scene);
-
-        const updateReticleUI = () => {
-            if (!view.builtInEffectManager.useDOF) {
-                viewfinder.style.display = 'none';
-                return;
-            }
-            viewfinder.style.display = 'block';
-            if (effect.useAutoFocus) {
-                viewfinder.className = 'af-viewfinder is-af';
-                viewfinderLabel.textContent = sceneState.activeLabel;
-            } else {
-                viewfinder.className = 'af-viewfinder is-mf';
-                viewfinderLabel.textContent = 'MF [MANUAL FOCUS]';
-            }
-        };
-
-        const aimAtStage = (stage, applyCameraPose) => {
-            sceneState.targetX = stage.x;
-            sceneState.targetY = stage.y;
-            sceneState.targetZ = stage.z;
-            sceneState.transitionActive = true;
-            sceneState.activeLabel = stage.label;
-            if (applyCameraPose) {
-                controller.distance = stage.distance;
-                const angleDiff = ((stage.pan - controller.pan + 540) % 360) - 180;
-                controller.pan = controller.pan + angleDiff;
-                controller.tilt = stage.tilt;
-            }
-            updateReticleUI();
-        };
-
-        // [KO] 사용자가 마우스 드래그나 휠로 카메라를 직접 조작하면 자동 순회(Auto Tour) 및 프리셋 이동 보간을 멈추고 자유 조작 모드로 즉시 전환
-        // [EN] Immediately stop Auto Tour and preset transition interpolation and switch to free control when the user drags or scrolls
-        const onUserInteract = () => {
-            sceneState.transitionActive = false;
-            if (sceneState.mode === 'tour') {
-                sceneState.mode = 'manualAim';
-                sceneState.activeLabel = 'AF-C [9-POINT ZONE] : FREE AIM';
-                updateReticleUI();
-            }
-        };
-        canvas.addEventListener('pointerdown', onUserInteract);
-        canvas.addEventListener('wheel', onUserInteract, {passive: true});
-
-        let lastStageIndex = -1;
-        let prevTime = -1;
+        setupAutoFocusScene(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            const rawDt = prevTime < 0 ? (1 / 60) : (time - prevTime) / 1000;
-            prevTime = time;
-            const dt = Math.min(Math.max(rawDt, 1 / 240), 0.05);
-
-            if (sceneState.mode === 'tour') {
-                const stageIndex = Math.floor(time / 2400) % STAGE_TARGETS.length;
-                if (stageIndex !== lastStageIndex) {
-                    lastStageIndex = stageIndex;
-                    aimAtStage(STAGE_TARGETS[stageIndex], true);
-                }
-            } else {
-                lastStageIndex = -1;
-            }
-
-            if (sceneState.transitionActive) {
-                const alpha = 1.0 - Math.pow(0.0001, dt);
-                const dx = sceneState.targetX - controller.centerX;
-                const dy = sceneState.targetY - controller.centerY;
-                const dz = sceneState.targetZ - controller.centerZ;
-                if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 0.002) {
-                    controller.centerX += dx * alpha;
-                    controller.centerY += dy * alpha;
-                    controller.centerZ += dz * alpha;
-                } else {
-                    controller.centerX = sceneState.targetX;
-                    controller.centerY = sceneState.targetY;
-                    controller.centerZ = sceneState.targetZ;
-                    sceneState.transitionActive = false;
-                }
-            }
         });
 
-        renderTestPane(redGPUContext, view, effect, sceneState, aimAtStage, updateReticleUI);
+        renderTestPane(redGPUContext, view, effect, controller);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -202,15 +118,6 @@ RedGPU.init(
 );
 
 const setupAutoFocusScene = (redGPUContext, scene) => {
-    const state = {
-        mode: 'tour',
-        targetX: STAGE_TARGETS[0].x,
-        targetY: STAGE_TARGETS[0].y,
-        targetZ: STAGE_TARGETS[0].z,
-        transitionActive: false,
-        activeLabel: STAGE_TARGETS[0].label
-    };
-
     const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
     groundMaterial.color.setColorByHEX('#0a0b0e');
     groundMaterial.specularStrength = 0.65;
@@ -304,18 +211,43 @@ const setupAutoFocusScene = (redGPUContext, scene) => {
             scene.addChild(orb);
         }
     }
-
-    return state;
 };
 
-const renderTestPane = (redGPUContext, targetView, effect, sceneState, aimAtStage, updateReticleUI) => {
+const renderTestPane = (redGPUContext, targetView, effect, controller) => {
+    let activeLabel = STAGE_TARGETS[0].label;
+    const updateReticleUI = () => {
+        if (!targetView.builtInEffectManager.useDOF) {
+            viewfinder.style.display = 'none';
+            return;
+        }
+        viewfinder.style.display = 'block';
+        if (effect.useAutoFocus) {
+            viewfinder.className = 'af-viewfinder is-af';
+            viewfinderLabel.textContent = activeLabel;
+        } else {
+            viewfinder.className = 'af-viewfinder is-mf';
+            viewfinderLabel.textContent = 'MF [MANUAL FOCUS]';
+        }
+    };
+
+    const aimAtStage = (stage) => {
+        activeLabel = stage.label;
+        controller.centerX = stage.x;
+        controller.centerY = stage.y;
+        controller.centerZ = stage.z;
+        controller.distance = stage.distance;
+        controller.pan = stage.pan;
+        controller.tilt = stage.tilt;
+        updateReticleUI();
+    };
+
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
-
             folder.addBinding(targetView.builtInEffectManager, 'useDOF').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
                 focusDistanceControl.disabled = !v.value || effect.useAutoFocus;
+                presetFolder.disabled = !v.value;
                 targetFolder.disabled = !v.value;
                 updateReticleUI();
             });
@@ -324,7 +256,6 @@ const renderTestPane = (redGPUContext, targetView, effect, sceneState, aimAtStag
                 focusDistanceControl.disabled = !targetView.builtInEffectManager.useDOF || v.value;
                 updateReticleUI();
             });
-
             const focusDistanceControl = folder.addBinding(effect, 'focusDistance', {
                 min: 2.0,
                 max: 30.0,
@@ -340,20 +271,27 @@ const renderTestPane = (redGPUContext, targetView, effect, sceneState, aimAtStag
                 folder.addBinding(effect, 'bokehBrightness', {min: 0, max: 5.0, step: 0.1})
             ];
 
-            const targetFolder = pane.addFolder({title: 'Viewfinder Aim Target', expanded: true});
-
-            targetFolder.addButton({title: 'Auto Focus Tour (Cycle 5 Stages)'}).on('click', () => {
-                sceneState.mode = 'tour';
-                aimAtStage(STAGE_TARGETS[0], true);
-            });
-
-            const addTargetButton = (title, stage) => {
-                targetFolder.addButton({title}).on('click', () => {
-                    sceneState.mode = 'manualAim';
-                    aimAtStage(stage, true);
+            const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
+            const addPresetButton = (title, method) => {
+                presetFolder.addButton({title}).on('click', () => {
+                    effect[method]();
+                    pane.refresh();
                 });
             };
+            addPresetButton('Game Default (65mm f/2.0, 10m)', 'setGameDefault');
+            addPresetButton('Cinematic (85mm f/1.4, 10m)', 'setCinematic');
+            addPresetButton('Portrait (85mm f/1.4, 7.5m)', 'setPortrait');
+            addPresetButton('Landscape (24mm f/8.0, 25m)', 'setLandscape');
+            addPresetButton('Macro (105mm f/2.0, 4.2m)', 'setMacro');
+            addPresetButton('Sports (135mm f/2.8, 18m)', 'setSports');
+            addPresetButton('Night Mode (75mm f/1.2, 9m)', 'setNightMode');
 
+            const targetFolder = pane.addFolder({title: 'Viewfinder Aim Target', expanded: true});
+            const addTargetButton = (title, stage) => {
+                targetFolder.addButton({title}).on('click', () => {
+                    aimAtStage(stage);
+                });
+            };
             addTargetButton('Aim : Near Left', STAGE_TARGETS[0]);
             addTargetButton('Aim : Near-Mid Right', STAGE_TARGETS[1]);
             addTargetButton('Aim : Center Character', STAGE_TARGETS[2]);

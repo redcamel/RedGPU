@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] LensFlare (IBL SkyBox) 예제
  * [EN] LensFlare (IBL SkyBox) example
  *
- * [KO] SkyAtmosphere 없이 일반 HDR IBL SkyBox 및 DirectionalLight/PBR 메쉬 환경에서 화면 공간 HDR 하이라이트와 주광원 경로 해석으로 동작하는 렌즈 플레어(Lens Flare) 후처리 효과를 시연합니다.
- * [EN] Demonstrates the Lens Flare post-processing effect operating via screen-space HDR highlights and directional light optical path evaluation in a standard HDR IBL SkyBox and PBR mesh environment without SkyAtmosphere.
+ * [KO] IBL SkyBox 및 DirectionalLight 환경에서 렌즈 플레어(Lens Flare) 이펙트를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply the Lens Flare effect in an IBL SkyBox and DirectionalLight environment.
  */
 
 const container = document.createElement('div');
@@ -37,14 +37,15 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] SkyAtmosphere 없이 IBL SkyBox + DirectionalLight 환경에서 HDR LensFlare 빌트인 이펙트 활성화
-        // [EN] Enable HDR LensFlare built-in effect in an IBL SkyBox + DirectionalLight environment without SkyAtmosphere
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        redGPUContext.addView(viewEffect);
+
+        // [KO] LensFlare 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable LensFlare effect and reference instance
         viewEffect.builtInEffectManager.useLensFlare = true;
         const effect = viewEffect.builtInEffectManager.lensFlare;
-        redGPUContext.addView(viewEffect);
 
         new RedGPU.GLTFLoader(
             redGPUContext,

@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=17929863338
  * [KO] Film Grain 예제
  * [EN] Film Grain example
  *
- * [KO] 빌트인 포스트 이펙트를 사용하여 시네마틱 필름 그레인(Film Grain) 입자 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply cinematic film grain effects using the built-in post effect.
+ * [KO] 필름 그레인(Film Grain) 이펙트를 사용하여 화면에 시네마틱 입자 질감을 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply a cinematic film grain texture effect.
  */
 
 const container = document.createElement('div');
@@ -19,7 +19,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 4;
+        controller.distance = 3;
         controller.tilt = 0;
         controller.speedDistance = 0.1;
 
@@ -31,14 +31,16 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] BuiltInEffectManager를 통해 FilmGrain 활성화 및 인스턴스 참조 획득
-        // [EN] Enable FilmGrain and obtain instance reference via BuiltInEffectManager
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        redGPUContext.addView(viewEffect);
+
+        // [KO] FilmGrain 이펙트 활성화 및 프리셋 설정
+        // [EN] Enable FilmGrain effect and configure preset
         viewEffect.builtInEffectManager.useFilmGrain = true;
         const effect = viewEffect.builtInEffectManager.filmGrain;
-        redGPUContext.addView(viewEffect);
+        effect.applyPreset(RedGPU.PostEffect.BuiltIn.FilmGrain.HEAVY);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Height Fog 예제
  * [EN] Height Fog example
  *
- * [KO] 내장(Built-in) 포스트 이펙트를 사용하여 선형 HDR 공간에서 3D 광선-고도 해석적 선적분 기반 안개(Height Fog) 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply Analytical 3D Ray-Height Line Integral fog (Height Fog) in Linear HDR space using the built-in post effect.
+ * [KO] 고도 기반 안개(Height Fog) 이펙트를 사용하여 높이와 거리에 따른 대기 안개 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply an altitude- and distance-based fog effect using Height Fog.
  */
 
 const canvas = document.createElement('canvas');
@@ -21,19 +21,17 @@ RedGPU.init(
         controller.tilt = -18;
 
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        // [KO] BuiltInEffectManager를 통한 고도 기반 안개(HeightFog) 활성화
-        // [KO] - 기본값(언리얼 엔진 표준): density = 0.02, baseHeight = 0, falloff = 0.2, nearDistance = 0, farDistance = 50
-        // [EN] Enable altitude-based HeightFog via BuiltInEffectManager
-        // [EN] - Default values (Unreal Engine standard): density = 0.02, baseHeight = 0, falloff = 0.2, nearDistance = 0, farDistance = 50
+        // [KO] HeightFog 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable HeightFog effect and reference instance
         view.builtInEffectManager.useHeightFog = true;
-        const heightFog = view.builtInEffectManager.heightFog;
+        const effect = view.builtInEffectManager.heightFog;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
@@ -48,7 +46,7 @@ RedGPU.init(
             }
         });
 
-        renderTestPane(redGPUContext, view, heightFog, autoRotateState);
+        renderTestPane(redGPUContext, view, effect, autoRotateState);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -162,12 +160,10 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
             };
 
             const heightFogFolder = pane.addFolder({title: 'PostEffect', expanded: true});
-
             heightFogFolder.addBinding(view.builtInEffectManager, 'useHeightFog').on('change', (ev) => {
                 controls.forEach((c) => c.disabled = !ev.value);
                 scenarioFolder.disabled = !ev.value;
             });
-
             heightFogFolder.addBinding(autoRotateState, 'autoRotate');
 
             const controls = [
@@ -211,7 +207,6 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
             ];
 
             const scenarioFolder = heightFogFolder.addFolder({title: 'Presets', expanded: true});
-
             const applyPreset = (density, baseHeight, falloff, nearDistance, farDistance, maxOpacity, fogColor, fogType) => {
                 heightFog.density = density;
                 heightFog.baseHeight = baseHeight;
@@ -226,7 +221,6 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
                 config.fogColor.b = fogColor.b;
                 pane.refresh();
             };
-
             scenarioFolder.addButton({title: 'Default (Unreal)'}).on('click', () => {
                 applyPreset(0.02, 0, 0.2, 0, 50, 1, {
                     r: 200,

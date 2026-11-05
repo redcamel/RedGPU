@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] LensFlare (SkyAtmosphere) 예제
  * [EN] LensFlare (SkyAtmosphere) example
  *
- * [KO] SkyAtmosphere 대기 산란 환경에서 화면 공간 HDR 하이라이트 고스트/할로와 태양 깊이 차폐 기반 다각형 조리개 보케·회절 스타버스트·아나모픽 스트릭을 결합한 하이브리드 렌즈 플레어(Lens Flare) 후처리 효과를 시연합니다.
- * [EN] Demonstrates the hybrid Lens Flare post-processing effect combining screen-space HDR highlight ghosts/halos with depth-occluded sun polygonal aperture bokeh, diffraction starbursts, and anamorphic streaks in a SkyAtmosphere environment.
+ * [KO] SkyAtmosphere 환경에서 태양광과 밝은 영역에 렌즈 플레어(Lens Flare) 이펙트를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply the Lens Flare effect to sunlight and bright areas in a SkyAtmosphere environment.
  */
 
 const container = document.createElement('div');
@@ -25,35 +25,29 @@ RedGPU.init(
         controller.speedDistance = 0.15;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 14.5;
         directionalLight.azimuth = -142.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
-        const skyBoxNormal = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        const skyBoxEffect = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-
-        const skyAtmosphereNormal = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        skyAtmosphereNormal.cloudCoverage = 0.2;
-
-        const skyAtmosphereEffect = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        skyAtmosphereEffect.cloudCoverage = 0.2;
-
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
-        viewNormal.skyAtmosphere = skyAtmosphereNormal;
+        viewNormal.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        viewNormal.skyAtmosphere.cloudCoverage = 0.2;
         redGPUContext.addView(viewNormal);
 
-        // [KO] 하이브리드 HDR LensFlare 빌트인 이펙트 활성화 및 인스턴스 참조 획득
-        // [EN] Enable hybrid HDR LensFlare built-in effect and obtain instance reference
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
-        viewEffect.skyAtmosphere = skyAtmosphereEffect;
+        viewEffect.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        viewEffect.skyAtmosphere.cloudCoverage = 0.2;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] LensFlare 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable LensFlare effect and reference instance
         viewEffect.builtInEffectManager.useLensFlare = true;
         const effect = viewEffect.builtInEffectManager.lensFlare;
-        redGPUContext.addView(viewEffect);
 
         new RedGPU.GLTFLoader(
             redGPUContext,
@@ -84,18 +78,7 @@ RedGPU.init(
         renderer.start(redGPUContext, (time) => {
         });
 
-        renderTestPane(
-            redGPUContext,
-            viewNormal,
-            viewEffect,
-            effect,
-            directionalLight,
-            skyBoxNormal,
-            skyBoxEffect,
-            skyAtmosphereNormal,
-            skyAtmosphereEffect,
-            container
-        );
+        renderTestPane(redGPUContext, viewEffect, effect, directionalLight, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -105,18 +88,7 @@ RedGPU.init(
     }
 );
 
-const renderTestPane = (
-    redGPUContext,
-    viewNormal,
-    targetView,
-    effect,
-    directionalLight,
-    skyBoxNormal,
-    skyBoxEffect,
-    skyAtmosphereNormal,
-    skyAtmosphereEffect,
-    container
-) => {
+const renderTestPane = (redGPUContext, targetView, effect, directionalLight, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect',
@@ -124,12 +96,7 @@ const renderTestPane = (
             targetContainer: container
         },
         gui: (pane) => {
-            const envConfig = {
-                useSkyAtmosphere: true
-            };
-
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
-
             folder.addBinding(targetView.builtInEffectManager, 'useLensFlare').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
                 presetFolder.disabled = !v.value;
@@ -159,29 +126,15 @@ const renderTestPane = (
                     pane.refresh();
                 });
             };
-
             addPresetButton('Cinematic', 'setCinematic');
             addPresetButton('Natural', 'setNatural');
             addPresetButton('Anamorphic', 'setAnamorphic');
             addPresetButton('Solar Max', 'setSolarMax');
             addPresetButton('Subtle', 'setSubtle');
 
-            const envFolder = pane.addFolder({title: 'Environment & Sun', expanded: true});
-            envFolder.addBinding(envConfig, 'useSkyAtmosphere').on('change', (v) => {
-                if (v.value) {
-                    viewNormal.skybox = null;
-                    targetView.skybox = null;
-                    viewNormal.skyAtmosphere = skyAtmosphereNormal;
-                    targetView.skyAtmosphere = skyAtmosphereEffect;
-                } else {
-                    viewNormal.skyAtmosphere = null;
-                    targetView.skyAtmosphere = null;
-                    viewNormal.skybox = skyBoxNormal;
-                    targetView.skybox = skyBoxEffect;
-                }
-            });
-            envFolder.addBinding(directionalLight, 'elevation', {min: -10, max: 90, step: 0.1});
-            envFolder.addBinding(directionalLight, 'azimuth', {min: -180, max: 180, step: 0.1});
+            const lightFolder = pane.addFolder({title: 'DirectionalLight', expanded: true});
+            lightFolder.addBinding(directionalLight, 'elevation', {min: -10, max: 90, step: 0.1});
+            lightFolder.addBinding(directionalLight, 'azimuth', {min: -180, max: 180, step: 0.1});
         }
     });
 };

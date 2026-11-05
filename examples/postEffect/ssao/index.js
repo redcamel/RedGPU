@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=17929863338
  * [KO] SSAO 예제
  * [EN] SSAO example
  *
- * [KO] Screen Space Ambient Occlusion (SSAO) 효과를 시연합니다.
- * [EN] Demonstrates the Screen Space Ambient Occlusion (SSAO) effect.
+ * [KO] 화면 공간 앰비언트 오클루전(SSAO) 이펙트를 사용하여 구석이나 틈새의 입체적인 음영을 표현하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to add depth and contact shadows to crevices using Screen Space Ambient Occlusion (SSAO).
  */
 
 const canvas = document.createElement('canvas');
@@ -29,9 +29,11 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, ibl.luminance);
         redGPUContext.addView(view);
 
-        // [KO] SSAO 활성화
-        // [EN] Enable SSAO
+        // [KO] SSAO 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable SSAO effect and reference instance
         view.builtInEffectManager.useSSAO = true;
+        const effect = view.builtInEffectManager.ssao;
+
         redGPUContext.antialiasingManager.useTAA = true;
 
         new RedGPU.GLTFLoader(
@@ -47,7 +49,7 @@ RedGPU.init(
         renderer.start(redGPUContext, (time) => {
         });
 
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext, view, effect);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -57,26 +59,27 @@ RedGPU.init(
     }
 );
 
-const renderTestPane = (redGPUContext, view) => {
+const renderTestPane = (redGPUContext, view, effect) => {
     new RedGPUExampleHelper(redGPUContext, {
+        topBar: {
+            ssao: false
+        },
         gui: (pane) => {
-            const ssaoFolder = pane.addFolder({title: 'PostEffect', expanded: true});
-            const ssao = view.builtInEffectManager.ssao;
-
-            ssaoFolder.addBinding(view.builtInEffectManager, 'useSSAO').on('change', (v) => {
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
+            folder.addBinding(view.builtInEffectManager, 'useSSAO').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
             });
 
             const controls = [
-                ssaoFolder.addBinding(ssao, 'useBlur'),
-                ssaoFolder.addBinding(ssao, 'useMultiBounce'),
-                ssaoFolder.addBinding(ssao, 'radius', {min: 0.01, max: 5.0, step: 0.01}),
-                ssaoFolder.addBinding(ssao, 'intensity', {min: 0.0, max: 10.0, step: 0.1}),
-                ssaoFolder.addBinding(ssao, 'bias', {min: 0.0, max: 0.1, step: 0.001}),
-                ssaoFolder.addBinding(ssao, 'biasDistanceScale', {min: 0.0, max: 0.5, step: 0.01}),
-                ssaoFolder.addBinding(ssao, 'fadeDistanceStart', {min: 1.0, max: 200.0, step: 0.1}),
-                ssaoFolder.addBinding(ssao, 'fadeDistanceRange', {min: 1.0, max: 100.0, step: 0.1}),
-                ssaoFolder.addBinding(ssao, 'contrast', {min: 0.5, max: 4.0, step: 0.1})
+                folder.addBinding(effect, 'useBlur'),
+                folder.addBinding(effect, 'useMultiBounce'),
+                folder.addBinding(effect, 'radius', {min: 0.01, max: 5.0, step: 0.01}),
+                folder.addBinding(effect, 'intensity', {min: 0.0, max: 10.0, step: 0.1}),
+                folder.addBinding(effect, 'bias', {min: 0.0, max: 0.1, step: 0.001}),
+                folder.addBinding(effect, 'biasDistanceScale', {min: 0.0, max: 0.5, step: 0.01}),
+                folder.addBinding(effect, 'fadeDistanceStart', {min: 1.0, max: 200.0, step: 0.1}),
+                folder.addBinding(effect, 'fadeDistanceRange', {min: 1.0, max: 100.0, step: 0.1}),
+                folder.addBinding(effect, 'contrast', {min: 0.5, max: 4.0, step: 0.1})
             ];
         }
     });

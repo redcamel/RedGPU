@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17930065
  * [KO] Depth of Field (DOF) 예제
  * [EN] Depth of Field (DOF) example
  *
- * [KO] 35mm 풀프레임 Thin-Lens 착란원(CoC)과 전·배경 분리 다각형 조리개 보케 기반의 피사계 심도(DOF) 포스트 이펙트 및 카메라 렌즈 프리셋을 시연합니다.
- * [EN] Demonstrates the Depth of Field (DOF) post effect and camera lens presets based on 35mm full-frame Thin-Lens CoC and foreground/background separated polygonal aperture bokeh.
+ * [KO] 피사계 심도(DOF) 이펙트를 사용하여 초점 거리에 따른 전·배경 흐림 및 보케 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply foreground/background blur and bokeh effects based on focus distance using Depth of Field (DOF).
  */
 
 const PRESET_CAMERA_TARGETS = {
@@ -28,26 +28,15 @@ container.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const defaultTarget = PRESET_CAMERA_TARGETS.setGameDefault;
+        const defaultTarget = PRESET_CAMERA_TARGETS.setCinematic;
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.centerX = defaultTarget.x;
         controller.centerY = defaultTarget.y;
         controller.centerZ = defaultTarget.z;
         controller.distance = defaultTarget.distance;
         controller.speedDistance = 0.4;
-        controller.distanceInterpolation = 0.01;
-        controller.rotationInterpolation = 0.01;
         controller.pan = defaultTarget.pan;
         controller.tilt = defaultTarget.tilt;
-
-        const cameraTransition = {
-            x: defaultTarget.x,
-            y: defaultTarget.y,
-            z: defaultTarget.z,
-            targetFocusDistance: 10.0,
-            active: false,
-            onUpdate: null
-        };
 
         const scene = new RedGPU.Display.Scene();
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
@@ -57,39 +46,20 @@ RedGPU.init(
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // [KO] 물리 보케 DOF(피사계 심도) 활성화 및 렌즈 파라미터 제어용 인스턴스 참조 획득
-        //      - focusDistance: 초점이 맺히는 피사체 거리 (단위: m, 기본값: 10.0)
-        //      - focalLength: 렌즈 초점 거리 (단위: mm, 망원일수록 배경 압축 및 착란원 확대, 기본값: 65.0)
-        //      - aperture: 조리개 F-값 (낮을수록 심도가 얕아지고 보케 확대, 기본값: 2.0)
-        //      - bladeCount: 조리개 날 개수 (0~2: 원형 보케, 3~9: 정다각형 보케, 기본값: 6)
-        //      - bokehBrightness: 고휘도 하이라이트 보케 디스크 강조 강도 (기본값: 1.5)
-        // [EN] Enable Physical Bokeh DOF and obtain the effect instance to control lens parameters
-        //      - focusDistance: In-focus subject distance (in meters, default: 10.0)
-        //      - focalLength: Lens focal length (in mm; longer telephoto increases bokeh size, default: 65.0)
-        //      - aperture: Aperture F-number (lower values yield shallower depth of field, default: 2.0)
-        //      - bladeCount: Aperture blade count (0~2: circular bokeh, 3~9: polygonal bokeh, default: 6)
-        //      - bokehBrightness: High-luminance highlight bokeh disc boost intensity (default: 1.5)
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        redGPUContext.addView(viewEffect);
+
+        // [KO] DOF 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable DOF effect and reference instance
         viewEffect.builtInEffectManager.useDOF = true;
         const effect = viewEffect.builtInEffectManager.dof;
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
         setupOpticalBenchScene(redGPUContext, scene);
-
-        const cancelTransition = () => {
-            if (cameraTransition.active) {
-                effect.focusDistance = cameraTransition.targetFocusDistance;
-                cameraTransition.active = false;
-                cameraTransition.onUpdate?.();
-            }
-        };
-        canvas.addEventListener('pointerdown', cancelTransition);
-        canvas.addEventListener('wheel', cancelTransition, {passive: true});
 
         const updateLayout = () => {
             const isPortrait = window.innerWidth < window.innerHeight;
@@ -108,38 +78,11 @@ RedGPU.init(
         updateLayout();
         window.addEventListener('resize', updateLayout);
 
-        let prevTime = -1;
-
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            const rawDt = prevTime < 0 ? (1 / 60) : (time - prevTime) / 1000;
-            prevTime = time;
-            const dt = Math.min(Math.max(rawDt, 1 / 240), 0.05);
-
-            if (cameraTransition.active) {
-                const alpha = 1.0 - Math.pow(0.0001, dt);
-                const dx = cameraTransition.x - controller.centerX;
-                const dy = cameraTransition.y - controller.centerY;
-                const dz = cameraTransition.z - controller.centerZ;
-                const df = cameraTransition.targetFocusDistance - effect.focusDistance;
-                if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) + Math.abs(df) > 0.002) {
-                    controller.centerX += dx * alpha;
-                    controller.centerY += dy * alpha;
-                    controller.centerZ += dz * alpha;
-                    effect.focusDistance += df * alpha;
-                    cameraTransition.onUpdate?.();
-                } else {
-                    controller.centerX = cameraTransition.x;
-                    controller.centerY = cameraTransition.y;
-                    controller.centerZ = cameraTransition.z;
-                    effect.focusDistance = cameraTransition.targetFocusDistance;
-                    cameraTransition.active = false;
-                    cameraTransition.onUpdate?.();
-                }
-            }
         });
 
-        renderTestPane(redGPUContext, viewEffect, effect, controller, cameraTransition, container);
+        renderTestPane(redGPUContext, viewEffect, effect, controller, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -250,7 +193,7 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
     }
 };
 
-const renderTestPane = (redGPUContext, targetView, effect, controller, cameraTransition, container) => {
+const renderTestPane = (redGPUContext, targetView, effect, controller, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect',
@@ -259,60 +202,35 @@ const renderTestPane = (redGPUContext, targetView, effect, controller, cameraTra
         },
         gui: (pane) => {
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
-
             folder.addBinding(targetView.builtInEffectManager, 'useDOF').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
                 presetFolder.disabled = !v.value;
             });
 
-            let isRefreshingUI = false;
-            const focusDistanceControl = folder.addBinding(effect, 'focusDistance', {min: 2.0, max: 30.0, step: 0.1});
-            focusDistanceControl.on('change', (ev) => {
-                if (!isRefreshingUI) {
-                    cameraTransition.targetFocusDistance = ev.value;
-                    cameraTransition.active = false;
-                }
-            });
-
             const controls = [
-                focusDistanceControl,
+                folder.addBinding(effect, 'focusDistance', {min: 2.0, max: 30.0, step: 0.1}),
                 folder.addBinding(effect, 'focalLength', {min: 12, max: 200, step: 1}),
                 folder.addBinding(effect, 'aperture', {min: 0.7, max: 22.0, step: 0.1}),
                 folder.addBinding(effect, 'bladeCount', {min: 0, max: 9, step: 1}),
                 folder.addBinding(effect, 'bokehBrightness', {min: 0, max: 5.0, step: 0.1})
             ];
 
-            cameraTransition.onUpdate = () => {
-                isRefreshingUI = true;
-                focusDistanceControl.refresh();
-                isRefreshingUI = false;
-            };
-
             const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
             const addPresetButton = (title, method) => {
                 presetFolder.addButton({title}).on('click', () => {
-                    const prevFocusDist = effect.focusDistance;
                     effect[method]();
-                    const targetFocusDist = effect.focusDistance;
                     const camTarget = PRESET_CAMERA_TARGETS[method];
                     if (camTarget) {
-                        effect.focusDistance = prevFocusDist;
-                        cameraTransition.targetFocusDistance = targetFocusDist;
-                        cameraTransition.x = camTarget.x;
-                        cameraTransition.y = camTarget.y;
-                        cameraTransition.z = camTarget.z;
-                        cameraTransition.active = true;
+                        controller.centerX = camTarget.x;
+                        controller.centerY = camTarget.y;
+                        controller.centerZ = camTarget.z;
                         controller.distance = camTarget.distance;
-                        const angleDiff = ((camTarget.pan - controller.pan + 540) % 360) - 180;
-                        controller.pan = controller.pan + angleDiff;
+                        controller.pan = camTarget.pan;
                         controller.tilt = camTarget.tilt;
                     }
-                    isRefreshingUI = true;
                     pane.refresh();
-                    isRefreshingUI = false;
                 });
             };
-
             addPresetButton('Game Default (65mm f/2.0, 10m)', 'setGameDefault');
             addPresetButton('Cinematic (85mm f/1.4, 10m)', 'setCinematic');
             addPresetButton('Portrait (85mm f/1.4, 7.5m)', 'setPortrait');

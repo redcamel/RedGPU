@@ -10,9 +10,9 @@ import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 
 interface LensDistortion {
     /**
-     * [KO] 왜곡 강도 (-1.0 ~ 1.0, 양수: 배럴 왜곡, 음수: 핀쿠션 왜곡)
-     * [EN] Distortion strength (-1.0 ~ 1.0, positive: barrel distortion, negative: pincushion distortion)
-     * @defaultValue 0.2
+     * [KO] 왜곡 강도 (-1.0 ~ 1.0, 기본값: 0.0, 양수: 배럴 왜곡, 음수: 핀쿠션 왜곡)
+     * [EN] Distortion strength (-1.0 ~ 1.0, default: 0.0, positive: barrel distortion, negative: pincushion distortion)
+     * @defaultValue 0.0
      */
     distortion: number;
 }
@@ -84,7 +84,7 @@ class LensDistortion extends ASingleComputePassPostEffect {
 }
 
 defineNumber(LensDistortion, [
-    {key: 'distortion', value: 0.2, min: -1, max: 1},
+    {key: 'distortion', value: 0, min: -1, max: 1},
 ]);
 Object.freeze(LensDistortion);
 export default LensDistortion;

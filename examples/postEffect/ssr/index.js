@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=17929863338
  * [KO] SSR 예제
  * [EN] SSR example
  *
- * [KO] Screen Space Reflection (SSR) 화면 공간 반사 효과를 시연합니다.
- * [EN] Demonstrates the Screen Space Reflection (SSR) effect.
+ * [KO] 화면 공간 반사(SSR) 이펙트를 사용하여 표면에 실시간 반사 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply real-time surface reflections using Screen Space Reflection (SSR).
  */
 
 const canvas = document.createElement('canvas');
@@ -16,7 +16,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 4.5;
+        controller.distance = 10;
         controller.tilt = -15;
 
         const scene = new RedGPU.Display.Scene();
@@ -25,11 +25,12 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-
-        // [KO] SSR(실시간 화면 공간 반사) 활성화
-        // [EN] Enable SSR (Screen Space Reflection)
-        view.builtInEffectManager.useSSR = true;
         redGPUContext.addView(view);
+
+        // [KO] SSR 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable SSR effect and reference instance
+        view.builtInEffectManager.useSSR = true;
+        const effect = view.builtInEffectManager.ssr;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
@@ -38,21 +39,16 @@ RedGPU.init(
         const orangeMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
         orangeMaterial.color.setColorByHEX('#af532e');
         orangeMaterial.metallic = 0.1;
-
         const floatingSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, orangeMaterial);
         floatingSphere.x = -1.5;
         scene.addChild(floatingSphere);
 
-        // [KO] ColorMaterial 테스트 메시
-        // [EN] ColorMaterial test mesh
         const colorBoxGeometry = new RedGPU.Primitive.Box(redGPUContext, 0.7, 0.7, 0.7);
         const colorMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#00d2ff');
         const colorMesh = new RedGPU.Display.Mesh(redGPUContext, colorBoxGeometry, colorMaterial);
         colorMesh.setPosition(-1.5, -0.4, 1.5);
         scene.addChild(colorMesh);
 
-        // [KO] BitmapMaterial 테스트 메시
-        // [EN] BitmapMaterial test mesh
         const bitmapBoxGeometry = new RedGPU.Primitive.Box(redGPUContext, 0.7, 0.7, 0.7);
         const bitmapTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../assets/UV_Grid_Sm.jpg');
         const bitmapMaterial = new RedGPU.Material.BitmapMaterial(redGPUContext, bitmapTexture);
@@ -60,8 +56,6 @@ RedGPU.init(
         bitmapMesh.setPosition(1.5, -0.4, 1.5);
         scene.addChild(bitmapMesh);
 
-        // [KO] TextField3D 테스트 객체
-        // [EN] TextField3D test object
         const textField3D = new RedGPU.Display.TextField3D(redGPUContext, 'SSR Reflection');
         textField3D.color = '#ffffff';
         textField3D.background = 'rgba(20, 30, 50, 0.85)';
@@ -75,7 +69,6 @@ RedGPU.init(
         const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
         groundMaterial.color.setColorByHEX('#7a5d4a');
         groundMaterial.metallic = 0.5;
-
         const ground = new RedGPU.Display.Mesh(redGPUContext, groundGeometry, groundMaterial);
         ground.y = -1;
         scene.addChild(ground);
@@ -90,7 +83,7 @@ RedGPU.init(
             bitmapMesh.rotationY -= 0.015;
         });
 
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext, view, effect);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -120,26 +113,24 @@ const loadGLTFModels = (redGPUContext, scene) => {
     });
 };
 
-const renderTestPane = (redGPUContext, view) => {
+const renderTestPane = (redGPUContext, view, effect) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         ibl: true,
         skybox: true,
         gui: (pane) => {
-            const ssrFolder = pane.addFolder({title: 'PostEffect', expanded: true});
-            const ssr = view.builtInEffectManager.ssr;
-
-            ssrFolder.addBinding(view.builtInEffectManager, 'useSSR').on('change', (v) => {
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
+            folder.addBinding(view.builtInEffectManager, 'useSSR').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
             });
 
             const controls = [
-                ssrFolder.addBinding(ssr, 'maxSteps', {min: 1, max: 512, step: 1}),
-                ssrFolder.addBinding(ssr, 'maxDistance', {min: 1, max: 200, step: 0.1}),
-                ssrFolder.addBinding(ssr, 'stepSize', {min: 0.001, max: 5.0, step: 0.001}),
-                ssrFolder.addBinding(ssr, 'reflectionIntensity', {min: 0.0, max: 10.0, step: 0.01}),
-                ssrFolder.addBinding(ssr, 'fadeDistance', {min: 1, max: 100, step: 0.1}),
-                ssrFolder.addBinding(ssr, 'edgeFade', {min: 0.0, max: 0.5, step: 0.01})
+                folder.addBinding(effect, 'maxSteps', {min: 1, max: 512, step: 1}),
+                folder.addBinding(effect, 'maxDistance', {min: 1, max: 200, step: 0.1}),
+                folder.addBinding(effect, 'stepSize', {min: 0.001, max: 5.0, step: 0.001}),
+                folder.addBinding(effect, 'reflectionIntensity', {min: 0.0, max: 10.0, step: 0.01}),
+                folder.addBinding(effect, 'fadeDistance', {min: 1, max: 100, step: 0.1}),
+                folder.addBinding(effect, 'edgeFade', {min: 0.0, max: 0.5, step: 0.01})
             ];
         }
     });
