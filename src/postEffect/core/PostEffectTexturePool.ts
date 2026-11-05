@@ -92,7 +92,9 @@ class PostEffectTexturePool extends RedGPUObject {
      */
     get idleCount(): number {
         let count = 0;
-        this.#pool.forEach(list => count += list.length);
+        for (const list of this.#pool.values()) {
+            count += list.length;
+        }
         return count;
     }
 
@@ -143,15 +145,18 @@ class PostEffectTexturePool extends RedGPUObject {
      */
     getDetails() {
         const details = [];
-        this.#pool.forEach((list, key) => {
-            const activeCount = [...this.#activeTextures].filter(t => this.#textureToKey.get(t) === key).length;
+        for (const [key, list] of this.#pool) {
+            let activeCount = 0;
+            for (const t of this.#activeTextures) {
+                if (this.#textureToKey.get(t) === key) activeCount++;
+            }
             details.push({
                 key,
                 total: list.length + activeCount,
                 active: activeCount,
                 idle: list.length
             });
-        });
+        }
         return details;
     }
 
@@ -182,7 +187,7 @@ class PostEffectTexturePool extends RedGPUObject {
         useStorage: boolean = true
     ): IPostEffectResult {
         const texture = this.#alloc(width, height, format, useStorage);
-        return this.#textureToResult.get(texture)!;
+        return this.#textureToResult.get(texture) as IPostEffectResult;
     }
 
     /**
@@ -198,7 +203,8 @@ class PostEffectTexturePool extends RedGPUObject {
             this.#activeTextures.delete(texture);
             const key = this.#textureToKey.get(texture);
             if (key) {
-                this.#pool.get(key)!.push(texture);
+                const list = this.#pool.get(key);
+                if (list) list.push(texture);
             }
         }
     }
@@ -211,7 +217,8 @@ class PostEffectTexturePool extends RedGPUObject {
         for (const texture of this.#activeTextures) {
             const key = this.#textureToKey.get(texture);
             if (key) {
-                this.#pool.get(key)!.push(texture);
+                const list = this.#pool.get(key);
+                if (list) list.push(texture);
             }
         }
         this.#activeTextures.clear();
@@ -223,9 +230,11 @@ class PostEffectTexturePool extends RedGPUObject {
      */
     clear(): void {
         this.releaseAll();
-        this.#pool.forEach(list => {
-            list.forEach(texture => texture.destroy());
-        });
+        for (const list of this.#pool.values()) {
+            for (let i = 0, len = list.length; i < len; i++) {
+                list[i].destroy();
+            }
+        }
         this.#pool.clear();
         this.#videoMemorySize = 0;
         this.#peakActiveCount = 0;
@@ -252,7 +261,7 @@ class PostEffectTexturePool extends RedGPUObject {
 
         let texture: GPUTexture;
         if (list.length > 0) {
-            texture = list.shift()!;
+            texture = list.shift() as GPUTexture;
         } else {
             this.#allocationCount++;
             const renderTargetUsage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING;

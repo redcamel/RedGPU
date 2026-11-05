@@ -31,16 +31,16 @@ import BloomUpsample from "./bloomUpsample/BloomUpsample";
  * @category Visual Effects
  */
 class Bloom extends AMultiPassPostEffect {
-    #effect_prefilter: BloomPrefilter;
-    #effect_downsample0: BloomDownsample;
-    #effect_downsample1: BloomDownsample;
-    #effect_downsample2: BloomDownsample;
-    #effect_downsample3: BloomDownsample;
-    #effect_upsample3: BloomUpsample;
-    #effect_upsample2: BloomUpsample;
-    #effect_upsample1: BloomUpsample;
-    #effect_upsample0: BloomUpsample;
-    #effect_composite: BloomComposite;
+    #prefilterPass: BloomPrefilter;
+    #downsample0Pass: BloomDownsample;
+    #downsample1Pass: BloomDownsample;
+    #downsample2Pass: BloomDownsample;
+    #downsample3Pass: BloomDownsample;
+    #upsample3Pass: BloomUpsample;
+    #upsample2Pass: BloomUpsample;
+    #upsample1Pass: BloomUpsample;
+    #upsample0Pass: BloomUpsample;
+    #compositePass: BloomComposite;
 
     /**
      * [KO] Bloom 인스턴스를 생성합니다.
@@ -78,16 +78,16 @@ class Bloom extends AMultiPassPostEffect {
             ],
         );
 
-        this.#effect_prefilter = prefilter;
-        this.#effect_downsample0 = downsample0;
-        this.#effect_downsample1 = downsample1;
-        this.#effect_downsample2 = downsample2;
-        this.#effect_downsample3 = downsample3;
-        this.#effect_upsample3 = upsample3;
-        this.#effect_upsample2 = upsample2;
-        this.#effect_upsample1 = upsample1;
-        this.#effect_upsample0 = upsample0;
-        this.#effect_composite = composite;
+        this.#prefilterPass = prefilter;
+        this.#downsample0Pass = downsample0;
+        this.#downsample1Pass = downsample1;
+        this.#downsample2Pass = downsample2;
+        this.#downsample3Pass = downsample3;
+        this.#upsample3Pass = upsample3;
+        this.#upsample2Pass = upsample2;
+        this.#upsample1Pass = upsample1;
+        this.#upsample0Pass = upsample0;
+        this.#compositePass = composite;
 
         this.setCinematic();
     }
@@ -102,11 +102,11 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Linear HDR luminance threshold
      */
     get threshold(): number {
-        return this.#effect_prefilter.threshold;
+        return this.#prefilterPass.threshold;
     }
 
     set threshold(value: number) {
-        this.#effect_prefilter.threshold = value;
+        this.#prefilterPass.threshold = value;
     }
 
     /**
@@ -119,11 +119,11 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Soft-Knee ratio
      */
     get softKnee(): number {
-        return this.#effect_prefilter.softKnee;
+        return this.#prefilterPass.softKnee;
     }
 
     set softKnee(value: number) {
-        this.#effect_prefilter.softKnee = value;
+        this.#prefilterPass.softKnee = value;
     }
 
     /**
@@ -136,11 +136,11 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Bloom composition intensity
      */
     get intensity(): number {
-        return this.#effect_composite.intensity;
+        return this.#compositePass.intensity;
     }
 
     set intensity(value: number) {
-        this.#effect_composite.intensity = value;
+        this.#compositePass.intensity = value;
     }
 
     /**
@@ -153,14 +153,14 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Light scatter radius ratio
      */
     get radius(): number {
-        return this.#effect_upsample0.radius;
+        return this.#upsample0Pass.radius;
     }
 
     set radius(value: number) {
-        this.#effect_upsample0.radius = value;
-        this.#effect_upsample1.radius = value;
-        this.#effect_upsample2.radius = value;
-        this.#effect_upsample3.radius = value;
+        this.#upsample0Pass.radius = value;
+        this.#upsample1Pass.radius = value;
+        this.#upsample2Pass.radius = value;
+        this.#upsample3Pass.radius = value;
     }
 
     /**
@@ -173,11 +173,11 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Maximum HDR luminance clamp
      */
     get maxBrightness(): number {
-        return this.#effect_prefilter.maxBrightness;
+        return this.#prefilterPass.maxBrightness;
     }
 
     set maxBrightness(value: number) {
-        this.#effect_prefilter.maxBrightness = value;
+        this.#prefilterPass.maxBrightness = value;
     }
 
     /**
@@ -189,7 +189,7 @@ class Bloom extends AMultiPassPostEffect {
      * [EN] Bloom tint `ColorRGB` instance
      */
     get tint(): ColorRGB {
-        return this.#effect_composite.tint;
+        return this.#compositePass.tint;
     }
 
     /**
@@ -294,27 +294,27 @@ class Bloom extends AMultiPassPostEffect {
         const h4 = Math.max(1, height >> 5);
 
         // 1. Progressive 13-Tap Downsample Chain (Full -> 1/2 -> 1/4 -> 1/8 -> 1/16 -> 1/32)
-        const mip0 = this.#effect_prefilter.render(view, w0, h0, sourceTextureInfo);
-        const mip1 = this.#effect_downsample0.render(view, w1, h1, mip0);
-        const mip2 = this.#effect_downsample1.render(view, w2, h2, mip1);
-        const mip3 = this.#effect_downsample2.render(view, w3, h3, mip2);
-        const mip4 = this.#effect_downsample3.render(view, w4, h4, mip3);
+        const mip0 = this.#prefilterPass.render(view, w0, h0, sourceTextureInfo);
+        const mip1 = this.#downsample0Pass.render(view, w1, h1, mip0);
+        const mip2 = this.#downsample1Pass.render(view, w2, h2, mip1);
+        const mip3 = this.#downsample2Pass.render(view, w3, h3, mip2);
+        const mip4 = this.#downsample3Pass.render(view, w4, h4, mip3);
 
         // 2. Progressive 9-Tap Tent Upsample Chain (In-Place onto mip3 -> mip2 -> mip1 -> mip0)
-        const up3 = this.#effect_upsample3.render(view, w3, h3, mip3, mip4);
+        const up3 = this.#upsample3Pass.render(view, w3, h3, mip3, mip4);
         pool.release(mip4.texture);
 
-        const up2 = this.#effect_upsample2.render(view, w2, h2, mip2, up3);
+        const up2 = this.#upsample2Pass.render(view, w2, h2, mip2, up3);
         pool.release(up3.texture);
 
-        const up1 = this.#effect_upsample1.render(view, w1, h1, mip1, up2);
+        const up1 = this.#upsample1Pass.render(view, w1, h1, mip1, up2);
         pool.release(up2.texture);
 
-        const up0 = this.#effect_upsample0.render(view, w0, h0, mip0, up1);
+        const up0 = this.#upsample0Pass.render(view, w0, h0, mip0, up1);
         pool.release(up1.texture);
 
         // 3. Final Full-Res HDR Composite (In-Place onto sourceTextureInfo)
-        const compositeResult = this.#effect_composite.render(view, width, height, sourceTextureInfo, up0);
+        const compositeResult = this.#compositePass.render(view, width, height, sourceTextureInfo, up0);
         pool.release(up0.texture);
 
         return compositeResult;

@@ -31,9 +31,9 @@ import LensFlareGenerate from "./lensFlareGenerate/LensFlareGenerate";
  * @category PostEffect
  */
 class LensFlare extends AMultiPassPostEffect {
-    #effect_generate: LensFlareGenerate;
-    #effect_blur: GaussianBlur;
-    #effect_composite: LensFlareComposite;
+    #generatePass: LensFlareGenerate;
+    #blurPass: GaussianBlur;
+    #compositePass: LensFlareComposite;
 
     /**
      * [KO] `LensFlare` 인스턴스를 생성합니다.
@@ -57,9 +57,9 @@ class LensFlare extends AMultiPassPostEffect {
             ],
         );
 
-        this.#effect_generate = generatePass;
-        this.#effect_blur = blurPass;
-        this.#effect_composite = compositePass;
+        this.#generatePass = generatePass;
+        this.#blurPass = blurPass;
+        this.#compositePass = compositePass;
 
         this.setCinematic();
     }
@@ -74,11 +74,11 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Lens flare composition intensity
      */
     get intensity(): number {
-        return this.#effect_composite.intensity;
+        return this.#compositePass.intensity;
     }
 
     set intensity(value: number) {
-        this.#effect_composite.intensity = value;
+        this.#compositePass.intensity = value;
     }
 
     /**
@@ -91,11 +91,11 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Linear HDR luminance threshold
      */
     get threshold(): number {
-        return this.#effect_generate.threshold;
+        return this.#generatePass.threshold;
     }
 
     set threshold(value: number) {
-        this.#effect_generate.threshold = value;
+        this.#generatePass.threshold = value;
     }
 
     /**
@@ -108,13 +108,13 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Ghost count
      */
     get ghostCount(): number {
-        return this.#effect_generate.ghostCount;
+        return this.#generatePass.ghostCount;
     }
 
     set ghostCount(value: number) {
         const rounded = Math.round(value);
-        this.#effect_generate.ghostCount = rounded;
-        this.#effect_composite.ghostCount = rounded;
+        this.#generatePass.ghostCount = rounded;
+        this.#compositePass.ghostCount = rounded;
     }
 
     /**
@@ -127,12 +127,12 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Ghost spacing multiplier
      */
     get ghostSpacing(): number {
-        return this.#effect_generate.ghostSpacing;
+        return this.#generatePass.ghostSpacing;
     }
 
     set ghostSpacing(value: number) {
-        this.#effect_generate.ghostSpacing = value;
-        this.#effect_composite.ghostSpacing = value;
+        this.#generatePass.ghostSpacing = value;
+        this.#compositePass.ghostSpacing = value;
     }
 
     /**
@@ -145,12 +145,12 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Ghost brightness intensity
      */
     get ghostIntensity(): number {
-        return this.#effect_generate.ghostIntensity;
+        return this.#generatePass.ghostIntensity;
     }
 
     set ghostIntensity(value: number) {
-        this.#effect_generate.ghostIntensity = value;
-        this.#effect_composite.ghostIntensity = value;
+        this.#generatePass.ghostIntensity = value;
+        this.#compositePass.ghostIntensity = value;
     }
 
     /**
@@ -163,12 +163,12 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Halo ring radius
      */
     get haloRadius(): number {
-        return this.#effect_generate.haloRadius;
+        return this.#generatePass.haloRadius;
     }
 
     set haloRadius(value: number) {
-        this.#effect_generate.haloRadius = value;
-        this.#effect_composite.haloRadius = value;
+        this.#generatePass.haloRadius = value;
+        this.#compositePass.haloRadius = value;
     }
 
     /**
@@ -181,11 +181,11 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Halo ring thickness
      */
     get haloThickness(): number {
-        return this.#effect_generate.haloThickness;
+        return this.#generatePass.haloThickness;
     }
 
     set haloThickness(value: number) {
-        this.#effect_generate.haloThickness = value;
+        this.#generatePass.haloThickness = value;
     }
 
     /**
@@ -198,12 +198,12 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Halo ring brightness intensity
      */
     get haloIntensity(): number {
-        return this.#effect_generate.haloIntensity;
+        return this.#generatePass.haloIntensity;
     }
 
     set haloIntensity(value: number) {
-        this.#effect_generate.haloIntensity = value;
-        this.#effect_composite.haloIntensity = value;
+        this.#generatePass.haloIntensity = value;
+        this.#compositePass.haloIntensity = value;
     }
 
     /**
@@ -216,12 +216,12 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Chromatic aberration strength
      */
     get chromaticAberration(): number {
-        return this.#effect_generate.chromaticAberration;
+        return this.#generatePass.chromaticAberration;
     }
 
     set chromaticAberration(value: number) {
-        this.#effect_generate.chromaticAberration = value;
-        this.#effect_composite.chromaticAberration = value;
+        this.#generatePass.chromaticAberration = value;
+        this.#compositePass.chromaticAberration = value;
     }
 
     /**
@@ -234,11 +234,11 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Aperture blade count
      */
     get bladeCount(): number {
-        return this.#effect_composite.bladeCount;
+        return this.#compositePass.bladeCount;
     }
 
     set bladeCount(value: number) {
-        this.#effect_composite.bladeCount = Math.round(value);
+        this.#compositePass.bladeCount = Math.round(value);
     }
 
     /**
@@ -251,11 +251,11 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Starburst intensity
      */
     get starburstIntensity(): number {
-        return this.#effect_composite.starburstIntensity;
+        return this.#compositePass.starburstIntensity;
     }
 
     set starburstIntensity(value: number) {
-        this.#effect_composite.starburstIntensity = value;
+        this.#compositePass.starburstIntensity = value;
     }
 
     /**
@@ -268,11 +268,11 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Anamorphic streak intensity
      */
     get anamorphicIntensity(): number {
-        return this.#effect_composite.anamorphicIntensity;
+        return this.#compositePass.anamorphicIntensity;
     }
 
     set anamorphicIntensity(value: number) {
-        this.#effect_composite.anamorphicIntensity = value;
+        this.#compositePass.anamorphicIntensity = value;
     }
 
     /**
@@ -285,11 +285,11 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Lens dirt scattering intensity
      */
     get lensDirtIntensity(): number {
-        return this.#effect_composite.lensDirtIntensity;
+        return this.#compositePass.lensDirtIntensity;
     }
 
     set lensDirtIntensity(value: number) {
-        this.#effect_composite.lensDirtIntensity = value;
+        this.#compositePass.lensDirtIntensity = value;
     }
 
     /**
@@ -302,12 +302,12 @@ class LensFlare extends AMultiPassPostEffect {
      * [EN] Blur radius
      */
     get blurSize(): number {
-        return this.#effect_blur.size;
+        return this.#blurPass.size;
     }
 
     set blurSize(value: number) {
         validateNumberRange(value, 1, 64);
-        this.#effect_blur.size = value;
+        this.#blurPass.size = value;
     }
 
     /**
@@ -443,11 +443,11 @@ class LensFlare extends AMultiPassPostEffect {
         const downW = Math.max(1, width >> 1);
         const downH = Math.max(1, height >> 1);
 
-        const rawFlare = this.#effect_generate.render(view, downW, downH, sourceTextureInfo);
-        const blurredFlare = this.#effect_blur.render(view, downW, downH, rawFlare);
+        const rawFlare = this.#generatePass.render(view, downW, downH, sourceTextureInfo);
+        const blurredFlare = this.#blurPass.render(view, downW, downH, rawFlare);
         pool.release(rawFlare.texture);
 
-        const compositeResult = this.#effect_composite.render(view, width, height, sourceTextureInfo, blurredFlare);
+        const compositeResult = this.#compositePass.render(view, width, height, sourceTextureInfo, blurredFlare);
         pool.release(blurredFlare.texture);
 
         return compositeResult;
@@ -466,7 +466,7 @@ class LensFlare extends AMultiPassPostEffect {
             const gLin = Math.pow(color.g / 255.0, 2.2);
             const bLin = Math.pow(color.b / 255.0, 2.2);
             const luxScale = Math.min(Math.max((primaryLight.intensityMultiplier * primaryLight.lux) / 100000.0, 0.25), 3.0);
-            this.#effect_composite.syncSunUniforms(
+            this.#compositePass.syncSunUniforms(
                 dx * invLen,
                 dy * invLen,
                 dz * invLen,
@@ -481,7 +481,7 @@ class LensFlare extends AMultiPassPostEffect {
 
         const skySunDir = view.skyAtmosphere?.params?.sunDirection;
         if (skySunDir) {
-            this.#effect_composite.syncSunUniforms(
+            this.#compositePass.syncSunUniforms(
                 skySunDir[0],
                 skySunDir[1],
                 skySunDir[2],
@@ -494,7 +494,7 @@ class LensFlare extends AMultiPassPostEffect {
             return;
         }
 
-        this.#effect_composite.syncSunUniforms(0, 1, 0, 0, 1, 1, 1, 0.0);
+        this.#compositePass.syncSunUniforms(0, 1, 0, 0, 1, 1, 1, 0.0);
     }
 }
 

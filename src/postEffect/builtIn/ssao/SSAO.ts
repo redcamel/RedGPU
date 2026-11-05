@@ -32,9 +32,9 @@ import SSAOBlend from "./ssao_blend/SSAOBlend";
  * @category PostEffect
  */
 class SSAO extends AMultiPassPostEffect {
-    #effect_ao: SSAO_AO
-    #effect_denoise: SSAODenoise
-    #effect_blend: SSAOBlend
+    #aoPass: SSAO_AO
+    #denoisePass: SSAODenoise
+    #blendPass: SSAOBlend
     #useBlur: boolean = true
 
 
@@ -55,9 +55,9 @@ class SSAO extends AMultiPassPostEffect {
                 new SSAOBlend(redGPUContext),
             ],
         );
-        this.#effect_ao = this.passList[0] as SSAO_AO
-        this.#effect_denoise = this.passList[1] as SSAODenoise
-        this.#effect_blend = this.passList[2] as SSAOBlend
+        this.#aoPass = this.passList[0] as SSAO_AO
+        this.#denoisePass = this.passList[1] as SSAODenoise
+        this.#blendPass = this.passList[2] as SSAOBlend
     }
 
     /**
@@ -87,11 +87,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Whether Multi-Bounce is applied
      */
     get useMultiBounce(): boolean {
-        return this.#effect_blend.useMultiBounce;
+        return this.#blendPass.useMultiBounce;
     }
 
     set useMultiBounce(value: boolean) {
-        this.#effect_blend.useMultiBounce = value;
+        this.#blendPass.useMultiBounce = value;
     }
 
     /**
@@ -104,11 +104,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Sampling radius
      */
     get radius(): number {
-        return this.#effect_ao.radius;
+        return this.#aoPass.radius;
     }
 
     set radius(value: number) {
-        this.#effect_ao.radius = value;
+        this.#aoPass.radius = value;
     }
 
     /**
@@ -121,11 +121,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] AO intensity
      */
     get intensity(): number {
-        return this.#effect_ao.intensity;
+        return this.#aoPass.intensity;
     }
 
     set intensity(value: number) {
-        this.#effect_ao.intensity = value;
+        this.#aoPass.intensity = value;
     }
 
     /**
@@ -138,11 +138,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Depth bias
      */
     get bias(): number {
-        return this.#effect_ao.bias;
+        return this.#aoPass.bias;
     }
 
     set bias(value: number) {
-        this.#effect_ao.bias = value;
+        this.#aoPass.bias = value;
     }
 
     /**
@@ -155,11 +155,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Bias distance scale
      */
     get biasDistanceScale(): number {
-        return this.#effect_ao.biasDistanceScale;
+        return this.#aoPass.biasDistanceScale;
     }
 
     set biasDistanceScale(value: number) {
-        this.#effect_ao.biasDistanceScale = value;
+        this.#aoPass.biasDistanceScale = value;
     }
 
     /**
@@ -172,11 +172,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Fade start distance
      */
     get fadeDistanceStart(): number {
-        return this.#effect_ao.fadeDistanceStart;
+        return this.#aoPass.fadeDistanceStart;
     }
 
     set fadeDistanceStart(value: number) {
-        this.#effect_ao.fadeDistanceStart = value;
+        this.#aoPass.fadeDistanceStart = value;
     }
 
     /**
@@ -189,11 +189,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Fade distance range
      */
     get fadeDistanceRange(): number {
-        return this.#effect_ao.fadeDistanceRange;
+        return this.#aoPass.fadeDistanceRange;
     }
 
     set fadeDistanceRange(value: number) {
-        this.#effect_ao.fadeDistanceRange = value;
+        this.#aoPass.fadeDistanceRange = value;
     }
 
     /**
@@ -206,11 +206,11 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Contrast value
      */
     get contrast(): number {
-        return this.#effect_ao.contrast;
+        return this.#aoPass.contrast;
     }
 
     set contrast(value: number) {
-        this.#effect_ao.contrast = value;
+        this.#aoPass.contrast = value;
     }
 
 
@@ -238,24 +238,24 @@ class SSAO extends AMultiPassPostEffect {
         if (this.intensity <= 0) return sourceTextureInfo;
         const pool = view.postEffectManager.texturePool;
 
-        const aoResult = this.#effect_ao.render(
+        const aoResult = this.#aoPass.render(
             view, width, height, sourceTextureInfo
         );
 
         if (this.useBlur) {
-            const denoiseResult = this.#effect_denoise.render(
+            const denoiseResult = this.#denoisePass.render(
                 view, width, height, aoResult
             );
             pool.release(aoResult.texture);
 
-            const blendResult = this.#effect_blend.render(
+            const blendResult = this.#blendPass.render(
                 view, width, height, sourceTextureInfo, denoiseResult
             );
             pool.release(denoiseResult.texture);
 
             return blendResult;
         } else {
-            const blendResult = this.#effect_blend.render(
+            const blendResult = this.#blendPass.render(
                 view, width, height, sourceTextureInfo, aoResult
             );
             pool.release(aoResult.texture);

@@ -68,9 +68,9 @@ class PostEffectManager extends RedGPUObject {
     #systemExtraEntries = [this.#preExposureEntry, this.#devicePixelRatioEntry];
 
     #gbufferBindGroupLayout: GPUBindGroupLayout;
-    #gbufferBindGroup_swap0: GPUBindGroup;
-    #gbufferBindGroup_swap1: GPUBindGroup;
-    #prevMSAAID_for_gbuffer: string;
+    #gbufferBindGroupSwap0: GPUBindGroup;
+    #gbufferBindGroupSwap1: GPUBindGroup;
+    #prevMsaaIdForGbuffer: string;
     #destroyed: boolean = false
 
     /**
@@ -110,7 +110,7 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Shared G-Buffer `GPUBindGroup`
      */
     get gbufferBindGroup(): GPUBindGroup {
-        return this.#view.renderViewStateData.swapBufferIndex ? this.#gbufferBindGroup_swap1 : this.#gbufferBindGroup_swap0;
+        return this.#view.renderViewStateData.swapBufferIndex ? this.#gbufferBindGroupSwap1 : this.#gbufferBindGroupSwap0;
     }
 
     /**
@@ -182,9 +182,10 @@ class PostEffectManager extends RedGPUObject {
         if (this.#destroyed) return;
         this.#destroyed = true
 
-        this.#postEffects.forEach(effect => {
-            effect.destroy()
-        })
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            effects[i].destroy();
+        }
         this.#postEffects = null
 
         this.#texturePool.clear();
@@ -267,10 +268,11 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Removes all registered post-processing effects and clears their resources.
      */
     removeAllEffect() {
-        this.#postEffects.forEach(effect => {
-            effect.clear()
-        })
-        this.#postEffects.length = 0
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            effects[i].clear();
+        }
+        effects.length = 0;
     }
 
     /**
@@ -390,9 +392,10 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Clears cached resources of all registered effects and the texture pool.
      */
     clear() {
-        this.#postEffects.forEach(effect => {
-            effect.clear()
-        })
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            effects[i].clear();
+        }
         if (this.#texturePool) {
             this.#texturePool.clear();
         }
@@ -450,7 +453,7 @@ class PostEffectManager extends RedGPUObject {
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {width, height} = gBufferColorTexture;
 
-        const msaaChanged = this.#prevMSAAID_for_gbuffer !== msaaID;
+        const msaaChanged = this.#prevMsaaIdForGbuffer !== msaaID;
         const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
 
         if (msaaChanged || dimensionsChanged) {
@@ -476,30 +479,35 @@ class PostEffectManager extends RedGPUObject {
                 size: this.#postEffectSystemUniformBuffer.size
             };
 
-            const getEntries = (currentDepth: GPUTextureView, prevDepth: GPUTextureView) => [
-                {binding: 0, resource: currentDepth},
-                {binding: 1, resource: normalView},
-                {binding: 2, resource: motionVectorView},
-                {binding: 3, resource: prevDepth},
-                {binding: 4, resource: systemUniformBuffer},
-                {binding: 5, resource: basicSampler}
-            ];
-
             const layout = this.#gbufferBindGroupLayout;
 
-            this.#gbufferBindGroup_swap0 = gpuDevice.createBindGroup({
+            this.#gbufferBindGroupSwap0 = gpuDevice.createBindGroup({
                 label: 'PostEffect_Shared_GBuffer_BG_Swap0',
                 layout,
-                entries: getEntries(depthView0, depthView1)
+                entries: [
+                    {binding: 0, resource: depthView0},
+                    {binding: 1, resource: normalView},
+                    {binding: 2, resource: motionVectorView},
+                    {binding: 3, resource: depthView1},
+                    {binding: 4, resource: systemUniformBuffer},
+                    {binding: 5, resource: basicSampler}
+                ]
             });
 
-            this.#gbufferBindGroup_swap1 = gpuDevice.createBindGroup({
+            this.#gbufferBindGroupSwap1 = gpuDevice.createBindGroup({
                 label: 'PostEffect_Shared_GBuffer_BG_Swap1',
                 layout,
-                entries: getEntries(depthView1, depthView0)
+                entries: [
+                    {binding: 0, resource: depthView1},
+                    {binding: 1, resource: normalView},
+                    {binding: 2, resource: motionVectorView},
+                    {binding: 3, resource: depthView0},
+                    {binding: 4, resource: systemUniformBuffer},
+                    {binding: 5, resource: basicSampler}
+                ]
             });
 
-            this.#prevMSAAID_for_gbuffer = msaaID;
+            this.#prevMsaaIdForGbuffer = msaaID;
         }
     }
 

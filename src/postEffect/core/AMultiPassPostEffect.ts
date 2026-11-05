@@ -101,7 +101,10 @@ abstract class AMultiPassPostEffect extends RedGPUObject {
     destroy() {
         if (this.#destroyed) return;
         this.#destroyed = true
-        this.#passList.forEach(v => v.destroy());
+        const passList = this.#passList;
+        for (let i = 0, len = passList.length; i < len; i++) {
+            passList[i].destroy();
+        }
         this.#passList = null
     }
 
@@ -110,7 +113,10 @@ abstract class AMultiPassPostEffect extends RedGPUObject {
      * [EN] Clears cached resources of all registered internal passes.
      */
     clear() {
-        this.#passList.forEach(v => v.clear());
+        const passList = this.#passList;
+        for (let i = 0, len = passList.length; i < len; i++) {
+            passList[i].clear();
+        }
     }
 
     /**
