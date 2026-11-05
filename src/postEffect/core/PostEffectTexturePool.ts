@@ -252,7 +252,7 @@ class PostEffectTexturePool extends RedGPUObject {
         validateUintRange(height, 1);
         const {resourceManager} = this
         this.#requestCount++;
-        const key = `${width}x${height}_${format}_${useStorage ? 'S' : 'R'}`;
+        const key = `${width}x${height}_${format}_${useStorage ? 'STORAGE' : 'RENDER'}`;
         let list = this.#pool.get(key);
         if (!list) {
             list = [];

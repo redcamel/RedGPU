@@ -86,7 +86,7 @@ redUnit.testGroup(
             setup(run, (ctx, pool) => {
                 pool.allocResult(100, 100, 'rgba8unorm');
                 const details = pool.getDetails();
-                run(Array.isArray(details) && details.length === 1 && details[0].key === '100x100_rgba8unorm_S');
+                run(Array.isArray(details) && details.length === 1 && details[0].key === '100x100_rgba8unorm_STORAGE');
             });
         }, true);
 
