@@ -18,6 +18,8 @@ const ExampleHeader = () => {
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
     const showSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.showSourceModal);
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
+    const guiConfig = useExampleHelperStore((state: ExampleHelperState) => state.guiConfig);
+    const showSSAO = guiConfig?.topBar?.ssao !== false;
 
     const [ssao, setSSAO] = useState<boolean>(false);
 
@@ -91,12 +93,16 @@ const ExampleHeader = () => {
                             <div style={verticalDividerStyle}/>
                         </>
                     )}
-                    <IconToggleButton
-                        label="SSAO"
-                        onClick={handleSSAOChange}
-                        isActive={ssao}
-                    />
-                    <div style={verticalDividerStyle}/>
+                    {showSSAO && (
+                        <>
+                            <IconToggleButton
+                                label="SSAO"
+                                onClick={handleSSAOChange}
+                                isActive={ssao}
+                            />
+                            <div style={verticalDividerStyle}/>
+                        </>
+                    )}
                     {viewportActions.map((action) => (
                         <IconToggleButton
                             key={action.id}

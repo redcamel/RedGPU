@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=17929863338
  * [KO] Bloom 예제
  * [EN] Bloom example
  *
- * [KO] 물리 기반 HDR 다단 Mip-Chain 블룸(Bloom) 포스트 이펙트를 사용하여 빛 번짐 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply physically-based HDR multi-stage Mip-Chain Bloom glow effects using post effects.
+ * [KO] 블룸(Bloom) 이펙트를 사용하여 밝은 영역에 빛 번짐 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply a bloom glow effect to bright areas.
  */
 
 const container = document.createElement('div');
@@ -19,7 +19,6 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.tilt = 0;
         controller.speedDistance = 0.2;
 
         const scene = new RedGPU.Display.Scene();
@@ -28,19 +27,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
         redGPUContext.addView(viewNormal);
 
-        // [KO] HDR Bloom 포스트 이펙트 활성화 및 인스턴스 참조 획득
-        // [EN] Enable HDR Bloom post effect and obtain instance reference
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        viewEffect.builtInEffectManager.useBloom = true;
-        const effect = viewEffect.builtInEffectManager.bloom;
+        viewEffect.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
         redGPUContext.addView(viewEffect);
 
-        const directionalLight = new RedGPU.Light.DirectionalLight();
-        // scene.lightManager.addDirectionalLight(directionalLight);
+        // [KO] Bloom 이펙트 활성화 및 인스턴스 참조
+        // [EN] Enable Bloom effect and reference instance
+        viewEffect.builtInEffectManager.useBloom = true;
+        const effect = viewEffect.builtInEffectManager.bloom;
 
         new RedGPU.GLTFLoader(
             redGPUContext,
@@ -85,6 +84,9 @@ RedGPU.init(
 
 const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
+        topBar: {
+            bloom: false
+        },
         compareLabel: {
             title: 'PostEffect',
             normalTitle: 'Original',
@@ -96,7 +98,6 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             };
 
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
-
             folder.addBinding(targetView.builtInEffectManager, 'useBloom').on('change', (v) => {
                 controls.forEach((c) => c.disabled = !v.value);
                 presetFolder.disabled = !v.value;
@@ -124,7 +125,6 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                     pane.refresh();
                 });
             };
-
             addPresetButton('Natural', 'setNatural');
             addPresetButton('Cinematic', 'setCinematic');
             addPresetButton('Neon Glow', 'setNeonGlow');

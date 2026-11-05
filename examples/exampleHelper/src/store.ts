@@ -30,6 +30,13 @@ export interface CompareLabelConfig {
     targetContainer?: HTMLElement;
 }
 
+export interface TopBarConfig {
+    toneMapping?: boolean;
+    antialiasing?: boolean;
+    bloom?: boolean;
+    ssao?: boolean;
+}
+
 export interface GuiConfig {
     RedGPU?: any;
     redGPUContext?: boolean;
@@ -40,6 +47,7 @@ export interface GuiConfig {
     skybox?: boolean;
     globalWind?: boolean | { expanded?: boolean };
     compareLabel?: CompareLabelConfig;
+    topBar?: TopBarConfig;
     gui?: (gui: any) => void;
 }
 

@@ -10,6 +10,11 @@ import {verticalDividerStyle} from '../../common/styles/uiStyles';
 const RenderingSettingsGroup: React.FC = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
+    const guiConfig = useExampleHelperStore((state: ExampleHelperState) => state.guiConfig);
+
+    const showToneMapping = guiConfig?.topBar?.toneMapping !== false;
+    const showAntialiasing = guiConfig?.topBar?.antialiasing !== false;
+    const showBloom = guiConfig?.topBar?.bloom !== false;
 
     const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
     const [toneMapping, setToneMapping] = useState<string>(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
@@ -29,7 +34,7 @@ const RenderingSettingsGroup: React.FC = () => {
                     setToneMapping(lastView.toneMappingManager.mode);
                 }
                 if (lastView.builtInEffectManager) {
-                    setBloom(lastView.builtInEffectManager.useBloom ? 'NATURAL' : 'NONE');
+                    setBloom(lastView.builtInEffectManager.useBloom ? 'CINEMATIC' : 'NONE');
                 }
             }
         }
@@ -121,33 +126,39 @@ const RenderingSettingsGroup: React.FC = () => {
 
     return (
         <>
-            <SelectBox
-                label="Tone"
-                value={toneMapping}
-                options={tmOptions}
-                style={isNarrow ? {flex: 1.3, minWidth: 0} : undefined}
-                onChange={handleToneMappingChange}
-            />
+            {showToneMapping && (
+                <SelectBox
+                    label="Tone"
+                    value={toneMapping}
+                    options={tmOptions}
+                    style={isNarrow ? {flex: 1.3, minWidth: 0} : undefined}
+                    onChange={handleToneMappingChange}
+                />
+            )}
 
-            <div style={dividerStyle}/>
+            {showToneMapping && (showAntialiasing || showBloom) && <div style={dividerStyle}/>}
 
-            <SelectBox
-                label="AA"
-                value={antialiasing}
-                options={aaOptions}
-                style={isNarrow ? {flex: 0.85, minWidth: 0} : undefined}
-                onChange={handleAntialiasingChange}
-            />
+            {showAntialiasing && (
+                <SelectBox
+                    label="AA"
+                    value={antialiasing}
+                    options={aaOptions}
+                    style={isNarrow ? {flex: 0.85, minWidth: 0} : undefined}
+                    onChange={handleAntialiasingChange}
+                />
+            )}
 
-            <div style={dividerStyle}/>
+            {showAntialiasing && showBloom && <div style={dividerStyle}/>}
 
-            <SelectBox
-                label="Bloom"
-                value={bloom}
-                options={bloomOptions}
-                style={isNarrow ? {flex: 1.1, minWidth: 0} : undefined}
-                onChange={handleBloomChange}
-            />
+            {showBloom && (
+                <SelectBox
+                    label="Bloom"
+                    value={bloom}
+                    options={bloomOptions}
+                    style={isNarrow ? {flex: 1.1, minWidth: 0} : undefined}
+                    onChange={handleBloomChange}
+                />
+            )}
         </>
     );
 };
