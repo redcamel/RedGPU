@@ -89,7 +89,7 @@ class Bloom extends AMultiPassPostEffect {
         this.#effect_upsample0 = upsample0;
         this.#effect_composite = composite;
 
-        this.setNatural();
+        this.setCinematic();
     }
 
     /**
