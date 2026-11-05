@@ -13,6 +13,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
         view.builtInEffectManager.useBloom = true;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
