@@ -114,7 +114,9 @@ class Convolution extends ASingleComputePassPostEffect {
     set kernel(value: number[]) {
         this.#kernel = value;
         let kernelWeight = 0;
-        this.#kernel.forEach(v => kernelWeight += v);
+        for (let i = 0, len = value.length; i < len; i++) {
+            kernelWeight += value[i];
+        }
         this.updateUniform('kernelWeight', kernelWeight || 1);
         this.updateUniform('kernel', value);
     }

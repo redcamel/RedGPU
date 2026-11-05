@@ -83,10 +83,6 @@ class ColorTemperatureTint extends ASingleRenderPassPostEffect {
             'POST_EFFECT_COLOR_TEMPERATURE_TINT',
             createBasicRenderPassPostEffectCode(fragmentCode, uniformStructCode, undefined, false)
         );
-
-        this.temperature = 6500;
-        this.amount = 1;
-        this.tint = 0;
     }
 
     /**

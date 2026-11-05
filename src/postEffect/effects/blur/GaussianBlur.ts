@@ -50,7 +50,6 @@ class GaussianBlur extends AMultiPassPostEffect {
             ],
             isLdr
         );
-        this.size = this.size;
     }
 
     /**
@@ -68,7 +67,10 @@ class GaussianBlur extends AMultiPassPostEffect {
 
     set size(value: number) {
         this.#size = value;
-        this.passList.forEach((v: BlurX | BlurY) => v.size = value);
+        const passList = this.passList as (BlurX | BlurY)[];
+        for (let i = 0, len = passList.length; i < len; i++) {
+            passList[i].size = value;
+        }
     }
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
