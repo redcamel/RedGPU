@@ -19,14 +19,16 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         if (!view) return;
 
         const lightingFolder = gui.addFolder({title: 'Lighting', expanded: true});
+        const initialLight = view.scene.lightManager.directionalLights[0];
+        const hasInitialLight = !!initialLight;
 
         const settings = {
             texture: hdrImages[0].name,
-            useLight: view.scene.lightManager.directionalLights.length > 0,
-            lux: view.scene.lightManager.directionalLights[0]?.lux || 100000,
-            elevation: view.scene.lightManager.directionalLights[0]?.elevation ?? 45,
-            azimuth: view.scene.lightManager.directionalLights[0]?.azimuth ?? 45,
-            color: view.scene.lightManager.directionalLights[0]?.color.hex || '#ffffff',
+            useLight: hasInitialLight,
+            lux: initialLight?.lux || hdrImages[0].sunLux || 100000,
+            elevation: initialLight?.elevation ?? hdrImages[0].elevation ?? 45,
+            azimuth: initialLight?.azimuth ?? hdrImages[0].azimuth ?? 45,
+            color: initialLight?.color.hex || hdrImages[0].color || '#ffffff',
             useIBL: true,
             intensityMultiplier: view.ibl?.intensityMultiplier || 1.0,
         };
@@ -34,7 +36,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         const pathInfo = {finalPath: ''};
         const {updatePathInfo, bindSourcePath} = createSourcePathMonitor(pathInfo);
 
-        const updateIBL = (name: string) => {
+        const updateIBL = (name: string, syncSunSettings: boolean = true) => {
             if (!settings.useIBL) return;
 
             const imageInfo = hdrImages.find(item => item.name === name);
@@ -53,13 +55,23 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
                 ibl.intensityMultiplier = settings.intensityMultiplier;
                 view.ibl = ibl;
 
-                // [KO] IBL 루미넌스 및 태양광 비율에 맞춰 직사광의 lux 동기화
-                // [EN] Synchronize directional light lux with the IBL luminance and sunLux ratio
-                const targetLux = (imageInfo as any)?.sunLux || luminance;
+                // [KO] IBL 루미넌스 및 태양광 설정(sunLux, elevation, azimuth, color)에 맞춰 직사광 동기화
+                // [EN] Synchronize directional light with the IBL luminance and sun settings (sunLux, elevation, azimuth, color)
+                const targetLux = imageInfo.sunLux || luminance;
                 settings.lux = targetLux;
+                if (syncSunSettings) {
+                    if (imageInfo.elevation !== undefined) settings.elevation = imageInfo.elevation;
+                    if (imageInfo.azimuth !== undefined) settings.azimuth = imageInfo.azimuth;
+                    if (imageInfo.color !== undefined) settings.color = imageInfo.color;
+                }
                 const lights = view.scene.lightManager.directionalLights;
                 if (lights.length > 0) {
                     lights[0].lux = targetLux;
+                    if (syncSunSettings) {
+                        lights[0].elevation = settings.elevation;
+                        lights[0].azimuth = settings.azimuth;
+                        lights[0].color.setColorByHEX(settings.color);
+                    }
                 }
             }
 
@@ -68,14 +80,19 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
 
         const lightBindings: any[] = [];
 
-        const syncLight = (enabled: boolean) => {
+        const syncLight = (enabled: boolean, syncSunSettings: boolean = true) => {
             if (enabled) {
-                // [KO] 현재 선택된 텍스처의 태양 설정값(sunLux) 동기화
-                // [EN] Synchronize sun settings (sunLux) of the currently selected texture
+                // [KO] 현재 선택된 텍스처의 태양 설정값(sunLux, elevation, azimuth, color) 동기화
+                // [EN] Synchronize sun settings (sunLux, elevation, azimuth, color) of the currently selected texture
                 const imageInfo = hdrImages.find(item => item.name === settings.texture);
                 const luminance = imageInfo?.luminance || 30000;
-                const targetLux = (imageInfo as any)?.sunLux || luminance;
+                const targetLux = imageInfo?.sunLux || luminance;
                 settings.lux = targetLux;
+                if (syncSunSettings && imageInfo) {
+                    if (imageInfo.elevation !== undefined) settings.elevation = imageInfo.elevation;
+                    if (imageInfo.azimuth !== undefined) settings.azimuth = imageInfo.azimuth;
+                    if (imageInfo.color !== undefined) settings.color = imageInfo.color;
+                }
 
                 if (view.scene.lightManager.directionalLights.length === 0) {
                     if (RedGPU) {
@@ -87,7 +104,13 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
                         view.scene.lightManager.addDirectionalLight(directionalLight);
                     }
                 } else {
-                    view.scene.lightManager.directionalLights[0].lux = targetLux;
+                    const primaryLight = view.scene.lightManager.directionalLights[0];
+                    primaryLight.lux = targetLux;
+                    if (syncSunSettings) {
+                        primaryLight.elevation = settings.elevation;
+                        primaryLight.azimuth = settings.azimuth;
+                        primaryLight.color.setColorByHEX(settings.color);
+                    }
                 }
             } else {
                 view.scene.lightManager.removeAllLight();
@@ -97,7 +120,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         };
 
         // 1. Lighting Controls
-        lightingFolder.addBinding(settings, 'useLight').on('change', (ev: any) => syncLight(ev.value));
+        lightingFolder.addBinding(settings, 'useLight').on('change', (ev: any) => syncLight(ev.value, true));
         lightBindings.push(
             lightingFolder.addBinding(settings, 'lux', {min: 0, max: 150000, step: 100})
                 .on('change', (ev: any) => {
@@ -132,7 +155,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
 
         lightingFolder.addBinding(settings, 'useIBL').on('change', (ev: any) => {
             if (ev.value) {
-                updateIBL(settings.texture);
+                updateIBL(settings.texture, false);
                 iblFolder.disabled = false;
             } else {
                 view.ibl = null;
@@ -144,7 +167,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         const iblFolder = lightingFolder.addFolder({title: 'IBL Settings', expanded: true});
 
         iblFolder.addBinding(settings, 'texture', {options: hdrOptions})
-            .on('change', (ev: any) => updateIBL(ev.value));
+            .on('change', (ev: any) => updateIBL(ev.value, true));
 
         // [KO] intensityMultiplier 제어 [EN] Control intensityMultiplier
         iblFolder.addBinding(settings, 'intensityMultiplier', {min: 0, max: 5, step: 0.1})
@@ -159,8 +182,8 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         bindSourcePath(iblFolder);
 
         // Initial setup
-        syncLight(settings.useLight);
-        updateIBL(settings.texture);
+        syncLight(settings.useLight, !hasInitialLight);
+        updateIBL(settings.texture, !hasInitialLight);
 
         return () => {
             lightingFolder.dispose();
