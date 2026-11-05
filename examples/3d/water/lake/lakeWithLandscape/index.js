@@ -23,6 +23,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         const currentIbl = new RedGPU.Resource.IBL(redGPUContext, '../../../../assets/hdr/field.hdr');
         view.ibl = currentIbl;
