@@ -25,6 +25,9 @@ RedGPU.init(
         redGPUContext.addView(view);
         view.builtInEffectManager.useBloom = true;
 
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         const ibl = new RedGPU.Resource.IBL(view.redGPUContext, '../../../../assets/hdr/Cannon_Exterior.hdr',25000);
         const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
         view.ibl = ibl;

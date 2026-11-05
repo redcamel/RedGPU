@@ -25,6 +25,9 @@ RedGPU.init(
         redGPUContext.addView(view);
         view.builtInEffectManager.useBloom = true;
 
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         const ibl = new RedGPU.Resource.IBL(view.redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
         view.ibl = ibl;
