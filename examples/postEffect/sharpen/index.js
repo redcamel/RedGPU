@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=17929863338
  * [KO] Sharpen 예제
  * [EN] Sharpen example
  *
- * [KO] 샤픈(Sharpen) 포스트 이펙트를 사용하여 화면의 윤곽선 선명도를 높이는 방법을 시연합니다.
- * [EN] Demonstrates how to enhance screen edge sharpness using the Sharpen post effect.
+ * [KO] Sharpen 이펙트를 사용하여 화면의 윤곽선 선명도를 높이는 방법을 보여줍니다.
+ * [EN] Demonstrates how to enhance screen edge sharpness using the Sharpen effect.
  */
 
 const container = document.createElement('div');
@@ -29,16 +29,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] Sharpen 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create Sharpen post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] Sharpen 이펙트 생성 및 뷰에 추가
+        // [EN] Create Sharpen effect and add to view
         const effect = new RedGPU.PostEffect.Sharpen(redGPUContext);
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

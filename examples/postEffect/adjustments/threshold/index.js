@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Threshold 예제
  * [EN] Threshold example
  *
- * [KO] 포스트 이펙트를 사용하여 화면의 임계값(Threshold) 이진화 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply a binary threshold effect to the screen using post effects.
+ * [KO] Threshold 이펙트를 사용하여 화면에 임계값 기반 흑백 이진화 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply a binary threshold effect using the Threshold effect.
  */
 
 const container = document.createElement('div');
@@ -29,16 +29,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] Threshold 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create Threshold post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] Threshold 이펙트 생성 및 뷰에 추가
+        // [EN] Create Threshold effect and add to view
         const effect = new RedGPU.PostEffect.Threshold(redGPUContext);
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

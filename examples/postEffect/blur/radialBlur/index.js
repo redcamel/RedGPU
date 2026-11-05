@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Radial Blur 예제
  * [EN] Radial Blur example
  *
- * [KO] 방사형 회전 블러(Radial Blur) 포스트 이펙트를 시연합니다.
- * [EN] Demonstrates the radial spin blur post effect.
+ * [KO] RadialBlur 이펙트를 사용하여 화면에 방사형 회전 블러 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply a radial spin blur effect using the RadialBlur effect.
  */
 
 const container = document.createElement('div');
@@ -29,16 +29,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] RadialBlur 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create RadialBlur post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] RadialBlur 이펙트 생성 및 뷰에 추가
+        // [EN] Create RadialBlur effect and add to view
         const effect = new RedGPU.PostEffect.RadialBlur(redGPUContext);
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

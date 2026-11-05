@@ -30,11 +30,13 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, ibl.luminance);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, ibl.luminance);
+        viewEffect.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewEffect);
 
         // [KO] ChromaticAberration 이펙트 활성화 및 인스턴스 참조

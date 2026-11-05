@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Directional Blur 예제
  * [EN] Directional Blur example
  *
- * [KO] 방향성 블러(Directional Blur) 포스트 이펙트를 시연합니다.
- * [EN] Demonstrates the directional blur post effect.
+ * [KO] DirectionalBlur 이펙트를 사용하여 지정한 각도 방향으로 블러 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply a directional blur effect along a specified angle using the DirectionalBlur effect.
  */
 
 const container = document.createElement('div');
@@ -29,16 +29,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] DirectionalBlur 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create DirectionalBlur post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] DirectionalBlur 이펙트 생성 및 뷰에 추가
+        // [EN] Create DirectionalBlur effect and add to view
         const effect = new RedGPU.PostEffect.DirectionalBlur(redGPUContext);
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

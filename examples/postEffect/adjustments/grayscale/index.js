@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Grayscale 예제
  * [EN] Grayscale example
  *
- * [KO] 포스트 이펙트를 사용하여 화면을 그레이스케일로 변환하는 방법을 보여줍니다.
- * [EN] Demonstrates how to convert the screen to grayscale using post effects.
+ * [KO] Grayscale 이펙트를 사용하여 화면을 흑백(그레이스케일)으로 변환하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to convert the screen to grayscale using the Grayscale effect.
  */
 
 const container = document.createElement('div');
@@ -29,16 +29,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] Grayscale 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create Grayscale post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] Grayscale 이펙트 생성 및 뷰에 추가
+        // [EN] Create Grayscale effect and add to view
         const effect = new RedGPU.PostEffect.Grayscale(redGPUContext);
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

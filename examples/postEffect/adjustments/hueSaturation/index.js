@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Hue & Saturation 예제
  * [EN] Hue & Saturation example
  *
- * [KO] 포스트 이펙트를 사용하여 화면의 색조(Hue)와 채도(Saturation)를 조절하는 방법을 보여줍니다.
- * [EN] Demonstrates how to adjust screen hue and saturation using post effects.
+ * [KO] HueSaturation 이펙트를 사용하여 화면의 색조와 채도를 조절하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to adjust screen hue and saturation using the HueSaturation effect.
  */
 
 const container = document.createElement('div');
@@ -29,16 +29,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] HueSaturation 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create HueSaturation post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] HueSaturation 이펙트 생성 및 뷰에 추가
+        // [EN] Create HueSaturation effect and add to view
         const effect = new RedGPU.PostEffect.HueSaturation(redGPUContext);
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=17929863338
  * [KO] Convolution 예제
  * [EN] Convolution example
  *
- * [KO] 컨볼루션(Convolution) 필터를 사용하여 다양한 이미지 처리 효과(Sharpen, Blur, Edge, Emboss 등)를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply various image processing effects (Sharpen, Blur, Edge, Emboss, etc.) using a convolution filter.
+ * [KO] Convolution 이펙트를 사용하여 커널 행렬 기반 이미지 필터 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply kernel matrix-based image filter effects using the Convolution effect.
  */
 
 const container = document.createElement('div');
@@ -29,17 +29,20 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] Convolution 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create Convolution post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] Convolution 이펙트 생성, 커널 설정 및 뷰에 추가
+        // [EN] Create Convolution effect, configure kernel, and add to view
         const effect = new RedGPU.PostEffect.Convolution(redGPUContext);
         effect.kernel = RedGPU.PostEffect.Convolution.EDGE;
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

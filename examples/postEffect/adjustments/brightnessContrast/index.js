@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Brightness & Contrast 예제
  * [EN] Brightness & Contrast example
  *
- * [KO] 포스트 이펙트를 사용하여 화면의 밝기(Brightness)와 대비(Contrast)를 조절하는 방법을 보여줍니다.
- * [EN] Demonstrates how to adjust screen brightness and contrast using post effects.
+ * [KO] BrightnessContrast 이펙트를 사용하여 화면의 밝기와 대비를 조절하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to adjust screen brightness and contrast using the BrightnessContrast effect.
  */
 
 const container = document.createElement('div');
@@ -29,16 +29,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] BrightnessContrast 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create BrightnessContrast post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] BrightnessContrast 이펙트 생성 및 뷰에 추가
+        // [EN] Create BrightnessContrast effect and add to view
         const effect = new RedGPU.PostEffect.BrightnessContrast(redGPUContext);
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
