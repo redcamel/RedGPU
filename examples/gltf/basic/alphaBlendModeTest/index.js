@@ -5,75 +5,55 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
  * [KO] Alpha Blend Mode Test 예제
  * [EN] Alpha Blend Mode Test example
  *
- * [KO] GLTF 알파 블렌드 모드 테스트 모델을 로드하고 렌더링합니다.
+ * [KO] GLTF 알파 블렌드 모드(Alpha Blend Mode) 테스트 모델을 로드하고 렌더링합니다.
  * [EN] Loads and renders the GLTF Alpha Blend Mode Test model.
  */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
 
-        // Create scene and view
         const scene = new RedGPU.Display.Scene();
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
-        // Load GLTF model
-        const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb';
-        loadGLTF(view, MODEL_URL);
+        // [KO] GLTF 모델 로드 및 화면 중앙 맞춤
+        // [EN] Load GLTF model and fit to screen center
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb',
+            (result) => {
+                const mesh = result.resultMesh;
+                scene.addChild(mesh);
+                RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view);
+            },
+            RedGPUExampleHelper.loadingProgressInfoHandler
+        );
 
-        // Start renderer
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // Add additional per-frame logic here if needed
         });
 
-        // Configure test panel
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error("Initialization failed:", failReason);
+        console.error('Initialization failed:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
 
-
-/**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
- * @param {RedGPU.Display.View3D} view
- * @param {string} url
- */
-const loadGLTF = (view, url) => {
-    const {redGPUContext, scene} = view;
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        url,
-        (result) => {
-            const mesh = result.resultMesh
-            scene.addChild(mesh)
-            RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
-        },
-        RedGPUExampleHelper.loadingProgressInfoHandler
-    );
-}
-
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
-const renderTestPane = (redGPUContext, targetView) => {
+const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
         ibl: true,
