@@ -1614,15 +1614,6 @@ export const ExampleList: ExampleListType = [
                             en: `A chess set demonstrating transmission and volume.`
                         },
                     },
-                    {
-                        name: 'USD Shader Ball',
-                        path: 'gltf/models/usdShaderBallForGltf',
-                        extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
-                        description: {
-                            ko: `투과(Transmission)와 볼륨(Volume) 등 고급 PBR 재질 속성을 검증하기 위한 표준 USD 셰이더 볼 모델입니다.`,
-                            en: `Standard USD Shader Ball model designed to showcase and test advanced PBR material properties including transmission and volume.`
-                        },
-                    },
                 ]
             },
             {
@@ -2037,6 +2028,24 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
+                                name: 'Transmission Order Test',
+                                path: 'gltf/gltfExtensions/transmission/transmissionOrderTest',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
+                                description: {
+                                    ko: `다중 투과(Transmission) 및 반투명 객체가 겹칠 때의 렌더링 정렬 순서를 테스트합니다.`,
+                                    en: `Tests rendering order of multiple overlapping transmissive and transparent objects.`
+                                },
+                            },
+                            {
+                                name: 'Transmission Thinwall Test Grid',
+                                path: 'gltf/gltfExtensions/transmission/transmissionThinwallTestGrid',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
+                                description: {
+                                    ko: `얇은 벽(Thin-walled) 옵션 활성화 여부에 따른 투과 차이를 테스트합니다.`,
+                                    en: `Tests transmission differences based on Thin-walled option activation.`
+                                },
+                            },
+                            {
                                 name: 'Stained Glass Lamp',
                                 path: 'gltf/gltfExtensions/transmission/stainedGlassLamp',
                                 extensionList: ['KHR_materials_transmission'],
@@ -2072,6 +2081,15 @@ export const ExampleList: ExampleListType = [
                                     en: `Commercial refrigerator model with glass doors.`
                                 },
                             },
+                            {
+                                name: 'Glass Broken Window',
+                                path: 'gltf/gltfExtensions/transmission/glassBrokenWindow',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
+                                description: {
+                                    ko: `깨진 유리창의 두께감과 굴절을 표현합니다.`,
+                                    en: `Expresses the thickness and refraction of a broken window.`
+                                },
+                            },
                         ]
                     },
                     {
@@ -2105,15 +2123,6 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'Transmission Thinwall Test Grid',
-                                path: 'gltf/gltfExtensions/volume/transmissionThinwallTestGrid',
-                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
-                                description: {
-                                    ko: `얇은 벽(Thin-walled) 옵션 활성화 여부에 따른 투과 차이를 테스트합니다.`,
-                                    en: `Tests transmission differences based on Thin-walled option activation.`
-                                },
-                            },
-                            {
                                 name: 'Attenuation Test',
                                 path: 'gltf/gltfExtensions/volume/attenuationTest',
                                 extensionList: ['KHR_materials_volume'],
@@ -2132,15 +2141,6 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'Glass Broken Window',
-                                path: 'gltf/gltfExtensions/volume/glassBrokenWindow',
-                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
-                                description: {
-                                    ko: `깨진 유리창의 두께감과 굴절을 표현합니다.`,
-                                    en: `Expresses the thickness and refraction of a broken window.`
-                                },
-                            },
-                            {
                                 name: 'Glass Hurricane Candle Holder',
                                 path: 'gltf/gltfExtensions/volume/glassHurricaneCandleHolder',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
@@ -2156,6 +2156,15 @@ export const ExampleList: ExampleListType = [
                                 description: {
                                     ko: `KHR_materials_transmission과 KHR_materials_volume을 사용하여 색유리와 같은 객체를 표현합니다.`,
                                     en: `Showcases KHR_materials_transmission and KHR_materials_volume, creating an object that resembles colored glass.`
+                                },
+                            },
+                            {
+                                name: 'USD Shader Ball',
+                                path: 'gltf/gltfExtensions/volume/usdShaderBallForGltf',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
+                                description: {
+                                    ko: `투과(Transmission)와 볼륨(Volume) 등 고급 PBR 재질 속성을 검증하기 위한 표준 USD 셰이더 볼 모델입니다.`,
+                                    en: `Standard USD Shader Ball model designed to showcase and test advanced PBR material properties including transmission and volume.`
                                 },
                             },
                         ]
