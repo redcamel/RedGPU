@@ -24,12 +24,12 @@ const RenderingSettingsGroup: React.FC = () => {
             else setAntialiasing('NONE');
 
             if (redGPUContext.viewList.length > 0) {
-                const firstView = redGPUContext.viewList[0];
-                if (firstView.toneMappingManager) {
-                    setToneMapping(firstView.toneMappingManager.mode);
+                const lastView = redGPUContext.viewList[redGPUContext.viewList.length - 1];
+                if (lastView.toneMappingManager) {
+                    setToneMapping(lastView.toneMappingManager.mode);
                 }
-                if (firstView.builtInEffectManager) {
-                    setBloom(firstView.builtInEffectManager.useBloom ? 'NATURAL' : 'NONE');
+                if (lastView.builtInEffectManager) {
+                    setBloom(lastView.builtInEffectManager.useBloom ? 'NATURAL' : 'NONE');
                 }
             }
         }

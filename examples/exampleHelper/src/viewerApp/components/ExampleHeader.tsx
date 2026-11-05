@@ -24,9 +24,9 @@ const ExampleHeader = () => {
     useEffect(() => {
         if (redGPUContext) {
             if (redGPUContext.viewList.length > 0) {
-                const firstView = redGPUContext.viewList[0];
-                if (firstView.builtInEffectManager) {
-                    setSSAO(firstView.builtInEffectManager.useSSAO);
+                const lastView = redGPUContext.viewList[redGPUContext.viewList.length - 1];
+                if (lastView.builtInEffectManager) {
+                    setSSAO(lastView.builtInEffectManager.useSSAO);
                 }
             }
         }
