@@ -214,8 +214,8 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(언리얼 엔진 표준 기본값: 200m)를 반환합니다.
-     * [EN] Returns the maximum shadow distance (Unreal Engine standard default: 200m).
+     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(기본값: 200m)를 반환합니다.
+     * [EN] Returns the maximum shadow distance (default: 200m).
      */
     get maxShadowDistance(): number {
         return this.#maxShadowDistance;

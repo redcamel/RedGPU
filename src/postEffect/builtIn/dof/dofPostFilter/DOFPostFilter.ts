@@ -6,8 +6,8 @@ import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 /**
- * [KO] 언리얼 엔진 `Diaphragm DOF` 규격에 맞춰 절반 해상도(`1/2`) 배경 보케 버퍼(`passMode = 0`)와 전경 보케+불투명도 버퍼(`passMode = 1`)를 각각 독립적으로 9-Tap Tent 스무딩하는 내부 서브패스입니다.
- * [EN] Internal sub-pass that independently performs 9-Tap Tent smoothing on the half-resolution (`1/2`) background bokeh buffer (`passMode = 0`) and foreground bokeh+opacity buffer (`passMode = 1`) matching Unreal Engine's `Diaphragm DOF`.
+ * [KO] 절반 해상도(`1/2`) 배경 보케 버퍼(`passMode = 0`)와 전경 보케+불투명도 버퍼(`passMode = 1`)를 각각 독립적으로 9-Tap Tent 스무딩하는 내부 서브패스입니다.
+ * [EN] Internal sub-pass that independently performs 9-Tap Tent smoothing on the half-resolution (`1/2`) background bokeh buffer (`passMode = 0`) and foreground bokeh+opacity buffer (`passMode = 1`).
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

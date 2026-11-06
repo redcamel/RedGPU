@@ -11,8 +11,8 @@ import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 /**
- * [KO] 언리얼 엔진 `Diaphragm DOF`의 `DOF_Recombine` 패스와 동일하게 풀해상도(`1×1`) 깊이 복원 CoC, 미세 비초점 구간(`Slight Out-of-Focus`) 원본 8-Tap 직접 개더링, 배경 보케 양방향 업샘플링 및 전경 불투명도(`α_fg`) Porter-Duff `Over` 합성을 수행하는 내부 패스입니다.
- * [EN] Internal pass matching Unreal Engine's `Diaphragm DOF` `DOF_Recombine` pass, performing full-resolution (`1×1`) depth-reconstructed CoC, direct 8-Tap full-resolution slight out-of-focus gathering, background bokeh bilateral upsampling, and foreground opacity (`α_fg`) Porter-Duff `Over` composition.
+ * [KO] 풀해상도(`1×1`) 깊이 복원 CoC, 미세 비초점 구간(`Slight Out-of-Focus`) 원본 8-Tap 직접 개더링, 배경 보케 양방향 업샘플링 및 전경 불투명도(`α_fg`) Porter-Duff `Over` 합성을 수행하는 내부 패스입니다.
+ * [EN] Internal pass performing full-resolution (`1×1`) depth-reconstructed CoC, direct 8-Tap full-resolution slight out-of-focus gathering, background bokeh bilateral upsampling, and foreground opacity (`α_fg`) Porter-Duff `Over` composition.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

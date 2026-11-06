@@ -311,8 +311,8 @@ class LensFlare extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 언리얼 엔진(Unreal Engine) 표준 기본값과 동일한 8-Element 물리 렌즈 플레어 기본 프리셋을 적용합니다.
-     * [EN] Applies the default 8-element physical lens flare preset matching Unreal Engine standard defaults.
+     * [KO] 8-Element 물리 렌즈 플레어 기본 프리셋을 적용합니다.
+     * [EN] Applies the default 8-element physical lens flare preset.
      */
     setNatural(): void {
         this.intensity = 1.0;

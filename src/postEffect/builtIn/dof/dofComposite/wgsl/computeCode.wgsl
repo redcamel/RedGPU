@@ -63,8 +63,8 @@ if (uniforms.historyValid == 1u) {
 let exactFullCoC = abs(exactHalfCoC) * halfToFullScale;
 let farBokehBlend = max(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(0.35, 1.5, -exactHalfCoC));
 
-// [KO] 2. 언리얼 DOF_Recombine 규격: 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, farBokehBlend < 0.999)에서 이산 CoC 검증 및 동일 부호 레이어 8-Tap 직접 개더링 수행
-// [EN] 2. Unreal DOF_Recombine specification: 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px, farBokehBlend < 0.999) with discrete CoC lookup and strict same-sign layer gating
+// [KO] 2. 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, farBokehBlend < 0.999)에서 이산 CoC 검증 및 동일 부호 레이어 8-Tap 직접 개더링 수행
+// [EN] 2. 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px, farBokehBlend < 0.999) with discrete CoC lookup and strict same-sign layer gating
 var baseFullResColor = sharpColor;
 if (exactFullCoC > 0.75 && farBokehBlend < 0.999) {
     let slightRadius = clamp(exactFullCoC, 0.75, 3.5);

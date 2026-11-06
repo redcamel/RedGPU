@@ -4,8 +4,8 @@ import createBasicComputePassPostEffectCode from "../../../core/createBasicCompu
 import computeCode from "./wgsl/computeCode.wgsl";
 
 /**
- * [KO] 언리얼 엔진 `Diaphragm DOF`의 `DOFDownsample` 패스와 동일하게, 상위 `cocMip` 텍스처를 CoC-Aware 양방향 B-Spline/Tent 가중치로 `1/4`(`Mip 1`) 및 `1/8`(`Mip 2`) 해상도로 다운샘플링하는 내부 서브패스입니다.
- * [EN] Internal sub-pass that downsamples the parent `cocMip` texture to `1/4` (`Mip 1`) and `1/8` (`Mip 2`) resolutions using CoC-Aware bilateral B-Spline/Tent weights, matching Unreal Engine's `Diaphragm DOF` `DOFDownsample` pass.
+ * [KO] 상위 `cocMip` 텍스처를 CoC-Aware 양방향 B-Spline/Tent 가중치로 `1/4`(`Mip 1`) 및 `1/8`(`Mip 2`) 해상도로 다운샘플링하는 내부 서브패스입니다.
+ * [EN] Internal sub-pass that downsamples the parent `cocMip` texture to `1/4` (`Mip 1`) and `1/8` (`Mip 2`) resolutions using CoC-Aware bilateral B-Spline/Tent weights.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

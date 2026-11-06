@@ -193,8 +193,8 @@ class Bloom extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 야외 대기 및 일반 PBR 씬에 가장 자연스러운 기본 물리 카메라 블룸 프리셋(언리얼 엔진 표준 `intensity = 0.675`)을 적용합니다.
-     * [EN] Applies the default natural physical camera bloom preset (Unreal Engine standard `intensity = 0.675`) suitable for outdoor atmosphere and standard PBR scenes.
+     * [KO] 야외 대기 및 일반 PBR 씬에 가장 자연스러운 기본 물리 카메라 블룸 프리셋(`intensity = 0.675`)을 적용합니다.
+     * [EN] Applies the default natural physical camera bloom preset (`intensity = 0.675`) suitable for outdoor atmosphere and standard PBR scenes.
      */
     setNatural(): void {
         this.threshold = 1.0;

@@ -11,8 +11,8 @@ import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 /**
- * [KO] 언리얼 엔진 `Diaphragm DOF` 규격에 맞춰 `Mip 0 ~ Mip 2` 적응형 샘플링과 조리개 날 꼭짓점 간 직선 선형 보간(`mix(V0, V1, t)`) 커널로 배경(`passMode = 0`) 및 전경(`passMode = 1`) 보케를 독립 개더링하는 내부 서브패스입니다.
- * [EN] Internal sub-pass that independently gathers background (`passMode = 0`) and foreground (`passMode = 1`) bokeh using `Mip 0 ~ Mip 2` adaptive sampling and blade-vertex linear interpolation (`mix(V0, V1, t)`) matching Unreal Engine's `Diaphragm DOF`.
+ * [KO] `Mip 0 ~ Mip 2` 적응형 샘플링과 조리개 날 꼭짓점 간 직선 선형 보간(`mix(V0, V1, t)`) 커널로 배경(`passMode = 0`) 및 전경(`passMode = 1`) 보케를 독립 개더링하는 내부 서브패스입니다.
+ * [EN] Internal sub-pass that independently gathers background (`passMode = 0`) and foreground (`passMode = 1`) bokeh using `Mip 0 ~ Mip 2` adaptive sampling and blade-vertex linear interpolation (`mix(V0, V1, t)`).
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
