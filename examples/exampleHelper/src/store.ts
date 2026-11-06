@@ -102,6 +102,11 @@ export interface ExampleHelperState {
     guiConfig: GuiConfig | null;
     isNarrow: boolean;
     loadingStates: Record<string, LoadingInfo>;
+    /**
+     * [KO] 하단 설명(Description) 영역이 뷰포트 하단에서부터 차지하는 높이(px). 설명이 없으면 0
+     * [EN] Height (px) occupied by the bottom Description area measured from the viewport bottom. 0 if none
+     */
+    descriptionOccupiedHeight: number;
     setRedGPU: (value: any) => void;
     setRedGPUContext: (value: RedGPUContext | null) => void;
     setCurrentExample: (value: ExampleItem | null) => void;
@@ -112,6 +117,7 @@ export interface ExampleHelperState {
     addTopBarRightAction: (action: TopBarAction) => void;
     setGuiConfig: (config: GuiConfig | null) => void;
     setIsNarrow: (value: boolean) => void;
+    setDescriptionOccupiedHeight: (value: number) => void;
     updateLoadingState: (info: LoadingInfo) => void;
     clearLoadingStates: () => void;
 }
@@ -131,6 +137,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     guiConfig: null,
     isNarrow: typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
     loadingStates: {},
+    descriptionOccupiedHeight: 0,
     setRedGPU: (value: any) => set({RedGPU: value}),
     setRedGPUContext: (value: RedGPUContext | null) => set({redGPUContext: value}),
     setCurrentExample: (value: ExampleItem | null) => set({currentExample: value}),
@@ -146,6 +153,9 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
         set({guiConfig: config, showSettingsPanel: hasGuiPanels(config), showCompareLabel: true});
     },
     setIsNarrow: (value: boolean) => set({isNarrow: value}),
+    setDescriptionOccupiedHeight: (value: number) => set((state) => (
+        state.descriptionOccupiedHeight === value ? state : {descriptionOccupiedHeight: value}
+    )),
     updateLoadingState: (info: LoadingInfo) => {
         if (!info) return;
         const key = info.url || 'default';

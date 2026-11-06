@@ -14,6 +14,31 @@ const Description = () => {
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
     const isCompactMobile = useMediaQuery(640);
     const [isToggleHovered, setIsToggleHovered] = React.useState(false);
+    const setDescriptionOccupiedHeight = useExampleHelperStore((state: ExampleHelperState) => state.setDescriptionOccupiedHeight);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    // [KO] 설명 컨테이너가 뷰포트 하단에서부터 차지하는 높이(= 뷰포트 하단 ~ 컨테이너 상단)를 측정하여 공유
+    // [EN] Measure and share the height the description container occupies from the viewport bottom (viewport bottom ~ container top)
+    React.useLayoutEffect(() => {
+        const container = containerRef.current;
+        if (!container) {
+            setDescriptionOccupiedHeight(0);
+            return;
+        }
+        const measure = () => {
+            setDescriptionOccupiedHeight(Math.max(0, window.innerHeight - container.getBoundingClientRect().top));
+        };
+        measure();
+        const resizeObserver = new ResizeObserver(measure);
+        resizeObserver.observe(container);
+        window.addEventListener('resize', measure);
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', measure);
+        };
+    }, [currentExample, language, isNarrow, isCompactMobile, setDescriptionOccupiedHeight]);
+
+    React.useEffect(() => () => setDescriptionOccupiedHeight(0), [setDescriptionOccupiedHeight]);
 
     if (!currentExample || !currentExample.description) {
         return null;
@@ -34,6 +59,7 @@ const Description = () => {
         <>
             {!isNarrow && <div style={bottomScrimStyle}/>}
             <div
+                ref={containerRef}
                 style={{
                     ...containerStyle,
                     left: isNarrow ? '22px' : '20px',

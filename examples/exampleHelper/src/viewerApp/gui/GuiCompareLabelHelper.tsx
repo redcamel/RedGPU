@@ -2,6 +2,9 @@ import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from '
 import {useExampleHelperStore} from '../../store';
 import View3D from "@redgpu/src/display/view/View3D";
 
+const LABEL_GAP_ABOVE_DESCRIPTION = 12;
+const DEFAULT_LABEL_BOTTOM = 30;
+
 /**
  * [KO] 뷰 비교를 위한 레이블을 표시하는 컴포넌트입니다.
  * [EN] Component that displays labels for view comparison.
@@ -10,6 +13,7 @@ const GuiCompareLabelHelper: React.FC = () => {
     const guiConfig = useExampleHelperStore((state) => state.guiConfig);
     const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
     const showCompareLabel = useExampleHelperStore((state) => state.showCompareLabel);
+    const descriptionOccupiedHeight = useExampleHelperStore((state) => state.descriptionOccupiedHeight);
     const [rect, setRect] = useState<DOMRect | null>(null);
     const compareViewsRef = useRef<{ viewNormal: View3D; viewEffect: View3D } | null>(null);
 
@@ -150,9 +154,14 @@ const GuiCompareLabelHelper: React.FC = () => {
                     : (window.innerHeight - (top + height / 2) + 6)
             };
         }
+        // [KO] 하단 설명 영역 바로 위에 배치 (설명이 없으면 기본 하단 여백 사용)
+        // [EN] Place right above the bottom description area (use default bottom margin if absent)
+        const bottom = descriptionOccupiedHeight > 0
+            ? descriptionOccupiedHeight + LABEL_GAP_ABOVE_DESCRIPTION
+            : DEFAULT_LABEL_BOTTOM;
         return {
             ...baseStyle,
-            bottom: '30px',
+            bottom: `${bottom}px`,
             left: left + width / 2,
             ...(isNormal ? {transform: 'translateX(calc(-100% - 6px))'} : {transform: 'translateX(6px)'})
         };
