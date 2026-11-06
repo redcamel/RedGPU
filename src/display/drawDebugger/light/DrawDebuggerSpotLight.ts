@@ -55,8 +55,9 @@ class DrawDebuggerSpotLight extends ADrawDebuggerLight<SpotLight> {
         if (!target.enableDebugger) return;
         this.#updateVertexDataFromTargetLight(target, lightDebugMesh.geometry.vertexBuffer);
 
+
+        label.setPosition(...target.position);
         lightDebugMesh.render(renderViewStateData);
-        label.setPosition(...target.position)
     }
 
     #updateVertexDataFromTargetLight(light: SpotLight, vertexBuffer: VertexBuffer) {

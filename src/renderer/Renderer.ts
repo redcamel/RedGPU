@@ -4,6 +4,7 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import FinalRender, {FinalRenderPassColorAttachment} from "./finalRender/FinalRender";
+import DebuggerRenderer from "./debuggerRenderer/DebuggerRenderer";
 import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import sortTransparentObjects from "../math/sortTransparentObjects";
 import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinning";
@@ -31,6 +32,7 @@ import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
  */
 class Renderer {
     #finalRender: FinalRender
+    #debuggerRenderer: DebuggerRenderer = new DebuggerRenderer()
     #gltfAnimationLooperManager: GltfAnimationLooperManager = new GltfAnimationLooperManager()
     #HD_render
 
@@ -83,6 +85,7 @@ class Renderer {
         }
         this.#finalRender?.destroy()
         this.#finalRender = null
+        this.#debuggerRenderer = null
         this.#gltfAnimationLooperManager = null
         this.#HD_render = null
     }
@@ -258,7 +261,9 @@ class Renderer {
         }
 
         {
-            (renderPassDescriptor.colorAttachments[0] as FinalRenderPassColorAttachment).postEffectView = view.postEffectManager.render().textureView
+            const postEffectView = view.postEffectManager.render().textureView;
+            this.#debuggerRenderer.render(view, postEffectView);
+            (renderPassDescriptor.colorAttachments[0] as FinalRenderPassColorAttachment).postEffectView = postEffectView;
         }
 
         processAnimationsAndSkinning(redGPUContext, renderViewStateData, this.#gltfAnimationLooperManager, view);
@@ -280,8 +285,25 @@ class Renderer {
      * [EN] Traverses the scene hierarchy (Axis and child objects) before render pass creation to collect per-layer render bundles and shadow casting lists, then flushes the indirect draw buffer.
      */
     #collectSceneRenderBundles(view: View3D) {
-        const {redGPUContext, renderViewStateData, scene, axis} = view;
+        const {redGPUContext, renderViewStateData, scene, grid, axis} = view;
+        if (grid) grid.render(renderViewStateData);
         if (axis) axis.render(renderViewStateData);
+        const {lightManager} = scene;
+        if (lightManager) {
+            const {directionalLights, pointLights, spotLights} = lightManager;
+            for (let i = 0, len = directionalLights.length; i < len; i++) {
+                const light = directionalLights[i];
+                if (light.enableDebugger) light.render(renderViewStateData);
+            }
+            for (let i = 0, len = pointLights.length; i < len; i++) {
+                const light = pointLights[i];
+                if (light.enableDebugger) light.render(renderViewStateData);
+            }
+            for (let i = 0, len = spotLights.length; i < len; i++) {
+                const light = spotLights[i];
+                if (light.enableDebugger) light.render(renderViewStateData);
+            }
+        }
         scene.shadowManager?.directionalShadowManager?.resetCastingList();
         const {children} = scene;
         let i = 0;
@@ -393,7 +415,7 @@ class Renderer {
     #needSingleSampleDepthResolve(view: View3D): boolean {
         const {builtInEffectManager} = view;
         return Boolean(
-            view.grid ||
+            this.#debuggerRenderer?.hasActiveDebuggers(view) ||
             view.skyAtmosphere ||
             builtInEffectManager?.useSSAO ||
             builtInEffectManager?.useSSR ||

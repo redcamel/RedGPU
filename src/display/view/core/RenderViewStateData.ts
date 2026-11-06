@@ -238,7 +238,8 @@ class RenderViewStateData {
         bundleListTransparentLayer: [] as GPURenderBundle[],
         bundleListParticleLayer: [] as GPURenderBundle[],
         bundleListRender2PathLayer: [] as GPURenderBundle[],
-        bundleListBasicList: [] as GPURenderBundle[]
+        bundleListBasicList: [] as GPURenderBundle[],
+        bundleListDebuggerLayer: [] as GPURenderBundle[]
     };
 
     /**
@@ -330,6 +331,7 @@ class RenderViewStateData {
         renderBundleResults.bundleListParticleLayer.length = 0;
         renderBundleResults.bundleListRender2PathLayer.length = 0;
         renderBundleResults.bundleListBasicList.length = 0;
+        renderBundleResults.bundleListDebuggerLayer.length = 0;
         this.currentRenderPassEncoder = null;
         this.skinList.length = 0;
         this.animationList.length = 0;

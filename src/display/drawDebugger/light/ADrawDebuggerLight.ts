@@ -2,7 +2,8 @@ import RedGPUObject from "../../../base/RedGPUObject";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Geometry from "../../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
+import DebuggerColorMaterial from "../core/debuggerColorMaterial/DebuggerColorMaterial";
+import DebuggerTextFieldMaterial from "../core/debuggerTextFieldMaterial/DebuggerTextFieldMaterial";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
@@ -27,7 +28,7 @@ import TextField3D from "../../textFields/textField3D/TextField3D";
  * @category Debugger
  */
 abstract class ADrawDebuggerLight<T extends ABaseLight> extends RedGPUObject {
-    #lightMaterial: ColorMaterial;
+    #lightMaterial: DebuggerColorMaterial;
     #lightDebugMesh: Mesh;
     #target: T;
     #label: TextField3D;
@@ -56,13 +57,18 @@ abstract class ADrawDebuggerLight<T extends ABaseLight> extends RedGPUObject {
         super(redGPUContext);
         this.#target = target;
         const lightGeometry = this.#createLightDebugGeometry(redGPUContext, maxLines);
-        this.#lightMaterial = new ColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));
+        this.#lightMaterial = new DebuggerColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));
         this.#lightDebugMesh = new Mesh(redGPUContext, lightGeometry, this.#lightMaterial);
         const {primitiveState} = this.#lightDebugMesh
         primitiveState.cullMode = 'none';
         primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
 
-        this.#label = new TextField3D(redGPUContext)
+        this.#label = new TextField3D(redGPUContext);
+        const prevLabelMaterial = this.#label.material;
+        const debuggerLabelMaterial = new DebuggerTextFieldMaterial(redGPUContext, prevLabelMaterial.diffuseTexture);
+        debuggerLabelMaterial.transparent = true;
+        debuggerLabelMaterial.diffuseTextureSampler = prevLabelMaterial.diffuseTextureSampler;
+        this.#label['_material'] = debuggerLabelMaterial;
         this.#label.usePixelSize = true
         this.#label.fontSize = 40
         this.#label.text = labelIcon

@@ -6,7 +6,6 @@ import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
-import DirectionalLight from "../../light/lights/DirectionalLight";
 import BuiltInEffectManager from "../../postEffect/builtIn/BuiltInEffectManager";
 import PostEffectManager from "../../postEffect/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -582,11 +581,6 @@ class View3D extends AView {
                 },
             ]);
         }
-        lightManager.directionalLights.forEach((light: DirectionalLight) => {
-            if (light.enableDebugger) {
-                light.render(this.renderViewStateData)
-            }
-        })
         gpuDevice.queue.writeBuffer(systemUniform_Vertex_UniformBuffer.gpuBuffer, 0, this.#uniformData);
 
         const dirLightVPInfo = members.directionalLightProjectionViewMatrix;

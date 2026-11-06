@@ -101,7 +101,7 @@ class ClusterLightManager extends RedGPUObject {
      * [EN] Uploads `PointLight` and `SpotLight` data from the scene to the GPU buffer and executes the clustered lighting compute passes.
      */
     updateClusterLights() {
-        const {scene, renderViewStateData, pixelRectArray} = this.#view
+        const {scene, pixelRectArray} = this.#view
         if (!scene) return
 
         const {pointLights, spotLights} = scene.lightManager
@@ -138,7 +138,7 @@ class ClusterLightManager extends RedGPUObject {
                     offset,
                 )
                 if (tLight.enableDebugger) {
-                    tLight.render(renderViewStateData)
+
                 }
             }
         }
@@ -157,7 +157,7 @@ class ClusterLightManager extends RedGPUObject {
                     offset,
                 )
                 if (tLight.enableDebugger) {
-                    tLight.render(renderViewStateData)
+
                 }
             }
         }

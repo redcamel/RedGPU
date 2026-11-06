@@ -55,7 +55,7 @@ class DrawDebuggerDirectionalLight extends ADrawDebuggerLight<DirectionalLight> 
         if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
         if (!target.enableDebugger) return;
         this.#updateVertexDataFromTargetLight(target, lightDebugMesh.geometry.vertexBuffer);
-        lightDebugMesh.render(renderViewStateData);
+
         const {direction} = target;
         const visualPosition = this.#visualPosition;
         const labelDistance = 0;
@@ -70,6 +70,7 @@ class DrawDebuggerDirectionalLight extends ADrawDebuggerLight<DirectionalLight> 
             visualPosition[1] - normalizedDir[1] * labelDistance,
             visualPosition[2] - normalizedDir[2] * labelDistance
         );
+        lightDebugMesh.render(renderViewStateData);
     }
 
     #updateVertexDataFromTargetLight(light: DirectionalLight, vertexBuffer: VertexBuffer) {

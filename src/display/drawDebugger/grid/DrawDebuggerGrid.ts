@@ -4,16 +4,13 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_BLEND_OPERATION from "../../../gpuConst/GPU_BLEND_OPERATION";
 import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
-import GPU_LOAD_OP from "../../../gpuConst/GPU_LOAD_OP";
-import GPU_STORE_OP from "../../../gpuConst/GPU_STORE_OP";
-import updateViewportAndScissor from "../../../renderer/helperFunc/updateViewportAndScissor";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
-import View3D from "../../view/View3D";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import shaderSource from './shader.wgsl';
 
 const SHADER_MODULE_NAME = 'VERTEX_MODULE_GRID';
@@ -110,11 +107,6 @@ class DrawDebuggerGrid extends BaseObject {
     #renderBundleCache: WeakMap<GPUBuffer, GPURenderBundle> = new WeakMap();
 
     #bundleEncoderDescriptor: GPURenderBundleEncoderDescriptor;
-    #colorAttachment: GPURenderPassColorAttachment;
-    #depthStencilAttachment: GPURenderPassDepthStencilAttachment;
-    #renderPassDescriptor: GPURenderPassDescriptor;
-    #singleBundleArray: [GPURenderBundle] = [null as any];
-    #currentView: View3D = null;
 
     /**
      * [KO] `DrawDebuggerGrid` 인스턴스를 생성합니다.
@@ -232,21 +224,6 @@ class DrawDebuggerGrid extends BaseObject {
             colorFormats: ['rgba8unorm'],
             depthStencilFormat: 'depth32float',
             sampleCount: 1,
-            depthReadOnly: true,
-        };
-        this.#colorAttachment = {
-            view: null as any,
-            loadOp: GPU_LOAD_OP.LOAD,
-            storeOp: GPU_STORE_OP.STORE,
-        };
-        this.#depthStencilAttachment = {
-            view: null as any,
-            depthReadOnly: true,
-        };
-        this.#renderPassDescriptor = {
-            label: 'DrawDebuggerGrid Overlay Render Pass',
-            colorAttachments: [this.#colorAttachment],
-            depthStencilAttachment: this.#depthStencilAttachment,
         };
     }
 
@@ -451,23 +428,18 @@ class DrawDebuggerGrid extends BaseObject {
     }
 
     /**
-     * [KO] 디버그 그리드를 렌더링합니다.
-     * [EN] Renders the debug grid.
+     * [KO] 디버그 그리드의 렌더 번들을 갱신하고 디버거 레이어 목록에 등록합니다.
+     * [EN] Updates the debug grid render bundle and registers it in the debugger layer list.
      *
-     * @param view -
-     * [KO] 렌더링할 View3D 인스턴스
-     * [EN] View3D instance to render
-     * @param targetTextureView -
-     * [KO] 컬러 렌더 타겟 텍스처 뷰
-     * [EN] Color render target texture view
-     * @param depthTextureView -
-     * [KO] 깊이 렌더 타겟 텍스처 뷰
-     * [EN] Depth render target texture view
+     * @param renderViewStateData -
+     * [KO] 현재 뷰의 렌더링 상태 데이터
+     * [EN] Render state data of the current view
      */
-    render(view: View3D, targetTextureView: GPUTextureView, depthTextureView: GPUTextureView): void {
+    render(renderViewStateData: RenderViewStateData): void {
         if (!this.#pipeline) return;
 
-        const renderResults = view.renderViewStateData.renderResults;
+        const {view, renderResults, renderBundleResults} = renderViewStateData;
+        const {bundleListDebuggerLayer} = renderBundleResults;
         const redGPUContext = view.redGPUContext;
         const systemUniformBuffer = view.systemUniform_Vertex_UniformBuffer;
         const systemUniformGpuBuffer = systemUniformBuffer.gpuBuffer;
@@ -481,16 +453,7 @@ class DrawDebuggerGrid extends BaseObject {
             this.#prevSystemUniformGpuBuffer = systemUniformGpuBuffer;
         }
 
-        this.#colorAttachment.view = targetTextureView;
-        this.#depthStencilAttachment.view = depthTextureView;
-        this.#singleBundleArray[0] = this.#renderBundle;
-        this.#currentView = view;
-
-        redGPUContext.commandEncoderManager.addPostProcessRenderPass(
-            this.#renderPassDescriptor,
-            this.#executeRenderPass
-        );
-        this.#currentView = null;
+        bundleListDebuggerLayer[bundleListDebuggerLayer.length] = this.#renderBundle;
     }
 
     /**
@@ -509,8 +472,6 @@ class DrawDebuggerGrid extends BaseObject {
         this.#renderBundle = null;
         this.#prevSystemUniformGpuBuffer = null;
         this.#renderBundleCache = new WeakMap();
-        this.#singleBundleArray[0] = null as any;
-        this.#currentView = null;
         console.log("🧹 DrawDebuggerGrid destroy 완료");
     }
 
@@ -552,11 +513,6 @@ class DrawDebuggerGrid extends BaseObject {
         }
         return cachedBundle;
     }
-
-    #executeRenderPass = (passEncoder: GPURenderPassEncoder): void => {
-        updateViewportAndScissor(this.#currentView, passEncoder, 'DEFAULT');
-        passEncoder.executeBundles(this.#singleBundleArray);
-    };
 
     #updateUniformBuffer(): void {
         if (!this.#uniformBuffer) return;

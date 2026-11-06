@@ -11,7 +11,7 @@ struct GlobalVertexStruct {
     combinedOpacity: f32,
     useDisplacementTexture: u32,
     displacementScale: f32,
-    disableJitter: u32,
+
     globalFragmentSlotIndex:u32,
     uvTransform: vec4<f32>,
 };

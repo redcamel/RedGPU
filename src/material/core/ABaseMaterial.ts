@@ -39,7 +39,12 @@ interface ABaseMaterial {
      * [KO] 머티리얼 인스턴스 여부 플래그
      * [EN] Flag indicating whether it is a material instance
      */
-    isInstanceofMaterial: boolean
+    isInstanceofMaterial: boolean;
+    /**
+     * [KO] 디버거 전용 머티리얼 여부 플래그
+     * [EN] Flag indicating whether it is a debugger-dedicated material
+     */
+    isDebuggerMaterial?: boolean;
 }
 
 /**

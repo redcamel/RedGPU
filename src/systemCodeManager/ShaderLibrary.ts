@@ -2250,11 +2250,7 @@ export namespace EntryPointLibrary {
          *     var output: VertexOutput;
          *     let u_resolution = systemUniforms.resolution;
          *     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
-         *     #redgpu_if disableJitter
-         *         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
-         *     #redgpu_else
-         *         let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
-         *     #redgpu_endIf
+         *     let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
          *     
          *     let u_viewMatrix = systemUniforms.camera.viewMatrix;
          *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
@@ -2560,7 +2556,7 @@ export namespace SystemStructLibrary {
      *     combinedOpacity: f32,
      *     useDisplacementTexture: u32,
      *     displacementScale: f32,
-     *     disableJitter: u32,
+
      *     globalFragmentSlotIndex:u32,
      *     uvTransform: vec4<f32>,
      * };

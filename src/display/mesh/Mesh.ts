@@ -47,7 +47,7 @@ interface Mesh {
      * [KO] TAA 지터(Jitter) 비활성화 여부
      * [EN] Whether to disable TAA jitter
      */
-    disableJitter: boolean
+
     /**
      * [KO] 변위 텍스처(Displacement Texture) 사용 여부
      * [EN] Whether to use displacement texture
@@ -1550,7 +1550,8 @@ class Mesh extends MeshBase {
                 bundleListParticleLayer,
                 bundleListTransparentLayer,
                 bundleListAlphaLayer,
-                bundleListBasicList
+                bundleListBasicList,
+                bundleListDebuggerLayer
             } = renderViewStateData.renderBundleResults
             {
                 {
@@ -1648,7 +1649,9 @@ class Mesh extends MeshBase {
                             }
                         }
                     }
-                    if (currentMaterial.use2PathRender) {
+                    if (currentMaterial.isDebuggerMaterial) {
+                        bundleListDebuggerLayer[bundleListDebuggerLayer.length] = renderBundle
+                    } else if (currentMaterial.use2PathRender) {
                         bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
                     } else if (this['isInstanceofParticle']) {
                         bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle
@@ -1908,7 +1911,13 @@ class Mesh extends MeshBase {
         this.#setDrawBuffer(geometry, lodIndex)
         const isLOD = lodIndex !== null
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
-            ...view.basicRenderBundleEncoderDescriptor,
+            ...(material.isDebuggerMaterial
+                ? {
+                    colorFormats: ['rgba8unorm'] as GPUTextureFormat[],
+                    depthStencilFormat: 'depth32float' as GPUTextureFormat,
+                    sampleCount: 1
+                }
+                : view.basicRenderBundleEncoderDescriptor),
             label: this.uuid,
         })
         if (isLOD) {
@@ -2034,7 +2043,7 @@ Object.defineProperty(Mesh.prototype, 'isInstanceofMesh', {
 defineBoolean(Mesh, [
     {key: 'receiveShadow', value: false},
     {key: 'useDisplacementTexture', value: false},
-    {key: 'disableJitter', value: false},
+
 ])
 Object.freeze(Mesh)
 export default Mesh
