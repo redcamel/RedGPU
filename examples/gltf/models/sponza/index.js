@@ -10,10 +10,10 @@ RedGPU.init(
     (redGPUContext) => {
         // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.tilt = 15;
+        controller.tilt = -15;
         controller.pan = 90;
         controller.centerY = 1;
-        controller.distance = 5;
+        controller.distance = 2;
         controller.speedDistance = 0.5;
 
         // Create scene and view

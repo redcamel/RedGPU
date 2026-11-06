@@ -19,10 +19,10 @@ RedGPU.init(
         controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.ibl = ibl;
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
         // [KO] GLTF 모델 로드 및 화면 중앙 맞춤
@@ -53,5 +53,9 @@ RedGPU.init(
 );
 
 const renderTestPane = (redGPUContext) => {
-    new RedGPUExampleHelper(redGPUContext);
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU: RedGPU,
+        ibl: true,
+        skybox: true,
+    });
 };
