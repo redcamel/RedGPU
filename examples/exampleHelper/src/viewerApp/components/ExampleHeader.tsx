@@ -86,45 +86,47 @@ const ExampleHeader = () => {
                     )}
                 </div>
 
-                <div style={rightSectionStyle}>
-                    {!isNarrow && (
-                        <>
-                            <RenderingSettingsGroup/>
-                            <div style={verticalDividerStyle}/>
-                        </>
-                    )}
-                    {showSSAO && (
-                        <>
+                {redGPUContext && (
+                    <div style={rightSectionStyle}>
+                        {!isNarrow && (
+                            <>
+                                <RenderingSettingsGroup/>
+                                <div style={verticalDividerStyle}/>
+                            </>
+                        )}
+                        {showSSAO && (
+                            <>
+                                <IconToggleButton
+                                    label="SSAO"
+                                    onClick={handleSSAOChange}
+                                    isActive={ssao}
+                                />
+                                <div style={verticalDividerStyle}/>
+                            </>
+                        )}
+                        {viewportActions.map((action) => (
                             <IconToggleButton
-                                label="SSAO"
-                                onClick={handleSSAOChange}
-                                isActive={ssao}
+                                key={action.id}
+                                icon={action.icon}
+                                label={action.label}
+                                onClick={action.onClick}
+                                isActive={!!action.isActive}
                             />
-                            <div style={verticalDividerStyle}/>
-                        </>
-                    )}
-                    {viewportActions.map((action) => (
-                        <IconToggleButton
-                            key={action.id}
-                            icon={action.icon}
-                            label={action.label}
-                            onClick={action.onClick}
-                            isActive={!!action.isActive}
-                        />
-                    ))}
-                    {settingAction && (
-                        <>
-                            <div style={verticalDividerStyle}/>
-                            <IconToggleButton
-                                key={settingAction.id}
-                                icon={settingAction.icon}
-                                label={settingAction.label}
-                                onClick={settingAction.onClick}
-                                isActive={!!settingAction.isActive}
-                            />
-                        </>
-                    )}
-                </div>
+                        ))}
+                        {settingAction && (
+                            <>
+                                <div style={verticalDividerStyle}/>
+                                <IconToggleButton
+                                    key={settingAction.id}
+                                    icon={settingAction.icon}
+                                    label={settingAction.label}
+                                    onClick={settingAction.onClick}
+                                    isActive={!!settingAction.isActive}
+                                />
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
         </header>
     );

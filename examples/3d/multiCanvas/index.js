@@ -81,13 +81,14 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
     btnCreate.addEventListener('click', init);
 
     init();
-    renderTestPane()
 };
-const renderTestPane = (redGPUContext) => {
-    new RedGPUExampleHelper(redGPUContext);
+
+const renderTestPane = () => {
+    new RedGPUExampleHelper();
 };
 
 // [KO] Canvas A(적색) 및 Canvas B(청색)에 대해 각각 초기 실행 및 바인딩
 // [EN] Initialize and bind for Canvas A (Red) and Canvas B (Blue) respectively
 setupContext('containerA', 'statusA', '#ff3333', 'btnDestroyA', 'btnCreateA');
 setupContext('containerB', 'statusB', '#3333ff', 'btnDestroyB', 'btnCreateB');
+renderTestPane();
