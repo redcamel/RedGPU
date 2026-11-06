@@ -5,10 +5,35 @@ import {ExampleItem} from './types/example';
 
 export interface LoadingInfo {
     url?: string;
-    model?: { loaded: number; total: number };
-    buffers?: { loaded: number; total: number };
-    textures?: { loaded: number; total: number };
+    model?: {
+        loaded: number;
+        total: number;
+        lengthComputable?: boolean;
+        percent?: number;
+        transferred?: string;
+        totalSize?: string;
+    };
+    buffers?: {
+        loaded: number;
+        total: number;
+        percent?: number;
+    };
+    textures?: {
+        loaded: number;
+        total: number;
+        percent?: number;
+    };
 }
+
+const cloneLoadingInfo = (info: LoadingInfo): LoadingInfo => ({
+    url: info.url,
+    model: info.model ? {...info.model} : undefined,
+    buffers: info.buffers ? {...info.buffers} : undefined,
+    textures: info.textures ? {...info.textures} : undefined,
+});
+
+let pendingLoadingBatch: Record<string, LoadingInfo> = {};
+let loadingBatchRafId: number | null = null;
 
 /**
  * [KO] TopBar의 우측 액션 버튼 정의 인터페이스
@@ -121,9 +146,37 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
         set({guiConfig: config, showSettingsPanel: hasGuiPanels(config), showCompareLabel: true});
     },
     setIsNarrow: (value: boolean) => set({isNarrow: value}),
-    updateLoadingState: (info: LoadingInfo) => set((state) => {
+    updateLoadingState: (info: LoadingInfo) => {
+        if (!info) return;
         const key = info.url || 'default';
-        return { loadingStates: { ...state.loadingStates, [key]: info } };
-    }),
-    clearLoadingStates: () => set({ loadingStates: {} })
+        pendingLoadingBatch[key] = cloneLoadingInfo(info);
+
+        if (typeof window === 'undefined') {
+            const batch = pendingLoadingBatch;
+            pendingLoadingBatch = {};
+            set((state) => ({loadingStates: {...state.loadingStates, ...batch}}));
+            return;
+        }
+
+        if (loadingBatchRafId === null) {
+            loadingBatchRafId = window.requestAnimationFrame(() => {
+                loadingBatchRafId = null;
+                const batch = pendingLoadingBatch;
+                pendingLoadingBatch = {};
+                if (Object.keys(batch).length > 0) {
+                    set((state) => ({
+                        loadingStates: {...state.loadingStates, ...batch}
+                    }));
+                }
+            });
+        }
+    },
+    clearLoadingStates: () => {
+        if (loadingBatchRafId !== null && typeof window !== 'undefined') {
+            window.cancelAnimationFrame(loadingBatchRafId);
+            loadingBatchRafId = null;
+        }
+        pendingLoadingBatch = {};
+        set({loadingStates: {}});
+    }
 }));

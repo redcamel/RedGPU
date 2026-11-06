@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {useExampleHelperStore} from '../../store';
 import '../styles/loading.css';
 
@@ -22,57 +22,126 @@ const LoadingUI: React.FC = () => {
     const clearLoadingStates = useExampleHelperStore((state) => state.clearLoadingStates);
     const [visible, setVisible] = useState(false);
     const [opacity, setOpacity] = useState(1);
+    const maxRatiosRef = useRef({model: 0, buffers: 0, textures: 0, total: 0});
 
     // 데이터 집계 (Aggregation)
     const totals = useMemo(() => {
         const t = {
-            model: { loaded: 0, total: 0 },
-            buffers: { loaded: 0, total: 0 },
-            textures: { loaded: 0, total: 0 }
+            model: {loaded: 0, total: 0, hasActivity: false, allDone: true},
+            buffers: {loaded: 0, total: 0, hasActivity: false, allDone: true},
+            textures: {loaded: 0, total: 0, hasActivity: false, allDone: true}
         };
 
-        Object.values(loadingStates).forEach((state) => {
-            (['model', 'buffers', 'textures'] as const).forEach((key) => {
-                if (state[key]) {
-                    t[key].loaded += state[key]?.loaded || 0;
-                    t[key].total += state[key]?.total || 0;
-                }
-            });
+        const states = Object.values(loadingStates);
+        if (states.length === 0) {
+            t.model.allDone = false;
+            t.buffers.allDone = false;
+            t.textures.allDone = false;
+            return t;
+        }
+
+        states.forEach((state) => {
+            if (state.model) {
+                t.model.hasActivity = true;
+                const loaded = state.model.loaded || 0;
+                const total = state.model.total || (state.model.percent === 100 ? loaded : 0);
+                t.model.loaded += loaded;
+                t.model.total += total;
+                const isModelDone = state.model.percent === 100 || (total > 0 && loaded >= total);
+                if (!isModelDone) t.model.allDone = false;
+            } else {
+                t.model.allDone = false;
+            }
+
+            if (state.buffers) {
+                t.buffers.hasActivity = true;
+                const loaded = state.buffers.loaded || 0;
+                const total = state.buffers.total || 0;
+                t.buffers.loaded += loaded;
+                t.buffers.total += total;
+                if (total > 0 && loaded < total) t.buffers.allDone = false;
+            } else {
+                // GLTF/GLB는 항상 getGLTFBuffersResources 단계를 거치므로 buffers가 아직 없으면 파싱 진행 중
+                t.buffers.allDone = false;
+            }
+
+            if (state.textures) {
+                t.textures.hasActivity = true;
+                const loaded = state.textures.loaded || 0;
+                const total = state.textures.total || 0;
+                t.textures.loaded += loaded;
+                t.textures.total += total;
+                if (total > 0 && loaded < total) t.textures.allDone = false;
+            }
         });
         return t;
     }, [loadingStates]);
 
-    const mRatio = totals.model.total > 0 ? totals.model.loaded / totals.model.total : 1;
-    const bRatio = totals.buffers.total > 0 ? totals.buffers.loaded / totals.buffers.total : 1;
-    const tRatio = totals.textures.total > 0 ? totals.textures.loaded / totals.textures.total : 1;
+    const rawMRatio = totals.model.total > 0
+        ? Math.min(1, totals.model.loaded / totals.model.total)
+        : (totals.model.allDone ? 1 : 0);
+    const rawBRatio = totals.buffers.total > 0
+        ? Math.min(1, totals.buffers.loaded / totals.buffers.total)
+        : (totals.buffers.allDone ? 1 : 0);
+    const rawTRatio = totals.textures.total > 0
+        ? Math.min(1, totals.textures.loaded / totals.textures.total)
+        : (totals.textures.hasActivity && totals.textures.allDone ? 1 : 0);
 
     const isAllFinished = useMemo(() => {
         const states = Object.values(loadingStates);
         if (states.length === 0) return false;
-        return mRatio >= 1 && bRatio >= 1 && tRatio >= 1;
-    }, [loadingStates, mRatio, bRatio, tRatio]);
+        return totals.model.allDone && totals.buffers.allDone && totals.textures.allDone;
+    }, [loadingStates, totals]);
+
+    if (Object.keys(loadingStates).length === 0) {
+        maxRatiosRef.current.model = 0;
+        maxRatiosRef.current.buffers = 0;
+        maxRatiosRef.current.textures = 0;
+        maxRatiosRef.current.total = 0;
+    } else {
+        maxRatiosRef.current.model = Math.max(maxRatiosRef.current.model, rawMRatio);
+        maxRatiosRef.current.buffers = Math.max(maxRatiosRef.current.buffers, rawBRatio);
+        maxRatiosRef.current.textures = Math.max(maxRatiosRef.current.textures, rawTRatio);
+    }
+
+    const mRatio = maxRatiosRef.current.model;
+    const bRatio = maxRatiosRef.current.buffers;
+    const tRatio = maxRatiosRef.current.textures;
+
+    const rawTotalRatio = isAllFinished
+        ? 1
+        : (mRatio * 0.5 + bRatio * 0.15 + (totals.textures.hasActivity ? tRatio * 0.35 : 0));
+    if (Object.keys(loadingStates).length > 0) {
+        maxRatiosRef.current.total = Math.max(maxRatiosRef.current.total, rawTotalRatio);
+    }
 
     // UI 노출 여부 결정
     useEffect(() => {
         if (Object.keys(loadingStates).length > 0) {
             setVisible(true);
-            setOpacity(1);
+            if (!isAllFinished) {
+                setOpacity(1);
+            }
         }
-    }, [loadingStates]);
+    }, [loadingStates, isAllFinished]);
 
     // 완료 시 페이드 아웃 처리
     useEffect(() => {
         if (isAllFinished) {
             const timer = setTimeout(() => {
                 setOpacity(0);
-            }, 1000);
+            }, 800);
             return () => clearTimeout(timer);
+        } else {
+            setOpacity(1);
         }
     }, [isAllFinished]);
 
-    // 트랜지션 종료 후 상태 초기화
-    const handleTransitionEnd = () => {
-        if (opacity === 0) {
+    // 트랜지션 종료 후 상태 초기화 (자식 요소 트랜지션 버블링 무시)
+    const handleTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>) => {
+        if (e.target !== e.currentTarget || e.propertyName !== 'opacity') return;
+        if (opacity === 0 && isAllFinished) {
+            maxRatiosRef.current = {model: 0, buffers: 0, textures: 0, total: 0};
             setVisible(false);
             clearLoadingStates();
         }
@@ -80,10 +149,7 @@ const LoadingUI: React.FC = () => {
 
     if (!visible) return null;
 
-    const activeSections = [totals.model.total, totals.buffers.total, totals.textures.total].filter(t => t > 0).length;
-    const avgTotal = activeSections > 0
-        ? (((totals.model.total > 0 ? mRatio : 0) + (totals.buffers.total > 0 ? bRatio : 0) + (totals.textures.total > 0 ? tRatio : 0)) / activeSections) * 100
-        : 100;
+    const avgTotal = maxRatiosRef.current.total * 100;
 
     return (
         <div 
@@ -98,7 +164,7 @@ const LoadingUI: React.FC = () => {
                     key: 'model',
                     ratio: mRatio,
                     loaded: formatBytes(totals.model.loaded),
-                    total: formatBytes(totals.model.total),
+                    total: totals.model.total > 0 ? formatBytes(totals.model.total) : formatBytes(totals.model.loaded),
                     unitClass: 'size',
                     showFiles: true
                 },
@@ -119,7 +185,7 @@ const LoadingUI: React.FC = () => {
                     showFiles: false
                 },
             ] as const).map(({key, ratio, loaded, total, unitClass, showFiles}) => (
-                totals[key].total > 0 && (
+                (totals[key].total > 0 || (key === 'model' && totals.model.hasActivity)) && (
                     <div key={key} className={`info-container-${key} loading-ui-info active`}>
                         <div className="loading-ui-info-wrapper">
                             <div className="loading-ui-info-title">{key}</div>
@@ -135,10 +201,10 @@ const LoadingUI: React.FC = () => {
                             {showFiles && (
                                 <div className="loading-ui-info-file">
                                     {Object.entries(loadingStates).map(([url, state]) => (
-                                        state.model && state.model.total > 0 ? (
+                                        state.model && (state.model.total > 0 || state.model.loaded > 0 || state.model.percent === 100) ? (
                                             <div key={url} className="file">
                                                 <span>{url}</span>
-                                                <span>{formatBytes(state.model.total)}</span>
+                                                <span>{formatBytes(state.model.total || state.model.loaded || 0)}</span>
                                             </div>
                                         ) : null
                                     ))}

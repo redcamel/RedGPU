@@ -25,6 +25,7 @@ const calcTargetMeshMatrix = (mesh: any, view: View3D) => {
  */
 class RedGPUExampleHelper {
     static loadingProgressInfoHandler = (info: any) => {
+        if (!info || typeof info !== 'object') return;
         useExampleHelperStore.getState().updateLoadingState(info);
     };
 
@@ -149,6 +150,7 @@ class RedGPUExampleHelper {
             }
         }
 
+        useExampleHelperStore.getState().clearLoadingStates();
         useExampleHelperStore.getState().setRedGPUContext(null);
         useExampleHelperStore.getState().setGuiConfig(null);
         useExampleHelperStore.getState().setRedGPU(null);
