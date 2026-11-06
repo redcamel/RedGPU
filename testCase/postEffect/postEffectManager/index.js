@@ -131,5 +131,80 @@ redUnit.testGroup(
                 } catch (e) { run(false, e); }
             });
         }, true);
+
+        runner.defineTest('Success Test: HeightFog default properties and valid setter updates', (run) => {
+            setup(run, (ctx, manager, view) => {
+                try {
+                    const heightFog = view.builtInEffectManager.heightFog;
+                    const checkDefaults =
+                        heightFog.density === 0.02 &&
+                        heightFog.baseHeight === 0 &&
+                        heightFog.height === 20 &&
+                        heightFog.nearDistance === 0 &&
+                        heightFog.farDistance === 50 &&
+                        heightFog.maxOpacity === 1 &&
+                        heightFog.fogType === RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL &&
+                        heightFog.fogColor instanceof RedGPU.ColorRGB;
+
+                    heightFog.density = 0.5;
+                    heightFog.baseHeight = -5;
+                    heightFog.height = 15;
+                    heightFog.nearDistance = 2;
+                    heightFog.farDistance = 80;
+                    heightFog.maxOpacity = 0.85;
+                    heightFog.fogType = RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL_SQUARED;
+                    heightFog.fogColor.setColorByRGB(180, 200, 240);
+
+                    const checkUpdated =
+                        Math.abs(heightFog.density - 0.5) < 0.0001 &&
+                        heightFog.baseHeight === -5 &&
+                        heightFog.height === 15 &&
+                        heightFog.nearDistance === 2 &&
+                        heightFog.farDistance === 80 &&
+                        Math.abs(heightFog.maxOpacity - 0.85) < 0.0001 &&
+                        heightFog.fogType === RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL_SQUARED &&
+                        heightFog.fogColor.r === 180 &&
+                        heightFog.fogColor.g === 200 &&
+                        heightFog.fogColor.b === 240;
+
+                    run(checkDefaults && checkUpdated);
+                } catch (e) {
+                    run(false, e);
+                }
+            });
+        }, true);
+
+        runner.defineTest('Failure Test: HeightFog density NaN validation', (run) => {
+            setup(run, (ctx, manager, view) => {
+                try {
+                    view.builtInEffectManager.heightFog.density = NaN;
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            });
+        }, false);
+
+        runner.defineTest('Failure Test: HeightFog baseHeight NaN validation', (run) => {
+            setup(run, (ctx, manager, view) => {
+                try {
+                    view.builtInEffectManager.heightFog.baseHeight = NaN;
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            });
+        }, false);
+
+        runner.defineTest('Failure Test: HeightFog fogType negative validation', (run) => {
+            setup(run, (ctx, manager, view) => {
+                try {
+                    view.builtInEffectManager.heightFog.fogType = -1;
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            });
+        }, false);
     }
 );

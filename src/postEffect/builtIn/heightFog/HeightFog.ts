@@ -67,12 +67,14 @@ interface HeightFog {
  * [EN] Height-based Fog built-in post-processing effect that simulates altitude-dependent fog in Linear HDR space using an Analytical 3D Ray-Height Line Integral.
  *
  * ::: warning
- * [KO] 이 클래스는 `BuiltInEffectManager`에 의해 내부적으로 자동 생성됩니다.<br/>`'new'` 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created internally by `BuiltInEffectManager`.<br/>Do not create an instance directly using the `'new'` keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * ### Example
  * ```typescript
+ * // [KO] View3D의 builtInEffectManager를 통해 HeightFog 활성화 및 고도/거리 파라미터 설정
+ * // [EN] Enable HeightFog and configure altitude/distance parameters through View3D's builtInEffectManager
  * view.builtInEffectManager.useHeightFog = true;
  * const heightFog = view.builtInEffectManager.heightFog;
  * heightFog.fogType = RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL;
@@ -102,8 +104,8 @@ class HeightFog extends ASingleRenderPassPostEffect {
     static EXPONENTIAL_SQUARED = 1;
 
     /**
-     * [KO] HeightFog 인스턴스를 생성합니다. (내부 시스템 전용)
-     * [EN] Creates a HeightFog instance. (Internal system use only)
+     * [KO] HeightFog 인스턴스를 생성합니다.
+     * [EN] Creates a HeightFog instance.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스

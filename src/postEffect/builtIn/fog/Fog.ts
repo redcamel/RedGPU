@@ -55,12 +55,14 @@ interface Fog {
  * [EN] Distance-based Fog built-in post-processing effect that blends distant objects with fog color in Linear HDR space based on depth information.
  *
  * ::: warning
- * [KO] 이 클래스는 `BuiltInEffectManager`에 의해 내부적으로 자동 생성됩니다.<br/>`'new'` 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created internally by `BuiltInEffectManager`.<br/>Do not create an instance directly using the `'new'` keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * ### Example
  * ```typescript
+ * // [KO] View3D의 builtInEffectManager를 통해 Fog 활성화 및 거리/밀도 파라미터 설정
+ * // [EN] Enable Fog and configure distance/density parameters through View3D's builtInEffectManager
  * view.builtInEffectManager.useFog = true;
  * const fog = view.builtInEffectManager.fog;
  * fog.fogType = RedGPU.PostEffect.BuiltIn.Fog.EXPONENTIAL_SQUARED;
