@@ -1569,7 +1569,7 @@ class Mesh extends MeshBase {
                     }
                     if (
                         !this.#bundleEncoderList[viewIndex]
-                        || this.#prevSystemBindGroupList[viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
+                        || this.#prevSystemBindGroupList[viewIndex] !== (currentMaterial.isDebuggerMaterial ? view.systemUniform_Debugger_UniformBindGroup : view.systemUniform_Vertex_UniformBindGroup)
                     ) {
                         this.#setRenderBundle(renderViewStateData)
                     }
@@ -1924,7 +1924,7 @@ class Mesh extends MeshBase {
 
         } else {
             this.#bundleEncoderList[renderViewStateData.viewIndex] = bundleEncoder
-            this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup
+            this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = material.isDebuggerMaterial ? view.systemUniform_Debugger_UniformBindGroup : view.systemUniform_Vertex_UniformBindGroup
             this.#prevFragmentBindGroup = fragmentUniformBindGroup
         }
 
@@ -1942,7 +1942,7 @@ class Mesh extends MeshBase {
                 bundleEncoder.setVertexBuffer(index + 1, v)
             })
         }
-        bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+        bundleEncoder.setBindGroup(0, material.isDebuggerMaterial ? view.systemUniform_Debugger_UniformBindGroup : view.systemUniform_Vertex_UniformBindGroup);
         bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
         bundleEncoder.setBindGroup(2, fragmentUniformBindGroup)
         let drawCommandSlot = this.#drawCommandSlot

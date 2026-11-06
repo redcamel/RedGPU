@@ -58,6 +58,7 @@ let temp3 = mat4.create()
 class View3D extends AView {
     #systemUniform_Vertex_StructInfo: any;
     #systemUniform_Vertex_UniformBindGroup: GPUBindGroup;
+    #systemUniform_Debugger_UniformBindGroup: GPUBindGroup;
     #systemUniform_Vertex_UniformBuffer: UniformBuffer;
     #skybox: SkyBox
     #skyAtmosphere: SkyAtmosphere
@@ -207,6 +208,18 @@ class View3D extends AView {
             return this.#systemUniform_Cascade_BindGroups[this.#currentCascadeIndex];
         }
         return this.#systemUniform_Vertex_UniformBindGroup;
+    }
+
+    /**
+     * [KO] 디버거 렌더링 패스 전용 시스템 버텍스 유니폼 바인드 그룹을 반환합니다.
+     * [EN] Returns the system vertex uniform bind group dedicated to the debugger rendering pass.
+     *
+     * @returns
+     * [KO] 디버거용 시스템 유니폼 `GPUBindGroup`
+     * [EN] Debugger system uniform `GPUBindGroup`
+     */
+    get systemUniform_Debugger_UniformBindGroup(): GPUBindGroup {
+        return this.#systemUniform_Debugger_UniformBindGroup;
     }
 
     /**
@@ -396,6 +409,7 @@ class View3D extends AView {
 
         this.#prevInfoList = []
         this.#systemUniform_Vertex_UniformBindGroup = null
+        this.#systemUniform_Debugger_UniformBindGroup = null
         if (this.#viewRenderTextureManager) {
             this.#viewRenderTextureManager.destroy();
         }
@@ -492,7 +506,10 @@ class View3D extends AView {
                 )
             }
             if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView, renderPath1DepthTextureView)
-            else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
+            else {
+                this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
+                this.#systemUniform_Debugger_UniformBindGroup = this.#prevInfoList[key].debuggerUniformBindGroup;
+            }
 
             this.#prevInfoList[key] = {
                 ibl,
@@ -507,7 +524,8 @@ class View3D extends AView {
                 globalSSAOVertexGPUBuffer,
                 globalSSAOFragmentGPUBuffer,
                 globalSSAOFragmentBuiltInGPUBuffer,
-                vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
+                vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup,
+                debuggerUniformBindGroup: this.#systemUniform_Debugger_UniformBindGroup
             }
         }
     }
@@ -705,6 +723,17 @@ class View3D extends AView {
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
+
+        const debuggerEntries = [...systemUniform_Vertex_BindGroupDescriptor.entries];
+        debuggerEntries[debuggerEntries.length - 1] = {
+            binding: 20,
+            resource: resourceManager.emptyDepthTextureView
+        };
+        this.#systemUniform_Debugger_UniformBindGroup = gpuDevice.createBindGroup({
+            layout: systemUniform_Vertex_BindGroupDescriptor.layout,
+            label: `SYSTEM_UNIFORM_DEBUGGER_BindGroup_${key}`,
+            entries: debuggerEntries
+        });
 
         const shadowDepthTextureViewEmpty = this.scene?.shadowManager?.directionalShadowManager?.shadowDepthTextureViewEmpty || shadowDepthTextureView;
         this.#systemUniform_Cascade_BindGroups = this.#systemUniform_Cascade_Buffers.map((buf, c) => {
