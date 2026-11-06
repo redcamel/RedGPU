@@ -28,12 +28,12 @@ export const ExampleGridCard: React.FC<CardProps> = ({
         >
             <div style={{
                 ...thumbWrapperStyle,
-                aspectRatio: isCompact ? '8 / 3' : '16 / 10',
+                aspectRatio: isCompact ? '8 / 3' : '40 / 21',
             }}>
                 <img
                     src={thumbUrl}
-                    width={640}
-                    height={400}
+                    width={800}
+                    height={420}
                     style={thumbStyle(hovered)}
                     alt={imageAlt}
                     title={imageTitle}

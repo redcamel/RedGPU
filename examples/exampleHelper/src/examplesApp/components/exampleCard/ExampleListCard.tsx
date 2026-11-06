@@ -24,7 +24,7 @@ export const ExampleListCard: React.FC<CardProps> = ({
         >
             <img
                 src={thumbUrl}
-                width={68}
+                width={80}
                 height={42}
                 style={listThumbStyle}
                 alt={imageAlt}
@@ -61,7 +61,7 @@ const listCardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties
 });
 
 const listThumbStyle: React.CSSProperties = {
-    width: '68px',
+    width: '80px',
     height: '42px',
     borderRadius: '8px',
     objectFit: 'cover',
