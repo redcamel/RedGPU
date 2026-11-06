@@ -63,7 +63,18 @@ const GuiPanel: React.FC = () => {
 
     return (
         <>
-            <div ref={guiContainerRef} style={guiContainerStyle}/>
+            <div
+                ref={guiContainerRef}
+                style={guiContainerStyle}
+                onMouseDownCapture={(e) => {
+                    if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+                        const selection = window.getSelection();
+                        if (selection && selection.type === 'Range') {
+                            selection.removeAllRanges();
+                        }
+                    }
+                }}
+            />
             {guiInstance && redGPUContext && (
                 <>
                     {guiConfig.redGPUContext && <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext}/>}
