@@ -32,10 +32,13 @@ export const ExampleGridCard: React.FC<CardProps> = ({
             }}>
                 <img
                     src={thumbUrl}
+                    width={640}
+                    height={400}
                     style={thumbStyle(hovered)}
                     alt={imageAlt}
                     title={imageTitle}
                     loading={isLCP ? "eager" : "lazy"}
+                    decoding={isLCP ? "sync" : "async"}
                     {...(isLCP ? { fetchPriority: "high" } : {})}
                 />
                 {!isNarrow && (

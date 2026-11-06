@@ -24,10 +24,13 @@ export const ExampleListCard: React.FC<CardProps> = ({
         >
             <img
                 src={thumbUrl}
+                width={68}
+                height={42}
                 style={listThumbStyle}
                 alt={imageAlt}
                 title={imageTitle}
                 loading={isLCP ? "eager" : "lazy"}
+                decoding={isLCP ? "sync" : "async"}
                 {...(isLCP ? { fetchPriority: "high" } : {})}
             />
             <div style={listContentStyle}>
