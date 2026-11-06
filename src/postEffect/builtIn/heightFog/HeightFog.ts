@@ -25,11 +25,11 @@ interface HeightFog {
      */
     baseHeight: number;
     /**
-     * [KO] 고도에 따른 안개 밀도 감쇠율 (0.001 ~ 2)
-     * [EN] Fog density falloff rate by altitude (0.001 ~ 2)
-     * @defaultValue 0.2
+     * [KO] 기준 높이(`baseHeight`)로부터 안개가 피어오르는 높이(두께, 0.1 이상)
+     * [EN] Height (thickness) of fog rising from `baseHeight` (0.1 or greater)
+     * @defaultValue 20
      */
-    falloff: number;
+    height: number;
     /**
      * [KO] 안개 시작 거리 (0 이상)
      * [EN] Fog start distance from camera (0 or greater)
@@ -78,7 +78,7 @@ interface HeightFog {
  * heightFog.fogType = RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL;
  * heightFog.density = 0.02;
  * heightFog.baseHeight = 0.0;
- * heightFog.falloff = 0.2;
+ * heightFog.height = 20.0;
  * heightFog.nearDistance = 0.0;
  * heightFog.farDistance = 50.0;
  * heightFog.fogColor.setColorByRGB(200, 210, 255);
@@ -160,7 +160,7 @@ class HeightFog extends ASingleRenderPassPostEffect {
 
 definePositiveNumber(HeightFog, [
     {key: 'density', value: 0.02, min: 0, max: 5},
-    {key: 'falloff', value: 0.2, min: 0.001, max: 2},
+    {key: 'height', value: 20, min: 0.1},
     {key: 'maxOpacity', value: 1, min: 0, max: 1},
 ]);
 defineNumber(HeightFog, [

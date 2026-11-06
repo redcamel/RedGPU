@@ -4,7 +4,7 @@ struct Uniforms {
     fogType: u32,
     density: f32,
     baseHeight: f32,
-    falloff: f32,
+    height: f32,
     nearDistance: f32,
     farDistance: f32,
     maxOpacity: f32,

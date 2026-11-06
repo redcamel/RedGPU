@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=17929
  * [KO] Height Fog 예제
  * [EN] Height Fog example
  *
- * [KO] 고도 기반 안개(Height Fog) 이펙트를 사용하여 높이와 거리에 따른 대기 안개 효과를 적용하는 방법을 보여줍니다.
- * [EN] Demonstrates how to apply an altitude- and distance-based fog effect using Height Fog.
+ * [KO] 고도 기반 안개(Height Fog) 이펙트를 사용하여 기준 높이(baseHeight)와 안개 두께(height), 거리에 따른 대기 안개 효과를 시연합니다.
+ * [EN] Demonstrates altitude- and distance-based atmospheric fog using Height Fog with baseHeight and height controls.
  */
 
 const canvas = document.createElement('canvas');
@@ -16,9 +16,10 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 28;
+        controller.distance = 34;
         controller.speedDistance = 1;
         controller.tilt = -18;
+        controller.pan = 25;
 
         const scene = new RedGPU.Display.Scene();
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
@@ -26,27 +27,33 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        view.grid = true;
         redGPUContext.addView(view);
 
-        // [KO] HeightFog 이펙트 활성화 및 인스턴스 참조
-        // [EN] Enable HeightFog effect and reference instance
+        // [KO] HeightFog 이펙트 활성화 및 초기 고도 구간(baseHeight ~ baseHeight + height) 설정
+        // [EN] Enable HeightFog effect and configure initial altitude band (baseHeight to baseHeight + height)
         view.builtInEffectManager.useHeightFog = true;
-        const effect = view.builtInEffectManager.heightFog;
+        const heightFog = view.builtInEffectManager.heightFog;
+        heightFog.density = 0.035;
+        heightFog.baseHeight = 0;
+        heightFog.height = 12;
+        heightFog.nearDistance = 0;
+        heightFog.farDistance = 65;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        createValleyScene(redGPUContext, scene);
+        createHeightFogTestScene(redGPUContext, scene);
 
         const autoRotateState = {autoRotate: true};
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
             if (autoRotateState.autoRotate) {
-                controller.pan += 0.15;
+                controller.pan += 0.12;
             }
         });
 
-        renderTestPane(redGPUContext, view, effect, autoRotateState);
+        renderTestPane(redGPUContext, view, heightFog, autoRotateState);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -56,96 +63,111 @@ RedGPU.init(
     }
 );
 
-const createValleyScene = (redGPUContext, scene) => {
-    const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 512, 512);
-    const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
+const createHeightFogTestScene = (redGPUContext, scene) => {
+    // [KO] 1. 고도 기준면 확인용 3단 계단식 분지 지형 (Y = -8 심연 바닥, Y = -4 중간 단상, Y = 0 기준 대지)
+    // [EN] 1. 3-tier stepped basin terrain for altitude reference (Y = -8 deep floor, Y = -4 mid terrace, Y = 0 base ground)
+    const deepFloorGeom = new RedGPU.Primitive.Ground(redGPUContext, 160, 160, 1, 1);
+    const deepFloorMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#243038');
+    const deepFloorMesh = new RedGPU.Display.Mesh(redGPUContext, deepFloorGeom, deepFloorMat);
+    deepFloorMesh.y = -8;
+    scene.addChild(deepFloorMesh);
 
-    const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 512, 512, {
-        mainLogic: `
-            let noise1 = getSimplexNoiseByDimension(base_uv * 2.0, uniforms);
-            let noise2 = getSimplexNoiseByDimension(base_uv * 4.0, uniforms) * 0.5;
-            let heightValue = (noise1 + noise2) * 0.35 + 0.5;
-            let finalColor = vec4<f32>(heightValue, heightValue, heightValue, 1.0);
-        `
-    });
-    terrainNoise.frequency = 1.8;
-    terrainNoise.amplitude = 1.4;
-    terrainNoise.octaves = 6;
-
-    terrainMaterial.displacementTexture = terrainNoise;
-    terrainMaterial.displacementScale = 10.0;
-
-    const terrainMesh = new RedGPU.Display.Mesh(redGPUContext, terrain, terrainMaterial);
-    terrainMesh.y = -12;
-    scene.addChild(terrainMesh);
-
-    const towerData = [
-        {x: 0, z: 0, height: 15, radius: 1.1, color: '#8B7355'},
-        {x: -10, z: -8, height: 11, radius: 0.85, color: '#A0522D'},
-        {x: 12, z: -6, height: 13, radius: 0.9, color: '#708090'},
-        {x: -8, z: 12, height: 9, radius: 0.75, color: '#8FBC8F'},
-        {x: 10, z: 14, height: 17, radius: 1.0, color: '#696969'},
-        {x: -18, z: 4, height: 12, radius: 0.8, color: '#8B7355'},
-        {x: 20, z: 4, height: 10, radius: 0.8, color: '#A0522D'}
+    const terracePositions = [
+        {x: -22, z: -22, w: 28, d: 28, y: -4, color: '#34495e'},
+        {x: 22, z: -22, w: 28, d: 28, y: -4, color: '#34495e'},
+        {x: -22, z: 22, w: 28, d: 28, y: -4, color: '#34495e'},
+        {x: 22, z: 22, w: 28, d: 28, y: -4, color: '#34495e'},
+        {x: -36, z: 0, w: 24, d: 80, y: 0, color: '#4a607a'},
+        {x: 36, z: 0, w: 24, d: 80, y: 0, color: '#4a607a'},
+        {x: 0, z: -36, w: 50, d: 24, y: 0, color: '#4a607a'}
     ];
 
-    towerData.forEach((item) => {
-        const baseY = -7;
-        const pillarGeom = new RedGPU.Primitive.Cylinder(redGPUContext, item.radius * 0.75, item.radius, item.height, 8);
-        const pillarMat = new RedGPU.Material.PhongMaterial(redGPUContext, item.color);
-        const pillarMesh = new RedGPU.Display.Mesh(redGPUContext, pillarGeom, pillarMat);
-        pillarMesh.setPosition(item.x, baseY + item.height * 0.5, item.z);
-        scene.addChild(pillarMesh);
+    terracePositions.forEach((item) => {
+        const slabHeight = item.y - (-8);
+        const geom = new RedGPU.Primitive.Box(redGPUContext, item.w, slabHeight, item.d);
+        const mat = new RedGPU.Material.PhongMaterial(redGPUContext, item.color);
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, geom, mat);
+        mesh.setPosition(item.x, -8 + slabHeight * 0.5, item.z);
+        scene.addChild(mesh);
+    });
 
-        const beaconGeom = new RedGPU.Primitive.Sphere(redGPUContext, item.radius * 0.45, 16, 16);
-        const beaconMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#FFD700');
-        beaconMat.emissiveColor.setColorByHEX('#FFAA22');
+    // [KO] 2. 2m 간격 눈금 마디가 있는 고도 측정 타워 (Y = -8부터 최고 Y = +22까지 수직 배치)
+    // [EN] 2. Graduated altitude towers with 2m segments (extending vertically from Y = -8 up to Y = +22)
+    const towerSpecs = [
+        {x: 0, z: 0, topY: 22, radius: 1.4},
+        {x: -10, z: -8, topY: 16, radius: 1.0},
+        {x: 11, z: -7, topY: 18, radius: 1.0},
+        {x: -11, z: 10, topY: 12, radius: 1.0},
+        {x: 12, z: 11, topY: 20, radius: 1.0},
+        {x: -20, z: -18, topY: 18, radius: 1.1},
+        {x: 20, z: -18, topY: 14, radius: 1.1},
+        {x: 0, z: -24, topY: 20, radius: 1.2}
+    ];
+
+    const segmentHeight = 2;
+    const bandGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 1.08, 1.08, 0.18, 16);
+    const bandZeroMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#00e5ff');
+    bandZeroMat.emissiveColor.setColorByHEX('#00e5ff');
+    bandZeroMat.emissiveStrength = 1.8;
+
+    const bandStepMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#ffd166');
+    bandStepMat.emissiveColor.setColorByHEX('#ffaa00');
+    bandStepMat.emissiveStrength = 1.2;
+
+    towerSpecs.forEach((tower) => {
+        const segGeom = new RedGPU.Primitive.Cylinder(redGPUContext, tower.radius, tower.radius, segmentHeight - 0.08, 16);
+        for (let y = -8; y < tower.topY; y += segmentHeight) {
+            const isAboveZero = y >= 0;
+            const isEvenStep = ((y + 8) / segmentHeight) % 2 === 0;
+            const segColor = isAboveZero
+                ? (isEvenStep ? '#d8e2dc' : '#9db4c0')
+                : (isEvenStep ? '#5c6b73' : '#3d474d');
+
+            const segMat = new RedGPU.Material.PhongMaterial(redGPUContext, segColor);
+            const segMesh = new RedGPU.Display.Mesh(redGPUContext, segGeom, segMat);
+            segMesh.setPosition(tower.x, y + segmentHeight * 0.5, tower.z);
+            scene.addChild(segMesh);
+
+            const levelY = y + segmentHeight;
+            if (levelY === 0 || levelY % 4 === 0) {
+                const ringMesh = new RedGPU.Display.Mesh(
+                    redGPUContext,
+                    bandGeom,
+                    levelY === 0 ? bandZeroMat : bandStepMat
+                );
+                ringMesh.setScale(tower.radius, 1, tower.radius);
+                ringMesh.setPosition(tower.x, levelY, tower.z);
+                scene.addChild(ringMesh);
+            }
+        }
+
+        const beaconGeom = new RedGPU.Primitive.Sphere(redGPUContext, tower.radius * 0.55, 16, 16);
+        const beaconMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff6b6b');
+        beaconMat.emissiveColor.setColorByHEX('#ff4d4d');
         beaconMat.emissiveStrength = 2.5;
         const beaconMesh = new RedGPU.Display.Mesh(redGPUContext, beaconGeom, beaconMat);
-        beaconMesh.setPosition(item.x, baseY + item.height + item.radius * 0.5, item.z);
+        beaconMesh.setPosition(tower.x, tower.topY + tower.radius * 0.6, tower.z);
         scene.addChild(beaconMesh);
     });
 
-    const bridgeGeom = new RedGPU.Primitive.Box(redGPUContext, 22, 0.5, 2.4);
-    const bridgeMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#8B4513');
-    const bridgeMesh = new RedGPU.Display.Mesh(redGPUContext, bridgeGeom, bridgeMat);
-    bridgeMesh.setPosition(1, 0.5, -7);
-    scene.addChild(bridgeMesh);
-
-    for (let i = -2; i <= 2; i++) {
-        const supportGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.35, 0.4, 8, 8);
-        const supportMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#5c3a1e');
-        const supportMesh = new RedGPU.Display.Mesh(redGPUContext, supportGeom, supportMat);
-        supportMesh.setPosition(1 + i * 4.5, -3.5, -7);
-        scene.addChild(supportMesh);
-    }
-
-    const treePositions = [
-        {x: -14, z: -16, height: 8, radius: 0.35},
-        {x: -6, z: -20, height: 9, radius: 0.4},
-        {x: 16, z: -15, height: 8.5, radius: 0.35},
-        {x: 4, z: -24, height: 10, radius: 0.45},
-        {x: 22, z: 12, height: 11, radius: 0.45},
-        {x: -22, z: -6, height: 9.5, radius: 0.4},
-        {x: 14, z: 22, height: 12, radius: 0.5},
-        {x: -16, z: 20, height: 11.5, radius: 0.5}
+    // [KO] 3. 고도별 안개 농도 변화를 연속적으로 보여주는 나선형 고도 마커 구체 (Y = -6 ~ +18, 2m 간격)
+    // [EN] 3. Spiral altitude marker spheres showing continuous fog density gradient (Y = -6 to +18, 2m steps)
+    const markerSphereGeom = new RedGPU.Primitive.Sphere(redGPUContext, 0.85, 20, 20);
+    const palette = [
+        '#00b4d8', '#0096c7', '#48cae4', '#90e0ef',
+        '#06d6a0', '#8ac926', '#ffca3a', '#ff924c',
+        '#ff595e', '#f15bb5', '#9b5de5', '#c77dff', '#ffffff'
     ];
 
-    treePositions.forEach((pos) => {
-        const baseY = -7;
-        const trunkGeom = new RedGPU.Primitive.Cylinder(redGPUContext, pos.radius * 0.6, pos.radius, pos.height, 8);
-        const trunkMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#4a3219');
-        const trunkMesh = new RedGPU.Display.Mesh(redGPUContext, trunkGeom, trunkMat);
-        trunkMesh.setPosition(pos.x, baseY + pos.height * 0.5, pos.z);
-        scene.addChild(trunkMesh);
-
-        const crownRadius = pos.radius * 3.2;
-        const crownGeom = new RedGPU.Primitive.Sphere(redGPUContext, crownRadius, 12, 12);
-        const crownMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d6b2d');
-        const crownMesh = new RedGPU.Display.Mesh(redGPUContext, crownGeom, crownMat);
-        crownMesh.setPosition(pos.x, baseY + pos.height + crownRadius * 0.5, pos.z);
-        scene.addChild(crownMesh);
-    });
+    for (let i = 0; i < 13; i++) {
+        const y = -6 + i * 2;
+        const angle = i * 0.48;
+        const radius = 6.5;
+        const mat = new RedGPU.Material.PhongMaterial(redGPUContext, palette[i]);
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, markerSphereGeom, mat);
+        mesh.setPosition(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+        scene.addChild(mesh);
+    }
 };
 
 const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
@@ -162,7 +184,7 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
             const heightFogFolder = pane.addFolder({title: 'PostEffect', expanded: true});
             heightFogFolder.addBinding(view.builtInEffectManager, 'useHeightFog').on('change', (ev) => {
                 controls.forEach((c) => c.disabled = !ev.value);
-                scenarioFolder.disabled = !ev.value;
+                presetFolder.disabled = !ev.value;
             });
             heightFogFolder.addBinding(autoRotateState, 'autoRotate');
 
@@ -173,12 +195,12 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
                         EXPONENTIAL_SQUARED: RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL_SQUARED
                     }
                 }),
-                heightFogFolder.addBinding(heightFog, 'density', {min: 0, max: 0.2, step: 0.001}),
-                heightFogFolder.addBinding(heightFog, 'baseHeight', {min: -10, max: 10, step: 0.1}),
-                heightFogFolder.addBinding(heightFog, 'falloff', {min: 0.001, max: 1, step: 0.005}),
+                heightFogFolder.addBinding(heightFog, 'density', {min: 0, max: 0.15, step: 0.001}),
+                heightFogFolder.addBinding(heightFog, 'baseHeight', {min: -8, max: 12, step: 0.5}),
+                heightFogFolder.addBinding(heightFog, 'height', {min: 0.5, max: 30, step: 0.5}),
                 heightFogFolder.addBinding(heightFog, 'nearDistance', {
                     min: 0,
-                    max: 50,
+                    max: 40,
                     step: 0.5
                 }).on('change', (ev) => {
                     if (heightFog.farDistance <= ev.value) {
@@ -188,8 +210,8 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
                 }),
                 heightFogFolder.addBinding(heightFog, 'farDistance', {
                     min: 1,
-                    max: 100,
-                    step: 0.5
+                    max: 120,
+                    step: 1
                 }).on('change', (ev) => {
                     if (ev.value <= heightFog.nearDistance) {
                         heightFog.farDistance = heightFog.nearDistance + 1;
@@ -206,11 +228,11 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
                 })
             ];
 
-            const scenarioFolder = heightFogFolder.addFolder({title: 'Presets', expanded: true});
-            const applyPreset = (density, baseHeight, falloff, nearDistance, farDistance, maxOpacity, fogColor, fogType) => {
+            const presetFolder = heightFogFolder.addFolder({title: 'Presets', expanded: true});
+            const applyPreset = (density, baseHeight, height, nearDistance, farDistance, maxOpacity, fogColor, fogType) => {
                 heightFog.density = density;
                 heightFog.baseHeight = baseHeight;
-                heightFog.falloff = falloff;
+                heightFog.height = height;
                 heightFog.nearDistance = nearDistance;
                 heightFog.farDistance = farDistance;
                 heightFog.maxOpacity = maxOpacity;
@@ -221,32 +243,33 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
                 config.fogColor.b = fogColor.b;
                 pane.refresh();
             };
-            scenarioFolder.addButton({title: 'Default (Unreal)'}).on('click', () => {
-                applyPreset(0.02, 0, 0.2, 0, 50, 1, {
+
+            presetFolder.addButton({title: 'Grid Base (Y: 0 ~ 12)'}).on('click', () => {
+                applyPreset(0.035, 0, 12, 0, 65, 1, {
                     r: 200,
                     g: 210,
                     b: 255
                 }, RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL);
             });
-            scenarioFolder.addButton({title: 'Dawn Valley'}).on('click', () => {
-                applyPreset(0.035, 1.0, 0.25, 0, 55, 1, {
-                    r: 255,
-                    g: 240,
-                    b: 215
+            presetFolder.addButton({title: 'Deep Basin Mist (Y: -8 ~ 0)'}).on('click', () => {
+                applyPreset(0.05, -8, 8, 0, 70, 0.95, {
+                    r: 160,
+                    g: 220,
+                    b: 235
                 }, RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL);
             });
-            scenarioFolder.addButton({title: 'Mysterious Forest'}).on('click', () => {
-                applyPreset(0.05, 2.5, 0.2, 0, 45, 0.9, {
-                    r: 180,
-                    g: 205,
+            presetFolder.addButton({title: 'Golden Dawn (Y: -4 ~ 14)'}).on('click', () => {
+                applyPreset(0.04, -4, 18, 0, 65, 1, {
+                    r: 255,
+                    g: 225,
                     b: 185
                 }, RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL);
             });
-            scenarioFolder.addButton({title: 'Ancient Ruins'}).on('click', () => {
-                applyPreset(0.04, 1.5, 0.3, 2, 60, 0.95, {
+            presetFolder.addButton({title: 'High Cloud Sea (Y: 6 ~ 20)'}).on('click', () => {
+                applyPreset(0.06, 6, 14, 0, 80, 0.95, {
                     r: 215,
-                    g: 195,
-                    b: 165
+                    g: 225,
+                    b: 250
                 }, RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL_SQUARED);
             });
         }
