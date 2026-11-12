@@ -44,7 +44,7 @@ redUnit.testGroup(
                     ae.minEV100 === -2.0 &&
                     ae.maxEV100 === 16.0 &&
                     ae.lowPercentile === 0.8 &&
-                    ae.highPercentile === 0.95 &&
+                    ae.highPercentile === 0.983 &&
                     ae.adaptationSpeedUp === 3.0 &&
                     ae.adaptationSpeedDown === 1.0 &&
                     ae.maxExposureMultiplier === 64.0 &&

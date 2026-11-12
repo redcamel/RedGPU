@@ -80,7 +80,7 @@ class AutoExposure extends RedGPUObject {
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
     #lowPercentile: number = 0.8;
-    #highPercentile: number = 0.95;
+    #highPercentile: number = 0.983;
     #maxExposureMultiplier: number = 64.0;
     #meteringMode: METERING_MODE = METERING_MODE.CENTER_WEIGHTED;
     #targetLuminance: number = 0.18;
@@ -269,8 +269,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 히스토그램 평균 산출 시 제외할 상위 명부(극단 광원 하이라이트) 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.95`)
-     * [EN] Gets or sets the upper highlight percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.95`)
+     * [KO] 히스토그램 평균 산출 시 제외할 상위 명부(극단 광원 하이라이트) 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.983`)
+     * [EN] Gets or sets the upper highlight percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.983`)
      *
      * @returns
      * [KO] 상위 백분위 값 (`0` ~ `1`)
