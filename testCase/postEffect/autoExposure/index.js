@@ -42,7 +42,7 @@ redUnit.testGroup(
             setup(run, (ctx, view, ae) => {
                 run(
                     ae.minEV100 === -2.0 &&
-                    ae.maxEV100 === 16.0 &&
+                    ae.maxEV100 === 20.0 &&
                     ae.lowPercentile === 0.8 &&
                     ae.highPercentile === 0.95 &&
                     ae.adaptationSpeedUp === 3.0 &&

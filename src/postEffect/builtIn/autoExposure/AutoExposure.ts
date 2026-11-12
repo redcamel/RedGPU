@@ -76,7 +76,7 @@ class AutoExposure extends RedGPUObject {
     #currentPreExposureRatio: number = 1.0;
 
     #minEV100: number = -2.0;
-    #maxEV100: number = 16.0;
+    #maxEV100: number = 20.0;
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
     #lowPercentile: number = 0.8;
@@ -201,8 +201,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 자동 노출이 허용하는 최대 EV100 상한값을 가져오거나 설정합니다. `minEV100`과 동일한 값으로 설정하면 해당 EV100으로 노출이 잠깁니다. (기본값: `16.0`)
-     * [EN] Gets or sets the maximum EV100 upper bound allowed by auto-exposure. Setting it equal to `minEV100` locks exposure to that EV100. (Default: `16.0`)
+     * [KO] 자동 노출이 허용하는 최대 EV100 상한값을 가져오거나 설정합니다. `minEV100`과 동일한 값으로 설정하면 해당 EV100으로 노출이 잠깁니다. (기본값: `20.0`)
+     * [EN] Gets or sets the maximum EV100 upper bound allowed by auto-exposure. Setting it equal to `minEV100` locks exposure to that EV100. (Default: `20.0`)
      *
      * @returns
      * [KO] 최대 EV100 값
