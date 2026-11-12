@@ -39,6 +39,8 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
     let alphaCutoff = 0.5;
     if ('material' in meshPrimitive) {
         currentMaterial = new PBRMaterial(redGPUContext);
+        currentMaterial.metallicFactor = 1;
+        currentMaterial.roughnessFactor = 1;
         const materialGlTfId = meshPrimitive.material;
         const materialInfo = gltfData.materials[materialGlTfId];
         doubleSided = !!materialInfo.doubleSided;
@@ -184,6 +186,8 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
         }
     } else {
         currentMaterial = new PBRMaterial(redGPUContext);
+        currentMaterial.metallicFactor = 1;
+        currentMaterial.roughnessFactor = 1;
     }
     if (Object.hasOwn(meshPrimitive.attributes, 'COLOR_0')) {
         currentMaterial.useVertexColor = true

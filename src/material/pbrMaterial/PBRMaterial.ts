@@ -41,7 +41,7 @@ const EXTENSION_LIST: {
             'metallicRoughnessTexture',
         ],
         positiveNumberList: [
-            {key: 'metallicFactor', value: 1},
+            {key: 'metallicFactor', value: 0},
             {key: 'roughnessFactor', value: 1},
         ]
     },

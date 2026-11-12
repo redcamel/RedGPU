@@ -14,7 +14,7 @@ redUnit.testGroup(
             try {
                 const cam = new MockCamera();
                 const checkAperture = cam.aperture === 16.0;
-                const checkShutter = cam.shutterSpeed === 1/3200;
+                const checkShutter = cam.shutterSpeed === 1 / 125;
                 const checkISO = cam.iso === 100;
                 const checkAuto = cam.useAutoExposure === true;
                 run(checkAperture && checkShutter && checkISO && checkAuto);

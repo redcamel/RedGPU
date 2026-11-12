@@ -41,14 +41,14 @@ redUnit.testGroup(
         runner.defineTest('Success Test: Default Properties & Initial Telemetry', (run) => {
             setup(run, (ctx, view, ae) => {
                 run(
-                    ae.minEV100 === -10.0 &&
-                    ae.maxEV100 === 20.0 &&
-                    ae.lowPercentile === 0.1 &&
-                    ae.highPercentile === 0.9 &&
+                    ae.minEV100 === -2.0 &&
+                    ae.maxEV100 === 16.0 &&
+                    ae.lowPercentile === 0.8 &&
+                    ae.highPercentile === 0.95 &&
                     ae.adaptationSpeedUp === 3.0 &&
                     ae.adaptationSpeedDown === 1.0 &&
                     ae.maxExposureMultiplier === 64.0 &&
-                    ae.meteringMode === RedGPU.PostEffect.BuiltIn.METERING_MODE.AVERAGE &&
+                    ae.meteringMode === RedGPU.PostEffect.BuiltIn.METERING_MODE.CENTER_WEIGHTED &&
                     ae.targetLuminance === 0.18 &&
                     ae.exposureCompensation === 0.0 &&
                     ae.useDebugOverlay === false &&

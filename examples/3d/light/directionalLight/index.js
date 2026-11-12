@@ -53,9 +53,7 @@ const createDirectionalLight = (scene) => {
 
 const createStudioEnvironment = (redGPUContext, scene) => {
     const studioMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    studioMaterial.baseColorFactor = [0.5, 0.5, 0.5, 1.0];
-    studioMaterial.metallicFactor = 0.0;
-    studioMaterial.roughnessFactor = 0.8;
+    studioMaterial.baseColorFactor = [150 / 255, 150 / 255, 180 / 255, 1];
 
     const floorGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 100);
     const floor = new RedGPU.Display.Mesh(redGPUContext, floorGeo, studioMaterial);

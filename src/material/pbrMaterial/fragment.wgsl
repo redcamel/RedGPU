@@ -740,7 +740,7 @@ fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let fv5 = fv2 * fv2 * fv;
     let lightScatter = 1.0 + fd90Minus1 * fl5;
     let viewScatter = 1.0 + fd90Minus1 * fv5;
-    let factor = (NdotL * energyFactor) * (lightScatter * viewScatter);
+    let factor = (NdotL * energyFactor * INV_PI) * (lightScatter * viewScatter);
     return albedo * factor;
 }
 

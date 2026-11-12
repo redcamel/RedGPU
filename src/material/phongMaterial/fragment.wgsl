@@ -70,7 +70,7 @@ fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
     let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
 
-    return albedo * lightScatter * viewScatter * energyFactor;
+    return albedo * lightScatter * viewScatter * (energyFactor * INV_PI);
 }
 
 fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
