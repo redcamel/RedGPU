@@ -73,22 +73,31 @@ class DebuggerRenderer {
      */
     render(view: View3D, targetTextureView: GPUTextureView): void {
         const {bundleListDebuggerLayer} = view.renderViewStateData.renderBundleResults;
-        if (!bundleListDebuggerLayer.length) return;
+        if (bundleListDebuggerLayer.length) {
+            const {redGPUContext, viewRenderTextureManager} = view;
+            const {useMSAA} = redGPUContext.antialiasingManager;
+            const {depthTextureView, renderPath1DepthResultTextureView} = viewRenderTextureManager;
+            const singleSampleDepthView = useMSAA ? renderPath1DepthResultTextureView : depthTextureView;
 
-        const {redGPUContext, viewRenderTextureManager} = view;
-        const {useMSAA} = redGPUContext.antialiasingManager;
-        const {depthTextureView, renderPath1DepthResultTextureView} = viewRenderTextureManager;
-        const singleSampleDepthView = useMSAA ? renderPath1DepthResultTextureView : depthTextureView;
+            this.#colorAttachment.view = targetTextureView;
+            this.#depthStencilAttachment.view = singleSampleDepthView;
+            this.#currentView = view;
 
-        this.#colorAttachment.view = targetTextureView;
-        this.#depthStencilAttachment.view = singleSampleDepthView;
-        this.#currentView = view;
+            redGPUContext.commandEncoderManager.addPostProcessRenderPass(
+                this.#renderPassDescriptor,
+                this.#executeRenderPass
+            );
+            this.#currentView = null;
+        }
 
-        redGPUContext.commandEncoderManager.addPostProcessRenderPass(
-            this.#renderPassDescriptor,
-            this.#executeRenderPass
-        );
-        this.#currentView = null;
+        const {builtInEffectManager, rawCamera} = view;
+        if (
+            rawCamera.useAutoExposure &&
+            builtInEffectManager.hasAutoExposure &&
+            builtInEffectManager.autoExposure.useDebugOverlay
+        ) {
+            builtInEffectManager.autoExposure.renderDebugOverlay(targetTextureView);
+        }
     }
 
     #executeRenderPass = (passEncoder: GPURenderPassEncoder): void => {

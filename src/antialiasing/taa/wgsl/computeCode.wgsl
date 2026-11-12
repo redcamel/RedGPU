@@ -113,7 +113,7 @@
         let currentYCoCg = rgbToYCoCg(currentRGB);
         let rawHistoryRGBA = sample_texture_catmull_rom_antiflicker(historyTexture, basicSampler, historyUV, screenSize);
 
-        let historyRGB = reversible_tonemap(rawHistoryRGBA.rgb);
+        let historyRGB = reversible_tonemap(max(rawHistoryRGBA.rgb * systemUniforms.preExposureRatio, vec3<f32>(0.0)));
         let historyYCoCg = rgbToYCoCg(historyRGB);
         let historyAlpha = rawHistoryRGBA.a;
 

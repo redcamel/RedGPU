@@ -595,17 +595,18 @@ class View3D extends AView {
                 },
                 {
                     key: 'preExposure',
-                    value: this.#builtInEffectManager.autoExposure.preExposure
+                    value: this.#builtInEffectManager.getPreExposure()
                 },
             ]);
         }
         gpuDevice.queue.writeBuffer(systemUniform_Vertex_UniformBuffer.gpuBuffer, 0, this.#uniformData);
 
+        let activeCascadeCount = 0;
         const dirLightVPInfo = members.directionalLightProjectionViewMatrix;
         if (dirLightVPInfo && this.#systemUniform_Cascade_Buffers.length && lightManager.directionalLightCount > 0 && shadowManager) {
             const vpOffsetF32 = dirLightVPInfo.uniformOffset / Float32Array.BYTES_PER_ELEMENT;
             const cascadePV = shadowManager.directionalShadowManager.cascadeProjectionViewMatrices;
-            const activeCascadeCount = Math.min(this.#systemUniform_Cascade_Buffers.length, Math.min(4, Math.max(1, shadowManager.directionalShadowManager.cascadeCount || 3)));
+            activeCascadeCount = Math.min(this.#systemUniform_Cascade_Buffers.length, Math.min(4, Math.max(1, shadowManager.directionalShadowManager.cascadeCount || 3)));
             this.#cascadeUniformDataU8.set(this.#uniformDataU8);
             for (let c = 0; c < activeCascadeCount; c++) {
                 const cascadeBuffer = this.#systemUniform_Cascade_Buffers[c];
@@ -614,6 +615,15 @@ class View3D extends AView {
                     gpuDevice.queue.writeBuffer(cascadeBuffer.gpuBuffer, 0, this.#cascadeUniformData);
                 }
             }
+        }
+
+        if (rawCamera.useAutoExposure && this.constructor === View3D && members.preExposure) {
+            this.#builtInEffectManager.autoExposure.syncVertexSystemUniformBuffers(
+                systemUniform_Vertex_UniformBuffer.gpuBuffer,
+                members.preExposure.uniformOffset,
+                this.#systemUniform_Cascade_Buffers,
+                activeCascadeCount
+            );
         }
     }
 

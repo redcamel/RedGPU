@@ -1,6 +1,6 @@
 import RedGPUObject from "../../base/RedGPUObject";
 import AutoExposure from "./autoExposure/AutoExposure";
-import View3D from "../../display/view/View3D";
+import type View3D from "../../display/view/View3D";
 import keepLog from "../../utils/keepLog";
 import Bloom from "./bloom/Bloom";
 import ChromaticAberration from "./chromaticAberration/ChromaticAberration";
@@ -89,6 +89,18 @@ class BuiltInEffectManager extends RedGPUObject {
     }
 
     /**
+     * [KO] 자동 노출(`AutoExposure`) 인스턴스가 이미 초기화되어 있는지 여부를 반환합니다.
+     * [EN] Returns whether the `AutoExposure` instance has already been initialized.
+     *
+     * @returns
+     * [KO] `AutoExposure` 초기화 여부
+     * [EN] Whether `AutoExposure` is initialized
+     */
+    get hasAutoExposure(): boolean {
+        return Boolean(this.#autoExposure);
+    }
+
+    /**
      * [KO] 자동 노출(`AutoExposure`) 인스턴스를 반환합니다.
      * [EN] Returns the `AutoExposure` instance.
      *
@@ -101,6 +113,26 @@ class BuiltInEffectManager extends RedGPUObject {
             this.#autoExposure = new AutoExposure(this.#view);
         }
         return this.#autoExposure;
+    }
+
+    /**
+     * [KO] 불필요한 GPU 버퍼 지연 생성을 방지하면서 현재 뷰의 사전 노출 배율(`preExposure`)을 계산하여 반환합니다.
+     * [EN] Calculates and returns the current view's pre-exposure multiplier (`preExposure`) without triggering unnecessary GPU buffer allocation.
+     *
+     * @returns
+     * [KO] 사전 노출 배율
+     * [EN] Pre-exposure multiplier
+     */
+    getPreExposure(): number {
+        if (this.#view.constructor.name !== 'View3D') {
+            return 1.0;
+        }
+        const {rawCamera} = this.#view;
+        if (rawCamera.useAutoExposure) {
+            return this.autoExposure.preExposure;
+        }
+        const compensation = this.#autoExposure ? this.#autoExposure.exposureCompensation : 0.0;
+        return 1.0 / (1.2 * Math.pow(2, rawCamera.ev100 - compensation));
     }
 
     /**

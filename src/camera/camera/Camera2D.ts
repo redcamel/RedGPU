@@ -36,6 +36,7 @@ class Camera2D extends ACamera {
      */
     constructor() {
         super();
+        this.useAutoExposure = false;
     }
 
     /**

@@ -144,7 +144,9 @@ class Renderer {
         viewList_renderPassDescriptorList.forEach((v, index) => {
             const targetView = redGPUContext.viewList[index];
             targetView.pickingManager?.checkEvents(targetView, time);
-            if (targetView.rawCamera.useAutoExposure) targetView.builtInEffectManager.autoExposure.resolveReadback();
+            if (targetView.rawCamera.useAutoExposure && targetView.builtInEffectManager.hasAutoExposure) {
+                targetView.builtInEffectManager.autoExposure.resolveReadback();
+            }
         });
     }
 
@@ -415,6 +417,7 @@ class Renderer {
     #needSingleSampleDepthResolve(view: View3D): boolean {
         const {builtInEffectManager} = view;
         return Boolean(
+            (view.rawCamera.useAutoExposure && view.constructor === View3D) ||
             this.#debuggerRenderer?.hasActiveDebuggers(view) ||
             view.skyAtmosphere ||
             builtInEffectManager?.useSSAO ||

@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix";
 import RedGPUObject from "../base/RedGPUObject";
-import View3D from "../display/view/View3D";
+import type View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASingleComputePassPostEffect from "./core/ASingleComputePassPostEffect";
@@ -64,8 +64,9 @@ class PostEffectManager extends RedGPUObject {
         prevNoneJitterProjectionViewMatrix: null
     };
     #preExposureEntry = {key: 'preExposure', value: 1};
+    #preExposureRatioEntry = {key: 'preExposureRatio', value: 1};
     #devicePixelRatioEntry = {key: 'devicePixelRatio', value: 1};
-    #systemExtraEntries = [this.#preExposureEntry, this.#devicePixelRatioEntry];
+    #systemExtraEntries = [this.#preExposureEntry, this.#preExposureRatioEntry, this.#devicePixelRatioEntry];
 
     #gbufferBindGroupLayout: GPUBindGroupLayout;
     #gbufferBindGroupSwap0: GPUBindGroup;
@@ -337,8 +338,12 @@ class PostEffectManager extends RedGPUObject {
             currentTextureView = this.#applySingleEffect(view.taa, currentTextureView, width, height);
         }
 
-        if (useAutoExposure) {
-            builtInEffectManager.autoExposure.render(currentTextureView);
+        if (useAutoExposure && view.constructor.name === 'View3D') {
+            const {viewRenderTextureManager} = view;
+            const singleSampleDepthView = antialiasingManager.useMSAA
+                ? viewRenderTextureManager.renderPath1DepthResultTextureView
+                : viewRenderTextureManager.depthTextureView;
+            builtInEffectManager.autoExposure.render(currentTextureView, singleSampleDepthView);
         }
         if (useDOF) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.dof, currentTextureView, width, height);
@@ -545,11 +550,19 @@ class PostEffectManager extends RedGPUObject {
 
         SystemUniformUpdater.updateSkyAtmosphere(skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32);
 
-        this.#preExposureEntry.value = builtInEffectManager.autoExposure.preExposure;
+        this.#preExposureEntry.value = builtInEffectManager.getPreExposure();
+        this.#preExposureRatioEntry.value = 1.0;
         this.#devicePixelRatioEntry.value = devicePixelRatio;
         updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, this.#systemExtraEntries);
 
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
+
+        if (rawCamera.useAutoExposure && this.#view.constructor.name === 'View3D' && members.preExposure) {
+            builtInEffectManager.autoExposure.syncPostEffectSystemUniformBuffer(
+                gpuBuffer,
+                members.preExposure.uniformOffset
+            );
+        }
     }
 
     #init() {
