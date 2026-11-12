@@ -1,6 +1,7 @@
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
 import ColorRGB from "./ColorRGB";
+import convertSrgbToLinear from "./convertSrgbToLinear";
 
 const RGBA_STRING_REGEX = /rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d*(?:\.\d+)?)\s*\)/;
 
@@ -143,22 +144,22 @@ class ColorRGBA extends ColorRGB {
     }
 
     /**
-     * [KO] 감마 보정된(Linear) 정규화된 RGBA 값을 배열로 반환합니다.
-     * [EN] Returns gamma-corrected (Linear) normalized RGBA values as an array.
+     * [KO] 표준 sRGB 전달 함수(IEC 61966-2-1)로 변환된 리니어(Linear) 정규화 RGBA 값을 배열로 반환합니다. 알파 값은 변환하지 않습니다.
+     * [EN] Returns linear normalized RGBA values converted with the standard sRGB transfer function (IEC 61966-2-1) as an array. The alpha value is not converted.
      * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.8);
-     * console.log(color.rgbaNormalLinear);
+     * console.log(color.rgbaNormalLinear); // [1, 0.2158..., 0, 0.8]
      * ```
      * @returns
-     * [KO] 감마 보정된(2.2) 정규화된 RGBA 값을 포함하는 배열
-     * [EN] Array containing gamma-corrected (2.2) normalized RGBA values
+     * [KO] 리니어 정규화 RGBA 값을 포함하는 배열
+     * [EN] Array containing linear normalized RGBA values
      */
     get rgbaNormalLinear(): number[] {
         const out = this.#rgbaNormalLinear;
-        out[0] = Math.pow(this.r / 255, 2.2);
-        out[1] = Math.pow(this.g / 255, 2.2);
-        out[2] = Math.pow(this.b / 255, 2.2);
+        out[0] = convertSrgbToLinear(this.r);
+        out[1] = convertSrgbToLinear(this.g);
+        out[2] = convertSrgbToLinear(this.b);
         out[3] = this.#a;
         return out;
     }

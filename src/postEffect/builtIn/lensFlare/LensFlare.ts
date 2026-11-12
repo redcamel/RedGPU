@@ -461,19 +461,16 @@ class LensFlare extends AMultiPassPostEffect {
             const dz = primaryLight.directionZ;
             const len = Math.hypot(dx, dy, dz);
             const invLen = len > 1e-6 ? -1.0 / len : 0.0;
-            const color = primaryLight.color;
-            const rLin = Math.pow(color.r / 255.0, 2.2);
-            const gLin = Math.pow(color.g / 255.0, 2.2);
-            const bLin = Math.pow(color.b / 255.0, 2.2);
+            const colorLinear = primaryLight.color.rgbNormalLinear;
             const luxScale = Math.min(Math.max((primaryLight.intensityMultiplier * primaryLight.lux) / 100000.0, 0.25), 3.0);
             this.#compositePass.syncSunUniforms(
                 dx * invLen,
                 dy * invLen,
                 dz * invLen,
                 len > 1e-6 ? 1 : 0,
-                rLin,
-                gLin,
-                bLin,
+                colorLinear[0],
+                colorLinear[1],
+                colorLinear[2],
                 luxScale
             );
             return;
