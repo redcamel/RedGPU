@@ -772,7 +772,7 @@ fn getDirectSpecularBTDF(
 
 fn getDirectDiffuseBTDF(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
     let cosTheta = max(-dot(N, L), 0.0);
-    return albedo * cosTheta;
+    return albedo * (cosTheta * INV_PI);
 }
 
 #redgpu_if isFoliage
@@ -784,7 +784,7 @@ fn getDirectFoliageBTDF(N: vec3<f32>, V: vec3<f32>, L: vec3<f32>, color: vec3<f3
     let lightOpposite = -(L + N * distortion);
     let vDotL = max(dot(V, lightOpposite), 0.0);
     let inScatter = vDotL * vDotL;
-    return color * (backWrap * 0.5 + inScatter * 0.5);
+    return color * ((backWrap * 0.5 + inScatter * 0.5) * INV_PI);
 }
 #redgpu_endIf
 
@@ -1280,7 +1280,7 @@ fn getIndirectPbrLighting(
         #redgpu_endIf
         return indirectLighting;
     } else {
-        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * occlusionParameter * preExposure;
+        let ambientContribution = albedo * systemUniforms.ambientLight.color * (systemUniforms.ambientLight.intensity * INV_PI) * occlusionParameter * preExposure;
         var indirectLighting = ambientContribution;
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {

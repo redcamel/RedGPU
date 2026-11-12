@@ -292,7 +292,7 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [KO] 간접 조명 (Ambient) [EN] Indirect lighting (Ambient)
-    var ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity;
+    var ambientContribution = albedo * u_ambientLight.color * (u_ambientLight.intensity * INV_PI);
 
     if (systemUniforms.useSkyAtmosphere == 1u) {
         let u_atmo = systemUniforms.skyAtmosphere;
