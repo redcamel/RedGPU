@@ -1,3 +1,5 @@
+#redgpu_include color.getLuminance
+
 @group(0) @binding(0) var sourceTexture : texture_2d<f32>;
 @group(1) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 256>;
 
@@ -38,9 +40,7 @@ fn main(
         let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
         
         if (texel.a > 0.0) {
-            let color = texel.rgb;
-            let brightness = max(color.r, max(color.g, color.b));
-            let lum = brightness * uniforms.invPreExposure;
+            let lum = getLuminance(texel.rgb) * uniforms.invPreExposure;
             
             if (lum > MIN_LUMINANCE) {
                 let ev100 = log2(lum) + 3.0;
