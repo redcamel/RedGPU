@@ -23,9 +23,6 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        const directionalLight = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(directionalLight);
-
         const meshes = createFilterCombinationGrid(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer();

@@ -34,7 +34,6 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
 
 
             scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
-            scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
 
             const material = new RedGPU.Material.PhongMaterial(redGPUContext, colorHex);
             const geometry = new RedGPU.Primitive.TorusKnot(redGPUContext, 1, 0.4, 128, 64);

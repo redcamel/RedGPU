@@ -24,9 +24,6 @@ RedGPU.init(
         view.grid = true;
         redGPUContext.addView(view);
 
-        const ambientLight = new RedGPU.Light.AmbientLight();
-        ambientLight.intensity = 0.5;
-        scene.lightManager.ambientLight = ambientLight;
         scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
         const eventState = {

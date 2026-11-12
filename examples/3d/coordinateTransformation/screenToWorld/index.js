@@ -267,6 +267,5 @@ function updateInfoDisplay(demo) {
 function setupLighting(scene) {
     const directionalLight = new RedGPU.Light.DirectionalLight();
     directionalLight.direction = [-0.5, -1, -0.5];
-    directionalLight.intensity = 0.8;
     scene.lightManager.addDirectionalLight(directionalLight);
 }

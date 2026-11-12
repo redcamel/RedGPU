@@ -28,20 +28,20 @@ RedGPU.init(
 
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         view.ibl = ibl;
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 8000);
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 30000);
 
         // [KO] 조명(Directional, Point, Spot) 생성 및 디버거 활성화
         // [EN] Create lights (Directional, Point, Spot) and enable debuggers
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.color.setColorByRGB(255, 255, 220);
-        directionalLight.lux = 1000;
+        directionalLight.lux = 60000;
         directionalLight.direction = [-0.4, -1, -0.3];
         directionalLight.enableDebugger = true;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const pointLight = new RedGPU.Light.PointLight();
         pointLight.color.setColorByRGB(255, 120, 120);
-        pointLight.lumen = 500000;
+        pointLight.lumen = 1500000;
         pointLight.radius = 8.0;
         pointLight.setPosition(-6, 4, 2);
         pointLight.enableDebugger = true;
@@ -49,7 +49,7 @@ RedGPU.init(
 
         const spotLight = new RedGPU.Light.SpotLight();
         spotLight.color.setColorByRGB(120, 160, 255);
-        spotLight.lumen = 500000;
+        spotLight.lumen = 1500000;
         spotLight.radius = 15.0;
         spotLight.setPosition(6, 5, 1);
         spotLight.direction = [-0.8, -0.7, -0.3];
@@ -179,7 +179,7 @@ const setSpotLightPanel = (pane, targetView) => {
     });
 
     lightFolder.addBinding(light, 'radius', { min: 0.1, max: 20, step: 0.1 });
-    lightFolder.addBinding(light, 'lumen', { min: 0, max: 1000000, step: 100 });
+    lightFolder.addBinding(light, 'lumen', {min: 0, max: 5000000, step: 10000});
     lightFolder.addBinding(light, 'innerCutoff', { min: 0, max: 90, step: 0.5 });
     lightFolder.addBinding(light, 'outerCutoff', { min: 0, max: 90, step: 0.5 });
 
@@ -207,7 +207,7 @@ const setPointLightPanel = (pane, targetView) => {
     });
 
     lightFolder.addBinding(light, 'radius', { min: 0.1, max: 20, step: 0.01 });
-    lightFolder.addBinding(light, 'lumen', { min: 0, max: 1000000, step: 100 });
+    lightFolder.addBinding(light, 'lumen', {min: 0, max: 5000000, step: 10000});
 
     lightFolder.addBinding(lightConfig, 'color', {
         picker: 'inline',

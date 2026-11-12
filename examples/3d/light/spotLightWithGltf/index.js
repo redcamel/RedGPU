@@ -69,7 +69,7 @@ RedGPU.init(
 );
 
 const createSpotLight = (scene) => {
-    const light = new RedGPU.Light.SpotLight('#00ffff', 350000);
+    const light = new RedGPU.Light.SpotLight('#00ffff', 3000000);
     light.setPosition(0, 6, 0);
     light.lookAt(0, 0, 0);
     light.radius = 10;
@@ -113,7 +113,7 @@ const renderTestPane = (redGPUContext, view, light) => {
                 light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
 
-            lightFolder.addBinding(light, 'lumen', {min: 0, max: 1000000, step: 1000});
+            lightFolder.addBinding(light, 'lumen', {min: 0, max: 5000000, step: 10000});
             lightFolder.addBinding(light, 'radius', {min: 0, max: 100, step: 1});
             lightFolder.addBinding(light, 'enableDebugger');
 

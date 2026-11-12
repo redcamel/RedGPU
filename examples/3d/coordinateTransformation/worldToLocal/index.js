@@ -182,9 +182,6 @@ function createOverlayBoxes() {
 function setupLighting(scene) {
     const directionalLight = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(directionalLight);
-
-    const ambientLight = new RedGPU.Light.AmbientLight('#404040', 0.4);
-    scene.lightManager.ambientLight = ambientLight;
 }
 
 /**
