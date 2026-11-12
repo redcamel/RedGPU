@@ -41,10 +41,10 @@ redUnit.testGroup(
         runner.defineTest('Success Test: Default Properties & Initial Telemetry', (run) => {
             setup(run, (ctx, view, ae) => {
                 run(
-                    ae.minEV100 === -2.0 &&
+                    ae.minEV100 === -10.0 &&
                     ae.maxEV100 === 20.0 &&
-                    ae.lowPercentile === 0.8 &&
-                    ae.highPercentile === 0.95 &&
+                    ae.lowPercentile === 0.1 &&
+                    ae.highPercentile === 0.9 &&
                     ae.adaptationSpeedUp === 3.0 &&
                     ae.adaptationSpeedDown === 1.0 &&
                     ae.maxExposureMultiplier === 64.0 &&

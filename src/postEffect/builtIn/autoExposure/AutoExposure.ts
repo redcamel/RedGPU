@@ -75,12 +75,12 @@ class AutoExposure extends RedGPUObject {
     #targetEV100: number = 1.0;
     #currentPreExposureRatio: number = 1.0;
 
-    #minEV100: number = -2.0;
+    #minEV100: number = -10.0;
     #maxEV100: number = 20.0;
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
-    #lowPercentile: number = 0.8;
-    #highPercentile: number = 0.95;
+    #lowPercentile: number = 0.1;
+    #highPercentile: number = 0.9;
     #maxExposureMultiplier: number = 64.0;
     #meteringMode: METERING_MODE = METERING_MODE.AVERAGE;
     #targetLuminance: number = 0.18;
@@ -184,8 +184,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 자동 노출이 허용하는 최소 EV100 하한값을 가져오거나 설정합니다. `maxEV100`과 동일한 값으로 설정하면 해당 EV100으로 노출이 잠깁니다. (기본값: `-2.0`)
-     * [EN] Gets or sets the minimum EV100 lower bound allowed by auto-exposure. Setting it equal to `maxEV100` locks exposure to that EV100. (Default: `-2.0`)
+     * [KO] 자동 노출이 허용하는 최소 EV100 하한값을 가져오거나 설정합니다. `maxEV100`과 동일한 값으로 설정하면 해당 EV100으로 노출이 잠깁니다. (기본값: `-10.0`)
+     * [EN] Gets or sets the minimum EV100 lower bound allowed by auto-exposure. Setting it equal to `maxEV100` locks exposure to that EV100. (Default: `-10.0`)
      *
      * @returns
      * [KO] 최소 EV100 값
@@ -252,8 +252,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 히스토그램 평균 산출 시 제외할 하위 암부 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.8`)
-     * [EN] Gets or sets the lower shadow percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.8`)
+     * [KO] 히스토그램 평균 산출 시 제외할 하위 암부 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.1`)
+     * [EN] Gets or sets the lower shadow percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.1`)
      *
      * @returns
      * [KO] 하위 백분위 값 (`0` ~ `1`)
@@ -269,8 +269,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 히스토그램 평균 산출 시 제외할 상위 명부(극단 광원 하이라이트) 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.95`)
-     * [EN] Gets or sets the upper highlight percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.95`)
+     * [KO] 히스토그램 평균 산출 시 제외할 상위 명부(극단 광원 하이라이트) 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.9`)
+     * [EN] Gets or sets the upper highlight percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.9`)
      *
      * @returns
      * [KO] 상위 백분위 값 (`0` ~ `1`)

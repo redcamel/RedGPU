@@ -93,12 +93,12 @@ fn main(@builtin(local_invocation_index) local_index: u32) {
             return;
         }
 
-        // 히스토그램 백분위 절삭 평균 (정규화 [0, 1] CDF 적분으로 4K/8K에서도 f32 정밀도 손실 0%)
+        // 히스토그램 백분위 절삭 및 선형 휘도 복원(exp2) 가중 평균 (정규화 [0, 1] CDF 적분)
         let invTotal = 1.0 / f32(totalPixels);
         let lowP = uniforms.lowPercentile;
         let highP = uniforms.highPercentile;
         var cdf: f32 = 0.0;
-        var weightedEV100Sum: f32 = 0.0;
+        var weightedLuminanceSum: f32 = 0.0;
         var validPdfSum: f32 = 0.0;
 
         for (var i = 0u; i < 256u; i = i + 1u) {
@@ -106,14 +106,16 @@ fn main(@builtin(local_invocation_index) local_index: u32) {
             let nextCdf = cdf + pdf;
             let validSlice = max(0.0, min(nextCdf, highP) - max(cdf, lowP));
             if (validSlice > 0.0) {
-                let binEV100 = uniforms.minEV100 + ((f32(i) + 0.5) * INV_256) * uniforms.ev100Range;
-                weightedEV100Sum += binEV100 * validSlice;
+                let binOffsetEV = ((f32(i) + 0.5) * INV_256) * uniforms.ev100Range;
+                let binRelativeLum = exp2(binOffsetEV);
+                weightedLuminanceSum += binRelativeLum * validSlice;
                 validPdfSum += validSlice;
             }
             cdf = nextCdf;
         }
 
-        let sceneAvgEV100 = weightedEV100Sum / max(validPdfSum, 0.00001);
+        let avgRelativeLum = max(0.000001, weightedLuminanceSum / max(validPdfSum, 0.00001));
+        let sceneAvgEV100 = uniforms.minEV100 + log2(avgRelativeLum);
         var targetEV100 = sceneAvgEV100 - uniforms.targetEV100Bias;
         targetEV100 = max(targetEV100, uniforms.minPossibleEV100);
         targetEV100 = clamp(targetEV100, uniforms.minEV100, uniforms.maxEV100);
