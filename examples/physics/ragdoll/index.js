@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -39,12 +39,11 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.scaleX = ground.scaleZ = 40;
 		ground.scaleY = 1;
 		ground.y = -0.5;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -52,6 +51,13 @@ RedGPU.init(
 		});
 
 		const activeRagdolls = [];
+
+        const getRandomColor = () => {
+            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
 
 		/**
 		 * [KO] 신체 부위(Limb) 생성 함수: 메쉬 생성과 물리 바디 등록을 동시에 수행
@@ -66,10 +72,9 @@ RedGPU.init(
 		 * @param {string} color
 		 */
 		const createLimb = (geometry, x, y, z, sx, sy, sz, color) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext));
+            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext, color));
 			mesh.x = x; mesh.y = y; mesh.z = z;
 			mesh.scaleX = sx; mesh.scaleY = sy; mesh.scaleZ = sz;
-			mesh.material.color.setColorByHEX(color);
 			scene.addChild(mesh);
 
 			const body = physicsEngine.createBody(mesh, {
@@ -89,7 +94,7 @@ RedGPU.init(
 		 * @param {number} offsetZ
 		 */
 		const spawnRagdoll = (offsetX, offsetZ) => {
-			const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+            const color = getRandomColor();
 			
 			// [KO] 주요 신체 부위 생성 (실제 사람 비율에 근접하게 설정)
 			// [EN] Create main body parts (Set close to real human proportions)

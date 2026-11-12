@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
@@ -39,9 +39,6 @@ RedGPU.init(
 		// [KO] 조명 설정
 		// [EN] Lighting setup
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.x = 10;
-		directionalLight.y = 20;
-		directionalLight.z = 10;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// [KO] 1. 바닥 생성 (물체가 천 아래로 떨어졌을 때를 대비)
@@ -49,13 +46,12 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.y = -5;
 		ground.scaleX = 60;
 		ground.scaleY = 1;
 		ground.scaleZ = 60;
-		ground.material.color.setColorByHEX('#333333');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -85,9 +81,8 @@ RedGPU.init(
 		const clothMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			clothGeometry,
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#cc4444')
 		);
-		clothMesh.material.color.setColorByHEX('#ff4444');
 		clothMesh.primitiveState.cullMode = 'none';
 		scene.addChild(clothMesh);
 
@@ -188,19 +183,25 @@ RedGPU.init(
 
 		// [KO] 5. 테스트 상호작용
 		// [EN] 5. Test interaction
+        const getRandomColor = () => {
+            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const spawnObject = () => {
 			const isBox = Math.random() > 0.5;
 			const size = 1.5 + Math.random() * 2.5;
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				isBox ? new RedGPU.Primitive.Box(redGPUContext) : new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
 			mesh.scaleX = mesh.scaleY = mesh.scaleZ = size;
 			mesh.x = (Math.random() - 0.5) * 6;
 			mesh.y = 25;
 			mesh.z = (Math.random() - 0.5) * 6;
-			mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			scene.addChild(mesh);
 			
 			physicsEngine.createBody(mesh, {

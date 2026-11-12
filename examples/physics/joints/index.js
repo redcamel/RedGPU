@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -47,13 +47,12 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.scaleX = 60;
 		ground.scaleY = 1;
 		ground.scaleZ = 60;
 		ground.y = -0.5;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -74,9 +73,8 @@ RedGPU.init(
 		const anchorMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#cc4444')
 		);
-		anchorMesh.material.color.setColorByHEX('#ff4444');
 		anchorMesh.y = 15;
 		scene.addChild(anchorMesh);
 
@@ -109,8 +107,7 @@ RedGPU.init(
 		 */
 		const initChain = () => {
 			const linkGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.4);
-			const linkMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-			linkMat.color.setColorByHEX('#888888');
+            const linkMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#888888');
 
 			let prevBody = anchorBody;
 			const numLinks = 8;
@@ -148,9 +145,8 @@ RedGPU.init(
 			const bigBallMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 1.5),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#4466cc')
 			);
-			bigBallMesh.material.color.setColorByHEX('#4444ff');
 			bigBallMesh.y = 15 - (numLinks + 1) * spacing - 0.5;
 			scene.addChild(bigBallMesh);
 

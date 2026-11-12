@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -51,6 +51,13 @@ RedGPU.init(
 			createPile(10);
 		};
 
+        const getRandomColor = () => {
+            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const createPile = (spawnY = 1) => {
 			if (activeBoxes.length > 1000) {
 				for (let i = 0; i < 100; i++) {
@@ -61,8 +68,7 @@ RedGPU.init(
 			}
 
 			for (let i = 0; i < 100; i++) {
-				const mesh = new RedGPU.Display.Mesh(redGPUContext, boxGeo, new RedGPU.Material.PhongMaterial(redGPUContext));
-				mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
+                const mesh = new RedGPU.Display.Mesh(redGPUContext, boxGeo, new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor()));
 				mesh.setPosition((Math.random() * 8) - 4, spawnY + (i * 0.6), (Math.random() * 8) - 4);
 				mesh.setScale(0.5);
 				scene.addChild(mesh);
@@ -73,10 +79,9 @@ RedGPU.init(
 			}
 		};
 
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+        const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#666666'));
 		ground.setScale(60, 1, 60);
 		ground.y = -0.5;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
 		ground.addListener('click', (e) => explodeAt(e.point));

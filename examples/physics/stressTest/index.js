@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
@@ -43,12 +43,11 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.scaleX = ground.scaleZ = 100;
 		ground.scaleY = 1;
 		ground.y = -0.5;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -59,6 +58,13 @@ RedGPU.init(
 		// [KO] 리소스 효율을 위해 1m 반지름의 기본 구체 지오메트리 공유
 		// [EN] Shared base sphere geometry with 1m radius for resource efficiency
 		const baseBallGeo = new RedGPU.Primitive.Sphere(redGPUContext, 1);
+
+        const getRandomColor = () => {
+            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
 
 		/**
 		 * [KO] 다양한 크기의 구체 생성 함수
@@ -73,10 +79,11 @@ RedGPU.init(
 			
 			// [KO] 개별 재질 생성: 각 객체의 고유 색상을 유지하고 깜박임을 방지합니다.
 			// [EN] Create individual material: Maintains each object's unique color and prevents flickering.
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, baseBallGeo, material);
+            const mesh = new RedGPU.Display.Mesh(
+                redGPUContext,
+                baseBallGeo,
+                new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
+            );
 			mesh.x = (Math.random() * 20) - 10;
 			mesh.y = 20 + (Math.random() * 10);
 			mesh.z = (Math.random() * 20) - 10;

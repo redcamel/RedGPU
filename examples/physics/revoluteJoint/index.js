@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
@@ -49,13 +49,12 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.y = -0.5;
 		ground.scaleX = 40;
 		ground.scaleY = 1;
 		ground.scaleZ = 40;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -67,13 +66,12 @@ RedGPU.init(
 		const pillar = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#888888')
 		);
 		pillar.y = 2.5;
 		pillar.scaleX = 0.4;
 		pillar.scaleY = 5;
 		pillar.scaleZ = 0.4;
-		pillar.material.color.setColorByHEX('#888888');
 		scene.addChild(pillar);
 		
 		// [KO] pillarBody 변수를 캡처하여 이후 조인트 생성에 사용합니다.
@@ -97,17 +95,16 @@ RedGPU.init(
 		const hub = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Cylinder(redGPUContext, 0.3, 0.3, 0.4),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#d4d4d8')
 		);
 		hub.rotationX = 90;
-		hub.material.color.setColorByHEX('#ffffff');
 		propellerGroup.addChild(hub);
 
 		for (let i = 0; i < 4; i++) {
 			const blade = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#d4a538')
 			);
 			blade.scaleX = 4.0;
 			blade.scaleY = 0.3;
@@ -116,7 +113,6 @@ RedGPU.init(
 			blade.x = Math.cos(angleRad) * 2.0;
 			blade.y = Math.sin(angleRad) * 2.0;
 			blade.rotationZ = i * 90;
-			blade.material.color.setColorByHEX('#ffcc00');
 			propellerGroup.addChild(blade);
 		}
 
@@ -155,12 +151,10 @@ RedGPU.init(
 		// 4. 상호작용용 낙하 공
 		const activeBalls = [];
 		const createBall = () => {
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX('#ffffff');
 			const ball = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 0.25),
-				material
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#cccccc')
 			);
 			ball.x = (Math.random() * 4) - 2;
 			ball.y = 10;

@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
@@ -48,9 +48,8 @@ RedGPU.init(
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
-		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -62,9 +61,8 @@ RedGPU.init(
 		const triggerMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#44aa55')
 		);
-		triggerMesh.material.color.setColorByHEX('#44ff44');
 		triggerMesh.material.opacity = 0.3;
 		triggerMesh.material.transparent = true;
 		triggerMesh.y = 5;
@@ -95,12 +93,10 @@ RedGPU.init(
 		 * [EN] Function to create a new ball
 		 */
 		const createBall = () => {
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX('#ffffff');
 			const ballMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
-				material
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#cccccc')
 			);
 			ballMesh.x = (Math.random() * 8) - 4;
 			ballMesh.y = 15;
@@ -162,7 +158,7 @@ RedGPU.init(
 			if (ballHandle !== null) {
 				const ballBody = physicsEngine.getBodyByColliderHandle(ballHandle);
 				if (ballBody?.mesh) {
-					ballBody.mesh.material.color.setColorByHEX('#ff44ff');
+                    ballBody.mesh.material.color.setColorByHEX('#b844cc');
 				}
 			}
 		};

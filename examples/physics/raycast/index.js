@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -37,14 +37,28 @@ RedGPU.init(
 
 		// [KO] 바닥 생성
 		// [EN] Create ground
-		const groundMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext, 30, 30), new RedGPU.Material.PhongMaterial(redGPUContext));
-		groundMesh.material.color.setColorByHEX('#444444');
+        const groundMesh = new RedGPU.Display.Mesh(
+            redGPUContext,
+            new RedGPU.Primitive.Ground(redGPUContext, 30, 30),
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
+        );
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
 
+        const getRandomColor = () => {
+            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const activeObjects = [];
 		const createBox = (i) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+            const mesh = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Box(redGPUContext),
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#cccccc')
+            );
 			mesh.setPosition((Math.random() * 10) - 5, 2 + (i * 1.5), (Math.random() * 10) - 5);
 			scene.addChild(mesh);
 
@@ -58,7 +72,7 @@ RedGPU.init(
 			mesh.addListener('click', (e) => {
 				const dir = e.ray.direction;
 				body.applyImpulse({ x: dir[0] * 40, y: (dir[1] * 40) + 15, z: dir[2] * 40 });
-				e.target.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
+                e.target.material.color.setColorByHEX(getRandomColor());
 			});
 		};
 

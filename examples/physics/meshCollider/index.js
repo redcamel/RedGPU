@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -54,9 +54,8 @@ RedGPU.init(
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				geometry,
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+				new RedGPU.Material.PhongMaterial(redGPUContext, color)
 			);
-			mesh.material.color.setColorByHEX(color);
 			mesh.x = x;
 			mesh.y = y;
 			mesh.z = z;
@@ -89,7 +88,7 @@ RedGPU.init(
 			0,
 			0,
 			110,
-			'#666666'
+			'#707070'
 		);
 		createComplexStatic(
 			new RedGPU.Primitive.TorusKnot(redGPUContext, 3, 0.8, 64, 16),
@@ -97,7 +96,7 @@ RedGPU.init(
 			-5,
 			0,
 			0,
-			'#444444'
+			'#585858'
 		);
 
 		// [KO] 바닥 생성 및 물리 적용: 시인성을 위해 색상을 #666666으로 변경
@@ -105,10 +104,9 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 30, 30),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+			new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.y = -10;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -117,17 +115,22 @@ RedGPU.init(
 
 		const activeBalls = [];
 
+		const getRandomColor = () => {
+			const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			return `#${r}${g}${b}`;
+		};
+
 		/**
 		 * [KO] 동적 구체 생성 함수
 		 * [EN] Function to create dynamic balls
 		 */
 		const createBall = () => {
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			const ball = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 0.1 + Math.random()),
-				material
+				new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
 			ball.x = (Math.random() * 6) - 3;
 			ball.y = 15;

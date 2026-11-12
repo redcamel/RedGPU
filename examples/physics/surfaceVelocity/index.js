@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
@@ -115,13 +115,12 @@ RedGPU.init(
 		const floor = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+			new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		floor.y = -3;
 		floor.scaleX = 30;
 		floor.scaleY = 1;
 		floor.scaleZ = 30;
-		floor.material.color.setColorByHEX('#111111');
 		scene.addChild(floor);
 		physicsEngine.createBody(floor, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -129,6 +128,13 @@ RedGPU.init(
 		});
 
 		const activeObjects = [];
+
+		const getRandomColor = () => {
+			const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			return `#${r}${g}${b}`;
+		};
 
 		/**
 		 * [KO] 박스 생성 함수
@@ -139,12 +145,11 @@ RedGPU.init(
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+				new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
 			mesh.scaleX = size;
 			mesh.scaleY = size;
 			mesh.scaleZ = size;
-			mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			
 			const onLeft = Math.random() > 0.5;
 			mesh.x = onLeft ? -3 : 3;

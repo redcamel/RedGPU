@@ -68,7 +68,7 @@ RedGPU.init(
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, color)
 			);
 			mesh.x = x;
 			mesh.y = y;
@@ -79,7 +79,6 @@ RedGPU.init(
 			mesh.rotationX = rx;
 			mesh.rotationY = ry;
 			mesh.rotationZ = rz;
-			mesh.material.color.setColorByHEX(color);
 			mesh.castShadow = true;
 			mesh.receiveShadow = true;
 			scene.addChild(mesh);
@@ -91,17 +90,17 @@ RedGPU.init(
 
 		// [KO] 환경 구축 (Dense & Compact Test Course)
 		// [EN] Environment build (Dense & Compact Test Course)
-		createBlock(0, -0.5, 0, 100, 1, 100, '#334155'); // Base Ground (슬레이트 블루그레이)
+        createBlock(0, -0.5, 0, 100, 1, 100, '#5a6578'); // Base Ground (슬레이트 블루그레이)
 
 		// [KO] 중앙 밀집 구역 (Center Complex)
 		// 계단 -> 플랫폼 -> 경사로 연결
 		for (let i = 0; i < 12; i++) {
 			// 파란색 -> 보라색 그라데이션 변형 HSL 색상 적용
 			const hue = 220 + (i * 3);
-			createBlock(0, i * 0.18, 5 + i * 0.45, 4, 0.2, 0.6, hslToHex(hue, 70, 60));
+            createBlock(0, i * 0.18, 5 + i * 0.45, 4, 0.2, 0.6, hslToHex(hue, 55, 55));
 		}
-		createBlock(0, 12 * 0.18, 12, 6, 0.2, 6, '#6d28d9'); // 연결 플랫폼 (퍼플)
-		createBlock(0, 12 * 0.18 + 1.4, 20, 6, 0.2, 10, '#db2777', 20, 0, 0); // 플랫폼에서 이어지는 경사로 (메탈릭 로즈/핑크)
+        createBlock(0, 12 * 0.18, 12, 6, 0.2, 6, '#6d58b5'); // 연결 플랫폼 (퍼플)
+        createBlock(0, 12 * 0.18 + 1.4, 20, 6, 0.2, 10, '#c0487a', 20, 0, 0); // 플랫폼에서 이어지는 경사로 (메탈릭 로즈/핑크)
 
 		// 나선형 계단을 플랫폼 주변으로 밀착
 		const spiralCenterX = 8;
@@ -113,48 +112,46 @@ RedGPU.init(
 			const z = spiralCenterZ + Math.sin(angle) * radius;
 			// 에메랄드 그린 HSL 그라데이션 적용
 			const hue = 140 + (i * 2);
-			createBlock(x, i * 0.35, z, 1.5, 0.15, 1.5, hslToHex(hue, 65, 50), 0, -angle * 180 / Math.PI, 0);
+            createBlock(x, i * 0.35, z, 1.5, 0.15, 1.5, hslToHex(hue, 50, 50), 0, -angle * 180 / Math.PI, 0);
 		}
 
 		// 파쿠르 코스를 중앙 플랫폼 옆으로 배치
 		for (let i = 0; i < 8; i++) {
-			// 네온 오렌지 / 골드 계열
+            // 오렌지 / 골드 계열
 			const hue = 30 + (i * 4);
 			createBlock(
 				-6 - i * 1.8, 
 				1 + i * 0.4, 
 				8 + (i % 2 === 0 ? 0.8 : -0.8), 
 				1.5, 0.15, 1.5,
-				hslToHex(hue, 85, 55)
+                hslToHex(hue, 65, 55)
 			);
 		}
 
 		// 좁은 길을 플랫폼 상단에 교차
-		createBlock(-12, 12 * 0.18, 12, 10, 0.15, 0.4, '#06b6d4'); // 좁은 길 (네온 사이언)
+        createBlock(-12, 12 * 0.18, 12, 10, 0.15, 0.4, '#3898b0'); // 좁은 길 (사이언)
 
 		// 입체 구조물을 시작 지점 근처로 당김
 		// 피라미드형 계단
 		for (let i = 0; i < 8; i++) {
 			const size = 12 - i * 1.5;
 			// 테크 크롬 그레이 그라데이션
-			const lightness = 25 + (i * 5);
+            const lightness = 35 + (i * 4);
 			createBlock(-15, i * 0.35, -5, size, 0.4, size, hslToHex(220, 10, lightness));
 		}
 
 		// 터널을 중앙 플랫폼 아래에 배치
-		createBlock(0, 0.1, 12, 10, 0.1, 10, '#3b202c'); // 터널 바닥 (딥 로즈)
-		createBlock(-4, 0, 12, 0.5, 2.5, 10, '#4b5563'); // 벽 1 (스톤 그레이)
-		createBlock(4, 0, 12, 0.5, 2.5, 10, '#4b5563'); // 벽 2 (스톤 그레이)
-		createBlock(0, 2.5, 12, 10, 0.5, 10, '#9ca3af'); // 지붕 (플랫폼 하단 - 테크 실버)
+        createBlock(0, 0.1, 12, 10, 0.1, 10, '#5a3d4c'); // 터널 바닥 (딥 로즈)
+        createBlock(-4, 0, 12, 0.5, 2.5, 10, '#5b6573'); // 벽 1 (스톤 그레이)
+        createBlock(4, 0, 12, 0.5, 2.5, 10, '#5b6573'); // 벽 2 (스톤 그레이)
+        createBlock(0, 2.5, 12, 10, 0.5, 10, '#8c939f'); // 지붕 (플랫폼 하단 - 테크 실버)
 
-		// 캐릭터용 물리 구동 캡슐 생성 (가시성을 완전히 끄고 투명화하여 투명 물리 바디로 작동)
+        // 캐릭터용 물리 구동 캡슐 생성 (가시성을 꺼서 비가시 물리 바디로 작동)
 		const charMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Capsule(redGPUContext, 0.3, 1.2),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		charMesh.material.transparent = true;
-		charMesh.material.opacity = 0.0;
 		charMesh.visible = false;
 		charMesh.y = 5;
 		scene.addChild(charMesh);

@@ -64,13 +64,12 @@ RedGPU.init(
 
 		// [KO] 지형 생성 함수 (현실적인 미터 단위)
 		// [EN] Helper function to create static terrain (realistic meter scale)
-		const createStatic = (geometry, x, y, z, sx, sy, sz, rx = 0, color = '#334155') => {
+        const createStatic = (geometry, x, y, z, sx, sy, sz, rx = 0, color = '#5a6578') => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				geometry,
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, color)
 			);
-			mesh.material.color.setColorByHEX(color);
 			mesh.x = x;
 			mesh.y = y;
 			mesh.z = z;
@@ -88,9 +87,9 @@ RedGPU.init(
 		};
 
 		// 바닥 (30m x 30m)
-		createStatic(new RedGPU.Primitive.Box(redGPUContext), 0, -0.5, 0, 30, 1, 30, 0, '#334155');
+        createStatic(new RedGPU.Primitive.Box(redGPUContext), 0, -0.5, 0, 30, 1, 30, 0, '#5a6578');
 		// 경사로 (폭 5m, 길이 8m)
-		createStatic(new RedGPU.Primitive.Box(redGPUContext), -6, 0.5, 8, 5, 0.5, 8, -20, '#db2777');
+        createStatic(new RedGPU.Primitive.Box(redGPUContext), -6, 0.5, 8, 5, 0.5, 8, -20, '#c0487a');
 		// 계단 (높이 0.2m 간격)
 		for (let i = 0; i < 5; i++) {
 			const hue = 30 + (i * 8);
@@ -103,7 +102,7 @@ RedGPU.init(
 				0.4,
 				1.5,
 				0,
-				hslToHex(hue, 90, 55)
+                hslToHex(hue, 65, 55)
 			);
 		}
 
@@ -172,15 +171,13 @@ RedGPU.init(
 			RedGPUExampleHelper.loadingProgressInfoHandler
 		);
 
-		// [KO] 캐릭터 물리 앵커 캡슐 생성 (가시성 및 렌더링을 완전히 꺼서 숨김)
-		// [EN] Create character physics anchor capsule (Hide completely by disabling visibility)
+        // [KO] 캐릭터 물리 앵커 캡슐 생성 (가시성을 꺼서 숨김)
+        // [EN] Create character physics anchor capsule (Hide by disabling visibility)
 		const charMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Capsule(redGPUContext, 0.3, 1.2),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		charMesh.material.transparent = true;
-		charMesh.material.opacity = 0.0; // 캡슐을 완전히 투명하게 설정
 		charMesh.visible = false; // 가시성을 꺼서 렌더링에서 완전히 스킵
 		charMesh.y = 3;
 		scene.addChild(charMesh);

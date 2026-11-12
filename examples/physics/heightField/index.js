@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -40,9 +40,6 @@ RedGPU.init(
 		// [KO] 조명 설정
 		// [EN] Lighting setup
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.x = 10;
-		directionalLight.y = 20;
-		directionalLight.z = 10;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// [KO] HeightField 설정 파라미터 (20m x 20m, 40x40 세그먼트)
@@ -80,9 +77,8 @@ RedGPU.init(
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			groundGeometry,
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+			new RedGPU.Material.PhongMaterial(redGPUContext, '#557799')
 		);
-		groundMesh.material.color.setColorByHEX('#446688');
 		scene.addChild(groundMesh);
 
 		// [KO] 정점 데이터 및 노멀 업데이트
@@ -131,18 +127,23 @@ RedGPU.init(
 
 		const activeObjects = [];
 
+		const getRandomColor = () => {
+			const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			return `#${r}${g}${b}`;
+		};
+
 		/**
 		 * [KO] 구체 스폰 함수
 		 * [EN] Sphere spawn function
 		 */
 		const spawnSpheres = () => {
 			for (let i = 0; i < 10; i++) {
-				const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-				material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 				const sphereMesh = new RedGPU.Display.Mesh(
 					redGPUContext,
 					new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
-					material
+					new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 				);
 				sphereMesh.x = Math.random() * 10 - 5;
 				sphereMesh.y = 15 + i * 2;

@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -53,13 +53,12 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.y = -0.5;
 		ground.scaleX = 40;
 		ground.scaleY = 1;
 		ground.scaleZ = 40;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -75,7 +74,7 @@ RedGPU.init(
 		const rail = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#888888')
 		);
 		rail.x = -2.0;
 		rail.y = 5;
@@ -83,7 +82,6 @@ RedGPU.init(
 		rail.scaleX = 0.2;
 		rail.scaleY = 10;
 		rail.scaleZ = 0.2;
-		rail.material.color.setColorByHEX('#888888');
 		scene.addChild(rail);
 		const railBody = physicsEngine.createBody(rail, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -99,7 +97,7 @@ RedGPU.init(
 		const platform = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#3898c8')
 		);
 		platform.x = 0;
 		platform.y = 1;
@@ -107,7 +105,6 @@ RedGPU.init(
 		platform.scaleX = 2.0;
 		platform.scaleY = 0.2;
 		platform.scaleZ = 2.0;
-		platform.material.color.setColorByHEX('#00ccff');
 		scene.addChild(platform);
 
 		const platformBody = physicsEngine.createBody(platform, {
@@ -145,13 +142,19 @@ RedGPU.init(
 		// [KO] 4. 상호작용용 낙하 박스 관리
 		// [EN] 4. Interaction falling boxes management
 		const activeBoxes = [];
+        const getRandomColor = () => {
+            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const createBox = () => {
 			const box = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
-			box.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			box.x = (Math.random() * 1.6) - 0.8;
 			box.y = 12;
 			box.z = (Math.random() * 1.6) - 0.8;

@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -48,9 +48,8 @@ RedGPU.init(
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+			new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
-		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -74,9 +73,8 @@ RedGPU.init(
 			const dumbbellGroup = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Cylinder(redGPUContext, 0.05, 0.05, 1.0),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+				new RedGPU.Material.PhongMaterial(redGPUContext, '#999999')
 			);
-			dumbbellGroup.material.color.setColorByHEX('#aaaaaa');
 			dumbbellGroup.x = x;
 			dumbbellGroup.y = y;
 			dumbbellGroup.z = z;
@@ -91,8 +89,7 @@ RedGPU.init(
 			// [KO] 2. 자식 메시(추) 생성: 반지름 0.25 (현실적인 원판 크기)
 			// [EN] 2. Create child meshes (Weights): radius 0.25 (realistic plate size)
 			const weightGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.25);
-			const weightMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-			weightMat.color.setColorByHEX('#ff4444');
+			const weightMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#cc4444');
 
 			const leftWeight = new RedGPU.Display.Mesh(
 				redGPUContext,

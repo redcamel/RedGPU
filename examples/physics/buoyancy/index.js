@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
@@ -52,13 +52,12 @@ RedGPU.init(
 		const waterVolume = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#2a88cc')
 		);
 		waterVolume.scaleX = waterVolume.scaleZ = 40;
 		waterVolume.scaleY = waterDepth;
 		waterVolume.y = -waterDepth / 2;
-		waterVolume.material.color.setColorByHEX('#00aaff');
-		waterVolume.material.opacity = 0.15;
+        waterVolume.material.opacity = 0.2;
 		waterVolume.material.transparent = true;
 		scene.addChild(waterVolume);
 
@@ -71,12 +70,11 @@ RedGPU.init(
 		const floor = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		floor.scaleX = floor.scaleZ = 40;
 		floor.scaleY = 1;
 		floor.y = -waterDepth - 0.5;
-		floor.material.color.setColorByHEX('#333333');
 		scene.addChild(floor);
 		physicsEngine.createBody(floor, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -119,9 +117,9 @@ RedGPU.init(
 			// [EN] Density visualization: Colors closer to red represent denser and heavier objects.
 			const colorFactor = (density - 0.8) / 4.2;
 			mesh.material.color.setColorByRGB(
-				Math.floor(colorFactor * 255), 
-				Math.floor((1 - colorFactor) * 255), 
-				Math.floor((1 - colorFactor) * 255)
+                Math.floor(60 + colorFactor * 150),
+                Math.floor(60 + (1 - colorFactor) * 140),
+                Math.floor(60 + (1 - colorFactor) * 140)
 			);
 			scene.addChild(mesh);
 

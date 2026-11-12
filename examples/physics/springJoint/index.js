@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
@@ -31,12 +31,9 @@ RedGPU.init(
 
 		const RAPIER = physicsEngine.RAPIER;
 
-		// [KO] 조명 설정: 씬에 입체감을 주기 위한 환경광과 직사광 추가
-		// [EN] Lighting setup: Add ambient and directional light for depth in the scene
+        // [KO] 조명 설정: 씬에 입체감을 주기 위한 직사광 추가
+        // [EN] Lighting setup: Add directional light for depth in the scene
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.x = 10;
-		directionalLight.y = 20;
-		directionalLight.z = 10;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// [KO] 1. 바닥 생성 및 정적 물리 바디 적용
@@ -44,13 +41,12 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.y = -0.5;
 		ground.scaleX = 40;
 		ground.scaleY = 1;
 		ground.scaleZ = 40;
-		ground.material.color.setColorByHEX('#333333');
 		scene.addChild(ground);
 		
 		physicsEngine.createBody(ground, {
@@ -72,7 +68,7 @@ RedGPU.init(
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#cc4444')
 			);
 			mesh.x = pt.x;
 			mesh.y = 15;
@@ -80,7 +76,6 @@ RedGPU.init(
 			mesh.scaleX = 0.5;
 			mesh.scaleY = 0.5;
 			mesh.scaleZ = 0.5;
-			mesh.material.color.setColorByHEX('#ff4444');
 			scene.addChild(mesh);
 			anchorMeshList.push(mesh);
 			
@@ -95,13 +90,12 @@ RedGPU.init(
 		const platform = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#3888cc')
 		);
 		platform.y = 5;
 		platform.scaleX = 10;
 		platform.scaleY = 0.5;
 		platform.scaleZ = 10;
-		platform.material.color.setColorByHEX('#00aaff');
 		scene.addChild(platform);
 
 		// [KO] 플랫폼에 물리 바디 설정: 현실적인 무게감을 위해 질량과 감쇠 조정
@@ -132,7 +126,7 @@ RedGPU.init(
 		// [KO] 5. 시각적 스프링 선 생성 (Line3D를 사용하여 스프링 시각화)
 		// [EN] 5. Create visual spring lines (Visualize springs using Line3D)
 		const springLines = anchorPoints.map(() => {
-			const line = new RedGPU.Display.Line3D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, '#ffffff');
+            const line = new RedGPU.Display.Line3D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, '#cccccc');
 			scene.addChild(line);
 			return line;
 		});
@@ -140,16 +134,22 @@ RedGPU.init(
 		// [KO] 6. 떨어지는 장애물 스폰 로직: 크기와 질량이 무작위인 박스와 구체 생성
 		// [EN] 6. Falling obstacle spawn logic: Create boxes and spheres with random size and mass
 		const activeObjects = [];
+        const getRandomColor = () => {
+            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const spawnObject = () => {
 			const isBox = Math.random() > 0.5;
 			const size = 0.5 + Math.random() * 1.5;
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				isBox ? new RedGPU.Primitive.Box(redGPUContext) : new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
 			mesh.scaleX = mesh.scaleY = mesh.scaleZ = size;
-			mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			mesh.x = (Math.random() * 8) - 4;
 			mesh.y = 25;
 			mesh.z = (Math.random() * 8) - 4;

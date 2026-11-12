@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -46,9 +46,8 @@ RedGPU.init(
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 10, 10),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
-		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -58,6 +57,13 @@ RedGPU.init(
 
 		const activeObjects = [];
 
+        const getRandomColor = () => {
+            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		/**
 		 * [KO] 새로운 구슬을 생성하고 충돌 이벤트를 활성화합니다.
 		 * [EN] Create a new ball and enable collision events.
@@ -66,12 +72,10 @@ RedGPU.init(
 		 * @param {number} z
 		 */
 		const createBall = (x, y, z) => {
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX('#ffffff');
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
-				material
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#d4d4d8')
 			);
 			mesh.x = x;
 			mesh.y = y;
@@ -116,9 +120,9 @@ RedGPU.init(
 		physicsEngine.onCollisionStarted = (h1, h2) => {
 			const body1 = physicsEngine.getBodyByColliderHandle(h1);
 			const body2 = physicsEngine.getBodyByColliderHandle(h2);
-			
-			if (body1?.mesh) body1.mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			if (body2?.mesh) body2.mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
+
+            if (body1?.mesh) body1.mesh.material.color.setColorByHEX(getRandomColor());
+            if (body2?.mesh) body2.mesh.material.color.setColorByHEX(getRandomColor());
 		};
 
 		const renderer = new RedGPU.Renderer();

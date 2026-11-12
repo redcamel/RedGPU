@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1792986333865";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
 const canvas = document.createElement('canvas');
@@ -46,9 +46,8 @@ RedGPU.init(
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+			new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
-		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -58,6 +57,13 @@ RedGPU.init(
 		const activeBoxes = [];
 		let currentGravityY = -9.81;
 
+		const getRandomColor = () => {
+			const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+			return `#${r}${g}${b}`;
+		};
+
 		/**
 		 * [KO] 1m 정육면체 박스 생성 함수
 		 * [EN] Function to create a 1m cubic box
@@ -66,13 +72,11 @@ RedGPU.init(
 		 * @param {number} z
 		 * @param {string} color
 		 */
-		const createBox = (x, y, z, color) => {
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX(color);
+		const createBox = (x, y, z, color = getRandomColor()) => {
 			const boxMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				material
+				new RedGPU.Material.PhongMaterial(redGPUContext, color)
 			);
 			boxMesh.x = x;
 			boxMesh.y = y;
@@ -99,8 +103,7 @@ RedGPU.init(
 				createBox(
 					Math.random() * 4 - 2,
 					y,
-					Math.random() * 4 - 2,
-					`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
+					Math.random() * 4 - 2
 				);
 			}
 		};
@@ -150,8 +153,7 @@ const renderTestPane = async (redGPUContext, physicsEngine, createBox, resetScen
 					createBox(
 						Math.random() * 4 - 2,
 						y,
-						Math.random() * 4 - 2,
-						`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
+						Math.random() * 4 - 2
 					);
 				}
 			};
