@@ -339,11 +339,7 @@ class PostEffectManager extends RedGPUObject {
         }
 
         if (useAutoExposure && view.constructor.name === 'View3D') {
-            const {viewRenderTextureManager} = view;
-            const singleSampleDepthView = antialiasingManager.useMSAA
-                ? viewRenderTextureManager.renderPath1DepthResultTextureView
-                : viewRenderTextureManager.depthTextureView;
-            builtInEffectManager.autoExposure.render(currentTextureView, singleSampleDepthView);
+            builtInEffectManager.autoExposure.render(currentTextureView);
         }
         if (useDOF) {
             currentTextureView = this.#applySingleEffect(builtInEffectManager.dof, currentTextureView, width, height);

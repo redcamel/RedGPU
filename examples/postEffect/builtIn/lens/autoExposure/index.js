@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
  * [KO] AutoExposure (자동 노출 및 눈 적응) 예제
  * [EN] AutoExposure (Auto-Exposure & Eye Adaptation) example
  *
- * [KO] 256-bin 로그 휘도 히스토그램 분석, 백분위 절삭, 측광 모드, 하늘 가중치 분리, 동적 바이어스 커브 및 디버그 히스토그램 HUD를 시연합니다.
- * [EN] Demonstrates 256-bin log-luminance histogram analysis, percentile trimming, metering modes, sky weighting, dynamic bias curves, and the debug histogram HUD.
+ * [KO] 256-bin 로그 휘도 히스토그램 분석, 백분위 절삭, 측광 모드, 노출 보정 및 디버그 히스토그램 HUD를 시연합니다.
+ * [EN] Demonstrates 256-bin log-luminance histogram analysis, percentile trimming, metering modes, exposure compensation, and the debug histogram HUD.
  */
 
 const VIEWPOINT_STAGES = [
@@ -89,11 +89,9 @@ RedGPU.init(
         view.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere.cloudCoverage = 0.32;
         view.skyAtmosphere.cloudDensity = 0.65;
-        view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
         redGPUContext.addView(view);
 
         const autoExposure = view.builtInEffectManager.autoExposure;
-        autoExposure.setNaturalCinematic();
         autoExposure.useDebugOverlay = true;
 
         setupColonnadeGalleryScene(redGPUContext, scene);
@@ -256,31 +254,26 @@ const renderTestPane = (redGPUContext, targetView, autoExposure, controller, dir
             exposureFolder.addBinding(targetView.rawCamera, 'useAutoExposure').on('change', (ev) => {
                 const disabled = !ev.value;
                 controls.forEach((c) => c.disabled = disabled);
-                presetFolder.disabled = disabled;
             });
 
             const meteringOptions = {
                 AVERAGE: RedGPU.PostEffect.BuiltIn.METERING_MODE.AVERAGE,
                 CENTER_WEIGHTED: RedGPU.PostEffect.BuiltIn.METERING_MODE.CENTER_WEIGHTED,
-                SPOT: RedGPU.PostEffect.BuiltIn.METERING_MODE.SPOT,
-                BASIC: RedGPU.PostEffect.BuiltIn.METERING_MODE.BASIC
+                SPOT: RedGPU.PostEffect.BuiltIn.METERING_MODE.SPOT
             };
 
             const controls = [
                 exposureFolder.addBinding(autoExposure, 'useDebugOverlay'),
                 exposureFolder.addBinding(autoExposure, 'meteringMode', {options: meteringOptions}),
                 exposureFolder.addBinding(autoExposure, 'exposureCompensation', {min: -4, max: 4, step: 0.05}),
+                exposureFolder.addBinding(autoExposure, 'targetLuminance', {min: 0.01, max: 1.0, step: 0.01}),
                 exposureFolder.addBinding(autoExposure, 'minEV100', {min: -10, max: 20, step: 0.1}),
                 exposureFolder.addBinding(autoExposure, 'maxEV100', {min: -4, max: 22, step: 0.1}),
                 exposureFolder.addBinding(autoExposure, 'adaptationSpeedUp', {min: 0.1, max: 10, step: 0.1}),
                 exposureFolder.addBinding(autoExposure, 'adaptationSpeedDown', {min: 0.1, max: 10, step: 0.1}),
-                exposureFolder.addBinding(autoExposure, 'lowPercentile', {min: 0, max: 0.9, step: 0.01}),
-                exposureFolder.addBinding(autoExposure, 'highPercentile', {min: 0.1, max: 1.0, step: 0.01}),
-                exposureFolder.addBinding(autoExposure, 'highlightProtection', {min: 0, max: 1, step: 0.01}),
-                exposureFolder.addBinding(autoExposure, 'skyMeteringWeight', {min: 0, max: 1, step: 0.01}),
-                exposureFolder.addBinding(autoExposure, 'spotRadius', {min: 0.02, max: 0.5, step: 0.01}),
-                exposureFolder.addBinding(autoExposure, 'lowKeyBias', {min: -4, max: 4, step: 0.05}),
-                exposureFolder.addBinding(autoExposure, 'highKeyBias', {min: -4, max: 4, step: 0.05})
+                exposureFolder.addBinding(autoExposure, 'lowPercentile', {min: 0, max: 0.99, step: 0.01}),
+                exposureFolder.addBinding(autoExposure, 'highPercentile', {min: 0.01, max: 1.0, step: 0.01}),
+                exposureFolder.addBinding(autoExposure, 'maxExposureMultiplier', {min: 1, max: 256, step: 1})
             ];
 
             const telemetryFolder = pane.addFolder({title: 'GPU Exposure Telemetry', expanded: true});
@@ -288,18 +281,6 @@ const renderTestPane = (redGPUContext, targetView, autoExposure, controller, dir
             telemetryFolder.addBinding(autoExposure, 'targetEV100', {readonly: true, interval: 100});
             telemetryFolder.addBinding(autoExposure, 'currentAdaptedEV100', {readonly: true, interval: 100});
             telemetryFolder.addBinding(autoExposure, 'effectiveEV100', {readonly: true, interval: 100});
-
-            const presetFolder = pane.addFolder({title: 'Presets', expanded: true});
-            const addPresetButton = (title, method) => {
-                presetFolder.addButton({title}).on('click', () => {
-                    autoExposure[method]();
-                    pane.refresh();
-                });
-            };
-            addPresetButton('Default', 'setDefault');
-            addPresetButton('Natural Cinematic', 'setNaturalCinematic');
-            addPresetButton('Indoor Prioritized', 'setIndoorPrioritized');
-            addPresetButton('Night Low-Key', 'setNightLowKey');
 
             const stageFolder = pane.addFolder({title: 'Lighting & Camera Stages', expanded: true});
             VIEWPOINT_STAGES.forEach((stage) => {

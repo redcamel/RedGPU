@@ -31,7 +31,7 @@ redUnit.testGroup(
                     M.AVERAGE === 0 &&
                     M.CENTER_WEIGHTED === 1 &&
                     M.SPOT === 2 &&
-                    M.BASIC === 3
+                    Object.keys(M).length === 3
                 );
             } catch (e) {
                 run(false, e);
@@ -41,24 +41,16 @@ redUnit.testGroup(
         runner.defineTest('Success Test: Default Properties & Initial Telemetry', (run) => {
             setup(run, (ctx, view, ae) => {
                 run(
-                    ae.minEV100 === -4.0 &&
-                    ae.maxEV100 === 20.0 &&
-                    ae.lowPercentile === 0.10 &&
-                    ae.highPercentile === 0.90 &&
+                    ae.minEV100 === -2.0 &&
+                    ae.maxEV100 === 16.0 &&
+                    ae.lowPercentile === 0.8 &&
+                    ae.highPercentile === 0.95 &&
                     ae.adaptationSpeedUp === 3.0 &&
                     ae.adaptationSpeedDown === 1.0 &&
                     ae.maxExposureMultiplier === 64.0 &&
-                    ae.meteringMode === RedGPU.PostEffect.BuiltIn.METERING_MODE.CENTER_WEIGHTED &&
+                    ae.meteringMode === RedGPU.PostEffect.BuiltIn.METERING_MODE.AVERAGE &&
                     ae.targetLuminance === 0.18 &&
                     ae.exposureCompensation === 0.0 &&
-                    ae.spotRadius === 0.15 &&
-                    ae.skyMeteringWeight === 0.65 &&
-                    ae.maxHistogramLuminance === 262144.0 &&
-                    ae.lowKeyBias === 0.0 &&
-                    ae.lowKeyEV100 === 1.0 &&
-                    ae.highKeyBias === 0.0 &&
-                    ae.highKeyEV100 === 13.0 &&
-                    ae.highlightProtection === 0.85 &&
                     ae.useDebugOverlay === false &&
                     ae.preExposureRatio === 1.0 &&
                     ae.videoMemorySize > 0
@@ -84,58 +76,28 @@ redUnit.testGroup(
             });
         }, true);
 
-        runner.defineTest('Success Test: All Setters, Presets, Locked EV Range & resetAdaptation()', (run) => {
+        runner.defineTest('Success Test: Setters, Locked EV Range & resetAdaptation()', (run) => {
             setup(run, (ctx, view, ae) => {
-                ae.setNaturalCinematic();
-                const checkCinematic =
-                    ae.meteringMode === RedGPU.PostEffect.BuiltIn.METERING_MODE.CENTER_WEIGHTED &&
-                    ae.lowKeyBias === -0.6 &&
-                    ae.highKeyBias === -0.3 &&
-                    ae.highlightProtection === 0.90;
-
-                ae.setIndoorPrioritized();
-                const checkIndoor =
-                    ae.skyMeteringWeight === 0.1 &&
-                    ae.maxExposureMultiplier === 128.0 &&
-                    ae.highlightProtection === 0.30;
-
-                ae.setNightLowKey();
-                const checkNight =
-                    ae.minEV100 === -6.0 &&
-                    ae.lowKeyBias === -1.2 &&
-                    ae.highlightProtection === 0.85;
-
-                ae.setDefault();
-                const checkDefault =
-                    ae.minEV100 === -4.0 &&
-                    ae.maxEV100 === 20.0 &&
-                    ae.meteringMode === RedGPU.PostEffect.BuiltIn.METERING_MODE.CENTER_WEIGHTED &&
-                    ae.skyMeteringWeight === 0.65 &&
-                    ae.highlightProtection === 0.85 &&
-                    ae.lowKeyBias === 0.0;
-
-                ae.spotRadius = 0.25;
-                ae.skyMeteringWeight = 0.3;
-                ae.highlightProtection = 0.5;
-                ae.maxHistogramLuminance = 4096;
-                ae.lowKeyEV100 = 0.5;
-                ae.highKeyEV100 = 14.5;
+                ae.meteringMode = RedGPU.PostEffect.BuiltIn.METERING_MODE.CENTER_WEIGHTED;
+                ae.targetLuminance = 0.22;
+                ae.adaptationSpeedUp = 4.0;
+                ae.adaptationSpeedDown = 1.5;
+                ae.lowPercentile = 0.5;
+                ae.highPercentile = 0.98;
+                ae.maxExposureMultiplier = 128.0;
                 ae.useDebugOverlay = true;
                 ae.minEV100 = 12.0;
                 ae.maxEV100 = 12.0;
                 ae.resetAdaptation();
 
                 run(
-                    checkCinematic &&
-                    checkIndoor &&
-                    checkNight &&
-                    checkDefault &&
-                    ae.spotRadius === 0.25 &&
-                    ae.skyMeteringWeight === 0.3 &&
-                    ae.highlightProtection === 0.5 &&
-                    ae.maxHistogramLuminance === 4096 &&
-                    ae.lowKeyEV100 === 0.5 &&
-                    ae.highKeyEV100 === 14.5 &&
+                    ae.meteringMode === RedGPU.PostEffect.BuiltIn.METERING_MODE.CENTER_WEIGHTED &&
+                    ae.targetLuminance === 0.22 &&
+                    ae.adaptationSpeedUp === 4.0 &&
+                    ae.adaptationSpeedDown === 1.5 &&
+                    ae.lowPercentile === 0.5 &&
+                    ae.highPercentile === 0.98 &&
+                    ae.maxExposureMultiplier === 128.0 &&
                     ae.useDebugOverlay === true &&
                     ae.minEV100 === 12.0 &&
                     ae.maxEV100 === 12.0
@@ -209,45 +171,6 @@ redUnit.testGroup(
                     },
                     () => {
                         ae.meteringMode = 99;
-                    },
-                    () => {
-                        ae.spotRadius = 0.01;
-                    },
-                    () => {
-                        ae.spotRadius = 0.8;
-                    },
-                    () => {
-                        ae.skyMeteringWeight = -0.1;
-                    },
-                    () => {
-                        ae.skyMeteringWeight = 1.2;
-                    },
-                    () => {
-                        ae.skyMeteringWeight = NaN;
-                    },
-                    () => {
-                        ae.highlightProtection = -0.1;
-                    },
-                    () => {
-                        ae.highlightProtection = 1.2;
-                    },
-                    () => {
-                        ae.highlightProtection = NaN;
-                    },
-                    () => {
-                        ae.maxHistogramLuminance = 0;
-                    },
-                    () => {
-                        ae.lowKeyBias = -10;
-                    },
-                    () => {
-                        ae.highKeyBias = 10;
-                    },
-                    () => {
-                        ae.lowKeyEV100 = NaN;
-                    },
-                    () => {
-                        ae.highKeyEV100 = NaN;
                     },
                     () => {
                         ae.currentAdaptedEV100 = NaN;

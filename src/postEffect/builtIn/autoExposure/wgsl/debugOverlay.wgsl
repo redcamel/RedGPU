@@ -11,7 +11,7 @@ struct EyeAdaptationState {
 
 struct AutoExposureUniforms {
     deltaTime: f32,
-    calibrationOffset: f32,
+    targetEV100Bias: f32,
     exposureCompensation: f32,
     minPossibleEV100: f32,
     minEV100: f32,
@@ -24,20 +24,12 @@ struct AutoExposureUniforms {
     adjustmentSpeedDown: f32,
     width: f32,
     height: f32,
-    invWidth: f32,
     invHeight: f32,
-    spotRadiusSqInv: f32,
-    skyMeteringWeight: f32,
-    maxHistogramLuminance: f32,
-    lowKeyBias: f32,
-    lowKeyEV100: f32,
-    highKeyBias: f32,
-    highKeyEV100: f32,
-    highlightProtection: f32,
     meteringMode: u32,
     forceReset: u32,
     isLockedRange: u32,
     pad0: u32,
+    pad1: u32,
 };
 
 @group(0) @binding(0) var<storage, read> debugHistogram : array<u32, 256>;
@@ -114,8 +106,8 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
             } else if (px.x >= padX + 40.0 && px.x <= padX + 54.0) {
                 color = vec3<f32>(0.18, 0.96, 0.52);
             }
-            for (var m = 0u; m < 4u; m = m + 1u) {
-                let pipX = plotMax.x - f32(4u - m) * 9.0 + 2.0;
+            for (var m = 0u; m < 3u; m = m + 1u) {
+                let pipX = plotMax.x - f32(3u - m) * 9.0 + 2.0;
                 if (px.x >= pipX && px.x <= pipX + 5.0) {
                     color = select(vec3<f32>(0.18, 0.22, 0.29), vec3<f32>(0.38, 0.78, 1.0), uniforms.meteringMode == m);
                 }
@@ -124,7 +116,7 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
         return vec4<f32>(color, alpha);
     }
 
-    // 하단 노출 스케일 램프 및 적응된 EV100 삼각 마커
+    // 하단 노출 스케일 램프 및 적응된 EV100 마커
     if (px.y < plotMin.y - 2.0) {
         if (px.x >= plotMin.x && px.x <= plotMax.x && px.y >= 4.0 && px.y <= 9.0) {
             let t = (px.x - plotMin.x) / plotSize.x;
@@ -163,21 +155,6 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
             let barTint = mix(vec3<f32>(0.18, 0.48, 0.88), vec3<f32>(0.36, 0.86, 0.98), plotUV.x);
             let peakBoost = mix(0.75, 1.0, plotUV.y / max(normCount, 0.001));
             color = barTint * peakBoost;
-        }
-
-        // Dynamic EV100 Bias Curve 시각화 (±4 EV 스케일)
-        if (abs(uniforms.lowKeyBias) > 0.001 || abs(uniforms.highKeyBias) > 0.001) {
-            let evAtX = uniforms.minEV100 + plotUV.x * safeRange;
-            let midEV = 0.5 * (uniforms.lowKeyEV100 + uniforms.highKeyEV100);
-            let lowEdge1 = max(min(uniforms.lowKeyEV100 + 3.0, midEV), uniforms.lowKeyEV100 + 0.01);
-            let highEdge0 = min(max(uniforms.highKeyEV100 - 3.0, midEV), uniforms.highKeyEV100 - 0.01);
-            let lowW = 1.0 - smoothstep(uniforms.lowKeyEV100, lowEdge1, evAtX);
-            let highW = smoothstep(highEdge0, uniforms.highKeyEV100, evAtX);
-            let curveBias = uniforms.lowKeyBias * lowW + uniforms.highKeyBias * highW;
-            let curveY = clamp(0.5 + curveBias * 0.125, 0.02, 0.98);
-            if (abs(plotUV.y - curveY) * plotSize.y < 1.1) {
-                color = mix(color, vec3<f32>(0.92, 0.42, 0.96), 0.9);
-            }
         }
 
         // 수직 마커: SceneAvg(White) -> Target(Amber) -> Adapted(Emerald)
