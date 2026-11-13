@@ -25,6 +25,8 @@ RedGPU.init(
 		scene.physicsEngine = physicsEngine;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
+		directionalLight.elevation = 35;
+		directionalLight.azimuth = 147.5;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		/**
@@ -152,9 +154,7 @@ RedGPU.init(
 			new RedGPU.Primitive.Capsule(redGPUContext, 0.3, 1.2),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		charMesh.visible = false;
 		charMesh.y = 5;
-		scene.addChild(charMesh);
 
 		// [KO] GLTF 캐릭터 로딩
 		// [EN] GLTF Character Loading
@@ -242,7 +242,7 @@ RedGPU.init(
 
 		// [KO] IBL 및 스카이박스 설정
 		// [EN] Setup IBL and SkyBox
-		const iblUrl = '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr';
+		const iblUrl = '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr';
 		const ibl = new RedGPU.Resource.IBL(redGPUContext, iblUrl, 10000);
 		view.ibl = ibl;
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -409,8 +409,6 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, resetFunc) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		RedGPU,
-		skybox: true,
-		ibl: true,
 		directionalShadow: true,
 		gui: (pane) => {
 			pane.addBlade({

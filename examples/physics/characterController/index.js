@@ -36,7 +36,7 @@ RedGPU.init(
 
 		// [KO] IBL 및 스카이박스 설정
 		// [EN] Setup IBL and SkyBox
-		const iblUrl = '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr';
+		const iblUrl = '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr';
 		const ibl = new RedGPU.Resource.IBL(redGPUContext, iblUrl, 10000);
 		view.ibl = ibl;
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -48,6 +48,8 @@ RedGPU.init(
 		scene.physicsEngine = physicsEngine;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
+		directionalLight.elevation = 35;
+		directionalLight.azimuth = 147.5;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// HSL 색상을 16진수 HEX 스트링(#RRGGBB)으로 변환하는 헬퍼 함수
@@ -178,9 +180,7 @@ RedGPU.init(
 			new RedGPU.Primitive.Capsule(redGPUContext, 0.3, 1.2),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		charMesh.visible = false; // 가시성을 꺼서 렌더링에서 완전히 스킵
 		charMesh.y = 3;
-		scene.addChild(charMesh);
 
 		const charBody = physicsEngine.createBody(charMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.KINEMATIC,
@@ -338,8 +338,6 @@ const renderTestPane = async (redGPUContext, resetCharacter) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
 		RedGPU,
-		skybox: true,
-		ibl: true,
 		gui: (pane) => {
 
 			pane.addBlade({
