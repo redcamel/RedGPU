@@ -5,14 +5,14 @@ import {useMediaQuery} from '../../utils/useMediaQuery';
 
 /**
  * [KO] 예제 소스 코드를 보여주는 컴포넌트입니다.
- * - PC 및 와이드 화면(>= 1280px)에서는 우측 사이드 패널로 표시하여 3D 뷰포트와 실시간으로 함께 볼 수 있습니다.
+ * - PC 및 와이드 화면(>= 1280px)에서는 좌측 사이드 패널로 표시하여 3D 뷰포트와 실시간으로 함께 볼 수 있습니다.
  * - 태블릿, 모바일, 또는 좁은 화면에서는 기존 전체화면 중앙 모달로 표시됩니다.
- * - 전체화면 및 우측 도킹 전환을 지원하며, Prism.js를 사용하여 신택스 하이라이팅을 적용합니다.
+ * - 사이드 패널과 전체화면 모달 간 전환 시 기하학적 수치가 연속적으로 보간되는 모핑(Morphing) 애니메이션을 제공합니다.
  *
  * [EN] Component that shows the example source code.
- * - Displayed as a right side panel on PC & wide screens (>= 1280px) to view simultaneously with the 3D viewport.
+ * - Displayed as a left side panel on PC & wide screens (>= 1280px) to view simultaneously with the 3D viewport.
  * - Displayed as a full-screen center modal on mobile, tablet, or narrow screens.
- * - Supports toggling between full-screen and right dock, and applies syntax highlighting using Prism.js.
+ * - Provides morphing animation where geometric values are smoothly interpolated when toggling between side panel and full screen.
  */
 const SourceModal = () => {
     const showSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.showSourceModal);
@@ -65,7 +65,7 @@ const SourceModal = () => {
                     setLoading(false);
                 });
         }
-    }, [showSourceModal, loadPrism]);
+    }, [showSourceModal, currentExample, loadPrism]);
 
     useEffect(() => {
         if (showSourceModal && !loading && sourceCode && (window as any).Prism && codeRef.current) {
@@ -73,15 +73,66 @@ const SourceModal = () => {
         }
     }, [sourceCode, loading, showSourceModal]);
 
-    if (!showSourceModal) return null;
+    // [KO] 단일 Fixed 좌표계 기반 오버레이 스타일 (사이드 모드 ↔ 풀스크린 부드러운 전환)
+    const overlayDynamicStyle: React.CSSProperties = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: isSideMode ? 10001 : 20000,
+        backgroundColor: isSideMode
+            ? 'rgba(0, 0, 0, 0)'
+            : (showSourceModal ? 'rgba(0, 0, 0, 0.75)' : 'rgba(0, 0, 0, 0)'),
+        backdropFilter: isSideMode
+            ? 'blur(0px)'
+            : (showSourceModal ? 'blur(12px)' : 'blur(0px)'),
+        WebkitBackdropFilter: isSideMode
+            ? 'blur(0px)'
+            : (showSourceModal ? 'blur(12px)' : 'blur(0px)'),
+        pointerEvents: isSideMode
+            ? 'none'
+            : (showSourceModal ? 'auto' : 'none'),
+        visibility: showSourceModal ? 'visible' : 'hidden',
+        transition: 'background-color 0.35s ease, backdrop-filter 0.35s ease, -webkit-backdrop-filter 0.35s ease, visibility 0.35s ease'
+    };
 
-    const overlayDynamicStyle: React.CSSProperties = isSideMode
-        ? sideOverlayStyle
-        : modalOverlayStyle;
+    // [KO] 단일 Fixed 좌표계 기반 패널 스타일 (사이드 ↔ 풀스크린 기하학적 모핑 애니메이션)
+    const panelDynamicStyle: React.CSSProperties = {
+        position: 'fixed',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        backgroundColor: 'rgba(18, 18, 20, 0.88)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
 
-    const panelDynamicStyle: React.CSSProperties = isSideMode
-        ? sidePanelStyle
-        : fullModalStyle;
+        // 기하학적 좌표 보간
+        top: isSideMode ? '80px' : (isNarrow ? '16px' : '34px'),
+        bottom: isSideMode ? '20px' : (isNarrow ? '16px' : '34px'),
+        left: isSideMode
+            ? '20px'
+            : (isNarrow ? '16px' : 'max(34px, calc(50% - 600px))'),
+        width: isSideMode
+            ? 'min(640px, 45vw)'
+            : (isNarrow ? 'calc(100vw - 32px)' : 'min(1200px, calc(100vw - 68px))'),
+        borderRadius: isSideMode ? '18px' : '14px',
+        boxShadow: isSideMode
+            ? '0 16px 40px rgba(0, 0, 0, 0.5)'
+            : '0 24px 60px rgba(0, 0, 0, 0.6)',
+
+        // 열림/닫힘 및 모드별 트랜스폼/투명도
+        transform: showSourceModal
+            ? 'translateX(0) scale(1)'
+            : (isSideMode ? 'translateX(calc(-100% - 28px)) scale(1)' : 'translateX(0) scale(0.96) translateY(12px)'),
+        opacity: showSourceModal ? 1 : 0,
+        pointerEvents: showSourceModal ? 'auto' : 'none',
+
+        // 연속적인 모핑 트랜지션
+        transition: 'left 0.35s cubic-bezier(0.16, 1, 0.3, 1), top 0.35s cubic-bezier(0.16, 1, 0.3, 1), bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.35s ease, box-shadow 0.35s ease'
+    };
 
     return (
         <div
@@ -100,9 +151,9 @@ const SourceModal = () => {
                             <button
                                 style={actionButtonStyle}
                                 onClick={() => setIsSourceModalMaximized(!isSourceModalMaximized)}
-                                title={isSourceModalMaximized ? '우측 패널로 도킹' : '전체화면으로 확대'}
+                                title={isSourceModalMaximized ? '좌측 패널로 도킹' : '전체화면으로 확대'}
                             >
-                                {isSourceModalMaximized ? 'DOCK RIGHT' : 'FULL SCREEN'}
+                                {isSourceModalMaximized ? 'DOCK LEFT' : 'FULL SCREEN'}
                             </button>
                         )}
                         <button style={closeButtonStyle} onClick={() => setShowSourceModal(false)}>
@@ -127,71 +178,6 @@ const SourceModal = () => {
 };
 
 // Styles
-const modalOverlayStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    zIndex: 20000,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '34px',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    pointerEvents: 'auto'
-};
-
-const sideOverlayStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'transparent',
-    zIndex: 10001,
-    pointerEvents: 'none',
-    padding: 0
-};
-
-const fullModalStyle: React.CSSProperties = {
-    width: '100%',
-    maxWidth: '1200px',
-    height: '100%',
-    backgroundColor: 'rgba(17, 17, 18, 0.88)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '12px',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6)',
-    pointerEvents: 'auto'
-};
-
-const sidePanelStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: '80px',
-    right: '20px',
-    width: 'min(640px, 45vw)',
-    height: 'calc(100dvh - 158px)',
-    maxHeight: 'calc(100dvh - 158px)',
-    backgroundColor: 'rgba(18, 18, 20, 0.88)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    borderRadius: '18px',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    boxShadow: '0 16px 40px rgba(0, 0, 0, 0.5)',
-    pointerEvents: 'auto',
-    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-};
-
 const headerStyle: React.CSSProperties = {
     padding: '12px 18px',
     borderBottom: '1px solid rgba(255, 255, 255, 0.08)',

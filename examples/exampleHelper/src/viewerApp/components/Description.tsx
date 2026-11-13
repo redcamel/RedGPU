@@ -12,6 +12,7 @@ const Description = () => {
     const language = useExampleHelperStore((state: ExampleHelperState) => state.language);
     const setLanguage = useExampleHelperStore((state: ExampleHelperState) => state.setLanguage);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
+    const showSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.showSourceModal);
     const isCompactMobile = useMediaQuery(640);
     const [isToggleHovered, setIsToggleHovered] = React.useState(false);
     const setDescriptionOccupiedHeight = useExampleHelperStore((state: ExampleHelperState) => state.setDescriptionOccupiedHeight);
@@ -57,14 +58,26 @@ const Description = () => {
 
     return (
         <>
-            {!isNarrow && <div style={bottomScrimStyle}/>}
+            {!isNarrow && (
+                <div
+                    style={{
+                        ...bottomScrimStyle,
+                        opacity: showSourceModal ? 0 : 1,
+                        transition: 'opacity 0.25s ease'
+                    }}
+                />
+            )}
             <div
                 ref={containerRef}
                 style={{
                     ...containerStyle,
                     left: isNarrow ? '22px' : '20px',
                     bottom: isNarrow ? '170px' : '32px',
-                    right: isNarrow ? '20px' : '310px'
+                    right: isNarrow ? '20px' : '310px',
+                    opacity: showSourceModal ? 0 : 1,
+                    transform: showSourceModal ? 'translateY(12px)' : 'translateY(0)',
+                    pointerEvents: showSourceModal ? 'none' : 'none',
+                    transition: 'opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
             >
                 <div style={{
