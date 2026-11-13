@@ -73,26 +73,18 @@ const SourceModal = () => {
         }
     }, [sourceCode, loading, showSourceModal]);
 
-    // [KO] 단일 Fixed 좌표계 기반 오버레이 스타일 (사이드 모드 ↔ 풀스크린 부드러운 전환)
-    const overlayDynamicStyle: React.CSSProperties = {
+    // [KO] 풀스크린 모드에서만 활성화되는 배경 딤 오버레이 (사이드 모드 시에는 렌더링되지 않아 불필요한 전체 점유 제거)
+    const backdropOverlayStyle: React.CSSProperties = {
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: isSideMode ? 10001 : 20000,
-        backgroundColor: isSideMode
-            ? 'rgba(0, 0, 0, 0)'
-            : (showSourceModal ? 'rgba(0, 0, 0, 0.75)' : 'rgba(0, 0, 0, 0)'),
-        backdropFilter: isSideMode
-            ? 'blur(0px)'
-            : (showSourceModal ? 'blur(12px)' : 'blur(0px)'),
-        WebkitBackdropFilter: isSideMode
-            ? 'blur(0px)'
-            : (showSourceModal ? 'blur(12px)' : 'blur(0px)'),
-        pointerEvents: isSideMode
-            ? 'none'
-            : (showSourceModal ? 'auto' : 'none'),
+        zIndex: 19999,
+        backgroundColor: showSourceModal ? 'rgba(0, 0, 0, 0.75)' : 'rgba(0, 0, 0, 0)',
+        backdropFilter: showSourceModal ? 'blur(12px)' : 'blur(0px)',
+        WebkitBackdropFilter: showSourceModal ? 'blur(12px)' : 'blur(0px)',
+        pointerEvents: showSourceModal ? 'auto' : 'none',
         visibility: showSourceModal ? 'visible' : 'hidden',
         transition: 'background-color 0.35s ease, backdrop-filter 0.35s ease, -webkit-backdrop-filter 0.35s ease, visibility 0.35s ease'
     };
@@ -100,6 +92,7 @@ const SourceModal = () => {
     // [KO] 단일 Fixed 좌표계 기반 패널 스타일 (사이드 ↔ 풀스크린 기하학적 모핑 애니메이션)
     const panelDynamicStyle: React.CSSProperties = {
         position: 'fixed',
+        zIndex: isSideMode ? 10001 : 20000,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -135,12 +128,13 @@ const SourceModal = () => {
     };
 
     return (
-        <div
-            style={overlayDynamicStyle}
-            onClick={() => {
-                if (!isSideMode) setShowSourceModal(false);
-            }}
-        >
+        <>
+            {!isSideMode && (
+                <div
+                    style={backdropOverlayStyle}
+                    onClick={() => setShowSourceModal(false)}
+                />
+            )}
             <div style={panelDynamicStyle} onClick={e => e.stopPropagation()}>
                 <div style={headerStyle}>
                     <div style={titleStyle}>
@@ -173,7 +167,7 @@ const SourceModal = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

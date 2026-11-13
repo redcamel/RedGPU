@@ -50,43 +50,48 @@ const ExampleHeader = () => {
     const settingAction = topBarRightActions.find((action) => action.id === 'setting-toggle');
 
     return (
-        <header
-            style={{
-                ...containerStyle,
-                top: isNarrow ? '16px' : '20px',
-                left: isNarrow ? '16px' : '20px',
-                right: isNarrow ? '16px' : '20px',
-            }}
-        >
-            <div style={navBarStyle}>
-                <div style={leftGroupStyle}>
-                    <div style={circleIslandStyle}>
-                        <IconButton
-                            icon={<HomeIcon color="#fff" size={18}/>}
-                            label="HOME"
-                            onClick={() => {
-                                window.location.href = '/RedGPU/examples/index.html'
-                            }}
-                            title="HOME"
-                        />
-                    </div>
-                    {!isNarrow && (
-                        <>
-                            <div style={leftSectionStyle}>
-                                <Title/>
-                            </div>
-                            <div style={rightSectionStyle}>
-                                <LabelButton
-                                    icon={<CodeIcon color="#fdb48d" size={18}/>}
-                                    label="CODE"
-                                    onClick={() => setShowSourceModal(!showSourceModal)}
-                                />
-                            </div>
-                        </>
-                    )}
+        <header>
+            <div
+                style={{
+                    ...headerLeftGroupStyle,
+                    top: isNarrow ? '16px' : '20px',
+                    left: isNarrow ? '16px' : '20px',
+                }}
+            >
+                <div style={circleIslandStyle}>
+                    <IconButton
+                        icon={<HomeIcon color="#fff" size={18}/>}
+                        label="HOME"
+                        onClick={() => {
+                            window.location.href = '/RedGPU/examples/index.html'
+                        }}
+                        title="HOME"
+                    />
                 </div>
+                {!isNarrow && (
+                    <>
+                        <div style={leftSectionStyle}>
+                            <Title/>
+                        </div>
+                        <div style={rightSectionStyle}>
+                            <LabelButton
+                                icon={<CodeIcon color="#fdb48d" size={18}/>}
+                                label="CODE"
+                                onClick={() => setShowSourceModal(!showSourceModal)}
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
 
-                {redGPUContext && (
+            {redGPUContext && (
+                <div
+                    style={{
+                        ...headerRightGroupStyle,
+                        top: isNarrow ? '16px' : '20px',
+                        right: isNarrow ? '16px' : '20px',
+                    }}
+                >
                     <div style={rightSectionStyle}>
                         {!isNarrow && (
                             <>
@@ -126,42 +131,32 @@ const ExampleHeader = () => {
                             </>
                         )}
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </header>
     );
 };
 
 // Styles
-const containerStyle: React.CSSProperties = {
+const headerLeftGroupStyle: React.CSSProperties = {
     position: 'fixed',
     height: '46px',
-    backgroundColor: 'transparent',
-    zIndex: 10003,
-    display: 'flex',
-    flexDirection: 'column',
-    wordBreak: 'keep-all',
-    pointerEvents: 'none'
-};
-
-const navBarStyle: React.CSSProperties = {
-    display: 'flex',
-    height: '100%',
-    width: '100%',
-    gap: '12px',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'transparent'
-};
-
-const leftGroupStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    height: '100%',
-    minWidth: 0,
-    flex: '0 1 auto',
     gap: '8px',
-    backgroundColor: 'transparent'
+    zIndex: 10003,
+    pointerEvents: 'none',
+    wordBreak: 'keep-all'
+};
+
+const headerRightGroupStyle: React.CSSProperties = {
+    position: 'fixed',
+    height: '46px',
+    display: 'flex',
+    alignItems: 'center',
+    zIndex: 10003,
+    pointerEvents: 'none',
+    wordBreak: 'keep-all'
 };
 
 const circleIslandStyle: React.CSSProperties = {

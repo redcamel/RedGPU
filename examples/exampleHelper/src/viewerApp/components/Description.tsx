@@ -73,7 +73,7 @@ const Description = () => {
                     ...containerStyle,
                     left: isNarrow ? '22px' : '20px',
                     bottom: isNarrow ? '170px' : '32px',
-                    right: isNarrow ? '20px' : '310px',
+                    maxWidth: isNarrow ? 'calc(100vw - 44px)' : 'calc(100vw - 350px)',
                     opacity: showSourceModal ? 0 : 1,
                     transform: showSourceModal ? 'translateY(12px)' : 'translateY(0)',
                     pointerEvents: showSourceModal ? 'none' : 'none',

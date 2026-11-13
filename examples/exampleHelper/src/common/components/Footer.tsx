@@ -169,13 +169,11 @@ const titleContainerStyle: React.CSSProperties = {
 const footerContainerStyle: React.CSSProperties = {
     position: 'fixed',
     bottom: '20px',
-    left: '20px',
     right: '20px',
     height: '46px',
     zIndex: 10002,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
     pointerEvents: 'none'
 };
 
