@@ -22,7 +22,12 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
+        const ibl = new RedGPU.Resource.IBL(
+            redGPUContext,
+            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+        );
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
         // 2. 조명 설정
@@ -106,7 +111,5 @@ const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
         directionalShadow: true,
-        ibl: true,
-        skybox: true,
     });
 };

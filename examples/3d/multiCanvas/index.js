@@ -28,6 +28,7 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
             // 1. 카메라 설정
             const controller = new RedGPU.Camera.OrbitController(redGPUContext);
             controller.distance = 6;
+            controller.tilt = -15;
 
             // 2. 씬 구성 (입체감을 위해 광원 1개와 PhongMaterial 추가)
             const scene = new RedGPU.Display.Scene();
