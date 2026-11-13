@@ -96,6 +96,7 @@ export interface ExampleHelperState {
     currentExample: ExampleItem | null;
     language: 'ko' | 'en';
     showSourceModal: boolean;
+    isSourceModalMaximized: boolean;
     showSettingsPanel: boolean;
     showCompareLabel: boolean;
     topBarRightActions: TopBarAction[];
@@ -112,6 +113,7 @@ export interface ExampleHelperState {
     setCurrentExample: (value: ExampleItem | null) => void;
     setLanguage: (value: 'ko' | 'en') => void;
     setShowSourceModal: (value: boolean) => void;
+    setIsSourceModalMaximized: (value: boolean) => void;
     setShowSettingsPanel: (value: boolean) => void;
     setShowCompareLabel: (value: boolean) => void;
     addTopBarRightAction: (action: TopBarAction) => void;
@@ -131,6 +133,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     currentExample: null,
     language: (typeof navigator !== 'undefined' && navigator.language.startsWith('ko')) ? 'ko' : 'en',
     showSourceModal: false,
+    isSourceModalMaximized: false,
     showSettingsPanel: false,
     showCompareLabel: true,
     topBarRightActions: [],
@@ -143,6 +146,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     setCurrentExample: (value: ExampleItem | null) => set({currentExample: value}),
     setLanguage: (value: 'ko' | 'en') => set({language: value}),
     setShowSourceModal: (value: boolean) => set({showSourceModal: value}),
+    setIsSourceModalMaximized: (value: boolean) => set({isSourceModalMaximized: value}),
     setShowSettingsPanel: (value: boolean) => set({showSettingsPanel: value}),
     setShowCompareLabel: (value: boolean) => set({showCompareLabel: value}),
     addTopBarRightAction: (action) => set((state) => {

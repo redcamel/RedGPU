@@ -12,6 +12,7 @@ import LoadingUI from './components/LoadingUI';
 import RenderingSettingsGroup from './components/RenderingSettingsGroup';
 import Title from './components/Title';
 import {keepLog} from "@redgpu/src/utils";
+import {useMediaQuery} from '../utils/useMediaQuery';
 
 const LazyGuiPanel = React.lazy(() => import('./gui/GuiPanel'));
 
@@ -43,6 +44,15 @@ const App = () => {
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
     const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
+    const showSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.showSourceModal);
+    const isSourceModalMaximized = useExampleHelperStore((state: ExampleHelperState) => state.isSourceModalMaximized);
+
+    const isBelowWide = useMediaQuery(1280);
+    const isWide = !isBelowWide && !isNarrow;
+    const isPC = redGPUContext
+        ? !redGPUContext.detector.isMobile
+        : (typeof navigator !== 'undefined' && !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    const isSourceSideMode = showSourceModal && isPC && isWide && !isSourceModalMaximized;
 
     // [KO] 모바일 환경(세로 협소 화면 또는 모바일 가로 모드) 진입 시 설정 패널을 1초 후 자동으로 닫음 (사용자 경험 개선)
     // [EN] Automatically close the settings panel after 1 second on mobile (narrow portrait or mobile landscape) for better UX
@@ -74,12 +84,16 @@ const App = () => {
     const dynamicPanelStyle: React.CSSProperties = {
         ...panelStyle,
         top: isNarrow ? '74px' : '80px',
-        right: isNarrow ? '16px' : '20px',
+        right: isNarrow
+            ? '16px'
+            : isSourceSideMode
+                ? 'calc(min(640px, 45vw) + 36px)'
+                : '20px',
         maxHeight: isNarrow ? 'calc(100dvh - 238px)' : 'calc(100dvh - 158px)',
         transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 24px))',
         opacity: showSettingsPanel ? 1 : 0,
         pointerEvents: showSettingsPanel ? 'auto' : 'none',
-        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
     };
 
     return (
