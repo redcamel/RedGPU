@@ -208,9 +208,9 @@ const renderTestPane = async (redGPUContext, resetScene, createPhysicalObject) =
 			pane.addButton({ title: 'Spawn Random' }).on('click', () => {
 				const types = ['box', 'sphere', 'cylinder', 'capsule'];
 				const randomType = types[Math.floor(Math.random() * types.length)];
-                const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
-                const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
-                const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+                const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+                const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+                const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
                 const randomColor = `#${r}${g}${b}`;
 				createPhysicalObject(
 					randomType,

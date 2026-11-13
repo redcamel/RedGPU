@@ -87,9 +87,9 @@ RedGPU.init(
 
 		const activeBalls = [];
         const getRandomColor = () => {
-            const r = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
-            const g = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
-            const b = Math.floor(70 + Math.random() * 140).toString(16).padStart(2, '0');
+            const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
             return `#${r}${g}${b}`;
         };
 
