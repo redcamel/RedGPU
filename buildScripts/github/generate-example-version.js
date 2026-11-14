@@ -346,10 +346,26 @@ try {
                         `    <script src="index.js?t=${timestamp}" type="module"></script>`
                     ].join('\n');
 
+                    // Preserve custom <style> blocks in <head> and custom DOM elements in <body>
+                    const headMatch = content.match(/<head>([\s\S]*?)<\/head>/i);
+                    const customStyles = headMatch
+                        ? (headMatch[1].match(/<style[\s\S]*?<\/style>/gi) || []).map(s => '    ' + s.trim()).join('\n\n')
+                        : '';
+
+                    const bodyMatch = content.match(/<body>([\s\S]*?)<\/body>/i);
+                    const customBodyContent = bodyMatch
+                        ? bodyMatch[1]
+                            .replace(/<main id="seo-static-content"[\s\S]*?<\/main>/gi, '')
+                            .replace(/<h1 style="position:\s*absolute[\s\S]*?<\/h1>/gi, '')
+                            .trim()
+                        : '';
+
                     // Update Head & Static Body
-                    content = content.replace(/<head>[\s\S]*?<\/head>/i, `<head>\n${standardTags}\n</head>`);
+                    const finalHeadInner = customStyles ? `${standardTags}\n\n${customStyles}` : standardTags;
+                    content = content.replace(/<head>[\s\S]*?<\/head>/i, `<head>\n${finalHeadInner}\n</head>`);
                     const staticBodyHtml = buildExampleStaticBody(entry, relPath, hasThumb);
-                    content = content.replace(/<body>[\s\S]*?<\/body>/i, `<body>\n${staticBodyHtml}\n</body>`);
+                    const finalBodyInner = customBodyContent ? `${staticBodyHtml}\n\n${customBodyContent}` : staticBodyHtml;
+                    content = content.replace(/<body>[\s\S]*?<\/body>/i, `<body>\n${finalBodyInner}\n</body>`);
                 }
             }
         }
