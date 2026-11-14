@@ -41,21 +41,21 @@ RedGPU의 **이미지 기반 조명**(IBL) 시스템은 HDR 환경 맵 또는 �
   <MermaidResponsive :definition="iblGraph" />
 </ClientOnly>
 
-### 1.1 방사 조도 텍스처 (Irradiance Texture)
+### 1.1 방사 조도 텍스처
 
 물체의 기본 명암과 주변광 (Ambient) 역할을 담당하는 **Diffuse Irradiance Map**입니다. 직접적인 광원이 없는 곳에서도 자연스러운 색감을 부여합니다. (`irradianceTexture`
 속성을 통해 접근)
 
-### 1.2 스펙큘러 프리필터 텍스처 (Specular Prefilter Texture)
+### 1.2 스펙큘러 프리필터 텍스처
 
 물체 표면에 주변 환경이 비치는 효과를 담당하는 **Specular Prefilter Map**입니다. 물리 기반 렌더링 (PBR) 재질에서 금속이나 유리 같은 표면의 반사를 현실감 있게 표현합니다.
 (`prefilterTexture` 속성을 통해 접근)
 
 ::: tip [조명 리소스 자동 적용]
-`view.ibl` 속성에 `IBL` 인스턴스를 할당하면, 내부에 생성된 **방사 조도 텍스처**와 **스펙큘러 프리필터 텍스처**가 해당 뷰에서 렌더링되는 모든 PBR 객체에 자동으로 적용됩니다.
+`view.ibl` 속성에 `IBL` 인스턴스를 할당하면, 내부에 생성된 **방사 조도 텍스처** 와 **스펙큘러 프리필터 텍스처** 가 해당 뷰에서 렌더링되는 모든 PBR 객체에 자동으로 적용됩니다.
 :::
 
-### 1.3 환경 텍스처 (Environment Texture)
+### 1.3 환경 텍스처
 
 원본 이미지를 고해상도 큐브맵으로 유지한 데이터로, 주로 `SkyBox` 의 시각적 배경 텍스처로 사용됩니다. (`environmentTexture` 속성을 통해 접근)
 

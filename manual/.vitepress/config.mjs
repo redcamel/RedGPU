@@ -388,12 +388,12 @@ export default withMermaid(defineConfig({
         ['meta', { property: 'og:site_name', content: 'RedGPU Documentation' }],
         ['meta', {
             property: 'og:image',
-            content: 'https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e'
+            content: 'https://repository-images.githubusercontent.com/223094122/6961ab82-4546-4854-aed9-10a020b28d67'
         }],
         ['meta', {name: 'twitter:card', content: 'summary_large_image'}],
         ['meta', {
             name: 'twitter:image',
-            content: 'https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e'
+            content: 'https://repository-images.githubusercontent.com/223094122/6961ab82-4546-4854-aed9-10a020b28d67'
         }],
     ],
     transformHead({pageData}) {

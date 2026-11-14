@@ -986,7 +986,7 @@ export namespace ShadowLibrary {
      * 
      *     // 1. 중심 코어 (Weight: 4.0)
      *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
-     *
+     * 
      *     // 2. 내측 5각 비격자 링 (Radius: 0.90 * s, Weight: 2.4 each -> 12.0)
      *     // 각도: 18°, 90°, 162°, 234°, 306° (직교 X/Y 동시 정렬 회피 및 1.0 텍셀 이내 Bilinear 중첩 보장)
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.8559,  0.2781) * s, cascadeIndex, compareDepth);
@@ -994,7 +994,7 @@ export namespace ShadowLibrary {
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.8559, -0.2781) * s, cascadeIndex, compareDepth);
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.2781, -0.8559) * s, cascadeIndex, compareDepth);
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5871, -0.6836) * s, cascadeIndex, compareDepth);
-     *
+     * 
      *     // 3. 외측 6각 회전 링 (Radius: 1.75 * s, Weight: 1.0 each -> 6.0)
      *     // 각도: 15°, 75°, 135°, 195°, 255°, 315° (내측 링과 0.85 텍셀 간격으로 완전 중첩)
      *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.6904,  0.4529) * s, cascadeIndex, compareDepth);
@@ -1064,7 +1064,7 @@ export namespace ShadowLibrary {
      * 
      *     let shadowInfo = systemUniforms.shadow;
      *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
-     *
+     * 
      *     // 2. 구면 뷰 거리 산출 (카메라 회전 불변 및 구면 외접구 100% 정합)
      *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
      *     let viewDepth = length(relPos);
@@ -1095,7 +1095,7 @@ export namespace ShadowLibrary {
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
-     *
+     * 
      *     // 🚀 4. [하드웨어 depthBiasSlopeScale 연동 서브텍셀 노멀 오프셋 및 적응형 바이어스]
      *     let slopeBias = saturate(1.0 - nDotL);
      *     let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
@@ -1131,7 +1131,7 @@ export namespace ShadowLibrary {
      *         shadowDepth - cascadeBias,
      *         oneOverTextureSize
      *     );
-     *
+     * 
      *     // 🌟 6. [캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
      *     if (cascadeIndex < cascadeCount - 1u) {
      *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
@@ -1140,7 +1140,7 @@ export namespace ShadowLibrary {
      *         let cascadeRange = splitFar - splitNear;
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
-     *
+     * 
      *         if (viewDepth > blendStart) {
      *             let nextIndex = cascadeIndex + 1u;
      *             let nextCascadeAtten = 1.0 / (1.0 + f32(nextIndex) * 0.35);
@@ -1154,7 +1154,7 @@ export namespace ShadowLibrary {
      *             if (!nextOutOfBounds) {
      *                 let nextShadowDepth = saturate(nextShadowCoord.z);
      *                 let nextCascadeBias = rawBaseBiasFactor * nextCascadeAtten + driftBias;
-     *
+     * 
      *                 let nextVis = sampleShadowIsotropic12Mesh(
      *                     directionalShadowMap,
      *                     directionalShadowMapSampler,
@@ -1163,7 +1163,7 @@ export namespace ShadowLibrary {
      *                     nextShadowDepth - nextCascadeBias,
      *                     oneOverTextureSize
      *                 );
-     *
+     * 
      *                 let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
      *                 finalVisibility = mix(finalVisibility, nextVis, blendFactor);
      *             }
@@ -1176,7 +1176,7 @@ export namespace ShadowLibrary {
      *             finalVisibility = mix(finalVisibility, 1.0, fadeFactor);
      *         }
      *     }
-     *
+     * 
      *     // 🌟 8. [Soft Horizon Terminator Fade]
      *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
      *     return finalVisibility * horizonFade;
@@ -1205,14 +1205,14 @@ export namespace ShadowLibrary {
      * 
      *     // 1. 중심 코어 (Weight: 4.0)
      *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
-     *
+     * 
      *     // 2. 내측 5각 비격자 링 (Radius: 0.90 * s, Weight: 2.4 each -> 12.0)
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.8559,  0.2781) * s, cascadeIndex, compareDepth);
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.2781,  0.8559) * s, cascadeIndex, compareDepth);
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.8559, -0.2781) * s, cascadeIndex, compareDepth);
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.2781, -0.8559) * s, cascadeIndex, compareDepth);
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5871, -0.6836) * s, cascadeIndex, compareDepth);
-     *
+     * 
      *     // 3. 외측 6각 회전 링 (Radius: 1.75 * s, Weight: 1.0 each -> 6.0)
      *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.6904,  0.4529) * s, cascadeIndex, compareDepth);
      *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.4529,  1.6904) * s, cascadeIndex, compareDepth);
@@ -1309,7 +1309,7 @@ export namespace ShadowLibrary {
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
-     *
+     * 
      *     // 4. 일반 메쉬(getDirectionalShadowVisibility)와 100% 동일한 서브텍셀 노멀 오프셋 및 적응형 깊이 바이어스
      *     let slopeBias = saturate(1.0 - nDotL);
      *     let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
@@ -1335,7 +1335,7 @@ export namespace ShadowLibrary {
      *     let shadowDepth = saturate(shadowCoord.z);
      *     let cascadeBias = rawBaseBiasFactor * cascadeAtten + driftBias;
      *     let compareDepth = shadowDepth - cascadeBias;
-     *
+     * 
      *     // 5. 캐스케이드 거리별 차등 탭 샘플링 (12 / 4 / 4 / 4)
      *     var finalVisibility: f32 = 1.0;
      *     if (cascadeIndex == 0u) {
@@ -1357,7 +1357,7 @@ export namespace ShadowLibrary {
      *             oneOverTextureSize
      *         );
      *     }
-     *
+     * 
      *     // 6. 캐스케이드 전환 블렌딩 (하위 20% 구간: 4-Tap Rotated-Grid 크로스페이드)
      *     if (cascadeIndex < cascadeCount - 1u) {
      *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
@@ -1366,7 +1366,7 @@ export namespace ShadowLibrary {
      *         let cascadeRange = splitFar - splitNear;
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
-     *
+     * 
      *         if (viewDepth > blendStart) {
      *             let nextIndex = cascadeIndex + 1u;
      *             let nextCascadeAtten = 1.0 / (1.0 + f32(nextIndex) * 0.35);
@@ -1381,7 +1381,7 @@ export namespace ShadowLibrary {
      *                 let nextShadowDepth = saturate(nextShadowCoord.z);
      *                 let nextCascadeBias = rawBaseBiasFactor * nextCascadeAtten + driftBias;
      *                 let nextCompareDepth = nextShadowDepth - nextCascadeBias;
-     *
+     * 
      *                 let nextVis = sampleShadowRotatedGrid4Landscape(
      *                     directionalShadowMap,
      *                     directionalShadowMapSampler,
@@ -1390,7 +1390,7 @@ export namespace ShadowLibrary {
      *                     nextCompareDepth,
      *                     oneOverTextureSize
      *                 );
-     *
+     * 
      *                 let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
      *                 finalVisibility = mix(finalVisibility, nextVis, blendFactor);
      *             }
@@ -1433,7 +1433,7 @@ export namespace ShadowLibrary {
      * 
      *     // 1. 중심 코어 (Weight: 4.0)
      *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
-     *
+     * 
      *     // 2. 5각 비격자 등방성 링 (Radius: 0.90 * s, Weight: 2.4 each -> 12.0, < 1.0 텍셀 유지로 Bilinear 중첩 100% 보존)
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.8559,  0.2781) * s, cascadeIndex, compareDepth);
      *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.2781,  0.8559) * s, cascadeIndex, compareDepth);
@@ -1449,7 +1449,7 @@ export namespace ShadowLibrary {
      *  * 🌟 [식생(Foliage) 중경(Cascade 1) 전용 4-Tap Rotated-Grid PCF]
      *  * - 바람(Wind)에 의해 흔들리는 잎사귀가 그림자 맵 텍셀 경계를 지날 때 1-Tap 이진 점프(깜빡임)가 발생하지 않도록
      *  *   1.0 텍셀 이내 비대칭 회전 격자(실효 16텍셀 연속 Bilinear 중첩)로 부드럽게 필터링합니다.
-     *  *
+     *  * 
      *  *\/
      * fn sampleShadowRotated4Foliage(
      *     directionalShadowMap: texture_depth_2d_array,
@@ -1467,7 +1467,7 @@ export namespace ShadowLibrary {
      *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.75, -0.35) * s, cascadeIndex, compareDepth);
      *     return sum * 0.25;
      * }
-     *
+     * 
      * /**
      *  * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수 (6 / 4 / 1 / 1)]
      *  * - Cascade 0 (초근경): 비회전 6-Tap 등방성 원형 디스크
@@ -1498,7 +1498,7 @@ export namespace ShadowLibrary {
      * 
      *     let shadowInfo = systemUniforms.shadow;
      *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
-     *
+     * 
      *     // 2. 구형 뷰 거리 산출 (구형 절두체 경계 구와 100% 일치시켜 가장자리 텍셀 낭비 제거 및 viewMatrix 행렬 곱 생략)
      *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
      *     let viewDepth = length(relPos);
@@ -1529,7 +1529,7 @@ export namespace ShadowLibrary {
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
-     *
+     * 
      *     // 4. 풍하중 잎사귀 떨림(Leaf Flutter) 및 수관 LOD 편차를 고려한 식생 전용 서브텍셀 리시버 바이어스
      *     let slopeBias = saturate(1.0 - nDotL);
      *     let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
@@ -1557,7 +1557,7 @@ export namespace ShadowLibrary {
      *     let cascadeBias = max(rawBaseBiasFactor, 0.00035) * cascadeAtten + driftBias;
      * 
      *     var finalVis: f32 = 1.0;
-     *
+     * 
      *     // 5. 적응형 샘플링: Cascade 0은 6-Tap 원형 디스크, Cascade 1은 4-Tap Rotated-Grid PCF, Cascade 2+는 1-Tap Bilinear PCF
      *     if (cascadeIndex == 0u) {
      *         finalVis = sampleShadowIsotropic6Foliage(
@@ -1595,7 +1595,7 @@ export namespace ShadowLibrary {
      *         let cascadeRange = splitFar - splitNear;
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
-     *
+     * 
      *         if (viewDepth > blendStart) {
      *             let nextIndex = cascadeIndex + 1u;
      *             let nextAtten = 1.0 / (1.0 + f32(nextIndex) * 0.35);
@@ -1610,7 +1610,7 @@ export namespace ShadowLibrary {
      *             if (!nextOutOfBounds) {
      *                 let nextShadowDepth = saturate(nextShadowCoord.z);
      *                 let nextCascadeBias = max(rawBaseBiasFactor, 0.00035) * nextAtten + driftBias;
-     *
+     * 
      *                 var nextVis: f32;
      *                 if (nextIndex == 1u) {
      *                     nextVis = sampleShadowRotated4Foliage(
@@ -1630,7 +1630,7 @@ export namespace ShadowLibrary {
      *                         nextShadowDepth - nextCascadeBias
      *                     );
      *                 }
-     *
+     * 
      *                 let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
      *                 finalVis = mix(finalVis, nextVis, blendFactor);
      *             }
@@ -1702,7 +1702,7 @@ export namespace ColorLibrary {
      * fn linearToSrgbVec3(linearColor: vec3<f32>) -> vec3<f32> {
      *     return select(
      *         12.92 * linearColor,
-     *         1.055 * pow(linearColor, vec3<f32>(1.0 / 2.4)) - 0.055,
+     *         1.055 * pow(max(linearColor, vec3<f32>(0.0031308)), vec3<f32>(1.0 / 2.4)) - 0.055,
      *         linearColor > vec3<f32>(0.0031308)
      *     );
      * }
@@ -2064,7 +2064,7 @@ export namespace LightingLibrary {
      * 
      * fn getLightDistanceAttenuation(distance: f32, radius: f32) -> f32 {
      *     let d2 = distance * distance;
-     *
+     *     
      *     // [KO] 거리 기반 부드러운 감쇠 윈도잉 함수
      *     // [EN] Smooth distance-based attenuation windowing function
      *     let factor = distance / radius;
@@ -2299,7 +2299,7 @@ export namespace EntryPointLibrary {
          *             output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
          *         }
          *     }
-         *
+         * 
          *     output.position = vec4<f32>(
          *         (output.position.xy - systemUniforms.pickingOffset * output.position.w) * u_resolution,
          *         output.position.zw
@@ -2556,7 +2556,7 @@ export namespace SystemStructLibrary {
      *     combinedOpacity: f32,
      *     useDisplacementTexture: u32,
      *     displacementScale: f32,
-
+     * 
      *     globalFragmentSlotIndex:u32,
      *     uvTransform: vec4<f32>,
      * };
@@ -2967,9 +2967,9 @@ export namespace ShaderLibrary {
      * 
      * @group(0) @binding(13) var atmosphereSampler: sampler;
      * @group(0) @binding(14) var transmittanceTexture: texture_2d<f32>;
-     *
+     * 
      * @group(0) @binding(15) var skyAtmosphere_skyLightLUTTextureArray: texture_cube_array<f32>;
-
+     * 
      * 
      * #redgpu_include systemStruct.globalVertexStruct;
      * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;

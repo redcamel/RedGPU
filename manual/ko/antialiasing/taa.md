@@ -3,7 +3,7 @@ title: TAA
 order: 1
 ---
 
-# TAA (Temporal AA)
+# TAA
 
 **`TAA`**(Temporal Antialiasing) 는 이전 프레임의 결과물을 현재 프레임과 합성하여 계단 현상을 제거하는 시간축 기반 안티앨리어싱 기법입니다.
 
@@ -25,10 +25,10 @@ redGPUContext.antialiasingManager.useTAA = true;
 
 ## 3. 품질 비교
 
-| 상태              | 결과 이미지                     |
-|:------------------|:--------------------------------|
-| **미적용 (NONE)** | ![None](/antialiasing/none.jpg) |
-| **TAA 적용**      | ![TAA](/antialiasing/taa.jpg)   |
+| 상태             | 결과 이미지                     |
+|:-----------------|:--------------------------------|
+| **미적용**(NONE) | ![None](/antialiasing/none.jpg) |
+| **TAA 적용**     | ![TAA](/antialiasing/taa.jpg)   |
 
 ---
 

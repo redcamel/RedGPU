@@ -23,7 +23,7 @@ const landscapeGraph = `
 `
 </script>
 
-# 대규모 지형 및 생태계 (Landscape & Ecosystem)
+# 대규모 지형 및 생태계
 
 <img src="/landscape/landscape.jpg" alt="Landscape" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:16px;" />
 

@@ -32,7 +32,7 @@ const meshGraph = `
   <MermaidResponsive :definition="meshGraph" />
 </ClientOnly>
 
-## 2. 지오메트리와 프리미티브 (Geometry & Primitive)
+## 2. 지오메트리와 프리미티브
 
 **지오메트리**(`Geometry`) 는 3D 공간 상의 수많은 **점**(Vertex) 데이터들의 집합입니다.
 
@@ -48,7 +48,7 @@ RedGPU는 외부 모델 파일을 불러오기 전, **공간 구성이나 시각
 | **`Circle`** / **`Ring`**     | 채워진 원형 평면 또는 가운데가 뚫린 링 평면 형태 |
 | **`Torus`** / **`TorusKnot`** | 도넛 모양의 고리 또는 복잡하게 꼬인 매듭 형태    |
 
-## 3. 표면 정의: 머티리얼 (Material)
+## 3. 표면 정의: 머티리얼
 
 **Material** 은 물체의 표면이 어떻게 보일지를 결정하는 속성입니다. 단순한 색상뿐만 아니라 텍스처, 반사율, 투명도 등을 정의할 수 있습니다.
 
@@ -74,7 +74,7 @@ blueAlphaMat.alpha = 0.5;
 이미지를 입히려면 `BitmapMaterial`, 빛과 그림자를 표현하려면 `PhongMaterial` 등을 사용합니다. 이들은 이어지는 챕터에서 상세히 다룹니다.
 :::
 
-## 4. 메시 제어 (Transformation)
+## 4. 메시 제어
 
 생성된 `Mesh` 객체는 3D 공간 안에서 자유롭게 변형할 수 있는 속성을 가집니다.
 

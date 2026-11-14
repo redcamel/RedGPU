@@ -3,7 +3,7 @@ title: FXAA
 order: 3
 ---
 
-# FXAA (Fast Approximate AA)
+# FXAA
 
 **`FXAA`** 는 렌더링된 최종 이미지를 분석하여 경계를 부드럽게 보정하는 **후처리**(Post-Processing) 방식의 안티앨리어싱 기법입니다.
 
@@ -25,10 +25,10 @@ redGPUContext.antialiasingManager.useFXAA = true;
 
 ## 3. 품질 비교
 
-| 상태              | 결과 이미지                     |
-|:------------------|:--------------------------------|
-| **미적용 (NONE)** | ![None](/antialiasing/none.jpg) |
-| **FXAA 적용**     | ![FXAA](/antialiasing/fxaa.jpg) |
+| 상태             | 결과 이미지                     |
+|:-----------------|:--------------------------------|
+| **미적용**(NONE) | ![None](/antialiasing/none.jpg) |
+| **FXAA 적용**    | ![FXAA](/antialiasing/fxaa.jpg) |
 
 ---
 

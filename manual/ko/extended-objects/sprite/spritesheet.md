@@ -50,7 +50,7 @@ scene.addChild(spriteSheet);
 
 ### 3.2 빌보드 및 크기 설정
 
-`SpriteSheet3D`는 `Sprite3D`와 동일한 빌보드 및 크기 설정 옵션을 제공합니다. 상세한 모드별 차이점과 작동 원리는
+`SpriteSheet3D` 는 `Sprite3D` 와 동일한 빌보드 및 크기 설정 옵션을 제공합니다. 상세한 모드별 차이점과 작동 원리는
 **[Sprite3D 매뉴얼의 크기 관계 섹션](./sprite.md#_3-3-월드-사이즈와-픽셀-사이즈의-관계)** 을 참조하십시오.
 
 | 속성명             | 설명                                   | 기본값  |
@@ -68,7 +68,7 @@ spriteSheet.pixelSize = 128;
 
 ## 4. 실습 예제: 스프라이트 시트 애니메이션 제어
 
-격자 형태의 시트 이미지가 `SpriteSheet3D`를 통해 어떻게 연속된 애니메이션으로 동작하는지, 그리고 FPS 및 재생 제어 (`play`, `pause`, `stop`)가 어떻게 반영되는지 확인해 보세요.
+격자 형태의 시트 이미지가 `SpriteSheet3D` 를 통해 어떻게 연속된 애니메이션으로 동작하는지, 그리고 FPS 및 재생 제어 (`play`, `pause`, `stop`)가 어떻게 반영되는지 확인해 보세요.
 
 <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/" style="width:100%; height:500px;"></iframe>
 

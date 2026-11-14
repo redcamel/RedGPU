@@ -56,5 +56,5 @@ using the **`TONE MAPPING`** dropdown menu located in the UI of every RedGPU exa
 
 ## Next Steps
 
-- **[Built-in Effects](./builtin-effects.md)**: Activating SSAO and real-time SSR for physical depth.
-- **[General Effects](./general-effects.md)**: Adding bloom, blur, and grayscale before or after tone mapping.
+- **[General Effects](./general-effects.md)**: Adding custom LDR blur, color adjustments, sharpen, and convolution after
+  tone mapping.

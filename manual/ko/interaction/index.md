@@ -8,9 +8,9 @@ order: 8
 RedGPU는 다양한 사용자 입력을 직관적이고 손쉽게 처리할 수 있는 도구를 제공합니다:
 
 - **피킹 (Picking) 시스템**: 3D 및 2D 객체에 대한 마우스 및 터치 이벤트를 직관적으로 처리합니다.
-- **키보드 버퍼 (keyboardKeyBuffer)**: 키보드 상태를 실시간으로 관리하여 프레임 단위의 세밀한 컨트롤을 지원합니다.
+- **키보드 버퍼**(keyboardKeyBuffer): 키보드 상태를 실시간으로 관리하여 프레임 단위의 세밀한 컨트롤을 지원합니다.
 
-## 1. 마우스 및 터치 인터렉션 (Picking)
+## 1. 마우스 및 터치 인터렉션
 
 RedGPU의 피킹 시스템은 `Mesh`, `Sprite3D`, `Sprite2D` 등 대부분의 디스플레이 객체에 대해 사용자 입력을 수신하고 반응할 수 있는 기능을 제공합니다.
 
@@ -44,7 +44,7 @@ mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
 | **`OUT`** | `'out'` | 마우스 커서가 객체 밖으로 벗어날 때 발생 (Hover Out) |
 | **`MOVE`** | `'move'` | 객체 위에서 마우스 포인터가 이동할 때 지속적으로 발생 |
 
-### 1.3 상세 이벤트 정보 (PickingEvent)
+### 1.3 상세 이벤트 정보
 
 이벤트 콜백에 전달되는 객체 (`e`)는 발생 시점의 다양한 정보를 담고 있습니다. 이를 통해 정밀한 상호작용 로직을 구현할 수 있습니다.
 
@@ -70,9 +70,10 @@ mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
 
 <iframe src="/RedGPU/examples/3d/interaction/mouseEvent/raycasting/" style="width:100%; height:500px;"></iframe>
 
-## 2. 키보드 인터렉션 (keyboardKeyBuffer)
+## 2. 키보드 인터렉션
 
-객체 피킹 외에도, `redGPUContext.keyboardKeyBuffer`를 통해 키보드의 실시간 눌림 상태를 확인할 수 있습니다. 이는 캐릭터 이동이나 카메라 컨트롤처럼 매 프레임마다 키 입력 상태를 체크해야
+객체 피킹 외에도, `redGPUContext.keyboardKeyBuffer` 를 통해 키보드의 실시간 눌림 상태를 확인할 수 있습니다. 이는 캐릭터 이동이나 카메라 컨트롤처럼 매 프레임마다 키 입력 상태를
+체크해야
 하는 로직에 유용합니다.
 
 ```javascript
@@ -95,7 +96,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 ```
 
 > [!TIP]
-> `keyboardKeyBuffer`는 브라우저 표준 `KeyboardEvent.key` 값을 키 (Key)로 사용합니다 (`'w'`, `'W'`, `' '`, `'ArrowUp'`, `'Shift'` 등).
+> `keyboardKeyBuffer` 는 브라우저 표준 `KeyboardEvent.key` 값을 키 (Key)로 사용합니다 (`'w'`, `'W'`, `' '`, `'ArrowUp'`, `'Shift'` 등).
 
 ---
 

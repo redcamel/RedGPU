@@ -3,7 +3,7 @@ title: Tone Mapping
 order: 3
 ---
 
-# 톤 매핑 (Tone Mapping)
+# 톤 매핑
 
 톤 매핑은 HDR (High Dynamic Range) 이미지의 넓은 밝기 범위를 표준 디바이스 (LDR)에서 표현 가능한 범위로 자연스럽게 변환하는 필수적인 후처리 기법입니다. 씬의 전체적인 노출, 대비, 색감을
 최종
@@ -28,7 +28,7 @@ tm.brightness = 0.02;
 
 ---
 
-## 2. 지원 알고리즘 (TONE_MAPPING_MODE)
+## 2. 지원 알고리즘
 
 원하는 비주얼 스타일에 따라 톤 매핑 모드를 실시간으로 변경할 수 있습니다. 상수값은 `RedGPU.ToneMapping.TONE_MAPPING_MODE`에 정의되어 있습니다.
 
@@ -54,5 +54,4 @@ view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_
 
 ## 다음 학습 추천
 
-- **[빌트인 이펙트](./builtin-effects.md)** : 물리 기반 입체감을 부여하는 SSAO 및 실시간 SSR 활성화하기
-- **[일반 이펙트](./general-effects.md)** : 톤 매핑 전후 단계에 블룸, 블러, 그레이스케일 추가하기
+- **[일반 이펙트](./general-effects.md)** : 톤 매핑 이후 LDR 단계에 블러, 색조 보정, 샤픈, 컨볼루션 추가하기

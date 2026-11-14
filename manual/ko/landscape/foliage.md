@@ -3,16 +3,17 @@ title: Foliage & Impostors
 order: 5
 ---
 
-# 대규모 식생과 임포스터 (Foliage & Impostors)
+# 대규모 식생과 임포스터
 
-`RedGPU.Landscape.FoliageManager`는 지형 위에 나무, 바위, 관목 등 수만~수십만 개의 3D 메시를 서브 셀 (Sub-Cell) 단위로 스트리밍하고, 거리별 다단계 메시 LOD와 **팔면체
+`RedGPU.Landscape.FoliageManager` 는 지형 위에 나무, 바위, 관목 등 수만~수십만 개의 3D 메시를 서브 셀 (Sub-Cell) 단위로 스트리밍하고, 거리별 다단계 메시 LOD와
+**팔면체
 임포스터**(Octahedral Impostor)를 결합하여 고속으로 렌더링합니다.
 
 ---
 
 ## 1. 식생 타입 등록 (`foliageManager.addType`)
 
-`GLTFLoader` 또는 `Mesh`로 준비한 모델을 `landscape.foliageManager.addType(options)`에 전달하여 식생 타입 (`Foliage`)을 등록합니다.
+`GLTFLoader` 또는 `Mesh` 로 준비한 모델을 `landscape.foliageManager.addType(options)`에 전달하여 식생 타입 (`Foliage`)을 등록합니다.
 
 - **`lods`**: 카메라 거리에 따라 순차 전환될 3D 메시 LOD 배열 (`[{ mesh, lodDistance }]`)을 지정합니다.
 - **`useImpostor: true` (기본값)**: 마지막 3D 메시 LOD 거리 너머부터 `cullingDistance` 구간까지는 엔진이 런타임에 자동 베이킹한 **팔면체 임포스터**(Octahedral
@@ -63,8 +64,8 @@ new RedGPU.GLTFLoader(
 |                         | **`cullingDistance`**                         | `200.0`         | 인스턴스가 렌더링되는 카메라로부터의 최대 가시 거리                   |
 | **밀도 및 배치**        | **`densityPerHectare`**                       | `1000.0`        | 헥타르(10,000㎡)당 기준 배치 밀도                                     |
 |                         | **`densityMultiplier`**                       | `1.0`           | 기준 밀도에 곱해지는 실시간 밀도 배율                                 |
-|                         | **`targetLayer`**                             | `''`            | 분포 확률을 참조할 `LandscapeLayer`의 이름 또는 인덱스                |
-|                         | **`densityScaleByWeight`**                    | `true`          | `targetLayer`의 가중치에 비례하여 밀도를 스케일링할지 여부            |
+|                         | **`targetLayer`**                             | `''`            | 분포 확률을 참조할 `LandscapeLayer` 의 이름 또는 인덱스               |
+|                         | **`densityScaleByWeight`**                    | `true`          | `targetLayer` 의 가중치에 비례하여 밀도를 스케일링할지 여부           |
 | **트랜스폼 및 경사**    | **`minSlope`** / **`maxSlope`**               | `0.0` / `45.0`  | 배치 가능한 최소·최대 지형 경사각 (단위: 도)                          |
 |                         | **`minScale`** / **`maxScale`**               | `[1, 1, 1]`     | 인스턴스별 랜덤 스케일 범위 `[x, y, z]`                               |
 |                         | **`alignToNormal`** / **`alignFactor`**       | `false` / `1.0` | 지형 표면 법선(Normal) 기울기에 맞춰 회전 정렬할지 여부 및 정렬 강도  |

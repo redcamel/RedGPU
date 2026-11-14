@@ -1,12 +1,12 @@
 ---
 title: General Effects
-order: 2
+order: 4
 ---
 
 # General Effects
 
-Manages standard post-processing effects provided under the `RedGPU.PostEffect` namespace, such as Gaussian blur, color
-adjustments, depth of field (DoF), and fog.
+Manages custom LDR post-processing effects provided under the `RedGPU.PostEffect` namespace, such as Gaussian blur,
+color adjustments, sharpen, and convolution.
 
 ## 1. Usage
 
@@ -56,15 +56,7 @@ All general effects are located under the `RedGPU.PostEffect` namespace.
 |                      | `Grayscale`            | Converts the image to black and white                      |
 |                      | `Invert`               | Color inversion                                            |
 |                      | `Threshold`            | Binarization based on a threshold                          |
-| **Lens**             | `Bloom`                | Physically-based HDR light bleeding effect (`useBloom`)    |
-|                      | `DOF`                  | Depth of Field (blurs areas out of focus, `useDOF`)        |
-|                      | `Vignetting`           | Darkens the outer edges of the screen                      |
-|                      | `ChromaticAberration`  | Recreates lens chromatic aberration                        |
-|                      | `LensDistortion`       | Lens distortion effect                                     |
-| **Atmospheric**      | `Fog`                  | Distance-based fog effect                                  |
-|                      | `HeightFog`            | Height-based fog effect                                    |
-| **Visual / Utility** | `FilmGrain`            | Film noise (grain) effect                                  |
-|                      | `Sharpen`              | Sharpening                                                 |
+| **Visual / Utility** | `Sharpen`              | Sharpening                                                 |
 |                      | `Convolution`          | Kernel-based filter (supports Sharpen, Edge, Emboss, etc.) |
 
 ---
@@ -73,13 +65,11 @@ All general effects are located under the `RedGPU.PostEffect` namespace.
 
 - [Brightness & Contrast](/RedGPU/examples/postEffect/adjustments/brightnessContrast/)
 - [Gaussian Blur](/RedGPU/examples/postEffect/blur/gaussianBlur/)
-- [Depth of Field (DoF)](/RedGPU/examples/postEffect/builtIn/lens/dof/)
-- [Chromatic Aberration](/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/)
-- [Height Fog](/RedGPU/examples/postEffect/builtIn/fog/heightFog/)
+- [Sharpen](/RedGPU/examples/postEffect/sharpen/)
+- [Convolution](/RedGPU/examples/postEffect/convolution/)
 
 ---
 
 ## Next Steps
 
-- **[Tone Mapping](./tone-mapping.md)**
-- **[Built-in Effects](./builtin-effects.md)**
+- **[Antialiasing](../antialiasing/index.md)**
