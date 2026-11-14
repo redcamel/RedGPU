@@ -1653,6 +1653,8 @@ class Mesh extends MeshBase {
                         bundleListDebuggerLayer[bundleListDebuggerLayer.length] = renderBundle
                     } else if (currentMaterial.use2PathRender) {
                         bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
+                        // @ts-ignore
+                        renderBundle.mesh = this
                     } else if (this['isInstanceofParticle']) {
                         bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle
                     } else if (currentMaterial.transparent) {
