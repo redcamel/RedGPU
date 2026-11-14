@@ -14,14 +14,15 @@ const timestamp = Date.now();
 const targetFolder = path.join(process.cwd(), 'examples');
 const baseUrl = 'https://redcamel.github.io/RedGPU/examples/';
 
-const escapeHtml = (str = '') => String(str)
-    .replace(/<[^>]*>?/gm, ' ')
+const stripHtml = (str = '') => String(str)
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/[<>]/g, ' ')
     .replace(/\s+/g, ' ')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
     .trim();
+
+const escapeHtml = (str = '') => stripHtml(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;');
 
 // 1. Load example list from exampleList.ts
 const pathMap = {};
@@ -292,7 +293,7 @@ try {
                                 "name": title,
                                 "applicationCategory": "DeveloperApplication",
                                 "operatingSystem": "Web",
-                                "description": entry.descriptionEn.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim(),
+                                "description": stripHtml(entry.descriptionEn),
                                 "url": canonicalUrl,
                                 "screenshot": socialImage,
                                 "isPartOf": {
