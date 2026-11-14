@@ -82,7 +82,6 @@ RedGPU.init(
         directionalLight.elevation = initialStage.sunElevation;
         directionalLight.azimuth = initialStage.sunAzimuth;
         directionalLight.lux = initialStage.sunLux;
-        directionalLight.castShadow = true;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);

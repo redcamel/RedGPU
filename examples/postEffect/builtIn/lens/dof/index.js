@@ -105,10 +105,8 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
     ground.y = -1.6;
     scene.addChild(ground);
 
-    // [KO] 1. 광학 심도 눈금자(Optical Depth Ruler): 카메라 거리 3.0m ~ 25.0m 구간에 0.5m 간격으로 눈금 슬래브를 배치하여
-    //         focusDistance 및 aperture 변화에 따른 합초 구간(In-Focus Band)과 전·배경 착란원 전이를 바닥에서 직관적으로 확인
-    // [EN] 1. Optical Depth Ruler: Places floor scale bars every 0.5m from 3.0m to 25.0m camera depth to visually inspect
-    //         the in-focus band and foreground/background CoC transition as focusDistance and aperture change
+    // [KO] 1. 광학 심도 눈금자(Optical Depth Ruler): 카메라 거리 3.0m ~ 25.0m 구간에 0.5m 간격으로 배치해 합초 구간과 착란원 전이를 확인
+    // [EN] 1. Optical Depth Ruler: Floor scale bars every 0.5m (3.0m–25.0m depth) to inspect the in-focus band and CoC transition
     const majorBarGeo = new RedGPU.Primitive.Box(redGPUContext, 3.8, 0.035, 0.1);
     const minorBarGeo = new RedGPU.Primitive.Box(redGPUContext, 2.2, 0.02, 0.055);
     const minorBarMat = new RedGPU.Material.PhongMaterial(redGPUContext);
@@ -136,11 +134,11 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
     // [EN] 2. Subject placement calibrated to each lens preset's target focusDistance (Macro 4.2m / Portrait 7.5m / NightMode 9.0m / Default·Cinematic 10.0m / Sports 18.0m)
     const helmetUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
     const helmetStages = [
-        {x: -1.15, y: -0.65, z: 5.8, scale: 0.74, rotY: 26},   // 4.2m (Macro)
-        {x: 1.15, y: -0.52, z: 2.5, scale: 0.78, rotY: -24},   // 7.5m (Portrait)
-        {x: -1.25, y: -0.45, z: 1.0, scale: 0.82, rotY: 18},   // 9.0m (Night Mode)
-        {x: 1.30, y: -0.35, z: -3.5, scale: 0.86, rotY: -20},  // 13.5m (Mid-Far)
-        {x: -1.45, y: -0.22, z: -8.0, scale: 0.92, rotY: 16}   // 18.0m (Sports)
+        {x: -1.15, y: -0.65, z: 5.8, scale: 0.74, rotY: 26},
+        {x: 1.15, y: -0.52, z: 2.5, scale: 0.78, rotY: -24},
+        {x: -1.25, y: -0.45, z: 1.0, scale: 0.82, rotY: 18},
+        {x: 1.30, y: -0.35, z: -3.5, scale: 0.86, rotY: -20},
+        {x: -1.45, y: -0.22, z: -8.0, scale: 0.92, rotY: 16}
     ];
 
     helmetStages.forEach((stage, idx) => {
@@ -160,7 +158,7 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
     const cesiumManUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf';
     new RedGPU.GLTFLoader(redGPUContext, cesiumManUrl, (result) => {
         const heroMesh = scene.addChild(result.resultMesh);
-        heroMesh.setPosition(0.0, -1.6, 0.0); // 10.0m (Game Default / Cinematic)
+        heroMesh.setPosition(0.0, -1.6, 0.0);
         heroMesh.setScale(1.85);
     });
 
