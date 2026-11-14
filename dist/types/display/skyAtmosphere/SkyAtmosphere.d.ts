@@ -17,7 +17,7 @@ import RedGPUObject from "../../base/RedGPUObject";
  * view.skyAtmosphere = skyAtmosphere;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/"></iframe>
  *
  * @see [SkyAtmosphere Basic Example](/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
  * @see [SkyAtmosphere Scattering Test](/RedGPU/examples/3d/skyAtmosphere/scatteringTest/)
@@ -374,23 +374,14 @@ declare class SkyAtmosphere extends RedGPUObject {
      */
     get aerialPerspectiveLUT(): DirectCubeTexture;
     /**
-     * [KO] 대기 산란 기반 간접 난반사(Irradiance) 큐브 텍스처를 반환합니다.
-     * [EN] Returns the atmospheric scattering-based indirect diffuse (Irradiance) cube texture.
+     * [KO] 간접 정반사(Cube 0) 및 간접 난반사(Cube 1, Mip 3) 조명이 통합된 스카이 라이트 큐브맵 배열 텍스처를 반환합니다.
+     * [EN] Returns the sky light cubemap array texture integrating indirect specular (Cube 0) and indirect diffuse (Cube 1, Mip 3) lighting.
      *
      * @returns
-     * [KO] Irradiance 큐브 텍스처
-     * [EN] Irradiance cube texture
+     * [KO] 통합 스카이 라이트 큐브맵 배열 텍스처
+     * [EN] Integrated sky light cubemap array texture
      */
-    get irradianceLUT(): DirectCubeTexture;
-    /**
-     * [KO] 대기 산란 기반 간접 정반사(Reflection) 큐브 텍스처를 반환합니다.
-     * [EN] Returns the atmospheric scattering-based indirect specular (Reflection) cube texture.
-     *
-     * @returns
-     * [KO] Reflection 큐브 텍스처
-     * [EN] Reflection cube texture
-     */
-    get reflectionLUT(): DirectCubeTexture;
+    get skyLightLUTTextureArray(): DirectCubeTexture;
     /**
      * [KO] 대기 LUT 샘플링에 사용되는 선형 샘플러를 반환합니다.
      * [EN] Returns the linear sampler used for atmospheric LUT sampling.
@@ -430,6 +421,24 @@ declare class SkyAtmosphere extends RedGPUObject {
      * [EN] Post-effect result with atmospheric effects applied
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
+    /**
+     * [KO] 태양 광원 방향, 카메라 고도 및 구름 시간 변화를 감지하여 대기 파라미터와 공유 유니폼 버퍼를 갱신합니다.
+     * [EN] Detects changes in sun light direction, camera altitude, and cloud time to update atmospheric parameters and the shared uniform buffer.
+     *
+     * @param view -
+     * [KO] 기준 View3D 인스턴스
+     * [EN] Reference View3D instance
+     */
+    updateUniformParams(view: View3D): void;
+    /**
+     * [KO] 최신 시스템 유니폼 및 대기 파라미터를 바탕으로 대기 산란 LUT들을 베이킹합니다.
+     * [EN] Bakes atmospheric scattering LUTs based on the latest system uniforms and atmospheric parameters.
+     *
+     * @param view -
+     * [KO] 기준 View3D 인스턴스
+     * [EN] Reference View3D instance
+     */
+    updateLUTs(view: View3D): void;
     /**
      * [KO] 태양 광원 방향, 카메라 고도 및 뷰 행렬 변화를 감지하여 대기 유니폼 버퍼와 LUT들을 갱신합니다.
      * [EN] Detects changes in sun light direction, camera altitude, and view matrix to update the atmospheric uniform buffer and LUTs.

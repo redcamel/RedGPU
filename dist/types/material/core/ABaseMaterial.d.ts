@@ -31,6 +31,11 @@ interface ABaseMaterial {
      * [EN] Flag indicating whether it is a material instance
      */
     isInstanceofMaterial: boolean;
+    /**
+     * [KO] 디버거 전용 머티리얼 여부 플래그
+     * [EN] Flag indicating whether it is a debugger-dedicated material
+     */
+    isDebuggerMaterial?: boolean;
 }
 /**
  * [KO] 모든 머티리얼의 공통 기반이 되는 추상 클래스입니다.
@@ -64,10 +69,11 @@ declare abstract class ABaseMaterial extends ResourceBase {
      */
     dirtyPipeline: boolean;
     /**
-     * [KO] 머티리얼 투명 렌더링 활성화 여부
-     * [EN] Whether transparent rendering is enabled for the material
+     * [KO] 머티리얼 투명 렌더링 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether transparent rendering is enabled for the material.
      */
-    transparent: boolean;
+    get transparent(): boolean;
+    set transparent(value: boolean);
     /**
      * [KO] ABaseMaterial 인스턴스를 초기화합니다.
      * [EN] Initializes an ABaseMaterial instance.

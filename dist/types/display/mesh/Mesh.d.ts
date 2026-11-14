@@ -19,7 +19,6 @@ interface Mesh {
      * [KO] TAA 지터(Jitter) 비활성화 여부
      * [EN] Whether to disable TAA jitter
      */
-    disableJitter: boolean;
     /**
      * [KO] 변위 텍스처(Displacement Texture) 사용 여부
      * [EN] Whether to use displacement texture
@@ -47,7 +46,7 @@ interface Mesh {
  * scene.addChild(mesh);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
  *
  * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)

@@ -1,6 +1,6 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1794640510497';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1794640510497';
-import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1794640510497';
+import * as RedGPU from '../../../../../dist/index.js?t=1794645384845';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1794645384845';
+import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1794645384845';
 
 /**
  * [KO] KTX2 ArrayCube3D 예제

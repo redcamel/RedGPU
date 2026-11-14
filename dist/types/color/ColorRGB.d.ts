@@ -104,12 +104,15 @@ declare class ColorRGB {
      */
     get rgbNormal(): number[];
     /**
-     * [KO] 감마 보정(2.2)이 적용된 선형(Linear) 정규화 RGB 값을 배열로 반환합니다.
-     * [EN] Returns gamma-corrected (2.2) linear normalized RGB values as an array.
+     * [KO] 표준 sRGB 전달 함수(IEC 61966-2-1)로 변환된 0~1 범위의 리니어(Linear) RGB 값을 배열로 반환합니다.
+     * [EN] Returns linear RGB values in the 0~1 range converted with the standard sRGB transfer function (IEC 61966-2-1) as an array.
+     *
+     * [KO] 핫패스 힙 할당을 막기 위해 내부 버퍼를 재사용하여 반환합니다. 값을 보관해야 하면 복사해서 사용하십시오.
+     * [EN] Returns a reused internal buffer to avoid hot-path heap allocation. Copy the values if they need to be retained.
      *
      * @returns
-     * [KO] 감마 보정된 선형 정규화 RGB 배열
-     * [EN] Gamma-corrected linear normalized RGB array
+     * [KO] 리니어 정규화 RGB 배열
+     * [EN] Linear normalized RGB array
      */
     get rgbNormalLinear(): number[];
     /**

@@ -1,16 +1,14 @@
 import RedGPUObject from "../base/RedGPUObject";
-import View3D from "../display/view/View3D";
+import type View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
-import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
-import SSAO from "./effects/ssao/SSAO";
-import SSR from "./effects/ssr/SSR";
-import AutoExposure from "../camera/core/autoExposure/AutoExposure";
+import ASingleComputePassPostEffect from "./core/ASingleComputePassPostEffect";
+import ASingleRenderPassPostEffect from "./core/ASingleRenderPassPostEffect";
 import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import { IPostEffectResult } from "./core/types";
 /**
- * [KO] `View3D`의 HDR/LDR 후처리 파이프라인(SSAO, SSR, TAA, ToneMapping, FXAA 및 사용자 이펙트)을 통합 관리하는 클래스입니다.
- * [EN] Class that manages the HDR/LDR post-processing pipeline (SSAO, SSR, TAA, ToneMapping, FXAA, and user effects) of a `View3D`.
+ * [KO] `View3D`의 후처리 파이프라인과 사용자 후처리 이펙트 리스트를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages the post-processing pipeline and user post-processing effect list of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -39,8 +37,8 @@ declare class PostEffectManager extends RedGPUObject {
      */
     constructor(view: View3D);
     /**
-     * [KO] 현재 MSAA 상태에 맞는 공유 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
-     * [EN] Returns the shared G-Buffer bind group layout matching the current MSAA state.
+     * [KO] 공유 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
+     * [EN] Returns the shared G-Buffer bind group layout.
      *
      * @returns
      * [KO] G-Buffer `GPUBindGroupLayout`
@@ -66,55 +64,6 @@ declare class PostEffectManager extends RedGPUObject {
      */
     get texturePool(): PostEffectTexturePool;
     /**
-     * [KO] 자동 노출(`AutoExposure`) 인스턴스를 반환합니다.
-     * [EN] Returns the `AutoExposure` instance.
-     *
-     * @returns
-     * [KO] `AutoExposure` 인스턴스
-     * [EN] `AutoExposure` instance
-     */
-    get autoExposure(): AutoExposure;
-    /**
-     * [KO] SSAO(Screen Space Ambient Occlusion) 활성화 여부입니다.
-     * [EN] Whether SSAO (Screen Space Ambient Occlusion) is enabled.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] SSAO 활성화 여부
-     * [EN] Whether SSAO is enabled
-     */
-    get useSSAO(): boolean;
-    set useSSAO(value: boolean);
-    /**
-     * [KO] SSAO 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the SSAO effect instance.
-     *
-     * @returns
-     * [KO] `SSAO` 인스턴스
-     * [EN] `SSAO` instance
-     */
-    get ssao(): SSAO;
-    /**
-     * [KO] SSR(Screen Space Reflection) 활성화 여부입니다.
-     * [EN] Whether SSR (Screen Space Reflection) is enabled.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] SSR 활성화 여부
-     * [EN] Whether SSR is enabled
-     */
-    get useSSR(): boolean;
-    set useSSR(value: boolean);
-    /**
-     * [KO] SSR 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the SSR effect instance.
-     *
-     * @returns
-     * [KO] `SSR` 인스턴스
-     * [EN] `SSR` instance
-     */
-    get ssr(): SSR;
-    /**
      * [KO] 후처리 시스템 공용 유니폼 버퍼를 반환합니다.
      * [EN] Returns the post-effect system common uniform buffer.
      *
@@ -137,10 +86,10 @@ declare class PostEffectManager extends RedGPUObject {
      * [EN] Returns the array of registered user post-processing effects.
      *
      * @returns
-     * [KO] 후처리 이펙트 배열 (`Array<ASinglePassPostEffect | AMultiPassPostEffect>`)
-     * [EN] Array of post-processing effects (`Array<ASinglePassPostEffect | AMultiPassPostEffect>`)
+     * [KO] 후처리 이펙트 배열 (`Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
+     * [EN] Array of post-processing effects (`Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
      */
-    get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect>;
+    get effectList(): Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>;
     /**
      * [KO] 텍스처 풀과 등록된 이펙트들의 총 비디오 메모리 사용량(바이트)을 반환합니다.
      * [EN] Returns the total video memory usage (in bytes) of the texture pool and registered effects.
@@ -168,7 +117,7 @@ declare class PostEffectManager extends RedGPUObject {
      * [KO] 추가할 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance to add
      */
-    addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
+    addEffect(v: ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect): void;
     /**
      * [KO] 지정된 인덱스의 후처리 이펙트를 반환합니다.
      * [EN] Returns the post-processing effect at the specified index.
@@ -180,7 +129,7 @@ declare class PostEffectManager extends RedGPUObject {
      * [KO] 해당 인덱스의 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance at the specified index
      */
-    getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect;
+    getEffectAt(index: number): ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect;
     /**
      * [KO] 특정 후처리 이펙트를 파이프라인에서 제거하고 리소스를 정리합니다.
      * [EN] Removes a specific post-processing effect from the pipeline and clears its resources.
@@ -189,7 +138,7 @@ declare class PostEffectManager extends RedGPUObject {
      * [KO] 제거할 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance to remove
      */
-    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
+    removeEffect(v: ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect): void;
     /**
      * [KO] 지정된 인덱스의 후처리 이펙트를 파이프라인에서 제거하고 리소스를 정리합니다.
      * [EN] Removes the post-processing effect at the specified index from the pipeline and clears its resources.

@@ -17,7 +17,7 @@ import ResourceBase from "../core/ResourceBase";
  * });
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/texture/bitmapTextureSampler/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/texture/bitmapTextureSampler/"></iframe>
  *
  * @see [Sampler Combination example](/RedGPU/examples/3d/texture/samplerCombination/)
  * @see [Sampler AddressMode example](/RedGPU/examples/3d/texture/samplerAddressMode/)

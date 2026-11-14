@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
+import ASingleComputePassPostEffect from "../../core/ASingleComputePassPostEffect";
 /**
  * [KO] 3x3 컨볼루션 커널을 사용하여 픽셀을 주변 픽셀과 합성하는 후처리 이펙트입니다.
  * [EN] Post-processing effect that combines pixels with surrounding pixels using a 3x3 convolution kernel.
@@ -11,12 +11,12 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/convolution/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/convolution/"></iframe>
  *
  * @see [Convolution example](/RedGPU/examples/postEffect/convolution/)
  * @category PostEffect
  */
-declare class Convolution extends ASinglePassPostEffect {
+declare class Convolution extends ASingleComputePassPostEffect {
     #private;
     /**
      * [KO] 원본 유지 기본 커널

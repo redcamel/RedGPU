@@ -115,11 +115,14 @@ declare class PostEffectTexturePool extends RedGPUObject {
      * @param format -
      * [KO] 텍스처 포맷
      * [EN] Texture format
+     * @param useStorage -
+     * [KO] `GPUTextureUsage.STORAGE_BINDING` 포함 여부 (`false` 설정 시 렌더 패스 타겟의 하드웨어 DCC 압축 유지)
+     * [EN] Whether to include `GPUTextureUsage.STORAGE_BINDING` (set to `false` to preserve hardware DCC compression on render pass targets)
      * @returns
      * [KO] 할당된 텍스처 및 뷰 결과 객체 (`IPostEffectResult`)
      * [EN] Allocated texture and view result object (`IPostEffectResult`)
      */
-    allocResult(width: number, height: number, format?: GPUTextureFormat): IPostEffectResult;
+    allocResult(width: number, height: number, format?: GPUTextureFormat, useStorage?: boolean): IPostEffectResult;
     /**
      * [KO] 사용이 끝난 특정 텍스처를 풀로 반환합니다.
      * [EN] Releases a specific texture back to the pool.

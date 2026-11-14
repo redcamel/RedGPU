@@ -19,85 +19,84 @@
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/">
     <meta property="twitter:title" content="UV Transform - RedGPU WebGPU Example">
-    <meta property="twitter:description"
-          content="Implements texture scrolling and tiling via material UV offset and scale.">
+    <meta property="twitter:description" content="Implements texture scrolling and tiling via material UV offset and scale.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "UV Transform",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Implements texture scrolling and tiling via material UV offset and scale.",
-                "url": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "3D"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Material & Texture"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Material"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 6,
-                        "name": "UV Transform",
-                        "item": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "UV Transform",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Implements texture scrolling and tiling via material UV offset and scale.",
+      "url": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "3D"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Material & Texture"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Material"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "UV Transform",
+          "item": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>3D &gt; Material &amp; Texture &gt; Material</p>
+        <p>3D Material &amp; Texture Material</p>
         <h1>UV Transform - RedGPU WebGPU Example</h1>
         <p>Implements texture scrolling and tiling via material UV offset and scale.</p>
         <p lang="ko">재질의 UV 오프셋과 스케일을 조절해 텍스처 흐름 및 타일링을 구현합니다.</p>
@@ -106,13 +105,12 @@
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/3d/material/colorMaterial/">ColorMaterial</a></li>
-                <li><a href="/RedGPU/examples/3d/material/bitmapMaterial/">BitmapMaterial</a></li>
-                <li><a href="/RedGPU/examples/3d/material/phongMaterial/">PhongMaterial</a></li>
-                <li><a href="/RedGPU/examples/3d/material/phongMaterialTextures/">PhongMaterial Texture Combination</a>
-                </li>
-                <li><a href="/RedGPU/examples/3d/material/opacity/">Material Opacity</a></li>
-                <li><a href="/RedGPU/examples/3d/material/fragmentVariantTest/">Fragment Variant Test</a></li>
+                    <li><a href="/RedGPU/examples/3d/material/colorMaterial/">ColorMaterial</a></li>
+                    <li><a href="/RedGPU/examples/3d/material/bitmapMaterial/">BitmapMaterial</a></li>
+                    <li><a href="/RedGPU/examples/3d/material/phongMaterial/">PhongMaterial</a></li>
+                    <li><a href="/RedGPU/examples/3d/material/phongMaterialTextures/">PhongMaterial Texture Combination</a></li>
+                    <li><a href="/RedGPU/examples/3d/material/opacity/">Material Opacity</a></li>
+                    <li><a href="/RedGPU/examples/3d/material/fragmentVariantTest/">Fragment Variant Test</a></li>
             </ul>
         </nav>
     </article>

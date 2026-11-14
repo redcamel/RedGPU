@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
+import { IPostEffectResult } from "../../core/types";
 /**
  * [KO] X축과 Y축 방향을 두 번의 패스로 나누어 처리(Separable Blur)하는 가우시안 블러 후처리 이펙트입니다.
  * [EN] Gaussian Blur post-processing effect that processes X and Y axis blurs in two separate passes (Separable Blur).
@@ -11,7 +13,7 @@ import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/"></iframe>
  *
  * @see [GaussianBlur example](/RedGPU/examples/postEffect/blur/gaussianBlur/)
  * @category Blur
@@ -30,8 +32,13 @@ declare class GaussianBlur extends AMultiPassPostEffect {
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
+     * @param options -
+     * [KO] 가우시안 블러 생성 옵션. 기본값은 LDR(`isLdr: true`, `rgba8unorm`)이며, HDR 빌트인 패스(`LensFlare` 등) 내부에서 사용될 경우를 대비해 `isLdr: false`(`rgba16float`) 설정을 열어둡니다.
+     * [EN] Gaussian blur creation options. Defaults to LDR (`isLdr: true`, `rgba8unorm`), and exposes `isLdr: false` (`rgba16float`) in case it is used inside an HDR built-in pass (e.g., `LensFlare`).
      */
-    constructor(redGPUContext: RedGPUContext);
+    constructor(redGPUContext: RedGPUContext, options?: {
+        isLdr?: boolean;
+    });
     /**
      * [KO] 블러 강도(단위: 픽셀, 0 ~ 512)를 반환하거나 설정합니다.
      * [EN] Returns or sets the blur strength (unit: pixels, 0 ~ 512).
@@ -43,5 +50,26 @@ declare class GaussianBlur extends AMultiPassPostEffect {
      */
     get size(): number;
     set size(value: number);
+    /**
+     * [KO] 가로/세로 2-Pass 가우시안 블러 효과를 렌더링합니다.
+     * [EN] Renders the horizontal/vertical 2-pass Gaussian blur effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 가우시안 블러가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with Gaussian blur applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }
 export default GaussianBlur;

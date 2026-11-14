@@ -223,6 +223,7 @@ declare class RenderViewStateData {
         bundleListParticleLayer: GPURenderBundle[];
         bundleListRender2PathLayer: GPURenderBundle[];
         bundleListBasicList: GPURenderBundle[];
+        bundleListDebuggerLayer: GPURenderBundle[];
     };
     /**
      * [KO] 프레임 내 처리할 스킨 메시 목록

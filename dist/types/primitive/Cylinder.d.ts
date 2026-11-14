@@ -8,7 +8,7 @@ import Primitive from "./core/Primitive";
  * ```typescript
  * const cylinder = new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 2, 32, 1);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/cylinder/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/cylinder/"></iframe>
  *
  * @see [Cylinder example](/RedGPU/examples/3d/primitive/cylinder/)
  * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)

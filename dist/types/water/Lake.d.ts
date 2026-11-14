@@ -13,7 +13,7 @@ import RenderViewStateData from "../display/view/core/RenderViewStateData";
  * scene.addWater(lake);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/water/lake/basicLake/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/water/lake/basicLake/"></iframe>
  *
  * @see [Basic lake example](/RedGPU/examples/3d/water/lake/basicLake/)
  * @see [Lake material example](/RedGPU/examples/3d/water/lake/lakeMaterial/)

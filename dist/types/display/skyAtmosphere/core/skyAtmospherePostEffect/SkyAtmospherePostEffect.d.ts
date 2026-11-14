@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../../postEffect/core/ASinglePassPostEffect";
+import ASingleRenderPassPostEffect from "../../../../postEffect/core/ASingleRenderPassPostEffect";
 import { IPostEffectResult } from "../../../../postEffect/core/types";
 import SkyAtmosphere from "../../SkyAtmosphere";
 /**
@@ -14,7 +14,7 @@ import SkyAtmosphere from "../../SkyAtmosphere";
  *
  * @category SkyAtmosphere
  */
-declare class SkyAtmospherePostEffect extends ASinglePassPostEffect {
+declare class SkyAtmospherePostEffect extends ASingleRenderPassPostEffect {
     #private;
     /**
      * [KO] SkyAtmospherePostEffect 인스턴스를 생성합니다.

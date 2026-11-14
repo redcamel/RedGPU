@@ -43,8 +43,8 @@ declare abstract class ACamera extends BaseObject {
     get aperture(): number;
     set aperture(value: number);
     /**
-     * [KO] 초(second) 단위의 셔터 속도를 가져오거나 설정합니다. (양수, 기본값: `1 / 3200`)
-     * [EN] Gets or sets the shutter speed in seconds. (Positive number, Default: `1 / 3200`)
+     * [KO] 초(second) 단위의 셔터 속도를 가져오거나 설정합니다. (양수, 기본값: `1 / 125`)
+     * [EN] Gets or sets the shutter speed in seconds. (Positive number, Default: `1 / 125`)
      *
      * @returns
      * [KO] 셔터 속도 (초)

@@ -19,98 +19,94 @@
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/">
     <meta property="twitter:title" content="Morph target load Test - RedGPU WebGPU Example">
-    <meta property="twitter:description"
-          content="Benchmarks real-time morph target performance across hundreds of models.">
+    <meta property="twitter:description" content="Benchmarks real-time morph target performance across hundreds of models.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "Morph target load Test",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Benchmarks real-time morph target performance across hundreds of models.",
-                "url": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "GLTF"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Animation"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Animation Performance Test"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 6,
-                        "name": "Morph target load Test",
-                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Morph target load Test",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Benchmarks real-time morph target performance across hundreds of models.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Animation"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Animation Performance Test"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Morph target load Test",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>GLTF &gt; Animation &gt; Animation Performance Test</p>
+        <p>GLTF Animation Animation Performance Test</p>
         <h1>Morph target load Test - RedGPU WebGPU Example</h1>
         <p>Benchmarks real-time morph target performance across hundreds of models.</p>
         <p lang="ko">수백 개의 모프 타겟 모델을 동시 렌더링해 모프 스키닝 성능을 측정합니다.</p>
-        <img src="thumb.webp" alt="Morph target load Test - RedGPU WebGPU Example" width="600" height="450"
-             loading="eager">
+        <img src="thumb.webp" alt="Morph target load Test - RedGPU WebGPU Example" width="600" height="450" loading="eager">
         <nav aria-label="Example Navigation">
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/gltf/animation/performance/mediumLoadSkinning/">Medium load Skinning</a>
-                </li>
-                <li><a href="/RedGPU/examples/gltf/animation/performance/highVertexLoadSkinning/">High vertex load
-                    Skinning</a></li>
+                    <li><a href="/RedGPU/examples/gltf/animation/performance/mediumLoadSkinning/">Medium load Skinning</a></li>
+                    <li><a href="/RedGPU/examples/gltf/animation/performance/highVertexLoadSkinning/">High vertex load Skinning</a></li>
             </ul>
         </nav>
     </article>

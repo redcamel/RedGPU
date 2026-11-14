@@ -19,80 +19,79 @@
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/physics/heightField/">
     <meta property="twitter:title" content="HeightField - RedGPU WebGPU Example">
-    <meta property="twitter:description"
-          content="Implements terrain surface physics collisions using HeightField data.">
+    <meta property="twitter:description" content="Implements terrain surface physics collisions using HeightField data.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/physics/heightField/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "HeightField",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Implements terrain surface physics collisions using HeightField data.",
-                "url": "https://redcamel.github.io/RedGPU/examples/physics/heightField/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/heightField/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "Physics"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Fundamentals"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "HeightField",
-                        "item": "https://redcamel.github.io/RedGPU/examples/physics/heightField/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "HeightField",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Implements terrain surface physics collisions using HeightField data.",
+      "url": "https://redcamel.github.io/RedGPU/examples/physics/heightField/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/heightField/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Physics"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Fundamentals"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "HeightField",
+          "item": "https://redcamel.github.io/RedGPU/examples/physics/heightField/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>Physics &gt; Fundamentals</p>
+        <p>Physics Fundamentals</p>
         <h1>HeightField - RedGPU WebGPU Example</h1>
         <p>Implements terrain surface physics collisions using HeightField data.</p>
         <p lang="ko">높이맵(HeightField) 데이터를 기반으로 굴곡진 지형의 물리 충돌을 구현합니다.</p>
@@ -101,11 +100,11 @@
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/physics/basic/">Basic Physics</a></li>
-                <li><a href="/RedGPU/examples/physics/shapes/">Shapes &amp; Materials</a></li>
-                <li><a href="/RedGPU/examples/physics/kinematic/">Kinematic Interaction</a></li>
-                <li><a href="/RedGPU/examples/physics/meshCollider/">Mesh Collider</a></li>
-                <li><a href="/RedGPU/examples/physics/gltfPhysics/">GLTF Physics</a></li>
+                    <li><a href="/RedGPU/examples/physics/basic/">Basic Physics</a></li>
+                    <li><a href="/RedGPU/examples/physics/shapes/">Shapes &amp; Materials</a></li>
+                    <li><a href="/RedGPU/examples/physics/kinematic/">Kinematic Interaction</a></li>
+                    <li><a href="/RedGPU/examples/physics/meshCollider/">Mesh Collider</a></li>
+                    <li><a href="/RedGPU/examples/physics/gltfPhysics/">GLTF Physics</a></li>
             </ul>
         </nav>
     </article>

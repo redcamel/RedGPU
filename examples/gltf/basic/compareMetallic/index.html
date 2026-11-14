@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compare Metallic - RedGPU WebGPU Example</title>
     <meta name="description" content="Compares Metallic rendering results.">
-    <meta name="keywords"
-          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, basic, compareMetallic, Compare Metallic">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, basic, compareMetallic, Compare Metallic">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/basic/compareMetallic/">
 
     <!-- Open Graph / Facebook -->
@@ -26,73 +25,73 @@
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "Compare Metallic",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Compares Metallic rendering results.",
-                "url": "https://redcamel.github.io/RedGPU/examples/gltf/basic/compareMetallic/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/basic/compareMetallic/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "GLTF"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Basic Compare"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Compare Metallic",
-                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/basic/compareMetallic/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Compare Metallic",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Compares Metallic rendering results.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/basic/compareMetallic/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/basic/compareMetallic/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Basic Compare"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Compare Metallic",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/basic/compareMetallic/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>GLTF &gt; Basic Compare</p>
+        <p>GLTF Basic Compare</p>
         <h1>Compare Metallic - RedGPU WebGPU Example</h1>
         <p>Compares Metallic rendering results.</p>
         <p lang="ko">금속성(Metallic) 렌더링 결과를 비교합니다.</p>
@@ -101,11 +100,11 @@
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/compareBaseColor/">Compare Base Color</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/compareAlphaCoverage/">Compare Alpha Coverage</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/compareNormal/">Compare Normal</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/compareRoughness/">Compare Roughness</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/compareAmbientOcclusion/">Compare Ambient Occlusion</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/compareBaseColor/">Compare Base Color</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/compareAlphaCoverage/">Compare Alpha Coverage</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/compareNormal/">Compare Normal</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/compareRoughness/">Compare Roughness</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/compareAmbientOcclusion/">Compare Ambient Occlusion</a></li>
             </ul>
         </nav>
     </article>

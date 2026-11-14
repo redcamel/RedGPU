@@ -19,97 +19,95 @@
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/">
     <meta property="twitter:title" content="IsometricController - RedGPU WebGPU Example">
-    <meta property="twitter:description"
-          content="Orthographic isometric camera controller with target tracking and zoom.">
+    <meta property="twitter:description" content="Orthographic isometric camera controller with target tracking and zoom.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "IsometricController",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Orthographic isometric camera controller with target tracking and zoom.",
-                "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "3D"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Core & Setup"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Camera Controller"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 6,
-                        "name": "IsometricController",
-                        "item": "https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "IsometricController",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Orthographic isometric camera controller with target tracking and zoom.",
+      "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "3D"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Core & Setup"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Camera Controller"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "IsometricController",
+          "item": "https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>3D &gt; Core &amp; Setup &gt; Camera Controller</p>
+        <p>3D Core &amp; Setup Camera Controller</p>
         <h1>IsometricController - RedGPU WebGPU Example</h1>
         <p>Orthographic isometric camera controller with target tracking and zoom.</p>
         <p lang="ko">직교 투영 기반의 타겟 추적 및 줌을 지원하는 아이소메트릭 컨트롤러입니다.</p>
-        <img src="thumb.webp" alt="IsometricController - RedGPU WebGPU Example" width="600" height="450"
-             loading="eager">
+        <img src="thumb.webp" alt="IsometricController - RedGPU WebGPU Example" width="600" height="450" loading="eager">
         <nav aria-label="Example Navigation">
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/3d/controller/freeController/">FreeController</a></li>
-                <li><a href="/RedGPU/examples/3d/controller/orbitController/">OrbitController</a></li>
-                <li><a href="/RedGPU/examples/3d/controller/followController/">FollowController</a></li>
+                    <li><a href="/RedGPU/examples/3d/controller/freeController/">FreeController</a></li>
+                    <li><a href="/RedGPU/examples/3d/controller/orbitController/">OrbitController</a></li>
+                    <li><a href="/RedGPU/examples/3d/controller/followController/">FollowController</a></li>
             </ul>
         </nav>
     </article>

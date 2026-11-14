@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import { IPostEffectResult } from "../../../core/types";
 interface ColorBalance {
     /**
      * [KO] 하이라이트 영역의 노랑-파랑 밸런스 (-100 ~ 100)
@@ -75,12 +77,12 @@ interface ColorBalance {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/colorBalance/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/colorBalance/"></iframe>
  *
  * @see [ColorBalance example](/RedGPU/examples/postEffect/adjustments/colorBalance/)
  * @category Adjustments
  */
-declare class ColorBalance extends ASinglePassPostEffect {
+declare class ColorBalance extends ASingleComputePassPostEffect {
     /**
      * [KO] ColorBalance 인스턴스를 생성합니다.
      * [EN] Creates a ColorBalance instance.
@@ -95,5 +97,26 @@ declare class ColorBalance extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
+    /**
+     * [KO] 색상 균형(Color Balance) 조절 효과를 렌더링합니다.
+     * [EN] Renders the color balance adjustment effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 색상 균형이 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with color balance applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }
 export default ColorBalance;

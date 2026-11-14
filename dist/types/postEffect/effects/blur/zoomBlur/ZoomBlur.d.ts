@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import { IPostEffectResult } from "../../../core/types";
 interface ZoomBlur {
     /**
      * [KO] 블러 강도 (0 ~ 100)
@@ -40,12 +42,12 @@ interface ZoomBlur {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/"></iframe>
  *
  * @see [ZoomBlur example](/RedGPU/examples/postEffect/blur/zoomBlur/)
  * @category Blur
  */
-declare class ZoomBlur extends ASinglePassPostEffect {
+declare class ZoomBlur extends ASingleComputePassPostEffect {
     /**
      * [KO] ZoomBlur 인스턴스를 생성합니다.
      * [EN] Creates a ZoomBlur instance.
@@ -60,5 +62,26 @@ declare class ZoomBlur extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
+    /**
+     * [KO] 줌 블러(Zoom Blur) 효과를 렌더링합니다.
+     * [EN] Renders the zoom blur effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 줌 블러가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with zoom blur applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }
 export default ZoomBlur;

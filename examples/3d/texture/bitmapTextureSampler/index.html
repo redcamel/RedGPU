@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BitmapTexture &amp; Sampler - RedGPU WebGPU Example</title>
     <meta name="description" content="A sample that demonstrates texture sampler options and mipmap support.">
-    <meta name="keywords"
-          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, texture, bitmapTextureSampler, BitmapTexture &amp; Sampler">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, texture, bitmapTextureSampler, BitmapTexture &amp; Sampler">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/texture/bitmapTextureSampler/">
 
     <!-- Open Graph / Facebook -->
@@ -26,90 +25,89 @@
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "BitmapTexture & Sampler",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "A sample that demonstrates texture sampler options and mipmap support.",
-                "url": "https://redcamel.github.io/RedGPU/examples/3d/texture/bitmapTextureSampler/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/texture/bitmapTextureSampler/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "3D"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Material & Texture"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Texture & Sampler"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 6,
-                        "name": "BitmapTexture & Sampler",
-                        "item": "https://redcamel.github.io/RedGPU/examples/3d/texture/bitmapTextureSampler/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "BitmapTexture & Sampler",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "A sample that demonstrates texture sampler options and mipmap support.",
+      "url": "https://redcamel.github.io/RedGPU/examples/3d/texture/bitmapTextureSampler/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/texture/bitmapTextureSampler/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "3D"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Material & Texture"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Texture & Sampler"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "BitmapTexture & Sampler",
+          "item": "https://redcamel.github.io/RedGPU/examples/3d/texture/bitmapTextureSampler/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>3D &gt; Material &amp; Texture &gt; Texture &amp; Sampler</p>
+        <p>3D Material &amp; Texture Texture &amp; Sampler</p>
         <h1>BitmapTexture &amp; Sampler - RedGPU WebGPU Example</h1>
         <p>A sample that demonstrates texture sampler options and mipmap support.</p>
         <p lang="ko">텍스처 샘플러 옵션과 밉맵 지원을 시연하는 샘플입니다.</p>
-        <img src="thumb.webp" alt="BitmapTexture &amp; Sampler - RedGPU WebGPU Example" width="600" height="450"
-             loading="eager">
+        <img src="thumb.webp" alt="BitmapTexture &amp; Sampler - RedGPU WebGPU Example" width="600" height="450" loading="eager">
         <nav aria-label="Example Navigation">
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/3d/texture/samplerCombination/">Sampler Combination</a></li>
-                <li><a href="/RedGPU/examples/3d/texture/samplerAddressMode/">Sampler AddressMode</a></li>
-                <li><a href="/RedGPU/examples/3d/texture/maxAnisotropy/">Max Anisotropy</a></li>
+                    <li><a href="/RedGPU/examples/3d/texture/samplerCombination/">Sampler Combination</a></li>
+                    <li><a href="/RedGPU/examples/3d/texture/samplerAddressMode/">Sampler AddressMode</a></li>
+                    <li><a href="/RedGPU/examples/3d/texture/maxAnisotropy/">Max Anisotropy</a></li>
             </ul>
         </nav>
     </article>

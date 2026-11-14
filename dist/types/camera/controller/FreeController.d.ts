@@ -71,7 +71,7 @@ type KeyNameMapper = {
  * controller.tilt = -15;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/controller/freeController/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/controller/freeController/"></iframe>
  * @see [FreeController example](/RedGPU/examples/3d/controller/freeController/)
  * @category Controller
  */
