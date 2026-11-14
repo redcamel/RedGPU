@@ -26,31 +26,73 @@
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-        "name": "Emissive Strength Test",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Tests high-intensity emissive representation exceeding 1.0.",
-  "url": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/thumb.webp",
-        "isPartOf": {
-            "@type": "CollectionPage",
-            "name": "RedGPU Examples",
-            "url": "https://redcamel.github.io/RedGPU/examples/"
-        },
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Emissive Strength Test",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Tests high-intensity emissive representation exceeding 1.0.",
+                "url": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "GLTF"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "GLTF Extensions"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "KHR_materials_emissive_strength"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "Emissive Strength Test",
+                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../../dist/index.js?t=1794639759027">
-    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1794639759027">
+    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1794639759027">
-    <script src="index.js?t=1794639759027" type="module"></script>
+    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">

@@ -25,31 +25,73 @@
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "FollowController",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-        "description": "Third-person camera controller that smoothly tracks a target mesh.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/thumb.webp",
-        "isPartOf": {
-            "@type": "CollectionPage",
-            "name": "RedGPU Examples",
-            "url": "https://redcamel.github.io/RedGPU/examples/"
-        },
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "FollowController",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Third-person camera controller that smoothly tracks a target mesh.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Core & Setup"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Camera Controller"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "FollowController",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1794639759027">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794639759027">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794639759027">
-    <script src="index.js?t=1794639759027" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">

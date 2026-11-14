@@ -246,25 +246,70 @@ try {
                     const helperRelPath = path.relative(dirPath, helperPath).replace(/\\/g, '/');
                     const canonicalUrl = (baseUrl + fileRelPath).replace(/\/index\.html$/, '/');
 
-                    // 1. Generate JSON-LD
+                    // 1. Generate JSON-LD (SoftwareApplication + BreadcrumbList)
+                    const crumbSegments = (entry.categoryChain ? entry.categoryChain.split(' > ') : relPath.split('/').slice(0, -1))
+                        .map(s => s.trim())
+                        .filter(Boolean);
+                    if (crumbSegments.length > 0 && crumbSegments[crumbSegments.length - 1] === title) {
+                        crumbSegments.pop();
+                    }
+
+                    const breadcrumbItems = [
+                        {
+                            "@type": "ListItem",
+                            "position": 1,
+                            "name": "RedGPU",
+                            "item": "https://redcamel.github.io/RedGPU/"
+                        },
+                        {
+                            "@type": "ListItem",
+                            "position": 2,
+                            "name": "Examples",
+                            "item": "https://redcamel.github.io/RedGPU/examples/"
+                        }
+                    ];
+
+                    crumbSegments.forEach((seg, idx) => {
+                        breadcrumbItems.push({
+                            "@type": "ListItem",
+                            "position": idx + 3,
+                            "name": seg
+                        });
+                    });
+
+                    breadcrumbItems.push({
+                        "@type": "ListItem",
+                        "position": breadcrumbItems.length + 1,
+                        "name": title,
+                        "item": canonicalUrl
+                    });
+
                     const jsonLd = {
                         "@context": "https://schema.org",
-                        "@type": "SoftwareApplication",
-                        "name": title,
-                        "applicationCategory": "DeveloperApplication",
-                        "operatingSystem": "Web",
-                        "description": entry.descriptionEn.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim(),
-                        "url": canonicalUrl,
-                        "screenshot": socialImage,
-                        "isPartOf": {
-                            "@type": "CollectionPage",
-                            "name": "RedGPU Examples",
-                            "url": "https://redcamel.github.io/RedGPU/examples/"
-                        },
-                        "author": {
-                            "@type": "Person",
-                            "name": "redcamel"
-                        }
+                        "@graph": [
+                            {
+                                "@type": "SoftwareApplication",
+                                "name": title,
+                                "applicationCategory": "DeveloperApplication",
+                                "operatingSystem": "Web",
+                                "description": entry.descriptionEn.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim(),
+                                "url": canonicalUrl,
+                                "screenshot": socialImage,
+                                "isPartOf": {
+                                    "@type": "CollectionPage",
+                                    "name": "RedGPU Examples",
+                                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                                },
+                                "author": {
+                                    "@type": "Person",
+                                    "name": "redcamel"
+                                }
+                            },
+                            {
+                                "@type": "BreadcrumbList",
+                                "itemListElement": breadcrumbItems
+                            }
+                        ]
                     };
 
                     const standardTags = [

@@ -397,12 +397,18 @@ export default withMermaid(defineConfig({
         }],
     ],
     transformHead({pageData}) {
-        const canonicalUrl = `https://redcamel.github.io/RedGPU/manual/${pageData.relativePath}`
-            .replace(/index\.md$/, '')
-            .replace(/\.md$/, '.html');
+        const toPublicUrl = (relPath) =>
+            encodeURI(
+                `https://redcamel.github.io/RedGPU/manual/${relPath}`
+                    .replace(/index\.md$/, '')
+                    .replace(/\.md$/, '.html')
+            );
+
+        const canonicalUrl = toPublicUrl(pageData.relativePath);
         const pageTitle = pageData.title ? `${pageData.title} | RedGPU` : 'RedGPU Documentation';
         const pageDescription = pageData.description || 'RedGPU - WebGPU based 3D Graphics Engine';
-        return [
+
+        const headTags = [
             ['link', {rel: 'canonical', href: canonicalUrl}],
             ['meta', {property: 'og:url', content: canonicalUrl}],
             ['meta', {property: 'og:title', content: pageTitle}],
@@ -410,6 +416,28 @@ export default withMermaid(defineConfig({
             ['meta', {name: 'twitter:title', content: pageTitle}],
             ['meta', {name: 'twitter:description', content: pageDescription}],
         ];
+
+        const relPath = (pageData.relativePath || '').replace(/\\/g, '/');
+        const langMatch = relPath.match(/^(ko|en)\/(.+)$/);
+        if (langMatch) {
+            const subPath = langMatch[2];
+            const koRelPath = `ko/${subPath}`;
+            const enRelPath = `en/${subPath}`;
+            const koFullPath = path.resolve(__dirname, '..', koRelPath);
+            const enFullPath = path.resolve(__dirname, '..', enRelPath);
+
+            if (fs.existsSync(koFullPath) && fs.existsSync(enFullPath)) {
+                const koUrl = toPublicUrl(koRelPath);
+                const enUrl = toPublicUrl(enRelPath);
+                headTags.push(
+                    ['link', {rel: 'alternate', hreflang: 'ko', href: koUrl}],
+                    ['link', {rel: 'alternate', hreflang: 'en', href: enUrl}],
+                    ['link', {rel: 'alternate', hreflang: 'x-default', href: enUrl}]
+                );
+            }
+        }
+
+        return headTags;
     },
 
     // 다국어 로케일 설정 (자동 생성)
@@ -591,6 +619,83 @@ export default withMermaid(defineConfig({
         if (pageData.relativePath.includes('api/RedGPU-API/')) {
             // 2. 해당 페이지의 frontmatter에 'api-page' 클래스 추가
             pageData.frontmatter.pageClass = 'api-page-layout';
+        }
+
+        // 3. frontmatter에 description이 없는 경우 마크다운 본문 첫 문단에서 자동 추출
+        if (!pageData.description && !pageData.frontmatter?.description && pageData.relativePath) {
+            try {
+                const mdPath = path.resolve(__dirname, '..', pageData.relativePath);
+                if (fs.existsSync(mdPath)) {
+                    let raw = fs.readFileSync(mdPath, 'utf8');
+                    // YAML frontmatter 제거
+                    raw = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+                    // <script>, <style> 멀티라인 블록 제거
+                    raw = raw.replace(/<script[\s\S]*?<\/script>/gi, '');
+                    raw = raw.replace(/<style[\s\S]*?<\/style>/gi, '');
+                    // 펜스 코드 블록 제거
+                    raw = raw.replace(/```[\s\S]*?```/g, '');
+                    // 첫 번째 H1(# ) 제목 이전의 TypeDoc 브레드크럼 헤더 영역 제거
+                    const h1Match = raw.match(/^#\s+.+$/m);
+                    if (h1Match && h1Match.index !== undefined) {
+                        raw = raw.slice(h1Match.index + h1Match[0].length);
+                    }
+
+                    const lines = raw.split(/\r?\n/);
+                    const paragraphLines = [];
+                    let inContainer = false;
+
+                    for (const line of lines) {
+                        const t = line.trim();
+                        if (!t) {
+                            if (paragraphLines.length > 0) break;
+                            continue;
+                        }
+                        if (t.startsWith(':::')) {
+                            inContainer = !inContainer;
+                            continue;
+                        }
+                        if (
+                            inContainer ||
+                            t.startsWith('#') ||
+                            t.startsWith('>') ||
+                            t.startsWith('|') ||
+                            t.startsWith('---') ||
+                            t.startsWith('***') ||
+                            t.startsWith('<') ||
+                            t.startsWith('![') ||
+                            t.startsWith('- ') ||
+                            t.startsWith('* ') ||
+                            t.startsWith('[**RedGPU API') ||
+                            t.startsWith('[RedGPU API]') ||
+                            /^Defined in:/i.test(t)
+                        ) {
+                            if (paragraphLines.length > 0) break;
+                            continue;
+                        }
+                        paragraphLines.push(t);
+                        if (paragraphLines.join(' ').length >= 140) break;
+                    }
+
+                    if (paragraphLines.length > 0) {
+                        let desc = paragraphLines
+                            .join(' ')
+                            .replace(/<[^>]*>?/gm, ' ')
+                            .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+                            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                            .replace(/[`*_~]/g, '')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+                        if (desc.length > 155) {
+                            desc = desc.slice(0, 152).trimEnd() + '...';
+                        }
+                        if (desc.length >= 10) {
+                            pageData.description = desc;
+                        }
+                    }
+                }
+            } catch (e) {
+                // fallback to default description
+            }
         }
     },
     // Mermaid 설정
