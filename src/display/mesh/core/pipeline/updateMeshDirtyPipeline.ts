@@ -25,7 +25,6 @@ const updateMeshDirtyPipeline = (
     mesh: Mesh,
     renderViewStateData?: RenderViewStateData
 ) => {
-    console.log('updateMeshDirtyPipeline')
     const {material, gpuRenderInfo, redGPUContext} = mesh
     const {resourceManager} = redGPUContext
     mesh.dirtyTransform = true

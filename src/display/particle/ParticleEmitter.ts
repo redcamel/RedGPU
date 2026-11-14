@@ -905,7 +905,7 @@ class ParticleEmitter extends Mesh {
         this.#simParamBuffer = gpuDevice.createBuffer(bufferDescriptor);
         gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
         this.#setParticleData()
-        console.log('\t\tthis.depthStencilState', this.depthStencilState)
+
         this.depthStencilState.depthWriteEnabled = false
     }
 
@@ -1056,7 +1056,7 @@ class ParticleEmitter extends Mesh {
         let shaderModuleDescriptor = {
             code: computeSource,
         };
-        console.log('shaderModuleDescriptor', shaderModuleDescriptor);
+
         let computeModule = redGPUContext.resourceManager.createGPUShaderModule('PARTICLE_EMITTER_MODULE', shaderModuleDescriptor);
         const computeBindGroupLayoutEntries: any = [
             {

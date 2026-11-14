@@ -3,7 +3,7 @@ import {GLTF} from "../../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
 import parseGLTF from "../parseGLTF";
 import formatBytes from "../../../../utils/formatBytes";
-import keepLog from "../../../../utils/keepLog";
+
 
 /**
  * [KO] 캐싱된 GLTF 데이터에서 메쉬 배열을 깊은 복사하여 반환합니다.
@@ -83,7 +83,7 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
             const contentLength = response.headers.get('content-length');
             const totalSize = contentLength ? parseInt(contentLength, 10) : 0;
 
-            keepLog(`전체 사이즈: ${totalSize} bytes`);
+
             const gltfData = await response.json();
             cache.set(loadFilePath, gltfData);
             gltfLoader.loadingProgressInfo.model = {
@@ -95,7 +95,7 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
                 totalSize: formatBytes(totalSize)
             }
             {
-                keepLog(gltfData)
+
                 const buffers = gltfData.buffers
                 const totalBuffers = buffers.length;
                 if (totalBuffers) {

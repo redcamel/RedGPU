@@ -1,4 +1,3 @@
-import keepLog from "../../../../utils/keepLog";
 import calculateTextureByteSize from "../../../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import View3D from "../../View3D";
@@ -387,7 +386,7 @@ class ViewRenderTextureManager extends RedGPUObject {
             (this.#depthResolveRenderPassDescriptor.depthStencilAttachment as any).view = null;
         }
         this.#view = null;
-        console.log("🧹 ViewRenderTextureManager destroy 완료");
+
     }
 
     #update() {
@@ -502,7 +501,7 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     #createGBuffer(type: GBUFFER_TYPE) {
-        keepLog(`새 텍스처 생성 중: ${type}`)
+
 
         let format = GBUFFER_FORMATS[type]?.format || navigator.gpu.getPreferredCanvasFormat();
         let {usage, withResolve, useMipmap} = GBUFFER_FORMATS[type];
@@ -514,7 +513,7 @@ class ViewRenderTextureManager extends RedGPUObject {
 
     #createDepthTexture(type: GBUFFER_INNER_TYPE): void {
         this.#destroyGBuffer(type)
-        keepLog(`새 텍스처 생성 중: ${type}`)
+
         const {useMSAA} = this.antialiasingManager
         const usage = useMSAA
             ? (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING)

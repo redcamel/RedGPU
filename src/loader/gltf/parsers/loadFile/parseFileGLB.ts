@@ -1,4 +1,3 @@
-import keepLog from "../../../../utils/keepLog";
 import getAbsoluteURL from "../../../../utils/file/getAbsoluteURL";
 import getArrayBufferFromSrc from "../../core/getArrayBufferFromSrc";
 import {GLTF} from "../../GLTF";
@@ -39,7 +38,7 @@ const BINPACKER_CHUNK_TYPE_BINARY = 0x004e4942;
  * @category Loader
  */
 const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
-    console.log('GLB Model parsing has start.');
+
     const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName)
     const {cache, pending} = gltfLoader.redGPUContext.resourceManager.gltfCacheManager.glbCache;
 
@@ -58,7 +57,7 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
         }
     }
     if (cache.has(loadFilePath)) {
-        keepLog('GLB Model parsing has cache', loadFilePath);
+
         progress()
         await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress);
         return;
@@ -75,12 +74,12 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
             loadFilePath,
             (buffer) => {
                 cache.set(loadFilePath, buffer);
-                keepLog('GLB Model parsing set cache', loadFilePath);
+
                 pending.delete(loadFilePath);
                 resolve(buffer);
             },
             (error) => {
-                keepLog('GLB Model parsing error', error);
+                console.error('GLB Model parsing error', error);
                 pending.delete(loadFilePath);
                 reject(error);
             },
@@ -96,7 +95,7 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
         const buffer = await promise;
         await parseArrayBuffer(gltfLoader, buffer, callBack, onProgress);
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 }
 /**

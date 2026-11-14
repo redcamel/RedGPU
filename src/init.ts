@@ -94,7 +94,6 @@ const init = async (
         if (!adapter) {
             throw new Error("Failed to request WebGPU adapter. Check options or browser support.");
         }
-        keepLog('PASS adapter', adapter);
 
         const gpuDeviceDescriptor: GPUDeviceDescriptor = {
             requiredFeatures: getRequiredFeature(adapter),
@@ -104,7 +103,6 @@ const init = async (
         if (!device) {
             throw new Error("Failed to request WebGPU device.");
         }
-        keepLog('PASS device', device);
 
         const context = canvas.getContext('webgpu');
         if (!context) {

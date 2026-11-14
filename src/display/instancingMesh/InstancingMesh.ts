@@ -350,7 +350,7 @@ class InstancingMesh extends Mesh {
         });
         this.#instanceChildren.length = 0;
 
-        console.log(`🧹 InstancingMesh destroy 완료: ${this.name || '무명'}`);
+
     }
 
     #updateTransformMatrix(): void {

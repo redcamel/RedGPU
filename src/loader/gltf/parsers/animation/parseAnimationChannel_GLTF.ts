@@ -53,7 +53,7 @@ const parseAnimationChannel_GLTF = (
         if (gltfLoader.parsingResult.groups[channelTargetDataNodeGlTfId]) {
             tGroup = gltfLoader.parsingResult.groups[channelTargetDataNodeGlTfId];
             tMesh = tGroup;
-        } else return console.log('여기로 오는경우가 있는건가2');
+        } else return;
     }
     if (
         channelTargetDataPath == 'scale'
@@ -71,7 +71,7 @@ const parseAnimationChannel_GLTF = (
         )
         parsedSingleClip.tracks.push(aniTrack);
     } else {
-        console.log('파싱할수없는 데이터', channelTargetDataPath);
+        console.warn('파싱할수없는 데이터', channelTargetDataPath);
     }
     if (aniTrack) {
         const {timeAnimationInfo} = aniTrack

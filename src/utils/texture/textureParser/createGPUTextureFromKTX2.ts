@@ -1,6 +1,6 @@
 import {KTX2Container, read} from 'ktx-parse';
 import {decompress as decompressZstd} from 'fzstd';
-import keepLog from "../../keepLog";
+
 
 const BASIS_JS_CDN_URL = 'https://unpkg.com/three@latest/examples/jsm/libs/basis/basis_transcoder.js';
 const BASIS_WASM_CDN_URL = 'https://unpkg.com/three@latest/examples/jsm/libs/basis/basis_transcoder.wasm';
@@ -181,7 +181,6 @@ function detectIsLegacyKTX2(container: KTX2Container, metadata: KTX2Metadata): {
 
     if (metadata.writer) {
         const ver = parseWriterVersion(metadata.writer);
-        keepLog(ver)
         if (ver) {
             if ((ver.name === 'toktx' || ver.name === 'libktx') && (ver.major < 4 || (ver.major === 4 && ver.minor === 0))) {
                 reasons.push(`구형 인코더 (${ver.name} ${ver.major} ${ver.minor} < v4.1)`);
@@ -542,14 +541,6 @@ export async function createGPUTextureFromKTX2({
                 basisTargetFormatEnum = BASIS_FORMAT.RGBA32;
             }
         }
-
-        console.log(`[KTX2 Transcode Diagnosis] ${label ?? 'unknown'}`, {
-            isUASTC, isHDR, isSRGB, hasAlpha,
-            hasBC, hasASTC, hasETC2,
-            format, basisTargetFormatEnum,
-            colorModel,
-            transferFunction: dfdList?.[0]?.transferFunction,
-        });
 
         isBasisTranscoded = true;
     } else {

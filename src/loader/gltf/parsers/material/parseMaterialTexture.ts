@@ -94,7 +94,6 @@ export default parseMaterialTexture
  */
 const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId: GlTfId) {
     if (!scenesData.images[sourceGlTfId]) {
-        console.log('없어', scenesData.images, sourceGlTfId)
         return null
     }
     const {uri} = scenesData.images[sourceGlTfId]

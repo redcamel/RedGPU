@@ -472,7 +472,6 @@ class DrawDebuggerGrid extends BaseObject {
         this.#renderBundle = null;
         this.#prevSystemUniformGpuBuffer = null;
         this.#renderBundleCache = new WeakMap();
-        console.log("🧹 DrawDebuggerGrid destroy 완료");
     }
 
     #getOrCreateRenderBundle(redGPUContext: RedGPUContext, systemUniformBuffer: UniformBuffer): GPURenderBundle {

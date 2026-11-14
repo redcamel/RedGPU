@@ -73,7 +73,7 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
             }
             break;
         default :
-            console.log('알수없는 형식 엑세서 타입', type);
+            console.warn('알수없는 형식 엑세서 타입', type);
             break;
     }
     parsedSkinInfo.inverseBindMatrices = []

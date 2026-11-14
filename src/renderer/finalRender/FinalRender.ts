@@ -134,7 +134,7 @@ class FinalRender {
         this.#currentRedGPUContext = null;
         this.#currentRenderPassDescriptorList = null;
 
-        console.log('✅ FinalRender 인스턴스 자원 해제 완료');
+
     }
 
     /**

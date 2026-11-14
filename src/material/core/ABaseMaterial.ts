@@ -377,7 +377,7 @@ abstract class ABaseMaterial extends ResourceBase {
             const info = this.#TEXTURE_STRUCT[k]
             const {binding, name, group, type} = info
             const {name: textureType} = type
-            console.log(this, name, this[name])
+
             let resource
             if (textureType === 'texture_cube') resource = resourceManager.getGPUResourceCubeTextureView(this[name])
             else if (textureType === 'texture_2d_array') {
@@ -538,7 +538,7 @@ abstract class ABaseMaterial extends ResourceBase {
         }
         this.#TEXTURE_STRUCT = null;
         this.#SAMPLER_STRUCT = null;
-        console.log(`🧹 ABaseMaterial destroy 완료: ${this.MODULE_NAME}`);
+
     }
 
     #checkVariant() {
@@ -583,12 +583,12 @@ abstract class ABaseMaterial extends ResourceBase {
                 activeFeatures.add(uniformName);
             }
         }
-        console.log('fragmentShaderVariantConditionalBlocks', fragmentShaderVariantConditionalBlocks);
-        console.log('activeFeatures', activeFeatures, this);
+
+
         const variantKey = activeFeatures.size > 0 ?
             Array.from(activeFeatures).sort().join('+') : 'none';
         if (activeFeatures.size) {
-            console.log('선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+
         }
         return variantKey;
     }

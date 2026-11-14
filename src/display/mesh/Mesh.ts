@@ -1822,7 +1822,7 @@ class Mesh extends MeshBase {
         this.#events = {};
         this.#eventsNum = 0;
 
-        console.log(`🧹 Mesh destroy 완료: ${this.name || '무명'}`);
+
     }
 
     #updateLODPipeline = () => {
@@ -2013,7 +2013,7 @@ class Mesh extends MeshBase {
                 targetShaderModule = this.gpuRenderInfo.vertexShaderModule;
             }
         } else {
-            console.log('🚀 버텍스 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
+
         }
         this.gpuRenderInfo.vertexShaderModule = targetShaderModule;
     }
@@ -2026,11 +2026,11 @@ class Mesh extends MeshBase {
                 activeFeatures.add(uniformName);
             }
         }
-        console.log('activeFeatures', activeFeatures, this);
+
         const variantKey = activeFeatures.size > 0 ?
             Array.from(activeFeatures).sort().join('+') : 'none';
         if (activeFeatures.size) {
-            console.log('선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+
         }
         return variantKey;
     }

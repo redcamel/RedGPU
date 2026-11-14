@@ -277,9 +277,9 @@ function bakeFoliageImpostor(
         });
 
     const {width, height, depth} = aabb;
-    console.log(`[bakeFoliageImpostor 🌲 3-Atlas MRT] Baking '${bakeName}': renderUnits=${renderUnits.length}, aabb=[W:${width.toFixed(2)}, H:${height.toFixed(2)}, D:${depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
 
-        const maxCameraDist = maxRadius * 4.0;
+
+    const maxCameraDist = maxRadius * 4.0;
         const renderPassViews = [];
 
         for (let gy = 0; gy < gridSize; gy++) {

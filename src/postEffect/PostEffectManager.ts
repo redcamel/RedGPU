@@ -11,7 +11,7 @@ import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformD
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
-import keepLog from "../utils/keepLog";
+
 
 /**
  * [KO] `View3D`의 후처리 파이프라인과 사용자 후처리 이펙트 리스트를 통합 관리하는 클래스입니다.
@@ -195,7 +195,7 @@ class PostEffectManager extends RedGPUObject {
         this.#postEffectSystemUniformBuffer.destroy()
         this.#postEffectSystemUniformBuffer = null
         this.#postEffectSystemUniformBufferStructInfo = null
-        keepLog(`🧹 ${this.view.name} PostEffectManager destroy 완료`)
+
     }
 
     /**

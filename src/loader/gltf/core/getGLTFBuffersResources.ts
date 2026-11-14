@@ -81,7 +81,7 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
                     checkLoadingStatus()
                 },
                 function (request, error) {
-                    console.log(request, error);
+                    console.error(request, error);
                 }
             );
         }

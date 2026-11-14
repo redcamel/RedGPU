@@ -1,4 +1,4 @@
-import keepLog from "../../../utils/keepLog";
+
 
 /**
  * [KO] HDR 텍스처 데이터를 나타내는 인터페이스입니다.
@@ -108,9 +108,6 @@ class HDRLoader {
      * [EN] Throws Error on HTTP failure or invalid format
      */
     async loadHDRFile(src: string): Promise<HDRData> {
-        if (this.#enableDebugLogs) {
-            keepLog(`HDR 파일 로딩 시작: ${src}`);
-        }
         const response = await fetch(src);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -118,11 +115,6 @@ class HDRLoader {
         const buffer = await response.arrayBuffer();
         const uint8Array = new Uint8Array(buffer);
         const rawHdrData = this.#parseHDRFile(uint8Array, src);
-        keepLog(
-            {
-                ...rawHdrData,
-            }
-        )
         return {
             ...rawHdrData,
         }
@@ -130,9 +122,6 @@ class HDRLoader {
 
     #parseHDRFile(uint8Array: Uint8Array, src: string): HDRData {
         const validation = this.#validateHDRFile(uint8Array);
-        if (this.#enableDebugLogs) {
-            keepLog(`파일 형식: ${validation.format}`);
-        }
         if (!validation.isValid) {
             throw new Error(validation.error || '지원되지 않는 파일 형식입니다');
         }
@@ -141,9 +130,6 @@ class HDRLoader {
                 this.#hexDump(uint8Array.slice(0, 200));
             }
             const hdrData = this.#parseRGBE(uint8Array);
-            if (this.#enableDebugLogs) {
-                this.#debugHDRInfo(hdrData);
-            }
             return hdrData;
         } else if (src.split('?')[0].toLowerCase().endsWith('.exr')) {
             throw new Error('EXR format not supported yet');
@@ -193,9 +179,6 @@ class HDRLoader {
         let fileExposure: number | undefined;
         if (header.EXPOSURE) {
             fileExposure = parseFloat(header.EXPOSURE);
-            if (this.#enableDebugLogs) {
-                keepLog(`파일 노출값: ${fileExposure.toFixed(3)}`);
-            }
         }
         const pixelData = new Float32Array(width * height * 4);
         let pixelIndex = 0;
@@ -287,14 +270,6 @@ class HDRLoader {
             }
         }
         return {data: scanlineData, nextOffset: offset};
-    }
-
-    #debugHDRInfo(hdrData: HDRData): void {
-        if (!this.#enableDebugLogs) return;
-        keepLog(`HDR 정보:`);
-        keepLog(`크기: ${hdrData.width} x ${hdrData.height}`);
-        keepLog(`데이터 길이: ${hdrData.data.length}`);
-        keepLog(`예상 픽셀 수: ${hdrData.width * hdrData.height * 4}`);
     }
 
     #hexDump(data: Uint8Array): void {

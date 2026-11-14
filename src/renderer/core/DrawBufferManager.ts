@@ -2,7 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import formatBytes from "../../utils/formatBytes";
 import RedGPUObject from "../../base/RedGPUObject";
-import keepLog from "../../utils/keepLog";
+
 
 /**
  * [KO] Indirect 드로우 커맨드를 GPU 버퍼 풀에 할당하고 업로드하는 매니저 클래스입니다.
@@ -272,7 +272,7 @@ class DrawBufferManager extends RedGPUObject {
         this.#bufferPool = []
         this.#dataPool = []
         this.#usedBufferIndices.clear()
-        keepLog('🗑️ DrawBufferManager 해제됨')
+
     }
 
     #initializeSystem(): void {
@@ -293,7 +293,7 @@ class DrawBufferManager extends RedGPUObject {
             this.#deviceMaxBufferSize / (DrawBufferManager.#INDEXED_COMMAND_SIZE * 4)
         );
 
-        console.log(`🚀 DrawBufferManager: Device Max Buffer Size: ${formatBytes(this.#deviceMaxBufferSize)}, Max Commands Per Buffer: ${this.#maxCommandsPerBuffer.toLocaleString()}`);
+
     }
 
     #createInitialBuffer(): void {
@@ -310,7 +310,7 @@ class DrawBufferManager extends RedGPUObject {
         const data = new Uint32Array(this.#maxCommandsPerBuffer * DrawBufferManager.#INDEXED_COMMAND_SIZE)
         this.#bufferPool.push(buffer)
         this.#dataPool.push(data)
-        console.log(`📦 새 드로우 버퍼 생성: #${this.#bufferPool.length - 1} (총 ${this.#bufferPool.length}개)`)
+
         return this.#bufferPool.length - 1
     }
 }

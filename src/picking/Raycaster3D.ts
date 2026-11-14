@@ -2,7 +2,7 @@ import {mat4, vec2, vec3, vec4} from "gl-matrix";
 import Ray from "../math/Ray";
 import View3D from "../display/view/View3D";
 import Mesh from "../display/mesh/Mesh";
-import keepLog from "../utils/keepLog";
+
 
 /**
  * [KO] 3D 공간에서 카메라와 화면 좌표를 기반으로 광선(`Ray`)을 투사하여 메시와의 정밀한 삼각형 단위 교차를 검사하는 클래스입니다.
@@ -203,7 +203,7 @@ class Raycaster3D {
         const view = this.#view;
         const m = mesh.modelMatrix;
         const pixelSize = (mesh as any).pixelSize;
-        keepLog((mesh as any).fontSize)
+
         const rx = (mesh as any).renderRatioX || 1;
         const ry = (mesh as any).renderRatioY || 1;
 

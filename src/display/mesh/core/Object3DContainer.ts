@@ -93,7 +93,7 @@ class Object3DContainer extends BaseObject {
             child.dirtyTransform = true;
             return child;
         } else {
-            console.log(`Failed to assign child. The child could not be removed from its previous parent.`);
+            console.warn(`Failed to assign child. The child could not be removed from its previous parent.`);
             return null;
         }
     }
@@ -116,13 +116,13 @@ class Object3DContainer extends BaseObject {
         validateUintRange(index);
         if (this.#children.length < index) index = this.#children.length;
         if (index < 0 || index > this.#children.length) {
-            console.log(`Invalid index. Index should be within 0 and ${this.#children.length}.`);
+            console.warn(`Invalid index. Index should be within 0 and ${this.#children.length}.`);
             return;
         }
         if (this.#assignChild(child)) {
             this.#children.splice(index, 0, child);
         } else {
-            console.log(`Failed to assign child. The child could not be removed from its previous parent.`);
+            console.warn(`Failed to assign child. The child could not be removed from its previous parent.`);
             return;
         }
         child.dirtyTransform = true;
@@ -143,7 +143,7 @@ class Object3DContainer extends BaseObject {
     getChildAt(index: number): Mesh {
         validateUintRange(index);
         if (index >= this.#children.length || index < 0) {
-            console.log(`Invalid index. Index should be within 0 and ${this.#children.length - 1}.`);
+            console.warn(`Invalid index. Index should be within 0 and ${this.#children.length - 1}.`);
             return undefined;
         }
         return this.#children[index];
@@ -164,7 +164,7 @@ class Object3DContainer extends BaseObject {
         this.#checkObject3DInstance(child);
         const index = this.#children.indexOf(child);
         if (index === -1) {
-            console.log(`Given object is not a child of this container: ${child}`);
+            console.warn(`Given object is not a child of this container: ${child}`);
             return -1;
         }
         return index;

@@ -25,7 +25,7 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
 import ClusterLightManager from "../../light/core/clusterLight/ClusterLightManager";
 import HierarchicalZBuffer from "./hzb/HierarchicalZBuffer";
-import keepLog from "../../utils/keepLog";
+
 import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
 
 
@@ -444,7 +444,7 @@ class View3D extends AView {
             this.#emptySkyAtmosphereCubeArrayView = null;
         }
 
-        keepLog(`🧹 ${this.name} destroy 완료`)
+
     }
 
     /**

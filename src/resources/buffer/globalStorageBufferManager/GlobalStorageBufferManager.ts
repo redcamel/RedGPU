@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
-import keepLog from "../../../utils/keepLog";
+
 
 interface BufferSlot {
     index: number;
@@ -410,7 +410,7 @@ class GlobalStorageBufferManager extends RedGPUObject {
             throw new Error(`[GlobalStorageBufferManager - ${this.#label}] Buffer 용량이 초과되었습니다. RedGPU는 안전을 위해 최대 128MB까지만 허용합니다.`);
         }
 
-        keepLog(`🔄 [${this.#label}] 리사이즈 실행: ${this.#totalSlotCount} -> ${newSlotCount}`);
+
         this.#totalSlotCount = newSlotCount;
 
         const newBuffer = this.gpuDevice.createBuffer({

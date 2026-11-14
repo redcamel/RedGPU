@@ -25,7 +25,7 @@ const parseIndicesInfo_GLTF = (accessorInfo: AccessorInfo_GLTF, indices) => {
             }
             break;
         default :
-            console.log('알수없는 형식 엑세서 타입', accessorInfo.accessor);
+            console.warn('알수없는 형식 엑세서 타입', accessorInfo.accessor);
             break;
     }
 };

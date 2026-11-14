@@ -318,7 +318,7 @@ class SkyBox extends RedGPUObject {
         this.#texture = null;
         this.#transitionTexture = null;
         this.#prevSystemUniform_Vertex_UniformBindGroup = null;
-        console.log(`🧹 SkyBox destroy 완료`);
+
     }
 
     #updateMSAAStatus() {

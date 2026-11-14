@@ -1,7 +1,7 @@
 import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import {GLTF} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
-import keepLog from "../../../utils/keepLog";
+
 
 /**
  * [KO] GLTF 카메라 정의를 PerspectiveCamera로 변환하여 `gltfLoader.parsingResult.cameras`에 추가합니다.
@@ -24,7 +24,7 @@ const parseCameras_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
             let camera3D = new PerspectiveCamera();
             if (camera.type == 'orthographic') {
             } else {
-                keepLog(camera)
+
                 const yfov = camera.perspective.yfov ?? camera.perspective.yfieldOfView;
                 if (yfov !== undefined) {
                     camera3D.fieldOfView = yfov * 180 / Math.PI;

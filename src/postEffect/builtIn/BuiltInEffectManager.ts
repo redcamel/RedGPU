@@ -1,7 +1,7 @@
 import RedGPUObject from "../../base/RedGPUObject";
 import AutoExposure from "./autoExposure/AutoExposure";
 import type View3D from "../../display/view/View3D";
-import keepLog from "../../utils/keepLog";
+
 import Bloom from "./bloom/Bloom";
 import ChromaticAberration from "./chromaticAberration/ChromaticAberration";
 import DOF from "./dof/DOF";
@@ -608,7 +608,7 @@ class BuiltInEffectManager extends RedGPUObject {
             this.#autoExposure.destroy();
             this.#autoExposure = null;
         }
-        keepLog(`🧹 ${this.#view.name} BuiltInEffectManager destroy 완료`);
+
     }
 
     #calcVideoMemory() {

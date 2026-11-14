@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import keepLog from "../../../utils/keepLog";
+
 import Sampler from "../../sampler/Sampler";
 import {
     BRDFGenerator,
@@ -672,7 +672,7 @@ class ResourceManager extends RedGPUObject {
         const {cacheKey, targetResourceManagedState} = target;
         const {table} = targetResourceManagedState;
         if (table.get(cacheKey)) {
-            keepLog(`Resource with cacheKey ${cacheKey} is already registered.`);
+            console.warn(`Resource with cacheKey ${cacheKey} is already registered.`);
             return;
         }
         table.set(cacheKey, resourceState);
@@ -824,7 +824,7 @@ class ResourceManager extends RedGPUObject {
         this.#wgslParser.destroy()
         this.#wgslParser = null
 
-        keepLog("🧹 ResourceManager destroy 완료");
+
     }
 
     /**
@@ -901,9 +901,8 @@ class ResourceManager extends RedGPUObject {
             };
             cachedView = targetGPUTexture.createView(targetDescriptor);
             textureViewMap.set(cacheKey, cachedView);
-            console.log('🔷 새 비트맵 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
-        } else {
-            console.log('비트맵 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
+
+
         }
         return cachedView;
     }
@@ -945,9 +944,6 @@ class ResourceManager extends RedGPUObject {
             };
             cachedView = targetGPUTexture.createView(targetDescriptor);
             textureViewMap.set(cacheKey, cachedView);
-            console.log('🧊 새 큐브 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
-        } else {
-            console.log('큐브 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
         }
         return cachedView;
     }

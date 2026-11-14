@@ -284,16 +284,6 @@ class ATextField extends Mesh {
         let extraLeft = 3, extraRight = 3, extraTop = 3, extraBottom = 3;
         const renderedWidth = rect.width + extraLeft + extraRight;
         const renderedHeight = rect.height + extraTop + extraBottom;
-        console.log("Calculated Render Size (Fully Including Box-Shadow):", {
-            rectWidth: rect.width,
-            rectHeight: rect.height,
-            renderedWidth,
-            renderedHeight,
-            extraLeft,
-            extraRight,
-            extraTop,
-            extraBottom,
-        });
         return {
             width: Math.ceil(renderedWidth) & ~1,
             height: Math.ceil(renderedHeight) & ~1,

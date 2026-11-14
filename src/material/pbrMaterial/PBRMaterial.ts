@@ -13,7 +13,6 @@ import defineUint from "../../defineProperty/funcs/number/defineUint";
 import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
-import keepLog from "../../utils/keepLog";
 
 
 const EXTENSION_LIST: {
@@ -790,7 +789,7 @@ class PBRMaterial extends AUVTransformBaseMaterial {
             this.occlusionTexture?.gpuTexture?.height || 1,
             this.metallicRoughnessTexture?.gpuTexture?.height || 1
         );
-        keepLog(this.occlusionTexture, this.metallicRoughnessTexture)
+
         await this.#packedORMTexture.packing(
             {
                 r: this.occlusionTexture?.gpuTexture,

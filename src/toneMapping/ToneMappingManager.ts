@@ -154,7 +154,7 @@ class ToneMappingManager extends RedGPUObject {
      */
     destroy() {
         this.clear();
-        console.log("🧹 ToneMappingManager destroy 완료");
+
     }
 
     #createToneMapping(): void {

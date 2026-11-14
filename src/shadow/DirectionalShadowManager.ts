@@ -6,7 +6,7 @@ import View3D from "../display/view/View3D";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
-import keepLog from "../utils/keepLog";
+
 import {mat4, vec3} from "gl-matrix";
 
 const g_invVM = mat4.create();
@@ -494,7 +494,7 @@ class DirectionalShadowManager {
             this.#shadowDepthTextureViewEmpty = null;
         }
         this.#hasCastingListCycleStarted = false;
-        keepLog('🧹 DirectionalShadowManager destroy 완료');
+
     }
 
     /**
