@@ -31,15 +31,9 @@ declare class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      * @param vntAtlas -
      * [KO] 가상 노멀 텍스처(VNT) 아틀라스
      * [EN] Virtual Normal Texture (VNT) atlas
-     * @param vbtBaseColorArray -
-     * [KO] 베이킹 결과를 저장할 VBT BaseColor 아틀라스 텍스처
-     * [EN] VBT BaseColor atlas texture to store the baked result
-     * @param vbtNormalArray -
-     * [KO] 베이킹 결과를 저장할 VBT Normal 아틀라스 텍스처
-     * [EN] VBT Normal atlas texture to store the baked result
-     * @param vbtORMArray -
-     * [KO] 베이킹 결과를 저장할 VBT ORM(Occlusion, Roughness, Metallic) 아틀라스 텍스처
-     * [EN] VBT ORM (Occlusion, Roughness, Metallic) atlas texture to store the baked result
+     * @param vbtAtlas -
+     * [KO] 베이킹 결과를 저장할 3-레이어 VBT(BaseColor, Normal, ORM) 아틀라스 텍스처
+     * [EN] 3-layer VBT (BaseColor, Normal, ORM) atlas texture to store the baked result
      * @param material -
      * [KO] 합성할 레이어 정보를 가진 `LandscapeMaterial` 인스턴스
      * [EN] `LandscapeMaterial` instance containing layer information to composite
@@ -47,7 +41,7 @@ declare class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      * [KO] 단일 타일당 픽셀 해상도 (기본값: `256`)
      * [EN] Pixel resolution per single tile (default: `256`)
      */
-    bakeAtlas(vntAtlas: DirectTexture, vbtBaseColorArray: DirectTexture, vbtNormalArray: DirectTexture, vbtORMArray: DirectTexture, material: LandscapeMaterial, singleTilePixels?: number): void;
+    bakeAtlas(vntAtlas: DirectTexture, vbtAtlas: DirectTexture, material: LandscapeMaterial, singleTilePixels?: number): void;
     /**
      * [KO] VBT 베이킹 및 타일 밉맵 생성에 사용된 GPU 버퍼와 캐시를 모두 해제합니다.
      * [EN] Releases all GPU buffers and caches used for VBT baking and tile mipmap generation.

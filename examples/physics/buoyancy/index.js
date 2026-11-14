@@ -75,7 +75,7 @@ RedGPU.init(
 		const createObject = () => {
 			const size = 0.8 + Math.random() * 1.0;
 			const isBall = Math.random() > 0.5;
-			
+
 			const density = 0.8 + Math.random() * 4.2;
 			
 			const mesh = new RedGPU.Display.Mesh(

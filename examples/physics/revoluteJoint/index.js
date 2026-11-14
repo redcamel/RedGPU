@@ -137,7 +137,7 @@ RedGPU.init(
 			{ x: 0, y: 0, z: 1 }      
 		);
 		const joint = physicsEngine.nativeWorld.createImpulseJoint(jointData, pillarBody.nativeBody, fanBody.nativeBody, true);
-		
+
 		joint.configureMotorVelocity(3.0, 500.0);
 
         // [KO] 4. 상호작용용 낙하 공
