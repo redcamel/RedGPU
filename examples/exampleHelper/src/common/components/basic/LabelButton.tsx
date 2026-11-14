@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 
 interface LabelButtonProps {
     label: string;
+    icon?: React.ReactNode;
     isActive?: boolean;
     onClick: () => void;
     title?: string;
@@ -9,19 +10,17 @@ interface LabelButtonProps {
 }
 
 /**
- * [KO] 텍스트 라벨 전용 버튼 컴포넌트입니다.
+ * [KO] 아이콘+텍스트 캡슐 버튼 컴포넌트입니다.
  */
-const LabelButton: React.FC<LabelButtonProps> = ({label, isActive = true, onClick, title, style}) => {
+const LabelButton: React.FC<LabelButtonProps> = ({label, icon, isActive = true, onClick, title, style}) => {
     const [isHovered, setIsHovered] = useState(false);
-
-    const themeColor = '#fdb48d';
 
     return (
         <button
             style={{
                 ...baseButtonStyle,
-                backgroundColor: isHovered ? '#1a1a1c' : '#111112',
-                color: themeColor,
+                backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                color: '#fdb48d',
                 ...style
             }}
             onClick={onClick}
@@ -29,8 +28,20 @@ const LabelButton: React.FC<LabelButtonProps> = ({label, isActive = true, onClic
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
+            {icon && <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isActive ? 1 : 0.4
+            }}>{icon}</span>}
             <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
                 opacity: isActive ? 1 : 0.4,
+                fontSize: '13px',
+                lineHeight: 1,
+                color: '#fdb48d',
+                fontWeight: 'bold',
                 transition: 'opacity 0.2s'
             }}>
                 {label}
@@ -43,16 +54,23 @@ const baseButtonStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100%',
-    padding: '0 20px',
-    backgroundColor: '#111112',
+    gap: '6px',
+    width: 'auto',
+    height: '36px',
+    padding: '0 14px',
+    backgroundColor: 'transparent',
     border: 'none',
-    fontSize: '11px',
+    borderRadius: '9999px',
+    fontSize: '13px',
+    lineHeight: '1.1',
+    color: '#fdb48d',
     fontWeight: 'bold',
     cursor: 'pointer',
-    transition: 'background-color 0.2s, opacity 0.2s',
-    letterSpacing: '0.05em',
-    flexShrink: 0
+    transition: 'all 0.15s ease',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+    boxSizing: 'border-box',
+    pointerEvents: 'auto'
 };
 
 export default LabelButton;

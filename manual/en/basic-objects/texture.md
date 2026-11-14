@@ -150,8 +150,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 - [BitmapMaterial Basic](/RedGPU/examples/3d/material/bitmapMaterial/)
 - [BitmapTexture Sampler Combination](/RedGPU/examples/3d/texture/bitmapTextureSampler/)
-- [Mipmap Generation Options](/RedGPU/examples/3d/texture/mipmapGenerator/)
-- [Transparent Texture Alpha Blending](/RedGPU/examples/3d/transparent/alphaBlend/)
+- [Texture Sampler Combination](/RedGPU/examples/3d/texture/samplerCombination/)
+- [Material Opacity](/RedGPU/examples/3d/material/opacity/)
 
 ---
 

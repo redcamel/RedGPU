@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
 
 /**
  * [KO] Morph Stress Test 예제
@@ -22,6 +22,10 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
+
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MorphStressTest/glTF-Binary/MorphStressTest.glb');
 
@@ -40,12 +44,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
- * @param {RedGPU.Display.View3D} view
- * @param {string} url
- */
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
@@ -55,12 +53,6 @@ function loadGLTF(view, url) {
     });
 }
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
 const renderTestPane = (redGPUContext, targetView) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,

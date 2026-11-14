@@ -1,5 +1,13 @@
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+
+/**
+ * [KO] Iridescence Metallic Spheres 예제
+ * [EN] Iridescence Metallic Spheres example
+ *
+ * [KO] GLTF Iridescence Metallic Spheres 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Iridescence Metallic Spheres model.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -14,6 +22,10 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
+
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/IridescenceMetallicSpheres/glTF/IridescenceMetallicSpheres.gltf');
 

@@ -1,5 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
+import DebuggerColorMaterial from "./core/debuggerColorMaterial/DebuggerColorMaterial";
 import Box from "../../primitive/Box";
 import Cylinder from "../../primitive/Cylinder";
 import Sphere from "../../primitive/Sphere";
@@ -35,7 +35,7 @@ class DrawDebuggerAxis extends Mesh {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, null, null);
-        const centerMesh = new Mesh(redGPUContext, new Sphere(redGPUContext, 0.5), new ColorMaterial(redGPUContext));
+        const centerMesh = new Mesh(redGPUContext, new Sphere(redGPUContext, 0.5), new DebuggerColorMaterial(redGPUContext));
         this.addChild(centerMesh);
         const geometry = new Box(redGPUContext);
         this.addChild(this.#createAxis(geometry, '#ff0000', [5, 0.1, 0.1], [2.5, 0, 0]));
@@ -48,7 +48,7 @@ class DrawDebuggerAxis extends Mesh {
 
     #createAxis(geometry: Box, color: string, scale: [number, number, number], position: [number, number, number]): Mesh {
         const {redGPUContext} = this;
-        const axis = new Mesh(redGPUContext, geometry, new ColorMaterial(redGPUContext, color));
+        const axis = new Mesh(redGPUContext, geometry, new DebuggerColorMaterial(redGPUContext, color));
         axis.setScale(...scale);
         axis.setPosition(...position);
         return axis;
@@ -64,7 +64,7 @@ class DrawDebuggerAxis extends Mesh {
         const coneTip = new Mesh(
             redGPUContext,
             new Cylinder(redGPUContext, scale[0], 0.001, scale[1], 32, 1),
-            new ColorMaterial(redGPUContext, color)
+            new DebuggerColorMaterial(redGPUContext, color)
         );
         coneTip.setScale(scale[0], scale[1], scale[0]);
         coneTip.setPosition(...position);

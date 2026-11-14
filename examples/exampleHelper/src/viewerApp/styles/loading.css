@@ -1,3 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+.RedGPUExampleHelper, .RedGPUExampleHelper button {
+    font-family: 'Inter', 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.RedGPUExampleHelper input,
+.RedGPUExampleHelper textarea,
+.RedGPUExampleHelper pre,
+.RedGPUExampleHelper code {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.RedGPUExampleHelper .tp-rotv {
+    --tp-base-background-color: transparent;
+    --tp-base-shadow-color: transparent;
+    --tp-base-border-radius: 10px;
+    --tp-blade-border-radius: 6px;
+    --tp-blade-horizontal-padding: 6px;
+    --tp-container-horizontal-padding: 6px;
+    --tp-container-vertical-padding: 6px;
+    --tp-container-unit-spacing: 5px;
+    --tp-container-unit-size: 22px;
+    --tp-container-background-color: rgba(255, 255, 255, 0.07);
+    --tp-container-background-color-hover: rgba(255, 255, 255, 0.12);
+    --tp-container-background-color-focus: rgba(255, 255, 255, 0.15);
+    --tp-container-background-color-active: rgba(255, 255, 255, 0.18);
+    --tp-input-background-color: rgba(255, 255, 255, 0.08);
+    --tp-input-background-color-hover: rgba(255, 255, 255, 0.13);
+    --tp-input-background-color-focus: rgba(255, 255, 255, 0.16);
+    --tp-input-background-color-active: rgba(255, 255, 255, 0.2);
+    --tp-monitor-background-color: rgba(0, 0, 0, 0.28);
+    font-size: 11.5px;
+}
+
+.RedGPUExampleHelper .tp-rotv_c > .tp-cntv:not(.tp-v-hidden) + .tp-cntv,
+.RedGPUExampleHelper .tp-fldv_c > .tp-cntv:not(.tp-v-hidden) + .tp-cntv {
+    margin-top: 1px;
+}
+
+.RedGPUExampleHelper .tp-rotv_c > .tp-fldv > .tp-fldv_b {
+    border-radius: 10px;
+}
+
+.RedGPUExampleHelper .tp-rotv_c > .tp-fldv.tp-fldv-expanded > .tp-fldv_b {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.RedGPUExampleHelper .tp-rotv_c > .tp-fldv > .tp-fldv_c {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.RedGPUExampleHelper .tp-rotv_c > .tp-fldv > .tp-fldv_i {
+    border-bottom-left-radius: 10px;
+}
+
+.RedGPUExampleHelper .tp-fldv_c > .tp-fldv {
+    margin-right: 6px;
+}
+
+.RedGPUExampleHelper .tp-fldv_c > .tp-fldv > .tp-fldv_b {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.RedGPUExampleHelper .tp-fldv_c > .tp-fldv.tp-fldv-expanded > .tp-fldv_b {
+    border-bottom-right-radius: 0;
+}
 
 .loading-ui {
     position: fixed;

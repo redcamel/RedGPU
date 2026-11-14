@@ -111,7 +111,7 @@ class Geometry extends ResourceBase {
         }
         this.gpuRenderInfo = null;
         this.#volume = null;
-        console.log("🧹 Geometry destroy 완료");
+
     }
 
     #updateVertexBuffer(vertexBuffer: VertexBuffer) {

@@ -28,6 +28,18 @@ const GuiPanel: React.FC = () => {
             pane.registerPlugin(EssentialsPlugin);
             setGuiInstance(pane);
 
+            // [KO] compareLabel 설정 시 최상단에 단독 뷰 보기 토글 자동 생성
+            if (guiConfig.compareLabel) {
+                const compareConfig = {
+                    postEffectViewOnly: !useExampleHelperStore.getState().showCompareLabel
+                };
+                (pane as any).addBinding(compareConfig, 'postEffectViewOnly', {
+                    label: `${guiConfig.compareLabel.title || 'PostEffect'} View Only`
+                }).on('change', (v: any) => {
+                    useExampleHelperStore.getState().setShowCompareLabel(!v.value);
+                });
+            }
+
             // [KO] 외부에서 정의한 커스텀 GUI 추가
             if (guiConfig.gui) {
                 try {
@@ -47,60 +59,42 @@ const GuiPanel: React.FC = () => {
 
     if (!guiConfig) return null;
 
+    const firstView = redGPUContext?.viewList[0];
+
     return (
         <>
-            <div ref={guiContainerRef} style={guiContainerStyle}/>
-            {guiInstance && guiConfig.redGPUContext && redGPUContext && (
-                <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext}/>
+            <div
+                ref={guiContainerRef}
+                style={guiContainerStyle}
+                onMouseDownCapture={(e) => {
+                    if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+                        const selection = window.getSelection();
+                        if (selection && selection.type === 'Range') {
+                            selection.removeAllRanges();
+                        }
+                    }
+                }}
+            />
+            {guiInstance && redGPUContext && (
+                <>
+                    {guiConfig.redGPUContext && <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext}/>}
+                    {guiConfig.viewList && <GuiViewList gui={guiInstance} redGPUContext={redGPUContext}/>}
+                    {guiConfig.scene && <GuiScene gui={guiInstance} scene={firstView?.scene}/>}
+                    {guiConfig.directionalShadow && firstView?.scene?.shadowManager?.directionalShadowManager && (
+                        <GuiDirectionalShadowHelper gui={guiInstance}
+                                                    directionalShadowManager={firstView.scene.shadowManager.directionalShadowManager}/>
+                    )}
+                    {guiConfig.globalWind && firstView?.scene?.windManager && (
+                        <GuiGlobalWindHelper gui={guiInstance}
+                                             windManager={firstView.scene.windManager}
+                                             expanded={typeof guiConfig.globalWind === 'object' ? guiConfig.globalWind.expanded : false}/>
+                    )}
+                    {guiConfig.ibl && firstView && <GuiIBLHelper gui={guiInstance} view={firstView}/>}
+                    {guiConfig.skybox && firstView && <GuiSkyBoxHelper gui={guiInstance} view={firstView}/>}
+                </>
             )}
-            {guiInstance && guiConfig.viewList && redGPUContext && (
-                <GuiViewList gui={guiInstance} redGPUContext={redGPUContext}/>
-            )}
-            {guiInstance && guiConfig.scene && redGPUContext && (
-                <GuiScene gui={guiInstance} scene={redGPUContext.viewList[0]?.scene}/>
-            )}
-            {guiInstance && guiConfig.directionalShadow && redGPUContext && redGPUContext.viewList[0]?.scene?.shadowManager?.directionalShadowManager && (
-                <GuiDirectionalShadowHelper gui={guiInstance}
-                                            directionalShadowManager={redGPUContext.viewList[0].scene.shadowManager.directionalShadowManager}/>
-            )}
-            {guiInstance && guiConfig.globalWind && redGPUContext && redGPUContext.viewList[0]?.scene?.windManager && (
-                <GuiGlobalWindHelper gui={guiInstance}
-                                     windManager={redGPUContext.viewList[0].scene.windManager}
-                                     expanded={typeof guiConfig.globalWind === 'object' ? guiConfig.globalWind.expanded : false}/>
-            )}
-            {guiInstance && guiConfig.ibl && redGPUContext && redGPUContext.viewList[0] && (
-                <GuiIBLHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>
-            )}
-            {guiInstance && guiConfig.skybox && redGPUContext && redGPUContext.viewList[0] && (
-                <GuiSkyBoxHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>
-            )}
-            {/*{guiInstance && redGPUContext && (*/}
-            {/*    <GuiDestroyTest gui={guiInstance} redGPUContext={redGPUContext}/>*/}
-            {/*)}*/}
         </>
     );
-};
-
-interface GuiDestroyTestProps {
-    gui: any;
-    redGPUContext: any;
-}
-
-const GuiDestroyTest: React.FC<GuiDestroyTestProps> = ({gui, redGPUContext}) => {
-    useEffect(() => {
-        const btn = gui.addButton({
-            title: 'destroy test',
-        });
-        btn.on('click', () => {
-            console.log('💥 Calling redGPUContext.destroy() via tweakpane destroy test button');
-            redGPUContext.destroy();
-        });
-        return () => {
-            btn.dispose();
-        };
-    }, [gui, redGPUContext]);
-
-    return null;
 };
 
 const guiContainerStyle: React.CSSProperties = {

@@ -6,6 +6,8 @@
 @group(2) @binding(1) var diffuseTextureSampler: sampler;
 @group(2) @binding(2) var diffuseTexture: texture_2d<f32>;
 
+const OVERLAY_UNJITTERED_MOTION_SENTINEL: f32 = 1000.0;
+
 /**
  * [KO] 텍스트 필드 프래그먼트 입력 데이터 구조체입니다.
  * [EN] Input data structure for text field fragment shader.
@@ -45,6 +47,6 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     output.color = vec4<f32>(finalColor.rgb , finalColor.a);
-    output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );
+    output.gBufferMotionVector = vec2<f32>(OVERLAY_UNJITTERED_MOTION_SENTINEL);
     return output;
 };

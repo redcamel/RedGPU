@@ -1,55 +1,43 @@
 import React from 'react';
-import {ExampleItem} from '../../../types/example';
-
-interface CardProps {
-    item: ExampleItem;
-    language: 'ko' | 'en';
-    hovered: boolean;
-    isNarrow: boolean;
-    isLCP: boolean;
-    onClick: () => void;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
-}
+import {CardProps} from '../ExampleCard';
+import {expBadgePillStyle} from '../../../common/styles/uiStyles';
 
 export const ExampleListCard: React.FC<CardProps> = ({
-    item, language, hovered, isNarrow, isLCP, onClick, onMouseEnter, onMouseLeave
+                                                         item,
+                                                         hovered,
+                                                         isNarrow,
+                                                         isLCP,
+                                                         thumbUrl,
+                                                         description,
+                                                         imageAlt,
+                                                         imageTitle,
+                                                         href,
+                                                         onMouseEnter,
+                                                         onMouseLeave
 }) => {
-    const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
-    const description = item.description ? (item.description[language] || item.description['en']) : '';
-    
-    // [KO] SEO: HTML 태그를 제거한 순수 텍스트 추출 및 언어별 alt 텍스트 적용
-    // [EN] SEO: Extract plain text without HTML tags and apply localized alt text
-    const plainDescription = description.replace(/<[^>]*>?/gm, '').trim();
-    const altSuffix = language === 'ko' ? 'RedGPU WebGPU 예제' : 'RedGPU WebGPU Example';
-    const imageAlt = `${item.name} - ${altSuffix}`;
-    const imageTitle = plainDescription || item.name;
-    
-    const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
-
     return (
-        <a 
+        <a
             href={href}
-            style={{...listCardStyle(hovered, isNarrow), textDecoration: 'none', display: 'flex'}}
+            style={listCardStyle(hovered, isNarrow)}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            onClick={(e) => {
-                // [KO] 기본 이동은 허용하되, 필요한 경우 추가 로직 수행
-            }}
         >
-            <img 
-                src={thumbUrl} 
-                style={listThumbStyle} 
-                alt={imageAlt} 
-                title={imageTitle} 
-                loading={isLCP ? "eager" : "lazy"} 
+            <img
+                src={thumbUrl}
+                width={80}
+                height={42}
+                style={listThumbStyle}
+                alt={imageAlt}
+                title={imageTitle}
+                loading={isLCP ? "eager" : "lazy"}
+                decoding={isLCP ? "sync" : "async"}
                 {...(isLCP ? { fetchPriority: "high" } : {})}
             />
             <div style={listContentStyle}>
-                <div style={{...titleStyle, fontSize: isNarrow ? '12px' : '14px'}}>{item.name}</div>
+                <div style={{...titleStyle, fontSize: isNarrow ? '12.5px' : '14px'}}>{item.name}</div>
                 {!isNarrow && <div style={listDescStyle} dangerouslySetInnerHTML={{__html: description}} />}
             </div>
-            {item.experimental && <span style={experimentalBadgeStyle}>EXP</span>}
+            {item.experimental && <span style={expBadgePillStyle}>EXP</span>}
         </a>
     );
 };
@@ -57,19 +45,28 @@ export const ExampleListCard: React.FC<CardProps> = ({
 const listCardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => ({
     display: 'flex',
     alignItems: 'center',
-    padding: isNarrow ? '8px 10px' : '10px 15px',
-    backgroundColor: hovered ? '#1a1a1c' : 'transparent',
-    borderBottom: '1px solid #222',
+    textDecoration: 'none',
+    width: '100%',
+    minWidth: 0,
+    padding: isNarrow ? '8px 12px' : '8px 14px',
+    backgroundColor: hovered ? 'rgba(24, 24, 30, 0.82)' : 'rgba(18, 18, 20, 0.76)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: `1px solid ${hovered ? 'rgba(253, 180, 141, 0.45)' : 'rgba(255, 255, 255, 0.09)'}`,
+    borderRadius: '12px',
+    boxShadow: hovered ? '0 8px 24px rgba(0, 0, 0, 0.45)' : '0 4px 14px rgba(0, 0, 0, 0.25)',
     cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    gap: isNarrow ? '10px' : '15px',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    gap: isNarrow ? '10px' : '16px',
 });
 
 const listThumbStyle: React.CSSProperties = {
-    width: '60px',
-    height: '34px',
-    borderRadius: '4px',
+    width: '80px',
+    height: '42px',
+    borderRadius: '8px',
     objectFit: 'cover',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    flexShrink: 0,
 };
 
 const listContentStyle: React.CSSProperties = {
@@ -77,31 +74,26 @@ const listContentStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: '20px',
+    minWidth: 0,
 };
 
 const titleStyle: React.CSSProperties = {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: '#eee',
+    fontWeight: 600,
+    lineHeight: '1.35',
+    color: '#f8f9fa',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    flexShrink: 0,
 };
 
 const listDescStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: '#666',
+    fontSize: '12.5px',
+    lineHeight: '1.5',
+    color: '#b0b0ba',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: '500px',
+    flex: 1,
+    minWidth: 0,
 };
-
-const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '9px',
-    backgroundColor: '#ff4d4d',
-    color: '#fff',
-    padding: '2px 6px',
-    borderRadius: '4px',
-    fontWeight: 'bold',
-};export default ExampleListCard;

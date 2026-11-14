@@ -17,7 +17,7 @@ fn main(inputData:InputData) -> VertexOutput {
     var output : VertexOutput;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
-    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+    let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
 
     // Translation을 제거한 View Matrix (Remove translation from View Matrix)
     var viewRotation = u_viewMatrix;
@@ -30,4 +30,3 @@ fn main(inputData:InputData) -> VertexOutput {
     output.vertexPosition = vec4<f32>(inputData.position, 1.0);
     return output;
 }
-

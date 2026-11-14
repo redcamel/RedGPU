@@ -1,6 +1,6 @@
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -46,9 +46,8 @@ RedGPU.init(
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 30, 30),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
-		groundMesh.material.color.setColorByHEX('#333333');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -60,9 +59,8 @@ RedGPU.init(
 		const obstacleMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#d4a538')
 		);
-		obstacleMesh.material.color.setColorByHEX('#ffcc00');
 		obstacleMesh.scaleX = 15;
 		obstacleMesh.scaleY = 1;
 		obstacleMesh.scaleZ = 1;
@@ -74,6 +72,13 @@ RedGPU.init(
 		});
 
 		const activeObjects = [];
+        const getRandomColor = () => {
+            const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		// [KO] 동적(Dynamic) 객체 생성 함수 (박스 또는 구체 랜덤)
 		// [EN] Dynamic object creation function (Random Box or Sphere)
 		const spawnObject = () => {
@@ -85,13 +90,10 @@ RedGPU.init(
 				? RedGPU.Physics.PHYSICS_SHAPE.BOX 
 				: RedGPU.Physics.PHYSICS_SHAPE.SPHERE;
 
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				geometry,
-				material
+                new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
 			mesh.x = Math.random() * 10 - 5;
 			mesh.y = 15;
@@ -138,12 +140,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

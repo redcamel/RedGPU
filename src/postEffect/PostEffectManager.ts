@@ -1,23 +1,21 @@
 import {mat4} from "gl-matrix";
 import RedGPUObject from "../base/RedGPUObject";
-import View3D from "../display/view/View3D";
+import type View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
-import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
+import ASingleComputePassPostEffect from "./core/ASingleComputePassPostEffect";
+import ASingleRenderPassPostEffect from "./core/ASingleRenderPassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
-import SSAO from "./effects/ssao/SSAO";
-import SSR from "./effects/ssr/SSR";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
-import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
-import keepLog from "../utils/keepLog";
+
 
 /**
- * [KO] `View3D`의 HDR/LDR 후처리 파이프라인(SSAO, SSR, TAA, ToneMapping, FXAA 및 사용자 이펙트)을 통합 관리하는 클래스입니다.
- * [EN] Class that manages the HDR/LDR post-processing pipeline (SSAO, SSR, TAA, ToneMapping, FXAA, and user effects) of a `View3D`.
+ * [KO] `View3D`의 후처리 파이프라인과 사용자 후처리 이펙트 리스트를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages the post-processing pipeline and user post-processing effect list of a `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -36,7 +34,7 @@ import keepLog from "../utils/keepLog";
  */
 class PostEffectManager extends RedGPUObject {
     #view: View3D
-    #postEffects: Array<ASinglePassPostEffect | AMultiPassPostEffect> = []
+    #postEffects: Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect> = []
     #texturePool: PostEffectTexturePool
 
     #prevWidth: number = 0
@@ -47,18 +45,33 @@ class PostEffectManager extends RedGPUObject {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
-    #ssao: SSAO;
-    #useSSAO: boolean = false;
-    #ssr: SSR;
-    #useSSR: boolean = false;
-    #autoExposure: AutoExposure;
     #initialResult: IPostEffectResult = {texture: null as any, textureView: null as any};
+    #projectionInfo: {
+        projectionMatrix: mat4;
+        projectionViewMatrix: mat4;
+        noneJitterProjectionMatrix: mat4;
+        noneJitterProjectionViewMatrix: mat4;
+        inverseProjectionMatrix: mat4;
+        inverseProjectionViewMatrix: mat4;
+        prevNoneJitterProjectionViewMatrix: mat4;
+    } = {
+        projectionMatrix: null,
+        projectionViewMatrix: null,
+        noneJitterProjectionMatrix: null,
+        noneJitterProjectionViewMatrix: null,
+        inverseProjectionMatrix: null,
+        inverseProjectionViewMatrix: null,
+        prevNoneJitterProjectionViewMatrix: null
+    };
+    #preExposureEntry = {key: 'preExposure', value: 1};
+    #preExposureRatioEntry = {key: 'preExposureRatio', value: 1};
+    #devicePixelRatioEntry = {key: 'devicePixelRatio', value: 1};
+    #systemExtraEntries = [this.#preExposureEntry, this.#preExposureRatioEntry, this.#devicePixelRatioEntry];
 
-    #gbufferBindGroupLayoutMSAA: GPUBindGroupLayout;
-    #gbufferBindGroupLayoutNonMSAA: GPUBindGroupLayout;
-    #gbufferBindGroup_swap0: GPUBindGroup;
-    #gbufferBindGroup_swap1: GPUBindGroup;
-    #prevMSAAID_for_gbuffer: string;
+    #gbufferBindGroupLayout: GPUBindGroupLayout;
+    #gbufferBindGroupSwap0: GPUBindGroup;
+    #gbufferBindGroupSwap1: GPUBindGroup;
+    #prevMsaaIdForGbuffer: string;
     #destroyed: boolean = false
 
     /**
@@ -78,15 +91,15 @@ class PostEffectManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 MSAA 상태에 맞는 공유 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
-     * [EN] Returns the shared G-Buffer bind group layout matching the current MSAA state.
+     * [KO] 공유 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
+     * [EN] Returns the shared G-Buffer bind group layout.
      *
      * @returns
      * [KO] G-Buffer `GPUBindGroupLayout`
      * [EN] G-Buffer `GPUBindGroupLayout`
      */
     get gbufferBindGroupLayout(): GPUBindGroupLayout {
-        return this.antialiasingManager.useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
+        return this.#gbufferBindGroupLayout;
     }
 
     /**
@@ -98,7 +111,7 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Shared G-Buffer `GPUBindGroup`
      */
     get gbufferBindGroup(): GPUBindGroup {
-        return this.#view.renderViewStateData.swapBufferIndex ? this.#gbufferBindGroup_swap1 : this.#gbufferBindGroup_swap0;
+        return this.#view.renderViewStateData.swapBufferIndex ? this.#gbufferBindGroupSwap1 : this.#gbufferBindGroupSwap0;
     }
 
     /**
@@ -111,87 +124,6 @@ class PostEffectManager extends RedGPUObject {
      */
     get texturePool(): PostEffectTexturePool {
         return this.#texturePool;
-    }
-
-    /**
-     * [KO] 자동 노출(`AutoExposure`) 인스턴스를 반환합니다.
-     * [EN] Returns the `AutoExposure` instance.
-     *
-     * @returns
-     * [KO] `AutoExposure` 인스턴스
-     * [EN] `AutoExposure` instance
-     */
-    get autoExposure(): AutoExposure {
-        if (!this.#autoExposure) {
-            this.#autoExposure = new AutoExposure(this.#view);
-        }
-        return this.#autoExposure;
-    }
-
-    /**
-     * [KO] SSAO(Screen Space Ambient Occlusion) 활성화 여부입니다.
-     * [EN] Whether SSAO (Screen Space Ambient Occlusion) is enabled.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] SSAO 활성화 여부
-     * [EN] Whether SSAO is enabled
-     */
-    get useSSAO(): boolean {
-        return this.#useSSAO;
-    }
-
-    set useSSAO(value: boolean) {
-        this.#useSSAO = value;
-        this.#checkSSAO()
-    }
-
-    /**
-     * [KO] SSAO 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the SSAO effect instance.
-     *
-     * @returns
-     * [KO] `SSAO` 인스턴스
-     * [EN] `SSAO` instance
-     */
-    get ssao(): SSAO {
-        if (!this.#ssao) {
-            this.#ssao = new SSAO(this.#view.redGPUContext)
-        }
-        return this.#ssao;
-    }
-
-    /**
-     * [KO] SSR(Screen Space Reflection) 활성화 여부입니다.
-     * [EN] Whether SSR (Screen Space Reflection) is enabled.
-     *
-     * @defaultValue false
-     * @returns
-     * [KO] SSR 활성화 여부
-     * [EN] Whether SSR is enabled
-     */
-    get useSSR(): boolean {
-        return this.#useSSR;
-    }
-
-    set useSSR(value: boolean) {
-        this.#useSSR = value;
-        this.#checkSSR()
-    }
-
-    /**
-     * [KO] SSR 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the SSR effect instance.
-     *
-     * @returns
-     * [KO] `SSR` 인스턴스
-     * [EN] `SSR` instance
-     */
-    get ssr(): SSR {
-        if (!this.#ssr) {
-            this.#ssr = new SSR(this.#view.redGPUContext)
-        }
-        return this.#ssr;
     }
 
     /**
@@ -223,10 +155,10 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Returns the array of registered user post-processing effects.
      *
      * @returns
-     * [KO] 후처리 이펙트 배열 (`Array<ASinglePassPostEffect | AMultiPassPostEffect>`)
-     * [EN] Array of post-processing effects (`Array<ASinglePassPostEffect | AMultiPassPostEffect>`)
+     * [KO] 후처리 이펙트 배열 (`Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
+     * [EN] Array of post-processing effects (`Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect>`)
      */
-    get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
+    get effectList(): Array<ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect> {
         return this.#postEffects;
     }
 
@@ -251,23 +183,11 @@ class PostEffectManager extends RedGPUObject {
         if (this.#destroyed) return;
         this.#destroyed = true
 
-        this.#postEffects.forEach(effect => {
-            effect.destroy()
-        })
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            effects[i].destroy();
+        }
         this.#postEffects = null
-
-        if (this.#ssao) {
-            this.#ssao.destroy();
-            this.#ssao = null;
-        }
-        if (this.#ssr) {
-            this.#ssr.destroy();
-            this.#ssr = null;
-        }
-        if (this.#autoExposure) {
-            this.#autoExposure.destroy();
-            this.#autoExposure = null;
-        }
 
         this.#texturePool.clear();
         this.#texturePool = null
@@ -275,7 +195,7 @@ class PostEffectManager extends RedGPUObject {
         this.#postEffectSystemUniformBuffer.destroy()
         this.#postEffectSystemUniformBuffer = null
         this.#postEffectSystemUniformBufferStructInfo = null
-        keepLog(`🧹 ${this.view.name} PostEffectManager destroy 완료`)
+
     }
 
     /**
@@ -291,7 +211,10 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 추가할 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance to add
      */
-    addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    addEffect(v: ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect) {
+        if (!v.isLdr) {
+            console.warn(`[PostEffectManager] ${v.constructor.name} is not an LDR effect (isLdr: false).`);
+        }
         this.#postEffects.push(v)
     }
 
@@ -306,7 +229,7 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 해당 인덱스의 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance at the specified index
      */
-    getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
+    getEffectAt(index: number): ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
     }
 
@@ -318,7 +241,7 @@ class PostEffectManager extends RedGPUObject {
      * [KO] 제거할 후처리 이펙트 인스턴스
      * [EN] Post-processing effect instance to remove
      */
-    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    removeEffect(v: ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect) {
         const index = this.#postEffects.indexOf(v);
         if (index > -1) {
             v.clear();
@@ -346,10 +269,11 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Removes all registered post-processing effects and clears their resources.
      */
     removeAllEffect() {
-        this.#postEffects.forEach(effect => {
-            effect.clear()
-        })
-        this.#postEffects.length = 0
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            effects[i].clear();
+        }
+        effects.length = 0;
     }
 
     /**
@@ -361,74 +285,96 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Final rendering result texture information (`IPostEffectResult`)
      */
     render(): IPostEffectResult {
-        const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
-        const {antialiasingManager} = redGPUContext
-        const {useMSAA, useFXAA, useTAA, msaaID} = antialiasingManager;
-        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {width, height} = gBufferColorTexture;
-
-        if (this.#prevMSAAID_for_gbuffer !== msaaID) {
-            this.#texturePool.clear();
-        }
-
         this.#updateSystemUniforms();
         this.#updateGbufferBindGroup();
-        const {useAutoExposure} = this.#view.rawCamera;
 
-        let currentTextureView = this.#renderToStorageTexture(this.#view);
-
-        if (this.#view.skyAtmosphere) {
-            currentTextureView = this.#applySingleEffect(this.#view.skyAtmosphere, currentTextureView, width, height);
-        }
-
-        if (this.#useSSAO) {
-            currentTextureView = this.#applySingleEffect(this.ssao, currentTextureView, width, height);
-        }
-        if (this.#useSSR) {
-            currentTextureView = this.#applySingleEffect(this.ssr, currentTextureView, width, height);
-        }
-
-        if (useTAA && this.#view.constructor.name === 'View3D') {
-            currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
-        }
-
-        if (useAutoExposure) {
-            this.autoExposure.render(currentTextureView);
-        }
-
-        let toneMapped = false;
-        const effects = this.#postEffects;
-        for (let i = 0, len = effects.length; i < len; i++) {
-            const effect = effects[i];
-            if (effect.isLdr && !toneMapped) {
-                currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
-                toneMapped = true;
-            }
-
-            currentTextureView = this.#applySingleEffect(effect, currentTextureView, width, height);
-        }
-
-        if (!toneMapped) {
-            currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
-        }
-
-        if (this.#view.grid) {
-            const singleSampleDepthView = useMSAA
-                ? viewRenderTextureManager.renderPath1DepthResultTextureView
-                : viewRenderTextureManager.depthTextureView;
-            this.#view.grid.render(this.#view, currentTextureView.textureView, singleSampleDepthView);
-        }
-
-        if (useFXAA || (useTAA && this.#view.constructor.name !== 'View3D')) {
-            currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
-        }
-
-        if (useTAA && this.#view.constructor.name === 'View3D' && taa.sharpness > 0) {
-            currentTextureView = this.#applySingleEffect(taa.casPass, currentTextureView, width, height);
-        }
+        let currentTextureView = this.#renderBuiltIn(this.#view, this.#prepareInitialSourceTexture(this.#view));
+        currentTextureView = this.#renderLDRToScreen(this.#view, currentTextureView);
 
         this.#texturePool.releaseAll();
 
+        return currentTextureView;
+    }
+
+    #renderBuiltIn(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        const {width, height} = sourceTextureInfo.texture;
+        const {redGPUContext, rawCamera, skyAtmosphere, builtInEffectManager, toneMappingManager} = view;
+        const {antialiasingManager} = redGPUContext;
+        const {useTAA} = antialiasingManager;
+        const {useAutoExposure} = rawCamera;
+        const {
+            useSSAO,
+            useSSR,
+            useFog,
+            useHeightFog,
+            useDOF,
+            useBloom,
+            useLensFlare,
+            useChromaticAberration,
+            useLensDistortion,
+            useVignetting,
+            useFilmGrain
+        } = builtInEffectManager;
+
+        let currentTextureView = sourceTextureInfo;
+        if (skyAtmosphere) {
+            currentTextureView = this.#applySingleEffect(skyAtmosphere, currentTextureView, width, height);
+        }
+
+        if (useSSAO) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.ssao, currentTextureView, width, height);
+        }
+        if (useSSR) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.ssr, currentTextureView, width, height);
+        }
+        if (useFog) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.fog, currentTextureView, width, height);
+        }
+        if (useHeightFog) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.heightFog, currentTextureView, width, height);
+        }
+
+        if (useTAA && view.constructor.name === 'View3D') {
+            currentTextureView = this.#applySingleEffect(view.taa, currentTextureView, width, height);
+        }
+
+        if (useAutoExposure && view.constructor.name === 'View3D') {
+            builtInEffectManager.autoExposure.render(currentTextureView);
+        }
+        if (useDOF) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.dof, currentTextureView, width, height);
+        }
+        if (useBloom) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.bloom, currentTextureView, width, height);
+        }
+        if (useLensFlare) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.lensFlare, currentTextureView, width, height);
+        }
+        currentTextureView = this.#applySingleEffect(toneMappingManager, currentTextureView, width, height);
+
+        if (useChromaticAberration) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.chromaticAberration, currentTextureView, width, height);
+        }
+        if (useLensDistortion) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.lensDistortion, currentTextureView, width, height);
+        }
+        if (useVignetting) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.vignetting, currentTextureView, width, height);
+        }
+        if (useFilmGrain) {
+            currentTextureView = this.#applySingleEffect(builtInEffectManager.filmGrain, currentTextureView, width, height);
+        }
+        return currentTextureView;
+    }
+
+    #renderLDRToScreen(view: View3D, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        const {width, height} = sourceTextureInfo.texture;
+
+        let currentTextureView = sourceTextureInfo;
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            currentTextureView = this.#applySingleEffect(effects[i], currentTextureView, width, height);
+        }
         return currentTextureView;
     }
 
@@ -437,9 +383,10 @@ class PostEffectManager extends RedGPUObject {
      * [EN] Clears cached resources of all registered effects and the texture pool.
      */
     clear() {
-        this.#postEffects.forEach(effect => {
-            effect.clear()
-        })
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            effects[i].clear();
+        }
         if (this.#texturePool) {
             this.#texturePool.clear();
         }
@@ -454,7 +401,11 @@ class PostEffectManager extends RedGPUObject {
         height: number
     ): IPostEffectResult {
         const nextTextureView = effect.render(this.#view, width, height, currentTextureView);
-        if (currentTextureView && currentTextureView.texture) {
+        if (
+            currentTextureView &&
+            currentTextureView.texture &&
+            currentTextureView.texture !== nextTextureView?.texture
+        ) {
             this.#texturePool.release(currentTextureView.texture);
         }
         return nextTextureView;
@@ -462,31 +413,26 @@ class PostEffectManager extends RedGPUObject {
 
     #initGBufferLayouts() {
         const {gpuDevice} = this.#view.redGPUContext;
+        const sharedVisibility = GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT;
 
-        const getEntries = (useMSAA: boolean): GPUBindGroupLayoutEntry[] => [
-            {
-                binding: 0,
-                visibility: GPUShaderStage.COMPUTE,
-                texture: {sampleType: 'depth', multisampled: useMSAA}
-            },
-            {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
-            {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {}},
-            {
-                binding: 3,
-                visibility: GPUShaderStage.COMPUTE,
-                texture: {sampleType: 'depth', multisampled: useMSAA}
-            },
-            {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-            {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {}}
-        ];
-
-        this.#gbufferBindGroupLayoutMSAA = gpuDevice.createBindGroupLayout({
-            label: 'PostEffect_Shared_GBuffer_BGL_MSAA',
-            entries: getEntries(true)
-        });
-        this.#gbufferBindGroupLayoutNonMSAA = gpuDevice.createBindGroupLayout({
-            label: 'PostEffect_Shared_GBuffer_BGL_NonMSAA',
-            entries: getEntries(false)
+        this.#gbufferBindGroupLayout = gpuDevice.createBindGroupLayout({
+            label: 'PostEffect_Shared_GBuffer_BGL',
+            entries: [
+                {
+                    binding: 0,
+                    visibility: sharedVisibility,
+                    texture: {sampleType: 'depth', multisampled: false}
+                },
+                {binding: 1, visibility: sharedVisibility, texture: {}},
+                {binding: 2, visibility: sharedVisibility, texture: {}},
+                {
+                    binding: 3,
+                    visibility: sharedVisibility,
+                    texture: {sampleType: 'depth', multisampled: false}
+                },
+                {binding: 4, visibility: sharedVisibility, buffer: {type: 'uniform'}},
+                {binding: 5, visibility: sharedVisibility, sampler: {}}
+            ]
         });
     }
 
@@ -498,12 +444,16 @@ class PostEffectManager extends RedGPUObject {
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {width, height} = gBufferColorTexture;
 
-        const msaaChanged = this.#prevMSAAID_for_gbuffer !== msaaID;
+        const msaaChanged = this.#prevMsaaIdForGbuffer !== msaaID;
         const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
 
         if (msaaChanged || dimensionsChanged) {
-            const depthView0 = viewRenderTextureManager.depthTextureView;
-            const depthView1 = viewRenderTextureManager.prevDepthTextureView;
+            const depthView0 = useMSAA
+                ? viewRenderTextureManager.renderPath1DepthResultTextureView
+                : viewRenderTextureManager.depthTextureView;
+            const depthView1 = useMSAA
+                ? viewRenderTextureManager.renderPath1DepthResultTextureView
+                : viewRenderTextureManager.prevDepthTextureView;
 
             const normalView = useMSAA
                 ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
@@ -520,55 +470,48 @@ class PostEffectManager extends RedGPUObject {
                 size: this.#postEffectSystemUniformBuffer.size
             };
 
-            const getEntries = (currentDepth: GPUTextureView, prevDepth: GPUTextureView) => [
-                {binding: 0, resource: currentDepth},
-                {binding: 1, resource: normalView},
-                {binding: 2, resource: motionVectorView},
-                {binding: 3, resource: prevDepth},
-                {binding: 4, resource: systemUniformBuffer},
-                {binding: 5, resource: basicSampler}
-            ];
+            const layout = this.#gbufferBindGroupLayout;
 
-            const layout = useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
-
-            this.#gbufferBindGroup_swap0 = gpuDevice.createBindGroup({
+            this.#gbufferBindGroupSwap0 = gpuDevice.createBindGroup({
                 label: 'PostEffect_Shared_GBuffer_BG_Swap0',
                 layout,
-                entries: getEntries(depthView0, depthView1)
+                entries: [
+                    {binding: 0, resource: depthView0},
+                    {binding: 1, resource: normalView},
+                    {binding: 2, resource: motionVectorView},
+                    {binding: 3, resource: depthView1},
+                    {binding: 4, resource: systemUniformBuffer},
+                    {binding: 5, resource: basicSampler}
+                ]
             });
 
-            this.#gbufferBindGroup_swap1 = gpuDevice.createBindGroup({
+            this.#gbufferBindGroupSwap1 = gpuDevice.createBindGroup({
                 label: 'PostEffect_Shared_GBuffer_BG_Swap1',
                 layout,
-                entries: getEntries(depthView1, depthView0)
+                entries: [
+                    {binding: 0, resource: depthView1},
+                    {binding: 1, resource: normalView},
+                    {binding: 2, resource: motionVectorView},
+                    {binding: 3, resource: depthView0},
+                    {binding: 4, resource: systemUniformBuffer},
+                    {binding: 5, resource: basicSampler}
+                ]
             });
 
-            this.#prevMSAAID_for_gbuffer = msaaID;
-        }
-    }
-
-    #checkSSAO() {
-        if (!this.#ssao && this.#useSSAO) {
-            this.#ssao = new SSAO(this.#view.redGPUContext)
-        }
-    }
-
-    #checkSSR() {
-        if (!this.#ssr && this.#useSSR) {
-            this.#ssr = new SSR(this.#view.redGPUContext)
+            this.#prevMsaaIdForGbuffer = msaaID;
         }
     }
 
     #updateSystemUniforms() {
         const {
-            inverseProjectionMatrix,
-            projectionMatrix,
             noneJitterProjectionMatrix,
+            projectionMatrix,
+            inverseProjectionMatrix,
             rawCamera,
             redGPUContext,
-            taa,
             renderViewStateData,
-            skyAtmosphere
+            skyAtmosphere,
+            builtInEffectManager
         } = this.#view;
         const {gpuDevice, antialiasingManager} = redGPUContext;
         const {viewMatrix} = rawCamera;
@@ -585,16 +528,17 @@ class PostEffectManager extends RedGPUObject {
 
         SystemUniformUpdater.updateTime(renderViewStateData, time.members, this.#uniformDataF32, this.#uniformDataU32);
 
+        const projectionInfo = this.#projectionInfo;
+        projectionInfo.projectionMatrix = projectionMatrix;
+        projectionInfo.projectionViewMatrix = projectionViewMatrix;
+        projectionInfo.noneJitterProjectionMatrix = noneJitterProjectionMatrix;
+        projectionInfo.noneJitterProjectionViewMatrix = noneJitterProjectionViewMatrix;
+        projectionInfo.inverseProjectionMatrix = inverseProjectionMatrix;
+        projectionInfo.inverseProjectionViewMatrix = mat4.invert(temp3, projectionViewMatrix);
+        projectionInfo.prevNoneJitterProjectionViewMatrix = antialiasingManager.useTAA ? this.#view.taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix;
+
         SystemUniformUpdater.updateProjection(
-            {
-                projectionMatrix,
-                projectionViewMatrix,
-                noneJitterProjectionMatrix,
-                noneJitterProjectionViewMatrix,
-                inverseProjectionMatrix,
-                inverseProjectionViewMatrix: mat4.invert(temp3, projectionViewMatrix),
-                prevNoneJitterProjectionViewMatrix: antialiasingManager.useTAA ? taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix
-            },
+            projectionInfo,
             projection.members,
             this.#uniformDataF32,
             this.#uniformDataU32
@@ -602,12 +546,19 @@ class PostEffectManager extends RedGPUObject {
 
         SystemUniformUpdater.updateSkyAtmosphere(skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32);
 
-        updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-            {key: 'preExposure', value: this.autoExposure.preExposure},
-            {key: 'devicePixelRatio', value: devicePixelRatio}
-        ]);
+        this.#preExposureEntry.value = builtInEffectManager.getPreExposure();
+        this.#preExposureRatioEntry.value = 1.0;
+        this.#devicePixelRatioEntry.value = devicePixelRatio;
+        updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, this.#systemExtraEntries);
 
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
+
+        if (rawCamera.useAutoExposure && this.#view.constructor.name === 'View3D' && members.preExposure) {
+            builtInEffectManager.autoExposure.syncPostEffectSystemUniformBuffer(
+                gpuBuffer,
+                members.preExposure.uniformOffset
+            );
+        }
     }
 
     #init() {
@@ -625,15 +576,19 @@ class PostEffectManager extends RedGPUObject {
 
     #calcVideoMemory() {
         this.#videoMemorySize = 0;
+        if (this.#postEffectSystemUniformBuffer) {
+            this.#videoMemorySize += this.#postEffectSystemUniformBuffer.videoMemorySize;
+        }
         if (this.#texturePool) {
             this.#videoMemorySize += this.#texturePool.videoMemorySize;
         }
-        this.#postEffects.forEach(effect => {
-            this.#videoMemorySize += effect.videoMemorySize
-        })
+        const postEffects = this.#postEffects;
+        for (let i = 0, len = postEffects.length; i < len; i++) {
+            this.#videoMemorySize += postEffects[i].videoMemorySize;
+        }
     }
 
-    #renderToStorageTexture(view: View3D): IPostEffectResult {
+    #prepareInitialSourceTexture(view: View3D): IPostEffectResult {
         const {redGPUContext, viewRenderTextureManager} = view;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {antialiasingManager} = redGPUContext;

@@ -165,7 +165,7 @@ fn getDirectionalShadowVisibility(
         oneOverTextureSize
     );
 
-    // 🌟 6. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
+    // 🌟 6. [캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
         let safePrevIndex = max(1u, cascadeIndex) - 1u;
@@ -210,7 +210,7 @@ fn getDirectionalShadowVisibility(
         }
     }
 
-    // 🌟 8. [언리얼 엔진 표준 Soft Horizon Terminator Fade]
+    // 🌟 8. [Soft Horizon Terminator Fade]
     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
     return finalVisibility * horizonFade;
 }

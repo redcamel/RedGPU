@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] IBL Texture Size 예제
@@ -54,8 +54,8 @@ RedGPU.init(
         loadGLTF(redGPUContext, sceneLowRes, modelUrl);
 
         const updateLayout = () => {
-            const isNarrow = window.innerWidth <= 768;
-            if (isNarrow) {
+            const isPortrait = window.innerWidth < window.innerHeight;
+            if (isPortrait) {
                 viewNormal.setSize('100%', '50%');
                 viewNormal.setPosition(0, 0);
                 viewLowRes.setSize('100%', '50%');

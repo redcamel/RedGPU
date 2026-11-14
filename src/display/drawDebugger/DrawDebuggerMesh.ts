@@ -2,7 +2,7 @@ import RedGPUObject from "../../base/RedGPUObject";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
+import DebuggerColorMaterial from "./core/debuggerColorMaterial/DebuggerColorMaterial";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
@@ -48,10 +48,10 @@ const EDGES = [
 class DrawDebuggerMesh extends RedGPUObject {
     #target: Mesh;
     #vertexBuffer: VertexBuffer;
-    #material: ColorMaterial;
+    #material: DebuggerColorMaterial;
     #debugMesh: Mesh;
     #debugMode: DebugMode = 'AABB';
-    #aabbMaterial: ColorMaterial;
+    #aabbMaterial: DebuggerColorMaterial;
     #aabbDebugMesh: Mesh;
     #cachedOBB: OBB | null = null;
     #cachedAABB: AABB | null = null;
@@ -72,14 +72,14 @@ class DrawDebuggerMesh extends RedGPUObject {
         this.#target = target;
         const geometry = this.#createWireframeBoxGeometry(redGPUContext);
         this.#vertexBuffer = geometry.vertexBuffer;
-        this.#material = new ColorMaterial(redGPUContext);
+        this.#material = new DebuggerColorMaterial(redGPUContext);
         this.#material.color.setColorByRGB(255, 0, 0);
         this.#debugMesh = new Mesh(redGPUContext, geometry, this.#material);
         this.#debugMesh.primitiveState.cullMode = 'none';
         this.#debugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
 
         const aabbGeometry = this.#createWireframeBoxGeometry(redGPUContext);
-        this.#aabbMaterial = new ColorMaterial(redGPUContext);
+        this.#aabbMaterial = new DebuggerColorMaterial(redGPUContext);
         this.#aabbMaterial.color.setColorByRGB(0, 255, 0);
         this.#aabbDebugMesh = new Mesh(redGPUContext, aabbGeometry, this.#aabbMaterial);
         this.#aabbDebugMesh.primitiveState.cullMode = 'none';

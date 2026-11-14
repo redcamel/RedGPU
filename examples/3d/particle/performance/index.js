@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] 파티클 성능 테스트 예제
@@ -15,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 100;
         controller.tilt = -15;
@@ -27,7 +26,8 @@ RedGPU.init(
         view.grid = null;
         redGPUContext.addView(view);
 
-        // 2. IBL 및 스카이박스 설정
+        // [KO] IBL 및 스카이박스 설정
+        // [EN] Set up IBL and skybox
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
             '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -36,19 +36,17 @@ RedGPU.init(
 
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        // 3. 파티클 성능 테스트 생성
         const {particleWrap} = createParticlePerformanceTest(redGPUContext, scene);
 
-        // 4. 애니메이션 렌더 루프 및 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // 메인 파티클 컨테이너 애니메이션
+            // [KO] 메인 파티클 컨테이너 애니메이션
+            // [EN] Animate the main particle container
             particleWrap.x += Math.sin(time / 500);
             particleWrap.y += Math.cos(time / 500);
             particleWrap.z += Math.sin(time / 500);
         });
 
-        // 5. 테스트 GUI 설정
         renderTestPane(redGPUContext);
     },
     (failReason) => {
@@ -59,15 +57,12 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 성능 테스트를 위한 대량의 파티클 이미터들을 생성합니다.
- * [EN] Creates a large number of particle emitters for performance testing.
- */
 const createParticlePerformanceTest = (redGPUContext, scene) => {
     const texture1 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle.png');
     const texture2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
 
-    // 메인 파티클 래퍼 (중심점 표시용 구체)
+    // [KO] 메인 파티클 래퍼 (중심점 표시용 구체)
+    // [EN] Main particle wrapper (sphere indicating the origin)
     const particleWrap = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext),
@@ -75,12 +70,12 @@ const createParticlePerformanceTest = (redGPUContext, scene) => {
     );
     scene.addChild(particleWrap);
 
-    // 메인 이미터 추가
     const mainEmitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
     mainEmitter.material.diffuseTexture = texture2;
     particleWrap.addChild(mainEmitter);
 
-    // 추가 100개의 이미터 생성
+    // [KO] 추가 100개의 이미터 생성
+    // [EN] Create 100 additional particle emitters
     let i = 100;
     while (i--) {
         const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
@@ -97,10 +92,6 @@ const createParticlePerformanceTest = (redGPUContext, scene) => {
     return {particleWrap};
 };
 
-/**
- * [KO] 예제 도우미 패널을 렌더링합니다.
- * [EN] Renders the example helper panel.
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };

@@ -3,7 +3,7 @@ title: Terrain
 order: 1
 ---
 
-# 기본 지형 (Terrain)
+# 기본 지형
 
 `RedGPU.Landscape.Landscape` 클래스는 대규모 지형의 공간 그리드, 전역 하이트맵 (`globalHeightmapUrl`), 연속적 LOD 모핑, 고도 쿼리 (`getHeightAt`) 및 지형
 디버거를 총괄합니다.
@@ -12,11 +12,11 @@ order: 1
 
 ## 1. 지형 생성 및 전역 하이트맵 (`globalHeightmapUrl`)
 
-`Landscape` 인스턴스를 생성한 뒤 `globalHeightmapUrl`과 `heightScale`을 지정하고 `scene.landscape`에 할당하면 지형이 생성됩니다.
+`Landscape` 인스턴스를 생성한 뒤 `globalHeightmapUrl` 과 `heightScale` 을 지정하고 `scene.landscape`에 할당하면 지형이 생성됩니다.
 
 ### 전역 하이트맵 (`globalHeightmapUrl`)의 역할
 
-- **단독 지형 구성 및 원거리 베이스 (Macro Base)**: 별도의 타일 스트리밍 없이 `globalHeightmapUrl` 하나만으로도 전체 지형을 즉시 렌더링할 수
+- **단독 지형 구성 및 원거리 베이스**(Macro Base): 별도의 타일 스트리밍 없이 `globalHeightmapUrl` 하나만으로도 전체 지형을 즉시 렌더링할 수
   있으며, [타일 스트리밍](./tile-streaming.md) 사용 시에는 아직 고해상도 타일이 로드되지 않은 원거리 지역의 기본 윤곽 (Fallback) 역할을 수행합니다.
 - **16비트 (16-bit) PNG 정밀도 지원**: 일반 8비트 이미지 (256단계)에서 발생하는 계단 현상 (Terracing) 없이 매끄러운 경사면을 표현할 수 있도록 **16비트 그레이스케일 PNG (
   65,536단계)** 파싱을 기본 지원합니다.
@@ -63,7 +63,7 @@ scene.landscape = landscape;
 
 ## 3. 지형 고도 조회 (`getHeightAt`) 및 디버거
 
-캐릭터나 일반 `Mesh` 객체를 지형 표면 위에 안착시킬 때는 `landscape.getHeightAt(x, z)`를 사용하며, `landscape.debuggerManager`로 와이어프레임 및 LOD 분포를
+캐릭터나 일반 `Mesh` 객체를 지형 표면 위에 안착시킬 때는 `landscape.getHeightAt(x, z)` 를 사용하며, `landscape.debuggerManager` 로 와이어프레임 및 LOD 분포를
 시각적으로 점검할 수 있습니다.
 
 ```javascript

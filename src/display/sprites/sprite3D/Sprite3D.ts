@@ -24,7 +24,7 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_3D'
  * scene.addChild(sprite);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/sprite/sprite3D/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/sprite/sprite3D/"></iframe>
  *
  * @see [Sprite3D Basic example](/RedGPU/examples/3d/sprite/sprite3D/)
  * @see [Sprite3D Comparison (World vs Pixel)](/RedGPU/examples/3d/sprite/sprite3DCompare/)

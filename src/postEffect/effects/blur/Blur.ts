@@ -1,8 +1,9 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import View3D from "../../../display/view/View3D";
-import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
-import {IPostEffectResult} from "../../core/types";
+import ASingleComputePassPostEffect from "../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../core/createBasicComputePassPostEffectCode";
 import Convolution from "../convolution/Convolution";
+import computeCode from "../convolution/wgsl/computeCode.wgsl";
+import uniformStructCode from "../convolution/wgsl/uniformStructCode.wgsl";
 
 
 /**
@@ -15,14 +16,12 @@ import Convolution from "../convolution/Convolution";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/blur/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/blur/"></iframe>
  *
  * @see [Blur example](/RedGPU/examples/postEffect/blur/blur/)
  * @category Blur
  */
-class Blur extends AMultiPassPostEffect {
-    #effect_convolution: Convolution;
-
+class Blur extends ASingleComputePassPostEffect {
     /**
      * [KO] Blur 인스턴스를 생성합니다.
      * [EN] Creates a Blur instance.
@@ -37,45 +36,18 @@ class Blur extends AMultiPassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(
+        super(redGPUContext, {isLdr: true});
+        this.init(
             redGPUContext,
-            [
-                new Convolution(redGPUContext),
-            ],
+            'POST_EFFECT_CONVOLUTION',
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
-        this.#effect_convolution = this.passList[0] as Convolution;
-        this.#effect_convolution.kernel = Convolution.BLUR;
-    }
-
-    /**
-     * [KO] 블러 후처리 효과를 렌더링합니다.
-     * [EN] Renders the blur post-processing effect.
-     *
-     * @param view -
-     * [KO] 대상 `View3D` 인스턴스
-     * [EN] Target `View3D` instance
-     * @param width -
-     * [KO] 렌더링 너비 (단위: 픽셀)
-     * [EN] Rendering width (in pixels)
-     * @param height -
-     * [KO] 렌더링 높이 (단위: 픽셀)
-     * [EN] Rendering height (in pixels)
-     * @param sourceTextureInfo -
-     * [KO] 입력 소스 텍스처 정보
-     * [EN] Input source texture information
-     * @returns
-     * [KO] 블러 처리된 결과 텍스처 정보 (`IPostEffectResult`)
-     * [EN] Blurred output texture information (`IPostEffectResult`)
-     */
-    render(
-        view: View3D,
-        width: number,
-        height: number,
-        sourceTextureInfo: IPostEffectResult
-    ): IPostEffectResult {
-        return this.#effect_convolution.render(
-            view, width, height, sourceTextureInfo
-        );
+        let kernelWeight = 0;
+        for (let i = 0, len = Convolution.BLUR.length; i < len; i++) {
+            kernelWeight += Convolution.BLUR[i];
+        }
+        this.updateUniform('kernelWeight', kernelWeight || 1);
+        this.updateUniform('kernel', Convolution.BLUR);
     }
 }
 

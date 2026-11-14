@@ -1,43 +1,109 @@
 import React from 'react';
 import {useExamplesStore} from '../store/useExamplesStore';
+import CategoryNav from './CategoryNav';
+import ViewControls from './ViewControls';
 import Logo from './header/Logo';
 import SearchInput from './header/SearchInput';
 import HeaderActions from './header/HeaderActions';
 
 const Header: React.FC = () => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
+    const isCompact = useExamplesStore(state => state.isCompact);
+    const searchQuery = useExamplesStore(state => state.searchQuery);
+    const sidebarOpen = useExamplesStore(state => state.sidebarOpen);
+
+    if (isNarrow) {
+        return (
+            <header style={{
+                ...headerStyle,
+                margin: '16px 16px 0 16px',
+            }}>
+                <Logo/>
+                {!isCompact && !searchQuery && <CategoryNav/>}
+                <div style={centerSectionStyle}>
+                    <SearchInput/>
+                </div>
+            </header>
+        );
+    }
 
     return (
-        <header style={{...headerStyle, padding: isNarrow ? '0 10px' : '0 20px'}}>
-            <Logo />
-
-            <div style={centerSectionStyle}>
-                <SearchInput />
+        <header style={{
+            ...headerStyle,
+            margin: '20px 20px 0 20px',
+        }}>
+            <div style={leftGroupStyle}>
+                <div style={{
+                    ...brandColumnStyle,
+                    width: (!searchQuery && sidebarOpen) ? '272px' : 'auto',
+                }}>
+                    <Logo/>
+                </div>
+                {!searchQuery && <CategoryNav/>}
             </div>
 
-            <HeaderActions />
+            <div style={rightGroupStyle}>
+                <div style={desktopSearchWrapperStyle}>
+                    <SearchInput/>
+                </div>
+                {!!searchQuery && <ViewControls/>}
+                <HeaderActions/>
+            </div>
         </header>
     );
 };
 
 const headerStyle: React.CSSProperties = {
     display: 'flex',
-    alignItems: 'stretch',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    height: '60px',
-    backgroundColor: '#111112',
-    borderBottom: '1px solid #333',
-    padding: '0 20px',
+    height: '46px',
+    gap: '12px',
+    backgroundColor: 'transparent',
+    padding: 0,
     zIndex: 100,
+    flexShrink: 0,
+};
+
+const leftGroupStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    flex: '0 0 auto',
+};
+
+const brandColumnStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+    flexShrink: 0,
+    transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+};
+
+const rightGroupStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: '8px',
+    flex: '1 1 auto',
+    minWidth: 0,
+};
+
+const desktopSearchWrapperStyle: React.CSSProperties = {
+    width: '100%',
+    maxWidth: '220px',
+    minWidth: '100px',
+    flex: '0 1 220px',
 };
 
 const centerSectionStyle: React.CSSProperties = {
     flex: 1,
+    minWidth: 0,
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    maxWidth: '600px',
-    padding: '0 20px',
+    padding: 0,
 };
 
 export default Header;

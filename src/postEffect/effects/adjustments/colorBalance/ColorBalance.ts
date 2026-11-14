@@ -1,11 +1,12 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
 import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
-
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface ColorBalance {
     /**
@@ -13,64 +14,64 @@ interface ColorBalance {
      * [EN] Yellow-Blue balance in highlight areas (-100 ~ 100)
      * @defaultValue 0
      */
-    highlightYellowBlue: number,
+    highlightYellowBlue: number;
     /**
      * [KO] 하이라이트 영역의 마젠타-초록 밸런스 (-100 ~ 100)
      * [EN] Magenta-Green balance in highlight areas (-100 ~ 100)
      * @defaultValue 0
      */
-    highlightMagentaGreen: number,
+    highlightMagentaGreen: number;
     /**
      * [KO] 하이라이트 영역의 시안-빨강 밸런스 (-100 ~ 100)
      * [EN] Cyan-Red balance in highlight areas (-100 ~ 100)
      * @defaultValue 0
      */
-    highlightCyanRed: number,
+    highlightCyanRed: number;
 
     /**
      * [KO] 미드톤 영역의 노랑-파랑 밸런스 (-100 ~ 100)
      * [EN] Yellow-Blue balance in midtone areas (-100 ~ 100)
      * @defaultValue 0
      */
-    midtoneYellowBlue: number,
+    midtoneYellowBlue: number;
     /**
      * [KO] 미드톤 영역의 마젠타-초록 밸런스 (-100 ~ 100)
      * [EN] Magenta-Green balance in midtone areas (-100 ~ 100)
      * @defaultValue 0
      */
-    midtoneMagentaGreen: number,
+    midtoneMagentaGreen: number;
     /**
      * [KO] 미드톤 영역의 시안-빨강 밸런스 (-100 ~ 100)
      * [EN] Cyan-Red balance in midtone areas (-100 ~ 100)
      * @defaultValue 0
      */
-    midtoneCyanRed: number,
+    midtoneCyanRed: number;
 
     /**
      * [KO] 쉐도우 영역의 노랑-파랑 밸런스 (-100 ~ 100)
      * [EN] Yellow-Blue balance in shadow areas (-100 ~ 100)
      * @defaultValue 0
      */
-    shadowYellowBlue: number,
+    shadowYellowBlue: number;
     /**
      * [KO] 쉐도우 영역의 마젠타-초록 밸런스 (-100 ~ 100)
      * [EN] Magenta-Green balance in shadow areas (-100 ~ 100)
      * @defaultValue 0
      */
-    shadowMagentaGreen: number,
+    shadowMagentaGreen: number;
     /**
      * [KO] 쉐도우 영역의 시안-빨강 밸런스 (-100 ~ 100)
      * [EN] Cyan-Red balance in shadow areas (-100 ~ 100)
      * @defaultValue 0
      */
-    shadowCyanRed: number,
+    shadowCyanRed: number;
 
     /**
      * [KO] 색상 변경 후 원본 휘도(밝기) 보존 여부
      * [EN] Whether to preserve original luminosity after color changes
      * @defaultValue true
      */
-    preserveLuminosity: boolean
+    preserveLuminosity: boolean;
 }
 
 /**
@@ -86,12 +87,12 @@ interface ColorBalance {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/colorBalance/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/colorBalance/"></iframe>
  *
  * @see [ColorBalance example](/RedGPU/examples/postEffect/adjustments/colorBalance/)
  * @category Adjustments
  */
-class ColorBalance extends ASinglePassPostEffect {
+class ColorBalance extends ASingleComputePassPostEffect {
 
     /**
      * [KO] ColorBalance 인스턴스를 생성합니다.
@@ -111,14 +112,51 @@ class ColorBalance extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_COLOR_BALANCE',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
+    }
+
+    /**
+     * [KO] 색상 균형(Color Balance) 조절 효과를 렌더링합니다.
+     * [EN] Renders the color balance adjustment effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 색상 균형이 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with color balance applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (
+            this.highlightYellowBlue === 0 &&
+            this.highlightMagentaGreen === 0 &&
+            this.highlightCyanRed === 0 &&
+            this.midtoneYellowBlue === 0 &&
+            this.midtoneMagentaGreen === 0 &&
+            this.midtoneCyanRed === 0 &&
+            this.shadowYellowBlue === 0 &&
+            this.shadowMagentaGreen === 0 &&
+            this.shadowCyanRed === 0
+        ) {
+            return sourceTextureInfo;
+        }
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 
 defineBoolean(ColorBalance, [
     {key: 'preserveLuminosity', value: true}
-])
+]);
 defineNumber(ColorBalance, [
     {key: 'highlightYellowBlue', value: 0, min: -100, max: 100},
     {key: 'highlightMagentaGreen', value: 0, min: -100, max: 100},
@@ -129,7 +167,6 @@ defineNumber(ColorBalance, [
     {key: 'shadowYellowBlue', value: 0, min: -100, max: 100},
     {key: 'shadowMagentaGreen', value: 0, min: -100, max: 100},
     {key: 'shadowCyanRed', value: 0, min: -100, max: 100},
-
-])
-Object.freeze(ColorBalance)
-export default ColorBalance
+]);
+Object.freeze(ColorBalance);
+export default ColorBalance;

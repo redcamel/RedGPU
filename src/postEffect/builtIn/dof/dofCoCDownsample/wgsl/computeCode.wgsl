@@ -1,0 +1,149 @@
+let index = global_id.xy;
+let halfDims = vec2<f32>(postEffectOutputDimensions);
+let fullDims = vec2<i32>(textureDimensions(sourceTexture));
+let maxColorCoord = max(fullDims - vec2<i32>(1), vec2<i32>(0));
+let maxDepthCoord = max(vec2<i32>(textureDimensions(depthTexture)) - vec2<i32>(1), vec2<i32>(0));
+let baseCoord = vec2<i32>(index) * 2;
+
+let d00Coord = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxDepthCoord);
+let d10Coord = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxDepthCoord);
+let d01Coord = clamp(baseCoord + vec2<i32>(0, 1), vec2<i32>(0), maxDepthCoord);
+let d11Coord = clamp(baseCoord + vec2<i32>(1, 1), vec2<i32>(0), maxDepthCoord);
+
+let invProjZW = extractInvProjZW(systemUniforms.projection.inverseProjectionMatrix);
+let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
+let maxHalfCoC = computeAutoMaxHalfCoC(systemUniforms.devicePixelRatio);
+
+let minFocusDepth = max(systemUniforms.camera.nearClipping, 0.01);
+let maxFocusDepth = min(max(systemUniforms.camera.farClipping, minFocusDepth + 1.0), 65000.0);
+let manualFocusDistance = clamp(uniforms.focusDistance, minFocusDepth, maxFocusDepth);
+var effectiveFocusDistance = manualFocusDistance;
+if (uniforms.useAutoFocus == 1u) {
+    let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
+    effectiveFocusDistance = select(manualFocusDistance, focusState.r, focusState.g > 0.5);
+}
+
+let lensParams = computeDOFCoCLensParams(
+    uniforms.aperture,
+    uniforms.focalLength,
+    effectiveFocusDistance,
+    halfDims.y
+);
+
+let coc00 = samplePhysicalHalfCoCAtDepthCoord(d00Coord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+let coc10 = samplePhysicalHalfCoCAtDepthCoord(d10Coord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+let coc01 = samplePhysicalHalfCoCAtDepthCoord(d01Coord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+let coc11 = samplePhysicalHalfCoCAtDepthCoord(d11Coord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+
+let minSignedCoC = min(min(coc00, coc10), min(coc01, coc11));
+let maxSignedCoC = max(max(coc00, coc10), max(coc01, coc11));
+
+// [KO] 2x2 쿼드 내 카메라 최근접(최소 CoC) 픽셀 좌표를 판별하여 전경 차폐 우선 대표 CoC 및 모션 벡터 샘플링 좌표로 활용
+// [EN] Identify the camera-closest (minimum CoC) pixel coordinate within the 2x2 quad for foreground-occluding CoC and motion vector sampling
+var closestDepthCoord = d00Coord;
+var closestCoC = coc00;
+if (coc10 < closestCoC) {
+    closestCoC = coc10;
+    closestDepthCoord = d10Coord;
+}
+if (coc01 < closestCoC) {
+    closestCoC = coc01;
+    closestDepthCoord = d01Coord;
+}
+if (coc11 < closestCoC) {
+    closestCoC = coc11;
+    closestDepthCoord = d11Coord;
+}
+
+// [KO] 전경(coc < 0)과 비전경(coc >= 0) 도메인을 연속 가중치로 분리하여 중간값 정리에 의한 양·음수 선형 혼합 영점 교차(CoC ≈ 0) 및 이진 스텝 점프를 원천 차단
+// [EN] Continuously separate foreground (coc < 0) and non-foreground (coc >= 0) domains to prevent zero-crossing (CoC ≈ 0) and binary step jumps from positive/negative linear mixing
+let avgCoC = (coc00 + coc10 + coc01 + coc11) * 0.25;
+let fgMask00 = smoothstep(0.05, 0.35, -coc00);
+let fgMask10 = smoothstep(0.05, 0.35, -coc10);
+let fgMask01 = smoothstep(0.05, 0.35, -coc01);
+let fgMask11 = smoothstep(0.05, 0.35, -coc11);
+let fgCount = fgMask00 + fgMask10 + fgMask01 + fgMask11;
+let nonFgCount = 4.0 - fgCount;
+let nonFgAvgCoC = select(
+    avgCoC,
+    (coc00 * (1.0 - fgMask00) + coc10 * (1.0 - fgMask10) + coc01 * (1.0 - fgMask01) + coc11 * (1.0 - fgMask11)) / max(nonFgCount, 1e-4),
+    nonFgCount > 1e-4
+);
+let fgAvgCoC = select(minSignedCoC, (coc00 * fgMask00 + coc10 * fgMask10 + coc01 * fgMask01 + coc11 * fgMask11) / max(fgCount, 1e-4), fgCount > 1e-4);
+let cocSpan = maxSignedCoC - minSignedCoC;
+let relativeSpan = cocSpan / max(abs(minSignedCoC), 0.5);
+let fgPreserve = mix(fgAvgCoC, minSignedCoC, smoothstep(0.25, 1.0, relativeSpan));
+let oppositeSignWeight = smoothstep(0.10, 0.35, -minSignedCoC) * smoothstep(0.10, 0.35, maxSignedCoC);
+let fgBlendWeight = max(smoothstep(0.15, 0.75, -minSignedCoC), oppositeSignWeight);
+var tileCoC = mix(nonFgAvgCoC, fgPreserve, fgBlendWeight);
+
+let c00 = clamp(baseCoord + vec2<i32>(0, 0), vec2<i32>(0), maxColorCoord);
+let c10 = clamp(baseCoord + vec2<i32>(1, 0), vec2<i32>(0), maxColorCoord);
+let c01 = clamp(baseCoord + vec2<i32>(0, 1), vec2<i32>(0), maxColorCoord);
+let c11 = clamp(baseCoord + vec2<i32>(1, 1), vec2<i32>(0), maxColorCoord);
+
+let col00 = textureLoad(sourceTexture, c00, 0).rgb;
+let col10 = textureLoad(sourceTexture, c10, 0).rgb;
+let col01 = textureLoad(sourceTexture, c01, 0).rgb;
+let col11 = textureLoad(sourceTexture, c11, 0).rgb;
+
+var hasValidHistory: bool = false;
+var prevSample = vec4<f32>(0.0);
+var temporalCoCBlend: f32 = 1.0;
+
+if (uniforms.historyValid == 1u) {
+    let dLCoord = clamp(baseCoord + vec2<i32>(-1, 0), vec2<i32>(0), maxDepthCoord);
+    let dRCoord = clamp(baseCoord + vec2<i32>(2, 0), vec2<i32>(0), maxDepthCoord);
+    let dUCoord = clamp(baseCoord + vec2<i32>(0, -1), vec2<i32>(0), maxDepthCoord);
+    let dDCoord = clamp(baseCoord + vec2<i32>(0, 2), vec2<i32>(0), maxDepthCoord);
+
+    let cocL = samplePhysicalHalfCoCAtDepthCoord(dLCoord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocR = samplePhysicalHalfCoCAtDepthCoord(dRCoord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocU = samplePhysicalHalfCoCAtDepthCoord(dUCoord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocD = samplePhysicalHalfCoCAtDepthCoord(dDCoord, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+
+    let minOuterCoC = min(minSignedCoC, min(min(cocL, cocR), min(cocU, cocD)));
+    let maxOuterCoC = max(maxSignedCoC, max(max(cocL, cocR), max(cocU, cocD)));
+    let hasSignDiscontinuity = (minOuterCoC < -0.1) && (maxOuterCoC > 0.1);
+    let safeMinOuterCoC = select(minOuterCoC, max(minOuterCoC, 0.0), tileCoC >= 0.0);
+    let safeMaxOuterCoC = select(maxOuterCoC, min(maxOuterCoC, 0.0), tileCoC < 0.0);
+
+    let velocity = textureLoad(gBufferMotionVector, closestDepthCoord, 0).xy;
+    if (all(abs(velocity) <= vec2<f32>(DOF_MAX_VALID_MOTION_UV))) {
+        let centerUV = (vec2<f32>(index) + 0.5) / max(halfDims, vec2<f32>(1.0));
+        let prevUV = centerUV - velocity;
+        if (all(prevUV >= vec2<f32>(0.0)) && all(prevUV <= vec2<f32>(1.0))) {
+            prevSample = textureSampleLevel(prevCoCTexture, basicSampler, prevUV, 0.0);
+            let isSameSignHistory = (prevSample.a * tileCoC >= 0.0) || (abs(prevSample.a) < 0.2 && abs(tileCoC) < 0.2);
+            let isNotCancelledOnEdge = !hasSignDiscontinuity || (prevSample.a * tileCoC > 0.0 && abs(prevSample.a - tileCoC) <= max(abs(tileCoC) * 0.5, 1.0));
+            if (isSameSignHistory && isNotCancelledOnEdge) {
+                hasValidHistory = true;
+                let clampedPrevCoC = clamp(prevSample.a, safeMinOuterCoC, safeMaxOuterCoC);
+                let motionPixels = length(velocity * vec2<f32>(fullDims));
+                temporalCoCBlend = clamp(0.10 + motionPixels * 0.15, 0.10, 0.65);
+                tileCoC = mix(clampedPrevCoC, tileCoC, temporalCoCBlend);
+            }
+        }
+    }
+}
+
+// [KO] 시간 안정화된 tileCoC 반경 크기에 비례하는 양방향(Bilateral) 컬러 가중 평균
+// [EN] Bilateral color weighted average proportional to temporally stabilized tileCoC radius magnitude
+let cocScaleRef = max(abs(tileCoC) * 0.25, 0.25);
+let w00 = 1.0 / (0.25 + abs(coc00 - tileCoC) / cocScaleRef);
+let w10 = 1.0 / (0.25 + abs(coc10 - tileCoC) / cocScaleRef);
+let w01 = 1.0 / (0.25 + abs(coc01 - tileCoC) / cocScaleRef);
+let w11 = 1.0 / (0.25 + abs(coc11 - tileCoC) / cocScaleRef);
+let wSum = w00 + w10 + w01 + w11;
+
+var downsampledColor = (col00 * w00 + col10 * w10 + col01 * w01 + col11 * w11) / wSum;
+
+if (hasValidHistory) {
+    let minCol = min(min(col00, col10), min(col01, col11));
+    let maxCol = max(max(col00, col10), max(col01, col11));
+    let colMargin = (maxCol - minCol) * 0.15;
+    let clampedPrevColor = clamp(prevSample.rgb, max(vec3<f32>(0.0), minCol - colMargin), maxCol + colMargin);
+    downsampledColor = mix(clampedPrevColor, downsampledColor, temporalCoCBlend);
+}
+
+textureStore(outputTexture, index, vec4<f32>(downsampledColor, tileCoC));

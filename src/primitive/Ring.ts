@@ -10,7 +10,7 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * ```typescript
  * const ring = new RedGPU.Primitive.Ring(redGPUContext, 0.5, 1, 32, 1);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/ring/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/ring/"></iframe>
  *
  * @see [Ring example](/RedGPU/examples/3d/primitive/ring/)
  * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)

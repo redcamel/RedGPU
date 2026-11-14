@@ -1,12 +1,13 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 import defineUint from "../../../../defineProperty/funcs/number/defineUint";
-
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface RadialBlur {
     /**
@@ -14,25 +15,25 @@ interface RadialBlur {
      * [EN] Blur strength (0 or greater)
      * @defaultValue 50
      */
-    amount: number
+    amount: number;
     /**
      * [KO] 블러 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙)
      * [EN] Blur center X offset (unit: pixels, 0 = screen center)
      * @defaultValue 0
      */
-    centerX: number
+    centerX: number;
     /**
      * [KO] 블러 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙)
      * [EN] Blur center Y offset (unit: pixels, 0 = screen center)
      * @defaultValue 0
      */
-    centerY: number
+    centerY: number;
     /**
      * [KO] 샘플링 횟수 (2 ~ 100)
      * [EN] Number of samples (2 ~ 100)
      * @defaultValue 16
      */
-    sampleCount: number
+    sampleCount: number;
 }
 
 /**
@@ -47,12 +48,12 @@ interface RadialBlur {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/"></iframe>
  *
  * @see [RadialBlur example](/RedGPU/examples/postEffect/blur/radialBlur/)
  * @category Blur
  */
-class RadialBlur extends ASinglePassPostEffect {
+class RadialBlur extends ASingleComputePassPostEffect {
 
     /**
      * [KO] RadialBlur 인스턴스를 생성합니다.
@@ -68,26 +69,49 @@ class RadialBlur extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1, isLdr: true});
         this.init(
             redGPUContext,
             'POST_EFFECT_RADIAL_BLUR',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 
-
+    /**
+     * [KO] 방사형 회전 블러(Radial Blur) 효과를 렌더링합니다.
+     * [EN] Renders the radial rotational blur effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 방사형 블러가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with radial blur applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.amount <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 definePositiveNumber(RadialBlur, [
     {key: 'amount', value: 50}
-])
+]);
 defineNumber(RadialBlur, [
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},
-])
+]);
 defineUint(RadialBlur, [
     {key: 'sampleCount', value: 16, min: 2, max: 100},
-])
-Object.freeze(RadialBlur)
-export default RadialBlur
+]);
+Object.freeze(RadialBlur);
+export default RadialBlur;

@@ -9,7 +9,7 @@ struct VertexOutput {
 struct FragmentOutput {
     @location(0) color : vec4<f32>,
     @location(1) normal : vec4<f32>,
-    @location(2) motionVector : vec4<f32>,
+    @location(2) motionVector : vec2<f32>,
 };
 
 @group(1) @binding(0) var bg_transmittanceLUT : texture_2d<f32>;
@@ -34,7 +34,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let tEarth = getRaySphereIntersection(camPos, viewDir, groundRadius);
     let isGroundHit = groundRadius > 0.0 && tEarth > 0.0;
 
-    let sunDir = uniforms.sunDirection;
+    let sunDir = normalize(uniforms.sunDirection);
 
     var baseRadiance: vec3<f32>;
     var skyTransmittance: f32 = 1.0;
@@ -68,7 +68,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
         let viewSunCos = dot(viewDir, sunDir);
         let skyTransVec = vec3<f32>(skyTransmittance);
         let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, skyTransVec);
-        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, skyTransVec);
+        let sunDisk = getSunDiskRadianceUnit(viewDir, sunDir, uniforms.sunSize, uniforms.sunLimbDarkening, skyTransVec);
         addedRadiance = mieGlow + sunDisk;
     }
 
@@ -105,6 +105,6 @@ fn main(input : VertexOutput) -> FragmentOutput {
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-    output.motionVector = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+    output.motionVector = vec2<f32>(100.0, 100.0);
     return output;
 }

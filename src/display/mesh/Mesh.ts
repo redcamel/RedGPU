@@ -47,7 +47,7 @@ interface Mesh {
      * [KO] TAA 지터(Jitter) 비활성화 여부
      * [EN] Whether to disable TAA jitter
      */
-    disableJitter: boolean
+
     /**
      * [KO] 변위 텍스처(Displacement Texture) 사용 여부
      * [EN] Whether to use displacement texture
@@ -81,7 +81,7 @@ interface LODGPURenderInfo {
  * scene.addChild(mesh);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
  *
  * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
@@ -157,6 +157,7 @@ class Mesh extends MeshBase {
     #drawBufferManager: DrawBufferManager | null = null;
     #needUpdateNormalMatrixUniform: boolean = true;
     #needUpdateMatrixUniform: boolean = true;
+    #needUpdatePrevMatrixUniform: boolean = true;
     #uniformDataMatrixList: Float32Array;
     #displacementScale: number;
     #LODManager: LODManager;
@@ -1337,32 +1338,37 @@ class Mesh extends MeshBase {
         if (passFrustumCulling) {
             {
                 if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
-
-                    const {redGPUContext} = this
-                    const {resourceManager} = redGPUContext
-                    const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
-                    const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-                    if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-                        this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                        if (!this.#needUpdateMatrixUniform) {
-                            redGPUContext.globalVertexSSBO.updateFloatData(
-                                this.#globalVertexSlotIndex,
-                                this.#prevModelMatrix,
-                                vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset / 4
-                            )
+                    if (this.#needUpdateMatrixUniform || this.#needUpdatePrevMatrixUniform || !this.#prevModelMatrix) {
+                        const {redGPUContext} = this
+                        const {resourceManager} = redGPUContext
+                        const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
+                        const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+                        if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+                            this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                            if (!this.#needUpdateMatrixUniform) {
+                                redGPUContext.globalVertexSSBO.updateFloatData(
+                                    this.#globalVertexSlotIndex,
+                                    this.#prevModelMatrix,
+                                    vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset / 4
+                                )
+                            }
+                        }
+                        if (this.#needUpdateMatrixUniform || !this.#prevModelMatrix) {
+                            if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+                            const prev = this.#prevModelMatrix
+                            const current = this.modelMatrix
+                            prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
+                            prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
+                            prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
+                            prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+                            this.#needUpdatePrevMatrixUniform = true
+                        } else {
+                            this.#needUpdatePrevMatrixUniform = false
                         }
                     }
-                    {
-                        if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
-                        const prev = this.#prevModelMatrix
-                        const current = this.modelMatrix
-                        prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
-                        prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
-                        prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
-                        prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
-                    }
-                } else {
+                } else if (this.#prevModelMatrix) {
                     this.#prevModelMatrix = null
+                    this.#needUpdatePrevMatrixUniform = true
                 }
                 {
                     const {redGPUContext} = this
@@ -1544,7 +1550,8 @@ class Mesh extends MeshBase {
                 bundleListParticleLayer,
                 bundleListTransparentLayer,
                 bundleListAlphaLayer,
-                bundleListBasicList
+                bundleListBasicList,
+                bundleListDebuggerLayer
             } = renderViewStateData.renderBundleResults
             {
                 {
@@ -1562,7 +1569,7 @@ class Mesh extends MeshBase {
                     }
                     if (
                         !this.#bundleEncoderList[viewIndex]
-                        || this.#prevSystemBindGroupList[viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
+                        || this.#prevSystemBindGroupList[viewIndex] !== (currentMaterial.isDebuggerMaterial ? view.systemUniform_Debugger_UniformBindGroup : view.systemUniform_Vertex_UniformBindGroup)
                     ) {
                         this.#setRenderBundle(renderViewStateData)
                     }
@@ -1642,7 +1649,9 @@ class Mesh extends MeshBase {
                             }
                         }
                     }
-                    if (currentMaterial.use2PathRender) {
+                    if (currentMaterial.isDebuggerMaterial) {
+                        bundleListDebuggerLayer[bundleListDebuggerLayer.length] = renderBundle
+                    } else if (currentMaterial.use2PathRender) {
                         bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
                     } else if (this['isInstanceofParticle']) {
                         bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle
@@ -1813,7 +1822,7 @@ class Mesh extends MeshBase {
         this.#events = {};
         this.#eventsNum = 0;
 
-        console.log(`🧹 Mesh destroy 완료: ${this.name || '무명'}`);
+
     }
 
     #updateLODPipeline = () => {
@@ -1902,14 +1911,20 @@ class Mesh extends MeshBase {
         this.#setDrawBuffer(geometry, lodIndex)
         const isLOD = lodIndex !== null
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
-            ...view.basicRenderBundleEncoderDescriptor,
+            ...(material.isDebuggerMaterial
+                ? {
+                    colorFormats: ['rgba8unorm'] as GPUTextureFormat[],
+                    depthStencilFormat: 'depth32float' as GPUTextureFormat,
+                    sampleCount: 1
+                }
+                : view.basicRenderBundleEncoderDescriptor),
             label: this.uuid,
         })
         if (isLOD) {
 
         } else {
             this.#bundleEncoderList[renderViewStateData.viewIndex] = bundleEncoder
-            this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup
+            this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = material.isDebuggerMaterial ? view.systemUniform_Debugger_UniformBindGroup : view.systemUniform_Vertex_UniformBindGroup
             this.#prevFragmentBindGroup = fragmentUniformBindGroup
         }
 
@@ -1927,7 +1942,7 @@ class Mesh extends MeshBase {
                 bundleEncoder.setVertexBuffer(index + 1, v)
             })
         }
-        bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+        bundleEncoder.setBindGroup(0, material.isDebuggerMaterial ? view.systemUniform_Debugger_UniformBindGroup : view.systemUniform_Vertex_UniformBindGroup);
         bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
         bundleEncoder.setBindGroup(2, fragmentUniformBindGroup)
         let drawCommandSlot = this.#drawCommandSlot
@@ -1998,7 +2013,7 @@ class Mesh extends MeshBase {
                 targetShaderModule = this.gpuRenderInfo.vertexShaderModule;
             }
         } else {
-            console.log('🚀 버텍스 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
+
         }
         this.gpuRenderInfo.vertexShaderModule = targetShaderModule;
     }
@@ -2011,11 +2026,11 @@ class Mesh extends MeshBase {
                 activeFeatures.add(uniformName);
             }
         }
-        console.log('activeFeatures', activeFeatures, this);
+
         const variantKey = activeFeatures.size > 0 ?
             Array.from(activeFeatures).sort().join('+') : 'none';
         if (activeFeatures.size) {
-            console.log('선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+
         }
         return variantKey;
     }
@@ -2028,7 +2043,7 @@ Object.defineProperty(Mesh.prototype, 'isInstanceofMesh', {
 defineBoolean(Mesh, [
     {key: 'receiveShadow', value: false},
     {key: 'useDisplacementTexture', value: false},
-    {key: 'disableJitter', value: false},
+
 ])
 Object.freeze(Mesh)
 export default Mesh

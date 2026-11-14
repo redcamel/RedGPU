@@ -223,7 +223,7 @@ class HDRTexture extends ManagementResourceBase {
         const textureDescriptor: GPUTextureDescriptor = {
             size: [this.#width, this.#height, 1],
             format: this.#format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
             label: `HDRTexture_2D_${this.#src}`
         };
 

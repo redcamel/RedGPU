@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] PhongMaterial Textures 예제
@@ -117,7 +117,7 @@ RedGPU.init(
                 label.worldSize = 0.9;
                 label.setPosition(0, -2, 0);
                 label.useBillboard = true;
-                label.useBillboardPerspective = true;
+
                 mesh.addChild(label);
             });
         });

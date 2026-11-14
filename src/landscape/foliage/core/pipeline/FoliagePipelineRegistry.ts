@@ -200,7 +200,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
                     writeMask: 0,
                 },
                 {
-                    format: 'rgba16float',
+                    format: 'rg16float',
                     blend: undefined,
                     writeMask: 0,
                 }
@@ -226,7 +226,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
                     writeMask,
                 },
                 {
-                    format: 'rgba16float',
+                    format: 'rg16float',
                     blend: undefined,
                     writeMask,
                 }

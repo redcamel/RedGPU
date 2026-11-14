@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Bitmap Texture Sampler 예제
@@ -19,9 +19,6 @@ RedGPU.init(
         controller.distance = 7.5;
 
         const scene = new RedGPU.Display.Scene();
-
-        const directionalLight = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(directionalLight);
 
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
@@ -51,12 +48,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Mesh} mesh
- */
 const renderTestPane = (redGPUContext, mesh) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {

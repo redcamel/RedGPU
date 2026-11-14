@@ -55,22 +55,55 @@ redUnit.testGroup(
             });
         }, true);
 
-        runner.defineTest('Success Test: Lazy Loaded Effects (SSAO, SSR, AutoExposure)', (run) => {
-            setup(run, (ctx, manager) => {
-                const ssao = manager.ssao;
+        runner.defineTest('Success Test: BuiltInEffectManager Lazy Loaded Effects (SSAO, SSR, Fog, HeightFog, DOF, Bloom, AutoExposure, ChromaticAberration, LensDistortion, Vignetting, FilmGrain)', (run) => {
+            setup(run, (ctx, manager, view) => {
+                const builtInEffectManager = view.builtInEffectManager;
+                const ssao = builtInEffectManager.ssao;
                 const checkSSAO = ssao instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
-                
-                const ssr = manager.ssr;
-                const checkSSR = ssr instanceof RedGPU.PostEffect.Core.ASinglePassPostEffect;
-                
-                const ae = manager.autoExposure;
-                const checkAE = ae instanceof RedGPU.Camera.Core.AutoExposure;
-                
-                manager.useSSAO = true;
-                manager.useSSR = true;
-                const checkToggles = manager.useSSAO === true && manager.useSSR === true;
-                
-                run(checkSSAO && checkSSR && checkAE && checkToggles);
+
+                const ssr = builtInEffectManager.ssr;
+                const checkSSR = ssr instanceof RedGPU.PostEffect.Core.ASingleComputePassPostEffect;
+
+                const fog = builtInEffectManager.fog;
+                const checkFog = fog instanceof RedGPU.PostEffect.BuiltIn.Fog;
+
+                const heightFog = builtInEffectManager.heightFog;
+                const checkHeightFog = heightFog instanceof RedGPU.PostEffect.BuiltIn.HeightFog;
+
+                const dof = builtInEffectManager.dof;
+                const checkDOF = dof instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
+
+                const bloom = builtInEffectManager.bloom;
+                const checkBloom = bloom instanceof RedGPU.PostEffect.Core.AMultiPassPostEffect;
+
+                const ae = builtInEffectManager.autoExposure;
+                const checkAE = ae instanceof RedGPU.PostEffect.BuiltIn.AutoExposure;
+
+                const chromaticAberration = builtInEffectManager.chromaticAberration;
+                const checkChromaticAberration = chromaticAberration instanceof RedGPU.PostEffect.BuiltIn.ChromaticAberration;
+
+                const lensDistortion = builtInEffectManager.lensDistortion;
+                const checkLensDistortion = lensDistortion instanceof RedGPU.PostEffect.BuiltIn.LensDistortion;
+
+                const vignetting = builtInEffectManager.vignetting;
+                const checkVignetting = vignetting instanceof RedGPU.PostEffect.BuiltIn.Vignetting;
+
+                const filmGrain = builtInEffectManager.filmGrain;
+                const checkFilmGrain = filmGrain instanceof RedGPU.PostEffect.BuiltIn.FilmGrain;
+
+                builtInEffectManager.useSSAO = true;
+                builtInEffectManager.useSSR = true;
+                builtInEffectManager.useFog = true;
+                builtInEffectManager.useHeightFog = true;
+                builtInEffectManager.useDOF = true;
+                builtInEffectManager.useBloom = true;
+                builtInEffectManager.useChromaticAberration = true;
+                builtInEffectManager.useLensDistortion = true;
+                builtInEffectManager.useVignetting = true;
+                builtInEffectManager.useFilmGrain = true;
+                const checkToggles = builtInEffectManager.useSSAO === true && builtInEffectManager.useSSR === true && builtInEffectManager.useFog === true && builtInEffectManager.useHeightFog === true && builtInEffectManager.useDOF === true && builtInEffectManager.useBloom === true && builtInEffectManager.useChromaticAberration === true && builtInEffectManager.useLensDistortion === true && builtInEffectManager.useVignetting === true && builtInEffectManager.useFilmGrain === true;
+
+                run(checkSSAO && checkSSR && checkFog && checkHeightFog && checkDOF && checkBloom && checkAE && checkChromaticAberration && checkLensDistortion && checkVignetting && checkFilmGrain && checkToggles);
             });
         }, true);
 
@@ -98,5 +131,80 @@ redUnit.testGroup(
                 } catch (e) { run(false, e); }
             });
         }, true);
+
+        runner.defineTest('Success Test: HeightFog default properties and valid setter updates', (run) => {
+            setup(run, (ctx, manager, view) => {
+                try {
+                    const heightFog = view.builtInEffectManager.heightFog;
+                    const checkDefaults =
+                        heightFog.density === 0.02 &&
+                        heightFog.baseHeight === 0 &&
+                        heightFog.height === 20 &&
+                        heightFog.nearDistance === 0 &&
+                        heightFog.farDistance === 50 &&
+                        heightFog.maxOpacity === 1 &&
+                        heightFog.fogType === RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL &&
+                        heightFog.fogColor instanceof RedGPU.ColorRGB;
+
+                    heightFog.density = 0.5;
+                    heightFog.baseHeight = -5;
+                    heightFog.height = 15;
+                    heightFog.nearDistance = 2;
+                    heightFog.farDistance = 80;
+                    heightFog.maxOpacity = 0.85;
+                    heightFog.fogType = RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL_SQUARED;
+                    heightFog.fogColor.setColorByRGB(180, 200, 240);
+
+                    const checkUpdated =
+                        Math.abs(heightFog.density - 0.5) < 0.0001 &&
+                        heightFog.baseHeight === -5 &&
+                        heightFog.height === 15 &&
+                        heightFog.nearDistance === 2 &&
+                        heightFog.farDistance === 80 &&
+                        Math.abs(heightFog.maxOpacity - 0.85) < 0.0001 &&
+                        heightFog.fogType === RedGPU.PostEffect.BuiltIn.HeightFog.EXPONENTIAL_SQUARED &&
+                        heightFog.fogColor.r === 180 &&
+                        heightFog.fogColor.g === 200 &&
+                        heightFog.fogColor.b === 240;
+
+                    run(checkDefaults && checkUpdated);
+                } catch (e) {
+                    run(false, e);
+                }
+            });
+        }, true);
+
+        runner.defineTest('Failure Test: HeightFog density NaN validation', (run) => {
+            setup(run, (ctx, manager, view) => {
+                try {
+                    view.builtInEffectManager.heightFog.density = NaN;
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            });
+        }, false);
+
+        runner.defineTest('Failure Test: HeightFog baseHeight NaN validation', (run) => {
+            setup(run, (ctx, manager, view) => {
+                try {
+                    view.builtInEffectManager.heightFog.baseHeight = NaN;
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            });
+        }, false);
+
+        runner.defineTest('Failure Test: HeightFog fogType negative validation', (run) => {
+            setup(run, (ctx, manager, view) => {
+                try {
+                    view.builtInEffectManager.heightFog.fogType = -1;
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            });
+        }, false);
     }
 );

@@ -5,16 +5,41 @@ const path = require('path');
 const baseUrl = 'https://redcamel.github.io/RedGPU/examples';
 // 대상 디렉토리 경로
 const examplesDir = path.join(__dirname, '../../examples');
-// 탐색할 카테고리
-const categories = ['2d', '3d', 'gltf', 'physics', 'postEffect'];
 
 // 현재 날짜 가져오기 (lastmod용)
 const today = new Date().toISOString().split('T')[0];
 
+// 1. exampleList.ts에서 정식 등록된 예제 경로 목록 추출
+const registeredPaths = new Set();
+const listPath = path.join(examplesDir, 'exampleHelper/src/data/exampleList.ts');
+if (fs.existsSync(listPath)) {
+    let listContent = fs.readFileSync(listPath, 'utf8');
+    listContent = listContent.replace(/import[\s\S]*?;/g, '');
+    listContent = listContent.replace(/:\s*ExampleListType/g, '');
+    listContent = listContent.replace(/export\s+default\s+[\s\S]*?;/g, '');
+    listContent = listContent.replace(/export\s+/g, '');
+    listContent = listContent.replace(/Object\.freeze\([\s\S]*?\);/g, '');
+    listContent += '\nreturn ExampleList;';
+
+    try {
+        const exampleList = new Function(listContent)();
+        const flatten = (list) => {
+            if (!list) return;
+            list.forEach((item) => {
+                if (item.path) registeredPaths.add(item.path);
+                if (item.list) flatten(item.list);
+            });
+        };
+        flatten(exampleList);
+    } catch (e) {
+        console.error('Failed to parse exampleList.ts:', e.message);
+    }
+}
+
 // URL 카운터
 let urlCount = 0;
 
-// 1. Examples Sitemap 생성 (sitemap-examples.xml)
+// 2. Examples Sitemap 생성 (sitemap-examples.xml)
 let examplesSitemapXML = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -31,18 +56,17 @@ let examplesSitemapXML = `<?xml version="1.0" encoding="UTF-8"?>
   </url>
 `;
 
-let num = 0;
+const sortedPaths = Array.from(registeredPaths).sort();
 
-// 폴더 구조 재귀적으로 탐색
-function exploreDirectory(dirPath, urlPath) {
+for (const relPath of sortedPaths) {
+    const dirPath = path.join(examplesDir, relPath);
     const indexHtmlPath = path.join(dirPath, 'index.html');
-    // index.html 파일이 있는지 확인
     if (fs.existsSync(indexHtmlPath)) {
         const indexJsPath = path.join(dirPath, 'index.js');
         const targetPath = fs.existsSync(indexJsPath) ? indexJsPath : indexHtmlPath;
         const lastModDate = fs.statSync(targetPath).mtime.toISOString().split('T')[0];
+        const urlPath = `${baseUrl}/${relPath}`;
 
-        // index.html이 있는 경우만 사이트맵에 추가
         examplesSitemapXML += `  <url>
     <loc>${urlPath}/</loc>
     <lastmod>${lastModDate}</lastmod>
@@ -51,30 +75,6 @@ function exploreDirectory(dirPath, urlPath) {
   </url>
 `;
         urlCount++;
-        console.log(`추가됨: ${urlPath}/`, ++num);
-    }
-
-    // 하위 디렉토리 읽기
-    const items = fs.readdirSync(dirPath);
-
-    for (const item of items) {
-        const itemPath = path.join(dirPath, item);
-        const stat = fs.statSync(itemPath);
-
-        // 디렉토리만 처리
-        if (stat.isDirectory()) {
-            exploreDirectory(itemPath, `${urlPath}/${item}`);
-        }
-    }
-}
-
-// 각 카테고리 탐색
-for (const category of categories) {
-    const categoryPath = path.join(examplesDir, category);
-
-    // 카테고리 폴더가 존재하는지 확인
-    if (fs.existsSync(categoryPath)) {
-        exploreDirectory(categoryPath, `${baseUrl}/${category}`);
     }
 }
 
@@ -86,11 +86,9 @@ const sitemapDir = path.join(__dirname, '../../');
 
 // Examples 사이트맵 파일 저장
 fs.writeFileSync(path.join(sitemapDir, 'sitemap-examples.xml'), examplesSitemapXML);
-console.log(`Examples 사이트맵이 생성되었습니다: sitemap-examples.xml (총 ${urlCount}개 URL)`);
+console.log(`Examples 사이트맵이 생성되었습니다: sitemap-examples.xml (총 ${urlCount}개 정식 예제 URL)`);
 
-
-// 2. Root Sitemap Index 생성 (sitemap.xml)
-// 이 파일은 다른 사이트맵들을 가리키는 인덱스 파일입니다.
+// 3. Root Sitemap Index 생성 (sitemap.xml)
 const sitemapIndexXML = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>

@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Sprite2D 기본 예제
@@ -67,10 +67,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 const renderTestPane = (redGPUContext, sprite) => {
     new RedGPUExampleHelper(redGPUContext, {
         redGPUContext: true,

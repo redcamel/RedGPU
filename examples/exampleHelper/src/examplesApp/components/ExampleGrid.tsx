@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from 'react';
 import ExampleSection from './ExampleSection';
 import {useFilteredExamples} from '../hooks/useFilteredExamples';
 import {ExampleItem} from '../../types/example';
-import {splitSectionItems} from '../utils/sectionHelpers';
+import {sectionStackStyle, splitSectionItems} from '../utils/sectionHelpers';
 import {useExamplesStore} from '../store/useExamplesStore';
 
 const ExampleGrid: React.FC = () => {
@@ -130,7 +130,7 @@ const ExampleGrid: React.FC = () => {
             )}
 
             {groupItems.length > 0 && (
-                <div style={stackStyle}>
+                <div style={sectionStackStyle}>
                     {groupItems.map((item, idx) => (
                         <ExampleSection key={item.name + idx} item={item} lcpCounter={lcpCounter} />
                     ))}
@@ -150,13 +150,6 @@ const gridStyle = (mode: string, isNarrow: boolean): React.CSSProperties => {
         gap: isNarrow ? '16px' : '24px',
         marginBottom: '40px',
     };
-};
-
-const stackStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '32px',
-    marginBottom: '20px',
 };
 
 const searchHeaderStyle: React.CSSProperties = {

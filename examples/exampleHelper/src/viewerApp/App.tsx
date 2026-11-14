@@ -16,6 +16,38 @@ import {keepLog} from "@redgpu/src/utils";
 const LazyGuiPanel = React.lazy(() => import('./gui/GuiPanel'));
 
 /**
+ * [KO] 모바일 기기에서 가로(Landscape) 모드로 보고 있는지 여부를 판별합니다.
+ * [EN] Determines whether the user is viewing in landscape mode on a mobile device.
+ */
+const checkIsMobileLandscape = (): boolean => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+    const isCoarseNoHover = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const isMobileUA = (navigator as any).userAgentData?.mobile === true ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTouchDevice = isCoarseNoHover || navigator.maxTouchPoints > 0;
+    const isLandscape = window.matchMedia('(orientation: landscape)').matches ||
+        window.innerWidth > window.innerHeight;
+
+    return isLandscape && (
+        (isMobileUA && isTouchDevice) ||
+        (isCoarseNoHover && window.innerHeight <= 600)
+    );
+};
+
+/**
+ * [KO] 현재 페이지가 iframe 내부에 임베드되어 있는지 여부를 판별합니다.
+ * [EN] Determines whether the current page is embedded inside an iframe.
+ */
+const checkIsIframe = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    try {
+        return window.self !== window.top;
+    } catch {
+        return true;
+    }
+};
+
+/**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
  * [EN] Main application component of the example helper.
  */
@@ -23,22 +55,28 @@ const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
-    const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
     const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
+    const isIframe = React.useMemo(() => checkIsIframe(), []);
 
-    // [KO] 모바일 환경(isNarrow)에서 진입 시 설정 패널을 1초 후 자동으로 닫음 (사용자 경험 개선)
-    // [EN] Automatically close the settings panel after 1 second on mobile (isNarrow) for better UX
+    // [KO] 모바일 환경(세로 협소 화면 또는 모바일 가로 모드) 진입 시 설정 패널을 1초 후 자동으로 닫음 (사용자 경험 개선)
+    // [EN] Automatically close the settings panel after 1 second on mobile (narrow portrait or mobile landscape) for better UX
     const autoCloseTriggered = React.useRef(false);
     React.useEffect(() => {
-        if (isNarrow && showSettingsPanel && !autoCloseTriggered.current) {
-            autoCloseTriggered.current = true;
+        if (autoCloseTriggered.current || !showSettingsPanel) return;
+        const shouldAutoClose = isIframe
+            ? (window.innerWidth <= 540 || checkIsMobileLandscape())
+            : (isNarrow || checkIsMobileLandscape());
+        if (shouldAutoClose) {
             const timer = setTimeout(() => {
+                autoCloseTriggered.current = true;
                 setShowSettingsPanel(false);
                 keepLog('Auto close settings panel');
             }, 1000);
             return () => clearTimeout(timer);
+        } else {
+            autoCloseTriggered.current = true;
         }
-    }, []);
+    }, [isIframe, isNarrow, showSettingsPanel, setShowSettingsPanel]);
 
     // [KO] 뷰포트 상태 동기화
     useViewportSync();
@@ -51,8 +89,10 @@ const App = () => {
 
     const dynamicPanelStyle: React.CSSProperties = {
         ...panelStyle,
-        maxHeight: isNarrow ? 'calc(100vh - 160px)' : 'calc(100vh - 103px)',
-        transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 10px))',
+        top: isIframe ? '68px' : (isNarrow ? '74px' : '80px'),
+        right: (isIframe || isNarrow) ? '16px' : '20px',
+        maxHeight: isIframe ? 'calc(100dvh - 84px)' : (isNarrow ? 'calc(100dvh - 238px)' : 'calc(100dvh - 158px)'),
+        transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 24px))',
         opacity: showSettingsPanel ? 1 : 0,
         pointerEvents: showSettingsPanel ? 'auto' : 'none',
         transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -60,8 +100,8 @@ const App = () => {
 
     return (
         <>
-            <ExampleHeader/>
-            <Description/>
+            <ExampleHeader isIframe={isIframe}/>
+            {!isIframe && <Description/>}
 
             <div style={dynamicPanelStyle}>
                 <div style={contentStyle}>
@@ -73,13 +113,16 @@ const App = () => {
 
             <GuiCompareLabelHelper/>
 
-            <Footer 
-                narrowTitle={<Title />}
-                narrowSettings={<RenderingSettingsGroup />}
-                isNarrow={isNarrow}
-                onShowSource={() => setShowSourceModal(true)}
-            />
-            <SourceModal/>
+            {!isIframe && (
+                <>
+                    <Footer
+                        narrowTitle={<Title/>}
+                        narrowSettings={<RenderingSettingsGroup/>}
+                        isNarrow={isNarrow}
+                    />
+                    <SourceModal/>
+                </>
+            )}
             <LoadingUI/>
         </>
     );
@@ -88,14 +131,19 @@ const App = () => {
 // Styles
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    right: '6px',
-    top: '60px',
     display: 'flex',
     flexDirection: 'column',
+    boxSizing: 'border-box',
     color: 'white',
     fontFamily: 'monospace',
     zIndex: 10002,
-    borderLeft: '1px solid rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(18, 18, 20, 0.82)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '18px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+    padding: '8px',
     overflow: 'hidden',
 };
 
@@ -103,6 +151,7 @@ const contentStyle: React.CSSProperties = {
     fontSize: '12px',
     flex: 1,
     overflowY: 'auto',
+    borderRadius: '10px',
     display: 'flex',
     flexDirection: 'column',
     gap: '24px'

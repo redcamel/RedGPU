@@ -1,6 +1,6 @@
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -42,21 +42,12 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		/**
-		 * [KO] 복잡한 지형 생성 함수 (정적 메쉬 콜라이더 사용)
-		 * RedGPU 물리 플러그인은 PHYSICS_SHAPE.MESH 설정을 통해 
-		 * 박스나 구체가 아닌 실제 메쉬의 정교한 형태 그대로 충돌 판정을 수행할 수 있게 합니다.
-		 * [EN] Function to create complex terrain (using static mesh collider)
-		 * The RedGPU physics plugin allows precise collision detection matching the 
-		 * actual mesh shape using the PHYSICS_SHAPE.MESH setting.
-		 */
 		const createComplexStatic = (geometry, x, y, z, rx, color) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				geometry,
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+				new RedGPU.Material.PhongMaterial(redGPUContext, color)
 			);
-			mesh.material.color.setColorByHEX(color);
 			mesh.x = x;
 			mesh.y = y;
 			mesh.z = z;
@@ -89,7 +80,7 @@ RedGPU.init(
 			0,
 			0,
 			110,
-			'#666666'
+			'#707070'
 		);
 		createComplexStatic(
 			new RedGPU.Primitive.TorusKnot(redGPUContext, 3, 0.8, 64, 16),
@@ -97,7 +88,7 @@ RedGPU.init(
 			-5,
 			0,
 			0,
-			'#444444'
+			'#585858'
 		);
 
 		// [KO] 바닥 생성 및 물리 적용: 시인성을 위해 색상을 #666666으로 변경
@@ -105,10 +96,9 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 30, 30),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+			new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.y = -10;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -117,17 +107,18 @@ RedGPU.init(
 
 		const activeBalls = [];
 
-		/**
-		 * [KO] 동적 구체 생성 함수
-		 * [EN] Function to create dynamic balls
-		 */
+		const getRandomColor = () => {
+            const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+			return `#${r}${g}${b}`;
+		};
+
 		const createBall = () => {
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			const ball = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 0.1 + Math.random()),
-				material
+				new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
 			ball.x = (Math.random() * 6) - 3;
 			ball.y = 15;
@@ -155,10 +146,6 @@ RedGPU.init(
 			}, 10000);
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeBalls.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -181,12 +168,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

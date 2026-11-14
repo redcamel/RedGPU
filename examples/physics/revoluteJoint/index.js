@@ -1,6 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -49,13 +49,12 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.y = -0.5;
 		ground.scaleX = 40;
 		ground.scaleY = 1;
 		ground.scaleZ = 40;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -67,13 +66,12 @@ RedGPU.init(
 		const pillar = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#888888')
 		);
 		pillar.y = 2.5;
 		pillar.scaleX = 0.4;
 		pillar.scaleY = 5;
 		pillar.scaleZ = 0.4;
-		pillar.material.color.setColorByHEX('#888888');
 		scene.addChild(pillar);
 		
 		// [KO] pillarBody 변수를 캡처하여 이후 조인트 생성에 사용합니다.
@@ -97,17 +95,16 @@ RedGPU.init(
 		const hub = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Cylinder(redGPUContext, 0.3, 0.3, 0.4),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#d4d4d8')
 		);
 		hub.rotationX = 90;
-		hub.material.color.setColorByHEX('#ffffff');
 		propellerGroup.addChild(hub);
 
 		for (let i = 0; i < 4; i++) {
 			const blade = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#d4a538')
 			);
 			blade.scaleX = 4.0;
 			blade.scaleY = 0.3;
@@ -116,7 +113,6 @@ RedGPU.init(
 			blade.x = Math.cos(angleRad) * 2.0;
 			blade.y = Math.sin(angleRad) * 2.0;
 			blade.rotationZ = i * 90;
-			blade.material.color.setColorByHEX('#ffcc00');
 			propellerGroup.addChild(blade);
 		}
 
@@ -141,26 +137,17 @@ RedGPU.init(
 			{ x: 0, y: 0, z: 1 }      
 		);
 		const joint = physicsEngine.nativeWorld.createImpulseJoint(jointData, pillarBody.nativeBody, fanBody.nativeBody, true);
-		
-		/**
-		 * [KO] 조인트 모터 설정 (configureMotorVelocity)
-		 * 첫 번째 인자(3.0): 목표 각속도 (초당 라디안). 회전의 빠르기와 방향을 결정합니다.
-		 * 두 번째 인자(500.0): 최대 힘 (토크). 목표 속도를 유지하기 위해 낼 수 있는 최대 파워입니다.
-		 * [EN] Joint Motor Configuration (configureMotorVelocity)
-		 * 1st Arg (3.0): Target angular velocity (rad/s). Determines speed and direction.
-		 * 2nd Arg (500.0): Max force (torque). The limit of power to maintain the target speed.
-		 */
+
 		joint.configureMotorVelocity(3.0, 500.0);
 
-		// 4. 상호작용용 낙하 공
+        // [KO] 4. 상호작용용 낙하 공
+        // [EN] 4. Interactive falling ball
 		const activeBalls = [];
 		const createBall = () => {
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX('#ffffff');
 			const ball = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 0.25),
-				material
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#cccccc')
 			);
 			ball.x = (Math.random() * 4) - 2;
 			ball.y = 10;
@@ -205,13 +192,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {object} joint
- * @param {function} resetScene
- */
 const renderTestPane = (redGPUContext, joint, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

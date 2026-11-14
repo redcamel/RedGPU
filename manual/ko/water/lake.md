@@ -5,14 +5,14 @@ order: 1
 
 # Lake (호수 수체)
 
-`RedGPU.Water.Lake`는 수심별 빛 감쇠, 수중 굴절, 커스틱 (Caustics), 화면 공간 반사 (**SSR**), 그리고 물체와 부딪힐 때 동심원 물결이 퍼져나가는 **실시간 수면 인터랙션**을
+`RedGPU.Water.Lake` 는 수심별 빛 감쇠, 수중 굴절, 커스틱 (Caustics), 화면 공간 반사 (**SSR**), 그리고 물체와 부딪힐 때 동심원 물결이 퍼져나가는 **실시간 수면 인터랙션** 을
 지원하는 호수 수체 클래스입니다.
 
 ---
 
 ## 1. 생성 및 Scene 등록
 
-`Lake`는 불투명 객체 렌더링이 끝난 뒤 배경 색상·깊이 버퍼를 참조하는 2-Pass 구조로 동작합니다. `scene.addWater(lake)` 메서드로 씬에 등록하여 사용합니다.
+`Lake` 는 불투명 객체 렌더링이 끝난 뒤 배경 색상·깊이 버퍼를 참조하는 2-Pass 구조로 동작합니다. `scene.addWater(lake)` 메서드로 씬에 등록하여 사용합니다.
 
 > [!NOTE]
 > 물결 노멀 맵 (`normalTexture`, `normalDetailTexture`)은 색상이 아닌 법선 벡터 데이터이므로 `BitmapTexture` 생성 시 포맷을 선형 포맷인 **
@@ -47,7 +47,7 @@ scene.addWater(lake);
 
 ## 2. 광학 재질 설정 (`LakeMaterial`)
 
-`Lake` 생성 시 `lake.material`에 `LakeMaterial`이 자동으로 할당됩니다. 수심에 따른 색상 (`baseColor`, `deepColor`), 굴절
+`Lake` 생성 시 `lake.material`에 `LakeMaterial` 이 자동으로 할당됩니다. 수심에 따른 색상 (`baseColor`, `deepColor`), 굴절
 (`refractionStrength`), 수중 커스틱 (`causticsStrength`), 화면 공간 반사 (`enableSSR`) 등을 조절할 수 있습니다.
 
 ```javascript
@@ -66,8 +66,8 @@ mat.enableSSR = true;                   // 화면 공간 반사(SSR) 활성화
 
 캐릭터나 물체가 수면에 닿거나 이동할 때 실시간으로 동심원 물결 (Ripple)이 퍼져나가는 GPU 2D 파동 시뮬레이션을 지원합니다.
 
-1. **상호작용할 객체 (`Mesh`) 설정**: 물결을 일으킬 메시에 `mesh.enableWaterInteraction = true`를 설정합니다. (루트 메시에 설정 시 하위 자식 메시에 자동 적용)
-2. **시뮬레이션 추적 대상 설정**: 넓은 호수에서 특정 캐릭터 주변에 물결 해상도를 집중시키려면 `lake.interactionFollowTarget = characterMesh`를 지정합니다.
+1. **상호작용할 객체 (`Mesh`) 설정**: 물결을 일으킬 메시에 `mesh.enableWaterInteraction = true` 를 설정합니다. (루트 메시에 설정 시 하위 자식 메시에 자동 적용)
+2. **시뮬레이션 추적 대상 설정**: 넓은 호수에서 특정 캐릭터 주변에 물결 해상도를 집중시키려면 `lake.interactionFollowTarget = characterMesh` 를 지정합니다.
 
 ```javascript
 // 1. 물결을 일으킬 객체 설정

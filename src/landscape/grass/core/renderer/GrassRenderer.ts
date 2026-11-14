@@ -317,7 +317,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         const preferredNormalFormat = this.#preferredCanvasFormat;
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Grass_Main_RenderBundle_msaa${sampleCount}_${this.instanceId}`,
-            colorFormats: ['rgba16float', preferredNormalFormat, 'rgba16float'],
+            colorFormats: ['rgba16float', preferredNormalFormat, 'rg16float'],
             depthStencilFormat: 'depth32float',
             sampleCount
         });
@@ -609,7 +609,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
                 targets: [
                     {format: 'rgba16float'},
                     {format: preferredNormalFormat},
-                    {format: 'rgba16float'}
+                    {format: 'rg16float'}
                 ]
             },
             primitive: {

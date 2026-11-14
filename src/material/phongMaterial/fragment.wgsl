@@ -33,7 +33,7 @@ struct InputData {
 
     @location(11) combinedOpacity: f32,
     //
-    @location(12) motionVector: vec3<f32>,
+
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
@@ -70,7 +70,7 @@ fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
     let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
 
-    return albedo * lightScatter * viewScatter * energyFactor;
+    return albedo * lightScatter * viewScatter * (energyFactor * INV_PI);
 }
 
 fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
@@ -292,13 +292,13 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [KO] 간접 조명 (Ambient) [EN] Indirect lighting (Ambient)
-    var ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity;
+    var ambientContribution = albedo * u_ambientLight.color * (u_ambientLight.intensity * INV_PI);
 
     if (systemUniforms.useSkyAtmosphere == 1u) {
         let u_atmo = systemUniforms.skyAtmosphere;
         let skyIntensity = u_atmo.sunIntensity;
         let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, N.y, u_atmo.atmosphereHeight);
-        let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity;
+        let skyIrradiance = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, N, 1, 3.0).rgb * skyIntensity;
         ambientContribution = (ambientContribution * diffTrans) + (albedo * skyIrradiance);
     }
     
@@ -331,7 +331,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let smoothness = 1.0 - roughnessParameter;
     let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
     output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, smoothnessCurved * (0.04 + 0.96 * metallicParameter * metallicParameter));
-    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
+    output.gBufferMotionVector = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
     
     return output;
 }

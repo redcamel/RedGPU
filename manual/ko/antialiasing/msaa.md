@@ -3,7 +3,7 @@ title: MSAA
 order: 2
 ---
 
-# MSAA (Multisample AA)
+# MSAA
 
 **MSAA**(Multisample Antialiasing) 는 하드웨어 (GPU) 레벨에서 폴리곤의 경계 (Edge) 부분을 멀티샘플링하여 외곽선을 부드럽게 처리하는 표준 안티앨리어싱 기법입니다.
 
@@ -27,10 +27,10 @@ redGPUContext.antialiasingManager.useMSAA = true;
 
 ## 3. 품질 비교
 
-| 상태              | 결과 이미지                     |
-|:------------------|:--------------------------------|
-| **미적용 (NONE)** | ![None](/antialiasing/none.jpg) |
-| **MSAA 적용**     | ![MSAA](/antialiasing/msaa.jpg) |
+| 상태             | 결과 이미지                     |
+|:-----------------|:--------------------------------|
+| **미적용**(NONE) | ![None](/antialiasing/none.jpg) |
+| **MSAA 적용**    | ![MSAA](/antialiasing/msaa.jpg) |
 
 ---
 

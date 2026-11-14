@@ -30,12 +30,12 @@ const instancingGraph = `
 
 ## 1. 왜 인스턴싱인가?
 
-일반적인 `Mesh`를 1만 개 생성하여 씬에 추가하면 1만 번의 드로우 콜이 발생하여 CPU 오버헤드로 인해 프레임이 급격히 떨어집니다. 반면, `InstancingMesh`는 데이터들을 하나의 버퍼로 묶어 단
+일반적인 `Mesh` 를 1만 개 생성하여 씬에 추가하면 1만 번의 드로우 콜이 발생하여 CPU 오버헤드로 인해 프레임이 급격히 떨어집니다. 반면, `InstancingMesh` 는 데이터들을 하나의 버퍼로 묶어 단
 1번의 드로우 콜로 GPU에 전송하여 처리하므로 압도적인 렌더링 성능을 제공합니다.
 
 ## 2. 기본 사용법
 
-`InstancingMesh`는 생성 시 할당할 최대 인스턴스 개수 (`maxInstanceCount`)와 초기 활성 개수 (`instanceCount`)를 지정해야 합니다.
+`InstancingMesh` 는 생성 시 할당할 최대 인스턴스 개수 (`maxInstanceCount`)와 초기 활성 개수 (`instanceCount`)를 지정해야 합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -85,7 +85,7 @@ for (let i = 0; i < instancedMesh.instanceCount; i++) {
 ```
 
 ::: warning [자식 구조 제약]
-`InstancingMesh`의 자식 인스턴스 (`InstancingMeshObject3D`)는 일반 `Mesh`와 유사한 트랜스폼 인터페이스를 가지지만, 독립된 3D 객체가 아니라 GPU 인스턴싱 버퍼 데이터를
+`InstancingMesh` 의 자식 인스턴스 (`InstancingMeshObject3D`)는 일반 `Mesh` 와 유사한 트랜스폼 인터페이스를 가지지만, 독립된 3D 객체가 아니라 GPU 인스턴싱 버퍼 데이터를
 제어하는 대리자 객체입니다. 따라서 `addChild()` 등을 통해 하위 자식 객체를 계층적으로 가질 수 없습니다.
 :::
 

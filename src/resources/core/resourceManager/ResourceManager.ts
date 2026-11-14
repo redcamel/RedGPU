@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import keepLog from "../../../utils/keepLog";
+
 import Sampler from "../../sampler/Sampler";
 import {
     BRDFGenerator,
@@ -672,7 +672,7 @@ class ResourceManager extends RedGPUObject {
         const {cacheKey, targetResourceManagedState} = target;
         const {table} = targetResourceManagedState;
         if (table.get(cacheKey)) {
-            keepLog(`Resource with cacheKey ${cacheKey} is already registered.`);
+            console.warn(`Resource with cacheKey ${cacheKey} is already registered.`);
             return;
         }
         table.set(cacheKey, resourceState);
@@ -824,7 +824,7 @@ class ResourceManager extends RedGPUObject {
         this.#wgslParser.destroy()
         this.#wgslParser = null
 
-        keepLog("🧹 ResourceManager destroy 완료");
+
     }
 
     /**
@@ -901,9 +901,8 @@ class ResourceManager extends RedGPUObject {
             };
             cachedView = targetGPUTexture.createView(targetDescriptor);
             textureViewMap.set(cacheKey, cachedView);
-            console.log('🔷 새 비트맵 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
-        } else {
-            console.log('비트맵 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
+
+
         }
         return cachedView;
     }
@@ -945,9 +944,6 @@ class ResourceManager extends RedGPUObject {
             };
             cachedView = targetGPUTexture.createView(targetDescriptor);
             textureViewMap.set(cacheKey, cachedView);
-            console.log('🧊 새 큐브 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
-        } else {
-            console.log('큐브 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
         }
         return cachedView;
     }
@@ -1112,7 +1108,7 @@ class ResourceManager extends RedGPUObject {
             const emptyBitmapTexture = gpuDevice.createTexture({
                 size: {width: 1, height: 1, depthOrArrayLayers: 1},
                 format: 'rgba8unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING,
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
                 label: 'EMPTY_BITMAP_TEXTURE',
             });
             this.#emptyBitmapTextureView = emptyBitmapTexture.createView({label: emptyBitmapTexture.label});
@@ -1143,7 +1139,7 @@ class ResourceManager extends RedGPUObject {
             const emptyCubeTexture = gpuDevice.createTexture({
                 size: {width: 1, height: 1, depthOrArrayLayers: 6},
                 format: 'rgba8unorm',
-                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
                 label: 'EMPTY_CUBE_TEXTURE',
             });
             this.#emptyCubeTextureView = emptyCubeTexture.createView(CubeTexture.defaultViewDescriptor);
@@ -1161,7 +1157,7 @@ class ResourceManager extends RedGPUObject {
                 size: {width: 1, height: 1, depthOrArrayLayers: 1},
                 dimension: '3d',
                 format: 'rgba8unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                usage: GPUTextureUsage.TEXTURE_BINDING,
                 label: 'EMPTY_TEXTURE_3D',
             });
             this.#emptyTexture3DView = emptyTexture3D.createView({
@@ -1171,7 +1167,7 @@ class ResourceManager extends RedGPUObject {
 
             const emptyDepthTexture = gpuDevice.createTexture({
                 size: {width: 1, height: 1, depthOrArrayLayers: 1},
-                format: 'depth24plus',
+                format: 'depth32float',
                 usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
                 label: 'EMPTY_DEPTH_TEXTURE',
             });
@@ -1234,8 +1230,8 @@ class ResourceManager extends RedGPUObject {
                         {binding: 12, visibility: GPUShaderStage.FRAGMENT, texture: {}},
                         {binding: 13, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
                         {binding: 14, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                        {binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
-                        {binding: 16, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
+                        {binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube-array"}},
+
                         {
                             binding: 17,
                             visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
@@ -1417,6 +1413,17 @@ export class ImmutableKeyMap extends Map {
     }
 }
 
+/**
+ * [KO] 등록된 리소스의 비디오 메모리 합계를 자동으로 추적하는 내부 `Map` 확장 클래스입니다.
+ * [EN] Internal `Map` extension class that automatically tracks total video memory of registered resources.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Resource
+ */
 class MemoryTrackingMap<K, V> extends Map<K, V> {
     #videoMemory: number = 0;
 
@@ -1424,10 +1431,32 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
         super();
     }
 
+    /**
+     * [KO] 추적 중인 총 비디오 메모리 크기(바이트)를 반환합니다.
+     * [EN] Returns the total tracked video memory size in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 크기 (바이트)
+     * [EN] Video memory size in bytes
+     */
     get videoMemory(): number {
         return this.#videoMemory;
     }
 
+    /**
+     * [KO] 리소스를 맵에 등록하고 비디오 메모리 사용량을 갱신합니다.
+     * [EN] Registers a resource in the map and updates video memory usage.
+     *
+     * @param key -
+     * [KO] 리소스 키
+     * [EN] Resource key
+     * @param value -
+     * [KO] 리소스 값
+     * [EN] Resource value
+     * @returns
+     * [KO] 현재 맵 인스턴스
+     * [EN] Current map instance
+     */
     set(key: K, value: V): this {
         const videoMemoryKey =
             (value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
@@ -1446,6 +1475,17 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
         return super.set(key, value);
     }
 
+    /**
+     * [KO] 리소스를 맵에서 제거하고 비디오 메모리 사용량을 차감합니다.
+     * [EN] Removes a resource from the map and subtracts its video memory usage.
+     *
+     * @param key -
+     * [KO] 삭제할 리소스 키
+     * [EN] Resource key to delete
+     * @returns
+     * [KO] 삭제 성공 여부
+     * [EN] Whether deletion succeeded
+     */
     delete(key: K): boolean {
         if (this.has(key)) {
             const value = this.get(key) as any;
@@ -1460,6 +1500,10 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
         return super.delete(key);
     }
 
+    /**
+     * [KO] 모든 리소스를 제거하고 비디오 메모리 사용량을 초기화합니다.
+     * [EN] Clears all resources and resets video memory usage to zero.
+     */
     clear(): void {
         this.#videoMemory = 0;
         super.clear();

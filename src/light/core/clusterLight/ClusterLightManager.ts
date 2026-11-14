@@ -4,6 +4,8 @@ import PassClustersLight from "./pass/light/PassClustersLight";
 import PassClustersLightHelper from "./core/PassClustersLightHelper";
 import RedGPUObject from "../../../base/RedGPUObject";
 
+const INV_FOUR_PI = 1.0 / (4.0 * Math.PI);
+
 /**
  * [KO] `View3D`의 3차원 프러스텀 클러스터 분할 및 다중 광원(`PointLight`, `SpotLight`) GPU 컬링 패스를 관리하는 시스템 내부 클래스입니다.
  * [EN] Internal system class that manages 3D frustum cluster subdivision and multi-light (`PointLight`, `SpotLight`) GPU culling passes for a `View3D`.
@@ -101,7 +103,7 @@ class ClusterLightManager extends RedGPUObject {
      * [EN] Uploads `PointLight` and `SpotLight` data from the scene to the GPU buffer and executes the clustered lighting compute passes.
      */
     updateClusterLights() {
-        const {scene, renderViewStateData, pixelRectArray} = this.#view
+        const {scene, pixelRectArray} = this.#view
         if (!scene) return
 
         const {pointLights, spotLights} = scene.lightManager
@@ -133,12 +135,12 @@ class ClusterLightManager extends RedGPUObject {
                 this.#clusterLightsBufferData.set(
                     [
                         ...tLight.position, tLight.radius,
-                        ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen, 0
+                        ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen * INV_FOUR_PI, 0
                     ],
                     offset,
                 )
                 if (tLight.enableDebugger) {
-                    tLight.render(renderViewStateData)
+
                 }
             }
         }
@@ -152,12 +154,12 @@ class ClusterLightManager extends RedGPUObject {
                 this.#clusterLightsBufferData.set(
                     [
                         ...tLight.position, tLight.radius,
-                        ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
+                        ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen * INV_FOUR_PI, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
                     ],
                     offset,
                 )
                 if (tLight.enableDebugger) {
-                    tLight.render(renderViewStateData)
+
                 }
             }
         }

@@ -1,6 +1,6 @@
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -47,36 +47,28 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.scaleX = 60;
 		ground.scaleY = 1;
 		ground.scaleZ = 60;
 		ground.y = -0.5;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
 			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
 		});
 
-		/**
-		 * [KO] 충돌 필터 설정
-		 * 사슬 조각들끼리 겹치거나 부딪혀서 발생하는 물리적 불안정함을 방지합니다.
-		 * [EN] Collision filter setup
-		 * Prevents physical instability caused by chain links colliding or overlapping.
-		 */
 		const CHAIN_GROUP = 0x0001; 
 		const chainCollisionFilter = (CHAIN_GROUP << 16) | (~CHAIN_GROUP & 0xFFFF);
 
-		// 2. 고정 앵커 (천장에 고정된 지점)
-		// 2. Fixed anchor (point fixed to the ceiling)
+        // [KO] 2. 고정 앵커 (천장에 고정된 지점)
+        // [EN] 2. Fixed anchor (point fixed to the ceiling)
 		const anchorMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#cc4444')
 		);
-		anchorMesh.material.color.setColorByHEX('#ff4444');
 		anchorMesh.y = 15;
 		scene.addChild(anchorMesh);
 
@@ -89,13 +81,6 @@ RedGPU.init(
 		const activeChain = [];
 		let bigBallInfo = null;
 
-		/**
-		 * [KO] 조인트 생성 헬퍼: 명시적으로 spherical 메서드 사용
-		 * [EN] Joint creation helper: Explicitly use the spherical method
-		 * @param {object} a1
-		 * @param {object} a2
-		 * @returns {object}
-		 */
 		const createJointData = (a1, a2) => {
 			const JD = RAPIER.JointData;
 			// [KO] Rapier의 spherical 조인트를 사용하여 자유로운 회전을 구현합니다.
@@ -103,14 +88,9 @@ RedGPU.init(
 			return JD.spherical(a1, a2);
 		};
 
-		/**
-		 * [KO] 사슬 구조 생성 함수
-		 * [EN] Function to create the chain structure
-		 */
 		const initChain = () => {
 			const linkGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.4);
-			const linkMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-			linkMat.color.setColorByHEX('#888888');
+            const linkMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#888888');
 
 			let prevBody = anchorBody;
 			const numLinks = 8;
@@ -148,9 +128,8 @@ RedGPU.init(
 			const bigBallMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 1.5),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#4466cc')
 			);
-			bigBallMesh.material.color.setColorByHEX('#4444ff');
 			bigBallMesh.y = 15 - (numLinks + 1) * spacing - 0.5;
 			scene.addChild(bigBallMesh);
 
@@ -194,13 +173,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} getBigBallBody
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, getBigBallBody, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

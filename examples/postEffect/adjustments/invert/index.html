@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invert</title>
+    <title>Invert - RedGPU WebGPU Example</title>
     <meta name="description" content="Example of Invert color adjustment effect.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, postEffect, adjustments, invert, Invert">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/">
@@ -11,41 +11,110 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/">
-    <meta property="og:title" content="Invert">
+    <meta property="og:title" content="Invert - RedGPU WebGPU Example">
     <meta property="og:description" content="Example of Invert color adjustment effect.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/">
-    <meta property="twitter:title" content="Invert">
+    <meta property="twitter:title" content="Invert - RedGPU WebGPU Example">
     <meta property="twitter:description" content="Example of Invert color adjustment effect.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Invert",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Example of Invert color adjustment effect.",
-  "url": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Invert",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Example of Invert color adjustment effect.",
+                "url": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "PostEffect"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "PostEffect"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Adjustments"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "Invert",
+                        "item": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/invert/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>PostEffect &gt; PostEffect &gt; Adjustments</p>
+        <h1>Invert - RedGPU WebGPU Example</h1>
+        <p>Example of Invert color adjustment effect.</p>
+        <p lang="ko">색상 반전 효과 예제입니다.</p>
+        <img src="thumb.webp" alt="Invert - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/grayscale/">Grayscale</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/colorBalance/">Color Balance</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/">Color Temperature Tint</a>
+                </li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/brightnessContrast/">Brightness Contrast</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/hueSaturation/">Hue Saturation</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/threshold/">Threshold</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

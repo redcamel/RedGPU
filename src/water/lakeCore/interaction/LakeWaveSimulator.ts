@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
+import GPU_LOAD_OP from "../../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../../gpuConst/GPU_STORE_OP";
 import computeShaderCode from "./shader/lakeWaveSimulation.wgsl";
 
 /**
@@ -215,20 +217,20 @@ class LakeWaveSimulator extends RedGPUObject {
                 {
                     view: this.#waveBufferAView,
                     clearValue: {r: 0, g: 0, b: 0, a: 0},
-                    loadOp: 'clear',
-                    storeOp: 'store'
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE
                 },
                 {
                     view: this.#waveBufferBView,
                     clearValue: {r: 0, g: 0, b: 0, a: 0},
-                    loadOp: 'clear',
-                    storeOp: 'store'
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE
                 },
                 {
                     view: this.rippleNormalTextureView,
                     clearValue: {r: 0, g: 0, b: 0, a: 0},
-                    loadOp: 'clear',
-                    storeOp: 'store'
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE
                 }
             ],
             label: 'LakeWave_ClearPass'

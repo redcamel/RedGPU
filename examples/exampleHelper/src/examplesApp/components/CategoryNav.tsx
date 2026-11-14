@@ -1,22 +1,27 @@
 import React from 'react';
 import {useExamplesStore} from '../store/useExamplesStore';
 import {ExampleList} from '../../data/exampleList';
+import {glassPillContainerStyle} from '../../common/styles/uiStyles';
+import {ViewModeLangButtons} from './ViewControls';
 
 const CategoryNav: React.FC = () => {
     const activeTab = useExamplesStore(state => state.activeTab);
     const setActiveTab = useExamplesStore(state => state.setActiveTab);
     const isNarrow = useExamplesStore(state => state.isNarrow);
-    
-    const categories = ExampleList.map(cat => cat.name);
+    const isCompact = useExamplesStore(state => state.isCompact);
 
     return (
-        <nav style={navStyle}>
+        <nav style={{
+            ...navStyle,
+            width: isCompact ? '100%' : 'fit-content',
+        }}>
             <div style={{
                 ...containerStyle,
+                width: isCompact ? '100%' : 'auto',
                 overflowX: isNarrow ? 'auto' : 'visible',
                 WebkitOverflowScrolling: 'touch',
-                scrollbarWidth: 'none', // Firefox
-                msOverflowStyle: 'none', // IE 10+
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
             }}>
                 <style>
                     {`
@@ -27,39 +32,35 @@ const CategoryNav: React.FC = () => {
                 </style>
                 <div className="category-nav-container" style={{
                     display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: isCompact ? 'space-between' : 'flex-start',
+                    width: isCompact ? '100%' : 'auto',
                     height: '100%',
-                    padding: '0',
-                    maxWidth: '1600px',
-                    margin: '0',
+                    padding: 0,
+                    gap: '4px',
                 }}>
                     {ExampleList.map(category => {
                         const cat = category.name;
                         const isActive = activeTab === cat;
-                        const isExperimental = category.experimental;
-                        
+
                         return (
                             <button
                                 key={cat}
                                 style={{
                                     ...tabButtonStyle,
-                                    padding: isNarrow ? '0 16px' : '0 32px',
-                                    color: isActive ? '#fdb48d' : '#aaa',
-                                    backgroundColor: isActive ? '#1a1a1c' : '#0a0a0b',
-                                    borderBottom: isActive ? '1px solid #1a1a1c' : '1px solid #333',
-                                    borderRight: '1px solid #333',
-                                    borderTop: isActive ? '2px solid #fdb48d' : '2px solid transparent',
+                                    flex: isCompact ? '1 0 auto' : '0 0 auto',
+                                    padding: isNarrow ? '0 12px' : '0 14px',
+                                    color: isActive ? '#fdb48d' : '#a0a0ab',
+                                    backgroundColor: isActive ? 'rgba(253, 180, 141, 0.16)' : 'transparent',
                                     whiteSpace: 'nowrap',
-                                    gap: '6px'
                                 }}
                                 onClick={() => setActiveTab(cat)}
                             >
                                 {cat}
-                                {isExperimental && (
-                                    <span style={experimentalBadgeStyle}>EXP</span>
-                                )}
                             </button>
                         );
                     })}
+                    {!isNarrow && <ViewModeLangButtons inline/>}
                 </div>
             </div>
         </nav>
@@ -67,43 +68,35 @@ const CategoryNav: React.FC = () => {
 };
 
 const navStyle: React.CSSProperties = {
-    backgroundColor: '#0a0a0b',
-    height: '44px',
-    flexShrink: 0,
-    zIndex: 90,
-    borderBottom: '1px solid #333',
+    ...glassPillContainerStyle,
+    display: 'inline-flex',
+    maxWidth: '100%',
+    minWidth: 0,
+    padding: '4px',
     overflow: 'hidden',
 };
 
 const containerStyle: React.CSSProperties = {
     height: '100%',
+    maxWidth: '100%',
 };
 
 const tabButtonStyle: React.CSSProperties = {
     position: 'relative',
-    height: '100%',
-    padding: '0 32px',
+    height: '36px',
     border: 'none',
-    fontSize: '11px',
+    outline: 'none',
+    borderRadius: '9999px',
+    fontSize: '13px',
     fontWeight: 'bold',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+    transition: 'all 0.18s ease',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
-};
-
-const experimentalBadgeStyle: React.CSSProperties = {
-    fontSize: '8px',
-    backgroundColor: '#ff4d4d',
-    color: '#fff',
-    padding: '2px 4px',
-    borderRadius: '4px',
-    fontWeight: 'bold',
-    lineHeight: '1',
-    display: 'inline-block'
+    letterSpacing: '0.02em',
+    boxSizing: 'border-box',
+    flexShrink: 0,
 };
 
 export default CategoryNav;

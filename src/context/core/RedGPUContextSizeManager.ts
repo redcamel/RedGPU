@@ -203,22 +203,26 @@ class RedGPUContextSizeManager extends RedGPUObject {
      */
     get parentDomRect(): ParentRect {
         const parent = this.#htmlCanvas.parentElement;
+        const canvasRect = this.#htmlCanvas.getBoundingClientRect();
 
         if (!parent || parent === document.body || parent === document.documentElement) {
             return {
                 x: 0,
                 y: 0,
-                width: window.innerWidth,
-                height: window.innerHeight
+                width: Math.max(0, window.innerWidth - Math.max(0, canvasRect.x)),
+                height: Math.max(0, window.innerHeight - Math.max(0, canvasRect.y))
             };
         }
 
         const rect = parent.getBoundingClientRect();
+        const offsetX = Math.max(0, canvasRect.x - rect.x);
+        const offsetY = Math.max(0, canvasRect.y - rect.y);
+
         return {
             x: rect.x,
             y: rect.y,
-            width: parent.clientWidth || rect.width,
-            height: parent.clientHeight || rect.height
+            width: Math.max(0, (parent.clientWidth || rect.width) - offsetX),
+            height: Math.max(0, (parent.clientHeight || rect.height) - offsetY)
         };
     }
 

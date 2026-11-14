@@ -3,7 +3,7 @@ title: Tile Streaming
 order: 3
 ---
 
-# 타일 스트리밍 (Tile Streaming)
+# 타일 스트리밍
 
 광활한 오픈월드 지형에서는 모든 지역의 고해상도 하이트맵을 한 번에 메모리에 적재하는 대신, 카메라 이동에 따라 필요한 주변 타일만 실시간으로 비동기 스트리밍 (`tileUrlResolver`)할 수 있습니다.
 

@@ -173,7 +173,7 @@ class DownSampleCubeMapGenerator extends RedGPUObject {
             const targetCubemap = resourceManager.createManagedTexture({
                 size: [targetSize, targetSize, 6],
                 format: format,
-                usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
+                usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
                 dimension: '2d',
                 mipLevelCount: targetMipLevels,
                 label: `DOWN_SAMPLE_CUBE_GENERATOR_TEXTURE_${targetSize}_${Date.now()}`

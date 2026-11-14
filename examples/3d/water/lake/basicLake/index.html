@@ -3,49 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic Lake</title>
-    <meta name="description" content="Basic example demonstrating how to create and register a Lake (scene.addWater) and adjust water level, swell waves, and core material properties in real time.">
+    <title>Basic Lake - RedGPU WebGPU Example</title>
+    <meta name="description" content="Registers a Lake and controls water level, waves, and material settings.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, water, lake, basicLake, Basic Lake">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/">
-    <meta property="og:title" content="Basic Lake">
-    <meta property="og:description" content="Basic example demonstrating how to create and register a Lake (scene.addWater) and adjust water level, swell waves, and core material properties in real time.">
+    <meta property="og:title" content="Basic Lake - RedGPU WebGPU Example">
+    <meta property="og:description" content="Registers a Lake and controls water level, waves, and material settings.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/">
-    <meta property="twitter:title" content="Basic Lake">
-    <meta property="twitter:description" content="Basic example demonstrating how to create and register a Lake (scene.addWater) and adjust water level, swell waves, and core material properties in real time.">
+    <meta property="twitter:title" content="Basic Lake - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Registers a Lake and controls water level, waves, and material settings.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Basic Lake",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Basic example demonstrating how to create and register a Lake (scene.addWater) and adjust water level, swell waves, and core material properties in real time.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Basic Lake",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Registers a Lake and controls water level, waves, and material settings.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "World & Simulation"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Water"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "Lake"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 7,
+                        "name": "Basic Lake",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/water/lake/basicLake/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; World &amp; Simulation &gt; Water &gt; Lake</p>
+        <h1>Basic Lake - RedGPU WebGPU Example</h1>
+        <p>Registers a Lake and controls water level, waves, and material settings.</p>
+        <p lang="ko">씬에 호수(Lake)를 등록하고 수위, 파동 및 기본 재질 속성을 제어합니다.</p>
+        <img src="thumb.webp" alt="Basic Lake - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/water/lake/lakeMaterial/">Lake Material</a></li>
+                <li><a href="/RedGPU/examples/3d/water/lake/interaction/">Object Interaction</a></li>
+                <li><a href="/RedGPU/examples/3d/water/lake/characterWalking/">Character Walking</a></li>
+                <li><a href="/RedGPU/examples/3d/water/lake/multiLake/">Multi Lake</a></li>
+                <li><a href="/RedGPU/examples/3d/water/lake/lakeWithLandscape/">Lake with Landscape</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

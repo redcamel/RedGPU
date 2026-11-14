@@ -3,21 +3,22 @@ title: Procedural Grass
 order: 4
 ---
 
-# 절차적 잔디 (Procedural Grass)
+# 절차적 잔디
 
-`RedGPU.Landscape.GrassManager`는 카메라 주변의 지형 표면 위에 수십만~수백만 개의 잔디 및 초목 클럼프를 **GPU 컴퓨트 셰이더에서 16m 셀 단위로 실시간 베이킹 및 컬링**하여
+`RedGPU.Landscape.GrassManager` 는 카메라 주변의 지형 표면 위에 수십만~수백만 개의 잔디 및 초목 클럼프를 **GPU 컴퓨트 셰이더에서 16m 셀 단위로 실시간 베이킹 및 컬링**하여
 렌더링하는 시스템입니다.
 
 ---
 
 ## 1. 잔디 타입 등록 (`grassManager.addType`)
 
-잔디 클럼프 형태의 `Mesh`를 준비한 뒤 `landscape.grassManager.addType(options)`를 호출하여 등록합니다. 복수 종류의 잔디나 들꽃을 함께 배치하려면 `addType()`을 추가로
+잔디 클럼프 형태의 `Mesh` 를 준비한 뒤 `landscape.grassManager.addType(options)` 를 호출하여 등록합니다. 복수 종류의 잔디나 들꽃을 함께 배치하려면 `addType()` 을
+추가로
 호출합니다.
 
 - **양면 식생 PBR 및 서브서피스 스캐터링**: 풀잎을 통과하는 태양광의 투과광 (`subsurfaceStrength`, `subsurfaceColor`)과 지형 바닥 색상이 풀뿌리로 자연스럽게 스며드는 지면
   블렌딩 (`groundBlendStrength`)을 지원합니다.
-- **전역 바람 연동**: `scene.windManager`의 풍향·풍속에 따라 일렁이는 정점 바람 애니메이션이 자동 적용됩니다.
+- **전역 바람 연동**: `scene.windManager` 의 풍향·풍속에 따라 일렁이는 정점 바람 애니메이션이 자동 적용됩니다.
 
 ```javascript
 new RedGPU.GLTFLoader(

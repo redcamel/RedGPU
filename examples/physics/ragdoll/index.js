@@ -1,6 +1,6 @@
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -39,12 +39,11 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.scaleX = ground.scaleZ = 40;
 		ground.scaleY = 1;
 		ground.y = -0.5;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -53,23 +52,17 @@ RedGPU.init(
 
 		const activeRagdolls = [];
 
-		/**
-		 * [KO] 신체 부위(Limb) 생성 함수: 메쉬 생성과 물리 바디 등록을 동시에 수행
-		 * [EN] Limb creation function: Creates mesh and registers physics body simultaneously
-		 * @param {RedGPU.Primitive.Primitive3D} geometry
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 * @param {number} sx
-		 * @param {number} sy
-		 * @param {number} sz
-		 * @param {string} color
-		 */
+        const getRandomColor = () => {
+            const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const createLimb = (geometry, x, y, z, sx, sy, sz, color) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext));
+            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext, color));
 			mesh.x = x; mesh.y = y; mesh.z = z;
 			mesh.scaleX = sx; mesh.scaleY = sy; mesh.scaleZ = sz;
-			mesh.material.color.setColorByHEX(color);
 			scene.addChild(mesh);
 
 			const body = physicsEngine.createBody(mesh, {
@@ -82,14 +75,8 @@ RedGPU.init(
 			return { mesh, body };
 		};
 
-		/**
-		 * [KO] 인간형 래그돌 생성 및 구형 조인트(Spherical Joint) 연결 로직
-		 * [EN] Humanoid ragdoll creation and Spherical Joint connection logic
-		 * @param {number} offsetX
-		 * @param {number} offsetZ
-		 */
 		const spawnRagdoll = (offsetX, offsetZ) => {
-			const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+            const color = getRandomColor();
 			
 			// [KO] 주요 신체 부위 생성 (실제 사람 비율에 근접하게 설정)
 			// [EN] Create main body parts (Set close to real human proportions)
@@ -102,7 +89,8 @@ RedGPU.init(
 				physicsEngine.nativeWorld.createImpulseJoint(jointData, b1.nativeBody, b2.nativeBody, true);
 			};
 
-			// 목(Neck) 및 허리(Waist) 연결
+            // [KO] 목(Neck) 및 허리(Waist) 연결
+            // [EN] Connect neck and waist joints
 			connect(torso.body, head.body, { x: 0, y: 0.45, z: 0 }, { x: 0, y: -0.25, z: 0 });
 			connect(torso.body, pelvis.body, { x: 0, y: -0.45, z: 0 }, { x: 0, y: 0.2, z: 0 });
 
@@ -127,10 +115,6 @@ RedGPU.init(
 
 		spawnRagdoll(0, 0);
 
-		/**
-		 * [KO] 씬 리셋: 기존 캐릭터 제거 및 새 캐릭터 생성
-		 * [EN] Scene Reset: Remove existing characters and spawn a new one
-		 */
 		const resetScene = () => {
 			activeRagdolls.forEach(limbs => limbs.forEach(limb => {
 				physicsEngine.removeBody(limb.body);
@@ -146,13 +130,6 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} spawnRagdoll
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, spawnRagdoll, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

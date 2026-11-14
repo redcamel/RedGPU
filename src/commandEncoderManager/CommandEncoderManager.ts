@@ -1,7 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
 import RedGPUObject from "../base/RedGPUObject";
-import keepLog from "../utils/keepLog";
+
 
 /**
  * [KO] 실행 단계(Phase)별 커맨드 제출 및 패스 통계 정보를 정의하는 인터페이스입니다.
@@ -468,7 +468,6 @@ class CommandEncoderManager extends RedGPUObject {
         if (buffers.length > 0) {
             this.gpuDevice.queue.submit(buffers);
             const logData = this.#createPhaseStats(type, buffers.length);
-            console.log(`🚀 [CommandEncoderManager] Submitted ${type} Phase`, logData);
             this.#resetStat(type);
             this.#processDeferredDestroys();
             return logData;
@@ -515,7 +514,6 @@ class CommandEncoderManager extends RedGPUObject {
             this.gpuDevice.queue.submit(allBuffers);
             const deferredDestroyCount = this.#processDeferredDestroys();
             const batchStats: CommandBatchStats = {phases, deferredDestroyCount};
-            console.log(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} Command Buffer(s)`, batchStats);
             return batchStats;
         }
         const deferredDestroyCount = this.#processDeferredDestroys();
@@ -550,7 +548,6 @@ class CommandEncoderManager extends RedGPUObject {
     destroy(): void {
         this.resetAll();
         this.#deferredDestroyList.length = 0;
-        keepLog("🧹 CommandEncoderManager destroy 완료");
     }
 
     #processDeferredDestroys(): number {
@@ -576,7 +573,6 @@ class CommandEncoderManager extends RedGPUObject {
         const buffer = encoder.finish();
         gpuDevice.queue.submit([buffer]);
         await gpuDevice.queue.onSubmittedWorkDone();
-        console.log(`🚀 [CommandEncoderManager] ${logTag}`, {label});
     }
 
     #getEncoder(type: CommandEncoderType): GPUCommandEncoder {

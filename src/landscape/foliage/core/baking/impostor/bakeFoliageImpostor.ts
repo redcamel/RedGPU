@@ -1,6 +1,8 @@
 import "../../../../core/shader/library/LandscapeShaderLibrary";
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
+import GPU_LOAD_OP from "../../../../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../../../../gpuConst/GPU_STORE_OP";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import type FoliageRenderUnit from "../../FoliageRenderUnit";
 import impostorBakeVertexWGSL from "./impostorBakeVertex.wgsl";
@@ -270,14 +272,14 @@ function bakeFoliageImpostor(
         const depthGPUTexture = gpuDevice.createTexture({
             label: `Foliage_Impostor_DepthTexture_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
-            format: 'depth24plus',
+            format: 'depth32float',
             usage: RENDER_ATTACHMENT,
         });
 
     const {width, height, depth} = aabb;
-    console.log(`[bakeFoliageImpostor 🌲 3-Atlas MRT] Baking '${bakeName}': renderUnits=${renderUnits.length}, aabb=[W:${width.toFixed(2)}, H:${height.toFixed(2)}, D:${depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
 
-        const maxCameraDist = maxRadius * 4.0;
+
+    const maxCameraDist = maxRadius * 4.0;
         const renderPassViews = [];
 
         for (let gy = 0; gy < gridSize; gy++) {
@@ -514,27 +516,27 @@ function bakeFoliageImpostor(
                 {
                     view: bakedGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 0, g: 0, b: 0, a: 0},
-                    loadOp: 'clear',
-                    storeOp: 'store',
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE,
                 },
                 {
                     view: bakedNormalGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 0.5, g: 1.0, b: 0.5, a: 0},
-                    loadOp: 'clear',
-                    storeOp: 'store',
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE,
                 },
                 {
                     view: bakedORMGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 1.0, g: 1.0, b: 0.0, a: 0.0},
-                    loadOp: 'clear',
-                    storeOp: 'store',
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE,
                 },
             ],
             depthStencilAttachment: {
                 view: depthGPUTexture.createView(),
                 depthClearValue: 1.0,
-                depthLoadOp: 'clear',
-                depthStoreOp: 'discard',
+                depthLoadOp: GPU_LOAD_OP.CLEAR,
+                depthStoreOp: GPU_STORE_OP.DISCARD,
             },
         });
 
@@ -728,7 +730,7 @@ function getOrCreateBakePipeline(redGPUContext: RedGPUContext, unit: FoliageRend
                 cullMode: 'none',
             },
             depthStencil: {
-                format: 'depth24plus',
+                format: 'depth32float',
                 depthWriteEnabled: true,
                 depthCompare: 'less-equal',
             }
@@ -763,7 +765,7 @@ function executeDilation(
         label: 'Foliage_Impostor_Dilation_PingPongTexture_B',
         size: [width, height, 1],
         format: 'rgba8unorm',
-        usage: pingPongUsage
+        usage: TEXTURE_BINDING | STORAGE_BINDING
     });
 
     const steps = [1, 2, 4, 8];

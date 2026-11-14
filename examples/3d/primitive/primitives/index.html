@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Primitives</title>
+    <title>Primitives - RedGPU WebGPU Example</title>
     <meta name="description" content="Samples of basic primitive geometries supported by RedGPU.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, primitive, primitives, Primitives">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/">
@@ -11,41 +11,109 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/">
-    <meta property="og:title" content="Primitives">
+    <meta property="og:title" content="Primitives - RedGPU WebGPU Example">
     <meta property="og:description" content="Samples of basic primitive geometries supported by RedGPU.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/">
-    <meta property="twitter:title" content="Primitives">
+    <meta property="twitter:title" content="Primitives - RedGPU WebGPU Example">
     <meta property="twitter:description" content="Samples of basic primitive geometries supported by RedGPU.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Primitives",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Samples of basic primitive geometries supported by RedGPU.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Primitives",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Samples of basic primitive geometries supported by RedGPU.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Objects & Geometry"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Primitive"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "Primitives",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Objects &amp; Geometry &gt; Primitive</p>
+        <h1>Primitives - RedGPU WebGPU Example</h1>
+        <p>Samples of basic primitive geometries supported by RedGPU.</p>
+        <p lang="ko">RedGPU가 지원하는 기본적인 프리미티브 지오메트리들의 샘플입니다.</p>
+        <img src="thumb.webp" alt="Primitives - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/primitive/box/">Box</a></li>
+                <li><a href="/RedGPU/examples/3d/primitive/roundedBox/">RoundedBox</a></li>
+                <li><a href="/RedGPU/examples/3d/primitive/circle/">Circle</a></li>
+                <li><a href="/RedGPU/examples/3d/primitive/cone/">Cone</a></li>
+                <li><a href="/RedGPU/examples/3d/primitive/cylinder/">Cylinder</a></li>
+                <li><a href="/RedGPU/examples/3d/primitive/plane/">Plane</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

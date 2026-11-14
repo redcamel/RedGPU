@@ -1,11 +1,11 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Interpolation Test 예제
  * [EN] Interpolation Test example
  *
- * [KO] GLTF 애니메이션의 보간(Interpolation) 테스트 모델을 로드하고 렌더링합니다.
+ * [KO] GLTF 애니메이션 보간(Interpolation) 테스트 모델을 로드하고 렌더링합니다.
  * [EN] Loads and renders the GLTF Animation Interpolation Test model.
  */
 
@@ -16,57 +16,44 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-
-        controller.tilt = 0
+        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/InterpolationTest/glTF-Binary/InterpolationTest.glb');
+        // [KO] GLTF 모델 로드 및 화면 중앙 맞춤
+        // [EN] Load GLTF model and fit to screen center
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/InterpolationTest/glTF-Binary/InterpolationTest.glb',
+            (result) => {
+                const mesh = result.resultMesh;
+                scene.addChild(mesh);
+                RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view);
+                view.camera.distance += 5;
+                mesh.y = -1.5;
+            },
+            RedGPUExampleHelper.loadingProgressInfoHandler
+        );
 
         const renderer = new RedGPU.Renderer();
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error('RedGPU initialization failed:', failReason);
-        const errorDiv = document.createElement('div');
-        errorDiv.innerHTML = failReason;
-        document.body.appendChild(errorDiv);
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
- * @param {RedGPU.Display.View3D} view
- * @param {string} url
- */
-function loadGLTF(view, url) {
-    const {redGPUContext, scene} = view;
-    new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-        const mesh = result.resultMesh
-        scene.addChild(mesh)
-        RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
-        view.camera.distance += 5
-        mesh.y = -1.5
-    });
-}
-
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
-const renderTestPane = (redGPUContext, targetView) => {
-    new RedGPUExampleHelper(redGPUContext, {
-        RedGPU: RedGPU,
-        ibl: true,
-        skybox: true,
-    });
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };

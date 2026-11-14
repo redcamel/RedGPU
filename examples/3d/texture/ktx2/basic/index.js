@@ -1,6 +1,6 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1792993380695';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1792993380695';
-import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1792993380695';
+import * as RedGPU from '../../../../../dist/index.js?t=1794640510497';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1794640510497';
+import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1794640510497';
 
 /**
  * [KO] KTX2 Basic 예제
@@ -90,11 +90,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };

@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Sampler Address Mode 예제
@@ -23,9 +23,6 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        const directionalLight = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(directionalLight);
-
         const meshes = createAddressModeGrid(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer();
@@ -45,13 +42,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] addressModeU와 addressModeV의 3x3 전체 조합 그리드를 생성합니다.
- * [EN] Creates a 3x3 grid of all addressModeU and addressModeV combinations.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {Array<RedGPU.Display.Mesh>}
- */
 const createAddressModeGrid = (redGPUContext, scene) => {
     const addressModes = [
         RedGPU.GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
@@ -88,7 +78,6 @@ const createAddressModeGrid = (redGPUContext, scene) => {
             label.color = '#ffffff';
             label.worldSize = 0.85;
             label.useBillboard = true;
-            label.useBillboardPerspective = true;
             label.setPosition(x, y - 1.8, 0);
             scene.addChild(label);
         });
@@ -97,11 +86,6 @@ const createAddressModeGrid = (redGPUContext, scene) => {
     return meshes;
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };

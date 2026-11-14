@@ -3,49 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DistanceCulling</title>
-    <meta name="description" content="Demonstrates Distance Culling, which excludes objects from rendering based on their distance from the camera.">
+    <title>DistanceCulling - RedGPU WebGPU Example</title>
+    <meta name="description" content="Excludes distant objects from rendering based on camera distance.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, frustumCulling, distanceCulling, DistanceCulling">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/">
-    <meta property="og:title" content="DistanceCulling">
-    <meta property="og:description" content="Demonstrates Distance Culling, which excludes objects from rendering based on their distance from the camera.">
+    <meta property="og:title" content="DistanceCulling - RedGPU WebGPU Example">
+    <meta property="og:description" content="Excludes distant objects from rendering based on camera distance.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/">
-    <meta property="twitter:title" content="DistanceCulling">
-    <meta property="twitter:description" content="Demonstrates Distance Culling, which excludes objects from rendering based on their distance from the camera.">
+    <meta property="twitter:title" content="DistanceCulling - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Excludes distant objects from rendering based on camera distance.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "DistanceCulling",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Demonstrates Distance Culling, which excludes objects from rendering based on their distance from the camera.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "DistanceCulling",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Excludes distant objects from rendering based on camera distance.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Lighting & Environment"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "SkyBox & IBL"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "FrustumCulling"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 7,
+                        "name": "DistanceCulling",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/frustumCulling/distanceCulling/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Lighting &amp; Environment &gt; SkyBox &amp; IBL &gt; FrustumCulling</p>
+        <h1>DistanceCulling - RedGPU WebGPU Example</h1>
+        <p>Excludes distant objects from rendering based on camera distance.</p>
+        <p lang="ko">카메라와의 거리에 따라 원거리 객체를 렌더링에서 제외하는 거리 컬링입니다.</p>
+        <img src="thumb.webp" alt="DistanceCulling - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/frustumCulling/frustumCulling/">FrustumCulling</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

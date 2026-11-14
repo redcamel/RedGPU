@@ -20,7 +20,7 @@ const updateViewportAndScissor = (
     viewRenderPassEncoder: GPURenderPassEncoder,
     renderType: 'DEFAULT' | 'SHADOW' | 'PICKING' = 'DEFAULT'
 ) => {
-    const {scene, pixelRectObject, pickingManager, redGPUContext} = view
+    const {scene, pixelRectObject} = view
     const {width, height} = pixelRectObject
 
     if (renderType === 'SHADOW') {
@@ -30,19 +30,8 @@ const updateViewportAndScissor = (
         viewRenderPassEncoder.setViewport(0, 0, shadowSize, shadowSize, 0, 1);
         viewRenderPassEncoder.setScissorRect(0, 0, shadowSize, shadowSize);
     } else if (renderType === 'PICKING') {
-        const dpr = window.devicePixelRatio;
-        const renderScale = redGPUContext.renderScale;
-        const combinedScale = dpr * renderScale;
-
-        const physicalX = Math.floor(pickingManager.mouseX * combinedScale);
-        const physicalY = Math.floor(pickingManager.mouseY * combinedScale);
-
-        viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
-        viewRenderPassEncoder.setScissorRect(
-            Math.max(0, Math.min(width - 1, physicalX)),
-            Math.max(0, Math.min(height - 1, physicalY)),
-            1, 1
-        );
+        viewRenderPassEncoder.setViewport(0, 0, 1, 1, 0, 1);
+        viewRenderPassEncoder.setScissorRect(0, 0, 1, 1);
     } else {
         viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
         viewRenderPassEncoder.setScissorRect(0, 0, width, height);

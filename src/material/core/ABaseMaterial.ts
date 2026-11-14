@@ -1,6 +1,7 @@
 import ColorRGB from "../../color/ColorRGB";
 import ColorRGBA from "../../color/ColorRGBA";
 import RedGPUContext from "../../context/RedGPUContext";
+import GPU_BLEND_FACTOR from "../../gpuConst/GPU_BLEND_FACTOR";
 import BlendState from "../../renderState/BlendState";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceBase from "../../resources/core/ResourceBase";
@@ -39,7 +40,12 @@ interface ABaseMaterial {
      * [KO] 머티리얼 인스턴스 여부 플래그
      * [EN] Flag indicating whether it is a material instance
      */
-    isInstanceofMaterial: boolean
+    isInstanceofMaterial: boolean;
+    /**
+     * [KO] 디버거 전용 머티리얼 여부 플래그
+     * [EN] Flag indicating whether it is a debugger-dedicated material
+     */
+    isDebuggerMaterial?: boolean;
 }
 
 /**
@@ -72,11 +78,20 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Flag indicating whether the pipeline needs updating
      */
     dirtyPipeline: boolean = false
+    #transparent: boolean = false
+
     /**
-     * [KO] 머티리얼 투명 렌더링 활성화 여부
-     * [EN] Whether transparent rendering is enabled for the material
+     * [KO] 머티리얼 투명 렌더링 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether transparent rendering is enabled for the material.
      */
-    transparent: boolean = false
+    get transparent(): boolean {
+        return this.#transparent;
+    }
+
+    set transparent(value: boolean) {
+        this.#transparent = value;
+        this.dirtyPipeline = true;
+    }
     readonly #blendColorState: BlendState
     readonly #blendAlphaState: BlendState
     #writeMaskState: GPUFlagsConstant = GPUColorWrite.ALL
@@ -139,7 +154,7 @@ abstract class ABaseMaterial extends ResourceBase {
             getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex)
         )
         this.#blendColorState = new BlendState(this)
-        this.#blendAlphaState = new BlendState(this)
+        this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.ONE, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA)
 
         this.#basicGPUSampler = resourceManager.basicSampler.gpuSampler
         this.#emptyBitmapGPUTextureView = resourceManager.emptyBitmapTextureView
@@ -363,7 +378,7 @@ abstract class ABaseMaterial extends ResourceBase {
             const info = this.#TEXTURE_STRUCT[k]
             const {binding, name, group, type} = info
             const {name: textureType} = type
-            console.log(this, name, this[name])
+
             let resource
             if (textureType === 'texture_cube') resource = resourceManager.getGPUResourceCubeTextureView(this[name])
             else if (textureType === 'texture_2d_array') {
@@ -428,6 +443,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Configured GPUFragmentState object
      */
     getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
+        const gBufferNormalWriteMask = ((this.#transparent || this['alphaBlend'] === 2) && !this.use2PathRender) ? 0 : this.writeMaskState;
         return {
             module: this.gpuRenderInfo.fragmentShaderModule,
             entryPoint,
@@ -443,10 +459,10 @@ abstract class ABaseMaterial extends ResourceBase {
                 {
                     format: navigator.gpu.getPreferredCanvasFormat(),
                     blend: undefined,
-                    writeMask: this.writeMaskState,
+                    writeMask: gBufferNormalWriteMask,
                 },
                 {
-                    format: 'rgba16float',
+                    format: 'rg16float',
                     blend: undefined,
                     writeMask: this.writeMaskState,
                 },
@@ -523,7 +539,7 @@ abstract class ABaseMaterial extends ResourceBase {
         }
         this.#TEXTURE_STRUCT = null;
         this.#SAMPLER_STRUCT = null;
-        console.log(`🧹 ABaseMaterial destroy 완료: ${this.MODULE_NAME}`);
+
     }
 
     #checkVariant() {
@@ -568,12 +584,12 @@ abstract class ABaseMaterial extends ResourceBase {
                 activeFeatures.add(uniformName);
             }
         }
-        console.log('fragmentShaderVariantConditionalBlocks', fragmentShaderVariantConditionalBlocks);
-        console.log('activeFeatures', activeFeatures, this);
+
+
         const variantKey = activeFeatures.size > 0 ?
             Array.from(activeFeatures).sort().join('+') : 'none';
         if (activeFeatures.size) {
-            console.log('선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+
         }
         return variantKey;
     }

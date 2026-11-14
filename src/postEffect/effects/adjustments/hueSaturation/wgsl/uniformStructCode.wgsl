@@ -2,6 +2,8 @@
 #redgpu_include color.getLuminance
 
 struct Uniforms {
-  hue:f32,
-  saturation:f32
+    hue: f32,
+    saturation: f32,
+    pad0: f32,
+    pad1: f32,
 };

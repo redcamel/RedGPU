@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] SpotLight 예제 (Lighting Studio)
@@ -46,7 +46,7 @@ RedGPU.init(
 );
 
 const createSpotLight = (scene) => {
-    const light = new RedGPU.Light.SpotLight('#ffffff', 100000);
+    const light = new RedGPU.Light.SpotLight('#ffffff', 400000);
     light.setPosition(0, 20, 0);
     light.lookAt(0, 0, 0);
     light.radius = 35;
@@ -59,8 +59,8 @@ const createSpotLight = (scene) => {
 
 const createStudioEnvironment = (redGPUContext, scene) => {
     const studioMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    studioMaterial.baseColorFactor = [0.1, 0.1, 0.1, 1.0];
-    studioMaterial.roughnessFactor = 0.5;
+    studioMaterial.baseColorFactor = [0.35, 0.35, 0.38, 1.0];
+    studioMaterial.roughnessFactor = 0.6;
     const floor = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext, 200, 200), studioMaterial);
     floor.rotationX = -90;
     floor.y = -2;
@@ -70,14 +70,14 @@ const createStudioEnvironment = (redGPUContext, scene) => {
 const createMaterialGrid = (redGPUContext, scene) => {
     const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1.2, 16, 16, 16);
     const matNonMetal = new RedGPU.Material.PBRMaterial(redGPUContext);
-    matNonMetal.baseColorFactor = [1.0, 0.2, 0.2, 1.0];
+    matNonMetal.baseColorFactor = [0.85, 0.22, 0.22, 1.0];
     matNonMetal.metallicFactor = 0.0;
-    matNonMetal.roughnessFactor = 0.4;
+    matNonMetal.roughnessFactor = 0.45;
 
     const matMetal = new RedGPU.Material.PBRMaterial(redGPUContext);
-    matMetal.baseColorFactor = [1.0, 1.0, 1.0, 1.0];
-    matMetal.metallicFactor = 1.0;
-    matMetal.roughnessFactor = 0.2;
+    matMetal.baseColorFactor = [0.85, 0.87, 0.90, 1.0];
+    matMetal.metallicFactor = 0.0;
+    matMetal.roughnessFactor = 0.15;
 
     const size = 20;
     const spacing = 4.5;
@@ -105,7 +105,7 @@ const renderTestPane = (redGPUContext, light) => {
                 const {r, g, b} = ev.value;
                 light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
-            folder.addBinding(light, 'lumen', {min: 0, max: 200000, step: 100});
+            folder.addBinding(light, 'lumen', {min: 0, max: 1000000, step: 1000});
             folder.addBinding(light, 'radius', {min: 0, max: 200, step: 1});
             folder.addBinding(light, 'enableDebugger');
 

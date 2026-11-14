@@ -4,69 +4,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impulse Explosion</title>
-    <meta name="description" content="Implements physics effects where impulse is applied from an explosion point to blow away surrounding objects.">
+    <title>Impulse Explosion - RedGPU WebGPU Example</title>
+    <meta name="description" content="Applies radial explosion impulses to blast away surrounding rigid bodies.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, physics, explosion, Impulse Explosion">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/physics/explosion/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/physics/explosion/">
-    <meta property="og:title" content="Impulse Explosion">
-    <meta property="og:description" content="Implements physics effects where impulse is applied from an explosion point to blow away surrounding objects.">
+    <meta property="og:title" content="Impulse Explosion - RedGPU WebGPU Example">
+    <meta property="og:description" content="Applies radial explosion impulses to blast away surrounding rigid bodies.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/physics/explosion/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/physics/explosion/">
-    <meta property="twitter:title" content="Impulse Explosion">
-    <meta property="twitter:description" content="Implements physics effects where impulse is applied from an explosion point to blow away surrounding objects.">
+    <meta property="twitter:title" content="Impulse Explosion - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Applies radial explosion impulses to blast away surrounding rigid bodies.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/physics/explosion/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Impulse Explosion",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Implements physics effects where impulse is applied from an explosion point to blow away surrounding objects.",
-  "url": "https://redcamel.github.io/RedGPU/examples/physics/explosion/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/explosion/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Impulse Explosion",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Applies radial explosion impulses to blast away surrounding rigid bodies.",
+                "url": "https://redcamel.github.io/RedGPU/examples/physics/explosion/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/explosion/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Physics"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Performance & Stress Test"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Impulse Explosion",
+                        "item": "https://redcamel.github.io/RedGPU/examples/physics/explosion/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>Physics &gt; Performance &amp; Stress Test</p>
+        <h1>Impulse Explosion - RedGPU WebGPU Example</h1>
+        <p>Applies radial explosion impulses to blast away surrounding rigid bodies.</p>
+        <p lang="ko">폭발 중심으로부터 주변 강체들에 방사형 충격량을 가하는 물리 예제입니다.</p>
+        <img src="thumb.webp" alt="Impulse Explosion - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/physics/galton/">Galton Board</a></li>
+                <li><a href="/RedGPU/examples/physics/bowling/">Physics Bowling</a></li>
+                <li><a href="/RedGPU/examples/physics/stressTest/">Ultimate Stress Test</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

@@ -1,10 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
-
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface HueSaturation {
     /**
@@ -12,13 +13,13 @@ interface HueSaturation {
      * [EN] Hue rotation value (unit: degrees, -180 ~ 180)
      * @defaultValue 0
      */
-    hue: number
+    hue: number;
     /**
      * [KO] 채도 조절 값 (-100 ~ 100)
      * [EN] Saturation adjustment value (-100 ~ 100)
      * @defaultValue 0
      */
-    saturation: number
+    saturation: number;
 }
 
 /**
@@ -33,12 +34,12 @@ interface HueSaturation {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/"></iframe>
  *
  * @see [HueSaturation example](/RedGPU/examples/postEffect/adjustments/hueSaturation/)
  * @category Adjustments
  */
-class HueSaturation extends ASinglePassPostEffect {
+class HueSaturation extends ASingleComputePassPostEffect {
 
     /**
      * [KO] HueSaturation 인스턴스를 생성합니다.
@@ -58,15 +59,39 @@ class HueSaturation extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_HUE_SATURATION',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
     }
 
+    /**
+     * [KO] 색조 및 채도(Hue & Saturation) 조절 효과를 렌더링합니다.
+     * [EN] Renders the hue and saturation adjustment effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 색조 및 채도가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with hue and saturation applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.hue === 0 && this.saturation === 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
 }
 
 defineNumber(HueSaturation, [
     {key: 'hue', value: 0, min: -180, max: 180},
     {key: 'saturation', value: 0, min: -100, max: 100}
-])
-Object.freeze(HueSaturation)
-export default HueSaturation
+]);
+Object.freeze(HueSaturation);
+export default HueSaturation;

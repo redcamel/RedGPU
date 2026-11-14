@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mesh Collider</title>
+    <title>Mesh Collider - RedGPU WebGPU Example</title>
     <meta name="description" content="Tests how to convert custom geometries into physics engine colliders.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, physics, meshCollider, Mesh Collider">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/physics/meshCollider/">
@@ -12,61 +12,103 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/physics/meshCollider/">
-    <meta property="og:title" content="Mesh Collider">
+    <meta property="og:title" content="Mesh Collider - RedGPU WebGPU Example">
     <meta property="og:description" content="Tests how to convert custom geometries into physics engine colliders.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/physics/meshCollider/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/physics/meshCollider/">
-    <meta property="twitter:title" content="Mesh Collider">
+    <meta property="twitter:title" content="Mesh Collider - RedGPU WebGPU Example">
     <meta property="twitter:description" content="Tests how to convert custom geometries into physics engine colliders.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/physics/meshCollider/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Mesh Collider",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Tests how to convert custom geometries into physics engine colliders.",
-  "url": "https://redcamel.github.io/RedGPU/examples/physics/meshCollider/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/meshCollider/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Mesh Collider",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Tests how to convert custom geometries into physics engine colliders.",
+                "url": "https://redcamel.github.io/RedGPU/examples/physics/meshCollider/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/meshCollider/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Physics"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Fundamentals"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Mesh Collider",
+                        "item": "https://redcamel.github.io/RedGPU/examples/physics/meshCollider/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>Physics &gt; Fundamentals</p>
+        <h1>Mesh Collider - RedGPU WebGPU Example</h1>
+        <p>Tests how to convert custom geometries into physics engine colliders.</p>
+        <p lang="ko">커스텀 기하구조를 물리 충돌체로 변환하는 방법을 테스트합니다.</p>
+        <img src="thumb.webp" alt="Mesh Collider - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/physics/basic/">Basic Physics</a></li>
+                <li><a href="/RedGPU/examples/physics/shapes/">Shapes &amp; Materials</a></li>
+                <li><a href="/RedGPU/examples/physics/kinematic/">Kinematic Interaction</a></li>
+                <li><a href="/RedGPU/examples/physics/heightField/">HeightField</a></li>
+                <li><a href="/RedGPU/examples/physics/gltfPhysics/">GLTF Physics</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

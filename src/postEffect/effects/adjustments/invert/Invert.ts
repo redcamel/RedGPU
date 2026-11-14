@@ -1,10 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
-
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
+import {IPostEffectResult} from "../../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 interface Invert {
     /**
@@ -12,7 +13,7 @@ interface Invert {
      * [EN] Invert effect application intensity (0 ~ 1)
      * @defaultValue 1
      */
-    amount: number
+    amount: number;
 }
 
 /**
@@ -26,12 +27,12 @@ interface Invert {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/"></iframe>
  *
  * @see [Invert example](/RedGPU/examples/postEffect/adjustments/invert/)
  * @category Adjustments
  */
-class Invert extends ASinglePassPostEffect {
+class Invert extends ASingleComputePassPostEffect {
     /**
      * [KO] Invert 인스턴스를 생성합니다.
      * [EN] Creates an Invert instance.
@@ -50,13 +51,38 @@ class Invert extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_INVERT',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
+    }
+
+    /**
+     * [KO] 색상 반전(Invert) 효과를 렌더링합니다.
+     * [EN] Renders the color inversion effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 색상 반전이 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with color inversion applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.amount <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 
 definePositiveNumber(Invert, [
     {key: 'amount', value: 1, min: 0, max: 1}
-])
-Object.freeze(Invert)
-export default Invert
+]);
+Object.freeze(Invert);
+export default Invert;

@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] DirectionalLight 예제 (Lighting Studio)
@@ -53,8 +53,7 @@ const createDirectionalLight = (scene) => {
 
 const createStudioEnvironment = (redGPUContext, scene) => {
     const studioMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    studioMaterial.baseColorFactor = [0.5, 0.5, 0.5, 1.0];
-    studioMaterial.roughnessFactor = 0.5;
+    studioMaterial.baseColorFactor = [150 / 255, 150 / 255, 180 / 255, 1];
 
     const floorGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 100);
     const floor = new RedGPU.Display.Mesh(redGPUContext, floorGeo, studioMaterial);

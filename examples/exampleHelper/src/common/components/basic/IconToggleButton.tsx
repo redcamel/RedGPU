@@ -1,8 +1,7 @@
 import React, {useState} from 'react';
 
 interface IconToggleButtonProps {
-    id?: string;
-    icon?: string | React.ReactNode;
+    icon?: React.ReactNode;
     label: string;
     isActive: boolean;
     onClick: () => void;
@@ -11,30 +10,22 @@ interface IconToggleButtonProps {
 
 /**
  * [KO] 상태(Active/Inactive)를 가지는 토글 버튼 컴포넌트입니다.
+ * - 동심원 곡률(Nested Radius): 외부(12px) - 패딩(4px) = 내부 칩(8px), 높이 36px
+ * - 텍스트 토글 버튼: width: auto + 좌우 패딩 12px (Intrinsic Auto-Layout)
+ * - 아이콘 토글 버튼: 36px × 36px 알약형 칩 버튼
  */
 const IconToggleButton: React.FC<IconToggleButtonProps> = ({icon, label, isActive, onClick, title}) => {
     const [isHovered, setIsHovered] = useState(false);
-
-    const themeColor = '#fff';
-    const idleBgColor = '#111112';
-    const hoverBgColor = '#1a1a1c';
-
-    const renderIcon = () => {
-        if (!icon) return label;
-        if (typeof icon === 'string') {
-            return <img src={icon} style={iconStyle} alt={label}/>;
-        }
-        return icon;
-    };
 
     return (
         <button
             style={{
                 ...baseButtonStyle,
-                width: icon ? '52px' : 'auto',
-                padding: icon ? '0' : '0 20px',
-                backgroundColor: isHovered ? hoverBgColor : idleBgColor,
-                color: themeColor,
+                width: icon ? '36px' : 'auto',
+                padding: icon ? '0' : '0 12px',
+                backgroundColor: 'transparent',
+                boxShadow: 'none',
+                color: isActive ? '#fdb48d' : '#ccc',
             }}
             onClick={onClick}
             title={title || label}
@@ -44,15 +35,19 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({icon, label, isActiv
             onMouseLeave={() => setIsHovered(false)}
         >
             <div style={{
-                opacity: isActive ? 1 : 0.2,
+                opacity: isActive ? 1 : (isHovered ? 0.7 : 0.35),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '100%',
                 height: '100%',
-                transition: 'opacity 0.2s'
+                fontSize: '13px',
+                lineHeight: '1.1',
+                color: isActive ? '#fdb48d' : '#ccc',
+                fontWeight: 'bold',
+                transition: 'opacity 0.15s'
             }}>
-                {renderIcon()}
+                {icon ?? label}
             </div>
         </button>
     );
@@ -62,21 +57,17 @@ const baseButtonStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100%',
-    backgroundColor: '#111112',
+    height: '36px',
+    borderRadius: '50%',
+    backgroundColor: 'transparent',
     border: 'none',
-    fontSize: '11px',
+    fontSize: '13px',
+    lineHeight: '1.1',
     fontWeight: 'bold',
     cursor: 'pointer',
-    transition: 'background-color 0.2s, opacity 0.2s',
-    letterSpacing: '0.05em',
+    transition: 'background-color 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s',
     flexShrink: 0,
     boxSizing: 'border-box'
-};
-
-const iconStyle: React.CSSProperties = {
-    width: '24px',
-    height: '24px'
 };
 
 export default IconToggleButton;

@@ -10,7 +10,7 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
-import keepLog from "../utils/keepLog";
+
 import DrawBufferManager from "../renderer/core/DrawBufferManager";
 
 import Renderer from "../renderer/Renderer";
@@ -31,7 +31,7 @@ import Renderer from "../renderer/Renderer";
  * });
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/helloWorld/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/helloWorld/"></iframe>
  * @see [Hello World example](/RedGPU/examples/3d/helloWorld/)
  * @category Context
  */
@@ -472,9 +472,8 @@ class RedGPUContext extends RedGPUContextViewContainer {
         if (this.#gpuContext) {
             try {
                 this.gpuContext.unconfigure();
-                keepLog('🧹 Canvas Context unconfigure 완료');
             } catch (e) {
-                keepLog('⚠️ Canvas Context unconfigure 실패:', e);
+                console.warn('⚠️ Canvas Context unconfigure 실패:', e);
             }
         }
         this.#observer?.destroy()
@@ -705,7 +704,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
             format: presentationFormat,
             alphaMode: this.#alphaMode,
         };
-        console.log(`configurationDescription`, this.#configurationDescription);
         this.#gpuContext.configure(this.#configurationDescription);
     }
 

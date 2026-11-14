@@ -432,7 +432,7 @@ fn getLandscapeIndirectLighting(
             let atmH = u_atmo.atmosphereHeight;
             let skyIntensity = u_atmo.sunIntensity;
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
+            let skyIrradiance = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, N, 1, 3.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
@@ -817,7 +817,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     output.color = outColor;
     output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
-    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
+    output.gBufferMotionVector = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
     return output;
 }
 

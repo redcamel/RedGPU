@@ -1,5 +1,13 @@
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
+
+/**
+ * [KO] Texture Transform Test 예제
+ * [EN] Texture Transform Test example
+ *
+ * [KO] KHR_texture_transform 확장이 적용된 GLTF 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders a GLTF model with the KHR_texture_transform extension.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -8,43 +16,42 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-
-        controller.tilt = 0
+        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TextureTransformTest/glTF/TextureTransformTest.gltf');
+        // [KO] GLTF 모델 로드 및 화면 중앙 맞춤
+        // [EN] Load GLTF model and fit to screen center
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TextureTransformTest/glTF/TextureTransformTest.gltf',
+            (result) => {
+                const mesh = result.resultMesh;
+                scene.addChild(mesh);
+                RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view);
+            },
+            RedGPUExampleHelper.loadingProgressInfoHandler
+        );
 
         const renderer = new RedGPU.Renderer();
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error('RedGPU initialization failed:', failReason);
-        const errorDiv = document.createElement('div');
-        errorDiv.innerHTML = failReason;
-        document.body.appendChild(errorDiv);
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-function loadGLTF(view, url) {
-    const {redGPUContext, scene} = view;
-    new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-        const mesh = result.resultMesh
-        scene.addChild(mesh)
-        RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
-    });
-}
-
-const renderTestPane = (redGPUContext, targetView) => {
-    new RedGPUExampleHelper(redGPUContext, {
-        RedGPU: RedGPU,
-        ibl: true,
-        skybox: true,
-    });
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };

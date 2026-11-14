@@ -39,7 +39,7 @@ const texture = new RedGPU.Resource.BitmapTexture(
 ```
 
 > [!TIP]
-> `BitmapTexture`는 이미지를 비동기로 로드하며, 별도의 로딩 완료 체크 로직 없이도 다운로드가 끝나는 즉시 화면에 자동 반영됩니다.
+> `BitmapTexture` 는 이미지를 비동기로 로드하며, 별도의 로딩 완료 체크 로직 없이도 다운로드가 끝나는 즉시 화면에 자동 반영됩니다.
 
 ## 2. 재질에 적용하기: BitmapMaterial
 
@@ -146,8 +146,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 - [BitmapMaterial 기본](/RedGPU/examples/3d/material/bitmapMaterial/)
 - [BitmapTexture 샘플러 조합](/RedGPU/examples/3d/texture/bitmapTextureSampler/)
-- [밉맵 생성 옵션 비교](/RedGPU/examples/3d/texture/mipmapGenerator/)
-- [투명 텍스처 알파 블렌딩](/RedGPU/examples/3d/transparent/alphaBlend/)
+- [텍스처 샘플러 조합 테스트](/RedGPU/examples/3d/texture/samplerCombination/)
+- [머티리얼 투명도 (Opacity)](/RedGPU/examples/3d/material/opacity/)
 
 ---
 

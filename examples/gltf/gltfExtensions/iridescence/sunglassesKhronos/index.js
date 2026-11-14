@@ -1,5 +1,13 @@
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+
+/**
+ * [KO] Sunglasses Khronos 예제
+ * [EN] Sunglasses Khronos example
+ *
+ * [KO] GLTF Sunglasses Khronos 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Sunglasses Khronos model.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -9,12 +17,16 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 
-        controller.tilt = 15
-        controller.pan = 45
+        controller.tilt = 0
+        controller.pan = -40
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
+
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SunglassesKhronos/glTF-Binary/SunglassesKhronos.glb');
 

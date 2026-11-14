@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sharpen</title>
+    <title>Sharpen - RedGPU WebGPU Example</title>
     <meta name="description" content="An example demonstrating sharpen effects.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, postEffect, sharpen, Sharpen">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/">
@@ -11,41 +11,104 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/">
-    <meta property="og:title" content="Sharpen">
+    <meta property="og:title" content="Sharpen - RedGPU WebGPU Example">
     <meta property="og:description" content="An example demonstrating sharpen effects.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/">
-    <meta property="twitter:title" content="Sharpen">
+    <meta property="twitter:title" content="Sharpen - RedGPU WebGPU Example">
     <meta property="twitter:description" content="An example demonstrating sharpen effects.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Sharpen",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "An example demonstrating sharpen effects.",
-  "url": "https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Sharpen",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "An example demonstrating sharpen effects.",
+                "url": "https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "PostEffect"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "PostEffect"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Image Filters"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "Sharpen",
+                        "item": "https://redcamel.github.io/RedGPU/examples/postEffect/sharpen/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>PostEffect &gt; PostEffect &gt; Image Filters</p>
+        <h1>Sharpen - RedGPU WebGPU Example</h1>
+        <p>An example demonstrating sharpen effects.</p>
+        <p lang="ko">선명도(Sharpen) 효과를 시연하는 예제입니다.</p>
+        <img src="thumb.webp" alt="Sharpen - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/postEffect/convolution/">Convolution</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

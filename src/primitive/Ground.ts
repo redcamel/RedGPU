@@ -10,7 +10,7 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * ```typescript
  * const ground = new RedGPU.Primitive.Ground(redGPUContext, 10, 10, 1, 1, false);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/ground/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/ground/"></iframe>
  *
  * @see [Ground example](/RedGPU/examples/3d/primitive/ground/)
  * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)

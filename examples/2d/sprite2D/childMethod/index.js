@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Sprite2D Child Method 예제
@@ -33,7 +33,6 @@ RedGPU.init(
         // 4. [KO] 리사이즈 이벤트 처리
         // [EN] Handle resize event
         view.onResize = (resizeEvent) => {
-            // 정보 업데이트 등 필요 시 작성
         };
 
         // 5. [KO] 렌더러 시작 및 애니메이션 루프
@@ -72,10 +71,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 자식 객체를 생성하여 추가합니다.
- * [EN] Creates and adds a child object.
- */
 const addChildObject = (redGPUContext, scene, color = getRandomHexColor()) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, color);
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -91,18 +86,10 @@ const addChildObject = (redGPUContext, scene, color = getRandomHexColor()) => {
     scene.addChild(sprite2D);
 };
 
-/**
- * [KO] 무작위 16진수 색상 값을 반환합니다.
- * [EN] Returns a random hex color value.
- */
 const getRandomHexColor = () => {
     return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {

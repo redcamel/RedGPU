@@ -3,69 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Scattering (Aerial Perspective)</title>
-    <meta name="description" content="Provides an intuitive comparison of how atmospheric scattering (Aerial Perspective) affects various materials (Color, Phong, PBR, etc.) along a distance runway.">
+    <title>Material Scattering (Aerial Perspective) - RedGPU WebGPU Example</title>
+    <meta name="description" content="Compares distance-based aerial perspective across various materials.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, skyAtmosphere, scatteringTest, Material Scattering (Aerial Perspective)">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/">
-    <meta property="og:title" content="Material Scattering (Aerial Perspective)">
-    <meta property="og:description" content="Provides an intuitive comparison of how atmospheric scattering (Aerial Perspective) affects various materials (Color, Phong, PBR, etc.) along a distance runway.">
+    <meta property="og:title" content="Material Scattering (Aerial Perspective) - RedGPU WebGPU Example">
+    <meta property="og:description" content="Compares distance-based aerial perspective across various materials.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/">
-    <meta property="twitter:title" content="Material Scattering (Aerial Perspective)">
-    <meta property="twitter:description" content="Provides an intuitive comparison of how atmospheric scattering (Aerial Perspective) affects various materials (Color, Phong, PBR, etc.) along a distance runway.">
+    <meta property="twitter:title" content="Material Scattering (Aerial Perspective) - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Compares distance-based aerial perspective across various materials.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Material Scattering (Aerial Perspective)",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Provides an intuitive comparison of how atmospheric scattering (Aerial Perspective) affects various materials (Color, Phong, PBR, etc.) along a distance runway.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Material Scattering (Aerial Perspective)",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Compares distance-based aerial perspective across various materials.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Lighting & Environment"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "SkyBox & IBL"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "SkyAtmosphere"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 7,
+                        "name": "Material Scattering (Aerial Perspective)",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/skyAtmosphere/scatteringTest/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Lighting &amp; Environment &gt; SkyBox &amp; IBL &gt; SkyAtmosphere</p>
+        <h1>Material Scattering (Aerial Perspective) - RedGPU WebGPU Example</h1>
+        <p>Compares distance-based aerial perspective across various materials.</p>
+        <p lang="ko">거리에 따른 대기 산란(공중 투시) 효과가 재질에 미치는 영향을 비교합니다.</p>
+        <img src="thumb.webp" alt="Material Scattering (Aerial Perspective) - RedGPU WebGPU Example" width="600"
+             height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/">SkyAtmosphere Basic</a></li>
+                <li><a href="/RedGPU/examples/3d/skyAtmosphere/gltf/">Atmosphere &amp; IBL Harmony</a></li>
+                <li><a href="/RedGPU/examples/3d/skyAtmosphere/generator/">SkyAtmosphere LUT Generator</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

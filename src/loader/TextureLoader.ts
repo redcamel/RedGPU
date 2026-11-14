@@ -92,9 +92,9 @@ export default class TextureLoader extends RedGPUObject {
      */
     textures = [];
     #loaded = 0;
-    readonly #srcInfoList;
-    readonly #callback;
-    readonly #progressCallback;
+    #srcInfoList;
+    #callback;
+    #progressCallback;
 
     /**
      * [KO] 새로운 TextureLoader 인스턴스를 생성하고 텍스처 목록 로딩을 시작합니다.
@@ -119,6 +119,7 @@ export default class TextureLoader extends RedGPUObject {
         this.#callback = callback;
         this.#progressCallback = progressCallback;
         if (this.#srcInfoList.length) {
+            this.#checkProgress();
             this.#srcInfoList.forEach((srcInfo, index: number) => this.#loadTexture(srcInfo, index));
         } else {
             this.#reportCompletion();
@@ -175,7 +176,6 @@ export default class TextureLoader extends RedGPUObject {
             }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format);
         }
         this.textures.push(targetTexture);
-        this.#checkProgress();
     }
 
     #checkProgress() {

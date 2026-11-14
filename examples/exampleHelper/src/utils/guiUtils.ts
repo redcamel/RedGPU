@@ -1,7 +1,77 @@
+import {hdrImages} from '../data/hdrList';
+
 /**
  * [KO] Tweakpane GUI 구성을 위한 유틸리티 함수들입니다.
  * [EN] Utility functions for Tweakpane GUI configuration.
  */
+
+export const hdrOptions = Object.fromEntries(hdrImages.map(item => [item.name, item.name]));
+
+export const createSourcePathMonitor = (pathInfo: { finalPath: string }) => {
+    let sourceBinding: any;
+    return {
+        updatePathInfo: (src: string | string[]) => {
+            const getFileName = (path: string) => path.split('/').pop() || path;
+            pathInfo.finalPath = Array.isArray(src) ? src.map(getFileName).join('\n') : getFileName(src);
+            if (sourceBinding) sourceBinding.refresh();
+        },
+        bindSourcePath: (folder: any) => {
+            sourceBinding = folder.addBinding(pathInfo, 'finalPath', {
+                readonly: true,
+                label: 'source',
+                multiline: true,
+                rows: 2
+            });
+        }
+    };
+};
+
+export const bindLuminance = (folder: any, getTarget: () => any) => {
+    folder.addBinding({
+        get luminance() {
+            const target = getTarget();
+            return target ? target.luminance : 0;
+        },
+        set luminance(v: number) {
+            const target = getTarget();
+            if (target) target.luminance = v;
+        },
+    }, 'luminance', {min: 0, max: 100000, step: 100});
+};
+
+export const bindSizeDimensions = (
+    folder: any,
+    target: any,
+    keys: readonly string[],
+    useExplicitUnitLabel: boolean = false
+) => {
+    const sizeData: Record<string, any> = {};
+    keys.forEach((key) => {
+        const parsed = parseSize(target[key]);
+        sizeData[key] = parsed.value;
+        sizeData[`${key}Unit`] = parsed.unit;
+    });
+
+    const updateDim = (key: string) => {
+        const value = sizeData[key];
+        const unit = sizeData[`${key}Unit`];
+        target[key] = unit === 'number' ? value : `${value}${unit}`;
+    };
+
+    keys.forEach((key) => {
+        const unitKey = `${key}Unit`;
+        folder.addBinding(sizeData, key, {
+            min: 0,
+            max: sizeData[unitKey] === '%' ? 200 : 4096,
+            step: 0.01
+        }).on('change', () => updateDim(key));
+
+        folder.addBinding(sizeData, unitKey, {
+            ...(useExplicitUnitLabel ? {label: `${key} Unit`} : {}),
+            options: {'%': '%', 'px': 'px', 'number': 'number'}
+        }).on('change', () => updateDim(key));
+    });
+};
 
 /**
  * [KO] 컬러와 알파 입력을 컨테이너에 추가합니다.

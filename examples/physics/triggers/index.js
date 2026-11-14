@@ -1,6 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -48,9 +48,8 @@ RedGPU.init(
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
-		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -62,9 +61,8 @@ RedGPU.init(
 		const triggerMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#44aa55')
 		);
-		triggerMesh.material.color.setColorByHEX('#44ff44');
 		triggerMesh.material.opacity = 0.3;
 		triggerMesh.material.transparent = true;
 		triggerMesh.y = 5;
@@ -90,17 +88,11 @@ RedGPU.init(
 		// [EN] Manage dynamic objects
 		const activeBalls = [];
 
-		/**
-		 * [KO] 새로운 구슬을 생성하는 함수
-		 * [EN] Function to create a new ball
-		 */
 		const createBall = () => {
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX('#ffffff');
 			const ballMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
-				material
+                new RedGPU.Material.PhongMaterial(redGPUContext, '#cccccc')
 			);
 			ballMesh.x = (Math.random() * 8) - 4;
 			ballMesh.y = 15;
@@ -133,10 +125,6 @@ RedGPU.init(
 			}, 10000);
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeBalls.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -149,10 +137,6 @@ RedGPU.init(
 		// [EN] Auto-spawn balls
 		setInterval(createBall, 1000);
 
-		/**
-		 * [KO] 물리 엔진 충돌 시작 콜백
-		 * [EN] Physics engine collision started callback
-		 */
 		physicsEngine.onCollisionStarted = (h1, h2) => {
 			const triggerHandle = triggerBody.nativeCollider.handle;
 			// [KO] 충돌한 두 물체 중 하나가 센서(trigger)인지 확인하고, 상대방 물체를 찾습니다.
@@ -162,7 +146,7 @@ RedGPU.init(
 			if (ballHandle !== null) {
 				const ballBody = physicsEngine.getBodyByColliderHandle(ballHandle);
 				if (ballBody?.mesh) {
-					ballBody.mesh.material.color.setColorByHEX('#ff44ff');
+                    ballBody.mesh.material.color.setColorByHEX('#b844cc');
 				}
 			}
 		};
@@ -177,14 +161,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {RedGPU.Display.Mesh} triggerMesh
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, scene, triggerMesh, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

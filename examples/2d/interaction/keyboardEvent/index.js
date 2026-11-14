@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -33,10 +33,6 @@ RedGPU.init(
 
 		const speed = 5;
 
-		/**
-		 * [KO] 렌더 루프
-		 * [EN] Render loop
-		 */
 		const render = () => {
 			const { keyboardKeyBuffer } = redGPUContext;
 
@@ -85,10 +81,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 GUI 렌더링
- * [EN] Render GUI for testing
- */
 const renderTestPane = (redGPUContext, keyboardKeyBuffer) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

@@ -35,7 +35,7 @@ const shadowGraph = `
 그림자 연산은 GPU 자원을 많이 소모합니다. 따라서 모든 물체에 적용하기보다, 시각적으로 중요한 물체와 바닥 등에 선별적으로 적용하는 것이 성능 최적화에 유리합니다.
 :::
 
-## 2. 객체 설정 (Cast & Receive)
+## 2. 객체 설정
 
 RedGPU의 모든 `Mesh` 객체는 그림자 생성 및 수신 여부를 결정하는 독립적인 속성을 가집니다.
 
@@ -49,7 +49,7 @@ const floor = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMateria
 floor.receiveShadow = true;
 ```
 
-## 3. 그림자 품질 관리 (ShadowManager)
+## 3. 그림자 품질 관리
 
 `Scene` 은 내부적으로 `ShadowManager` 와 `DirectionalShadowManager` 를 소유하고 있으며, 캐스케이드 그림자 맵 (CSM)과 소프트 섀도우 (PCSS) 품질을 전역적으로 제어할
 수 있습니다.

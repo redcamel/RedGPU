@@ -1,6 +1,6 @@
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -46,19 +46,19 @@ RedGPU.init(
 		const GROUP_BLACK = 0x0004; 
 		const GROUP_ALL   = 0xFFFF;
 
-		// 1. 바닥 생성 함수 (현실적인 미터 단위 스케일)
+        // [KO] 1. 바닥 생성 함수 (현실적인 미터 단위 스케일)
+        // [EN] 1. Ground creation function (realistic meter-scale)
 		const createFloor = (x, color, membership) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, color)
 			);
 			mesh.x = x;
 			mesh.y = -0.5;
 			mesh.scaleX = 10;
 			mesh.scaleY = 1;
 			mesh.scaleZ = 20;
-			mesh.material.color.setColorByHEX(color);
 			scene.addChild(mesh);
 			const body = physicsEngine.createBody(mesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -71,34 +71,25 @@ RedGPU.init(
 			body.nativeCollider.setCollisionGroups(bitmask);
 		};
 
-		createFloor(-12, '#ff4444', GROUP_RED);
-		createFloor(0, '#333333', GROUP_BLACK);
-		createFloor(12, '#4444ff', GROUP_BLUE);
+        createFloor(-12, '#cc4444', GROUP_RED);
+        createFloor(0, '#666666', GROUP_BLACK);
+        createFloor(12, '#4466cc', GROUP_BLUE);
 
-		// 2. 구슬 생성 시스템
+        // [KO] 2. 구슬 생성 시스템
+        // [EN] 2. Marble spawning system
 		const activeBalls = [];
 		const ballGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
 
 		const spawnBall = (type) => {
-			const mesh = new RedGPU.Display.Mesh(
-				redGPUContext,
-				ballGeo,
-				new RedGPU.Material.PhongMaterial(redGPUContext)
-			);
-			mesh.y = 15;
-			mesh.x = (Math.random() * 30) - 15;
-			mesh.z = (Math.random() * 10) - 5;
-			scene.addChild(mesh);
-
 			let membership, filter, color;
 			switch(type) {
 				case 'RED':
-					color = '#ff4444';
+                    color = '#d9534f';
 					membership = GROUP_RED;
 					filter = GROUP_RED; 
 					break;
 				case 'BLUE':
-					color = '#4444ff';
+                    color = '#4a90e2';
 					membership = GROUP_BLUE;
 					filter = GROUP_BLUE; 
 					break;
@@ -108,13 +99,22 @@ RedGPU.init(
 					filter = GROUP_BLACK; 
 					break;
 				case 'RAINBOW':
-					color = '#ffffff';
+                    color = '#d4d4d8';
 					membership = 0x0008; 
 					filter = GROUP_ALL; 
 					break;
 			}
 
-			mesh.material.color.setColorByHEX(color);
+            const mesh = new RedGPU.Display.Mesh(
+                redGPUContext,
+                ballGeo,
+                new RedGPU.Material.PhongMaterial(redGPUContext, color)
+            );
+            mesh.y = 15;
+            mesh.x = (Math.random() * 30) - 15;
+            mesh.z = (Math.random() * 10) - 5;
+            scene.addChild(mesh);
+
 			const body = physicsEngine.createBody(mesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
@@ -160,12 +160,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

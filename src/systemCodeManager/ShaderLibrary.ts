@@ -35,7 +35,6 @@ import globalVertexStruct_wgsl from './shader/systemStruct/globalStruct/globalVe
 import globalFragmentStructPBR_wgsl from './shader/systemStruct/globalStruct/globalFragmentStructPBR.wgsl';
 import globalFragmentStructBuiltIn_wgsl from './shader/systemStruct/globalStruct/globalFragmentStructBuiltIn.wgsl';
 import POST_EFFECT_SYSTEM_UNIFORM_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM.wgsl';
-import POST_EFFECT_SYSTEM_UNIFORM_MSAA_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM_MSAA.wgsl';
 import SYSTEM_UNIFORM_wgsl from './shader/systemStruct/SYSTEM_UNIFORM.wgsl';
 import getReflectionVectorFromViewDirection_wgsl
     from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
@@ -965,9 +964,10 @@ export namespace ShadowLibrary {
     /**
      * // 🌟 [비회전 12-Tap 등방성 원형 가우시안 디스크 (Cascade 0 ~ 3 전 구간 공용)]
      * // - 직교 격자(U/V 축)에 종속된 Tent PCF의 대각선 계단(Stair-stepping) 한계와 IGN 회전의 모래알 노이즈를 동시에 해결합니다.
-     * // - 중심(1탭, r=0) + 내측 링(5탭, r=1.05 texels) + 외측 링(6탭, r=2.05 texels)을 비격자 황금각으로 배치하여,
-     * //   하드웨어 2x2 Bilinear 비교 샘플러 패치들이 빈틈없이 중첩(Overlapping)되면서 노이즈 0%의 완벽한 원형 반음영을 생성합니다.
-     * // - 원거리 캐스케이드(Cascade 2~3)에서는 radiusScale을 점진적으로 확장(1.0x -> 1.36x)하여 거친 텍셀의 도트 모서리를 둥글게 뭉개줍니다.
+     * // - 중심(1탭, r=0) + 내측 링(5탭, r=0.90 texels) + 외측 링(6탭, r=1.75 texels)을 비격자 황금각으로 배치하여,
+     * //   링 간격(0.85~0.90 texels)이 하드웨어 2x2 Bilinear 보간 폭(1.0 texel) 이내에서 100% 빈틈없이 중첩(Overlapping)됩니다.
+     * // - 원거리 캐스케이드(Cascade 2~3)에서는 텍셀의 월드 크기가 커지는 것에 맞춰 radiusScale을 점진적으로 수축(1.0x -> 0.76x)하여
+     * //   하드웨어 Bilinear 중첩 무결성을 유지하면서 원거리 그림자의 과도한 블러 및 겹그림자(Banding)를 방지합니다.
      *
      *
      * ```wgsl
@@ -981,37 +981,37 @@ export namespace ShadowLibrary {
      *     compareDepth: f32,
      *     oneOverTextureSize: f32
      * ) -> f32 {
-     *     let radiusScale = 1.0 + f32(cascadeIndex) * 0.12;
+     *     let radiusScale = max(0.76, 1.0 - f32(cascadeIndex) * 0.08);
      *     let s = oneOverTextureSize * radiusScale;
      * 
      *     // 1. 중심 코어 (Weight: 4.0)
      *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
      * 
-     *     // 2. 내측 5각 비격자 링 (Radius: 1.05 * s, Weight: 2.4 each -> 12.0)
-     *     // 각도: 18°, 90°, 162°, 234°, 306° (직교 X/Y 동시 정렬 회피)
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.9986,  0.3245) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.3245,  0.9986) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.9986, -0.3245) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.3245, -0.9986) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.6850, -0.7975) * s, cascadeIndex, compareDepth);
+     *     // 2. 내측 5각 비격자 링 (Radius: 0.90 * s, Weight: 2.4 each -> 12.0)
+     *     // 각도: 18°, 90°, 162°, 234°, 306° (직교 X/Y 동시 정렬 회피 및 1.0 텍셀 이내 Bilinear 중첩 보장)
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.8559,  0.2781) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.2781,  0.8559) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.8559, -0.2781) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.2781, -0.8559) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5871, -0.6836) * s, cascadeIndex, compareDepth);
      * 
-     *     // 3. 외측 6각 회전 링 (Radius: 2.05 * s, Weight: 1.0 each -> 6.0)
-     *     // 각도: 15°, 75°, 135°, 195°, 255°, 315° (사각형 텍셀의 대각선 계단 윤곽 완전 파괴)
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.9801,  0.5306) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5306,  1.9801) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.4496,  1.4496) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.9801, -0.5306) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.5306, -1.9801) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.4496, -1.4496) * s, cascadeIndex, compareDepth);
+     *     // 3. 외측 6각 회전 링 (Radius: 1.75 * s, Weight: 1.0 each -> 6.0)
+     *     // 각도: 15°, 75°, 135°, 195°, 255°, 315° (내측 링과 0.85 텍셀 간격으로 완전 중첩)
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.6904,  0.4529) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.4529,  1.6904) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.2374,  1.2374) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.6904, -0.4529) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.4529, -1.6904) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.2374, -1.2374) * s, cascadeIndex, compareDepth);
      * 
      *     // 총 가중치 합: 4.0 + 12.0 + 6.0 = 22.0
      *     return sum * (1.0 / 22.0);
      * }
      * 
      * /**
-     *  * 🌟 [비회전 4-Tap 26.6° Rotated-Grid PCF (캐스케이드 전환 블렌딩 전용)]
+     *  * 🌟 [비회전 4-Tap 26.6° Rotated-Grid PCF]
      *  * - RGSS (Rotated Grid Super-Sampling, arctan(0.5) ≈ 26.6°) 배치로 4개의 하드웨어 2x2 Bilinear 탭이
-     *  *   가로·세로·대각선 좌표를 모두 다르게 샘플링하여 전환 구간 대역폭을 아끼면서 계단 방향성을 억제합니다.
+     *  *   가로·세로·대각선 좌표를 모두 다르게 샘플링하여 계단 방향성을 억제합니다.
      *  * 
      *  *\/
      * fn sampleShadowRotatedGrid4Mesh(
@@ -1022,7 +1022,7 @@ export namespace ShadowLibrary {
      *     compareDepth: f32,
      *     oneOverTextureSize: f32
      * ) -> f32 {
-     *     let radiusScale = 1.0 + f32(cascadeIndex) * 0.12;
+     *     let radiusScale = max(0.76, 1.0 - f32(cascadeIndex) * 0.08);
      *     let s = oneOverTextureSize * radiusScale;
      * 
      *     var sum: f32 = 0.0;
@@ -1037,7 +1037,7 @@ export namespace ShadowLibrary {
      * /**
      *  * 🌟 [현대적인 Clean Soft CSM 메인 진입점 - 전 구간 무분기 12-Tap 비회전 등방성 원형 가우시안 PCF (12 / 12 / 12 / 12)]
      *  * - Cascade 0 ~ 3 전 구간 (0.1m ~ 200.0m): 12-Tap 비회전 등방성 원형 가우시안 디스크 (워프 분기 0%, 계단 윤곽 및 회전 노이즈 동시 제거)
-     *  * - 캐스케이드 전환 구간 (20%): 4-Tap 26.6° Rotated-Grid PCF 크로스페이드
+     *  * - 캐스케이드 전환 구간 (20%): 동일 12-Tap 디스크 크로스페이드로 경계선 반음영 단절 원천 제거
      *  * 
      *  * @param directionalShadowMap [KO] 방향성 광원용 2D 뎁스 텍스처 어레이 [EN] 2D depth texture array for directional light
      *  * @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
@@ -1065,13 +1065,12 @@ export namespace ShadowLibrary {
      *     let shadowInfo = systemUniforms.shadow;
      *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
      * 
-     *     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+     *     // 2. 구면 뷰 거리 산출 (카메라 회전 불변 및 구면 외접구 100% 정합)
      *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
-     *     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-     *     let viewDepth = -viewPos.z;
+     *     let viewDepth = length(relPos);
      * 
      *     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
-     *     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+     *     if (viewDepth >= maxShadowDist) {
      *         return 1.0;
      *     }
      * 
@@ -1097,10 +1096,12 @@ export namespace ShadowLibrary {
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
      * 
-     *     // 🚀 4. [언리얼 엔진 5 표준 서브텍셀 노멀 오프셋 바이어스]
+     *     // 🚀 4. [하드웨어 depthBiasSlopeScale 연동 서브텍셀 노멀 오프셋 및 적응형 바이어스]
      *     let slopeBias = saturate(1.0 - nDotL);
-     *     let normalBiasScale = 0.5 + slopeBias * 1.5;
-     *     let baseBiasFactor = bias * (1.0 + slopeBias * 3.5);
+     *     let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
+     *     let rawNormalBiasScale = 0.35 + slopeBias * 0.95;
+     *     let normalBiasScale = rawNormalBiasScale * cascadeAtten;
+     *     let rawBaseBiasFactor = bias * (1.0 + slopeBias * 2.0);
      *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
      *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
      *     let normalOffset = N * normalBiasScale * worldTexelSize;
@@ -1117,9 +1118,9 @@ export namespace ShadowLibrary {
      * 
      *     // 🌟 [대규모 오픈월드 부동소수점 오차 흡수 바이어스 계수 산출]
      *     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
-     *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
+     *     let driftBias = maxCoord * 0.00000025;
      *     let shadowDepth = saturate(shadowCoord.z);
-     *     let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *     let cascadeBias = rawBaseBiasFactor * cascadeAtten + driftBias;
      * 
      *     // 5. 전 구간 무분기 12-Tap 등방성 원형 가우시안 디스크 샘플링 (Cascade 0 ~ 3 통일)
      *     var finalVisibility: f32 = sampleShadowIsotropic12Mesh(
@@ -1131,7 +1132,7 @@ export namespace ShadowLibrary {
      *         oneOverTextureSize
      *     );
      * 
-     *     // 🌟 6. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
+     *     // 🌟 6. [캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
      *     if (cascadeIndex < cascadeCount - 1u) {
      *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
      *         let safePrevIndex = max(1u, cascadeIndex) - 1u;
@@ -1140,28 +1141,32 @@ export namespace ShadowLibrary {
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
      * 
-     *         if (viewDepth > blendStart && finalVisibility < 0.9999) {
+     *         if (viewDepth > blendStart) {
      *             let nextIndex = cascadeIndex + 1u;
+     *             let nextCascadeAtten = 1.0 / (1.0 + f32(nextIndex) * 0.35);
      *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
      *             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
-     *             let nextBiasedPos = worldPosition + N * normalBiasScale * nextWorldTexelSize;
+     *             let nextBiasedPos = worldPosition + N * (rawNormalBiasScale * nextCascadeAtten) * nextWorldTexelSize;
      * 
      *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
      *             let nextTUV = nextShadowCoord.xy;
-     *             let nextShadowDepth = saturate(nextShadowCoord.z);
-     *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *             let nextOutOfBounds = nextTUV.x < -0.02 || nextTUV.x > 1.02 || nextTUV.y < -0.02 || nextTUV.y > 1.02 || nextShadowCoord.z < 0.0 || nextShadowCoord.z > 1.0;
+     *             if (!nextOutOfBounds) {
+     *                 let nextShadowDepth = saturate(nextShadowCoord.z);
+     *                 let nextCascadeBias = rawBaseBiasFactor * nextCascadeAtten + driftBias;
      * 
-     *             let nextVis = sampleShadowRotatedGrid4Mesh(
-     *                 directionalShadowMap,
-     *                 directionalShadowMapSampler,
-     *                 nextTUV,
-     *                 nextIndex,
-     *                 nextShadowDepth - nextCascadeBias,
-     *                 oneOverTextureSize
-     *             );
+     *                 let nextVis = sampleShadowIsotropic12Mesh(
+     *                     directionalShadowMap,
+     *                     directionalShadowMapSampler,
+     *                     nextTUV,
+     *                     nextIndex,
+     *                     nextShadowDepth - nextCascadeBias,
+     *                     oneOverTextureSize
+     *                 );
      * 
-     *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
-     *             finalVisibility = mix(finalVisibility, nextVis, blendFactor);
+     *                 let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
+     *                 finalVisibility = mix(finalVisibility, nextVis, blendFactor);
+     *             }
      *         }
      *     } else {
      *         // 7. 최외곽 15% 부드러운 페이드아웃 (하드 컷오프 방지)
@@ -1172,7 +1177,7 @@ export namespace ShadowLibrary {
      *         }
      *     }
      * 
-     *     // 🌟 8. [언리얼 엔진 표준 Soft Horizon Terminator Fade]
+     *     // 🌟 8. [Soft Horizon Terminator Fade]
      *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
      *     return finalVisibility * horizonFade;
      * }
@@ -1201,27 +1206,27 @@ export namespace ShadowLibrary {
      *     // 1. 중심 코어 (Weight: 4.0)
      *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
      * 
-     *     // 2. 내측 5각 비격자 링 (Radius: 1.05 * s, Weight: 2.4 each -> 12.0)
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.9986,  0.3245) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.3245,  0.9986) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.9986, -0.3245) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.3245, -0.9986) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.6850, -0.7975) * s, cascadeIndex, compareDepth);
+     *     // 2. 내측 5각 비격자 링 (Radius: 0.90 * s, Weight: 2.4 each -> 12.0)
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.8559,  0.2781) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.2781,  0.8559) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.8559, -0.2781) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.2781, -0.8559) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5871, -0.6836) * s, cascadeIndex, compareDepth);
      * 
-     *     // 3. 외측 6각 회전 링 (Radius: 2.05 * s, Weight: 1.0 each -> 6.0)
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.9801,  0.5306) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5306,  1.9801) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.4496,  1.4496) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.9801, -0.5306) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.5306, -1.9801) * s, cascadeIndex, compareDepth);
-     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.4496, -1.4496) * s, cascadeIndex, compareDepth);
+     *     // 3. 외측 6각 회전 링 (Radius: 1.75 * s, Weight: 1.0 each -> 6.0)
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.6904,  0.4529) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.4529,  1.6904) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.2374,  1.2374) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-1.6904, -0.4529) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.4529, -1.6904) * s, cascadeIndex, compareDepth);
+     *     sum += 1.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 1.2374, -1.2374) * s, cascadeIndex, compareDepth);
      * 
      *     // 총 가중치 합: 4.0 + 12.0 + 6.0 = 22.0
      *     return sum * (1.0 / 22.0);
      * }
      * 
      * /**
-     *  * 🌟 [지형(Landscape) 중경(Cascade 1 & C0->C1 전환) 전용 4-Tap 26.6° Rotated-Grid PCF]
+     *  * 🌟 [지형(Landscape) 중·원경 전용 4-Tap 26.6° Rotated-Grid PCF]
      *  * - RGSS (arctan(0.5) ≈ 26.6°) 배치로 4개의 하드웨어 2x2 Bilinear 탭이 서로 다른 가로·세로 축을 샘플링하여
      *  *   기존 9-Tap 5x5 Tent 대비 텍스처 대역폭을 55.6% 절감하고 나눗셈(fdiv)을 100% 제거합니다.
      *  * 
@@ -1234,7 +1239,8 @@ export namespace ShadowLibrary {
      *     compareDepth: f32,
      *     oneOverTextureSize: f32
      * ) -> f32 {
-     *     let s = oneOverTextureSize * 1.12;
+     *     let radiusScale = max(0.76, 1.0 - f32(cascadeIndex) * 0.08);
+     *     let s = oneOverTextureSize * radiusScale;
      * 
      *     var sum: f32 = 0.0;
      *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.375,  0.875) * s, cascadeIndex, compareDepth);
@@ -1246,18 +1252,17 @@ export namespace ShadowLibrary {
      * }
      * 
      * /**
-     *  * 🏔️ [지형(Landscape) 전용 적응형 CSM 메인 진입점 (12 / 4 / 1 / 1)]
-     *  * - Cascade 0 (0.1m ~ 12.1m): 12-Tap 비회전 등방성 원형 가우시안 디스크 (일반 메쉬와 100% 일치)
-     *  * - Cascade 1 (12.1m ~ 29.6m): 4-Tap 26.6° Rotated-Grid PCF (0 fdiv, 텍스처 대역폭 66.7% 절감)
-     *  * - Cascade 2 ~ 3 (29.6m ~ 200.0m): 1-Tap 하드웨어 2x2 Bilinear PCF (원경 지형 대역폭 91.7% 절감)
-     *  * - 정점 셰이더(landscapeVertex.wgsl)에서 계산된 viewDepth를 전달받아 픽셀당 viewMatrix 행렬 곱셈 생략
+     *  * 🏔️ [지형(Landscape) 전용 적응형 CSM 메인 진입점]
+     *  * - Cascade 0: 12-Tap 비회전 등방성 원형 가우시안 디스크 (일반 메쉬와 100% 일치)
+     *  * - Cascade 1 ~ 3: 4-Tap 26.6° Rotated-Grid PCF (계단 윤곽 제거 및 원경 대역폭 66.7% 절감)
+     *  * - 정점 셰이더(landscapeVertex.wgsl)에서 계산된 구면 viewDepth를 전달받아 픽셀당 행렬 곱셈 생략
      *  * 
      *  * @param directionalShadowMap [KO] 방향성 광원용 2D 뎁스 텍스처 어레이 [EN] 2D depth texture array for directional light
      *  * @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
      *  * @param worldPosition [KO] 월드 공간 상의 픽셀 좌표 [EN] World position of pixel
      *  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
      *  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
-     *  * @param viewDepth [KO] 정점 셰이더에서 보간된 뷰 공간 깊이 (-viewPos.z) [EN] Interpolated view-space depth
+     *  * @param viewDepth [KO] 정점 셰이더에서 보간된 카메라 거리 [EN] Interpolated camera distance
      *  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
      *  * 
      *  *\/
@@ -1305,10 +1310,12 @@ export namespace ShadowLibrary {
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
      * 
-     *     // 4. 일반 메쉬(getDirectionalShadowVisibility)와 100% 동일한 서브텍셀 노멀 오프셋 및 깊이 바이어스
+     *     // 4. 일반 메쉬(getDirectionalShadowVisibility)와 100% 동일한 서브텍셀 노멀 오프셋 및 적응형 깊이 바이어스
      *     let slopeBias = saturate(1.0 - nDotL);
-     *     let normalBiasScale = 0.5 + slopeBias * 1.5;
-     *     let baseBiasFactor = bias * (1.0 + slopeBias * 3.5);
+     *     let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
+     *     let rawNormalBiasScale = 0.35 + slopeBias * 0.95;
+     *     let normalBiasScale = rawNormalBiasScale * cascadeAtten;
+     *     let rawBaseBiasFactor = bias * (1.0 + slopeBias * 2.0);
      *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
      *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
      *     let normalOffset = N * normalBiasScale * worldTexelSize;
@@ -1324,12 +1331,12 @@ export namespace ShadowLibrary {
      *     }
      * 
      *     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
-     *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
+     *     let driftBias = maxCoord * 0.00000025;
      *     let shadowDepth = saturate(shadowCoord.z);
-     *     let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *     let cascadeBias = rawBaseBiasFactor * cascadeAtten + driftBias;
      *     let compareDepth = shadowDepth - cascadeBias;
      * 
-     *     // 5. 캐스케이드 거리별 차등 탭 샘플링 (12 / 4 / 1 / 1)
+     *     // 5. 캐스케이드 거리별 차등 탭 샘플링 (12 / 4 / 4 / 4)
      *     var finalVisibility: f32 = 1.0;
      *     if (cascadeIndex == 0u) {
      *         finalVisibility = sampleShadowIsotropic12Landscape(
@@ -1340,26 +1347,18 @@ export namespace ShadowLibrary {
      *             compareDepth,
      *             oneOverTextureSize
      *         );
-     *     } else if (cascadeIndex == 1u) {
+     *     } else {
      *         finalVisibility = sampleShadowRotatedGrid4Landscape(
      *             directionalShadowMap,
      *             directionalShadowMapSampler,
      *             tUV,
-     *             1u,
+     *             cascadeIndex,
      *             compareDepth,
      *             oneOverTextureSize
      *         );
-     *     } else {
-     *         finalVisibility = textureSampleCompareLevel(
-     *             directionalShadowMap,
-     *             directionalShadowMapSampler,
-     *             tUV,
-     *             cascadeIndex,
-     *             compareDepth
-     *         );
      *     }
      * 
-     *     // 6. 캐스케이드 전환 블렌딩 (하위 20% 구간: C0->C1은 4-Tap, C1->C2->C3은 1-Tap)
+     *     // 6. 캐스케이드 전환 블렌딩 (하위 20% 구간: 4-Tap Rotated-Grid 크로스페이드)
      *     if (cascadeIndex < cascadeCount - 1u) {
      *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
      *         let safePrevIndex = max(1u, cascadeIndex) - 1u;
@@ -1368,40 +1367,33 @@ export namespace ShadowLibrary {
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
      * 
-     *         if (viewDepth > blendStart && finalVisibility < 0.9999) {
+     *         if (viewDepth > blendStart) {
      *             let nextIndex = cascadeIndex + 1u;
+     *             let nextCascadeAtten = 1.0 / (1.0 + f32(nextIndex) * 0.35);
      *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
      *             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
-     *             let nextBiasedPos = worldPosition + N * normalBiasScale * nextWorldTexelSize;
+     *             let nextBiasedPos = worldPosition + N * (rawNormalBiasScale * nextCascadeAtten) * nextWorldTexelSize;
      * 
      *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
      *             let nextTUV = nextShadowCoord.xy;
-     *             let nextShadowDepth = saturate(nextShadowCoord.z);
-     *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
-     *             let nextCompareDepth = nextShadowDepth - nextCascadeBias;
+     *             let nextOutOfBounds = nextTUV.x < -0.02 || nextTUV.x > 1.02 || nextTUV.y < -0.02 || nextTUV.y > 1.02 || nextShadowCoord.z < 0.0 || nextShadowCoord.z > 1.0;
+     *             if (!nextOutOfBounds) {
+     *                 let nextShadowDepth = saturate(nextShadowCoord.z);
+     *                 let nextCascadeBias = rawBaseBiasFactor * nextCascadeAtten + driftBias;
+     *                 let nextCompareDepth = nextShadowDepth - nextCascadeBias;
      * 
-     *             var nextVis: f32 = 1.0;
-     *             if (nextIndex == 1u) {
-     *                 nextVis = sampleShadowRotatedGrid4Landscape(
-     *                     directionalShadowMap,
-     *                     directionalShadowMapSampler,
-     *                     nextTUV,
-     *                     1u,
-     *                     nextCompareDepth,
-     *                     oneOverTextureSize
-     *                 );
-     *             } else {
-     *                 nextVis = textureSampleCompareLevel(
+     *                 let nextVis = sampleShadowRotatedGrid4Landscape(
      *                     directionalShadowMap,
      *                     directionalShadowMapSampler,
      *                     nextTUV,
      *                     nextIndex,
-     *                     nextCompareDepth
+     *                     nextCompareDepth,
+     *                     oneOverTextureSize
      *                 );
-     *             }
      * 
-     *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
-     *             finalVisibility = mix(finalVisibility, nextVis, blendFactor);
+     *                 let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
+     *                 finalVisibility = mix(finalVisibility, nextVis, blendFactor);
+     *             }
      *         }
      *     } else {
      *         // 7. 최외곽 15% 부드러운 페이드아웃
@@ -1422,7 +1414,7 @@ export namespace ShadowLibrary {
     /**
      * // 🌟 [식생(Foliage) 초근경(Cascade 0) 전용 비회전 6-Tap 등방성 원형 가우시안 디스크]
      * // - 기존 9-Tap 5x5 Tent PCF 대비 텍스처 샘플링을 33.3%(9-Tap -> 6-Tap) 절감하고 부동소수점 나눗셈(fdiv) 6회를 100% 제거합니다.
-     * // - 중심(1탭, w=4.0) + 5각 비격자 링(5탭, r=1.05 texels, w=2.4)의 하드웨어 2x2 Bilinear 중첩(실효 24텍셀)으로
+     * // - 중심(1탭, w=4.0) + 5각 비격자 링(5탭, r=0.90 texels, w=2.4)의 하드웨어 2x2 Bilinear 중첩(실효 24텍셀)으로
      * //   직교 격자 대각선 계단 현상 없이 매끄러운 원형 반음영을 생성합니다.
      *
      *
@@ -1442,21 +1434,45 @@ export namespace ShadowLibrary {
      *     // 1. 중심 코어 (Weight: 4.0)
      *     var sum: f32 = 4.0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV, cascadeIndex, compareDepth);
      * 
-     *     // 2. 5각 비격자 등방성 링 (Radius: 1.05 * s, Weight: 2.4 each -> 12.0)
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.9986,  0.3245) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.3245,  0.9986) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.9986, -0.3245) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.3245, -0.9986) * s, cascadeIndex, compareDepth);
-     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.6850, -0.7975) * s, cascadeIndex, compareDepth);
+     *     // 2. 5각 비격자 등방성 링 (Radius: 0.90 * s, Weight: 2.4 each -> 12.0, < 1.0 텍셀 유지로 Bilinear 중첩 100% 보존)
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.8559,  0.2781) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.2781,  0.8559) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.8559, -0.2781) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.2781, -0.8559) * s, cascadeIndex, compareDepth);
+     *     sum += 2.4 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.5871, -0.6836) * s, cascadeIndex, compareDepth);
      * 
      *     // 총 가중치 합: 4.0 + 12.0 = 16.0 (1.0 / 16.0 = 0.0625, 2의 거듭제곱 무오차 상수)
      *     return sum * 0.0625;
      * }
      * 
      * /**
-     *  * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수 (6 / 1 / 1 / 1)]
-     *  * - Cascade 0 (초근경): 비회전 6-Tap 등방성 원형 디스크로 기존 9-Tap Tent 대비 텍스처 대역폭 33% 절감 및 나눗셈(fdiv) 100% 제거
-     *  * - Cascade 1+ (중원경): 초고속 1-Tap 하드웨어 Bilinear PCF로 대규모 숲 오버드로우 대역폭 절감
+     *  * 🌟 [식생(Foliage) 중경(Cascade 1) 전용 4-Tap Rotated-Grid PCF]
+     *  * - 바람(Wind)에 의해 흔들리는 잎사귀가 그림자 맵 텍셀 경계를 지날 때 1-Tap 이진 점프(깜빡임)가 발생하지 않도록
+     *  *   1.0 텍셀 이내 비대칭 회전 격자(실효 16텍셀 연속 Bilinear 중첩)로 부드럽게 필터링합니다.
+     *  * 
+     *  *\/
+     * fn sampleShadowRotated4Foliage(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     tUV: vec2<f32>,
+     *     cascadeIndex: u32,
+     *     compareDepth: f32,
+     *     oneOverTextureSize: f32
+     * ) -> f32 {
+     *     let s = oneOverTextureSize;
+     *     var sum: f32 = 0.0;
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.35,  0.75) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.75,  0.35) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( 0.35, -0.75) * s, cascadeIndex, compareDepth);
+     *     sum += textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-0.75, -0.35) * s, cascadeIndex, compareDepth);
+     *     return sum * 0.25;
+     * }
+     * 
+     * /**
+     *  * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수 (6 / 4 / 1 / 1)]
+     *  * - Cascade 0 (초근경): 비회전 6-Tap 등방성 원형 디스크
+     *  * - Cascade 1 (중경): 4-Tap Rotated-Grid PCF로 풍하중 애니메이션 시 텍셀 경계 깜빡임 방지
+     *  * - Cascade 2+ (원경): 초고속 1-Tap 하드웨어 Bilinear PCF로 대규모 숲 오버드로우 대역폭 절감
      *  * - Caster Bounding Volume 0-Tap 가드 및 캐스케이드 전환 크로스페이드 적용
      *  * 
      *  * @param directionalShadowMap 방향성 광원용 2D 뎁스 텍스처 어레이
@@ -1483,13 +1499,12 @@ export namespace ShadowLibrary {
      *     let shadowInfo = systemUniforms.shadow;
      *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
      * 
-     *     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+     *     // 2. 구형 뷰 거리 산출 (구형 절두체 경계 구와 100% 일치시켜 가장자리 텍셀 낭비 제거 및 viewMatrix 행렬 곱 생략)
      *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
-     *     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-     *     let viewDepth = -viewPos.z;
+     *     let viewDepth = length(relPos);
      * 
      *     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
-     *     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+     *     if (viewDepth >= maxShadowDist) {
      *         return 1.0;
      *     }
      * 
@@ -1515,10 +1530,12 @@ export namespace ShadowLibrary {
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
      * 
-     *     // 4. 식생 맞춤형 서브텍셀 슬로프 바이어스 및 노멀 오프셋
+     *     // 4. 풍하중 잎사귀 떨림(Leaf Flutter) 및 수관 LOD 편차를 고려한 식생 전용 서브텍셀 리시버 바이어스
      *     let slopeBias = saturate(1.0 - nDotL);
-     *     let normalBiasScale = 0.25 + slopeBias * 0.65;
-     *     let baseBiasFactor = bias * (1.0 + slopeBias * 1.5);
+     *     let cascadeAtten = 1.0 / (1.0 + f32(cascadeIndex) * 0.35);
+     *     let rawNormalBiasScale = 0.35 + slopeBias * 0.75;
+     *     let normalBiasScale = rawNormalBiasScale * cascadeAtten;
+     *     let rawBaseBiasFactor = bias * (1.0 + slopeBias * 1.5);
      *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
      *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
      *     let normalOffset = N * normalBiasScale * worldTexelSize;
@@ -1535,19 +1552,28 @@ export namespace ShadowLibrary {
      * 
      *     let absPos = abs(worldPosition);
      *     let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
-     *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
+     *     let driftBias = maxCoord * 0.00000025;
      *     let shadowDepth = saturate(shadowCoord.z);
-     *     let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0002 + driftBias);
+     *     let cascadeBias = max(rawBaseBiasFactor, 0.00035) * cascadeAtten + driftBias;
      * 
      *     var finalVis: f32 = 1.0;
      * 
-     *     // 5. 적응형 샘플링: 초근경(Cascade 0)은 비회전 6-Tap 등방성 원형 디스크, 중원경(Cascade 1+)은 1-Tap 하드웨어 Bilinear PCF
+     *     // 5. 적응형 샘플링: Cascade 0은 6-Tap 원형 디스크, Cascade 1은 4-Tap Rotated-Grid PCF, Cascade 2+는 1-Tap Bilinear PCF
      *     if (cascadeIndex == 0u) {
      *         finalVis = sampleShadowIsotropic6Foliage(
      *             directionalShadowMap,
      *             directionalShadowMapSampler,
      *             tUV,
      *             0u,
+     *             shadowDepth - cascadeBias,
+     *             oneOverTextureSize
+     *         );
+     *     } else if (cascadeIndex == 1u) {
+     *         finalVis = sampleShadowRotated4Foliage(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             1u,
      *             shadowDepth - cascadeBias,
      *             oneOverTextureSize
      *         );
@@ -1570,28 +1596,44 @@ export namespace ShadowLibrary {
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
      * 
-     *         if (viewDepth > blendStart && finalVis < 0.9999) {
+     *         if (viewDepth > blendStart) {
      *             let nextIndex = cascadeIndex + 1u;
+     *             let nextAtten = 1.0 / (1.0 + f32(nextIndex) * 0.35);
      *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
      *             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
-     *             let nextNormalOffset = N * normalBiasScale * nextWorldTexelSize;
+     *             let nextNormalOffset = N * (rawNormalBiasScale * nextAtten) * nextWorldTexelSize;
      *             let nextBiasedPos = worldPosition + nextNormalOffset;
      *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
      * 
      *             let nextTUV = nextShadowCoord.xy;
-     *             let nextShadowDepth = saturate(nextShadowCoord.z);
-     *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0002 + driftBias);
+     *             let nextOutOfBounds = nextTUV.x < 0.0 || nextTUV.x > 1.0 || nextTUV.y < 0.0 || nextTUV.y > 1.0 || nextShadowCoord.z < 0.0 || nextShadowCoord.z > 1.0;
+     *             if (!nextOutOfBounds) {
+     *                 let nextShadowDepth = saturate(nextShadowCoord.z);
+     *                 let nextCascadeBias = max(rawBaseBiasFactor, 0.00035) * nextAtten + driftBias;
      * 
-     *             let nextVis = textureSampleCompareLevel(
-     *                 directionalShadowMap,
-     *                 directionalShadowMapSampler,
-     *                 nextTUV,
-     *                 nextIndex,
-     *                 nextShadowDepth - nextCascadeBias
-     *             );
+     *                 var nextVis: f32;
+     *                 if (nextIndex == 1u) {
+     *                     nextVis = sampleShadowRotated4Foliage(
+     *                         directionalShadowMap,
+     *                         directionalShadowMapSampler,
+     *                         nextTUV,
+     *                         1u,
+     *                         nextShadowDepth - nextCascadeBias,
+     *                         oneOverTextureSize
+     *                     );
+     *                 } else {
+     *                     nextVis = textureSampleCompareLevel(
+     *                         directionalShadowMap,
+     *                         directionalShadowMapSampler,
+     *                         nextTUV,
+     *                         nextIndex,
+     *                         nextShadowDepth - nextCascadeBias
+     *                     );
+     *                 }
      * 
-     *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
-     *             finalVis = mix(finalVis, nextVis, blendFactor);
+     *                 let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
+     *                 finalVis = mix(finalVis, nextVis, blendFactor);
+     *             }
      *         }
      *     } else {
      *         // 7. 최외곽 캐스케이드 부드러운 페이드아웃
@@ -1660,7 +1702,7 @@ export namespace ColorLibrary {
      * fn linearToSrgbVec3(linearColor: vec3<f32>) -> vec3<f32> {
      *     return select(
      *         12.92 * linearColor,
-     *         1.055 * pow(linearColor, vec3<f32>(1.0 / 2.4)) - 0.055,
+     *         1.055 * pow(max(linearColor, vec3<f32>(0.0031308)), vec3<f32>(1.0 / 2.4)) - 0.055,
      *         linearColor > vec3<f32>(0.0031308)
      *     );
      * }
@@ -2007,9 +2049,9 @@ export namespace LightingLibrary {
      * // [KO] 물리적인 역제곱 법칙(Inverse Square Law)에 따른 광원 감쇄 계수를 계산합니다.
      * // [EN] Calculates the light attenuation factor according to the physical Inverse Square Law.
      *
-     * // [KO] 이 함수는 순수 물리적 역제곱 법칙(1/d^2)을 따르며, Frostbite 방식의 윈도잉 함수를 사용하여 광원의 radius 지점에서 부드럽게 0으로 수렴하도록 합니다.
+     * // [KO] 이 함수는 순수 물리적 역제곱 법칙(1/d^2)을 따르며, 거리 기반 윈도잉 함수를 사용하여 광원의 radius 지점에서 부드럽게 0으로 수렴하도록 합니다.
      * // [KO] 주의: 4*PI 분산 계수는 에너지 보존을 위해 외부(Lumen 단위 변환 시)에서 적용되어야 합니다.
-     * // [EN] This function follows the pure physical inverse square law (1/d^2) and uses a Frostbite-style windowing function to smoothly converge to 0 at the light's radius.
+     * // [EN] This function follows the pure physical inverse square law (1/d^2) and uses a distance-based windowing function to smoothly converge to 0 at the light's radius.
      * // [EN] Note: The 4*PI dispersion factor should be applied externally (during Lumen unit conversion) for energy conservation.
      *
      * // @param distance [KO] 광원으로부터의 거리 [EN] Distance from the light source
@@ -2023,8 +2065,8 @@ export namespace LightingLibrary {
      * fn getLightDistanceAttenuation(distance: f32, radius: f32) -> f32 {
      *     let d2 = distance * distance;
      *     
-     *     // [KO] 현대적인 표준 윈도잉 함수 (Frostbite / Unreal 방식)
-     *     // [EN] Modern standard windowing function (Frostbite / Unreal style)
+     *     // [KO] 거리 기반 부드러운 감쇠 윈도잉 함수
+     *     // [EN] Smooth distance-based attenuation windowing function
      *     let factor = distance / radius;
      *     let factor2 = factor * factor;
      *     let factor4 = factor2 * factor2;
@@ -2101,7 +2143,11 @@ export namespace EntryPointLibrary {
          *     let position = u_modelMatrix * vec4<f32>(input_position, 1.0);
          *     let relPos = position.xyz - u_camera.cameraPosition;
          *     let viewPos = (u_viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-         *     output.position = u_projectionMatrix * vec4<f32>(viewPos, 1.0);
+         *     let clipPos = u_projectionMatrix * vec4<f32>(viewPos, 1.0);
+         *     output.position = vec4<f32>(
+         *         (clipPos.xy - systemUniforms.pickingOffset * clipPos.w) * systemUniforms.resolution,
+         *         clipPos.zw
+         *     );
          *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
@@ -2204,11 +2250,7 @@ export namespace EntryPointLibrary {
          *     var output: VertexOutput;
          *     let u_resolution = systemUniforms.resolution;
          *     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
-         *     #redgpu_if disableJitter
-         *         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
-         *     #redgpu_else
-         *         let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
-         *     #redgpu_endIf
+         *     let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
          *     
          *     let u_viewMatrix = systemUniforms.camera.viewMatrix;
          *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
@@ -2258,6 +2300,10 @@ export namespace EntryPointLibrary {
          *         }
          *     }
          * 
+         *     output.position = vec4<f32>(
+         *         (output.position.xy - systemUniforms.pickingOffset * output.position.w) * u_resolution,
+         *         output.position.zw
+         *     );
          *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
@@ -2316,7 +2362,7 @@ export namespace SystemStructLibrary {
      * struct OutputFragment {
      *     @location(0) color: vec4<f32>,
      *     @location(1) gBufferNormal: vec4<f32>,
-     *     @location(2) gBufferMotionVector: vec4<f32>,
+     *     @location(2) gBufferMotionVector: vec2<f32>,
      * }
      * ```
      */
@@ -2510,7 +2556,7 @@ export namespace SystemStructLibrary {
      *     combinedOpacity: f32,
      *     useDisplacementTexture: u32,
      *     displacementScale: f32,
-     *     disableJitter: u32,
+     * 
      *     globalFragmentSlotIndex:u32,
      *     uvTransform: vec4<f32>,
      * };
@@ -2710,7 +2756,6 @@ export namespace SystemStructLibrary {
      *     normalScale:f32,
      *     displacementScale:f32,
      *     //
-     *     useSSR:u32,
      *     metallic:f32,
      *     roughness:f32,
      *     //
@@ -2887,6 +2932,7 @@ export namespace ShaderLibrary {
      * 	  projection: Projection,
      * 	  time: Time,
      * 	  resolution:vec2<f32>,
+     *      pickingOffset:vec2<f32>,
      *       //
      *       camera:Camera,
      * 	  usePrefilterTexture:u32,
@@ -2922,8 +2968,8 @@ export namespace ShaderLibrary {
      * @group(0) @binding(13) var atmosphereSampler: sampler;
      * @group(0) @binding(14) var transmittanceTexture: texture_2d<f32>;
      * 
-     * @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
-     * @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
+     * @group(0) @binding(15) var skyAtmosphere_skyLightLUTTextureArray: texture_cube_array<f32>;
+     * 
      * 
      * #redgpu_include systemStruct.globalVertexStruct;
      * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
@@ -3039,8 +3085,9 @@ export namespace ShaderLibrary {
      *     time: Time,
      *     camera: Camera,
      *     useSkyAtmosphere: u32,
-     *     preExposure: f32,
      *     devicePixelRatio: f32,
+     *     preExposure: f32,
+     *     preExposureRatio: f32,
      *     skyAtmosphere: SkyAtmosphere,
      * };
      * 
@@ -3053,36 +3100,6 @@ export namespace ShaderLibrary {
      * ```
      */
     export const POST_EFFECT_SYSTEM_UNIFORM = POST_EFFECT_SYSTEM_UNIFORM_wgsl;
-    /**
-     * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다. (MSAA)
-     * // [EN] Post effect system uniform structure. (MSAA)
-     *
-     *
-     * ```wgsl
-     * #redgpu_include systemStruct.Camera
-     * #redgpu_include systemStruct.Projection
-     * #redgpu_include systemStruct.Time
-     * #redgpu_include systemStruct.SkyAtmosphere
-     * 
-     * struct SystemUniform {
-     *     projection: Projection,
-     *     time: Time,
-     *     camera: Camera,
-     *     useSkyAtmosphere: u32,
-     *     preExposure: f32,
-     *     devicePixelRatio: f32,
-     *     skyAtmosphere: SkyAtmosphere,
-     * };
-     * 
-     * @group(2) @binding(0) var depthTexture : texture_depth_multisampled_2d;
-     * @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
-     * @group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;
-     * @group(2) @binding(3) var prevDepthTexture : texture_depth_multisampled_2d;
-     * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
-     * @group(2) @binding(5) var basicSampler : sampler;
-     * ```
-     */
-    export const POST_EFFECT_SYSTEM_UNIFORM_MSAA = POST_EFFECT_SYSTEM_UNIFORM_MSAA_wgsl;
 
     export import math = MathLibrary;
 

@@ -1,5 +1,6 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+
 /**
  * [KO] Basic Animations 예제
  * [EN] Basic Animations example
@@ -20,6 +21,10 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
+
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         const glbUrls = [
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnimatedCube/glTF/AnimatedCube.gltf',
@@ -44,14 +49,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] GLTF 모델들을 그리드 형태로 로드합니다.
- * [EN] Loads GLTF models in a grid layout.
- * @param {RedGPU.Display.View3D} view
- * @param {string[]} urls
- * @param {number} gridSize
- * @param {number} spacing
- */
 function loadGLTFGrid(view, urls, gridSize = 5, spacing = 5) {
     const {redGPUContext, scene} = view;
 
@@ -79,12 +76,6 @@ function loadGLTFGrid(view, urls, gridSize = 5, spacing = 5) {
     });
 }
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
 const renderTestPane = (redGPUContext, targetView) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,

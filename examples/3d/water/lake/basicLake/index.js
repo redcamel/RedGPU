@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Basic Lake 예제
@@ -23,6 +23,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,

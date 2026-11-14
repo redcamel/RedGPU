@@ -1,0 +1,179 @@
+let index = global_id.xy;
+let fullDims = vec2<f32>(postEffectOutputDimensions);
+let invFullDims = 1.0 / fullDims;
+let uv = (vec2<f32>(index) + 0.5) * invFullDims;
+
+let sharpSample = textureLoad(sourceTexture, index, 0);
+let sharpColor = sharpSample.rgb;
+
+let halfDims = vec2<f32>(textureDimensions(bgBokehTexture));
+let halfTexelSize = 1.0 / halfDims;
+let halfToFullScale = fullDims.y / max(halfDims.y, 1.0);
+
+// [KO] 1. 풀해상도(1x1) 5-Tap 십자 깊이 범위 및 시간 안정화된 CoC(cocTexture) 결합으로 2x2 블록 계단 현상과 TAA 서브픽셀 경계 떨림을 동시 제거
+// [EN] 1. Combine full-resolution (1x1) 5-Tap cross depth bounds with temporally stabilized CoC (cocTexture) to eliminate both 2x2 blocky silhouettes and TAA sub-pixel edge jitter
+let maxHalfCoC = computeAutoMaxHalfCoC(systemUniforms.devicePixelRatio);
+let minNearDepth = max(systemUniforms.camera.nearClipping, 0.001);
+let invProjZW = extractInvProjZW(systemUniforms.projection.inverseProjectionMatrix);
+
+let minFocusDepth = max(systemUniforms.camera.nearClipping, 0.01);
+let maxFocusDepth = min(max(systemUniforms.camera.farClipping, minFocusDepth + 1.0), 65000.0);
+let manualFocusDistance = clamp(uniforms.focusDistance, minFocusDepth, maxFocusDepth);
+var effectiveFocusDistance = manualFocusDistance;
+if (uniforms.useAutoFocus == 1u) {
+    let focusState = textureLoad(focusTexture, vec2<i32>(0, 0), 0);
+    effectiveFocusDistance = select(manualFocusDistance, focusState.r, focusState.g > 0.5);
+}
+
+let lensParams = computeDOFCoCLensParams(
+    uniforms.aperture,
+    uniforms.focalLength,
+    effectiveFocusDistance,
+    halfDims.y
+);
+
+let maxDepthCoord = max(vec2<i32>(textureDimensions(depthTexture)) - vec2<i32>(1), vec2<i32>(0));
+let maxHalfCoord = max(vec2<i32>(textureDimensions(cocTexture)) - vec2<i32>(1), vec2<i32>(0));
+let coordC = clamp(vec2<i32>(index), vec2<i32>(0), maxDepthCoord);
+let cocC = samplePhysicalHalfCoCAtDepthCoord(coordC, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+
+var exactHalfCoC = cocC;
+if (uniforms.historyValid == 1u) {
+    let coordL = clamp(coordC + vec2<i32>(-1, 0), vec2<i32>(0), maxDepthCoord);
+    let coordR = clamp(coordC + vec2<i32>(1, 0), vec2<i32>(0), maxDepthCoord);
+    let coordU = clamp(coordC + vec2<i32>(0, -1), vec2<i32>(0), maxDepthCoord);
+    let coordD = clamp(coordC + vec2<i32>(0, 1), vec2<i32>(0), maxDepthCoord);
+
+    let cocL = samplePhysicalHalfCoCAtDepthCoord(coordL, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocR = samplePhysicalHalfCoCAtDepthCoord(coordR, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocU = samplePhysicalHalfCoCAtDepthCoord(coordU, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+    let cocD = samplePhysicalHalfCoCAtDepthCoord(coordD, invProjZW, minNearDepth, lensParams, maxHalfCoC);
+
+    let minCrossCoC = min(cocC, min(min(cocL, cocR), min(cocU, cocD)));
+    let maxCrossCoC = max(cocC, max(max(cocL, cocR), max(cocU, cocD)));
+
+    // [KO] 상시 0.0 부호 경계 클램핑 및 양선형 부호 상쇄·급감 폴백으로 대각선 및 [-0.25, +0.25] 구간에서도 부호 역전과 1픽셀 점선을 100% 원천 차단
+    // [EN] Unconditionally enforce 0.0 sign-boundary clamping and bilinear sign-cancellation/magnitude-drop fallback to completely prevent sign inversion and 1-pixel contours across diagonals and [-0.25, +0.25]
+    let safeMinCoC = select(minCrossCoC, max(minCrossCoC, 0.0), cocC >= 0.0);
+    let safeMaxCoC = select(maxCrossCoC, min(maxCrossCoC, 0.0), cocC < 0.0);
+    let stabilizedHalfCoC = textureSampleLevel(cocTexture, basicSampler, uv, 0.0).a;
+    let isBilinearSignCancelled = (stabilizedHalfCoC * cocC <= 0.0) || (abs(cocC) > 0.2 && abs(stabilizedHalfCoC) < abs(cocC) * 0.5);
+    exactHalfCoC = select(clamp(stabilizedHalfCoC, safeMinCoC, safeMaxCoC), cocC, isBilinearSignCancelled);
+}
+let exactFullCoC = abs(exactHalfCoC) * halfToFullScale;
+let farBokehBlend = max(smoothstep(0.5, 1.75, exactHalfCoC), smoothstep(0.35, 1.5, -exactHalfCoC));
+
+// [KO] 2. 미세 비초점 구간(Slight Out-of-Focus: 0.75px ~ 4.5px, farBokehBlend < 0.999)에서 이산 CoC 검증 및 동일 부호 레이어 8-Tap 직접 개더링 수행
+// [EN] 2. 8-Tap direct gathering in the slight out-of-focus transition zone (0.75px ~ 4.5px, farBokehBlend < 0.999) with discrete CoC lookup and strict same-sign layer gating
+var baseFullResColor = sharpColor;
+if (exactFullCoC > 0.75 && farBokehBlend < 0.999) {
+    let slightRadius = clamp(exactFullCoC, 0.75, 3.5);
+    var slightSumColor = sharpColor;
+    var slightSumWeight: f32 = 1.0;
+
+    for (var i = 0u; i < 8u; i = i + 1u) {
+        let tapOffset = SLIGHT_DOF_OFFSETS[i] * slightRadius;
+        let tapFullCoord = vec2<f32>(index) + 0.5 + tapOffset;
+        let tapUV = saturate(tapFullCoord * invFullDims);
+        let tapHalfCoord = clamp(vec2<i32>(tapFullCoord * 0.5), vec2<i32>(0), maxHalfCoord);
+        let tapHalfCoC = textureLoad(cocTexture, tapHalfCoord, 0).a;
+        let tapFullCoC = abs(tapHalfCoC) * halfToFullScale;
+        let sameLayerWeight = select(0.0, 1.0, tapHalfCoC * exactHalfCoC >= 0.0);
+        let tapWeight = smoothstep(0.35, 1.15, tapFullCoC) * sameLayerWeight;
+        if (tapWeight > 0.0) {
+            let tapColor = textureSampleLevel(sourceTexture, basicSampler, tapUV, 0.0).rgb;
+            slightSumColor += tapColor * tapWeight;
+            slightSumWeight += tapWeight;
+        }
+    }
+
+    let slightGatherColor = slightSumColor / max(slightSumWeight, 1e-4);
+    let slightBlend = smoothstep(0.75, 2.0, exactFullCoC);
+    baseFullResColor = mix(sharpColor, slightGatherColor, slightBlend);
+}
+
+// [KO] 3. 배경(Background) 보케 버퍼 조건부 9-Tap CoC-Bilateral Tent 업샘플링 및 블렌딩 (초점 영역 0-Tap 조기 스킵)
+// [EN] 3. Conditional Background bokeh buffer 9-Tap CoC-Bilateral Tent upsampling and blending (0-Tap early skip in in-focus regions)
+let d = halfTexelSize.xyxy * vec4<f32>(1.0, 1.0, -1.0, 0.0);
+
+var compositedBgColor = baseFullResColor;
+if (farBokehBlend > 1e-3) {
+    let b00 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.xy, 0.0);
+    let b10 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.wy, 0.0);
+    let b20 = textureSampleLevel(bgBokehTexture, basicSampler, uv - d.zy, 0.0);
+    let b01 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.zw, 0.0);
+    let b11 = textureSampleLevel(bgBokehTexture, basicSampler, uv, 0.0);
+    let b21 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xw, 0.0);
+    let b02 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.zy, 0.0);
+    let b12 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.wy, 0.0);
+    let b22 = textureSampleLevel(bgBokehTexture, basicSampler, uv + d.xy, 0.0);
+
+    // [KO] 비전경 픽셀에서는 합초 개구부 게이트(saturate) 기반 양방향 가중치로 합초 경계를 보호하고, 전경 픽셀로 갈수록 양방향 페널티(penaltyScale)를 연속적으로 0으로 감쇠시켜 실루엣 안팎의 홀필링 배경과 실제 배경을 부드럽게 보간
+    // [EN] On non-foreground pixels, protect in-focus boundaries via bilateral weights; as CoC transitions into foreground, continuously attenuate penaltyScale to 0 to smoothly interpolate hole-filled and adjacent real background
+    let centerSharpGate = saturate(max(exactHalfCoC, 0.0));
+    let penaltyScale = 6.0 * (1.0 - smoothstep(0.05, 0.45, -exactHalfCoC));
+    let bw00 = computeBgUpsampleBilateralWeight(b00.a, centerSharpGate, 1.0, penaltyScale);
+    let bw10 = computeBgUpsampleBilateralWeight(b10.a, centerSharpGate, 2.0, penaltyScale);
+    let bw20 = computeBgUpsampleBilateralWeight(b20.a, centerSharpGate, 1.0, penaltyScale);
+    let bw01 = computeBgUpsampleBilateralWeight(b01.a, centerSharpGate, 2.0, penaltyScale);
+    let bw11 = computeBgUpsampleBilateralWeight(b11.a, centerSharpGate, 4.0, penaltyScale);
+    let bw21 = computeBgUpsampleBilateralWeight(b21.a, centerSharpGate, 2.0, penaltyScale);
+    let bw02 = computeBgUpsampleBilateralWeight(b02.a, centerSharpGate, 1.0, penaltyScale);
+    let bw12 = computeBgUpsampleBilateralWeight(b12.a, centerSharpGate, 2.0, penaltyScale);
+    let bw22 = computeBgUpsampleBilateralWeight(b22.a, centerSharpGate, 1.0, penaltyScale);
+
+    let bgWeightSum = max(bw00 + bw10 + bw20 + bw01 + bw11 + bw21 + bw02 + bw12 + bw22, 1e-4);
+    let upsampledBgColor = (
+        b00.rgb * bw00 + b10.rgb * bw10 + b20.rgb * bw20 +
+        b01.rgb * bw01 + b11.rgb * bw11 + b21.rgb * bw21 +
+        b02.rgb * bw02 + b12.rgb * bw12 + b22.rgb * bw22
+    ) / bgWeightSum;
+
+    compositedBgColor = mix(baseFullResColor, upsampledBgColor, farBokehBlend);
+}
+
+// [KO] 4. 전경(Foreground) 보케 및 불투명도(α_fg) 4-코너 양선형 볼록 상한 부등식(α_tent <= 3.0625 * sum_corners) 기반 2단계 게이팅 9-Tap Tent 업샘플링
+// [EN] 4. Foreground bokeh and opacity (α_fg) 9-Tap Tent upsampling with 2-stage gating via exact 4-corner bilinear convex upper bound (α_tent <= 3.0625 * sum_corners)
+let f00 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.xy, 0.0);
+let f20 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.zy, 0.0);
+let f02 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.zy, 0.0);
+let f22 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.xy, 0.0);
+
+var finalColor = compositedBgColor;
+if (f00.a + f20.a + f02.a + f22.a > 3e-4) {
+    let f11 = textureSampleLevel(fgBokehTexture, basicSampler, uv, 0.0);
+    let f10 = textureSampleLevel(fgBokehTexture, basicSampler, uv - d.wy, 0.0);
+    let f01 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.zw, 0.0);
+    let f21 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.xw, 0.0);
+    let f12 = textureSampleLevel(fgBokehTexture, basicSampler, uv + d.wy, 0.0);
+
+    let upsampledFgOpacity = (
+        f00.a * 1.0 + f10.a * 2.0 + f20.a * 1.0 +
+        f01.a * 2.0 + f11.a * 4.0 + f21.a * 2.0 +
+        f02.a * 1.0 + f12.a * 2.0 + f22.a * 1.0
+    ) * (1.0 / 16.0);
+
+    if (upsampledFgOpacity > 1e-3) {
+        let fcw00 = 1.0 * max(f00.a, 1e-4);
+        let fcw10 = 2.0 * max(f10.a, 1e-4);
+        let fcw20 = 1.0 * max(f20.a, 1e-4);
+        let fcw01 = 2.0 * max(f01.a, 1e-4);
+        let fcw11 = 4.0 * max(f11.a, 1e-4);
+        let fcw21 = 2.0 * max(f21.a, 1e-4);
+        let fcw02 = 1.0 * max(f02.a, 1e-4);
+        let fcw12 = 2.0 * max(f12.a, 1e-4);
+        let fcw22 = 1.0 * max(f22.a, 1e-4);
+
+        let fgColorWeightSum = max(fcw00 + fcw10 + fcw20 + fcw01 + fcw11 + fcw21 + fcw02 + fcw12 + fcw22, 1e-4);
+        let upsampledFgColor = (
+            f00.rgb * fcw00 + f10.rgb * fcw10 + f20.rgb * fcw20 +
+            f01.rgb * fcw01 + f11.rgb * fcw11 + f21.rgb * fcw21 +
+            f02.rgb * fcw02 + f12.rgb * fcw12 + f22.rgb * fcw22
+        ) / fgColorWeightSum;
+
+        let finalFgOpacity = saturate(upsampledFgOpacity);
+        finalColor = mix(compositedBgColor, upsampledFgColor, finalFgOpacity);
+    }
+}
+
+textureStore(outputTexture, index, vec4<f32>(finalColor, sharpSample.a));

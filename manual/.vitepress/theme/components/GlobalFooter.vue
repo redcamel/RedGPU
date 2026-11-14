@@ -31,6 +31,7 @@
 }
 .footer-links {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
   margin-bottom: 16px;

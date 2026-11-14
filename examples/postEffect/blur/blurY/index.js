@@ -1,12 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Blur Y 예제
  * [EN] Blur Y example
  *
- * [KO] 세로 방향 블러(Blur Y) 포스트 이펙트를 시연합니다.
- * [EN] Demonstrates the vertical blur (Blur Y) post effect.
+ * [KO] BlurY 이펙트를 사용하여 화면에 세로 방향 블러 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply a vertical blur effect using the BlurY effect.
  */
 
 const container = document.createElement('div');
@@ -19,7 +19,8 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 3;
+        controller.distance = 2.9;
+        controller.tilt = 0;
         controller.speedDistance = 0.1;
 
         const scene = new RedGPU.Display.Scene();
@@ -28,16 +29,19 @@ RedGPU.init(
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewNormal.builtInEffectManager.useBloom = true;
         redGPUContext.addView(viewNormal);
 
-        // [KO] BlurY 포스트 이펙트 생성 및 뷰에 추가
-        // [EN] Create BlurY post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        viewEffect.builtInEffectManager.useBloom = true;
+        redGPUContext.addView(viewEffect);
+
+        // [KO] BlurY 이펙트 생성 및 뷰에 추가
+        // [EN] Create BlurY effect and add to view
         const effect = new RedGPU.PostEffect.BlurY(redGPUContext);
         viewEffect.postEffectManager.addEffect(effect);
-        redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
@@ -51,12 +55,12 @@ RedGPU.init(
         );
 
         const updateLayout = () => {
-            const isNarrow = window.innerWidth <= 768;
-            if (isNarrow) {
-                viewNormal.setSize('100%', '50%');
-                viewNormal.setPosition(0, 0);
+            const isPortrait = window.innerWidth < window.innerHeight;
+            if (isPortrait) {
                 viewEffect.setSize('100%', '50%');
-                viewEffect.setPosition(0, '50%');
+                viewEffect.setPosition(0, 0);
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, '50%');
             } else {
                 viewNormal.setSize('50%', '100%');
                 viewNormal.setPosition(0, 0);

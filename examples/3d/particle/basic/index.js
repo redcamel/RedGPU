@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] 파티클 기본 예제
@@ -15,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 50;
 
@@ -23,7 +22,8 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // 2. IBL 및 스카이박스 설정
+        // [KO] IBL 및 스카이박스 설정
+        // [EN] Set up IBL and skybox
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
             '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -33,19 +33,17 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         view.grid = true;
 
-        // 3. 파티클 설정
         const {particleEmitter, particleContainer} = createParticleTest(redGPUContext, scene);
 
-        // 4. 애니메이션 렌더 루프 및 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // 이미터 컨테이너를 사인파 궤적으로 이동시킵니다.
+            // [KO] 이미터 컨테이너를 사인파 궤적으로 이동
+            // [EN] Move the emitter container along a sine-wave trajectory
             particleContainer.x = Math.sin(time / 500) * 5;
             particleContainer.y = Math.cos(time / 500) * 5;
             particleContainer.z = Math.sin(time / 500) * 5;
         });
 
-        // 5. 테스트 GUI 설정
         renderTestPane(redGPUContext, particleEmitter);
     },
     (failReason) => {
@@ -56,12 +54,9 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트를 위한 파티클 이미터와 컨테이너를 생성합니다.
- * [EN] Creates a particle emitter and container for testing.
- */
 const createParticleTest = (redGPUContext, scene) => {
-    // 파티클의 중심점을 시각화하기 위한 빨간색 구체 컨테이너
+    // [KO] 파티클 중심점 시각화용 빨간색 구체 컨테이너
+    // [EN] Red sphere container to visualize the particle origin
     const particleContainer = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext),
@@ -69,11 +64,9 @@ const createParticleTest = (redGPUContext, scene) => {
     );
     scene.addChild(particleContainer);
 
-    // 파티클 이미터 생성
     const particleEmitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
     particleContainer.addChild(particleEmitter);
 
-    // 기본 텍스처 및 블렌딩 설정
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
     particleEmitter.material.diffuseTexture = texture;
     particleEmitter.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE;
@@ -81,18 +74,12 @@ const createParticleTest = (redGPUContext, scene) => {
     return {particleEmitter, particleContainer};
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링하고 파티클 속성을 제어합니다.
- * [EN] Renders the GUI for testing and controls particle properties.
- */
 const renderTestPane = (redGPUContext, particleEmitter) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // particle 폴더
             const particleFolder = pane.addFolder({title: 'particle', expanded: true});
             particleFolder.addBinding(particleEmitter, 'particleNum', {min: 0, max: 50000, step: 1});
 
-            // geometry material 폴더
             const assetFolder = pane.addFolder({title: 'geometry material', expanded: true});
             assetFolder.addBinding(particleEmitter, 'useBillboard');
             assetFolder.addBinding({texture: '../../../assets/particle/particle2.png'}, 'texture', {
@@ -109,12 +96,10 @@ const renderTestPane = (redGPUContext, particleEmitter) => {
                 particleEmitter.geometry = new RedGPU.Primitive[ev.value](redGPUContext);
             });
 
-            // life 폴더
             const lifeFolder = pane.addFolder({title: 'life', expanded: true});
             lifeFolder.addBinding(particleEmitter, 'minLife', {min: 0, max: 10000, step: 1});
             lifeFolder.addBinding(particleEmitter, 'maxLife', {min: 0, max: 10000, step: 1});
 
-            // position 폴더
             const posFolder = pane.addFolder({title: 'position', expanded: true});
             posFolder.addBlade({view: 'separator'});
             posFolder.addBinding(particleEmitter, 'minStartX', {min: -20, max: 20});
@@ -135,7 +120,6 @@ const renderTestPane = (redGPUContext, particleEmitter) => {
             posFolder.addBinding(particleEmitter, 'maxEndZ', {min: -20, max: 20});
             posFolder.addBinding(particleEmitter, 'easeZ', {options: RedGPU.Display.PARTICLE_EASE});
 
-            // rotation 폴더
             const rotFolder = pane.addFolder({title: 'rotation', expanded: true});
             rotFolder.addBlade({view: 'separator'});
             rotFolder.addBinding(particleEmitter, 'minStartRotationX', {min: 0, max: 360});
@@ -156,7 +140,6 @@ const renderTestPane = (redGPUContext, particleEmitter) => {
             rotFolder.addBinding(particleEmitter, 'maxEndRotationZ', {min: 0, max: 360});
             rotFolder.addBinding(particleEmitter, 'easeRotationZ', {options: RedGPU.Display.PARTICLE_EASE});
 
-            // scale 폴더
             const scaleFolder = pane.addFolder({title: 'scale', expanded: true});
             scaleFolder.addBlade({view: 'separator'});
             scaleFolder.addBinding(particleEmitter, 'minStartScale', {min: 0, max: 5});
@@ -165,7 +148,6 @@ const renderTestPane = (redGPUContext, particleEmitter) => {
             scaleFolder.addBinding(particleEmitter, 'maxEndScale', {min: 0, max: 5});
             scaleFolder.addBinding(particleEmitter, 'easeScale', {options: RedGPU.Display.PARTICLE_EASE});
 
-            // alpha 폴더
             const alphaFolder = pane.addFolder({title: 'alpha', expanded: true});
             alphaFolder.addBlade({view: 'separator'});
             alphaFolder.addBinding(particleEmitter, 'minStartAlpha', {min: 0, max: 1});

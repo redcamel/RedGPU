@@ -1,6 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -39,9 +39,6 @@ RedGPU.init(
 		// [KO] 조명 설정
 		// [EN] Lighting setup
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.x = 10;
-		directionalLight.y = 20;
-		directionalLight.z = 10;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// [KO] 1. 바닥 생성 (물체가 천 아래로 떨어졌을 때를 대비)
@@ -49,13 +46,12 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.y = -5;
 		ground.scaleX = 60;
 		ground.scaleY = 1;
 		ground.scaleZ = 60;
-		ground.material.color.setColorByHEX('#333333');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -85,19 +81,12 @@ RedGPU.init(
 		const clothMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			clothGeometry,
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#cc4444')
 		);
-		clothMesh.material.color.setColorByHEX('#ff4444');
 		clothMesh.primitiveState.cullMode = 'none';
 		scene.addChild(clothMesh);
 
 		const nodes = [];
-		/**
-		 * [KO] 물리 노드(정점) 생성
-		 * 네 모서리 정점은 STATIC으로 설정하여 공중에 고정시킵니다.
-		 * [EN] Create physics nodes (vertices)
-		 * Set the four corner vertices to STATIC to fix them in mid-air.
-		 */
 		for (let iz = 0; iz < nrows; iz++) {
 			for (let ix = 0; ix < ncols; ix++) {
 				const isCorner = 
@@ -114,8 +103,6 @@ RedGPU.init(
 				mesh.x = ix * spacingX - width / 2;
 				mesh.y = startY;
 				mesh.z = iz * spacingZ - depth / 2;
-				mesh.visible = false; 
-				scene.addChild(mesh);
 
 				const body = physicsEngine.createBody(mesh, {
 					type: isCorner ? RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC : RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
@@ -188,19 +175,25 @@ RedGPU.init(
 
 		// [KO] 5. 테스트 상호작용
 		// [EN] 5. Test interaction
+        const getRandomColor = () => {
+            const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const spawnObject = () => {
 			const isBox = Math.random() > 0.5;
 			const size = 1.5 + Math.random() * 2.5;
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				isBox ? new RedGPU.Primitive.Box(redGPUContext) : new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
 			mesh.scaleX = mesh.scaleY = mesh.scaleZ = size;
 			mesh.x = (Math.random() - 0.5) * 6;
 			mesh.y = 25;
 			mesh.z = (Math.random() - 0.5) * 6;
-			mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			scene.addChild(mesh);
 			
 			physicsEngine.createBody(mesh, {
@@ -247,15 +240,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성 함수
- * [EN] Function to create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Mesh} clothMesh
- * @param {function} spawnObject
- * @param {function} windBlast
- * @param {function} resetScene
- */
 const renderTestPane = (redGPUContext, clothMesh, spawnObject, windBlast, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

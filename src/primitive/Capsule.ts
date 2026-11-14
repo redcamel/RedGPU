@@ -10,7 +10,7 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * ```typescript
  * const capsule = new RedGPU.Primitive.Capsule(redGPUContext, 0.5, 1.0, 32, 1, 12);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/capsule/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/capsule/"></iframe>
  *
  * @see [Capsule example](/RedGPU/examples/3d/primitive/capsule/)
  * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)

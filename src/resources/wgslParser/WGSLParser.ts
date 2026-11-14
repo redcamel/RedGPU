@@ -412,8 +412,6 @@ class WGSLParser {
         }
         this.#preprocessCache.clear();
         this.#sourceNameRegistry.clear();
-
-        console.log('✨ WGSLParser 격리 캐시 메모리 완벽 해소 완료');
     }
 
     /**
@@ -461,10 +459,8 @@ class WGSLParser {
         let reflectResult;
 
         if (cachedReflect) {
-            console.log('🚀 캐시에서 리플렉트 로드:', cacheKey);
             reflectResult = {...cachedReflect};
         } else {
-            console.log('🔄 리플렉트 파싱 시작:', cacheKey);
             const reflect = new WgslReflect(defaultSource);
 
             reflectResult = {
@@ -542,13 +538,7 @@ class WGSLParser {
             conditionalBlockInfos: conditionalBlocks,
         };
 
-        const totalCombinations = Math.pow(2, uniqueKeys.length);
         this.#preprocessCache.set(cacheKey, result);
-
-        if (totalCombinations > 1) {
-            console.log(`레이지 바리안트 생성기 초기화 (캐시 저장):`, totalCombinations, cacheKey);
-            console.log('고유 키들:', uniqueKeys);
-        }
         return result;
     }
 }

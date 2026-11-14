@@ -176,6 +176,6 @@ const subView = new RedGPU.Display.View3D(redGPUContext, sharedScene, subCamera)
 
 ## 다음 단계
 
-`Scene`(무대)까지 준비되었으니, 이제 이 무대를 바라볼 **시점**을 정의해야 합니다. 3D 공간을 2D 화면으로 투영하는 `Camera` 에 대해 알아봅니다.
+`Scene`(무대)까지 준비되었으니, 이제 이 무대를 바라볼 **시점** 을 정의해야 합니다. 3D 공간을 2D 화면으로 투영하는 `Camera` 에 대해 알아봅니다.
 
 - **[Camera](./camera.md)** : 3D 공간을 2D 화면으로 투영하는 카메라와 시점 제어

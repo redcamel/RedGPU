@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] World To Local 예제
@@ -65,22 +65,10 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 구성합니다.
- * [EN] Configures GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };
 
-/**
- * [KO] 계층 구조를 가진 테스트용 메시들을 생성합니다.
- * [EN] Creates hierarchical test meshes.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {object} Created meshes
- */
 function createTestMeshes(redGPUContext, scene) {
     const textureMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
     textureMaterial.diffuseTexture = new RedGPU.Resource.BitmapTexture(
@@ -122,11 +110,6 @@ function createTestMeshes(redGPUContext, scene) {
     return {parentMesh, localToWorldMesh, worldToLocalMesh};
 }
 
-/**
- * [KO] 화면 오버레이 정보 박스들을 생성합니다.
- * [EN] Creates on-screen info overlay boxes.
- * @returns {object} Overlay box elements
- */
 function createOverlayBoxes() {
     const boxStyle = {
         position: 'absolute',
@@ -174,23 +157,11 @@ function createOverlayBoxes() {
     };
 }
 
-/**
- * [KO] 장면에 조명을 설정합니다.
- * [EN] Sets up lighting in the scene.
- * @param {RedGPU.Display.Scene} scene
- */
 function setupLighting(scene) {
     const directionalLight = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(directionalLight);
-
-    const ambientLight = new RedGPU.Light.AmbientLight('#404040', 0.4);
-    scene.lightManager.ambientLight = ambientLight;
 }
 
-/**
- * [KO] 실시간으로 좌표 변환을 테스트하고 UI를 업데이트합니다.
- * [EN] Tests coordinate transformations and updates UI in real-time.
- */
 function updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, view, overlayBoxes) {
     const {parentMeshInfoBox, localToWorldTestBox, worldToLocalTestBox} = overlayBoxes;
 
@@ -265,10 +236,6 @@ function updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, v
     `;
 }
 
-/**
- * [KO] localToWorld 정확성을 역변환으로 검증합니다.
- * [EN] Validates localToWorld accuracy using reverse transformation.
- */
 function validateLocalToWorldAccuracy(targetMesh, inputLocalCoords, outputWorldCoords) {
     const backToLocalCoords = targetMesh.worldToLocal(outputWorldCoords[0], outputWorldCoords[1], outputWorldCoords[2]);
     const absoluteError = Math.sqrt(
@@ -285,10 +252,6 @@ function validateLocalToWorldAccuracy(targetMesh, inputLocalCoords, outputWorldC
     return { relativeErrorPercentage, isAccurate: absoluteError < 0.001 };
 }
 
-/**
- * [KO] worldToLocal 정확성을 역변환으로 검증합니다.
- * [EN] Validates worldToLocal accuracy using reverse transformation.
- */
 function validateWorldToLocalAccuracy(targetMesh, inputWorldCoords, outputLocalCoords) {
     const backToWorldCoords = targetMesh.localToWorld(outputLocalCoords[0], outputLocalCoords[1], outputLocalCoords[2]);
     const absoluteError = Math.sqrt(

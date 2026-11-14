@@ -83,7 +83,7 @@ const parseSparse_GLTF = (gltfLoader: GLTFLoader, propertyKey: string, targetAcc
             }
             break;
         default :
-            console.log('Unknown accessor type', targetAccessor.type);
+            console.warn('Unknown accessor type', targetAccessor.type);
             break;
     }
     let bufferURIDataView;

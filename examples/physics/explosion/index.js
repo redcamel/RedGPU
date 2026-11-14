@@ -1,6 +1,6 @@
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -51,6 +51,13 @@ RedGPU.init(
 			createPile(10);
 		};
 
+        const getRandomColor = () => {
+            const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const createPile = (spawnY = 1) => {
 			if (activeBoxes.length > 1000) {
 				for (let i = 0; i < 100; i++) {
@@ -61,8 +68,7 @@ RedGPU.init(
 			}
 
 			for (let i = 0; i < 100; i++) {
-				const mesh = new RedGPU.Display.Mesh(redGPUContext, boxGeo, new RedGPU.Material.PhongMaterial(redGPUContext));
-				mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
+                const mesh = new RedGPU.Display.Mesh(redGPUContext, boxGeo, new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor()));
 				mesh.setPosition((Math.random() * 8) - 4, spawnY + (i * 0.6), (Math.random() * 8) - 4);
 				mesh.setScale(0.5);
 				scene.addChild(mesh);
@@ -73,10 +79,9 @@ RedGPU.init(
 			}
 		};
 
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+        const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#666666'));
 		ground.setScale(60, 1, 60);
 		ground.y = -0.5;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
 		ground.addListener('click', (e) => explodeAt(e.point));
@@ -88,18 +93,11 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {Array<object>} activeBoxes
- */
 const renderTestPane = async (redGPUContext, activeBoxes) => {
-	
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {
 			pane.addBlade({ view: 'text', label: 'Interaction', value: 'Click to EXPLODE & SPAWN!', parse: (v) => v, readonly: true });
-			pane.addBinding(activeBoxes, 'length', { label: 'Box Count', readonly: true, interval: 100 });
+            pane.addBinding(activeBoxes, 'length', {readonly: true, interval: 100});
 		}
 	});
 };

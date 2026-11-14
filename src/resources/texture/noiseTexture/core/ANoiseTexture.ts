@@ -25,21 +25,16 @@ const BASIC_OPTIONS = {
 }
 
 /**
- * ::: warning [KO] 직접 인스턴스 생성 금지
- * 이 클래스는 추상 베이스 클래스로 설계되었으므로 직접 인스턴스를 생성할 수 없습니다.
- * 구체적인 서브클래스(예: `SimplexTexture`)를 인스턴스화하여 사용하십시오.
- * :::
- *
- * ::: warning [EN] Do Not Instantiate Directly
- * This class is designed as an abstract base class and cannot be instantiated directly.
- * Use concrete subclasses (e.g., `SimplexTexture`) instead.
- * :::
- *
  * [KO] 노이즈 텍스처의 기반이 되는 추상 클래스입니다.
  * [EN] Abstract base class for noise textures.
  *
  * [KO] 컴퓨트 셰이더를 사용하여 실시간으로 노이즈 패턴을 생성하는 기능을 제공합니다.
  * [EN] Provides functionality to generate noise patterns in real-time using compute shaders.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
  * @category NoiseTexture
  */
@@ -394,7 +389,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
             size: {width: width, height: height},
             format: 'rgba16float',
             mipLevelCount: this.mipLevelCount,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | (this.mipLevelCount > 1 ? GPUTextureUsage.RENDER_ATTACHMENT : 0),
             label: this.cacheKey,
         };
         const storageTexture = redGPUContext.gpuDevice.createTexture(this.#textureDescriptor);

@@ -3,69 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TextureEncodingTest</title>
-    <meta name="description" content="Tests that textures are sampled with the correct transfer functions. Verifies base color and emissive textures are decoded from sRGB.">
-    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, basic, textureEncodingTest, TextureEncodingTest">
+    <title>Texture Encoding Test - RedGPU WebGPU Example</title>
+    <meta name="description" content="Verifies sRGB decoding and color space sampling for BaseColor and Emissive.">
+    <meta name="keywords"
+          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, basic, textureEncodingTest, Texture Encoding Test">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/">
-    <meta property="og:title" content="TextureEncodingTest">
-    <meta property="og:description" content="Tests that textures are sampled with the correct transfer functions. Verifies base color and emissive textures are decoded from sRGB.">
+    <meta property="og:title" content="Texture Encoding Test - RedGPU WebGPU Example">
+    <meta property="og:description"
+          content="Verifies sRGB decoding and color space sampling for BaseColor and Emissive.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/">
-    <meta property="twitter:title" content="TextureEncodingTest">
-    <meta property="twitter:description" content="Tests that textures are sampled with the correct transfer functions. Verifies base color and emissive textures are decoded from sRGB.">
+    <meta property="twitter:title" content="Texture Encoding Test - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Verifies sRGB decoding and color space sampling for BaseColor and Emissive.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "TextureEncodingTest",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Tests that textures are sampled with the correct transfer functions. Verifies base color and emissive textures are decoded from sRGB.",
-  "url": "https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Texture Encoding Test",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Verifies sRGB decoding and color space sampling for BaseColor and Emissive.",
+                "url": "https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "GLTF"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Basic"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Texture Encoding Test",
+                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/basic/textureEncodingTest/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>GLTF &gt; Basic</p>
+        <h1>Texture Encoding Test - RedGPU WebGPU Example</h1>
+        <p>Verifies sRGB decoding and color space sampling for BaseColor and Emissive.</p>
+        <p lang="ko">BaseColor와 Emissive 텍스처의 sRGB 디코딩 샘플링을 검증합니다.</p>
+        <img src="thumb.webp" alt="Texture Encoding Test - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/gltf/basic/textureLinearInterpolationTest/">Texture Linear Interpolation
+                    Test</a></li>
+                <li><a href="/RedGPU/examples/gltf/basic/vertexColorTest/">Vertex Color Test</a></li>
+                <li><a href="/RedGPU/examples/gltf/basic/boxVertexColors/">Box Vertex Colors</a></li>
+                <li><a href="/RedGPU/examples/gltf/basic/orientationTest/">Orientation Test</a></li>
+                <li><a href="/RedGPU/examples/gltf/basic/textureCoordinateTest/">Texture Coordinate Test</a></li>
+                <li><a href="/RedGPU/examples/gltf/basic/alphaBlendModeTest/">Alpha Blend Mode Test</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

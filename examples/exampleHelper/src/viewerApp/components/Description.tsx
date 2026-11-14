@@ -1,5 +1,7 @@
 import React from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {expBadgePillStyle} from '../../common/styles/uiStyles';
+import {useMediaQuery} from '../../utils/useMediaQuery';
 
 /**
  * [KO] 예제 설명을 표시하는 컴포넌트입니다. 언어 토글 버튼을 통해 한국어/영어 설명을 전환할 수 있습니다.
@@ -9,70 +11,309 @@ const Description = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
     const language = useExampleHelperStore((state: ExampleHelperState) => state.language);
     const setLanguage = useExampleHelperStore((state: ExampleHelperState) => state.setLanguage);
-    const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
+    const showSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.showSourceModal);
+    const isCompactMobile = useMediaQuery(640);
+    const [isToggleHovered, setIsToggleHovered] = React.useState(false);
+    const setDescriptionOccupiedHeight = useExampleHelperStore((state: ExampleHelperState) => state.setDescriptionOccupiedHeight);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    // [KO] 설명 컨테이너가 뷰포트 하단에서부터 차지하는 높이(= 뷰포트 하단 ~ 컨테이너 상단)를 측정하여 공유
+    // [EN] Measure and share the height the description container occupies from the viewport bottom (viewport bottom ~ container top)
+    React.useLayoutEffect(() => {
+        const container = containerRef.current;
+        if (!container) {
+            setDescriptionOccupiedHeight(0);
+            return;
+        }
+        const measure = () => {
+            setDescriptionOccupiedHeight(Math.max(0, window.innerHeight - container.getBoundingClientRect().top));
+        };
+        measure();
+        const resizeObserver = new ResizeObserver(measure);
+        resizeObserver.observe(container);
+        window.addEventListener('resize', measure);
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', measure);
+        };
+    }, [currentExample, language, isNarrow, isCompactMobile, setDescriptionOccupiedHeight]);
+
+    React.useEffect(() => () => setDescriptionOccupiedHeight(0), [setDescriptionOccupiedHeight]);
+
     if (!currentExample || !currentExample.description) {
         return null;
     }
 
-    const description = currentExample.description[language] || currentExample.description['en'] || '';
-    if (!description) return null;
+    const rawDescription = currentExample.description[language] || currentExample.description['en'] || '';
+    if (!rawDescription) return null;
+
+    const description = isCompactMobile
+        ? rawDescription
+        : rawDescription.replace(/\. +(?=[A-Za-z가-힣0-9('"`\[])/g, '.<br/>');
+
+    const categoryLabel = currentExample.path
+        ? currentExample.path.split('/').slice(0, -1).join(' · ')
+        : '';
 
     return (
-        <div style={{...containerStyle, right: showSettingsPanel && !isNarrow? '320px' : 0}}>
-            <div style={contentStyle}>
-                <span dangerouslySetInnerHTML={{__html: description}}/>
-            </div>
-            <button
-                style={toggleButtonStyle}
-                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+        <>
+            {!isNarrow && (
+                <div
+                    style={{
+                        ...bottomScrimStyle,
+                        opacity: showSourceModal ? 0 : 1,
+                        transition: 'opacity 0.25s ease'
+                    }}
+                />
+            )}
+            <div
+                ref={containerRef}
+                style={{
+                    ...containerStyle,
+                    left: isNarrow ? '22px' : '20px',
+                    bottom: isNarrow ? '170px' : '32px',
+                    maxWidth: isNarrow ? 'calc(100vw - 44px)' : 'calc(100vw - 350px)',
+                    opacity: showSourceModal ? 0 : 1,
+                    transform: showSourceModal ? 'translateY(12px)' : 'translateY(0)',
+                    pointerEvents: showSourceModal ? 'none' : 'none',
+                    transition: 'opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
             >
-                {language === 'ko' ? 'ENGLISH' : '한국어'}
-            </button>
-        </div>
+                <div style={{
+                    ...editorialWrapperStyle,
+                    gap: isNarrow ? '10px' : '12px',
+                }}>
+                    <div style={accentBarStyle}/>
+                    <div style={textColumnStyle}>
+                        {!isNarrow && (
+                            <>
+                                <div style={eyebrowRowStyle}>
+                                    <span style={brandTagStyle}>RedGPU</span>
+                                    <span style={eyebrowDotStyle}>·</span>
+                                    <span style={brandSubStyle}>WebGPU Engine</span>
+                                    {categoryLabel && (
+                                        <>
+                                            <span style={eyebrowDividerStyle}>/</span>
+                                            <span style={eyebrowCategoryStyle}>{categoryLabel}</span>
+                                        </>
+                                    )}
+                                </div>
+                                <div style={titleRowStyle}>
+                                    <span style={titleStyle}>
+                                        {currentExample.name}
+                                    </span>
+                                    {currentExample.experimental && (
+                                        <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                        <div style={{
+                            ...contentStyle,
+                            fontSize: isNarrow ? '13px' : '14px',
+                            fontWeight: 400,
+                            color: 'rgba(220, 224, 232, 0.78)'
+                        }}>
+                            <span style={{verticalAlign: 'middle'}} dangerouslySetInnerHTML={{__html: description}}/>
+                            <button
+                                style={{
+                                    ...toggleButtonStyle,
+                                    backgroundColor: isToggleHovered ? 'rgba(253, 180, 141, 0.24)' : 'rgba(253, 180, 141, 0.14)',
+                                    borderColor: isToggleHovered ? 'rgba(253, 180, 141, 0.65)' : 'rgba(253, 180, 141, 0.38)',
+                                    color: isToggleHovered ? '#fff' : '#fdb48d'
+                                }}
+                                onMouseEnter={() => setIsToggleHovered(true)}
+                                onMouseLeave={() => setIsToggleHovered(false)}
+                                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                                title={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
+                            >
+                                {language === 'ko' ? 'EN' : 'KO'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
     );
 };
 
 // Styles
-const containerStyle: React.CSSProperties = {
+const bottomScrimStyle: React.CSSProperties = {
     position: 'fixed',
-    top: '52px',
     left: 0,
     right: 0,
+    bottom: 0,
+    height: '136px',
+    background: 'linear-gradient(180deg, rgba(8, 8, 10, 0) 0%, rgba(8, 8, 10, 0.28) 52%, rgba(8, 8, 10, 0.56) 100%)',
+    pointerEvents: 'none',
+    zIndex: 10001
+};
+const containerStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: '20px',
     backgroundColor: 'transparent',
-    padding: '12px 20px',
+    padding: 0,
     zIndex: 10002,
     display: 'flex',
-    flexDirection: 'column', // 수직 배치로 변경
-    alignItems: 'flex-start', // 왼쪽 정렬
+    alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    gap: '10px', // 글과 버튼 사이 간격 축소
+    pointerEvents: 'none',
+    userSelect: 'none'
+};
+
+const editorialWrapperStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    padding: 0,
+    backgroundColor: 'transparent',
     pointerEvents: 'none'
 };
 
+const accentBarStyle: React.CSSProperties = {
+    width: '3px',
+    borderRadius: '9999px',
+    background: 'linear-gradient(180deg, #fdb48d 0%, rgba(253, 180, 141, 0.45) 70%, rgba(253, 180, 141, 0.08) 100%)',
+    boxShadow: '0 0 12px rgba(253, 180, 141, 0.35)',
+    flexShrink: 0,
+    marginTop: '2px',
+    marginBottom: '2px'
+};
+
+const textColumnStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: '6px'
+};
+
+const eyebrowRowStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    minHeight: '12px',
+    gap: '5px',
+    flexWrap: 'wrap',
+    opacity: 0.78,
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.35)'
+};
+
+const brandTagStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: '9.5px',
+    fontWeight: 800,
+    color: '#fdb48d',
+    letterSpacing: '0.07em',
+    lineHeight: '1',
+};
+
+const eyebrowDotStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: '9.5px',
+    fontWeight: 700,
+    color: 'rgba(255, 255, 255, 0.45)',
+    lineHeight: '1'
+};
+
+const brandSubStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: '9.5px',
+    fontWeight: 600,
+    color: 'rgba(255, 255, 255, 0.72)',
+    letterSpacing: '0.06em',
+    lineHeight: '1',
+};
+
+const eyebrowDividerStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: '9px',
+    fontWeight: 600,
+    color: 'rgba(253, 180, 141, 0.45)',
+    margin: '0 1px',
+    lineHeight: '1'
+};
+
+const eyebrowCategoryStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: '9.5px',
+    fontWeight: 700,
+    color: 'rgba(253, 180, 141, 0.92)',
+    letterSpacing: '0.07em',
+    lineHeight: '1',
+};
+
+const titleRowStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    flexWrap: 'wrap'
+};
+
+const titleStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: '26px',
+    fontWeight: 600,
+    color: '#f8f9fa',
+    lineHeight: '1.15',
+    letterSpacing: '-0.015em',
+    textShadow: '0 1px 3px rgba(0, 0, 0, 0.4)'
+};
+
+const experimentalBadgeStyle: React.CSSProperties = {
+    ...expBadgePillStyle,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '20px',
+    fontSize: '10px',
+    backgroundColor: 'rgba(255, 90, 95, 0.18)',
+    border: '1px solid rgba(255, 90, 95, 0.4)',
+    padding: '0 8px',
+    letterSpacing: '0.06em',
+    lineHeight: '1',
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)'
+};
+
 const contentStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: '#eee',
     lineHeight: '1.6',
-    maxWidth: '800px',
+    letterSpacing: '-0.01em',
     wordBreak: 'keep-all',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)',
-    pointerEvents: 'auto'
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)'
 };
 
 const toggleButtonStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // 배경 투명도 조정
-    color: '#ccc',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    padding: '3px 10px',
-    fontSize: '9px', // 버튼 크기 살짝 축소
-    fontWeight: 'bold',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    verticalAlign: 'middle',
+    marginLeft: '8px',
+    transform: 'translateY(-1px)',
+    width: 'auto',
+    height: '20px',
+    padding: '0 8px',
+    backgroundColor: 'rgba(253, 180, 141, 0.14)',
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
+    color: '#fdb48d',
+    border: '1px solid rgba(253, 180, 141, 0.38)',
+    fontSize: '10px',
+    fontWeight: 800,
+    lineHeight: '1',
+    letterSpacing: '0.06em',
+    textShadow: 'none',
     cursor: 'pointer',
-    borderRadius: '4px',
+    borderRadius: '9999px',
     flexShrink: 0,
-    transition: 'all 0.2s',
-    pointerEvents: 'auto',
-    backdropFilter: 'blur(4px)'
+    transition: 'all 0.18s ease',
+    pointerEvents: 'auto'
 };
 
 export default Description;

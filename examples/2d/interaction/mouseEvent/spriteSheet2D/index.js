@@ -1,6 +1,8 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
-import {createEventInfoBox, updateEventInfo} from "../../../../3d/interaction/mouseEvent/eventInfoBox.js?t=1792993380695";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+import {
+    createEventInfoBox,
+    updateEventInfo
+} from "../../../../3d/interaction/mouseEvent/eventInfoBox.js?t=1794640510497";
 
 /**
  * [KO] SpriteSheet2D 마우스 이벤트 예제
@@ -30,10 +32,6 @@ RedGPU.init(
 
 		const renderer = new RedGPU.Renderer();
 
-		/**
-		 * [KO] 렌더 루프
-		 * [EN] Render loop
-		 */
 		const render = () => {
 			const radius = 250;
 			const numChildren = view.scene.children.length;
@@ -63,10 +61,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 샘플 SpriteSheet2D 객체 생성 및 이벤트 등록
- * [EN] Create sample SpriteSheet2D objects and register events
- */
 const createSampleSprite2D = async (redGPUContext, scene, infoBox) => {
 	const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
 

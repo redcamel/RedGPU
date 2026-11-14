@@ -4,69 +4,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raycasting Interaction</title>
-    <meta name="description" content="Casts rays from mouse click positions to detect physics objects and implements interactions like pushing them with force.">
+    <title>Raycasting Interaction - RedGPU WebGPU Example</title>
+    <meta name="description" content="Detects physics bodies via mouse raycasting and applies push impulses.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, physics, raycast, Raycasting Interaction">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/physics/raycast/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/physics/raycast/">
-    <meta property="og:title" content="Raycasting Interaction">
-    <meta property="og:description" content="Casts rays from mouse click positions to detect physics objects and implements interactions like pushing them with force.">
+    <meta property="og:title" content="Raycasting Interaction - RedGPU WebGPU Example">
+    <meta property="og:description" content="Detects physics bodies via mouse raycasting and applies push impulses.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/physics/raycast/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/physics/raycast/">
-    <meta property="twitter:title" content="Raycasting Interaction">
-    <meta property="twitter:description" content="Casts rays from mouse click positions to detect physics objects and implements interactions like pushing them with force.">
+    <meta property="twitter:title" content="Raycasting Interaction - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Detects physics bodies via mouse raycasting and applies push impulses.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/physics/raycast/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Raycasting Interaction",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Casts rays from mouse click positions to detect physics objects and implements interactions like pushing them with force.",
-  "url": "https://redcamel.github.io/RedGPU/examples/physics/raycast/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/raycast/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Raycasting Interaction",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Detects physics bodies via mouse raycasting and applies push impulses.",
+                "url": "https://redcamel.github.io/RedGPU/examples/physics/raycast/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/raycast/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Physics"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Interaction & Events"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Raycasting Interaction",
+                        "item": "https://redcamel.github.io/RedGPU/examples/physics/raycast/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>Physics &gt; Interaction &amp; Events</p>
+        <h1>Raycasting Interaction - RedGPU WebGPU Example</h1>
+        <p>Detects physics bodies via mouse raycasting and applies push impulses.</p>
+        <p lang="ko">마우스 클릭 광선으로 물리 객체를 검출하고 충격량을 가해 밀어냅니다.</p>
+        <img src="thumb.webp" alt="Raycasting Interaction - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/physics/collisionEvents/">Collision Events</a></li>
+                <li><a href="/RedGPU/examples/physics/triggers/">Triggers &amp; Sensors</a></li>
+                <li><a href="/RedGPU/examples/physics/collisionFiltering/">Collision Filtering</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

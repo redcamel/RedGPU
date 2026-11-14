@@ -1,6 +1,6 @@
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -45,13 +45,12 @@ RedGPU.init(
 
 		// [KO] 정적 환경 구축 (50m 바닥 및 경사로)
 		// [EN] Build static environment (50m floor and ramp)
-		const createStaticBox = (x, y, z, w, h, d, color = '#444444', rx = 0, rz = 0) => {
+        const createStaticBox = (x, y, z, w, h, d, color = '#666666', rx = 0, rz = 0) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+                new RedGPU.Material.PhongMaterial(redGPUContext, color)
 			);
-			mesh.material.color.setColorByHEX(color);
 			mesh.x = x;
 			mesh.y = y;
 			mesh.z = z;
@@ -68,22 +67,11 @@ RedGPU.init(
 			});
 		};
 
-		createStaticBox(0, -0.5, 0, 50, 1, 50, '#444444');
-		createStaticBox(-12, 6, 0, 20, 1, 25, '#666666', 0, -25);
+        createStaticBox(0, -0.5, 0, 50, 1, 50, '#666666');
+        createStaticBox(-12, 6, 0, 20, 1, 25, '#7a7a7a', 0, -25);
 
 		const activeObjects = [];
 
-		/**
-		 * [KO] 다양한 형상의 물리 객체 생성 함수 (현실적인 1~2m 스케일)
-		 * [EN] Helper function to create various shaped physics objects (realistic 1-2m scale)
-		 * @param {string} type
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 * @param {string} color
-		 * @param {number} restitution
-		 * @param {number} friction
-		 */
 		const createPhysicalObject = (type, x, y, z, color, restitution = 0.5, friction = 0.5) => {
 			let geometry, shape;
 			switch (type) {
@@ -104,12 +92,10 @@ RedGPU.init(
 					shape = RedGPU.Physics.PHYSICS_SHAPE.CAPSULE;
 					break;
 			}
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX(color);
 			const boxMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				geometry,
-				material
+                new RedGPU.Material.PhongMaterial(redGPUContext, color)
 			);
 			boxMesh.x = x;
 			boxMesh.y = y;
@@ -130,7 +116,7 @@ RedGPU.init(
 		// [KO] 초기 씬 구성
 		// [EN] Initial scene configuration
 		const initScene = () => {
-			const colors = ['#ff4444', '#44ff44', '#4444ff', '#ffff44', '#ff44ff', '#44ffff'];
+            const colors = ['#cc4444', '#44aa55', '#4466cc', '#ccaa44', '#aa44cc', '#44aaaa'];
 			const shapes = ['box', 'sphere', 'cylinder', 'capsule'];
 			for (let i = 0; i < 12; i++) {
 				createPhysicalObject(
@@ -143,10 +129,6 @@ RedGPU.init(
 			}
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeObjects.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -168,20 +150,13 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- * @param {function} createPhysicalObject
- */
 const renderTestPane = async (redGPUContext, resetScene, createPhysicalObject) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {
 			const params = {
 				type: 'sphere',
-				color: '#ffffff',
+                color: '#cccccc',
 				restitution: 0.6,
 				friction: 0.4
 			};
@@ -211,7 +186,10 @@ const renderTestPane = async (redGPUContext, resetScene, createPhysicalObject) =
 			pane.addButton({ title: 'Spawn Random' }).on('click', () => {
 				const types = ['box', 'sphere', 'cylinder', 'capsule'];
 				const randomType = types[Math.floor(Math.random() * types.length)];
-				const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+                const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+                const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+                const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+                const randomColor = `#${r}${g}${b}`;
 				createPhysicalObject(
 					randomType,
 					-18 + (Math.random() * 4),

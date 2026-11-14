@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Raycasting (Precision Picking) 예제
@@ -24,9 +24,6 @@ RedGPU.init(
         view.grid = true;
         redGPUContext.addView(view);
 
-        const ambientLight = new RedGPU.Light.AmbientLight();
-        ambientLight.intensity = 0.5;
-        scene.lightManager.ambientLight = ambientLight;
         scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
         const eventState = {

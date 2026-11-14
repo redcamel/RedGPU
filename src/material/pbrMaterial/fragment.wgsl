@@ -68,7 +68,7 @@ struct InputData {
     @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
-    @location(12) motionVector: vec3<f32>,
+
     #redgpu_if isFoliage
     @location(13) groundColor_blendFactor: vec4<f32>,
     #redgpu_endIf
@@ -298,6 +298,7 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_endIf
         if (resultAlpha <= effectiveCutOff) { discard; }
     #redgpu_endIf
+    resultAlpha = u_opacity;
 
 
 
@@ -623,6 +624,9 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_else
         output.color = finalColor;
     #redgpu_endIf
+    if (uniforms.alphaBlend == 2u && output.color.a == 0.0) {
+        discard;
+    }
 
     {
         let smoothness = 1.0 - roughnessParameter;
@@ -630,7 +634,7 @@ fn main(inputData:InputData) -> OutputFragment {
         let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallicParameter * metallicParameter);
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
-    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0 );
+    output.gBufferMotionVector = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
     return output;
 }
 
@@ -740,7 +744,7 @@ fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let fv5 = fv2 * fv2 * fv;
     let lightScatter = 1.0 + fd90Minus1 * fl5;
     let viewScatter = 1.0 + fd90Minus1 * fv5;
-    let factor = (NdotL * energyFactor) * (lightScatter * viewScatter);
+    let factor = (NdotL * energyFactor * INV_PI) * (lightScatter * viewScatter);
     return albedo * factor;
 }
 
@@ -772,7 +776,7 @@ fn getDirectSpecularBTDF(
 
 fn getDirectDiffuseBTDF(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
     let cosTheta = max(-dot(N, L), 0.0);
-    return albedo * cosTheta;
+    return albedo * (cosTheta * INV_PI);
 }
 
 #redgpu_if isFoliage
@@ -784,7 +788,7 @@ fn getDirectFoliageBTDF(N: vec3<f32>, V: vec3<f32>, L: vec3<f32>, color: vec3<f3
     let lightOpposite = -(L + N * distortion);
     let vDotL = max(dot(V, lightOpposite), 0.0);
     let inScatter = vDotL * vDotL;
-    return color * (backWrap * 0.5 + inScatter * 0.5);
+    return color * ((backWrap * 0.5 + inScatter * 0.5) * INV_PI);
 }
 #redgpu_endIf
 
@@ -953,7 +957,7 @@ fn getIndirectClearcoatBRDF(
     ibl_brdfLUTTexture: texture_2d<f32>,
     useSkyAtmosphere: bool,
     sunIntensity: f32,
-    skyAtmosphere_prefilteredTexture: texture_cube<f32>,
+    skyAtmosphere_skyLightLUTTextureArray: texture_cube_array<f32>,
     atmosphereSampler: sampler,
     cameraHeight: f32,
     atmosphereHeight: f32,
@@ -969,9 +973,9 @@ fn getIndirectClearcoatBRDF(
         let u_atmo = systemUniforms.skyAtmosphere;
         let skyIntensity = u_atmo.sunIntensity;
         let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, cameraHeight, clearcoatR.y, atmosphereHeight);
-        let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+        let atmoMipCount = f32(textureNumLevels(skyAtmosphere_skyLightLUTTextureArray) - 1);
         let atmoMipLevel = clearcoatRoughness * atmoMipCount;
-        let ccSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, clearcoatR, atmoMipLevel).rgb * skyIntensity * systemUniforms.preExposure;
+        let ccSkyScat = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, clearcoatR, 0, atmoMipLevel).rgb * skyIntensity * systemUniforms.preExposure;
         clearcoatRadiance = (clearcoatRadiance * ccTrans) + ccSkyScat;
     }
     let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
@@ -1164,12 +1168,12 @@ fn getIndirectPbrLighting(
             let atmH = u_atmo.atmosphereHeight;
             let skyIntensity = u_atmo.sunIntensity;
             let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
-            let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+            let atmoMipCount = f32(textureNumLevels(skyAtmosphere_skyLightLUTTextureArray) - 1);
             let atmoMipLevel = iblRoughness * atmoMipCount;
-            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
+            let specSkyScat = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, R, 0, atmoMipLevel).rgb * skyIntensity * preExposure;
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
+            let skyIrradiance = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler, N, 1, 3.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
@@ -1215,7 +1219,7 @@ fn getIndirectPbrLighting(
                 let u_atmo = systemUniforms.skyAtmosphere;
                 let skyIntensity = u_atmo.sunIntensity;
                 let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * skyIntensity * preExposure;
+                let backSkyScat = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, prefilterTextureSampler, -N, 0, 0.0).rgb * skyIntensity * preExposure;
                 backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
             }
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight);
@@ -1233,7 +1237,7 @@ fn getIndirectPbrLighting(
                 let u_atmo = systemUniforms.skyAtmosphere;
                 let skyIntensity = u_atmo.sunIntensity;
                 let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * skyIntensity * preExposure;
+                let backSkyScat = textureSampleLevel(skyAtmosphere_skyLightLUTTextureArray, prefilterTextureSampler, -N, 0, 0.0).rgb * skyIntensity * preExposure;
                 backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
             }
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight);
@@ -1269,7 +1273,7 @@ fn getIndirectPbrLighting(
                  let clearcoatResult = getIndirectClearcoatBRDF(
                      V, clearcoatNormal, clearcoatRoughnessParameter, iblMipmapCount,
                      ibl_prefilterTexture, prefilterTextureSampler, ibl_brdfLUTTexture,
-                     u_useSkyAtmosphere, u_atmo.sunIntensity, skyAtmosphere_prefilteredTexture, atmosphereSampler,
+                     u_useSkyAtmosphere, u_atmo.sunIntensity, skyAtmosphere_skyLightLUTTextureArray, atmosphereSampler,
                      u_atmo.cameraHeight, u_atmo.atmosphereHeight, transmittanceTexture,
                      R, all(clearcoatNormal == N)
                  );
@@ -1280,7 +1284,7 @@ fn getIndirectPbrLighting(
         #redgpu_endIf
         return indirectLighting;
     } else {
-        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * occlusionParameter * preExposure;
+        let ambientContribution = albedo * systemUniforms.ambientLight.color * (systemUniforms.ambientLight.intensity * INV_PI) * occlusionParameter * preExposure;
         var indirectLighting = ambientContribution;
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {

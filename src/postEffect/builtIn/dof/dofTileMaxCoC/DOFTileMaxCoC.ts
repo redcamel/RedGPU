@@ -1,0 +1,30 @@
+import RedGPUContext from "../../../../context/RedGPUContext";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
+import dofOpticsCommon from "../wgsl/dofOpticsCommon.wgsl";
+import computeCode from "./wgsl/computeCode.wgsl";
+
+/**
+ * [KO] `1/16` 해상도(Half-Res `8×8` 타일)에서 인접 반경 내 최소 전경 CoC(`minNearCoC`)와 최대 배경 CoC(`maxFarCoC`)를 산출 및 확장(Dilate)하여 보케 절단과 전경 블리딩 누락을 원천 방지하는 내부 서브패스입니다.
+ * [EN] Internal sub-pass at `1/16` resolution (Half-Res `8×8` tiles) that computes and dilates the minimum foreground CoC (`minNearCoC`) and maximum background CoC (`maxFarCoC`) within the neighboring radius to prevent bokeh clipping and foreground bleeding gaps.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category PostEffect
+ */
+class DOFTileMaxCoC extends ASingleComputePassPostEffect {
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_DOF_TILE_MAX_COC',
+            createBasicComputePassPostEffectCode(this, computeCode, dofOpticsCommon)
+        );
+    }
+}
+
+Object.freeze(DOFTileMaxCoC);
+export default DOFTileMaxCoC;

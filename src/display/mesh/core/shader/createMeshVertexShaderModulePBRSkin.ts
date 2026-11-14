@@ -33,7 +33,6 @@ const createMeshVertexShaderModulePBRSkin = (
     const label = `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}`
     const code = `${vertexModuleSourcePbrSkin}`
     const vModuleDescriptor: GPUShaderModuleDescriptor = {code}
-    console.log('createMeshVertexShaderModulePBRSkin', currentShaderModuleName)
     if (currentShaderModuleName === label) return resourceManager.getGPUShaderModule(label,)
     else {
         gpuRenderInfo.vertexUniformInfo = resourceManager.wgslParser.parse(`MESH_VERTEX_PBR_SKIN_JOINT`, vModuleDescriptor.code).uniforms.vertexUniforms

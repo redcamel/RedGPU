@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -41,12 +41,12 @@ const EMBOSS = ([
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/convolution/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/convolution/"></iframe>
  *
  * @see [Convolution example](/RedGPU/examples/postEffect/convolution/)
  * @category PostEffect
  */
-class Convolution extends ASinglePassPostEffect {
+class Convolution extends ASingleComputePassPostEffect {
     /**
      * [KO] 원본 유지 기본 커널
      * [EN] Default identity kernel
@@ -93,8 +93,9 @@ class Convolution extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_CONVOLUTION',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
+        this.kernel = this.#kernel;
     }
 
     /**
@@ -113,7 +114,9 @@ class Convolution extends ASinglePassPostEffect {
     set kernel(value: number[]) {
         this.#kernel = value;
         let kernelWeight = 0;
-        this.#kernel.forEach(v => kernelWeight += v);
+        for (let i = 0, len = value.length; i < len; i++) {
+            kernelWeight += value[i];
+        }
         this.updateUniform('kernelWeight', kernelWeight || 1);
         this.updateUniform('kernel', value);
     }

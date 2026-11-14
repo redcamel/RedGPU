@@ -24,7 +24,7 @@ const skyboxGraph = `
 
 # Skybox
 
-Skybox는 3D 공간의 무한한 배경을 표현하는 기술입니다. `SkyBox` 객체를 생성하여 `View3D`의 `skybox` 속성에 할당하면 렌더링됩니다.
+Skybox는 3D 공간의 무한한 배경을 표현하는 기술입니다. `SkyBox` 객체를 생성하여 `View3D` 의 `skybox` 속성에 할당하면 렌더링됩니다.
 
 ## 1. 기본 사용법
 
@@ -54,7 +54,7 @@ SkyBox에 적용할 텍스처를 생성하는 방법은 크게 두 가지로 나
 - **활용**: 가장 사실적인 렌더링 결과를 얻기 위해 주로 사용되는 현대적인 방식입니다.
 
 ::: info [HDR 파일 사용 가이드]
-RedGPU에서 한 장의 HDR (.hdr) 파노라마 이미지를 스카이박스로 사용하려면 반드시 `IBL`을 거쳐야 합니다. 스카이박스는 큐브 형태의 데이터를 요구하며, `IBL`이 2D 파노라마를 큐브맵으로 자동
+RedGPU에서 한 장의 HDR (.hdr) 파노라마 이미지를 스카이박스로 사용하려면 반드시 `IBL` 을 거쳐야 합니다. 스카이박스는 큐브 형태의 데이터를 요구하며, `IBL` 이 2D 파노라마를 큐브맵으로 자동
 변환해 줍니다.
 :::
 
@@ -69,9 +69,9 @@ const ibl = new RedGPU.Resource.IBL(
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 ```
 
-### 2.2 6장의 이미지 (CubeTexture)
+### 2.2 6장의 이미지
 
-상, 하, 좌, 우, 앞, 뒤 6장의 일반 이미지 (JPG, PNG 등)를 결합하여 `CubeTexture`를 생성하는 고전적인 방식입니다. 이미지 배열은 반드시 **px, nx, py, ny, pz, nz**
+상, 하, 좌, 우, 앞, 뒤 6장의 일반 이미지 (JPG, PNG 등)를 결합하여 `CubeTexture` 를 생성하는 고전적인 방식입니다. 이미지 배열은 반드시 **px, nx, py, ny, pz, nz**
 순서로 전달해야 합니다.
 
 - **장점**: 리소스를 구하기 쉽고 직관적입니다.
@@ -98,7 +98,7 @@ const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 
 ## 4. 라이브 데모
 
-### A. IBL 환경 텍스처 활용 (HDR)
+### A. IBL 환경 텍스처 활용
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Skybox (IBL)" slugHash="skybox-ibl">

@@ -3,49 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FollowController</title>
-    <meta name="description" content="FollowController provides third-person camera control that follows a target mesh. Features include smooth camera following, customizable distance and height, pan/tilt control, target rotation tracking, and wheel/pinch zoom. Suitable for object tracking scenarios and genres requiring automatic camera alignment (e.g., racing, flight simulators, third-person runners) rather than general free-look third-person games.">
+    <title>FollowController - RedGPU WebGPU Example</title>
+    <meta name="description" content="Third-person camera controller that smoothly tracks a target mesh.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, controller, followController, FollowController">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/controller/followController/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/controller/followController/">
-    <meta property="og:title" content="FollowController">
-    <meta property="og:description" content="FollowController provides third-person camera control that follows a target mesh. Features include smooth camera following, customizable distance and height, pan/tilt control, target rotation tracking, and wheel/pinch zoom. Suitable for object tracking scenarios and genres requiring automatic camera alignment (e.g., racing, flight simulators, third-person runners) rather than general free-look third-person games.">
+    <meta property="og:title" content="FollowController - RedGPU WebGPU Example">
+    <meta property="og:description" content="Third-person camera controller that smoothly tracks a target mesh.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/controller/followController/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/controller/followController/">
-    <meta property="twitter:title" content="FollowController">
-    <meta property="twitter:description" content="FollowController provides third-person camera control that follows a target mesh. Features include smooth camera following, customizable distance and height, pan/tilt control, target rotation tracking, and wheel/pinch zoom. Suitable for object tracking scenarios and genres requiring automatic camera alignment (e.g., racing, flight simulators, third-person runners) rather than general free-look third-person games.">
+    <meta property="twitter:title" content="FollowController - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Third-person camera controller that smoothly tracks a target mesh.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/controller/followController/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "FollowController",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "FollowController provides third-person camera control that follows a target mesh. Features include smooth camera following, customizable distance and height, pan/tilt control, target rotation tracking, and wheel/pinch zoom. Suitable for object tracking scenarios and genres requiring automatic camera alignment (e.g., racing, flight simulators, third-person runners) rather than general free-look third-person games.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "FollowController",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Third-person camera controller that smoothly tracks a target mesh.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Core & Setup"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Camera Controller"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "FollowController",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/controller/followController/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Core &amp; Setup &gt; Camera Controller</p>
+        <h1>FollowController - RedGPU WebGPU Example</h1>
+        <p>Third-person camera controller that smoothly tracks a target mesh.</p>
+        <p lang="ko">타겟 메쉬의 이동과 회전을 부드럽게 추적하는 3인칭 카메라 컨트롤러입니다.</p>
+        <img src="thumb.webp" alt="FollowController - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/freeController/">FreeController</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/orbitController/">OrbitController</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/isometricController/">IsometricController</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

@@ -138,7 +138,7 @@ const controller = new RedGPU.Camera.OrbitController (redGPUContext);
 
 `View3D` 는 캔버스 내에서 자신이 차지할 영역과 렌더링 해상도를 결정합니다. 반응형 레이아웃 대응을 위해 CSS 픽셀 단위의 크기와 실제 GPU 렌더링 해상도를 분리하여 관리합니다.
 
-### 영역 설정 (Size & Position)
+### 영역 설정
 
 `setSize()` 와 `setPosition()` 메서드를 통해 뷰의 크기와 위치를 지정할 수 있습니다. 수치 (`number`), 퍼센트 (`%`), 그리고 픽셀 (`px`) 단위를 모두 지원합니다.
 

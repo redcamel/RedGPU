@@ -14,6 +14,7 @@ RedUnit.pageLoader('RedGPU', [
 	{title: 'initialize', src: './initialize'},
 	{title: 'light', src: './light'},
 	{title: 'math', src: './math'},
+    {title: 'autoExposure', src: './postEffect/autoExposure'},
 	{title: 'postEffectCore', src: './postEffect/core'},
 	{title: 'postEffectManager', src: './postEffect/postEffectManager'},
 	{title: 'postEffectTexturePool', src: './postEffect/postEffectTexturePool'},

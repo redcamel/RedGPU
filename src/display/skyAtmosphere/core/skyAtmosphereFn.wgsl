@@ -163,7 +163,7 @@ fn phaseMie(cosTheta: f32, g: f32) -> f32 {
  * [EN] Stabilized Mie phase function with anisotropy capped at 0.80 to prevent singularities during LUT baking.
  */
 fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
-    return phaseMie(cosTheta, min(g, 0.80));
+    return phaseMie(cosTheta, min(g, 0.45));
 }
 
 /**
@@ -186,17 +186,23 @@ fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
  * [EN] Calculates the unit radiance of the sun disk with limb darkening applied.
  */
 fn getSunDiskRadianceUnit(
-    viewSunCos: f32,
+    viewDir: vec3<f32>,
+    sunDir: vec3<f32>,
     sunSize: f32,
     sunLimbDarkening: f32,
     skyTrans: vec3<f32>
 ) -> vec3<f32> {
-    let sunRad = (sunSize * 0.5) * DEG_TO_RAD;
-    let cosSunRad = cos(sunRad);
-    if (viewSunCos <= cosSunRad) { return vec3<f32>(0.0); }
-    let oneMinusCosSunRad = 1.0 - cosSunRad;
-    let dist = (1.0 - viewSunCos) / max(1e-7, oneMinusCosSunRad);
-    let sunMask = 1.0 - smoothstep(0.99, 1.0, dist);
+    let halfSunRad = (sunSize * 0.25) * DEG_TO_RAD;
+    let sinHalfSunRad = sin(halfSunRad);
+    let oneMinusCosSunRad = 2.0 * sinHalfSunRad * sinHalfSunRad;
+    if (oneMinusCosSunRad <= 0.0) { return vec3<f32>(0.0); }
+
+    let diffDir = viewDir - sunDir;
+    let oneMinusViewSunCos = 0.5 * dot(diffDir, diffDir);
+    if (oneMinusViewSunCos >= oneMinusCosSunRad) { return vec3<f32>(0.0); }
+
+    let dist = oneMinusViewSunCos / max(1e-10, oneMinusCosSunRad);
+    let sunMask = 1.0 - smoothstep(0.95, 1.0, dist);
     if (sunMask <= 0.0) { return vec3<f32>(0.0); }
 
     let solidAngle = PI2 * oneMinusCosSunRad;
@@ -240,8 +246,8 @@ fn getMieGlowAmountUnit(
     skyAtmosphereSampler: sampler,
     transToEdge: vec3<f32>
 ) -> vec3<f32> {
-    let sharpG = min(max(params.mieAnisotropy, 0.88), 0.94); 
-    let stableG = min(params.mieAnisotropy, 0.80);
+    let sharpG = clamp(params.mieAnisotropy + 0.14, 0.88, 0.96); 
+    let stableG = min(params.mieAnisotropy, 0.45);
 
     let sharpPhase = phaseMie(viewSunCos, sharpG);
     let stablePhase = phaseMie(viewSunCos, stableG);
@@ -249,9 +255,13 @@ fn getMieGlowAmountUnit(
     if (diffPhase <= 0.0) { return vec3<f32>(0.0); }
 
     let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, params.sunDirection.y, params.atmosphereHeight);
-    
-    return sunTransForGlow * (params.mieScattering / max(vec3<f32>(0.0001), params.mieScattering + params.mieAbsorption)) 
-                        * (diffPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS * params.skyLuminanceFactor;
+    let mieScatterDepth = params.mieScattering * params.mieExponentialDistribution;
+    let totalExtDepthVec = params.rayleighScattering * params.rayleighExponentialDistribution
+        + (params.mieScattering + params.mieAbsorption) * params.mieExponentialDistribution;
+    let meanTotalExtDepth = (totalExtDepthVec.r + totalExtDepthVec.g + totalExtDepthVec.b) * (1.0 / 3.0);
+    let mieOpticalFraction = mieScatterDepth / max(1e-5, meanTotalExtDepth);
+
+    return sunTransForGlow * mieOpticalFraction * (diffPhase * PI) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS * params.skyLuminanceFactor;
 }
 
 /**

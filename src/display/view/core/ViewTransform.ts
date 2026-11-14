@@ -28,6 +28,7 @@ class ViewTransform extends RedGPUObject {
     onResize: ((event: RedResizeEvent<ViewTransform>) => void) | null = null;
     #projectionMatrix = mat4.create()
     #noneJitterProjectionMatrix = mat4.create()
+    #inverseProjectionMatrix = mat4.create()
     readonly #frustumPlanesBuffer: number[][] = [
         new Array(4), new Array(4), new Array(4),
         new Array(4), new Array(4), new Array(4)
@@ -295,7 +296,7 @@ class ViewTransform extends RedGPUObject {
     get projectionMatrix(): mat4 {
         const {redGPUContext} = this
         const {antialiasingManager} = redGPUContext
-        this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
+        mat4.copy(this.#projectionMatrix, this.noneJitterProjectionMatrix)
         const needJitter = this.constructor.name === 'View3D' && (this.camera.constructor.name !== 'IsometricController') && antialiasingManager.useTAA
 
         if (needJitter) {
@@ -319,7 +320,7 @@ class ViewTransform extends RedGPUObject {
      * [EN] Inverse projection matrix
      */
     get inverseProjectionMatrix(): mat4 {
-        return mat4.invert(mat4.create(), this.#projectionMatrix);
+        return mat4.invert(this.#inverseProjectionMatrix, this.#projectionMatrix);
     }
 
     /**

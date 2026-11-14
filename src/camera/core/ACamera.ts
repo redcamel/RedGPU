@@ -19,7 +19,7 @@ const STANDARD_SHUTTER_SPEEDS = [
  */
 abstract class ACamera extends BaseObject {
     #aperture: number = 16.0;
-    #shutterSpeed: number = 1 / 3200;
+    #shutterSpeed: number = 1 / 125;
     #iso: number = 100;
     #ev100: number = 0;
     #useAutoExposure: boolean = true;
@@ -95,8 +95,8 @@ abstract class ACamera extends BaseObject {
     }
 
     /**
-     * [KO] 초(second) 단위의 셔터 속도를 가져오거나 설정합니다. (양수, 기본값: `1 / 3200`)
-     * [EN] Gets or sets the shutter speed in seconds. (Positive number, Default: `1 / 3200`)
+     * [KO] 초(second) 단위의 셔터 속도를 가져오거나 설정합니다. (양수, 기본값: `1 / 125`)
+     * [EN] Gets or sets the shutter speed in seconds. (Positive number, Default: `1 / 125`)
      *
      * @returns
      * [KO] 셔터 속도 (초)
@@ -141,8 +141,8 @@ abstract class ACamera extends BaseObject {
      * [EN] Optional `View3D` instance from which to read adapted auto exposure
      */
     updateExposure(view?: View3D): void {
-        if (view && this.#useAutoExposure) {
-            this.#ev100 = view.postEffectManager.autoExposure.currentAdaptedEV100;
+        if (view && this.#useAutoExposure && view.builtInEffectManager.hasAutoExposure) {
+            this.#ev100 = view.builtInEffectManager.autoExposure.currentAdaptedEV100;
         } else {
             this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
         }

@@ -3,49 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ColorBalance</title>
+    <title>Color Balance - RedGPU WebGPU Example</title>
     <meta name="description" content="Example of Color Balance color adjustment effect.">
-    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, postEffect, adjustments, colorBalance, ColorBalance">
+    <meta name="keywords"
+          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, postEffect, adjustments, colorBalance, Color Balance">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/">
-    <meta property="og:title" content="ColorBalance">
+    <meta property="og:title" content="Color Balance - RedGPU WebGPU Example">
     <meta property="og:description" content="Example of Color Balance color adjustment effect.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/">
-    <meta property="twitter:title" content="ColorBalance">
+    <meta property="twitter:title" content="Color Balance - RedGPU WebGPU Example">
     <meta property="twitter:description" content="Example of Color Balance color adjustment effect.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "ColorBalance",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Example of Color Balance color adjustment effect.",
-  "url": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Color Balance",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Example of Color Balance color adjustment effect.",
+                "url": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "PostEffect"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "PostEffect"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Adjustments"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "Color Balance",
+                        "item": "https://redcamel.github.io/RedGPU/examples/postEffect/adjustments/colorBalance/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>PostEffect &gt; PostEffect &gt; Adjustments</p>
+        <h1>Color Balance - RedGPU WebGPU Example</h1>
+        <p>Example of Color Balance color adjustment effect.</p>
+        <p lang="ko">컬러 밸런스 색상 보정 효과 예제입니다.</p>
+        <img src="thumb.webp" alt="Color Balance - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/grayscale/">Grayscale</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/invert/">Invert</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/">Color Temperature Tint</a>
+                </li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/brightnessContrast/">Brightness Contrast</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/hueSaturation/">Hue Saturation</a></li>
+                <li><a href="/RedGPU/examples/postEffect/adjustments/threshold/">Threshold</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {ExampleHelperState, hasGuiPanels, useExampleHelperStore} from '../../store';
 import {AxisIcon, DebugIcon, GridIcon, SettingIcon} from '../../common/components/Icons';
 
 /**
@@ -36,7 +36,7 @@ export const useTopBarActions = () => {
             addTopBarRightAction({
                 id: 'axis-toggle',
                 label: 'AXIS',
-                icon: (React.createElement(AxisIcon, {color: "#ccc", size: 18})),
+                icon: (React.createElement(AxisIcon, {color: axisActive ? "#fdb48d" : "#ccc", size: 20})),
                 isActive: axisActive,
                 onClick: () => {
                     const nextValue = !axisActive;
@@ -51,7 +51,7 @@ export const useTopBarActions = () => {
             addTopBarRightAction({
                 id: 'grid-toggle',
                 label: 'GRID',
-                icon: (React.createElement(GridIcon, {color: "#ccc", size: 24})),
+                icon: (React.createElement(GridIcon, {color: gridActive ? "#fdb48d" : "#ccc", size: 16})),
                 isActive: gridActive,
                 onClick: () => {
                     const nextValue = !gridActive;
@@ -66,7 +66,7 @@ export const useTopBarActions = () => {
             addTopBarRightAction({
                 id: 'debug-toggle',
                 label: 'DEBUG',
-                icon: (React.createElement(DebugIcon, {color: "#ccc", size: 24})),
+                icon: (React.createElement(DebugIcon, {color: debugActive ? "#fdb48d" : "#ccc", size: 18})),
                 isActive: debugActive,
                 onClick: () => {
                     const nextValue = !debugActive;
@@ -78,22 +78,11 @@ export const useTopBarActions = () => {
             });
 
             // SETTING Toggle
-            const hasPanels = !!(
-                guiConfig?.redGPUContext ||
-                guiConfig?.viewList ||
-                guiConfig?.scene ||
-                guiConfig?.directionalShadow ||
-                guiConfig?.ibl ||
-                guiConfig?.skybox ||
-                guiConfig?.globalWind ||
-                guiConfig?.gui
-            );
-
-            if (hasPanels) {
+            if (hasGuiPanels(guiConfig)) {
                 addTopBarRightAction({
                     id: 'setting-toggle',
                     label: 'SETTING',
-                    icon: (React.createElement(SettingIcon, {color: "#ccc", size: 24})),
+                    icon: (React.createElement(SettingIcon, {color: showSettingsPanel ? "#fdb48d" : "#ccc", size: 18})),
                     isActive: showSettingsPanel,
                     onClick: () => {
                         setShowSettingsPanel(!showSettingsPanel);
@@ -104,7 +93,6 @@ export const useTopBarActions = () => {
     }, [redGPUContext, axisActive, gridActive, debugActive, showSettingsPanel, guiConfig, addTopBarRightAction, setShowSettingsPanel]);
 
     return {
-        debugActive,
         setDebugActive
     };
 };

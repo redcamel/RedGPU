@@ -87,7 +87,7 @@ for (let i = 0; i < instancedMesh.instanceCount; i++) {
 ```
 
 ::: warning [Child Hierarchy Restriction]
-Although the child instances of `InstancingMesh` (`InstancingMeshObject3D`) have a transform interface similar to a
+Although the child instances of `InstancingMesh` have a transform interface similar to a
 standard `Mesh`, they are not independent 3D objects. Instead, they are delegate objects that control the GPU instancing
 buffer data. Therefore, they cannot host hierarchical child objects via `addChild()`.
 :::

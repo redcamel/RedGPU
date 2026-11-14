@@ -317,7 +317,6 @@ class BitmapTexture extends ManagementResourceBase {
         if (this.#useMipmap) {
             this.#mipLevelCount = getMipLevelCount(W, H)
             textureDescriptor.mipLevelCount = this.#mipLevelCount
-            textureDescriptor.usage |= GPUTextureUsage.RENDER_ATTACHMENT;
         }
         const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, [imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
         this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)

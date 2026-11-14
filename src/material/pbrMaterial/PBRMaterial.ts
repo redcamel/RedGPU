@@ -13,7 +13,6 @@ import defineUint from "../../defineProperty/funcs/number/defineUint";
 import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
-import keepLog from "../../utils/keepLog";
 
 
 const EXTENSION_LIST: {
@@ -41,7 +40,7 @@ const EXTENSION_LIST: {
             'metallicRoughnessTexture',
         ],
         positiveNumberList: [
-            {key: 'metallicFactor', value: 1},
+            {key: 'metallicFactor', value: 0},
             {key: 'roughnessFactor', value: 1},
         ]
     },
@@ -790,7 +789,7 @@ class PBRMaterial extends AUVTransformBaseMaterial {
             this.occlusionTexture?.gpuTexture?.height || 1,
             this.metallicRoughnessTexture?.gpuTexture?.height || 1
         );
-        keepLog(this.occlusionTexture, this.metallicRoughnessTexture)
+
         await this.#packedORMTexture.packing(
             {
                 r: this.occlusionTexture?.gpuTexture,
@@ -1015,8 +1014,7 @@ defineBoolean(PBRMaterial, [
     {key: 'useVertexColor', value: false},
     {key: 'useVertexTangent', value: false},
     {key: 'isFoliage', value: false},
-    {key: 'useKHR_materials_unlit', value: false},
-    {key: 'useSSR', value: true}
+    {key: 'useKHR_materials_unlit', value: false}
 ])
 Object.defineProperty(PBRMaterial.prototype, 'isPBRMaterial', {
     value: true,

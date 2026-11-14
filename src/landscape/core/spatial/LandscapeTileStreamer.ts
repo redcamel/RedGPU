@@ -389,7 +389,7 @@ class LandscapeTileStreamer extends RedGPUObject {
         const rawVhtTexture = gpuDevice.createTexture({
             size: [targetAtlasW, targetAtlasH],
             format: 'r32float',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
             label: 'Landscape_VHT_AtlasTexture'
         });
         this.#vhtAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VHT_AtlasTexture', rawVhtTexture);
@@ -397,7 +397,7 @@ class LandscapeTileStreamer extends RedGPUObject {
         const rawVntTexture = gpuDevice.createTexture({
             size: [targetAtlasW, targetAtlasH],
             format: 'rgba16float',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
             label: 'Landscape_VNT_AtlasTexture'
         });
         this.#vntAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VNT_AtlasTexture', rawVntTexture);
@@ -406,7 +406,7 @@ class LandscapeTileStreamer extends RedGPUObject {
             size: [targetVbtAtlasW, targetVbtAtlasH, 3],
             mipLevelCount: 6,
             format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
             label: 'Landscape_VBT_AtlasArrayTexture'
         });
         this.#vbtBaseColorAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_BaseColorAtlasTexture', rawVbtAtlas);
@@ -858,7 +858,7 @@ class LandscapeTileStreamer extends RedGPUObject {
                 const gpuTexture = gpuDevice.createTexture({
                     size: [width, height],
                     format: 'r16unorm',
-                    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
+                    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
                     label: `Landscape_Tile_16BitPngTexture_r16unorm_${key}`
                 });
 

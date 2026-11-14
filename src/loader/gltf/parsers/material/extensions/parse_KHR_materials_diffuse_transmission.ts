@@ -20,7 +20,6 @@ const parse_KHR_materials_diffuse_transmission = (currentMaterial: PBRMaterial, 
     currentMaterial.useKHR_materials_diffuse_transmission = true
     currentMaterial.KHR_diffuseTransmissionFactor = KHR_materials_diffuse_transmission.diffuseTransmissionFactor || 0.0
     currentMaterial.KHR_diffuseTransmissionColorFactor = KHR_materials_diffuse_transmission.diffuseTransmissionColorFactor || [1, 1, 1]
-    currentMaterial.transparent = true
     {
         const diffuseTransmissionTextureInfo = KHR_materials_diffuse_transmission.diffuseTransmissionTexture;
         if (diffuseTransmissionTextureInfo) {

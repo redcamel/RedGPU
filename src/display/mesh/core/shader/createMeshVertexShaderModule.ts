@@ -1,16 +1,30 @@
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
 import createMeshVertexShaderModulePBRSkin from "./createMeshVertexShaderModulePBRSkin";
 import Mesh from "../../Mesh";
+import debuggerMeshVertexSource from "../../../drawDebugger/core/shader/debuggerMeshVertex.wgsl";
 
 const NAME_SHADER_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN';
 const NAME_SHADER_PBR = 'VERTEX_MODULE_MESH_PBR';
 const NAME_SHADER_BASIC = 'VERTEX_MODULE_MESH';
 const NAME_SHADER_ONLY_FRAGMENT_PBR = 'VERTEX_MODULE_MESH_ONLY_FRAGMENT_PBR';
 const NAME_SHADER_ONLY_VERTEX_PBR = 'VERTEX_MODULE_MESH_ONLY_VERTEX_PBR';
+const NAME_SHADER_DEBUGGER = 'VERTEX_MODULE_MESH_DEBUGGER';
+let cachedDebuggerShaderInfo: any = null;
 
 
 const determineShaderConfig = (mesh: Mesh) => {
     const {geometry, material} = mesh;
+    if (material.isDebuggerMaterial) {
+        if (!cachedDebuggerShaderInfo) {
+            cachedDebuggerShaderInfo = mesh.redGPUContext.resourceManager.wgslParser.parse('MESH_DEBUGGER', debuggerMeshVertexSource);
+        }
+        return {
+            name: NAME_SHADER_DEBUGGER,
+            shaderInfo: cachedDebuggerShaderInfo,
+            source: cachedDebuggerShaderInfo.defaultSource,
+            uniformStruct: cachedDebuggerShaderInfo.uniforms.vertexUniforms,
+        };
+    }
 
     const vertexIsPBR = geometry.vertexBuffer.interleavedStruct.label === 'PBR';
     const materialIsPBR = material instanceof PBRMaterial;

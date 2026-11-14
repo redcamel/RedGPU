@@ -46,7 +46,7 @@ interface ParticleEmitter {
  * scene.addChild(emitter);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/particle/basic/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/particle/basic/"></iframe>
  *
  * [KO] 아래는 ParticleEmitter의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of ParticleEmitter.
@@ -905,7 +905,7 @@ class ParticleEmitter extends Mesh {
         this.#simParamBuffer = gpuDevice.createBuffer(bufferDescriptor);
         gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
         this.#setParticleData()
-        console.log('\t\tthis.depthStencilState', this.depthStencilState)
+
         this.depthStencilState.depthWriteEnabled = false
     }
 
@@ -1056,7 +1056,7 @@ class ParticleEmitter extends Mesh {
         let shaderModuleDescriptor = {
             code: computeSource,
         };
-        console.log('shaderModuleDescriptor', shaderModuleDescriptor);
+
         let computeModule = redGPUContext.resourceManager.createGPUShaderModule('PARTICLE_EMITTER_MODULE', shaderModuleDescriptor);
         const computeBindGroupLayoutEntries: any = [
             {

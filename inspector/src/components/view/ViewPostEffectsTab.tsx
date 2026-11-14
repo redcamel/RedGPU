@@ -16,7 +16,7 @@ import ToneMappingView from "./ToneMappingView";
  */
 const ViewPostEffectsTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: number }) => {
     const {redGPUContext} = useInspectorStore();
-    const {postEffectManager, rawCamera} = view;
+    const {postEffectManager, builtInEffectManager, rawCamera} = view;
 
     if (!postEffectManager) {
         return <div style={placeholderStyle}>PostEffectManager not available</div>;
@@ -59,8 +59,10 @@ const ViewPostEffectsTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTi
             <Section title="Built-in Effects">
                 <StatBoolItem label="useFXAA" value={antialiasingManager.useFXAA}/>
                 <StatBoolItem label="useTAA" value={antialiasingManager.useTAA}/>
-                <StatBoolItem label="useSSAO" value={postEffectManager.useSSAO}/>
-                <StatBoolItem label="useSSR" value={postEffectManager.useSSR}/>
+                <StatBoolItem label="useSSAO" value={builtInEffectManager.useSSAO}/>
+                <StatBoolItem label="useSSR" value={builtInEffectManager.useSSR}/>
+                <StatBoolItem label="useDOF" value={builtInEffectManager.useDOF}/>
+                <StatBoolItem label="useBloom" value={builtInEffectManager.useBloom}/>
                 <StatBoolItem label="Auto Exposure" value={rawCamera.useAutoExposure}/>
                 <StatBoolItem label="Sky Atmosphere" value={!!view.skyAtmosphere}/>
                 <Divider/>

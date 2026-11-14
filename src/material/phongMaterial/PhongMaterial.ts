@@ -5,7 +5,6 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
-import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import defineColorRGB from "../../defineProperty/funcs/color/defineColorRGB";
@@ -41,6 +40,11 @@ interface PhongMaterial {
      * [EN] Specular reflection strength (default: `1`)
      */
     specularStrength: number
+    /**
+     * [KO] 스펙큘러 광택도 (기본값: `32`)
+     * [EN] Specular shininess (default: `32`)
+     */
+    shininess: number
     /**
      * [KO] 알파(불투명도) 맵 텍스처
      * [EN] Alpha (opacity) map texture
@@ -117,11 +121,6 @@ interface PhongMaterial {
      */
     roughness: number
     /**
-     * [KO] 스크린 스페이스 리플렉션(SSR) 사용 여부
-     * [EN] Whether to use Screen Space Reflection (SSR)
-     */
-    useSSR: number;
-    /**
      * [KO] 변위(Displacement) 맵 변형 스케일 (기본값: `1`)
      * [EN] Displacement map deformation scale (default: `1`)
      */
@@ -150,7 +149,7 @@ interface PhongMaterial {
  * material.diffuseTexture = sourceTexture;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/material/phongMaterial/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/material/phongMaterial/"></iframe>
  *
  * @see [PhongMaterial example](/RedGPU/examples/3d/material/phongMaterial/)
  * @see [PhongMaterial Textures example](/RedGPU/examples/3d/material/phongMaterialTextures/)
@@ -242,9 +241,6 @@ defineTexture(PhongMaterial, [
     {key: 'normalTexture'},
     {key: 'specularTexture'},
     {key: 'displacementTexture'},
-])
-defineBoolean(PhongMaterial, [
-    {key: 'useSSR', value: false}
 ])
 definePositiveNumber(PhongMaterial, [
     {key: 'metallic', value: 0, min: 0, max: 1},

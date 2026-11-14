@@ -61,7 +61,7 @@ interface LODGPURenderInfo {
  * scene.addChild(instancingMesh);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/instancedMesh/simple/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/instancedMesh/simple/"></iframe>
  *
  * @see [InstancingMesh Simple example](/RedGPU/examples/3d/instancedMesh/simple/)
  * @see [InstancingMesh Sphere example](/RedGPU/examples/3d/instancedMesh/sphere/)
@@ -286,7 +286,7 @@ class InstancingMesh extends Mesh {
             if (!shadowRender) {
                 this.#performGPUCulling(renderViewStateData);
             }
-            this.#renderGeometry(renderViewStateData, shadowRender, currentRenderPassEncoder);
+            this.#renderGeometry(renderViewStateData, shadowRender, shadowRender ? currentRenderPassEncoder : null);
         }
         if (this.castShadow) {
             castingList[castingList.length] = this;
@@ -350,7 +350,7 @@ class InstancingMesh extends Mesh {
         });
         this.#instanceChildren.length = 0;
 
-        console.log(`🧹 InstancingMesh destroy 완료: ${this.name || '무명'}`);
+
     }
 
     #updateTransformMatrix(): void {
@@ -386,18 +386,22 @@ class InstancingMesh extends Mesh {
     ): void {
         const {gpuRenderInfo} = this;
         const {pipeline, shadowPipeline} = gpuRenderInfo;
-        const {view, renderResults} = renderViewStateData
+        const {view, renderResults, renderBundleResults} = renderViewStateData
         this.#updateDisplacementUniforms();
         this.#updateInstanceUniforms();
         const {fragmentUniformBindGroup} = this.material.gpuRenderInfo;
-        renderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-        renderPassEncoder.setBindGroup(2, fragmentUniformBindGroup);
-        renderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline);
+        const targetEncoder: GPURenderPassEncoder | GPURenderBundleEncoder = renderPassEncoder || this.#redGPUContext.gpuDevice.createRenderBundleEncoder({
+            ...view.basicRenderBundleEncoderDescriptor,
+            label: this.uuid,
+        });
+        targetEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+        targetEncoder.setBindGroup(2, fragmentUniformBindGroup);
+        targetEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline);
 
         const indirectArgsSize = INDIRECT_ARGS_SIZE;
 
         this.#renderGeometryWithBuffer(
-            renderPassEncoder,
+            targetEncoder,
             this.geometry,
             this.gpuRenderInfo.vertexUniformBindGroup,
             this.material.gpuRenderInfo.fragmentUniformBindGroup,
@@ -407,9 +411,9 @@ class InstancingMesh extends Mesh {
 
         this.LODManager.LODList.forEach((lod, index) => {
             const lodRenderInfo = this.#lodGPURenderInfoList[index];
-            renderPassEncoder.setPipeline(lodRenderInfo.pipeline);
+            targetEncoder.setPipeline(lodRenderInfo.pipeline);
             this.#renderGeometryWithBuffer(
-                renderPassEncoder,
+                targetEncoder,
                 lod.geometry,
                 lodRenderInfo.vertexUniformBindGroup,
                 lod.material ? lod.material.gpuRenderInfo.fragmentUniformBindGroup : this.material.gpuRenderInfo.fragmentUniformBindGroup,
@@ -418,12 +422,23 @@ class InstancingMesh extends Mesh {
             );
         });
 
+        if (!renderPassEncoder) {
+            const renderBundle = (targetEncoder as GPURenderBundleEncoder).finish({
+                label: `${this.name}_Instancing`
+            });
+            if (this.material?.use2PathRender) {
+                renderBundleResults.bundleListRender2PathLayer[renderBundleResults.bundleListRender2PathLayer.length] = renderBundle;
+            } else {
+                renderBundleResults.bundleListBasicList[renderBundleResults.bundleListBasicList.length] = renderBundle;
+            }
+        }
+
         renderResults.numDrawCalls++;
         renderResults.numInstances++;
     }
 
     #renderGeometryWithBuffer(
-        renderPassEncoder: GPURenderPassEncoder,
+        renderPassEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
         geometry: Geometry | Primitive,
         vertexUniformBindGroup: GPUBindGroup,
         fragmentUniformBindGroup: GPUBindGroup,

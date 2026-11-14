@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Keyboard Event 예제
@@ -24,10 +24,6 @@ RedGPU.init(
         view.grid = true;
         view.axis = true;
         redGPUContext.addView(view);
-
-        const ambientLight = new RedGPU.Light.AmbientLight();
-        ambientLight.intensity = 0.5;
-        scene.lightManager.ambientLight = ambientLight;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);

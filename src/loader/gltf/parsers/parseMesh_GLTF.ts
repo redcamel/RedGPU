@@ -233,6 +233,9 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         }
         if (tMesh.material.alphaBlend === 2) {
             tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS_EQUAL
+            if (!tMesh.material.use2PathRender) {
+                tMesh.depthStencilState.depthWriteEnabled = false
+            }
         }
         tMesh.animationInfo.morphInfo = morphInfo;
         tMesh.animationInfo.morphInfo.origin = new Float32Array(interleaveData);

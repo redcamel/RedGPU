@@ -2,7 +2,6 @@
 // [EN] 1. Index and basic data calculation
 let index = global_id.xy;
 let dimensions = vec2<f32>(textureDimensions(sourceTexture));
-if (f32(index.x) >= dimensions.x || f32(index.y) >= dimensions.y) { return; }
 
 let invSize = 1.0 / dimensions;
 let centerUV = (vec2<f32>(index) + 0.5) * invSize;

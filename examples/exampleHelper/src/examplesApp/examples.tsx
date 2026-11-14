@@ -26,6 +26,10 @@ class RedGPUExamples {
     }
 
     private init() {
+        const staticSeo = document.getElementById('seo-static-content');
+        if (staticSeo) {
+            staticSeo.remove();
+        }
         if (!this.domRoot) {
             this.domRoot = document.createElement('div');
             this.domRoot.id = 'redgpu-examples-root';

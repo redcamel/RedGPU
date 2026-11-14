@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] 독립적인 컨텍스트 영역을 설정하고 이벤트를 연결하는 함수 (최소화된 클로저 패턴)
@@ -25,30 +25,27 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
         RedGPU.init(canvas, (redGPUContext) => {
             activeContext = redGPUContext;
 
-            // 1. 카메라 설정
             const controller = new RedGPU.Camera.OrbitController(redGPUContext);
             controller.distance = 6;
+            controller.tilt = -15;
 
-            // 2. 씬 구성 (입체감을 위해 광원 1개와 PhongMaterial 추가)
             const scene = new RedGPU.Display.Scene();
 
 
             scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
-            scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
 
             const material = new RedGPU.Material.PhongMaterial(redGPUContext, colorHex);
             const geometry = new RedGPU.Primitive.TorusKnot(redGPUContext, 1, 0.4, 128, 64);
             const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
             scene.addChild(mesh);
 
-            // 3. 뷰 추가 및 렌더 가동
             const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
             view.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
             redGPUContext.addView(view);
 
             const renderer = new RedGPU.Renderer();
             renderer.start(redGPUContext, () => {
-                mesh.rotationY += 1; // 자전 루프
+                mesh.rotationY += 1;
             });
 
             console.log(`[RedGPU] Initialized ${containerId}`);
@@ -81,13 +78,14 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
     btnCreate.addEventListener('click', init);
 
     init();
-    renderTestPane()
 };
-const renderTestPane = (redGPUContext) => {
-    new RedGPUExampleHelper(redGPUContext);
+
+const renderTestPane = () => {
+    new RedGPUExampleHelper();
 };
 
 // [KO] Canvas A(적색) 및 Canvas B(청색)에 대해 각각 초기 실행 및 바인딩
 // [EN] Initialize and bind for Canvas A (Red) and Canvas B (Blue) respectively
 setupContext('containerA', 'statusA', '#ff3333', 'btnDestroyA', 'btnCreateA');
 setupContext('containerB', 'statusB', '#3333ff', 'btnDestroyB', 'btnCreateB');
+renderTestPane();

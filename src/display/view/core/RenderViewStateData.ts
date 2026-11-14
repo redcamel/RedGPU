@@ -238,7 +238,8 @@ class RenderViewStateData {
         bundleListTransparentLayer: [] as GPURenderBundle[],
         bundleListParticleLayer: [] as GPURenderBundle[],
         bundleListRender2PathLayer: [] as GPURenderBundle[],
-        bundleListBasicList: [] as GPURenderBundle[]
+        bundleListBasicList: [] as GPURenderBundle[],
+        bundleListDebuggerLayer: [] as GPURenderBundle[]
     };
 
     /**
@@ -297,6 +298,7 @@ class RenderViewStateData {
             useFrustumCulling,
             frustumPlanes,
             scene,
+            builtInEffectManager,
             postEffectManager,
             pickingManager,
             viewRenderTextureManager
@@ -329,6 +331,8 @@ class RenderViewStateData {
         renderBundleResults.bundleListParticleLayer.length = 0;
         renderBundleResults.bundleListRender2PathLayer.length = 0;
         renderBundleResults.bundleListBasicList.length = 0;
+        renderBundleResults.bundleListDebuggerLayer.length = 0;
+        this.currentRenderPassEncoder = null;
         this.skinList.length = 0;
         this.animationList.length = 0;
         this.isScene2DMode = view.camera instanceof Camera2D;
@@ -344,6 +348,7 @@ class RenderViewStateData {
         try {
             this.usedVideoMemory = viewRenderTextureManager.videoMemorySize
                 + shadowManager.directionalShadowManager.videoMemorySize
+                + builtInEffectManager.videoMemorySize
                 + postEffectManager.videoMemorySize
                 + pickingManager.videoMemorySize;
         } catch (e) {

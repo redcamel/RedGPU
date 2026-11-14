@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] GLTF Directional Light 그림자 예제
@@ -15,40 +15,43 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 20;
         controller.speedDistance = 0.3;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
+        const ibl = new RedGPU.Resource.IBL(
+            redGPUContext,
+            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+        );
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        // 2. 조명 설정
         // [KO] 그림자를 생성할 방향성 조명을 추가합니다.
         // [EN] Add a directional light that will generate shadows.
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 3. 바닥 및 GLTF 모델 로드
+        // [KO] 바닥 및 GLTF 모델 로드
+        // [EN] Load ground mesh and GLTF models
         addGround(redGPUContext, scene);
         loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -3, 3, 3);
         loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 3, 0, 3);
 
-        // 4. 애니메이션 렌더 루프 및 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // 로드된 모델들의 애니메이션 처리 (첫 번째 자식인 바닥 제외)
+            // [KO] 로드된 모델 애니메이션 처리 (첫 번째 자식인 바닥 제외)
+            // [EN] Animate loaded models (excluding the ground mesh at index 0)
             let i = scene.numChildren;
             while (i--) {
-                if (i === 0) continue; // 바닥 메시 제외
+                if (i === 0) continue;
                 const model = scene.children[i];
                 model.rotationY += 0.5;
             }
         });
 
-        // 6. 테스트 GUI 설정
         renderTestPane(redGPUContext, scene);
     },
     (failReason) => {
@@ -59,10 +62,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] GLTF 모델을 로드하고 그림자 설정을 적용합니다.
- * [EN] Loads a GLTF model and applies shadow settings.
- */
 const loadGLTF = (redGPUContext, scene, url, xPosition, yPosition, scale = 1) => {
     new RedGPU.GLTFLoader(
         redGPUContext,
@@ -83,10 +82,6 @@ const loadGLTF = (redGPUContext, scene, url, xPosition, yPosition, scale = 1) =>
     );
 };
 
-/**
- * [KO] 그림자를 수신할 바닥 메시를 추가합니다.
- * [EN] Adds a ground mesh to receive shadows.
- */
 const addGround = (redGPUContext, scene) => {
     const ground = new RedGPU.Display.Mesh(
         redGPUContext,
@@ -98,15 +93,9 @@ const addGround = (redGPUContext, scene) => {
     scene.addChild(ground);
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
         directionalShadow: true,
-        ibl: true,
-        skybox: true,
     });
 };

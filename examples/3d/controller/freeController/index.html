@@ -3,49 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeController</title>
-    <meta name="description" content="FreeController provides first-person camera control with keyboard (WASD/QERTFG) and mouse/touch input. Features include free movement in 3D space, rotation control, customizable speed/acceleration, and key binding configuration.">
+    <title>FreeController - RedGPU WebGPU Example</title>
+    <meta name="description" content="First-person camera controller with keyboard and mouse navigation.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, controller, freeController, FreeController">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/">
-    <meta property="og:title" content="FreeController">
-    <meta property="og:description" content="FreeController provides first-person camera control with keyboard (WASD/QERTFG) and mouse/touch input. Features include free movement in 3D space, rotation control, customizable speed/acceleration, and key binding configuration.">
+    <meta property="og:title" content="FreeController - RedGPU WebGPU Example">
+    <meta property="og:description" content="First-person camera controller with keyboard and mouse navigation.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/">
-    <meta property="twitter:title" content="FreeController">
-    <meta property="twitter:description" content="FreeController provides first-person camera control with keyboard (WASD/QERTFG) and mouse/touch input. Features include free movement in 3D space, rotation control, customizable speed/acceleration, and key binding configuration.">
+    <meta property="twitter:title" content="FreeController - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="First-person camera controller with keyboard and mouse navigation.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "FreeController",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "FreeController provides first-person camera control with keyboard (WASD/QERTFG) and mouse/touch input. Features include free movement in 3D space, rotation control, customizable speed/acceleration, and key binding configuration.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "FreeController",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "First-person camera controller with keyboard and mouse navigation.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Core & Setup"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Camera Controller"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "FreeController",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/controller/freeController/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Core &amp; Setup &gt; Camera Controller</p>
+        <h1>FreeController - RedGPU WebGPU Example</h1>
+        <p>First-person camera controller with keyboard and mouse navigation.</p>
+        <p lang="ko">키보드와 마우스 입력으로 3D 공간을 자유롭게 이동하는 1인칭 컨트롤러입니다.</p>
+        <img src="thumb.webp" alt="FreeController - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/orbitController/">OrbitController</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/followController/">FollowController</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/isometricController/">IsometricController</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

@@ -25,8 +25,17 @@ const calcTargetMeshMatrix = (mesh: any, view: View3D) => {
  */
 class RedGPUExampleHelper {
     static loadingProgressInfoHandler = (info: any) => {
+        if (!info || typeof info !== 'object') return;
         useExampleHelperStore.getState().updateLoadingState(info);
     };
+
+    static setShowCompareLabel(value: boolean): void {
+        useExampleHelperStore.getState().setShowCompareLabel(value);
+    }
+
+    public setShowCompareLabel(value: boolean): void {
+        useExampleHelperStore.getState().setShowCompareLabel(value);
+    }
 
     /**
      * [KO] 메쉬가 화면 중앙에 꽉 차도록 카메라 거리를 자동으로 조절합니다.
@@ -73,7 +82,6 @@ class RedGPUExampleHelper {
         // - padding: 1.15 정도로 설정하여 모델이 테두리에 닿지 않게 여유를 줌
         // - zSize / 2: 카메라가 모델 '중심'이 아닌 '앞면'을 기준으로 거리를 잡도록 보정
         const padding = 1.15;
-        // const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
         const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
 
         // 5. 타겟(Center) 설정 - 질문하신 centerY 보정 적용
@@ -95,9 +103,6 @@ class RedGPUExampleHelper {
             orbitController.distance = 1;
         }
         orbitController.speedDistance = Math.max(0.1, requiredDistance * 0.1);
-
-        // },1000)
-
     }
 
     private root: ReactDOM.Root | null = null;
@@ -105,6 +110,10 @@ class RedGPUExampleHelper {
     private isDestroyed = false;
 
     constructor(redGPUContext: RedGPUContext, guiConfig?: GuiConfig | ((gui: any) => void)) {
+        const staticSeo = document.getElementById('seo-static-content');
+        if (staticSeo) {
+            staticSeo.remove();
+        }
         useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
         if (guiConfig) {
             if (typeof guiConfig === 'function') {
@@ -145,6 +154,7 @@ class RedGPUExampleHelper {
             }
         }
 
+        useExampleHelperStore.getState().clearLoadingStates();
         useExampleHelperStore.getState().setRedGPUContext(null);
         useExampleHelperStore.getState().setGuiConfig(null);
         useExampleHelperStore.getState().setRedGPU(null);

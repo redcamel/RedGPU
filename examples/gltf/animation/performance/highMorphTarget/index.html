@@ -3,69 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Morph target load Test</title>
-    <meta name="description" content="Perform morph stress tests by instantiating hundreds of MorphStressTest models. Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation. Check performance limits on each device.">
+    <title>Morph target load Test - RedGPU WebGPU Example</title>
+    <meta name="description" content="Benchmarks real-time morph target performance across hundreds of models.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, animation, performance, highMorphTarget, Morph target load Test">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/">
-    <meta property="og:title" content="Morph target load Test">
-    <meta property="og:description" content="Perform morph stress tests by instantiating hundreds of MorphStressTest models. Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation. Check performance limits on each device.">
+    <meta property="og:title" content="Morph target load Test - RedGPU WebGPU Example">
+    <meta property="og:description" content="Benchmarks real-time morph target performance across hundreds of models.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/">
-    <meta property="twitter:title" content="Morph target load Test">
-    <meta property="twitter:description" content="Perform morph stress tests by instantiating hundreds of MorphStressTest models. Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation. Check performance limits on each device.">
+    <meta property="twitter:title" content="Morph target load Test - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Benchmarks real-time morph target performance across hundreds of models.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Morph target load Test",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Perform morph stress tests by instantiating hundreds of MorphStressTest models. Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation. Check performance limits on each device.",
-  "url": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Morph target load Test",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Benchmarks real-time morph target performance across hundreds of models.",
+                "url": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "GLTF"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Animation"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Animation Performance Test"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "Morph target load Test",
+                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/animation/performance/highMorphTarget/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>GLTF &gt; Animation &gt; Animation Performance Test</p>
+        <h1>Morph target load Test - RedGPU WebGPU Example</h1>
+        <p>Benchmarks real-time morph target performance across hundreds of models.</p>
+        <p lang="ko">수백 개의 모프 타겟 모델을 동시 렌더링해 모프 스키닝 성능을 측정합니다.</p>
+        <img src="thumb.webp" alt="Morph target load Test - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/gltf/animation/performance/mediumLoadSkinning/">Medium load Skinning</a>
+                </li>
+                <li><a href="/RedGPU/examples/gltf/animation/performance/highVertexLoadSkinning/">High vertex load
+                    Skinning</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

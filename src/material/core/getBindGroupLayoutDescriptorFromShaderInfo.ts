@@ -259,9 +259,6 @@ const getVertexBindGroupLayoutDescriptorFromShaderInfo = (
  * @param targetGroupIndex -
  * [KO] 대상 바인드 그룹 인덱스
  * [EN] Target bind group index
- * @param useMSAAOrOverride -
- * [KO] MSAA 사용 여부 불리언 또는 바인딩 오버라이드 맵 (`boolean | Record<number, Partial<GPUBindGroupLayoutEntry>>`, 선택)
- * [EN] MSAA usage boolean flag or binding override map (`boolean | Record<number, Partial<GPUBindGroupLayoutEntry>>`, optional)
  * @param overrideEntries -
  * [KO] 특정 바인딩 번호의 설정을 덮어쓸 엔트리 맵 (`Record<number, Partial<GPUBindGroupLayoutEntry>>`, 선택)
  * [EN] Entry map to override specific binding configurations (`Record<number, Partial<GPUBindGroupLayoutEntry>>`, optional)
@@ -273,11 +270,9 @@ const getVertexBindGroupLayoutDescriptorFromShaderInfo = (
 const getComputeBindGroupLayoutDescriptorFromShaderInfo = (
     SHADER_INFO: any,
     targetGroupIndex: number,
-    useMSAAOrOverride?: boolean | Record<number, Partial<GPUBindGroupLayoutEntry>>,
     overrideEntries?: Record<number, Partial<GPUBindGroupLayoutEntry>>
 ) => {
-    const overrides = typeof useMSAAOrOverride === 'object' ? useMSAAOrOverride : overrideEntries;
-    return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.COMPUTE, overrides);
+    return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.COMPUTE, overrideEntries);
 };
 
 export {

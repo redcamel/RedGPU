@@ -1,0 +1,127 @@
+import RedGPUContext from "../../../context/RedGPUContext";
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+import View3D from "../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../core/createBasicComputePassPostEffectCode";
+import {IPostEffectResult} from "../../core/types";
+import computeCode from "./wgsl/computeCode.wgsl";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
+
+interface SSR {
+    /**
+     * [KO] 최대 레이 마칭 단계 수 (1 ~ 512)
+     * [EN] Maximum number of ray marching steps (1 ~ 512)
+     * @defaultValue 64
+     */
+    maxSteps: number;
+    /**
+     * [KO] 최대 반사 추적 거리 (단위: 월드 거리, 1.0 ~ 200.0)
+     * [EN] Maximum reflection tracking distance in world units (1.0 ~ 200.0)
+     * @defaultValue 15.0
+     */
+    maxDistance: number;
+    /**
+     * [KO] 레이 마칭 단계 기본 크기 (0.001 ~ 5.0)
+     * [EN] Base step size during ray marching (0.001 ~ 5.0)
+     * @defaultValue 0.02
+     */
+    stepSize: number;
+    /**
+     * [KO] 반사 효과 전체 강도 (0.0 ~ 10)
+     * [EN] Overall intensity of the reflection effect (0.0 ~ 10)
+     * @defaultValue 1
+     */
+    reflectionIntensity: number;
+    /**
+     * [KO] 거리에 따른 반사 감쇠 시작 거리 (1.0 ~ 100.0)
+     * [EN] Distance where reflection attenuation starts (1.0 ~ 100.0)
+     * @defaultValue 12.0
+     */
+    fadeDistance: number;
+    /**
+     * [KO] 화면 가장자리 반사 페이드 영역 크기 (0.0 ~ 0.5)
+     * [EN] Reflection fade area size at the screen edges (0.0 ~ 0.5)
+     * @defaultValue 0.15
+     */
+    edgeFade: number;
+}
+
+/**
+ * [KO] 화면 공간의 깊이(Depth)와 법선(Normal) 정보를 기반으로 레이 마칭을 수행하여 실시간 반사를 구현하는 SSR(Screen Space Reflection) 후처리 이펙트입니다.
+ * [EN] Screen Space Reflection (SSR) post-processing effect that implements real-time reflections via ray marching using screen-space depth and normal information.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * // [KO] View3D의 builtInEffectManager를 통해 SSR 활성화 및 설정 제어
+ * // [EN] Enable and configure SSR through View3D's builtInEffectManager
+ * view.builtInEffectManager.useSSR = true;
+ * const ssr = view.builtInEffectManager.ssr;
+ * ssr.maxSteps = 128;
+ * ssr.reflectionIntensity = 0.8;
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/"></iframe>
+ *
+ * @see [SSR example](/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/)
+ * @category PostEffect
+ */
+class SSR extends ASingleComputePassPostEffect {
+
+    /**
+     * [KO] SSR 인스턴스를 생성합니다.
+     * [EN] Creates an SSR instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_SSR',
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode)
+        );
+    }
+
+    /**
+     * [KO] 화면 공간 반사(SSR) 효과를 렌더링합니다.
+     * [EN] Renders the Screen Space Reflection (SSR) effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] SSR 효과가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with SSR applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.reflectionIntensity <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
+    }
+}
+
+definePositiveNumber(SSR, [
+    {key: 'maxSteps', value: 64, min: 1, max: 512},
+    {key: 'maxDistance', value: 15.0, min: 1.0, max: 200.0},
+    {key: 'stepSize', value: 0.02, min: 0.001, max: 5.0},
+    {key: 'reflectionIntensity', value: 1, min: 0.0, max: 10},
+    {key: 'fadeDistance', value: 12.0, min: 1.0, max: 100.0},
+    {key: 'edgeFade', value: 0.15, min: 0.0, max: 0.5}
+]);
+Object.freeze(SSR);
+export default SSR;

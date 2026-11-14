@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USD Shader Ball - RedGPU WebGPU Example</title>
+    <meta name="description" content="Standard USD Shader Ball showcasing transmission and volume PBR properties.">
+    <meta name="keywords"
+          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, gltfExtensions, volume, usdShaderBallForGltf, USD Shader Ball">
+    <link rel="canonical"
+          href="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url"
+          content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/">
+    <meta property="og:title" content="USD Shader Ball - RedGPU WebGPU Example">
+    <meta property="og:description"
+          content="Standard USD Shader Ball showcasing transmission and volume PBR properties.">
+    <meta property="og:image"
+          content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url"
+          content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/">
+    <meta property="twitter:title" content="USD Shader Ball - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Standard USD Shader Ball showcasing transmission and volume PBR properties.">
+    <meta property="twitter:image"
+          content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "USD Shader Ball",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Standard USD Shader Ball showcasing transmission and volume PBR properties.",
+                "url": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "GLTF"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "GLTF Extensions"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "KHR_materials_volume"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "USD Shader Ball",
+                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/"
+                    }
+                ]
+            }
+        ]
+    }</script>
+
+    <!-- Module Preload -->
+    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+
+    <!-- Assets -->
+    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
+</head>
+<body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>GLTF &gt; GLTF Extensions &gt; KHR_materials_volume</p>
+        <h1>USD Shader Ball - RedGPU WebGPU Example</h1>
+        <p>Standard USD Shader Ball showcasing transmission and volume PBR properties.</p>
+        <p lang="ko">투과와 볼륨 등 고급 PBR 재질 속성을 검증하는 표준 USD 셰이더 볼입니다.</p>
+        <img src="thumb.webp" alt="USD Shader Ball - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/compareIor/">Compare IOR</a></li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/IORTestGrid/">IOR Test Grid</a></li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/compareVolume/">Compare Volume</a></li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/attenuationTest/">Attenuation Test</a></li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/glassVaseFlowers/">Glass Vase Flowers</a></li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/glassHurricaneCandleHolder/">Glass Hurricane
+                    Candle Holder</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
+</body>
+</html>

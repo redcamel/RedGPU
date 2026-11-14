@@ -123,6 +123,14 @@ const filterLanguageFiles = (dir, currentLang) => {
 
             let processed = processedLines.join('\n');
 
+            // JSDoc의 <iframe> 태그를 VitePress 전역 컴포넌트인 <ExampleFrame />으로 일원화
+            if (processed.includes('<iframe')) {
+                processed = processed.replace(
+                    /<iframe\s+src=(["'])([^"']+)\1(?:\s+style=(["'])[^"']*\3)?\s*><\/iframe>/g,
+                    '<ExampleFrame src="$2" />'
+                );
+            }
+
             // 프로덕션 빌드 환경(배포)에서만 GitHub Pages 외부 도메인 경로로 치환합니다.
             if (process.env.NODE_ENV === 'production') {
                 processed = processed.replace(/([\(\"\'])\/RedGPU\//g, '$1https://redcamel.github.io/RedGPU/');

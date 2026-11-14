@@ -3,49 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrbitController</title>
-    <meta name="description" content="OrbitController provides orbital camera control that rotates around a center point. Features include mouse drag rotation, wheel zoom, touch pinch zoom, customizable center position, distance control, and pan/tilt limits.">
+    <title>OrbitController - RedGPU WebGPU Example</title>
+    <meta name="description" content="Orbital camera controller with pivot rotation, zoom, and pan/tilt.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, controller, orbitController, OrbitController">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/">
-    <meta property="og:title" content="OrbitController">
-    <meta property="og:description" content="OrbitController provides orbital camera control that rotates around a center point. Features include mouse drag rotation, wheel zoom, touch pinch zoom, customizable center position, distance control, and pan/tilt limits.">
+    <meta property="og:title" content="OrbitController - RedGPU WebGPU Example">
+    <meta property="og:description" content="Orbital camera controller with pivot rotation, zoom, and pan/tilt.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/">
-    <meta property="twitter:title" content="OrbitController">
-    <meta property="twitter:description" content="OrbitController provides orbital camera control that rotates around a center point. Features include mouse drag rotation, wheel zoom, touch pinch zoom, customizable center position, distance control, and pan/tilt limits.">
+    <meta property="twitter:title" content="OrbitController - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Orbital camera controller with pivot rotation, zoom, and pan/tilt.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "OrbitController",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "OrbitController provides orbital camera control that rotates around a center point. Features include mouse drag rotation, wheel zoom, touch pinch zoom, customizable center position, distance control, and pan/tilt limits.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "OrbitController",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Orbital camera controller with pivot rotation, zoom, and pan/tilt.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Core & Setup"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Camera Controller"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "OrbitController",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/controller/orbitController/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Core &amp; Setup &gt; Camera Controller</p>
+        <h1>OrbitController - RedGPU WebGPU Example</h1>
+        <p>Orbital camera controller with pivot rotation, zoom, and pan/tilt.</p>
+        <p lang="ko">중심점 기준 회전, 줌, 팬·틸트 제어를 제공하는 궤도형 카메라 컨트롤러입니다.</p>
+        <img src="thumb.webp" alt="OrbitController - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/freeController/">FreeController</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/followController/">FollowController</a></li>
+                <li><a href="/RedGPU/examples/3d/controller/isometricController/">IsometricController</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

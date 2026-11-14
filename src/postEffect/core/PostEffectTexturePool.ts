@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import {IPostEffectResult} from "./types";
 import RedGPUObject from "../../base/RedGPUObject";
+import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 
 /**
  * [KO] 후처리 과정에서 생성되는 임시 텍스처를 재사용하여 비디오 메모리 점유율과 할당 오버헤드를 줄이는 텍스처 풀 클래스입니다.
@@ -26,7 +27,6 @@ class PostEffectTexturePool extends RedGPUObject {
     #pool: Map<string, GPUTexture[]> = new Map();
     #activeTextures: Set<GPUTexture> = new Set();
     #textureToKey: WeakMap<GPUTexture, string> = new WeakMap();
-    #textureToView: WeakMap<GPUTexture, GPUTextureView> = new WeakMap();
     #textureToResult: WeakMap<GPUTexture, IPostEffectResult> = new WeakMap();
     #videoMemorySize: number = 0;
 
@@ -92,7 +92,9 @@ class PostEffectTexturePool extends RedGPUObject {
      */
     get idleCount(): number {
         let count = 0;
-        this.#pool.forEach(list => count += list.length);
+        for (const list of this.#pool.values()) {
+            count += list.length;
+        }
         return count;
     }
 
@@ -143,15 +145,18 @@ class PostEffectTexturePool extends RedGPUObject {
      */
     getDetails() {
         const details = [];
-        this.#pool.forEach((list, key) => {
-            const activeCount = [...this.#activeTextures].filter(t => this.#textureToKey.get(t) === key).length;
+        for (const [key, list] of this.#pool) {
+            let activeCount = 0;
+            for (const t of this.#activeTextures) {
+                if (this.#textureToKey.get(t) === key) activeCount++;
+            }
             details.push({
                 key,
                 total: list.length + activeCount,
                 active: activeCount,
                 idle: list.length
             });
-        });
+        }
         return details;
     }
 
@@ -168,13 +173,21 @@ class PostEffectTexturePool extends RedGPUObject {
      * @param format -
      * [KO] 텍스처 포맷
      * [EN] Texture format
+     * @param useStorage -
+     * [KO] `GPUTextureUsage.STORAGE_BINDING` 포함 여부 (`false` 설정 시 렌더 패스 타겟의 하드웨어 DCC 압축 유지)
+     * [EN] Whether to include `GPUTextureUsage.STORAGE_BINDING` (set to `false` to preserve hardware DCC compression on render pass targets)
      * @returns
      * [KO] 할당된 텍스처 및 뷰 결과 객체 (`IPostEffectResult`)
      * [EN] Allocated texture and view result object (`IPostEffectResult`)
      */
-    allocResult(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): IPostEffectResult {
-        const texture = this.#alloc(width, height, format);
-        return this.#textureToResult.get(texture)!;
+    allocResult(
+        width: number,
+        height: number,
+        format: GPUTextureFormat = 'rgba16float',
+        useStorage: boolean = true
+    ): IPostEffectResult {
+        const texture = this.#alloc(width, height, format, useStorage);
+        return this.#textureToResult.get(texture) as IPostEffectResult;
     }
 
     /**
@@ -190,7 +203,8 @@ class PostEffectTexturePool extends RedGPUObject {
             this.#activeTextures.delete(texture);
             const key = this.#textureToKey.get(texture);
             if (key) {
-                this.#pool.get(key)!.push(texture);
+                const list = this.#pool.get(key);
+                if (list) list.push(texture);
             }
         }
     }
@@ -203,7 +217,8 @@ class PostEffectTexturePool extends RedGPUObject {
         for (const texture of this.#activeTextures) {
             const key = this.#textureToKey.get(texture);
             if (key) {
-                this.#pool.get(key)!.push(texture);
+                const list = this.#pool.get(key);
+                if (list) list.push(texture);
             }
         }
         this.#activeTextures.clear();
@@ -215,9 +230,11 @@ class PostEffectTexturePool extends RedGPUObject {
      */
     clear(): void {
         this.releaseAll();
-        this.#pool.forEach(list => {
-            list.forEach(texture => texture.destroy());
-        });
+        for (const list of this.#pool.values()) {
+            for (let i = 0, len = list.length; i < len; i++) {
+                list[i].destroy();
+            }
+        }
         this.#pool.clear();
         this.#videoMemorySize = 0;
         this.#peakActiveCount = 0;
@@ -225,10 +242,17 @@ class PostEffectTexturePool extends RedGPUObject {
         this.#requestCount = 0;
     }
 
-    #alloc(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): GPUTexture {
+    #alloc(
+        width: number,
+        height: number,
+        format: GPUTextureFormat = 'rgba16float',
+        useStorage: boolean = true
+    ): GPUTexture {
+        validateUintRange(width, 1);
+        validateUintRange(height, 1);
         const {resourceManager} = this
         this.#requestCount++;
-        const key = `${width}x${height}_${format}`;
+        const key = `${width}x${height}_${format}_${useStorage ? 'STORAGE' : 'RENDER'}`;
         let list = this.#pool.get(key);
         if (!list) {
             list = [];
@@ -237,20 +261,25 @@ class PostEffectTexturePool extends RedGPUObject {
 
         let texture: GPUTexture;
         if (list.length > 0) {
-            texture = list.shift()!;
+            texture = list.shift() as GPUTexture;
         } else {
             this.#allocationCount++;
+            const renderTargetUsage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING;
+            const usage = useStorage
+                ? (renderTargetUsage | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING)
+                : format === 'rgba8unorm'
+                    ? renderTargetUsage
+                    : (renderTargetUsage | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST);
             texture = resourceManager.createManagedTexture({
                 size: {width, height},
                 format,
-                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+                usage,
                 label: `PostEffectTexturePool_${key}`
             });
             this.#videoMemorySize += calculateTextureByteSize(texture);
 
             const textureView = resourceManager.getGPUResourceBitmapTextureView(texture);
             this.#textureToKey.set(texture, key);
-            this.#textureToView.set(texture, textureView);
             this.#textureToResult.set(texture, {texture, textureView});
         }
         this.#activeTextures.add(texture);

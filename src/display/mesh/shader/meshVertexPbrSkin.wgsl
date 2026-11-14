@@ -48,7 +48,7 @@ struct VertexOutput {
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
 
-    @location(12) motionVector: vec3<f32>,
+
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
@@ -170,7 +170,11 @@ fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     let position = globalVertexData.matrixList.modelMatrix * vec4<f32>(skinnedPosData.position, 1.0);
     let relPos = position.xyz - systemUniforms.camera.cameraPosition;
     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-    output.position = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
+    let clipPos = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
+    output.position = vec4<f32>(
+        (clipPos.xy - systemUniforms.pickingOffset * clipPos.w) * systemUniforms.resolution,
+        clipPos.zw
+    );
     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
 
     return output;

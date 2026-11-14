@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../../postEffect/core/ASinglePassPostEffect";
+import ASingleRenderPassPostEffect from "../../../../postEffect/core/ASingleRenderPassPostEffect";
+import createBasicRenderPassPostEffectCode from "../../../../postEffect/core/createBasicRenderPassPostEffectCode";
 import {IPostEffectResult} from "../../../../postEffect/core/types";
 import SkyAtmosphere from "../../SkyAtmosphere";
-import ShaderLibrary from "../../../../systemCodeManager/ShaderLibrary";
-import skyAtmospherePostEffectComputeShaderCode_wgsl from "./wgsl/skyAtmospherePostEffectComputeShaderCode.wgsl";
+import fragmentCode from "./wgsl/fragmentCode.wgsl";
 
 /**
  * [KO] Aerial Perspective 3D LUT를 참조하여 씬 내 오브젝트들에 깊이에 따른 대기 산란광과 투과율 감쇠를 적용하는 포스트 이펙트 클래스입니다.
@@ -17,7 +17,7 @@ import skyAtmospherePostEffectComputeShaderCode_wgsl from "./wgsl/skyAtmosphereP
  *
  * @category SkyAtmosphere
  */
-class SkyAtmospherePostEffect extends ASinglePassPostEffect {
+class SkyAtmospherePostEffect extends ASingleRenderPassPostEffect {
     #transmittanceTextureInfo: IPostEffectResult;
     #skyViewTextureInfo: IPostEffectResult;
     #aerialPerspectiveTextureInfo: IPostEffectResult;
@@ -34,7 +34,20 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      * [EN] Associated SkyAtmosphere instance
      */
     constructor(redGPUContext: RedGPUContext, skyAtmosphere: SkyAtmosphere) {
-        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
+        super(redGPUContext, {
+            blendState: {
+                color: {
+                    srcFactor: 'one',
+                    dstFactor: 'src-alpha',
+                    operation: 'add'
+                },
+                alpha: {
+                    srcFactor: 'zero',
+                    dstFactor: 'one',
+                    operation: 'add'
+                }
+            }
+        });
         const {transmittanceLUT, skyViewLUT, aerialPerspectiveLUT} = skyAtmosphere;
         this.#transmittanceTextureInfo = {
             texture: transmittanceLUT.gpuTexture,
@@ -46,41 +59,33 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             textureView: aerialPerspectiveLUT.gpuTextureView
         };
 
-        const createCode = (useMSAA: boolean) => {
-            const postEffectSystemUniform = useMSAA ? ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM_MSAA : ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM;
-            return [
-                '#redgpu_include depth.getLinearizeDepth',
-                '#redgpu_include skyAtmosphere.skyAtmosphereFn',
-                '@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float, read>;',
-                '@group(0) @binding(1) var transmittanceLUT : texture_2d<f32>;',
-                '@group(0) @binding(2) var skyViewLUT : texture_2d<f32>;',
-                '@group(0) @binding(3) var aerialPerspectiveLUT : texture_3d<f32>;',
-                '',
-                postEffectSystemUniform,
-                '',
-                '@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
-                '',
-                'fn fetchDepth(pos: vec2<u32>) -> f32 {',
-                '    let dSize = textureDimensions(depthTexture);',
-                '    let clampedPos = min(pos, dSize - 1u);',
-                '    return textureLoad(depthTexture, clampedPos, 0);',
-                '}',
-                '',
-                `@compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})`,
-                'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
-                '    let uniforms = systemUniforms.skyAtmosphere;',
-                skyAtmospherePostEffectComputeShaderCode_wgsl,
-                '}'
-            ].join('\n');
-        };
+        const uniformStruct = [
+            '#redgpu_include depth.getLinearizeDepth',
+            '#redgpu_include skyAtmosphere.skyAtmosphereFn',
+            'fn fetchDepth(pos: vec2<u32>) -> f32 {',
+            '    let dSize = textureDimensions(depthTexture);',
+            '    let clampedPos = min(pos, dSize - 1u);',
+            '    return textureLoad(depthTexture, clampedPos, 0);',
+            '}',
+        ].join('\n');
+
+        const code = [
+            'let uniforms = systemUniforms.skyAtmosphere;',
+            fragmentCode
+        ].join('\n');
 
         this.init(
             redGPUContext,
             'POST_EFFECT_SKY_ATMOSPHERE',
-            {
-                msaa: createCode(true),
-                nonMsaa: createCode(false)
-            }
+            createBasicRenderPassPostEffectCode(
+                code,
+                uniformStruct,
+                [
+                    {name: 'transmittanceLUT', textureType: 'texture_2d<f32>'},
+                    {name: 'skyViewLUT', textureType: 'texture_2d<f32>'},
+                    {name: 'aerialPerspectiveLUT', textureType: 'texture_3d<f32>'}
+                ]
+            )
         );
     }
 

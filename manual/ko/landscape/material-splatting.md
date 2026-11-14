@@ -3,17 +3,18 @@ title: Multi-Layer Splatting
 order: 2
 ---
 
-# 다중 레이어 스플래팅 (Multi-Layer Splatting)
+# 다중 레이어 스플래팅
 
-`RedGPU.Landscape.LandscapeMaterial`과 `RedGPU.Landscape.LandscapeLayer`는 **단일 RGBA 가중치 맵 (`weightTexture`)의 4개 채널 (`R`,
-`G`, `B`, `A`)** 과 높이 블렌딩 (`heightBlendFactor`)을 기반으로 지형 표면 위에 최대 **8개의 PBR 레이어**를 합성하는 **다중 레이어 스플래팅**(Multi-Layer
+`RedGPU.Landscape.LandscapeMaterial` 과 `RedGPU.Landscape.LandscapeLayer` 는 **단일 RGBA 가중치 맵 (`weightTexture`)의 4개 채널 (
+`R`,
+`G`, `B`, `A`)** 과 높이 블렌딩 (`heightBlendFactor`)을 기반으로 지형 표면 위에 최대 **8개의 PBR 레이어** 를 합성하는 **다중 레이어 스플래팅**(Multi-Layer
 Splatting) 시스템을 제공합니다.
 
 ---
 
 ## 1. 스플래팅 레이어 등록 (`addLayer`)
 
-`landscape.addLayer(options)`를 호출하여 최대 8개의 `LandscapeLayer`를 등록합니다. 첫 번째 (0번) 레이어는 기본 바탕 (Base Fallback) 레이어를 겸하며, 각
+`landscape.addLayer(options)` 를 호출하여 최대 8개의 `LandscapeLayer` 를 등록합니다. 첫 번째 (0번) 레이어는 기본 바탕 (Base Fallback) 레이어를 겸하며, 각
 레이어는 공유 가중치 맵 (`weightTexture`)의 지정된 채널 (`'R' | 'G' | 'B' | 'A'`) 가중치에 따라 혼합됩니다.
 
 > [!IMPORTANT]
@@ -69,13 +70,13 @@ const rockLayer = landscape.addLayer({
 
 | 분류                 | 속성명                                    | 기본값                | 설명                                                                                 |
 |:---------------------|:------------------------------------------|:----------------------|:-------------------------------------------------------------------------------------|
-| **식별 및 상태**     | **`name`**                                | 필수                  | 레이어 고유 이름 (식생·잔디의 `targetLayer`와 연동)                                  |
+| **식별 및 상태**     | **`name`**                                | 필수                  | 레이어 고유 이름 (식생·잔디의 `targetLayer` 와 연동)                                 |
 |                      | **`enabled`**                             | `true`                | 레이어 활성화 여부                                                                   |
 | **텍스처 및 가중치** | **`baseColorTexture`**                    | `undefined`           | 베이스 컬러(Albedo) 텍스처 경로 또는 `BitmapTexture`                                 |
 |                      | **`normalTexture`**                       | `undefined`           | 탄젠트 공간 노멀 맵 경로 또는 `BitmapTexture`                                        |
 |                      | **`ormTexture`**                          | `undefined`           | Occlusion(R), Roughness(G), Metallic(B), Height(A) 패킹 텍스처                       |
 |                      | **`weightTexture`**                       | `undefined`           | 레이어 분포 가중치를 담은 스플랫 맵 텍스처 (단일 RGBA 맵 공유)                       |
-|                      | **`weightChannel`**                       | `'R'`                 | `weightTexture`에서 참조할 채널 (`'R' \| 'G' \| 'B' \| 'A'` 또는 `0 ~ 3`)            |
+|                      | **`weightChannel`**                       | `'R'`                 | `weightTexture` 에서 참조할 채널 (`'R' \| 'G' \| 'B' \| 'A'` 또는 `0 ~ 3`)           |
 | **UV 및 타일링**     | **`uvScale`** / **`uvOffset`**            | `[20, 20]` / `[0, 0]` | 타일 대비 텍스처 UV 반복 배율 `[u, v]` 및 오프셋 `[u, v]`                            |
 |                      | **`nearUVScaleMultiplier`**               | `2.0`                 | 근접 디테일 영역에 적용되는 UV 스케일 배율                                           |
 |                      | **`stochasticTiling`**                    | `true`                | 넓은 면적의 텍스처 반복 무늬(Tiling Artifact)를 억제하는 스토캐스틱 샘플링 사용 여부 |

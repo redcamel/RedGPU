@@ -56,19 +56,87 @@ RedGPU는 다양한 인터랙션 시나리오에 대응하는 4가지 표준 컨
 
 ### OrbitController
 특정 대상을 중심으로 회전하며 관찰하기에 최적화되어 있습니다.
+
+```javascript
+const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+controller.centerX = 0;
+controller.centerY = 1;
+controller.centerZ = 0;
+controller.distance = 10; // 타겟 중심으로부터의 거리
+controller.pan = 45;      // 수평 회전 각도 (도)
+controller.tilt = -20;    // 수직 회전 각도 (도)
+```
+
 <iframe src="/RedGPU/examples/3d/controller/orbitController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### FreeController
 1인칭 시점에서 **W, A, S, D** 키와 마우스를 이용해 공간을 자유롭게 탐색합니다.
+
+```javascript
+const controller = new RedGPU.Camera.FreeController(redGPUContext);
+controller.x = 0;
+controller.y = 5;
+controller.z = 20;
+controller.moveSpeed = 20;        // 이동 속도
+controller.mouseSensitivity = 0.15; // 마우스 회전 감도
+```
+
 <iframe src="/RedGPU/examples/3d/controller/freeController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### IsometricController
-고정된 각도를 유지하여 전략 시뮬레이션이나 인포그래픽에 적합합니다.
+
+내부적으로 `OrthographicCamera` 를 사용하여 원근 왜곡 없이 고정된 쿼터뷰 각도를 유지하며, 전략 시뮬레이션이나 인포그래픽에 적합합니다.
+
+```javascript
+const controller = new RedGPU.Camera.IsometricController(redGPUContext);
+controller.viewHeight = 15; // 직교 투영 시야 높이
+controller.zoom = 1.0;      // 줌 배율 (minZoom ~ maxZoom)
+controller.cameraAngle = 45; // 아이소메트릭 수평 회전 각도
+```
+
 <iframe src="/RedGPU/examples/3d/controller/isometricController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### FollowController
-캐릭터나 움직이는 물체를 부드럽게 따라가는 시점을 제공합니다.
+
+캐릭터나 움직이는 물체(`targetMesh`)의 이동과 회전을 부드럽게 따라가는 3인칭 시점을 제공합니다.
+
+```javascript
+const controller = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
+controller.distance = 8;  // 타겟 뒤쪽 거리
+controller.height = 2;    // 타겟 기준 카메라 높이
+controller.pan = 0;       // 타겟 기준 수평 오프셋 각도
+controller.tilt = 15;     // 수직 내려다보는 각도
+```
+
 <iframe src="/RedGPU/examples/3d/controller/followController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
+
+---
+
+## 3. 캐릭터 이동 컨트롤러
+
+카메라 시점 제어와 함께 3D 캐릭터 메시의 키보드 이동(WASD/방향키, 달리기, 점프) 및 지형 높이 동기화(`getFloorHeight`)가 필요한 경우 `SimpleCharacterController` 를
+결합하여 사용할 수 있습니다.
+
+```javascript
+const characterController = new RedGPU.Charactor.SimpleCharacterController(
+    redGPUContext,
+    characterMesh,
+    view.camera,
+    {
+        speed: 3.0,
+        runSpeed: 7.0,
+        rotationSpeed: 8.0,
+        jumpForce: 5.0,
+        floorHeight: 0.0,
+        getFloorHeight: (x, z) => landscape.getHeightAt(x, z), // 선택: 동적 지형 높이 콜백
+    }
+);
+
+// 렌더 루프에서 매 프레임 deltaTime(초) 전달
+renderer.start(redGPUContext, (time) => {
+    characterController.update(deltaTime);
+});
+```
 
 ---
 
@@ -78,6 +146,7 @@ RedGPU는 다양한 인터랙션 시나리오에 대응하는 4가지 표준 컨
 - [FreeController](/RedGPU/examples/3d/controller/freeController/)
 - [FollowController](/RedGPU/examples/3d/controller/followController/)
 - [IsometricController](/RedGPU/examples/3d/controller/isometricController/)
+- [키보드 캐릭터 이동 제어](/RedGPU/examples/gltf/animation/keyboardCharacterControl/)
 
 ---
 

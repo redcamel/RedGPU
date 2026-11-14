@@ -30,7 +30,7 @@ const sceneGraph = `
 RedGPU의 `Mesh` 는 지오메트리와 머티리얼을 가진 객체임과 동시에, 다른 메시를 포함할 수 있는 컨테이너 역할을 합니다.
 
 - **부모 메시**(Parent) : 자식 객체들을 포함하는 기준점입니다. 부모가 움직이면 자식은 부모로부터의 상대적인 거리를 유지하며 함께 움직입니다.
-- **자식 메시**(Child) : 부모에 소속된 객체입니다. 자신의 `x, y, z` 좌표는 부모의 중심점을 `(0, 0, 0)`으로 간주하는 상대 좌표로 계산됩니다.
+- **자식 메시**(Child) : 부모에 소속된 객체입니다. 자신의 `x, y, z` 좌표는 부모의 중심점을 `(0, 0, 0)` 으로 간주하는 상대 좌표로 계산됩니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="sceneGraph" />
@@ -118,7 +118,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 ```
 
-## 라이브 데모 (Live Demo)
+## 라이브 데모
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Mesh Hierarchy" slugHash="mesh-hierarchy">

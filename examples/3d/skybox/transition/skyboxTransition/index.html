@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic transition</title>
+    <title>Basic transition - RedGPU WebGPU Example</title>
     <meta name="description" content="An example showing smooth transition effects between skyboxes.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, skybox, transition, skyboxTransition, Basic transition">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/">
@@ -11,41 +11,115 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/">
-    <meta property="og:title" content="Basic transition">
+    <meta property="og:title" content="Basic transition - RedGPU WebGPU Example">
     <meta property="og:description" content="An example showing smooth transition effects between skyboxes.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/">
-    <meta property="twitter:title" content="Basic transition">
+    <meta property="twitter:title" content="Basic transition - RedGPU WebGPU Example">
     <meta property="twitter:description" content="An example showing smooth transition effects between skyboxes.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Basic transition",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "An example showing smooth transition effects between skyboxes.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Basic transition",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "An example showing smooth transition effects between skyboxes.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Lighting & Environment"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "SkyBox & IBL"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "SkyBox"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 7,
+                        "name": "Skybox transition"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 8,
+                        "name": "Basic transition",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Lighting &amp; Environment &gt; SkyBox &amp; IBL &gt; SkyBox &gt; Skybox transition</p>
+        <h1>Basic transition - RedGPU WebGPU Example</h1>
+        <p>An example showing smooth transition effects between skyboxes.</p>
+        <p lang="ko">스카이박스 간의 부드러운 전환 효과를 보여주는 예제입니다.</p>
+        <img src="thumb.webp" alt="Basic transition - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/">transitionAlphaTexture
+                    - with NoiseTexture</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

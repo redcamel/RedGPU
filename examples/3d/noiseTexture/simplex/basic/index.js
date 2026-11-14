@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Simplex Noise (Basic) 예제
@@ -25,7 +25,6 @@ RedGPU.init(
         // [EN] Configure Scene and Lighting
         const scene = new RedGPU.Display.Scene();
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.intensity = 2;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);

@@ -1,11 +1,22 @@
+import RedGPUObject from "../../base/RedGPUObject";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import ASinglePassPostEffect from "./ASinglePassPostEffect";
+import ASingleComputePassPostEffect from "./ASingleComputePassPostEffect";
+import ASingleRenderPassPostEffect from "./ASingleRenderPassPostEffect";
 import {IPostEffectResult} from "./types";
 
+interface AMultiPassPostEffect {
+    /**
+     * [KO] 후처리 이펙트 인스턴스 여부
+     * [EN] Whether the instance is a post-processing effect
+     * @defaultValue true
+     */
+    isInstanceofPostEffect: boolean;
+}
+
 /**
- * [KO] 여러 개의 단일 패스(`ASinglePassPostEffect`) 이펙트를 순차적으로 연결해 실행하는 다중 패스 후처리 추상 클래스입니다.
- * [EN] Abstract class for multi-pass post-processing effects that sequentially chains and executes multiple single-pass (`ASinglePassPostEffect`) effects.
+ * [KO] 여러 개의 단일 패스(`ASingleComputePassPostEffect` 또는 `ASingleRenderPassPostEffect`) 이펙트를 순차적으로 연결해 실행하는 다중 패스 후처리 추상 클래스입니다.
+ * [EN] Abstract class for multi-pass post-processing effects that sequentially chains and executes multiple single-pass (`ASingleComputePassPostEffect` or `ASingleRenderPassPostEffect`) effects.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -14,10 +25,11 @@ import {IPostEffectResult} from "./types";
  *
  * @category PostEffect
  */
-abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
-    #passList: ASinglePassPostEffect[] = []
+abstract class AMultiPassPostEffect extends RedGPUObject {
+    #passList: (ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect)[] = []
 
     #videoMemorySize: number = 0
+    #isLdr: boolean = false
     #destroyed: boolean = false
 
     /**
@@ -34,9 +46,27 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [KO] 톤매핑 이후 LDR 공간 동작 여부
      * [EN] Whether the effect operates in LDR space after tone mapping
      */
-    protected constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[], isLdr: boolean = false) {
-        super(redGPUContext, {isLdr});
+    protected constructor(
+        redGPUContext: RedGPUContext,
+        passList: (ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect)[],
+        isLdr: boolean = false
+    ) {
+        super(redGPUContext);
+        this.#isLdr = isLdr;
         this.#passList.push(...passList);
+    }
+
+    /**
+     * [KO] 톤매핑 이후 LDR(Low Dynamic Range) 공간에서 동작하는지 여부를 반환합니다.
+     * [EN] Returns whether the effect operates in LDR (Low Dynamic Range) space after tone mapping.
+     *
+     * @defaultValue false
+     * @returns
+     * [KO] LDR 공간 동작 여부
+     * [EN] Whether the effect operates in LDR space
+     */
+    get isLdr(): boolean {
+        return this.#isLdr;
     }
 
     /**
@@ -57,10 +87,10 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [EN] Returns the array of registered internal single-pass effects.
      *
      * @returns
-     * [KO] 내부 단일 패스 이펙트 배열 (`ASinglePassPostEffect[]`)
-     * [EN] Array of internal single-pass post effects (`ASinglePassPostEffect[]`)
+     * [KO] 내부 단일 패스 이펙트 배열 (`(ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect)[]`)
+     * [EN] Array of internal single-pass post effects (`(ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect)[]`)
      */
-    get passList(): ASinglePassPostEffect[] {
+    get passList(): (ASingleComputePassPostEffect | ASingleRenderPassPostEffect | AMultiPassPostEffect)[] {
         return this.#passList;
     }
 
@@ -71,9 +101,11 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
     destroy() {
         if (this.#destroyed) return;
         this.#destroyed = true
-        this.#passList.forEach(v => v.destroy());
+        const passList = this.#passList;
+        for (let i = 0, len = passList.length; i < len; i++) {
+            passList[i].destroy();
+        }
         this.#passList = null
-        super.destroy();
     }
 
     /**
@@ -81,7 +113,10 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [EN] Clears cached resources of all registered internal passes.
      */
     clear() {
-        this.#passList.forEach(v => v.clear());
+        const passList = this.#passList;
+        for (let i = 0, len = passList.length; i < len; i++) {
+            passList[i].clear();
+        }
     }
 
     /**
@@ -117,7 +152,7 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
 
             targetOutputInfo = effect.render(view, width, height, sourceTextureInfo);
 
-            if (prevTemp) {
+            if (prevTemp && prevTemp.texture && prevTemp.texture !== targetOutputInfo?.texture) {
                 pool.release(prevTemp.texture);
             }
         }
@@ -127,11 +162,16 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
 
     #calcVideoMemory() {
         this.#videoMemorySize = 0;
-        this.#passList.forEach(effect => {
-            this.#videoMemorySize += effect.videoMemorySize;
-        });
+        const passList = this.#passList;
+        for (let i = 0, len = passList.length; i < len; i++) {
+            this.#videoMemorySize += passList[i].videoMemorySize;
+        }
     }
 }
 
+Object.defineProperty(AMultiPassPostEffect.prototype, 'isInstanceofPostEffect', {
+    value: true,
+    writable: false
+});
 Object.freeze(AMultiPassPostEffect);
 export default AMultiPassPostEffect;

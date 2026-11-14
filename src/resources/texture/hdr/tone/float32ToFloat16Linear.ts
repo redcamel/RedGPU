@@ -79,9 +79,6 @@ export async function float32ToFloat16Linear(
     const {width, height, targetTexture} = options;
     const pixelCount = float32Data.length / 4;
 
-    console.log(`Float32 → Float16 변환 및 업로드 시작`);
-    console.log(`총 픽셀 수: ${pixelCount.toLocaleString()}`);
-
     let buffers: Float16ConversionBuffers | null = null;
     try {
         const computeShader = gpuDevice.createShaderModule({
@@ -110,7 +107,6 @@ export async function float32ToFloat16Linear(
         );
 
         const executionTime = performance.now() - startTime;
-        console.log(`변환 및 업로드 완료: ${executionTime.toFixed(2)}ms`);
 
         return {
             processedPixels: pixelCount,

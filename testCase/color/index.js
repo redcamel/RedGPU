@@ -70,11 +70,15 @@ redUnit.testGroup(
             }
         }, true);
 
-        runner.defineTest('Success Test Test: rgbNormalLinear getter', (run) => {
+        runner.defineTest('Success Test Test: rgbNormalLinear getter (sRGB IEC 61966-2-1)', (run) => {
             try {
-                const color = new RedGPU.Color.ColorRGB(255, 128, 0);
+                const color = new RedGPU.Color.ColorRGB(255, 128, 10);
                 const linear = color.rgbNormalLinear;
-                run(Math.abs(linear[0] - 1) < 0.001 && Math.abs(linear[1] - Math.pow(128/255, 2.2)) < 0.001 && linear[2] === 0);
+                run(
+                    Math.abs(linear[0] - 1) < 0.00001 &&
+                    Math.abs(linear[1] - 0.2158605) < 0.00001 &&
+                    Math.abs(linear[2] - 0.0030353) < 0.00001
+                );
             } catch (e) {
                 run(false, e);
             }
@@ -245,11 +249,16 @@ redUnit.testGroup(
             }
         }, true);
 
-        runner.defineTest('Success Test Test: rgbaNormalLinear getter', (run) => {
+        runner.defineTest('Success Test Test: rgbaNormalLinear getter (sRGB IEC 61966-2-1)', (run) => {
             try {
-                const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.5);
+                const color = new RedGPU.Color.ColorRGBA(255, 128, 10, 0.5);
                 const linear = color.rgbaNormalLinear;
-                run(Math.abs(linear[0] - 1) < 0.001 && Math.abs(linear[1] - Math.pow(128/255, 2.2)) < 0.001 && linear[2] === 0 && linear[3] === 0.5);
+                run(
+                    Math.abs(linear[0] - 1) < 0.00001 &&
+                    Math.abs(linear[1] - 0.2158605) < 0.00001 &&
+                    Math.abs(linear[2] - 0.0030353) < 0.00001 &&
+                    linear[3] === 0.5
+                );
             } catch (e) {
                 run(false, e);
             }

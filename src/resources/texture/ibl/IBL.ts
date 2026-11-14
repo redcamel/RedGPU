@@ -34,7 +34,7 @@ class IBL extends RedGPUObject {
     #irradianceSize: number;
     #isInitializing: boolean = false;
     #intensityMultiplier: number = 1.0;
-    #luminance: number = 20000.0;
+    #luminance: number = 25000.0;
 
     /**
      * [KO] IBL 인스턴스를 생성하고 환경맵 소스 로딩을 시작합니다.

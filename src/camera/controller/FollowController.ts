@@ -25,7 +25,7 @@ const DUMMY_VIEW = {pixelRectObject: {height: 1}} as unknown as View3D;
  * controller.tilt = 30;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/controller/followController/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/controller/followController/"></iframe>
  * @see [FollowController example](/RedGPU/examples/3d/controller/followController/)
  * @category Controller
  */

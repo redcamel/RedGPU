@@ -1,5 +1,13 @@
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+
+/**
+ * [KO] Stained Glass Lamp 예제
+ * [EN] Stained Glass Lamp example
+ *
+ * [KO] GLTF Stained Glass Lamp 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Stained Glass Lamp model.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -13,6 +21,10 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
+
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/StainedGlassLamp/glTF/StainedGlassLamp.gltf');
 
@@ -34,10 +46,12 @@ RedGPU.init(
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-        const mesh = result.resultMesh
-        scene.addChild(mesh)
-        RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
-    });
+            const mesh = result.resultMesh
+            scene.addChild(mesh)
+            RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
+        },
+        RedGPUExampleHelper.loadingProgressInfoHandler
+    );
 }
 
 const renderTestPane = (redGPUContext, targetView) => {

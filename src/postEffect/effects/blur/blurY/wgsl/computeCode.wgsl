@@ -1,19 +1,13 @@
-// [KO] 1. 인덱스 및 기초 데이터 계산
-// [EN] 1. Index and basic data calculation
-let index = global_id.xy;
+// [KO] 1. 기초 데이터 계산
+// [EN] 1. Basic data calculation
+let index = vec2<u32>(global_id.xy);
 let dimensions = vec2<f32>(textureDimensions(sourceTexture));
-if (f32(index.x) >= dimensions.x || f32(index.y) >= dimensions.y) { return; }
-
 let invSize = 1.0 / dimensions;
 let centerUV = (vec2<f32>(index) + 0.5) * invSize;
 
 // [KO] DPR을 반영하여 물리적 해상도에 맞는 블러 크기 계산
 // [EN] Scale blur size by DPR to match physical resolution
 let blurSize = uniforms.size * systemUniforms.devicePixelRatio;
-if (blurSize <= 0.0) {
-    textureStore(outputTexture, index, textureSampleLevel(sourceTexture, basicSampler, centerUV, 0.0));
-    return;
-}
 
 // [KO] 2. 업계 표준 1D 분리형 가우시안 블러 수행 (Y축)
 // [EN] 2. Industry standard 1D Separable Gaussian Blur execution (Y-axis)

@@ -1,32 +1,38 @@
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+
+/**
+ * [KO] Commercial Refrigerator 예제
+ * [EN] Commercial Refrigerator example
+ *
+ * [KO] GLTF Commercial Refrigerator 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Commercial Refrigerator model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
 
-        // Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
-        // Load GLTF model
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CommercialRefrigerator/glTF-Binary/CommercialRefrigerator.glb';
         loadGLTF(view, MODEL_URL);
 
-        // Start renderer
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // Add additional per-frame logic here if needed
         });
 
-        // Configure test panel
         renderTestPane(redGPUContext, view);
     },
     (failReason) => {

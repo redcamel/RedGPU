@@ -24,10 +24,10 @@ fn main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
     let invProj = systemUniforms.projection.inverseProjectionMatrix;
     let invView = systemUniforms.camera.inverseViewMatrix;
 
-    // [KO] NDC 좌표를 역투영·역뷰 행렬로 변환하여 월드 공간 광선 방향을 복원합니다.
-    // [EN] Transform NDC coordinates by inverse projection and view matrices to reconstruct the world-space ray direction.
-    let viewDir = invProj * ndcPos;
-    let worldDir = invView * vec4<f32>(viewDir.xyz / viewDir.w, 0.0);
+    // [KO] NDC 좌표를 역투영·역뷰 행렬로 변환하여 월드 공간 광선 방향을 복원합니다. (지터 오프셋 배제)
+    // [EN] Transform NDC coordinates by inverse projection and view matrices to reconstruct the world-space ray direction (excluding jitter offset).
+    let viewDir = vec3<f32>(x * invProj[0][0], y * invProj[1][1], -1.0);
+    let worldDir = invView * vec4<f32>(viewDir, 0.0);
 
     output.vertexPosition = worldDir.xyz;
     return output;

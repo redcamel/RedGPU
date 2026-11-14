@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] High Vertex Load Skinning 예제
@@ -23,8 +23,16 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
-        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, '../../../../assets/hdr/Cannon_Exterior.hdr',25000);
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        directionalLight.lux = 30000;
+        directionalLight.elevation = 3.4;
+        directionalLight.azimuth = 147.5;
+        directionalLight.color.setColorByHEX('#ffa973');
+        scene.lightManager.addDirectionalLight(directionalLight);
+
+        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
         view.ibl = ibl;
         view.skybox = newSkybox;
@@ -55,12 +63,6 @@ let first = true
 let pane;
 let helper;
 
-/**
- * [KO] 테스트용 GUI 패널을 렌더링합니다.
- * [EN] Renders a GUI panel for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
 const renderTestPane = (redGPUContext, targetView) => {
     helper = new RedGPUExampleHelper(redGPUContext, {
         gui: (gui) => {
@@ -84,12 +86,6 @@ const renderTestPane = (redGPUContext, targetView) => {
     });
 };
 
-/**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
- * @param {RedGPU.Display.View3D} view
- * @param {string} url
- */
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     

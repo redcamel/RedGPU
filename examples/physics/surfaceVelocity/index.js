@@ -1,6 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -41,19 +41,6 @@ RedGPU.init(
 
 		const beltSystems = [];
 
-		/**
-		 * [KO] 컨베이어 벨트 생성 함수
-		 * [EN] Function to create a conveyor belt
-		 *
-		 * [KO] 단일 키네마틱 바디와 텍스처 애니메이션을 조합하여 효율적인 컨베이어 벨트를 시뮬레이션합니다.
-		 * [EN] Simulates an efficient conveyor belt by combining a single kinematic body and texture animation.
-		 * @param {number} x
-		 * @param {number} z
-		 * @param {number} length
-		 * @param {number} width
-		 * @param {number} speed
-		 * @param {number} direction
-		 */
 		const createRealConveyor = (x, z, length, width, speed, direction) => {
 			// [KO] 벨트 텍스처 및 재질 설정
 			// [EN] Set up belt texture and material
@@ -115,13 +102,12 @@ RedGPU.init(
 		const floor = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+			new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		floor.y = -3;
 		floor.scaleX = 30;
 		floor.scaleY = 1;
 		floor.scaleZ = 30;
-		floor.material.color.setColorByHEX('#111111');
 		scene.addChild(floor);
 		physicsEngine.createBody(floor, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -130,21 +116,23 @@ RedGPU.init(
 
 		const activeObjects = [];
 
-		/**
-		 * [KO] 박스 생성 함수
-		 * [EN] Function to create a box
-		 */
+		const getRandomColor = () => {
+			const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+			const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+			const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+			return `#${r}${g}${b}`;
+		};
+
 		const createBox = () => {
 			const size = 0.4;
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+				new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
 			);
 			mesh.scaleX = size;
 			mesh.scaleY = size;
 			mesh.scaleZ = size;
-			mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			
 			const onLeft = Math.random() > 0.5;
 			mesh.x = onLeft ? -3 : 3;
@@ -187,10 +175,6 @@ RedGPU.init(
 			activeObjects.length = 0;
 		};
 
-		/**
-		 * [KO] 업데이트 루프
-		 * [EN] Update loop
-		 */
 		let lastTime = 0;
 		const render = (time) => {
 			if (!lastTime) lastTime = time;
@@ -225,12 +209,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성 함수
- * [EN] Function to create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- */
 const renderTestPane = (redGPUContext, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

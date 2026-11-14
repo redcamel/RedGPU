@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
 
 /**
  * [KO] Hello RedGPU 예제
@@ -57,11 +57,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI 패널을 구성합니다.
- * [EN] Configures the GUI panel for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
         redGPUContext: true

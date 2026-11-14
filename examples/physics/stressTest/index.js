@@ -1,6 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -43,12 +43,11 @@ RedGPU.init(
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+            new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
 		ground.scaleX = ground.scaleZ = 100;
 		ground.scaleY = 1;
 		ground.y = -0.5;
-		ground.material.color.setColorByHEX('#666666');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -60,12 +59,13 @@ RedGPU.init(
 		// [EN] Shared base sphere geometry with 1m radius for resource efficiency
 		const baseBallGeo = new RedGPU.Primitive.Sphere(redGPUContext, 1);
 
-		/**
-		 * [KO] 다양한 크기의 구체 생성 함수
-		 * 각 구체는 고유의 크기와 재질을 가지며, 부피에 비례하는 질량을 할당받습니다.
-		 * [EN] Variously sized sphere creation function
-		 * Each sphere has its own unique size and material, assigned a mass proportional to its volume.
-		 */
+        const getRandomColor = () => {
+            const r = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const g = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            const b = Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        };
+
 		const createBall = () => {
 			// [KO] 반지름 결정 (0.1m ~ 0.6m)
 			// [EN] Radius determination (0.1m to 0.6m)
@@ -73,10 +73,11 @@ RedGPU.init(
 			
 			// [KO] 개별 재질 생성: 각 객체의 고유 색상을 유지하고 깜박임을 방지합니다.
 			// [EN] Create individual material: Maintains each object's unique color and prevents flickering.
-			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, baseBallGeo, material);
+            const mesh = new RedGPU.Display.Mesh(
+                redGPUContext,
+                baseBallGeo,
+                new RedGPU.Material.PhongMaterial(redGPUContext, getRandomColor())
+            );
 			mesh.x = (Math.random() * 20) - 10;
 			mesh.y = 20 + (Math.random() * 10);
 			mesh.z = (Math.random() * 20) - 10;
@@ -86,14 +87,6 @@ RedGPU.init(
 			mesh.scaleX = mesh.scaleY = mesh.scaleZ = radius;
 			scene.addChild(mesh);
 
-			/**
-			 * [KO] 물리 바디 생성
-			 * 질량을 크기에 비례하게 설정(radius * 10)하여 무거운 구체가 가벼운 구체를 쳐내도록 유도합니다.
-			 * 구체는 상자보다 휴면(Sleep) 상태 진입이 까다로워 엔진 성능 테스트에 더욱 효과적입니다.
-			 * [EN] Create physics body
-			 * Set mass proportional to size (radius * 10), causing heavy spheres to push lighter ones.
-			 * Spheres are harder to enter the Sleep state than boxes, making them more effective for engine stress testing.
-			 */
 			const body = physicsEngine.createBody(mesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
@@ -104,10 +97,6 @@ RedGPU.init(
 			activeObjects.push({ mesh, body });
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수: 현재 시뮬레이션 중인 모든 객체 제거
-		 * [EN] Scene reset function: Remove all objects currently being simulated
-		 */
 		const resetScene = () => {
 			activeObjects.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -122,14 +111,6 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} createBall
- * @param {function} resetScene
- * @param {Array<object>} activeObjects
- */
 const renderTestPane = (redGPUContext, createBall, resetScene, activeObjects) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

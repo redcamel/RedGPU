@@ -68,7 +68,7 @@ class AnimationData_GLTF {
                 factor = 3;
                 break;
             default:
-                console.log('알수없는 형식 엑세서 타입', accessor);
+                console.warn('알수없는 형식 엑세서 타입', accessor);
         }
         const temp = []
         let offset = 0;

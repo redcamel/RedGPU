@@ -10,7 +10,7 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * ```typescript
  * const cone = new RedGPU.Primitive.Cone(redGPUContext, 1, 2, 32, 1, true);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/cone/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/cone/"></iframe>
  *
  * @see [Cone example](/RedGPU/examples/3d/primitive/cone/)
  * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)

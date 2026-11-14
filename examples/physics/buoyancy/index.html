@@ -4,69 +4,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buoyancy Basics</title>
-    <meta name="description" content="Simulates buoyancy and fluid resistance for objects in water. Adjusts upward force based on submerged depth.">
+    <title>Buoyancy Basics - RedGPU WebGPU Example</title>
+    <meta name="description" content="Simulates floating bodies using depth-based buoyancy and fluid drag.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, physics, buoyancy, Buoyancy Basics">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/physics/buoyancy/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/physics/buoyancy/">
-    <meta property="og:title" content="Buoyancy Basics">
-    <meta property="og:description" content="Simulates buoyancy and fluid resistance for objects in water. Adjusts upward force based on submerged depth.">
+    <meta property="og:title" content="Buoyancy Basics - RedGPU WebGPU Example">
+    <meta property="og:description" content="Simulates floating bodies using depth-based buoyancy and fluid drag.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/physics/buoyancy/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/physics/buoyancy/">
-    <meta property="twitter:title" content="Buoyancy Basics">
-    <meta property="twitter:description" content="Simulates buoyancy and fluid resistance for objects in water. Adjusts upward force based on submerged depth.">
+    <meta property="twitter:title" content="Buoyancy Basics - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Simulates floating bodies using depth-based buoyancy and fluid drag.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/physics/buoyancy/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Buoyancy Basics",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Simulates buoyancy and fluid resistance for objects in water. Adjusts upward force based on submerged depth.",
-  "url": "https://redcamel.github.io/RedGPU/examples/physics/buoyancy/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/buoyancy/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Buoyancy Basics",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Simulates floating bodies using depth-based buoyancy and fluid drag.",
+                "url": "https://redcamel.github.io/RedGPU/examples/physics/buoyancy/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/buoyancy/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Physics"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Simulation & Systems"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Buoyancy Basics",
+                        "item": "https://redcamel.github.io/RedGPU/examples/physics/buoyancy/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>Physics &gt; Simulation &amp; Systems</p>
+        <h1>Buoyancy Basics - RedGPU WebGPU Example</h1>
+        <p>Simulates floating bodies using depth-based buoyancy and fluid drag.</p>
+        <p lang="ko">침수 깊이에 비례하는 부력과 유체 저항으로 물에 뜨는 물체를 시뮬레이션합니다.</p>
+        <img src="thumb.webp" alt="Buoyancy Basics - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/physics/surfaceVelocity/">Surface Velocity (Conveyor)</a></li>
+                <li><a href="/RedGPU/examples/physics/ragdoll/">Ragdoll System</a></li>
+                <li><a href="/RedGPU/examples/physics/characterController/">Character Controller</a></li>
+                <li><a href="/RedGPU/examples/physics/advancedCharacterController/">Advanced Character Controller</a>
+                </li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

@@ -3,69 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collision Filtering</title>
-    <meta name="description" content="Implements advanced physics techniques to selectively control collisions between specific objects through Bitmask-based collision group settings.">
+    <title>Collision Filtering - RedGPU WebGPU Example</title>
+    <meta name="description" content="Filters collisions between specific object groups using bitmask rules.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, physics, collisionFiltering, Collision Filtering">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/">
-    <meta property="og:title" content="Collision Filtering">
-    <meta property="og:description" content="Implements advanced physics techniques to selectively control collisions between specific objects through Bitmask-based collision group settings.">
+    <meta property="og:title" content="Collision Filtering - RedGPU WebGPU Example">
+    <meta property="og:description" content="Filters collisions between specific object groups using bitmask rules.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/">
-    <meta property="twitter:title" content="Collision Filtering">
-    <meta property="twitter:description" content="Implements advanced physics techniques to selectively control collisions between specific objects through Bitmask-based collision group settings.">
+    <meta property="twitter:title" content="Collision Filtering - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Filters collisions between specific object groups using bitmask rules.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Collision Filtering",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Implements advanced physics techniques to selectively control collisions between specific objects through Bitmask-based collision group settings.",
-  "url": "https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "Collision Filtering",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Filters collisions between specific object groups using bitmask rules.",
+                "url": "https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Physics"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Interaction & Events"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "Collision Filtering",
+                        "item": "https://redcamel.github.io/RedGPU/examples/physics/collisionFiltering/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>Physics &gt; Interaction &amp; Events</p>
+        <h1>Collision Filtering - RedGPU WebGPU Example</h1>
+        <p>Filters collisions between specific object groups using bitmask rules.</p>
+        <p lang="ko">비트마스크 충돌 그룹을 설정해 특정 그룹 간에만 선택적으로 충돌시킵니다.</p>
+        <img src="thumb.webp" alt="Collision Filtering - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/physics/raycast/">Raycasting Interaction</a></li>
+                <li><a href="/RedGPU/examples/physics/collisionEvents/">Collision Events</a></li>
+                <li><a href="/RedGPU/examples/physics/triggers/">Triggers &amp; Sensors</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

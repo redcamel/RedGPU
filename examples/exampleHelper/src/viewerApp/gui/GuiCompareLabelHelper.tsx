@@ -1,11 +1,9 @@
-import React, {useCallback, useEffect, useLayoutEffect, useState} from 'react';
+import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useExampleHelperStore} from '../../store';
+import View3D from "@redgpu/src/display/view/View3D";
 
-// [KO] 레이아웃 상수 정의
-// [EN] Define layout constants
-const HEADER_HEIGHT = 51;
-const FOOTER_HEIGHT_NORMAL = 50;
-const FOOTER_HEIGHT_NARROW = 148;
+const LABEL_GAP_ABOVE_DESCRIPTION = 12;
+const DEFAULT_LABEL_BOTTOM = 30;
 
 /**
  * [KO] 뷰 비교를 위한 레이블을 표시하는 컴포넌트입니다.
@@ -14,32 +12,77 @@ const FOOTER_HEIGHT_NARROW = 148;
 const GuiCompareLabelHelper: React.FC = () => {
     const guiConfig = useExampleHelperStore((state) => state.guiConfig);
     const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
-    const isNarrow = useExampleHelperStore((state) => state.isNarrow);
+    const showCompareLabel = useExampleHelperStore((state) => state.showCompareLabel);
+    const descriptionOccupiedHeight = useExampleHelperStore((state) => state.descriptionOccupiedHeight);
     const [rect, setRect] = useState<DOMRect | null>(null);
+    const compareViewsRef = useRef<{ viewNormal: View3D; viewEffect: View3D } | null>(null);
+
+    useEffect(() => {
+        if (redGPUContext && guiConfig?.compareLabel && redGPUContext.viewList.length >= 2) {
+            compareViewsRef.current = {
+                viewNormal: redGPUContext.viewList[0],
+                viewEffect: redGPUContext.viewList[1]
+            };
+        } else if (!redGPUContext || !guiConfig?.compareLabel) {
+            compareViewsRef.current = null;
+        }
+    }, [redGPUContext, guiConfig?.compareLabel]);
+
+    const syncCompareViewLayout = useCallback(() => {
+        if (!redGPUContext || !guiConfig?.compareLabel || !compareViewsRef.current) return;
+        const {viewNormal, viewEffect} = compareViewsRef.current;
+
+        if (!showCompareLabel) {
+            if (redGPUContext.viewList.includes(viewNormal)) {
+                redGPUContext.removeView(viewNormal);
+            }
+            viewEffect.setSize('100%', '100%');
+            viewEffect.setPosition(0, 0);
+        } else {
+            if (!redGPUContext.viewList.includes(viewNormal)) {
+                redGPUContext.removeView(viewEffect);
+                redGPUContext.addView(viewNormal);
+                redGPUContext.addView(viewEffect);
+            }
+            const isPortrait = window.innerWidth < window.innerHeight;
+            if (isPortrait) {
+                viewEffect.setSize('100%', '50%');
+                viewEffect.setPosition(0, 0);
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, '50%');
+            } else {
+                viewNormal.setSize('50%', '100%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('50%', '100%');
+                viewEffect.setPosition('50%', 0);
+            }
+        }
+    }, [redGPUContext, guiConfig?.compareLabel, showCompareLabel]);
+
+    useEffect(() => {
+        syncCompareViewLayout();
+    }, [syncCompareViewLayout]);
 
     const updateContainerStyle = useCallback(() => {
         const container = guiConfig?.compareLabel?.targetContainer;
         if (container) {
-            const bottomOffset = isNarrow ? FOOTER_HEIGHT_NARROW : FOOTER_HEIGHT_NORMAL;
-
-            // [KO] 컨테이너 스타일 직접 설정 (고정 위치 및 영역 확보)
-            // [EN] Set container styles directly (fixed position and area allocation)
+            // [KO] 플로팅 레이아웃에서는 전체 화면(0~100%)을 온전히 사용
+            // [EN] Use full screen (0~100%) in floating layout
             Object.assign(container.style, {
                 position: 'fixed',
-                top: `${HEADER_HEIGHT}px`,
+                top: '0',
                 left: '0',
                 width: '100%',
-                bottom: `${bottomOffset}px`
+                bottom: '0'
             });
 
             setRect(container.getBoundingClientRect());
         } else {
             setRect(null);
         }
-    }, [guiConfig?.compareLabel?.targetContainer, isNarrow]);
+        syncCompareViewLayout();
+    }, [guiConfig?.compareLabel?.targetContainer, syncCompareViewLayout]);
 
-    // [KO] 브라우저가 그리기 전에 스타일을 즉시 적용하여 레이아웃 어긋남 방지
-    // [EN] Apply styles immediately before the browser paints to prevent layout mismatch
     useLayoutEffect(() => {
         updateContainerStyle();
     }, [updateContainerStyle]);
@@ -48,8 +91,6 @@ const GuiCompareLabelHelper: React.FC = () => {
         const container = guiConfig?.compareLabel?.targetContainer;
         if (!container) return;
 
-        // [KO] ResizeObserver를 사용하여 컨테이너 크기 변화 정밀 감지
-        // [EN] Use ResizeObserver for precise detection of container size changes
         const resizeObserver = new ResizeObserver(() => {
             updateContainerStyle();
         });
@@ -61,8 +102,6 @@ const GuiCompareLabelHelper: React.FC = () => {
             resizeObserver.disconnect();
             window.removeEventListener('resize', updateContainerStyle);
 
-            // [KO] 컴포넌트 언마운트 시 스타일 초기화
-            // [EN] Reset styles when component unmounts
             Object.assign(container.style, {
                 position: '',
                 top: '',
@@ -73,7 +112,7 @@ const GuiCompareLabelHelper: React.FC = () => {
         };
     }, [updateContainerStyle, guiConfig?.compareLabel?.targetContainer]);
 
-    if (!guiConfig?.compareLabel || !redGPUContext) return null;
+    if (!guiConfig?.compareLabel || !redGPUContext || !showCompareLabel) return null;
 
     const {title, normalTitle = 'Normal'} = guiConfig.compareLabel;
 
@@ -82,39 +121,49 @@ const GuiCompareLabelHelper: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '8px 10px',
-        backgroundColor: '#5b52aa',
+        minWidth: '84px',
+        boxSizing: 'border-box',
+        padding: '7px 12px',
+        backgroundColor: 'rgba(91, 82, 170, 0.85)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
         color: '#fff',
-        fontSize: '12px',
+        fontSize: '11px',
         fontWeight: 600,
         pointerEvents: 'none',
         lineHeight: 1,
-        zIndex: 10,
+        zIndex: 10002,
     };
 
     const getStyle = (isNormal: boolean): React.CSSProperties => {
-        // [KO] rect가 아직 계산되지 않았을 경우를 위한 기본값 설정
-        // [EN] Set default values for when rect is not yet calculated
-        const top = rect ? rect.top : HEADER_HEIGHT;
+        const top = rect ? rect.top : 0;
         const left = rect ? rect.left : 0;
         const width = rect ? rect.width : window.innerWidth;
-        const footerHeight = isNarrow ? FOOTER_HEIGHT_NARROW : FOOTER_HEIGHT_NORMAL;
-        const height = rect ? rect.height : (window.innerHeight - (HEADER_HEIGHT + footerHeight));
+        const height = rect ? rect.height : window.innerHeight;
+        const isPortrait = width < height;
 
-        if (isNarrow) {
+        if (isPortrait) {
             return {
                 ...baseStyle,
-                left: left,
-                [isNormal ? 'bottom' : 'top']: isNormal
-                    ? (window.innerHeight - (top + height / 2))
-                    : (top + height / 2 + 1)
+                left: left + 12,
+                [isNormal ? 'top' : 'bottom']: isNormal
+                    ? (top + height / 2 + 6)
+                    : (window.innerHeight - (top + height / 2) + 6)
             };
         }
+        // [KO] 하단 설명 영역 바로 위에 배치 (설명이 없으면 기본 하단 여백 사용)
+        // [EN] Place right above the bottom description area (use default bottom margin if absent)
+        const bottom = descriptionOccupiedHeight > 0
+            ? descriptionOccupiedHeight + LABEL_GAP_ABOVE_DESCRIPTION
+            : DEFAULT_LABEL_BOTTOM;
         return {
             ...baseStyle,
-            bottom: window.innerHeight - (top + height),
+            bottom: `${bottom}px`,
             left: left + width / 2,
-            ...(isNormal ? {transform: 'translateX(calc(-100% - 1px))'} : {})
+            ...(isNormal ? {transform: 'translateX(calc(-100% - 6px))'} : {transform: 'translateX(6px)'})
         };
     };
 

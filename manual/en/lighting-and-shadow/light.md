@@ -259,3 +259,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 - [PointLight](/RedGPU/examples/3d/light/pointLight/)
 - [Multi-PointLight Performance](/RedGPU/examples/3d/light/pointLightPerformance/)
 - [SpotLight](/RedGPU/examples/3d/light/spotLight/)
+
+---
+
+## Next Steps
+
+Learn about Phong Material, which expresses sophisticated surface textures and depth by receiving light.
+
+- **[Phong Material](./phong-material.md)**

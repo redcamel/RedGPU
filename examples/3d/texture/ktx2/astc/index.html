@@ -3,49 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASTC (Mobile / Apple Silicon Only)</title>
-    <meta name="description" content="Test example for Apple Silicon (Mac/iOS) and Android GPU dedicated ASTC textures.">
+    <title>ASTC (Mobile / Apple Silicon Only) - RedGPU WebGPU Example</title>
+    <meta name="description" content="Tests ASTC compressed KTX2 textures with software decoding fallback.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, texture, ktx2, astc, ASTC (Mobile / Apple Silicon Only)">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/">
-    <meta property="og:title" content="ASTC (Mobile / Apple Silicon Only)">
-    <meta property="og:description" content="Test example for Apple Silicon (Mac/iOS) and Android GPU dedicated ASTC textures.">
+    <meta property="og:title" content="ASTC (Mobile / Apple Silicon Only) - RedGPU WebGPU Example">
+    <meta property="og:description" content="Tests ASTC compressed KTX2 textures with software decoding fallback.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/">
-    <meta property="twitter:title" content="ASTC (Mobile / Apple Silicon Only)">
-    <meta property="twitter:description" content="Test example for Apple Silicon (Mac/iOS) and Android GPU dedicated ASTC textures.">
+    <meta property="twitter:title" content="ASTC (Mobile / Apple Silicon Only) - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Tests ASTC compressed KTX2 textures with software decoding fallback.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "ASTC (Mobile / Apple Silicon Only)",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Web",
-  "description": "Test example for Apple Silicon (Mac/iOS) and Android GPU dedicated ASTC textures.",
-  "url": "https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/",
-  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/thumb.webp",
-  "author": {
-    "@type": "Person",
-    "name": "redcamel"
-  }
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "name": "ASTC (Mobile / Apple Silicon Only)",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web",
+                "description": "Tests ASTC compressed KTX2 textures with software decoding fallback.",
+                "url": "https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/",
+                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/thumb.webp",
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "RedGPU Examples",
+                    "url": "https://redcamel.github.io/RedGPU/examples/"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "redcamel"
+                }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "RedGPU",
+                        "item": "https://redcamel.github.io/RedGPU/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Examples",
+                        "item": "https://redcamel.github.io/RedGPU/examples/"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "3D"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "Material & Texture"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 5,
+                        "name": "KTX2 Texture"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 6,
+                        "name": "ASTC (Mobile / Apple Silicon Only)",
+                        "item": "https://redcamel.github.io/RedGPU/examples/3d/texture/ktx2/astc/"
+                    }
+                ]
+            }
+        ]
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../../dist/index.js?t=1792993380695">
-    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1792993380695">
+    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
+    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1792993380695">
-    <script src="index.js?t=1792993380695" type="module"></script>
+    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
+    <script src="index.js?t=1794640510497" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Material &amp; Texture &gt; KTX2 Texture</p>
+        <h1>ASTC (Mobile / Apple Silicon Only) - RedGPU WebGPU Example</h1>
+        <p>Tests ASTC compressed KTX2 textures with software decoding fallback.</p>
+        <p lang="ko">ASTC 압축 KTX2 텍스처와 소프트웨어 디코딩 폴백을 테스트합니다.</p>
+        <img src="thumb.webp" alt="ASTC (Mobile / Apple Silicon Only) - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/texture/ktx2/basic/">Basic (Three.js 18 Standard)</a></li>
+                <li><a href="/RedGPU/examples/3d/texture/ktx2/legacy/">Legacy (1st Gen Reference)</a></li>
+                <li><a href="/RedGPU/examples/3d/texture/ktx2/transcode/">Transcode (Basis Universal ETC1S / UASTC)</a>
+                </li>
+                <li><a href="/RedGPU/examples/3d/texture/ktx2/zstd/">ZSTD (Supercompressed &amp; Block)</a></li>
+                <li><a href="/RedGPU/examples/3d/texture/ktx2/arrayCube3d/">Array / Cube / 3D (3D / Array / Cubemap)</a>
+                </li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

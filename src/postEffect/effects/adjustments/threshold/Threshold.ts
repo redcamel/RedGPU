@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import createBasicComputePassPostEffectCode from "../../../core/createBasicComputePassPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
@@ -26,12 +26,12 @@ interface Threshold {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/threshold/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/threshold/"></iframe>
  *
  * @see [Threshold example](/RedGPU/examples/postEffect/adjustments/threshold/)
  * @category Adjustments
  */
-class Threshold extends ASinglePassPostEffect {
+class Threshold extends ASingleComputePassPostEffect {
 
     /**
      * [KO] Threshold 인스턴스를 생성합니다.
@@ -51,7 +51,7 @@ class Threshold extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_THRESHOLD',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicComputePassPostEffectCode(this, computeCode, uniformStructCode, undefined, true, false)
         );
     }
 

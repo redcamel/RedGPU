@@ -1,6 +1,6 @@
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../dist/index.js?t=1792993380695";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../dist/index.js?t=1794640510497";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1794640510497";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -48,9 +48,8 @@ RedGPU.init(
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
+			new RedGPU.Material.PhongMaterial(redGPUContext, '#666666')
 		);
-		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -61,22 +60,14 @@ RedGPU.init(
 
 		const activeDumbbells = [];
 
-		/**
-		 * [KO] 아령 생성 함수: 현실적인 크기(전체 약 1.5m)로 설정
-		 * [EN] Function to create a dumbbell: Set to realistic size (approx. 1.5m total)
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 */
 		const createDumbbell = (x, y, z) => {
 			// [KO] 1. 부모 메시(실린더) 생성: 반지름 0.05, 높이 1.0 (현실적인 손잡이 크기)
 			// [EN] 1. Create parent mesh (Cylinder): radius 0.05, height 1.0 (realistic handle size)
 			const dumbbellGroup = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Cylinder(redGPUContext, 0.05, 0.05, 1.0),
-				new RedGPU.Material.PhongMaterial(redGPUContext)
+				new RedGPU.Material.PhongMaterial(redGPUContext, '#999999')
 			);
-			dumbbellGroup.material.color.setColorByHEX('#aaaaaa');
 			dumbbellGroup.x = x;
 			dumbbellGroup.y = y;
 			dumbbellGroup.z = z;
@@ -91,8 +82,7 @@ RedGPU.init(
 			// [KO] 2. 자식 메시(추) 생성: 반지름 0.25 (현실적인 원판 크기)
 			// [EN] 2. Create child meshes (Weights): radius 0.25 (realistic plate size)
 			const weightGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.25);
-			const weightMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-			weightMat.color.setColorByHEX('#ff4444');
+			const weightMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#cc4444');
 
 			const leftWeight = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -110,10 +100,6 @@ RedGPU.init(
 			rightWeight.y = -0.5;
 			dumbbellGroup.addChild(rightWeight);
 
-			/**
-			 * [KO] 3. 물리 바디 생성: 작아진 크기에 맞춰 질량 조정
-			 * [EN] 3. Create physics body: Adjust mass to match the smaller size
-			 */
 			const body = physicsEngine.createBody(dumbbellGroup, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 				mass: 5,             // [KO] 크기에 적합한 질량 [EN] Appropriate mass for size
@@ -137,10 +123,6 @@ RedGPU.init(
 			}
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeDumbbells.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -162,14 +144,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} createDumbbell
- * @param {function} resetScene
- * @param {Array<object>} activeDumbbells
- */
 const renderTestPane = async (redGPUContext, createDumbbell, resetScene, activeDumbbells) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

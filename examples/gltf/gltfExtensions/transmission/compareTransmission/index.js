@@ -1,5 +1,13 @@
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792993380695";
-import * as RedGPU from "../../../../../dist/index.js?t=1792993380695";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794640510497";
+import * as RedGPU from "../../../../../dist/index.js?t=1794640510497";
+
+/**
+ * [KO] Compare Transmission 예제
+ * [EN] Compare Transmission example
+ *
+ * [KO] GLTF Compare Transmission 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Compare Transmission model.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -13,6 +21,10 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
+
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareTransmission/glTF-Binary/CompareTransmission.glb');
 

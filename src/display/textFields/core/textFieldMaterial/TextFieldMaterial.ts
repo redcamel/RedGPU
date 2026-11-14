@@ -65,7 +65,6 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
         this.initGPURenderInfos()
     }
 
-
 }
 
 defineSampler(TextFieldMaterial, [

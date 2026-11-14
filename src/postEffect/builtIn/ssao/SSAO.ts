@@ -1,0 +1,269 @@
+import RedGPUContext from "../../../context/RedGPUContext";
+import View3D from "../../../display/view/View3D";
+import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
+import {IPostEffectResult} from "../../core/types";
+import SSAO_AO from "./ssao_ao/SSAO_AO";
+import SSAODenoise from "./ssao_denoise/SSAODenoise";
+import SSAOBlend from "./ssao_blend/SSAOBlend";
+
+/**
+ * [KO] Ground Truth Ambient Occlusion (GTAO), Edge-Stopping Bilateral Denoiser, 및 Multi-Bounce를 기반으로 고품질 화면 공간 주변광 차폐 음영을 생성하는 SSAO 후처리 이펙트입니다.
+ * [EN] SSAO post-processing effect that generates high-quality screen-space ambient occlusion shadows based on Ground Truth Ambient Occlusion (GTAO), Edge-Stopping Bilateral Denoiser, and Multi-Bounce.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * // [KO] View3D의 builtInEffectManager를 통해 SSAO 활성화 및 설정 제어
+ * // [EN] Enable and configure SSAO through View3D's builtInEffectManager
+ * view.builtInEffectManager.useSSAO = true;
+ * const ssao = view.builtInEffectManager.ssao;
+ * ssao.radius = 0.5;
+ * ssao.intensity = 1.5;
+ * ssao.useMultiBounce = true;
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/"></iframe>
+ *
+ * @see [SSAO example](/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/)
+ * @category PostEffect
+ */
+class SSAO extends AMultiPassPostEffect {
+    #aoPass: SSAO_AO
+    #denoisePass: SSAODenoise
+    #blendPass: SSAOBlend
+    #useBlur: boolean = true
+
+
+    /**
+     * [KO] SSAO 인스턴스를 생성합니다.
+     * [EN] Creates an SSAO instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
+    constructor(redGPUContext: RedGPUContext) {
+        super(
+            redGPUContext,
+            [
+                new SSAO_AO(redGPUContext),
+                new SSAODenoise(redGPUContext),
+                new SSAOBlend(redGPUContext),
+            ],
+        );
+        this.#aoPass = this.passList[0] as SSAO_AO
+        this.#denoisePass = this.passList[1] as SSAODenoise
+        this.#blendPass = this.passList[2] as SSAOBlend
+    }
+
+    /**
+     * [KO] 깊이·법선 경계를 보존하는 Edge-Stopping Bilateral 디노이저 패스 사용 여부를 반환하거나 설정합니다.
+     * [EN] Returns or sets whether the Edge-Stopping Bilateral denoiser pass that preserves depth and normal edges is used.
+     *
+     * @defaultValue true
+     * @returns
+     * [KO] 디노이저 블러 사용 여부
+     * [EN] Whether denoiser blur is used
+     */
+    get useBlur(): boolean {
+        return this.#useBlur;
+    }
+
+    set useBlur(value: boolean) {
+        this.#useBlur = Boolean(value);
+    }
+
+    /**
+     * [KO] 알베도 색감을 보존하는 GTAO 다중 반사(Multi-Bounce) 적용 여부를 반환하거나 설정합니다.
+     * [EN] Returns or sets whether GTAO Multi-Bounce, which preserves albedo color saturation in occluded creases, is applied.
+     *
+     * @defaultValue true
+     * @returns
+     * [KO] 다중 반사 적용 여부
+     * [EN] Whether Multi-Bounce is applied
+     */
+    get useMultiBounce(): boolean {
+        return this.#blendPass.useMultiBounce;
+    }
+
+    set useMultiBounce(value: boolean) {
+        this.#blendPass.useMultiBounce = value;
+    }
+
+    /**
+     * [KO] 차폐를 계산할 월드 단위 샘플링 반경(0.01 ~ 5.0)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the sampling radius in world units (0.01 ~ 5.0) for occlusion calculation.
+     *
+     * @defaultValue 0.5
+     * @returns
+     * [KO] 샘플링 반경
+     * [EN] Sampling radius
+     */
+    get radius(): number {
+        return this.#aoPass.radius;
+    }
+
+    set radius(value: number) {
+        this.#aoPass.radius = value;
+    }
+
+    /**
+     * [KO] AO 음영의 강도(0 ~ 10)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the intensity (0 ~ 10) of the AO shadow.
+     *
+     * @defaultValue 1.0
+     * @returns
+     * [KO] AO 강도
+     * [EN] AO intensity
+     */
+    get intensity(): number {
+        return this.#aoPass.intensity;
+    }
+
+    set intensity(value: number) {
+        this.#aoPass.intensity = value;
+    }
+
+    /**
+     * [KO] 자기 차폐(Self-occlusion) 현상을 방지하기 위한 깊이 바이어스 값(0.0 ~ 0.1)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the depth bias value (0.0 ~ 0.1) to prevent self-occlusion artifacts.
+     *
+     * @defaultValue 0.01
+     * @returns
+     * [KO] 깊이 바이어스
+     * [EN] Depth bias
+     */
+    get bias(): number {
+        return this.#aoPass.bias;
+    }
+
+    set bias(value: number) {
+        this.#aoPass.bias = value;
+    }
+
+    /**
+     * [KO] 카메라 거리에 비례하여 적용되는 바이어스 스케일 계수(0.0 ~ 0.5)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the bias scale factor (0.0 ~ 0.5) applied proportionally to camera distance.
+     *
+     * @defaultValue 0.01
+     * @returns
+     * [KO] 거리별 바이어스 스케일
+     * [EN] Bias distance scale
+     */
+    get biasDistanceScale(): number {
+        return this.#aoPass.biasDistanceScale;
+    }
+
+    set biasDistanceScale(value: number) {
+        this.#aoPass.biasDistanceScale = value;
+    }
+
+    /**
+     * [KO] AO 효과가 감쇠되기 시작하는 카메라 거리(1.0 ~ 200.0)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the camera distance (1.0 ~ 200.0) at which the AO effect starts to fade out.
+     *
+     * @defaultValue 30.0
+     * @returns
+     * [KO] 페이드 시작 거리
+     * [EN] Fade start distance
+     */
+    get fadeDistanceStart(): number {
+        return this.#aoPass.fadeDistanceStart;
+    }
+
+    set fadeDistanceStart(value: number) {
+        this.#aoPass.fadeDistanceStart = value;
+    }
+
+    /**
+     * [KO] AO 효과가 완전히 사라지기까지의 페이드 거리 구간 길이(1.0 ~ 100.0)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the fade distance range (1.0 ~ 100.0) over which the AO effect completely fades out.
+     *
+     * @defaultValue 50.0
+     * @returns
+     * [KO] 페이드 거리 범위
+     * [EN] Fade distance range
+     */
+    get fadeDistanceRange(): number {
+        return this.#aoPass.fadeDistanceRange;
+    }
+
+    set fadeDistanceRange(value: number) {
+        this.#aoPass.fadeDistanceRange = value;
+    }
+
+    /**
+     * [KO] AO 음영의 대비(0.5 ~ 4.0)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the contrast (0.5 ~ 4.0) of the AO shadow.
+     *
+     * @defaultValue 1.0
+     * @returns
+     * [KO] 대비 값
+     * [EN] Contrast value
+     */
+    get contrast(): number {
+        return this.#aoPass.contrast;
+    }
+
+    set contrast(value: number) {
+        this.#aoPass.contrast = value;
+    }
+
+
+    /**
+     * [KO] SSAO 다중 패스 후처리 효과를 렌더링합니다.
+     * [EN] Renders the multi-pass SSAO post-processing effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 원본 소스 텍스처 정보
+     * [EN] Original source texture information
+     * @returns
+     * [KO] SSAO가 합성된 후처리 결과 (`IPostEffectResult`)
+     * [EN] Post-effect result with SSAO composited (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
+        if (this.intensity <= 0) return sourceTextureInfo;
+        const pool = view.postEffectManager.texturePool;
+
+        const aoResult = this.#aoPass.render(
+            view, width, height, sourceTextureInfo
+        );
+
+        if (this.useBlur) {
+            const denoiseResult = this.#denoisePass.render(
+                view, width, height, aoResult
+            );
+            pool.release(aoResult.texture);
+
+            const blendResult = this.#blendPass.render(
+                view, width, height, sourceTextureInfo, denoiseResult
+            );
+            pool.release(denoiseResult.texture);
+
+            return blendResult;
+        } else {
+            const blendResult = this.#blendPass.render(
+                view, width, height, sourceTextureInfo, aoResult
+            );
+            pool.release(aoResult.texture);
+
+            return blendResult;
+        }
+    }
+}
+
+Object.freeze(SSAO)
+export default SSAO

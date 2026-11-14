@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
+import {IPostEffectResult} from "../../core/types";
 import BlurX from "./blurX/BlurX";
 import BlurY from "./blurY/BlurY";
 
@@ -14,13 +16,13 @@ import BlurY from "./blurY/BlurY";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/"></iframe>
  *
  * @see [GaussianBlur example](/RedGPU/examples/postEffect/blur/gaussianBlur/)
  * @category Blur
  */
 class GaussianBlur extends AMultiPassPostEffect {
-    #size: number = 32
+    #size: number = 32;
 
     /**
      * [KO] GaussianBlur 인스턴스를 생성합니다.
@@ -34,16 +36,20 @@ class GaussianBlur extends AMultiPassPostEffect {
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
+     * @param options -
+     * [KO] 가우시안 블러 생성 옵션. 기본값은 LDR(`isLdr: true`, `rgba8unorm`)이며, HDR 빌트인 패스(`LensFlare` 등) 내부에서 사용될 경우를 대비해 `isLdr: false`(`rgba16float`) 설정을 열어둡니다.
+     * [EN] Gaussian blur creation options. Defaults to LDR (`isLdr: true`, `rgba8unorm`), and exposes `isLdr: false` (`rgba16float`) in case it is used inside an HDR built-in pass (e.g., `LensFlare`).
      */
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, options?: { isLdr?: boolean }) {
+        const isLdr = options?.isLdr ?? true;
         super(
             redGPUContext,
             [
-                new BlurX(redGPUContext),
-                new BlurY(redGPUContext)
+                new BlurX(redGPUContext, {isLdr}),
+                new BlurY(redGPUContext, {isLdr})
             ],
+            isLdr
         );
-        this.size = this.size
     }
 
     /**
@@ -61,9 +67,37 @@ class GaussianBlur extends AMultiPassPostEffect {
 
     set size(value: number) {
         this.#size = value;
-        this.passList.forEach((v: BlurX | BlurY) => v.size = value)
+        const passList = this.passList as (BlurX | BlurY)[];
+        for (let i = 0, len = passList.length; i < len; i++) {
+            passList[i].size = value;
+        }
+    }
+
+    /**
+     * [KO] 가로/세로 2-Pass 가우시안 블러 효과를 렌더링합니다.
+     * [EN] Renders the horizontal/vertical 2-pass Gaussian blur effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 가우시안 블러가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with Gaussian blur applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        if (this.#size <= 0) return sourceTextureInfo;
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 
-Object.freeze(GaussianBlur)
-export default GaussianBlur
+Object.freeze(GaussianBlur);
+export default GaussianBlur;
