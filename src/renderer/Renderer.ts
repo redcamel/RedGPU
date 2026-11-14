@@ -399,7 +399,18 @@ class Renderer {
                 },
             }, (renderPassEncoder) => {
                 updateViewportAndScissor(view, renderPassEncoder)
-                renderPassEncoder.executeBundles(renderViewStateData.renderBundleResults.bundleListRender2PathLayer);
+                const {
+                    bundleListRender2PathLayer,
+                    bundleListAlphaLayer,
+                    bundleListTransparentLayer
+                } = renderViewStateData.renderBundleResults
+                renderPassEncoder.executeBundles(sortTransparentObjects(view.rawCamera, bundleListRender2PathLayer));
+                if (bundleListAlphaLayer.length) {
+                    renderPassEncoder.executeBundles(bundleListAlphaLayer);
+                }
+                if (bundleListTransparentLayer.length) {
+                    renderPassEncoder.executeBundles(bundleListTransparentLayer);
+                }
             });
 
             if (useMSAA && this.#needSingleSampleDepthResolve(view)) {
