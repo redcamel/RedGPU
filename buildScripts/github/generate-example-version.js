@@ -15,7 +15,6 @@ const targetFolder = path.join(process.cwd(), 'examples');
 const baseUrl = 'https://redcamel.github.io/RedGPU/examples/';
 
 const stripHtml = (str = '') => String(str)
-    .replace(/<[^>]*>/g, ' ')
     .replace(/[<>]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
