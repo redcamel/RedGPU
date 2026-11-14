@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Character Controller</title>
-    <meta name="description" content="Implements physics-based 3rd person character movement walking on the ground and climbing stairs using the Rapier physics engine. Integrates a translucent physical capsule collider with a GLTF character (Soldier) model, demonstrating runtime animation blending based on action states.">
+    <title>Character Controller - RedGPU WebGPU Example</title>
+    <meta name="description" content="Capsule character controller with glTF animation for walking and stairs.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, physics, characterController, Character Controller">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/physics/characterController/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/physics/characterController/">
-    <meta property="og:title" content="Character Controller">
-    <meta property="og:description" content="Implements physics-based 3rd person character movement walking on the ground and climbing stairs using the Rapier physics engine. Integrates a translucent physical capsule collider with a GLTF character (Soldier) model, demonstrating runtime animation blending based on action states.">
+    <meta property="og:title" content="Character Controller - RedGPU WebGPU Example">
+    <meta property="og:description" content="Capsule character controller with glTF animation for walking and stairs.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/physics/characterController/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/physics/characterController/">
-    <meta property="twitter:title" content="Character Controller">
-    <meta property="twitter:description" content="Implements physics-based 3rd person character movement walking on the ground and climbing stairs using the Rapier physics engine. Integrates a translucent physical capsule collider with a GLTF character (Soldier) model, demonstrating runtime animation blending based on action states.">
+    <meta property="twitter:title" content="Character Controller - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Capsule character controller with glTF animation for walking and stairs.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/physics/characterController/thumb.webp">
 
     <!-- Structured Data -->
@@ -29,9 +30,14 @@
   "name": "Character Controller",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Web",
-  "description": "Implements physics-based 3rd person character movement walking on the ground and climbing stairs using the Rapier physics engine. Integrates a translucent physical capsule collider with a GLTF character (Soldier) model, demonstrating runtime animation blending based on action states.",
+        "description": "Capsule character controller with glTF animation for walking and stairs.",
   "url": "https://redcamel.github.io/RedGPU/examples/physics/characterController/",
   "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/characterController/thumb.webp",
+        "isPartOf": {
+            "@type": "CollectionPage",
+            "name": "RedGPU Examples",
+            "url": "https://redcamel.github.io/RedGPU/examples/"
+        },
   "author": {
     "@type": "Person",
     "name": "redcamel"
@@ -39,22 +45,34 @@
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../dist/index.js?t=1792986333865">
-    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1792986333865">
+    <link rel="modulepreload" href="../../../dist/index.js?t=1794639759027">
+    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1794639759027">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../assets/css/example.css?t=1792986333865">
-    <script src="index.js?t=1792986333865" type="module"></script>
+    <link rel="stylesheet" href="../../assets/css/example.css?t=1794639759027">
+    <script src="index.js?t=1794639759027" type="module"></script>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>Physics &gt; Simulation &amp; Systems</p>
+        <h1>Character Controller - RedGPU WebGPU Example</h1>
+        <p>Capsule character controller with glTF animation for walking and stairs.</p>
+        <p lang="ko">캡슐 충돌체와 glTF 캐릭터 애니메이션을 결합한 지면·계단 보행 예제입니다.</p>
+        <img src="thumb.webp" alt="Character Controller - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/physics/surfaceVelocity/">Surface Velocity (Conveyor)</a></li>
+                <li><a href="/RedGPU/examples/physics/buoyancy/">Buoyancy Basics</a></li>
+                <li><a href="/RedGPU/examples/physics/ragdoll/">Ragdoll System</a></li>
+                <li><a href="/RedGPU/examples/physics/advancedCharacterController/">Advanced Character Controller</a>
+                </li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

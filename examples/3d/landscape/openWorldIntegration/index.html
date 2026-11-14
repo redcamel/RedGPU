@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open World Integration</title>
-    <meta name="description" content="Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.">
+    <title>Open World Integration - RedGPU WebGPU Example</title>
+    <meta name="description" content="Integrates streaming terrain, PBR splatting, foliage, and character control.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, openWorldIntegration, Open World Integration">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/">
-    <meta property="og:title" content="Open World Integration">
-    <meta property="og:description" content="Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.">
+    <meta property="og:title" content="Open World Integration - RedGPU WebGPU Example">
+    <meta property="og:description"
+          content="Integrates streaming terrain, PBR splatting, foliage, and character control.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/">
-    <meta property="twitter:title" content="Open World Integration">
-    <meta property="twitter:description" content="Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.">
+    <meta property="twitter:title" content="Open World Integration - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Integrates streaming terrain, PBR splatting, foliage, and character control.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/thumb.webp">
 
     <!-- Structured Data -->
@@ -29,9 +31,14 @@
   "name": "Open World Integration",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Web",
-  "description": "Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.",
+        "description": "Integrates streaming terrain, PBR splatting, foliage, and character control.",
   "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/",
   "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/openWorldIntegration/thumb.webp",
+        "isPartOf": {
+            "@type": "CollectionPage",
+            "name": "RedGPU Examples",
+            "url": "https://redcamel.github.io/RedGPU/examples/"
+        },
   "author": {
     "@type": "Person",
     "name": "redcamel"
@@ -39,15 +46,35 @@
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792986333865">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792986333865">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794639759027">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794639759027">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792986333865">
-    <script src="index.js?t=1792986333865" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794639759027">
+    <script src="index.js?t=1794639759027" type="module"></script>
 </head>
 <body>
-
-
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; World &amp; Simulation &gt; Landscape</p>
+        <h1>Open World Integration - RedGPU WebGPU Example</h1>
+        <p>Integrates streaming terrain, PBR splatting, foliage, and character control.</p>
+        <p lang="ko">타일 스트리밍 지형, 멀티레이어 스플랫, 식생 및 캐릭터 컨트롤러 통합 예제입니다.</p>
+        <img src="thumb.webp" alt="Open World Integration - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/basicTerrain/">Basic Terrain</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/multiLayerSplatting/">Multi-Layer Splatting</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/tileStreaming/">Tile Streaming</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/proceduralGrass/">Procedural Grass Field</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/foliageAndImpostors/">Foliage &amp; Impostors</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/landscapeAndWater/">Landscape &amp; Water System</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

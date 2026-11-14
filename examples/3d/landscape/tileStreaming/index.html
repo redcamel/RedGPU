@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tile Streaming</title>
-    <meta name="description" content="Partitions a large-scale terrain into 16x16 (256) tiles to stream 16-bit high-resolution heightmap tiles asynchronously around the camera (tileUrlResolver, tileLoadingRadius), monitored in real time via debuggerManager.">
+    <title>Tile Streaming - RedGPU WebGPU Example</title>
+    <meta name="description" content="Asynchronously streams high-res heightmap tiles across a 16×16 terrain.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, tileStreaming, Tile Streaming">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/landscape/tileStreaming/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/tileStreaming/">
-    <meta property="og:title" content="Tile Streaming">
-    <meta property="og:description" content="Partitions a large-scale terrain into 16x16 (256) tiles to stream 16-bit high-resolution heightmap tiles asynchronously around the camera (tileUrlResolver, tileLoadingRadius), monitored in real time via debuggerManager.">
+    <meta property="og:title" content="Tile Streaming - RedGPU WebGPU Example">
+    <meta property="og:description" content="Asynchronously streams high-res heightmap tiles across a 16×16 terrain.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/tileStreaming/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/tileStreaming/">
-    <meta property="twitter:title" content="Tile Streaming">
-    <meta property="twitter:description" content="Partitions a large-scale terrain into 16x16 (256) tiles to stream 16-bit high-resolution heightmap tiles asynchronously around the camera (tileUrlResolver, tileLoadingRadius), monitored in real time via debuggerManager.">
+    <meta property="twitter:title" content="Tile Streaming - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Asynchronously streams high-res heightmap tiles across a 16×16 terrain.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/tileStreaming/thumb.webp">
 
     <!-- Structured Data -->
@@ -29,9 +30,14 @@
   "name": "Tile Streaming",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Web",
-  "description": "Partitions a large-scale terrain into 16x16 (256) tiles to stream 16-bit high-resolution heightmap tiles asynchronously around the camera (tileUrlResolver, tileLoadingRadius), monitored in real time via debuggerManager.",
+        "description": "Asynchronously streams high-res heightmap tiles across a 16×16 terrain.",
   "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/tileStreaming/",
   "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/tileStreaming/thumb.webp",
+        "isPartOf": {
+            "@type": "CollectionPage",
+            "name": "RedGPU Examples",
+            "url": "https://redcamel.github.io/RedGPU/examples/"
+        },
   "author": {
     "@type": "Person",
     "name": "redcamel"
@@ -39,13 +45,34 @@
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792986333865">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792986333865">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794639759027">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794639759027">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792986333865">
-    <script src="index.js?t=1792986333865" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794639759027">
+    <script src="index.js?t=1794639759027" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; World &amp; Simulation &gt; Landscape</p>
+        <h1>Tile Streaming - RedGPU WebGPU Example</h1>
+        <p>Asynchronously streams high-res heightmap tiles across a 16×16 terrain.</p>
+        <p lang="ko">16×16 분할 지형에서 카메라 위치에 맞춰 고해상도 타일을 비동기 스트리밍합니다.</p>
+        <img src="thumb.webp" alt="Tile Streaming - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/basicTerrain/">Basic Terrain</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/multiLayerSplatting/">Multi-Layer Splatting</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/proceduralGrass/">Procedural Grass Field</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/foliageAndImpostors/">Foliage &amp; Impostors</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/openWorldIntegration/">Open World Integration</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/landscapeAndWater/">Landscape &amp; Water System</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

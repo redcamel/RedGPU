@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UV Transform</title>
-    <meta name="description" content="Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.">
+    <title>UV Transform - RedGPU WebGPU Example</title>
+    <meta name="description" content="Implements texture scrolling and tiling via material UV offset and scale.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, material, uvTransform, UV Transform">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/">
-    <meta property="og:title" content="UV Transform">
-    <meta property="og:description" content="Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.">
+    <meta property="og:title" content="UV Transform - RedGPU WebGPU Example">
+    <meta property="og:description" content="Implements texture scrolling and tiling via material UV offset and scale.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/">
-    <meta property="twitter:title" content="UV Transform">
-    <meta property="twitter:description" content="Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.">
+    <meta property="twitter:title" content="UV Transform - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Implements texture scrolling and tiling via material UV offset and scale.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp">
 
     <!-- Structured Data -->
@@ -29,9 +30,14 @@
   "name": "UV Transform",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Web",
-  "description": "Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.",
+        "description": "Implements texture scrolling and tiling via material UV offset and scale.",
   "url": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/",
   "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp",
+        "isPartOf": {
+            "@type": "CollectionPage",
+            "name": "RedGPU Examples",
+            "url": "https://redcamel.github.io/RedGPU/examples/"
+        },
   "author": {
     "@type": "Person",
     "name": "redcamel"
@@ -39,13 +45,35 @@
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792986333865">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792986333865">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794639759027">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794639759027">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792986333865">
-    <script src="index.js?t=1792986333865" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794639759027">
+    <script src="index.js?t=1794639759027" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; Material &amp; Texture &gt; Material</p>
+        <h1>UV Transform - RedGPU WebGPU Example</h1>
+        <p>Implements texture scrolling and tiling via material UV offset and scale.</p>
+        <p lang="ko">재질의 UV 오프셋과 스케일을 조절해 텍스처 흐름 및 타일링을 구현합니다.</p>
+        <img src="thumb.webp" alt="UV Transform - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/material/colorMaterial/">ColorMaterial</a></li>
+                <li><a href="/RedGPU/examples/3d/material/bitmapMaterial/">BitmapMaterial</a></li>
+                <li><a href="/RedGPU/examples/3d/material/phongMaterial/">PhongMaterial</a></li>
+                <li><a href="/RedGPU/examples/3d/material/phongMaterialTextures/">PhongMaterial Texture Combination</a>
+                </li>
+                <li><a href="/RedGPU/examples/3d/material/opacity/">Material Opacity</a></li>
+                <li><a href="/RedGPU/examples/3d/material/fragmentVariantTest/">Fragment Variant Test</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

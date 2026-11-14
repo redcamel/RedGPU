@@ -2,96 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="../../../../assets/css/example.css" rel="stylesheet">
-    <style>
-        .af-viewfinder {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            width: 72px;
-            height: 72px;
-            transform: translate(-50%, -50%);
-            border-radius: 6px;
-            pointer-events: none;
-            z-index: 10;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depth of Field (Auto Focus) - RedGPU WebGPU Example</title>
+    <meta name="description" content="Continuous Auto-Focus tracking subject distance via 9-Point Zone metering.">
+    <meta name="keywords"
+          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, postEffect, builtIn, lens, dofAutoFocus, Depth of Field (Auto Focus)">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/">
 
-        .af-viewfinder::before,
-        .af-viewfinder::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            transition: background-color 0.2s ease;
-        }
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/">
+    <meta property="og:title" content="Depth of Field (Auto Focus) - RedGPU WebGPU Example">
+    <meta property="og:description"
+          content="Continuous Auto-Focus tracking subject distance via 9-Point Zone metering.">
+    <meta property="og:image"
+          content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/thumb.webp">
 
-        .af-viewfinder::before {
-            width: 14px;
-            height: 1.5px;
-        }
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url"
+          content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/">
+    <meta property="twitter:title" content="Depth of Field (Auto Focus) - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Continuous Auto-Focus tracking subject distance via 9-Point Zone metering.">
+    <meta property="twitter:image"
+          content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/thumb.webp">
 
-        .af-viewfinder::after {
-            width: 1.5px;
-            height: 14px;
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Depth of Field (Auto Focus)",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "description": "Continuous Auto-Focus tracking subject distance via 9-Point Zone metering.",
+        "url": "https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/",
+        "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/thumb.webp",
+        "isPartOf": {
+            "@type": "CollectionPage",
+            "name": "RedGPU Examples",
+            "url": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "redcamel"
         }
+    }</script>
 
-        .af-viewfinder.is-af {
-            border: 1.5px solid rgba(0, 225, 65, 0.9);
-            box-shadow: 0 0 14px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 225, 65, 0.18);
-        }
+    <!-- Module Preload -->
+    <link rel="modulepreload" href="../../../../../dist/index.js?t=1794639759027">
+    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1794639759027">
 
-        .af-viewfinder.is-af::before,
-        .af-viewfinder.is-af::after {
-            background: rgba(0, 225, 65, 0.95);
-        }
-
-        .af-viewfinder.is-mf {
-            border: 1.5px dashed rgba(255, 145, 0, 0.9);
-            box-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
-        }
-
-        .af-viewfinder.is-mf::before,
-        .af-viewfinder.is-mf::after {
-            background: rgba(255, 145, 0, 0.95);
-        }
-
-        .af-zone-dots {
-            position: absolute;
-            inset: 14px;
-            border: 1px dotted rgba(255, 255, 255, 0.28);
-            border-radius: 3px;
-        }
-
-        .af-viewfinder-label {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 3px 9px;
-            font-family: monospace;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            background: rgba(10, 12, 16, 0.88);
-            border-radius: 4px;
-            white-space: nowrap;
-        }
-
-        .af-viewfinder.is-af .af-viewfinder-label {
-            color: #00e141;
-            border: 1px solid rgba(0, 225, 65, 0.55);
-        }
-
-        .af-viewfinder.is-mf .af-viewfinder-label {
-            color: #ff9100;
-            border: 1px solid rgba(255, 145, 0, 0.55);
-        }
-    </style>
-    <script src="index.js" type="module"></script>
+    <!-- Assets -->
+    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1794639759027">
+    <script src="index.js?t=1794639759027" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>PostEffect &gt; BuiltInEffect &gt; Camera &amp; Lens</p>
+        <h1>Depth of Field (Auto Focus) - RedGPU WebGPU Example</h1>
+        <p>Continuous Auto-Focus tracking subject distance via 9-Point Zone metering.</p>
+        <p lang="ko">화면 중앙 9-Point Zone 피사체 거리를 감지해 초점을 자동 추적합니다.</p>
+        <img src="thumb.webp" alt="Depth of Field (Auto Focus) - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/autoExposure/">Auto Exposure</a></li>
+                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/dof/">Depth of Field</a></li>
+                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/bloom/">Bloom</a></li>
+                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyAtmosphere/">Lens Flare
+                    (SkyAtmosphere)</a></li>
+                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyBox/">Lens Flare (SkyBox)</a></li>
+                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/">Chromatic Aberration</a>
+                </li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

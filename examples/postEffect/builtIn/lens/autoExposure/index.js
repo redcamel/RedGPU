@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js?t=1794639759027";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1794639759027";
 
 /**
  * [KO] AutoExposure (자동 노출 및 눈 적응) 예제

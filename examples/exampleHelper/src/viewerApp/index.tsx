@@ -110,6 +110,10 @@ class RedGPUExampleHelper {
     private isDestroyed = false;
 
     constructor(redGPUContext: RedGPUContext, guiConfig?: GuiConfig | ((gui: any) => void)) {
+        const staticSeo = document.getElementById('seo-static-content');
+        if (staticSeo) {
+            staticSeo.remove();
+        }
         useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
         if (guiConfig) {
             if (typeof guiConfig === 'function') {

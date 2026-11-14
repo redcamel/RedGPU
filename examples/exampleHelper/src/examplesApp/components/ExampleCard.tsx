@@ -44,7 +44,7 @@ const ExampleCard: React.FC<ExampleCardProps> = ({item, lcpCounter}) => {
     const altSuffix = language === 'ko' ? 'RedGPU WebGPU 예제' : 'RedGPU WebGPU Example';
     const imageAlt = `${item.name} - ${altSuffix}`;
     const imageTitle = plainDescription || item.name;
-    const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
+    const href = item.path ? `/RedGPU/examples/${item.path}/` : '#';
 
     const commonProps: CardProps = {
         item,

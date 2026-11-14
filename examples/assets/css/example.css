@@ -38,3 +38,58 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
     background: #70020c;
 }
+
+.seo-static-content {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    padding: 32px;
+    color: #e4e4e7;
+    background: transparent;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+}
+
+.seo-static-content article {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.seo-static-content h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.seo-static-content p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #a1a1aa;
+}
+
+.seo-static-content img {
+    max-width: 480px;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.seo-static-content nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    margin-top: 8px;
+}
+
+.seo-static-content a {
+    color: #fdb48d;
+    text-decoration: none;
+    font-size: 13px;
+}

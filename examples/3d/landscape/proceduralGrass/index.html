@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Procedural Grass Field</title>
-    <meta name="description" content="Procedurally bakes and culls tens of thousands of grass instances on the GPU based on terrain splat layer weights (targetLayer) and slope via grassManager.addType, featuring Near/Far LOD and ground color blending.">
+    <title>Procedural Grass Field - RedGPU WebGPU Example</title>
+    <meta name="description" content="Procedurally scatters and culls tens of thousands of GPU grass blades.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, proceduralGrass, Procedural Grass Field">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/landscape/proceduralGrass/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/proceduralGrass/">
-    <meta property="og:title" content="Procedural Grass Field">
-    <meta property="og:description" content="Procedurally bakes and culls tens of thousands of grass instances on the GPU based on terrain splat layer weights (targetLayer) and slope via grassManager.addType, featuring Near/Far LOD and ground color blending.">
+    <meta property="og:title" content="Procedural Grass Field - RedGPU WebGPU Example">
+    <meta property="og:description" content="Procedurally scatters and culls tens of thousands of GPU grass blades.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/proceduralGrass/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/proceduralGrass/">
-    <meta property="twitter:title" content="Procedural Grass Field">
-    <meta property="twitter:description" content="Procedurally bakes and culls tens of thousands of grass instances on the GPU based on terrain splat layer weights (targetLayer) and slope via grassManager.addType, featuring Near/Far LOD and ground color blending.">
+    <meta property="twitter:title" content="Procedural Grass Field - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="Procedurally scatters and culls tens of thousands of GPU grass blades.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/proceduralGrass/thumb.webp">
 
     <!-- Structured Data -->
@@ -29,9 +30,14 @@
   "name": "Procedural Grass Field",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Web",
-  "description": "Procedurally bakes and culls tens of thousands of grass instances on the GPU based on terrain splat layer weights (targetLayer) and slope via grassManager.addType, featuring Near/Far LOD and ground color blending.",
+        "description": "Procedurally scatters and culls tens of thousands of GPU grass blades.",
   "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/proceduralGrass/",
   "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/proceduralGrass/thumb.webp",
+        "isPartOf": {
+            "@type": "CollectionPage",
+            "name": "RedGPU Examples",
+            "url": "https://redcamel.github.io/RedGPU/examples/"
+        },
   "author": {
     "@type": "Person",
     "name": "redcamel"
@@ -39,13 +45,35 @@
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792986333865">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792986333865">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794639759027">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794639759027">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792986333865">
-    <script src="index.js?t=1792986333865" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794639759027">
+    <script src="index.js?t=1794639759027" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; World &amp; Simulation &gt; Landscape</p>
+        <h1>Procedural Grass Field - RedGPU WebGPU Example</h1>
+        <p>Procedurally scatters and culls tens of thousands of GPU grass blades.</p>
+        <p lang="ko">지형 가중치와 경사도를 기반으로 수만 개의 GPU 절차적 잔디를 배치·컬링합니다.</p>
+        <img src="thumb.webp" alt="Procedural Grass Field - RedGPU WebGPU Example" width="600" height="450"
+             loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/basicTerrain/">Basic Terrain</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/multiLayerSplatting/">Multi-Layer Splatting</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/tileStreaming/">Tile Streaming</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/foliageAndImpostors/">Foliage &amp; Impostors</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/openWorldIntegration/">Open World Integration</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/landscapeAndWater/">Landscape &amp; Water System</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

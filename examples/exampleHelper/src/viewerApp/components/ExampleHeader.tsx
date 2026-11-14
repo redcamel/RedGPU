@@ -112,7 +112,7 @@ const ExampleHeader: React.FC<ExampleHeaderProps> = ({isIframe = false}) => {
                         icon={<HomeIcon color="#fff" size={18}/>}
                         label="HOME"
                         onClick={() => {
-                            window.location.href = '/RedGPU/examples/index.html'
+                            window.location.href = '/RedGPU/examples/'
                         }}
                         title="HOME"
                     />

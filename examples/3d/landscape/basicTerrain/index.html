@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic Terrain</title>
-    <meta name="description" content="Basic example creating a large-scale terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and debug modes.">
+    <title>Basic Terrain - RedGPU WebGPU Example</title>
+    <meta name="description" content="16-bit heightmap terrain with continuous LOD, geomorphing, and shadows.">
     <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, basicTerrain, Basic Terrain">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/landscape/basicTerrain/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/basicTerrain/">
-    <meta property="og:title" content="Basic Terrain">
-    <meta property="og:description" content="Basic example creating a large-scale terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and debug modes.">
+    <meta property="og:title" content="Basic Terrain - RedGPU WebGPU Example">
+    <meta property="og:description" content="16-bit heightmap terrain with continuous LOD, geomorphing, and shadows.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/basicTerrain/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/basicTerrain/">
-    <meta property="twitter:title" content="Basic Terrain">
-    <meta property="twitter:description" content="Basic example creating a large-scale terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and debug modes.">
+    <meta property="twitter:title" content="Basic Terrain - RedGPU WebGPU Example">
+    <meta property="twitter:description"
+          content="16-bit heightmap terrain with continuous LOD, geomorphing, and shadows.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/basicTerrain/thumb.webp">
 
     <!-- Structured Data -->
@@ -29,9 +30,14 @@
   "name": "Basic Terrain",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Web",
-  "description": "Basic example creating a large-scale terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and debug modes.",
+        "description": "16-bit heightmap terrain with continuous LOD, geomorphing, and shadows.",
   "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/basicTerrain/",
   "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/basicTerrain/thumb.webp",
+        "isPartOf": {
+            "@type": "CollectionPage",
+            "name": "RedGPU Examples",
+            "url": "https://redcamel.github.io/RedGPU/examples/"
+        },
   "author": {
     "@type": "Person",
     "name": "redcamel"
@@ -39,13 +45,34 @@
 }</script>
 
     <!-- Module Preload -->
-    <link rel="modulepreload" href="../../../../dist/index.js?t=1792986333865">
-    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1792986333865">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794639759027">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794639759027">
 
     <!-- Assets -->
-    <link rel="stylesheet" href="../../../assets/css/example.css?t=1792986333865">
-    <script src="index.js?t=1792986333865" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794639759027">
+    <script src="index.js?t=1794639759027" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>3D &gt; World &amp; Simulation &gt; Landscape</p>
+        <h1>Basic Terrain - RedGPU WebGPU Example</h1>
+        <p>16-bit heightmap terrain with continuous LOD, geomorphing, and shadows.</p>
+        <p lang="ko">16비트 하이트맵 지형 생성과 연속 LOD·지오모핑 및 그림자를 제어합니다.</p>
+        <img src="thumb.webp" alt="Basic Terrain - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/multiLayerSplatting/">Multi-Layer Splatting</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/tileStreaming/">Tile Streaming</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/proceduralGrass/">Procedural Grass Field</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/foliageAndImpostors/">Foliage &amp; Impostors</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/openWorldIntegration/">Open World Integration</a></li>
+                <li><a href="/RedGPU/examples/3d/landscape/landscapeAndWater/">Landscape &amp; Water System</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

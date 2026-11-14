@@ -63,6 +63,7 @@ const init = async (
 ) => {
     if (isSearchEngineBot()) {
         keepLog('🤖 Search engine bot detected - skipping WebGPU initialization');
+        revealStaticSeoContent();
         return;
     }
     const gpu = typeof navigator !== 'undefined' ? navigator.gpu : undefined;
@@ -184,4 +185,19 @@ const isSearchEngineBot = (): boolean => {
     }
     const userAgent = navigator.userAgent.toLowerCase();
     return BOT_PATTERN.test(userAgent);
+};
+
+const revealStaticSeoContent = (): void => {
+    if (typeof document === 'undefined') return;
+    const staticSeo = document.getElementById('seo-static-content');
+    if (staticSeo) {
+        Object.assign(staticSeo.style, {
+            opacity: '1',
+            pointerEvents: 'auto',
+            userSelect: 'auto',
+            zIndex: '1',
+            overflowY: 'auto',
+            background: '#0d0d10'
+        });
+    }
 };
