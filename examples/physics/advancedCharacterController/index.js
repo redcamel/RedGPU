@@ -29,32 +29,8 @@ RedGPU.init(
 		directionalLight.azimuth = 147.5;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		/**
-		 * [KO] 정적 블록 생성 함수
-		 * [EN] Static block creation function
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 * @param {number} sx
-		 * @param {number} sy
-		 * @param {number} sz
-		 * @param {string} color
-		 */
-		/**
-		 * [KO] 정적 블록 생성 함수
-		 * [EN] Static block creation function
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 * @param {number} sx
-		 * @param {number} sy
-		 * @param {number} sz
-		 * @param {string} color
-		 * @param {number} rx
-		 * @param {number} ry
-		 * @param {number} rz
-		 */
-			// HSL 색상을 16진수 HEX 스트링(#RRGGBB)으로 변환하는 헬퍼 함수
+		// [KO] HSL 색상을 16진수 HEX 문자열로 변환
+		// [EN] Convert HSL color to hexadecimal HEX string
 		const hslToHex = (h, s, l) => {
 				l /= 100;
 				const a = (s * Math.min(l, 1 - l)) / 100;
@@ -90,21 +66,17 @@ RedGPU.init(
 			});
 		};
 
-		// [KO] 환경 구축 (Dense & Compact Test Course)
-		// [EN] Environment build (Dense & Compact Test Course)
-        createBlock(0, -0.5, 0, 100, 1, 100, '#5a6578'); // Base Ground (슬레이트 블루그레이)
+		// [KO] 환경 구축 (바닥, 계단, 나선형 계단, 파쿠르 코스, 터널)
+		// [EN] Build test course environment (ground, stairs, spiral stairs, parkour course, tunnel)
+		createBlock(0, -0.5, 0, 100, 1, 100, '#5a6578');
 
-		// [KO] 중앙 밀집 구역 (Center Complex)
-		// 계단 -> 플랫폼 -> 경사로 연결
 		for (let i = 0; i < 12; i++) {
-			// 파란색 -> 보라색 그라데이션 변형 HSL 색상 적용
 			const hue = 220 + (i * 3);
             createBlock(0, i * 0.18, 5 + i * 0.45, 4, 0.2, 0.6, hslToHex(hue, 55, 55));
 		}
-        createBlock(0, 12 * 0.18, 12, 6, 0.2, 6, '#6d58b5'); // 연결 플랫폼 (퍼플)
-        createBlock(0, 12 * 0.18 + 1.4, 20, 6, 0.2, 10, '#c0487a', 20, 0, 0); // 플랫폼에서 이어지는 경사로 (메탈릭 로즈/핑크)
+		createBlock(0, 12 * 0.18, 12, 6, 0.2, 6, '#6d58b5');
+		createBlock(0, 12 * 0.18 + 1.4, 20, 6, 0.2, 10, '#c0487a', 20, 0, 0);
 
-		// 나선형 계단을 플랫폼 주변으로 밀착
 		const spiralCenterX = 8;
 		const spiralCenterZ = 10;
 		for (let i = 0; i < 20; i++) {
@@ -112,14 +84,11 @@ RedGPU.init(
 			const radius = 3;
 			const x = spiralCenterX + Math.cos(angle) * radius;
 			const z = spiralCenterZ + Math.sin(angle) * radius;
-			// 에메랄드 그린 HSL 그라데이션 적용
 			const hue = 140 + (i * 2);
             createBlock(x, i * 0.35, z, 1.5, 0.15, 1.5, hslToHex(hue, 50, 50), 0, -angle * 180 / Math.PI, 0);
 		}
 
-		// 파쿠르 코스를 중앙 플랫폼 옆으로 배치
 		for (let i = 0; i < 8; i++) {
-            // 오렌지 / 골드 계열
 			const hue = 30 + (i * 4);
 			createBlock(
 				-6 - i * 1.8, 
@@ -130,25 +99,21 @@ RedGPU.init(
 			);
 		}
 
-		// 좁은 길을 플랫폼 상단에 교차
-        createBlock(-12, 12 * 0.18, 12, 10, 0.15, 0.4, '#3898b0'); // 좁은 길 (사이언)
+		createBlock(-12, 12 * 0.18, 12, 10, 0.15, 0.4, '#3898b0');
 
-		// 입체 구조물을 시작 지점 근처로 당김
-		// 피라미드형 계단
 		for (let i = 0; i < 8; i++) {
 			const size = 12 - i * 1.5;
-			// 테크 크롬 그레이 그라데이션
             const lightness = 35 + (i * 4);
 			createBlock(-15, i * 0.35, -5, size, 0.4, size, hslToHex(220, 10, lightness));
 		}
 
-		// 터널을 중앙 플랫폼 아래에 배치
-        createBlock(0, 0.1, 12, 10, 0.1, 10, '#5a3d4c'); // 터널 바닥 (딥 로즈)
-        createBlock(-4, 0, 12, 0.5, 2.5, 10, '#5b6573'); // 벽 1 (스톤 그레이)
-        createBlock(4, 0, 12, 0.5, 2.5, 10, '#5b6573'); // 벽 2 (스톤 그레이)
-        createBlock(0, 2.5, 12, 10, 0.5, 10, '#8c939f'); // 지붕 (플랫폼 하단 - 테크 실버)
+		createBlock(0, 0.1, 12, 10, 0.1, 10, '#5a3d4c');
+		createBlock(-4, 0, 12, 0.5, 2.5, 10, '#5b6573');
+		createBlock(4, 0, 12, 0.5, 2.5, 10, '#5b6573');
+		createBlock(0, 2.5, 12, 10, 0.5, 10, '#8c939f');
 
-        // 캐릭터용 물리 구동 캡슐 생성 (가시성을 꺼서 비가시 물리 바디로 작동)
+		// [KO] 캐릭터용 물리 구동 캡슐 생성 (씬에 추가하지 않고 물리 바디로만 동작)
+		// [EN] Create physics-driven capsule for character (operates as physics body without adding to scene)
 		const charMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Capsule(redGPUContext, 0.3, 1.2),
@@ -174,10 +139,10 @@ RedGPU.init(
 				soldierMesh.setCastShadowRecursively(true);
 				soldierMesh.setReceiveShadowRecursively(true);
 
-				// Soldier.glb의 기본 앞면 각도 정렬 (0도)
 				scene.addChild(soldierMesh);
 
-				// ── 애니메이션 클립 매핑 ─────────
+				// [KO] 애니메이션 클립 매핑 및 상태 머신 구성
+				// [EN] Map animation clips and configure state machine
 				const clips = loader.parsingResult.animations;
 				if (clips && clips.length > 0) {
 					const idleState = clips[0];
@@ -188,7 +153,6 @@ RedGPU.init(
 					walkState.name = 'Walk';
 					runState.name = 'Run';
 
-					// ── 상태 머신 ──────────────────
 					stateMachine = new RedGPU.AnimStateMachine(idleState);
 					stateMachine.addState(walkState);
 					stateMachine.addState(runState);
@@ -225,16 +189,16 @@ RedGPU.init(
 		});
 
 		const charController = physicsEngine.createCharacterController(0.01);
-		
-		// [KO] 카메라 컨트롤러 설정 (OrbitController)
-		// [EN] Set up camera controller (OrbitController)
+
+		// [KO] 3인칭 밀착형 카메라 컨트롤러 설정
+		// [EN] Set up third-person close-range camera controller
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 6; // 3인칭 밀착형 줌 조절 (keyboardCharacterControl 스타일)
-		controller.tilt = -15; // 3인칭 밀착형 틸트 조절 (keyboardCharacterControl 스타일)
-		controller.minDistance = 2.5;  // 최소 줌인 한계
-		controller.maxDistance = 15;  // 최대 줌아웃 한계
-		controller.minTilt = -75;    // 땅 밑을 과도하게 뚫어보지 않도록 틸트 하한 제한
-		controller.maxTilt = -5;     // 수평보다 약간 아래까지만 가능하도록 상한 제한
+		controller.distance = 6;
+		controller.tilt = -15;
+		controller.minDistance = 2.5;
+		controller.maxDistance = 15;
+		controller.minTilt = -75;
+		controller.maxTilt = -5;
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
@@ -294,7 +258,6 @@ RedGPU.init(
 
 			const controlPower = isGrounded ? 1.0 : airControl;
 
-			// Shift 달리기 체크
 			const isRunning = len > 0 && (keyboardBuffer.shift || keyboardBuffer.Shift);
 			const currentSpeed = isRunning ? moveSpeed * 1.8 : moveSpeed;
 
@@ -327,16 +290,15 @@ RedGPU.init(
 			const dt = lastTime !== null ? (time - lastTime) / 1000 : 0;
 			lastTime = time;
 
-			// [KO] gltf 캐릭터 위치 및 회전 업데이트
-			// [EN] Update gltf character position and rotation
+			// [KO] glTF 캐릭터 위치, 회전 보간 및 상태 머신 갱신
+			// [EN] Update glTF character position, rotation interpolation, and state machine
 			if (soldierMesh) {
 				soldierMesh.x = charMesh.x;
-				soldierMesh.y = charMesh.y - 0.9; // 캡슐 중심에서 아래로 0.9m 오프셋 정렬 (발바닥 위치)
+				soldierMesh.y = charMesh.y - 0.9;
 				soldierMesh.z = charMesh.z;
 
 				const speedXZ = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
 
-				// 이동 속도 벡터 방향으로 회전 보간 (Orient Rotation to Movement)
 				if (speedXZ > 0.005 && dt > 0) {
 					const targetYawRad = Math.atan2(-velocity.x, -velocity.z);
 					const targetYawDeg = targetYawRad * (180 / Math.PI);
@@ -350,13 +312,13 @@ RedGPU.init(
 					soldierMesh.rotationY += diff * factor;
 				}
 
-				// 상태 머신용 전이 조건 상태 갱신
 				if (isRunning && speedXZ > 0.01) targetStateName = 'Run';
 				else if (speedXZ > 0.005) targetStateName = 'Walk';
 				else targetStateName = 'Idle';
 			}
 
-			// 카메라가 캐릭터의 중심보다 약간 위(Y축 +0.3m 오프셋)를 스무스하게 따라가도록 업데이트 (3인칭 카메라 Lerp)
+			// [KO] 3인칭 카메라가 캐릭터 중심(+0.3m)을 부드럽게 추적
+			// [EN] Smoothly follow the character center (+0.3m) with third-person camera
 			const lerpFactor = 0.1;
 			controller.centerX += (charMesh.x - controller.centerX) * lerpFactor;
 			controller.centerY += ((charMesh.y + 0.3) - controller.centerY) * lerpFactor;
@@ -370,18 +332,15 @@ RedGPU.init(
 			const aspect = width / height;
 			const baseDistance = redGPUContext.detector.isMobile ? 8 : 10;
 
-			// 화면 비율에 맞춰 카메라 거리 자동 조절
 			controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
 		};
 
-		// 초기 리사이즈 실행
 		redGPUContext.onResize({
 			target: redGPUContext,
 			screenRectObject: redGPUContext.screenRectObject,
 			pixelRectObject: redGPUContext.pixelRectObject
 		});
 
-		// 초기 1회 카메라 센터 지정 (Lerp에 의한 오프닝 카메라 딜레이 방지)
 		controller.centerX = charMesh.x;
 		controller.centerY = charMesh.y + 0.3;
 		controller.centerZ = charMesh.z;
@@ -400,12 +359,6 @@ RedGPU.init(
 	(failReason) => { console.error(failReason); }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetFunc
- */
 const renderTestPane = async (redGPUContext, resetFunc) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		RedGPU,

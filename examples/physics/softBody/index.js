@@ -87,12 +87,6 @@ RedGPU.init(
 		scene.addChild(clothMesh);
 
 		const nodes = [];
-		/**
-		 * [KO] 물리 노드(정점) 생성
-		 * 네 모서리 정점은 STATIC으로 설정하여 공중에 고정시킵니다.
-		 * [EN] Create physics nodes (vertices)
-		 * Set the four corner vertices to STATIC to fix them in mid-air.
-		 */
 		for (let iz = 0; iz < nrows; iz++) {
 			for (let ix = 0; ix < ncols; ix++) {
 				const isCorner = 
@@ -109,8 +103,6 @@ RedGPU.init(
 				mesh.x = ix * spacingX - width / 2;
 				mesh.y = startY;
 				mesh.z = iz * spacingZ - depth / 2;
-				mesh.visible = false; 
-				scene.addChild(mesh);
 
 				const body = physicsEngine.createBody(mesh, {
 					type: isCorner ? RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC : RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
@@ -248,15 +240,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성 함수
- * [EN] Function to create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Mesh} clothMesh
- * @param {function} spawnObject
- * @param {function} windBlast
- * @param {function} resetScene
- */
 const renderTestPane = (redGPUContext, clothMesh, spawnObject, windBlast, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

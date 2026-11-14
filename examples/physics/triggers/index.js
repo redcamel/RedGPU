@@ -88,10 +88,6 @@ RedGPU.init(
 		// [EN] Manage dynamic objects
 		const activeBalls = [];
 
-		/**
-		 * [KO] 새로운 구슬을 생성하는 함수
-		 * [EN] Function to create a new ball
-		 */
 		const createBall = () => {
 			const ballMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -129,10 +125,6 @@ RedGPU.init(
 			}, 10000);
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeBalls.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -145,10 +137,6 @@ RedGPU.init(
 		// [EN] Auto-spawn balls
 		setInterval(createBall, 1000);
 
-		/**
-		 * [KO] 물리 엔진 충돌 시작 콜백
-		 * [EN] Physics engine collision started callback
-		 */
 		physicsEngine.onCollisionStarted = (h1, h2) => {
 			const triggerHandle = triggerBody.nativeCollider.handle;
 			// [KO] 충돌한 두 물체 중 하나가 센서(trigger)인지 확인하고, 상대방 물체를 찾습니다.
@@ -173,14 +161,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {RedGPU.Display.Mesh} triggerMesh
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, scene, triggerMesh, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

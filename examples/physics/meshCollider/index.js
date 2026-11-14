@@ -42,14 +42,6 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		/**
-		 * [KO] 복잡한 지형 생성 함수 (정적 메쉬 콜라이더 사용)
-		 * RedGPU 물리 플러그인은 PHYSICS_SHAPE.MESH 설정을 통해 
-		 * 박스나 구체가 아닌 실제 메쉬의 정교한 형태 그대로 충돌 판정을 수행할 수 있게 합니다.
-		 * [EN] Function to create complex terrain (using static mesh collider)
-		 * The RedGPU physics plugin allows precise collision detection matching the 
-		 * actual mesh shape using the PHYSICS_SHAPE.MESH setting.
-		 */
 		const createComplexStatic = (geometry, x, y, z, rx, color) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -122,10 +114,6 @@ RedGPU.init(
 			return `#${r}${g}${b}`;
 		};
 
-		/**
-		 * [KO] 동적 구체 생성 함수
-		 * [EN] Function to create dynamic balls
-		 */
 		const createBall = () => {
 			const ball = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -158,10 +146,6 @@ RedGPU.init(
 			}, 10000);
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeBalls.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -184,12 +168,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

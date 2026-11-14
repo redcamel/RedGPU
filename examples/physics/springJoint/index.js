@@ -2,6 +2,14 @@ import * as RedGPU from "../../../dist/index.js?t=1792986333865";
 import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1792986333865";
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1792986333865";
 
+/**
+ * [KO] 스프링 조인트 (Spring Joint)
+ * [EN] Spring Joint
+ *
+ * [KO] Rapier 물리 엔진의 스프링 조인트를 사용하여 천장 앵커에 매달린 탄성 플랫폼과 낙하 물체의 상호작용을 시연합니다.
+ * [EN] Demonstrates the interaction between an elastic platform suspended from ceiling anchors using Rapier spring joints and falling objects.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -203,30 +211,32 @@ RedGPU.init(
 		const renderer = new RedGPU.Renderer();
 		renderer.start(redGPUContext, updateSpringLines);
 
-		// [KO] 8. 테스트 UI 구성: 플랫폼 충격 주기 및 오브젝트 제거 기능
-		// [EN] 8. Set up test UI: Platform kick and object clearing functions
-		new RedGPUExampleHelper(redGPUContext, {
-			gui: (pane) => {
-				const params = {
-					kick: () => {
-						platformBody.nativeBody.wakeUp();
-						platformBody.applyImpulse({ x: 0, y: 200, z: 0 });
-					},
-					reset: () => {
-						activeObjects.forEach(item => {
-							physicsEngine.removeBody(item.body);
-							scene.removeChild(item.mesh);
-						});
-						activeObjects.length = 0;
-					}
-				};
-
-				pane.addButton({ title: 'Kick Platform' }).on('click', params.kick);
-				pane.addButton({ title: 'Clear Objects' }).on('click', params.reset);
-			}
-		});
-	},
-	(failReason) => {
-		console.error(failReason);
-	}
+        renderTestPane(redGPUContext, scene, physicsEngine, platformBody, activeObjects);
+    },
+    (failReason) => {
+        console.error(failReason);
+    }
 );
+
+const renderTestPane = (redGPUContext, scene, physicsEngine, platformBody, activeObjects) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const params = {
+                kick: () => {
+                    platformBody.nativeBody.wakeUp();
+                    platformBody.applyImpulse({x: 0, y: 200, z: 0});
+                },
+                reset: () => {
+                    activeObjects.forEach(item => {
+                        physicsEngine.removeBody(item.body);
+                        scene.removeChild(item.mesh);
+                    });
+                    activeObjects.length = 0;
+                }
+            };
+
+            pane.addButton({title: 'Kick Platform'}).on('click', params.kick);
+            pane.addButton({title: 'Clear Objects'}).on('click', params.reset);
+        }
+    });
+};

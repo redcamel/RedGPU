@@ -43,12 +43,6 @@ RedGPU.init(
 		const waterLevel = 0;
 		const waterDepth = 10;
 
-		/**
-		 * [KO] 1. 수조(Water Volume) 시각화
-		 * 물리적인 충돌체는 아니며, 물속 영역을 시각적으로 나타내기 위한 반투명 박스입니다.
-		 * [EN] 1. Water Volume visualization
-		 * A semi-transparent box to visually represent the underwater area, not a physical collider.
-		 */
 		const waterVolume = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
@@ -61,12 +55,6 @@ RedGPU.init(
 		waterVolume.material.transparent = true;
 		scene.addChild(waterVolume);
 
-		/**
-		 * [KO] 2. 실제 바닥 생성
-		 * 수조의 바닥을 구성하며, 물체가 무한히 떨어지는 것을 방지하는 정적 물리 바디입니다.
-		 * [EN] 2. Create actual floor
-		 * A static physics body that forms the bottom of the tank and prevents objects from falling infinitely.
-		 */
 		const floor = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
@@ -79,25 +67,15 @@ RedGPU.init(
 		physicsEngine.createBody(floor, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
 			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
-			restitution: 0.0 // 묵직한 느낌을 위해 탄성 제거
+            restitution: 0.0
 		});
 
 		const activeObjects = [];
 
-		/**
-		 * [KO] 물리 기반 객체 생성 함수
-		 * 각 객체는 고유의 크기(Volume)와 밀도(Density)를 가지며, 이에 따라 질량과 부력이 결정됩니다.
-		 * [EN] Physics-based object creation function
-		 * Each object has its own volume and density, which determine its mass and buoyancy.
-		 */
 		const createObject = () => {
 			const size = 0.8 + Math.random() * 1.0;
 			const isBall = Math.random() > 0.5;
 			
-			/**
-			 * [KO] 밀도 설정: 0.8(가벼움, 뜸) ~ 5.0(매우 무거움, 가라앉음)
-			 * [EN] Density setup: 0.8 (Light, floats) to 5.0 (Very heavy, sinks)
-			 */
 			const density = 0.8 + Math.random() * 4.2;
 			
 			const mesh = new RedGPU.Display.Mesh(
@@ -132,7 +110,7 @@ RedGPU.init(
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 				shape: isBall ? RedGPU.Physics.PHYSICS_SHAPE.SPHERE : RedGPU.Physics.PHYSICS_SHAPE.BOX,
 				mass: mass,
-				restitution: 0.0, // 납덩어리 같은 무게감을 위해 탄성 제거
+                restitution: 0.0,
 				friction: 1.0,    
 				linearDamping: 0.01,
 				angularDamping: 0.01
@@ -141,20 +119,17 @@ RedGPU.init(
 			activeObjects.push({ body, size, volume, density });
 		};
 
-		// 초기 객체 스폰
+        // [KO] 초기 객체 스폰
+        // [EN] Spawn initial objects
 		for (let i = 0; i < 15; i++) {
 			createObject();
 		}
 
-		/**
-		 * [KO] 정교한 부력 및 수중 항력 시뮬레이션 루프
-		 * 아르키메데스의 원리(부력 = 잠긴 부피 * 액체 밀도 * 중력)를 실시간으로 계산합니다.
-		 * [EN] Advanced buoyancy and underwater drag simulation loop
-		 * Calculates Archimedes' Principle (Buoyancy = Submerged Volume * Liquid Density * Gravity) in real-time.
-		 */
 		const render = () => {
 			const dt = 1 / 60;
-			const liquidDensity = 1.0; // 물의 밀도 기준
+            // [KO] 물의 밀도 기준
+            // [EN] Water density reference
+            const liquidDensity = 1.0;
 			const gravity = 9.81;
 
 			activeObjects.forEach(obj => {
@@ -167,21 +142,9 @@ RedGPU.init(
 				const submergedRatio = Math.max(0, Math.min(1, submergedDepth / obj.size));
 				
 				if (submergedRatio > 0) {
-					/**
-					 * [KO] 부력(Buoyancy Force) 적용
-					 * 잠긴 부피에 비례하여 위쪽으로 충격량(Impulse)을 가합니다.
-					 * [EN] Apply Buoyancy Force
-					 * Applies an upward impulse proportional to the submerged volume.
-					 */
 					const buoyancyForce = (obj.volume * submergedRatio) * liquidDensity * gravity * 120; 
 					obj.body.applyImpulse({ x: 0, y: buoyancyForce * dt, z: 0 });
 
-					/**
-					 * [KO] 수중 저항(Underwater Drag) 적용
-					 * 물속에 잠긴 정도에 비례하여 이동 및 회전 저항(Damping)을 가변적으로 적용합니다.
-					 * [EN] Apply Underwater Drag
-					 * Variably applies movement and rotational damping proportional to the submerged degree.
-					 */
 					const dragFactor = 1.0 + (submergedRatio * 8.0); 
 					obj.body.nativeBody.setLinearDamping(dragFactor);
 					obj.body.nativeBody.setAngularDamping(dragFactor);
@@ -196,9 +159,6 @@ RedGPU.init(
 
 		new RedGPU.Renderer().start(redGPUContext, render);
 
-		/**
-		 * [KO] 씬 초기화 및 재구성
-		 */
 		const resetScene = () => {
 			activeObjects.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -217,13 +177,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} createObject
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, createObject, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

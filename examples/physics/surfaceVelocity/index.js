@@ -41,19 +41,6 @@ RedGPU.init(
 
 		const beltSystems = [];
 
-		/**
-		 * [KO] 컨베이어 벨트 생성 함수
-		 * [EN] Function to create a conveyor belt
-		 *
-		 * [KO] 단일 키네마틱 바디와 텍스처 애니메이션을 조합하여 효율적인 컨베이어 벨트를 시뮬레이션합니다.
-		 * [EN] Simulates an efficient conveyor belt by combining a single kinematic body and texture animation.
-		 * @param {number} x
-		 * @param {number} z
-		 * @param {number} length
-		 * @param {number} width
-		 * @param {number} speed
-		 * @param {number} direction
-		 */
 		const createRealConveyor = (x, z, length, width, speed, direction) => {
 			// [KO] 벨트 텍스처 및 재질 설정
 			// [EN] Set up belt texture and material
@@ -136,10 +123,6 @@ RedGPU.init(
 			return `#${r}${g}${b}`;
 		};
 
-		/**
-		 * [KO] 박스 생성 함수
-		 * [EN] Function to create a box
-		 */
 		const createBox = () => {
 			const size = 0.4;
 			const mesh = new RedGPU.Display.Mesh(
@@ -192,10 +175,6 @@ RedGPU.init(
 			activeObjects.length = 0;
 		};
 
-		/**
-		 * [KO] 업데이트 루프
-		 * [EN] Update loop
-		 */
 		let lastTime = 0;
 		const render = (time) => {
 			if (!lastTime) lastTime = time;
@@ -230,12 +209,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성 함수
- * [EN] Function to create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- */
 const renderTestPane = (redGPUContext, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

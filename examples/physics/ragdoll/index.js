@@ -59,18 +59,6 @@ RedGPU.init(
             return `#${r}${g}${b}`;
         };
 
-		/**
-		 * [KO] 신체 부위(Limb) 생성 함수: 메쉬 생성과 물리 바디 등록을 동시에 수행
-		 * [EN] Limb creation function: Creates mesh and registers physics body simultaneously
-		 * @param {RedGPU.Primitive.Primitive3D} geometry
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 * @param {number} sx
-		 * @param {number} sy
-		 * @param {number} sz
-		 * @param {string} color
-		 */
 		const createLimb = (geometry, x, y, z, sx, sy, sz, color) => {
             const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext, color));
 			mesh.x = x; mesh.y = y; mesh.z = z;
@@ -87,12 +75,6 @@ RedGPU.init(
 			return { mesh, body };
 		};
 
-		/**
-		 * [KO] 인간형 래그돌 생성 및 구형 조인트(Spherical Joint) 연결 로직
-		 * [EN] Humanoid ragdoll creation and Spherical Joint connection logic
-		 * @param {number} offsetX
-		 * @param {number} offsetZ
-		 */
 		const spawnRagdoll = (offsetX, offsetZ) => {
             const color = getRandomColor();
 			
@@ -107,7 +89,8 @@ RedGPU.init(
 				physicsEngine.nativeWorld.createImpulseJoint(jointData, b1.nativeBody, b2.nativeBody, true);
 			};
 
-			// 목(Neck) 및 허리(Waist) 연결
+            // [KO] 목(Neck) 및 허리(Waist) 연결
+            // [EN] Connect neck and waist joints
 			connect(torso.body, head.body, { x: 0, y: 0.45, z: 0 }, { x: 0, y: -0.25, z: 0 });
 			connect(torso.body, pelvis.body, { x: 0, y: -0.45, z: 0 }, { x: 0, y: 0.2, z: 0 });
 
@@ -132,10 +115,6 @@ RedGPU.init(
 
 		spawnRagdoll(0, 0);
 
-		/**
-		 * [KO] 씬 리셋: 기존 캐릭터 제거 및 새 캐릭터 생성
-		 * [EN] Scene Reset: Remove existing characters and spawn a new one
-		 */
 		const resetScene = () => {
 			activeRagdolls.forEach(limbs => limbs.forEach(limb => {
 				physicsEngine.removeBody(limb.body);
@@ -151,13 +130,6 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} spawnRagdoll
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, spawnRagdoll, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

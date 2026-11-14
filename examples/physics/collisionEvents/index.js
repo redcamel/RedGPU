@@ -64,13 +64,6 @@ RedGPU.init(
             return `#${r}${g}${b}`;
         };
 
-		/**
-		 * [KO] 새로운 구슬을 생성하고 충돌 이벤트를 활성화합니다.
-		 * [EN] Create a new ball and enable collision events.
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 */
 		const createBall = (x, y, z) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -96,10 +89,6 @@ RedGPU.init(
 			activeObjects.push({ mesh, body });
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeObjects.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -113,10 +102,6 @@ RedGPU.init(
 		// [EN] Create initial ball
 		createBall(0, 5, 0);
 
-		/**
-		 * [KO] 충돌 시작 시 호출되는 콜백 함수
-		 * [EN] Callback function called when a collision starts
-		 */
 		physicsEngine.onCollisionStarted = (h1, h2) => {
 			const body1 = physicsEngine.getBodyByColliderHandle(h1);
 			const body2 = physicsEngine.getBodyByColliderHandle(h2);
@@ -135,13 +120,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} createBall
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, createBall, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

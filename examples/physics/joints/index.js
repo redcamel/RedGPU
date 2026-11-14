@@ -59,17 +59,11 @@ RedGPU.init(
 			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
 		});
 
-		/**
-		 * [KO] 충돌 필터 설정
-		 * 사슬 조각들끼리 겹치거나 부딪혀서 발생하는 물리적 불안정함을 방지합니다.
-		 * [EN] Collision filter setup
-		 * Prevents physical instability caused by chain links colliding or overlapping.
-		 */
 		const CHAIN_GROUP = 0x0001; 
 		const chainCollisionFilter = (CHAIN_GROUP << 16) | (~CHAIN_GROUP & 0xFFFF);
 
-		// 2. 고정 앵커 (천장에 고정된 지점)
-		// 2. Fixed anchor (point fixed to the ceiling)
+        // [KO] 2. 고정 앵커 (천장에 고정된 지점)
+        // [EN] 2. Fixed anchor (point fixed to the ceiling)
 		const anchorMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
@@ -87,13 +81,6 @@ RedGPU.init(
 		const activeChain = [];
 		let bigBallInfo = null;
 
-		/**
-		 * [KO] 조인트 생성 헬퍼: 명시적으로 spherical 메서드 사용
-		 * [EN] Joint creation helper: Explicitly use the spherical method
-		 * @param {object} a1
-		 * @param {object} a2
-		 * @returns {object}
-		 */
 		const createJointData = (a1, a2) => {
 			const JD = RAPIER.JointData;
 			// [KO] Rapier의 spherical 조인트를 사용하여 자유로운 회전을 구현합니다.
@@ -101,10 +88,6 @@ RedGPU.init(
 			return JD.spherical(a1, a2);
 		};
 
-		/**
-		 * [KO] 사슬 구조 생성 함수
-		 * [EN] Function to create the chain structure
-		 */
 		const initChain = () => {
 			const linkGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.4);
             const linkMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#888888');
@@ -190,13 +173,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} getBigBallBody
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, getBigBallBody, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

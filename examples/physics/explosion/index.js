@@ -93,18 +93,11 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {Array<object>} activeBoxes
- */
 const renderTestPane = async (redGPUContext, activeBoxes) => {
-	
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {
 			pane.addBlade({ view: 'text', label: 'Interaction', value: 'Click to EXPLODE & SPAWN!', parse: (v) => v, readonly: true });
-			pane.addBinding(activeBoxes, 'length', { label: 'Box Count', readonly: true, interval: 100 });
+            pane.addBinding(activeBoxes, 'length', {readonly: true, interval: 100});
 		}
 	});
 };

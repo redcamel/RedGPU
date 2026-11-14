@@ -44,17 +44,6 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		/**
-		 * [KO] 정적 박스 생성 함수 (보드 프레임용)
-		 * [EN] Static box creation function (for board frame)
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 * @param {number} w
-		 * @param {number} h
-		 * @param {number} d
-		 * @param {string} color
-		 */
         const createStaticBox = (x, y, z, w, h, d, color = '#666666') => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -74,12 +63,12 @@ RedGPU.init(
 			});
 		};
 
-		// [KO] 보드 구조물 생성 (약 15m x 20m 스케일)
-		// [EN] Create board structures (approx. 15m x 20m scale)
-        createStaticBox(0, 0, -0.5, 15, 20, 1, '#585858'); // 뒷벽
-        createStaticBox(0, -10, 0.5, 15, 1, 2, '#707070'); // 바닥
-        createStaticBox(-7.5, 0, 0.5, 1, 20, 2, '#707070'); // 왼쪽벽
-        createStaticBox(7.5, 0, 0.5, 1, 20, 2, '#707070'); // 오른쪽벽
+        // [KO] 보드 구조물 생성 (약 15m x 20m 스케일: 뒷벽, 바닥, 좌우 벽)
+        // [EN] Create board structures (approx. 15m x 20m scale: back wall, floor, left and right walls)
+        createStaticBox(0, 0, -0.5, 15, 20, 1, '#585858');
+        createStaticBox(0, -10, 0.5, 15, 1, 2, '#707070');
+        createStaticBox(-7.5, 0, 0.5, 1, 20, 2, '#707070');
+        createStaticBox(7.5, 0, 0.5, 1, 20, 2, '#707070');
 
 		// [KO] 핀(Pins) 배치: 현실적인 간격(1.2m)으로 조정
 		// [EN] Pin placement: Adjusted to realistic spacing (1.2m)
@@ -171,14 +160,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {number} intervalId
- * @param {function} createBall
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, intervalId, createBall, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

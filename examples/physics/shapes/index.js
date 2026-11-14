@@ -72,17 +72,6 @@ RedGPU.init(
 
 		const activeObjects = [];
 
-		/**
-		 * [KO] 다양한 형상의 물리 객체 생성 함수 (현실적인 1~2m 스케일)
-		 * [EN] Helper function to create various shaped physics objects (realistic 1-2m scale)
-		 * @param {string} type
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 * @param {string} color
-		 * @param {number} restitution
-		 * @param {number} friction
-		 */
 		const createPhysicalObject = (type, x, y, z, color, restitution = 0.5, friction = 0.5) => {
 			let geometry, shape;
 			switch (type) {
@@ -140,10 +129,6 @@ RedGPU.init(
 			}
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeObjects.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -165,13 +150,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- * @param {function} createPhysicalObject
- */
 const renderTestPane = async (redGPUContext, resetScene, createPhysicalObject) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

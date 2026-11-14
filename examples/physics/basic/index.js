@@ -64,14 +64,6 @@ RedGPU.init(
 			return `#${r}${g}${b}`;
 		};
 
-		/**
-		 * [KO] 1m 정육면체 박스 생성 함수
-		 * [EN] Function to create a 1m cubic box
-		 * @param {number} x
-		 * @param {number} y
-		 * @param {number} z
-		 * @param {string} color
-		 */
 		const createBox = (x, y, z, color = getRandomColor()) => {
 			const boxMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -108,10 +100,6 @@ RedGPU.init(
 			}
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeBoxes.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -133,15 +121,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RapierPhysics} physicsEngine
- * @param {function} createBox
- * @param {function} resetScene
- * @param {function} updateGravityY
- */
 const renderTestPane = async (redGPUContext, physicsEngine, createBox, resetScene, updateGravityY) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

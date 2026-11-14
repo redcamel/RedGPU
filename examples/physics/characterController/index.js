@@ -19,12 +19,12 @@ RedGPU.init(
 		// [KO] 카메라 컨트롤러 설정
 		// [EN] Set up camera controller
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 6; // 3인칭 밀착형 줌 조절 (keyboardCharacterControl 스타일)
-		controller.tilt = -15; // 3인칭 밀착형 틸트 조절 (keyboardCharacterControl 스타일)
-		controller.minDistance = 2.5;  // 최소 줌인 한계
-		controller.maxDistance = 15;  // 최대 줌아웃 한계
-		controller.minTilt = -75;    // 땅 밑을 과도하게 뚫어보지 않도록 틸트 하한 제한
-		controller.maxTilt = -5;     // 수평보다 약간 아래까지만 가능하도록 상한 제한
+        controller.distance = 6;
+        controller.tilt = -15;
+        controller.minDistance = 2.5;
+        controller.maxDistance = 15;
+        controller.minTilt = -75;
+        controller.maxTilt = -5;
 
 		const scene = new RedGPU.Display.Scene();
 
@@ -52,7 +52,8 @@ RedGPU.init(
 		directionalLight.azimuth = 147.5;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		// HSL 색상을 16진수 HEX 스트링(#RRGGBB)으로 변환하는 헬퍼 함수
+        // [KO] HSL 색상을 16진수 HEX 문자열로 변환
+        // [EN] Convert HSL color to hexadecimal HEX string
 		const hslToHex = (h, s, l) => {
 			l /= 100;
 			const a = (s * Math.min(l, 1 - l)) / 100;
@@ -88,11 +89,10 @@ RedGPU.init(
 			});
 		};
 
-		// 바닥 (30m x 30m)
+        // [KO] 바닥, 경사로, 계단 지형 생성
+        // [EN] Create ground, ramp, and stair terrain
         createStatic(new RedGPU.Primitive.Box(redGPUContext), 0, -0.5, 0, 30, 1, 30, 0, '#5a6578');
-		// 경사로 (폭 5m, 길이 8m)
         createStatic(new RedGPU.Primitive.Box(redGPUContext), -6, 0.5, 8, 5, 0.5, 8, -20, '#c0487a');
-		// 계단 (높이 0.2m 간격)
 		for (let i = 0; i < 5; i++) {
 			const hue = 30 + (i * 8);
 			createStatic(
@@ -128,9 +128,9 @@ RedGPU.init(
 
 				scene.addChild(soldierMesh);
 
-				// ── 애니메이션 클립 매핑 ─────────
+                // [KO] 애니메이션 클립 매핑 및 상태 머신 구성 (0=Idle, 1=Run, 2=TPose, 3=Walk)
+                // [EN] Map animation clips and configure state machine (0=Idle, 1=Run, 2=TPose, 3=Walk)
 				const clips = loader.parsingResult.animations;
-				// Soldier.glb: 0=Idle, 1=Run, 2=TPose, 3=Walk
 				if (clips && clips.length > 0) {
 					const idleState = clips[0];
 					const runState = clips[1];
@@ -140,14 +140,12 @@ RedGPU.init(
 					walkState.name = 'Walk';
 					runState.name = 'Run';
 
-					// ── 상태 머신 ──────────────────
 					stateMachine = new RedGPU.AnimStateMachine(idleState);
 					stateMachine.addState(walkState);
 					stateMachine.addState(runState);
 
-					const BLEND = 0.25; // 전이 시간 (초)
+                    const BLEND = 0.25;
 
-					// Idle ↔ Walk ↔ Run 전이 그래프
 					const pairs = [
 						['Idle', 'Walk'], ['Idle', 'Run'],
 						['Walk', 'Idle'], ['Walk', 'Run'],
@@ -162,7 +160,6 @@ RedGPU.init(
 						});
 					});
 
-					// 기존 자동 재생 정지 후, 재생 시작 + 상태 머신 주입
 					loader.stopAnimation();
 					loader.playAnimation(idleState);
 					if (loader.activeAnimations.length > 0) {
@@ -239,7 +236,6 @@ RedGPU.init(
 				inputZ /= len;
 			}
 
-			// Shift 달리기 체크
 			const isRunning = len > 0 && (keyboardBuffer.shift || keyboardBuffer.Shift);
 			const currentSpeed = isRunning ? 0.3 : speed;
 
@@ -262,14 +258,13 @@ RedGPU.init(
 			const isGrounded = charController.computedGrounded ? charController.computedGrounded() : false;
 			if (isGrounded) movement.y = 0;
 
-			// [KO] gltf 캐릭터 위치 및 회전 업데이트
-			// [EN] Update gltf character position and rotation
+            // [KO] glTF 캐릭터 위치, 회전 보간 및 상태 머신 갱신
+            // [EN] Update glTF character position, rotation interpolation, and state machine
 			if (soldierMesh) {
 				soldierMesh.x = charMesh.x;
-				soldierMesh.y = charMesh.y - 0.9; // 캡슐 중심에서 아래로 0.9m 오프셋 정렬 (발바닥 위치)
+                soldierMesh.y = charMesh.y - 0.9;
 				soldierMesh.z = charMesh.z;
 
-				// 이동 벡터 방향으로 자연스럽게 회전 (Orient Rotation to Movement)
 				if (len > 0 && dt > 0) {
 					const targetYawRad = Math.atan2(-movement.x, -movement.z);
 					const targetYawDeg = targetYawRad * (180 / Math.PI);
@@ -283,7 +278,6 @@ RedGPU.init(
 					soldierMesh.rotationY += diff * factor;
 				}
 
-				// 상태 머신용 전이 조건 상태 갱신
 				if (isRunning) targetStateName = 'Run';
 				else if (len > 0) targetStateName = 'Walk';
 				else targetStateName = 'Idle';
@@ -303,18 +297,15 @@ RedGPU.init(
 			const aspect = width / height;
 			const baseDistance = redGPUContext.detector.isMobile ? 8 : 10;
 
-			// 화면 비율에 맞춰 카메라 거리 자동 조절
 			controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
 		};
 
-		// 초기 리사이즈 실행
 		redGPUContext.onResize({
 			target: redGPUContext,
 			screenRectObject: redGPUContext.screenRectObject,
 			pixelRectObject: redGPUContext.pixelRectObject
 		});
 
-		// 초기 1회 카메라 센터 지정 (Lerp에 의한 오프닝 카메라 딜레이 방지)
 		controller.centerX = charMesh.x;
 		controller.centerY = charMesh.y + 1.2;
 		controller.centerZ = charMesh.z;
@@ -328,12 +319,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetCharacter
- */
 const renderTestPane = async (redGPUContext, resetCharacter) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

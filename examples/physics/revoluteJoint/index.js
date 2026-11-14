@@ -138,17 +138,10 @@ RedGPU.init(
 		);
 		const joint = physicsEngine.nativeWorld.createImpulseJoint(jointData, pillarBody.nativeBody, fanBody.nativeBody, true);
 		
-		/**
-		 * [KO] 조인트 모터 설정 (configureMotorVelocity)
-		 * 첫 번째 인자(3.0): 목표 각속도 (초당 라디안). 회전의 빠르기와 방향을 결정합니다.
-		 * 두 번째 인자(500.0): 최대 힘 (토크). 목표 속도를 유지하기 위해 낼 수 있는 최대 파워입니다.
-		 * [EN] Joint Motor Configuration (configureMotorVelocity)
-		 * 1st Arg (3.0): Target angular velocity (rad/s). Determines speed and direction.
-		 * 2nd Arg (500.0): Max force (torque). The limit of power to maintain the target speed.
-		 */
 		joint.configureMotorVelocity(3.0, 500.0);
 
-		// 4. 상호작용용 낙하 공
+        // [KO] 4. 상호작용용 낙하 공
+        // [EN] 4. Interactive falling ball
 		const activeBalls = [];
 		const createBall = () => {
 			const ball = new RedGPU.Display.Mesh(
@@ -199,13 +192,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {object} joint
- * @param {function} resetScene
- */
 const renderTestPane = (redGPUContext, joint, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

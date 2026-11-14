@@ -66,12 +66,6 @@ RedGPU.init(
             return `#${r}${g}${b}`;
         };
 
-		/**
-		 * [KO] 다양한 크기의 구체 생성 함수
-		 * 각 구체는 고유의 크기와 재질을 가지며, 부피에 비례하는 질량을 할당받습니다.
-		 * [EN] Variously sized sphere creation function
-		 * Each sphere has its own unique size and material, assigned a mass proportional to its volume.
-		 */
 		const createBall = () => {
 			// [KO] 반지름 결정 (0.1m ~ 0.6m)
 			// [EN] Radius determination (0.1m to 0.6m)
@@ -93,14 +87,6 @@ RedGPU.init(
 			mesh.scaleX = mesh.scaleY = mesh.scaleZ = radius;
 			scene.addChild(mesh);
 
-			/**
-			 * [KO] 물리 바디 생성
-			 * 질량을 크기에 비례하게 설정(radius * 10)하여 무거운 구체가 가벼운 구체를 쳐내도록 유도합니다.
-			 * 구체는 상자보다 휴면(Sleep) 상태 진입이 까다로워 엔진 성능 테스트에 더욱 효과적입니다.
-			 * [EN] Create physics body
-			 * Set mass proportional to size (radius * 10), causing heavy spheres to push lighter ones.
-			 * Spheres are harder to enter the Sleep state than boxes, making them more effective for engine stress testing.
-			 */
 			const body = physicsEngine.createBody(mesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
@@ -111,10 +97,6 @@ RedGPU.init(
 			activeObjects.push({ mesh, body });
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수: 현재 시뮬레이션 중인 모든 객체 제거
-		 * [EN] Scene reset function: Remove all objects currently being simulated
-		 */
 		const resetScene = () => {
 			activeObjects.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -129,14 +111,6 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} createBall
- * @param {function} resetScene
- * @param {Array<object>} activeObjects
- */
 const renderTestPane = (redGPUContext, createBall, resetScene, activeObjects) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

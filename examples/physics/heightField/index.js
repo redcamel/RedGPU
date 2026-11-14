@@ -134,10 +134,6 @@ RedGPU.init(
 			return `#${r}${g}${b}`;
 		};
 
-		/**
-		 * [KO] 구체 스폰 함수
-		 * [EN] Sphere spawn function
-		 */
 		const spawnSpheres = () => {
 			for (let i = 0; i < 10; i++) {
 				const sphereMesh = new RedGPU.Display.Mesh(
@@ -160,10 +156,6 @@ RedGPU.init(
 			}
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 * [EN] Scene reset function
-		 */
 		const resetScene = () => {
 			activeObjects.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -187,14 +179,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성 함수
- * [EN] Function to create a control panel for testing
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RapierPhysics} physicsEngine
- * @param {function} spawnSpheres
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, physicsEngine, spawnSpheres, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

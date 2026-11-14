@@ -59,7 +59,9 @@ RedGPU.init(
 			new RedGPU.Primitive.Ground(redGPUContext, 1.05, 22),
 			new RedGPU.Material.PhongMaterial(redGPUContext, '#9c7853')
 		);
-		laneMesh.z = -9; // 파울 라인부터 핀 뒤쪽 공간까지 커버
+        // [KO] 파울 라인부터 핀 뒤쪽 공간까지 커버하도록 레인 배치
+        // [EN] Position the lane to cover from the foul line to behind the pins
+        laneMesh.z = -9;
 		scene.addChild(laneMesh);
 		physicsEngine.createBody(laneMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -76,14 +78,12 @@ RedGPU.init(
 		const pinGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.06, 0.06, 0.38);
 		const pinMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#d8d8d8');
 
-		/**
-		 * [KO] 볼링 핀 스폰 (실제 규격: 파울 라인으로부터 18.288m 지점에 1번 핀 배치)
-		 * [EN] Spawn pins (Real Specs: Place Pin #1 at 18.288m from the foul line)
-		 */
 		const spawnPins = () => {
 			const rows = 4;
-			const spacingX = 0.3048; // 12인치 간격
-			const spacingZ = 0.264;  // 정삼각형 배치를 위한 Z 간격
+            // [KO] 12인치 X 간격 및 정삼각형 배치를 위한 Z 간격
+            // [EN] 12-inch X spacing and Z interval for equilateral triangle layout
+            const spacingX = 0.3048;
+            const spacingZ = 0.264;
 			const headPinZ = -18.288; // [KO] 실제 규격 거리 [EN] Real specification distance
 
 			for (let row = 0; row < rows; row++) {
@@ -131,21 +131,17 @@ RedGPU.init(
 
 		spawnPins();
 
-		/**
-		 * [KO] 볼링공 투구 (실제 규격: 지름 21.8cm, 무게 약 7kg)
-		 * [EN] Throwing bowling ball (Real Specs: Diameter 21.8cm, Weight approx. 7kg)
-		 * @param {number} power
-		 * @param {number} aim
-		 */
 		const throwBall = (power, aim) => {
+            // [KO] 반경 10.9cm 볼링공 생성 및 파울 라인 근처에서 투구
+            // [EN] Create a 10.9cm radius bowling ball and throw near the foul line
 			const ballMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
-				new RedGPU.Primitive.Sphere(redGPUContext, 0.109), // 반경 10.9cm
+                new RedGPU.Primitive.Sphere(redGPUContext, 0.109),
 				new RedGPU.Material.PhongMaterial(redGPUContext, '#cc4444')
 			);
 			ballMesh.x = aim * 0.3;
 			ballMesh.y = 0.109;
-			ballMesh.z = 1; // 파울 라인 근처에서 투구
+            ballMesh.z = 1;
 			scene.addChild(ballMesh);
 
 			const ballBody = physicsEngine.createBody(ballMesh, {
@@ -176,13 +172,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} throwBall
- * @param {function} resetGame
- */
 const renderTestPane = async (redGPUContext, throwBall, resetGame) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {

@@ -90,12 +90,6 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {

@@ -46,7 +46,8 @@ RedGPU.init(
 		const GROUP_BLACK = 0x0004; 
 		const GROUP_ALL   = 0xFFFF;
 
-		// 1. 바닥 생성 함수 (현실적인 미터 단위 스케일)
+        // [KO] 1. 바닥 생성 함수 (현실적인 미터 단위 스케일)
+        // [EN] 1. Ground creation function (realistic meter-scale)
 		const createFloor = (x, color, membership) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -74,7 +75,8 @@ RedGPU.init(
         createFloor(0, '#666666', GROUP_BLACK);
         createFloor(12, '#4466cc', GROUP_BLUE);
 
-		// 2. 구슬 생성 시스템
+        // [KO] 2. 구슬 생성 시스템
+        // [EN] 2. Marble spawning system
 		const activeBalls = [];
 		const ballGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
 
@@ -158,12 +160,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {function} resetScene
- */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
