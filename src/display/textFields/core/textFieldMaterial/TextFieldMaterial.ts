@@ -65,6 +65,18 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
         this.initGPURenderInfos()
     }
 
+    /**
+     * [KO] 텍스트 필드의 TAA 리액티브 마스크(`gBufferMotionVector`)가 기록되도록 모션 벡터 타겟의 `writeMask`를 유지합니다.
+     * [EN] Preserves the `writeMask` of the motion vector target so the text field's TAA reactive mask (`gBufferMotionVector`) is written.
+     */
+    getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
+        const state = super.getFragmentRenderState(entryPoint);
+        const targets = state.targets as GPUColorTargetState[];
+        if (targets[2]) {
+            targets[2].writeMask = this.writeMaskState;
+        }
+        return state;
+    }
 
 }
 
