@@ -97,7 +97,8 @@ const createUnderwaterEnvironment = (redGPUContext, scene) => {
     marbleMaterial.roughnessFactor = 0.25;
     marbleMaterial.metallicFactor = 0.05;
 
-    // 1. 중앙 대칭 침수형 석조 테라스 계단 (수면 위 +0.55m ➔ 심해 -2.95m, 바닥까지 연결된 솔리드 기단)
+    // [KO] 1. 중앙 대칭 침수형 석조 테라스 계단 (수면 위 +0.55m ~ 심해 -2.95m)
+    // [EN] 1. Central symmetric submerged stone terrace steps (+0.55m above water to -2.95m depth)
     const addSolidStep = (x, z, w, d, topY) => {
         const h = topY - floorY;
         const stepMesh = new RedGPU.Display.Mesh(
@@ -125,7 +126,8 @@ const createUnderwaterEnvironment = (redGPUContext, scene) => {
     });
     addSolidStep(0.0, -1.0, 4.2, 6.0, -2.95);
 
-    // 2. 수면 관통 사선 굴절 테스트 바 & 구체 (수면 경계 굴절 꺾임 확인용)
+    // [KO] 2. 수면 관통 사선 굴절 테스트 바 & 구체 (수면 경계 굴절 꺾임 확인용)
+    // [EN] 2. Diagonal refraction test bars and sphere piercing the water surface
     const goldMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     goldMaterial.baseColorFactor = [0.95, 0.80, 0.30, 1.0];
     goldMaterial.roughnessFactor = 0.15;
@@ -155,7 +157,8 @@ const createUnderwaterEnvironment = (redGPUContext, scene) => {
         scene.addChild(sphereMesh);
     });
 
-    // 3. 후면 대칭 SSR 반사 랜드마크 (중앙 타워 + 시안 토러스 + 좌우 루비/앰버 기둥)
+    // [KO] 3. 후면 대칭 SSR 반사 랜드마크 (중앙 타워 + 시안 토러스 + 좌우 루비/앰버 기둥)
+    // [EN] 3. Rear symmetric SSR reflection landmarks (central tower, cyan torus, and ruby/amber pillars)
     const darkObsidian = new RedGPU.Material.PBRMaterial(redGPUContext);
     darkObsidian.baseColorFactor = [0.12, 0.14, 0.18, 1.0];
     darkObsidian.roughnessFactor = 0.18;

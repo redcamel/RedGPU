@@ -226,7 +226,8 @@ const createBeachEnvironment = (redGPUContext, scene) => {
         maxAnisotropy: 16
     });
 
-    // 1. 연속된 완만 경사 해변/수중 바닥 (육지 해변에서 수중까지 이음새 없이 연결)
+    // [KO] 1. 연속된 완만 경사 해변/수중 바닥 (육지 해변에서 수중까지 이음새 없이 연결)
+    // [EN] 1. Continuous gently sloped beach and underwater floor (seamless from shore to seabed)
     const seabedMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     seabedMaterial.baseColorTexture = gravelAlbedo;
     seabedMaterial.normalTexture = gravelNormal;
@@ -249,7 +250,8 @@ const createBeachEnvironment = (redGPUContext, scene) => {
     seabedMesh.receiveShadow = true;
     scene.addChild(seabedMesh);
 
-    // 2. 자연 해안 바위 및 외곽 석주 재질 정의
+    // [KO] 2. 자연 해안 바위 및 외곽 석주 재질 정의
+    // [EN] 2. Materials for coastal rocks and outer stone pillars
     const rockMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     rockMaterial.baseColorTexture = rockAlbedo;
     rockMaterial.normalTexture = rockNormal;
@@ -267,7 +269,8 @@ const createBeachEnvironment = (redGPUContext, scene) => {
     pillarMaterial.roughnessFactor = 0.30;
     pillarMaterial.metallicFactor = 0.05;
 
-    // 3. 중앙 수역을 비워두고 외곽에 여유 있게 배치한 수중 석주 4기 (긴 사선 그림자 및 SSR 반사 제공)
+    // [KO] 3. 외곽 수중 석주 4기 배치 (긴 사선 그림자 및 SSR 반사 제공)
+    // [EN] 3. Four outer underwater stone pillars (for long diagonal shadows and SSR reflections)
     const pillarGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.65, 0.78, 8.5, 24);
     [
         {x: 8.5, z: -2.5, heightScale: 1.0},
@@ -284,7 +287,8 @@ const createBeachEnvironment = (redGPUContext, scene) => {
         scene.addChild(pillar);
     });
 
-    // 4. 원경 및 좌우 해안가 외곽의 큼직한 바위 군락 (중앙 보행 경로를 방해하지 않는 개방형 구도)
+    // [KO] 4. 원경 및 좌우 해안가 외곽 바위 군락 (중앙 보행 경로 개방)
+    // [EN] 4. Distant and lateral coastal rock clusters (keeping the central walking path open)
     const boulderGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 24, 24);
     [
         {x: -13.5, y: 0.3, z: -5.0, scale: [4.2, 2.2, 3.6], rotX: 15, rotY: 25},
@@ -304,7 +308,8 @@ const createBeachEnvironment = (redGPUContext, scene) => {
         scene.addChild(boulder);
     });
 
-    // 5. 수면 상하 부유 바위 3개 (캐릭터 이동 시 20x20 슬라이딩 파동 도메인 진입/이탈 확인용)
+    // [KO] 5. 수면 상하 부유 바위 3개 (캐릭터 이동 시 20x20 슬라이딩 파동 도메인 진입/이탈 확인용)
+    // [EN] 5. Three rocks near the water surface (for testing entry/exit of the 20x20 sliding wave domain)
     const floatRockGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 20, 20);
     [
         {x: -5.8, y: 0.44, z: 1.5, scale: 1.05},

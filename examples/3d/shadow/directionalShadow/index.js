@@ -15,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = -15;
         controller.distance = 30;
@@ -30,22 +29,20 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        // 2. 조명 설정
         // [KO] 그림자를 생성할 방향성 조명을 추가합니다.
         // [EN] Add a directional light that will generate shadows.
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 4. 무작위 객체 생성
         addRandomMeshes(redGPUContext, scene);
 
-        // 5. 애니메이션 렌더 루프 및 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // 생성된 무작위 메시들의 애니메이션 처리 (첫 번째 자식인 바닥 제외)
+            // [KO] 무작위 메시 애니메이션 처리 (첫 번째 자식인 바닥 제외)
+            // [EN] Animate random meshes (excluding the ground mesh at index 0)
             let i = scene.numChildren;
             while (i--) {
-                if (i === 0) continue; // 바닥 메시 제외
+                if (i === 0) continue;
                 const mesh = scene.children[i];
                 mesh.rotationX += 1.5;
                 mesh.rotationY += 1.5;
@@ -54,7 +51,6 @@ RedGPU.init(
             }
         });
 
-        // 7. 테스트 GUI 설정
         renderTestPane(redGPUContext, scene);
     },
     (failReason) => {
@@ -74,7 +70,8 @@ const addRandomMeshes = (redGPUContext, scene) => {
         new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
     ];
 
-    // 바닥 메시 생성 (그림자를 받음)
+    // [KO] 바닥 메시 생성 (그림자 수신)
+    // [EN] Create ground mesh (receives shadows)
     const ground = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Ground(redGPUContext),
@@ -84,7 +81,8 @@ const addRandomMeshes = (redGPUContext, scene) => {
     ground.receiveShadow = true;
     scene.addChild(ground);
 
-    // 500개의 무작위 메시 생성
+    // [KO] 500개의 무작위 메시 생성
+    // [EN] Create 500 random meshes
     for (let i = 0; i < 500; i++) {
         const geometry = geometries[Math.floor(Math.random() * geometries.length)];
         const material = new RedGPU.Material.PhongMaterial(redGPUContext, getRandomHexValue());
@@ -100,7 +98,6 @@ const addRandomMeshes = (redGPUContext, scene) => {
         mesh.rotationY = Math.random() * 360;
         mesh.rotationZ = Math.random() * 360;
 
-        // 그림자 생성 설정
         mesh.castShadow = true;
 
         scene.addChild(mesh);

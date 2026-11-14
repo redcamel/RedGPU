@@ -25,12 +25,10 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
         RedGPU.init(canvas, (redGPUContext) => {
             activeContext = redGPUContext;
 
-            // 1. 카메라 설정
             const controller = new RedGPU.Camera.OrbitController(redGPUContext);
             controller.distance = 6;
             controller.tilt = -15;
 
-            // 2. 씬 구성 (입체감을 위해 광원 1개와 PhongMaterial 추가)
             const scene = new RedGPU.Display.Scene();
 
 
@@ -41,14 +39,13 @@ const setupContext = (containerId, statusMsgId, colorHex, btnDestroyId, btnCreat
             const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
             scene.addChild(mesh);
 
-            // 3. 뷰 추가 및 렌더 가동
             const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
             view.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
             redGPUContext.addView(view);
 
             const renderer = new RedGPU.Renderer();
             renderer.start(redGPUContext, () => {
-                mesh.rotationY += 1; // 자전 루프
+                mesh.rotationY += 1;
             });
 
             console.log(`[RedGPU] Initialized ${containerId}`);

@@ -15,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 20;
         controller.speedDistance = 0.3;
@@ -30,30 +29,29 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        // 2. 조명 설정
         // [KO] 그림자를 생성할 방향성 조명을 추가합니다.
         // [EN] Add a directional light that will generate shadows.
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 3. 바닥 및 GLTF 모델 로드
+        // [KO] 바닥 및 GLTF 모델 로드
+        // [EN] Load ground mesh and GLTF models
         addGround(redGPUContext, scene);
         loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -3, 3, 3);
         loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 3, 0, 3);
 
-        // 4. 애니메이션 렌더 루프 및 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // 로드된 모델들의 애니메이션 처리 (첫 번째 자식인 바닥 제외)
+            // [KO] 로드된 모델 애니메이션 처리 (첫 번째 자식인 바닥 제외)
+            // [EN] Animate loaded models (excluding the ground mesh at index 0)
             let i = scene.numChildren;
             while (i--) {
-                if (i === 0) continue; // 바닥 메시 제외
+                if (i === 0) continue;
                 const model = scene.children[i];
                 model.rotationY += 0.5;
             }
         });
 
-        // 6. 테스트 GUI 설정
         renderTestPane(redGPUContext, scene);
     },
     (failReason) => {

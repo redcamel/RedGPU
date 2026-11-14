@@ -125,7 +125,8 @@ const createUnderwaterEnvironment = (redGPUContext, scene) => {
     groundMesh.receiveShadow = true;
     scene.addChild(groundMesh);
 
-    // 1. 수중 6x6 바둑판 타일 플라자 (상단면 y: -1.25m, 동심원 물결 전파 시 격자 굴절 왜곡 극대화)
+    // [KO] 1. 수중 6x6 바둑판 타일 플라자 (동심원 물결 전파 시 격자 굴절 왜곡 극대화)
+    // [EN] 1. Underwater 6x6 checkerboard plaza (maximizing grid refraction distortion under ripples)
     const lightTileMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     lightTileMaterial.baseColorFactor = [0.92, 0.89, 0.83, 1.0];
     lightTileMaterial.roughnessFactor = 0.25;
@@ -162,7 +163,8 @@ const createUnderwaterEnvironment = (redGPUContext, scene) => {
         }
     }
 
-    // 2. 8각 원형 반사 열주 아레나 (반경 7.4m: 시뮬레이션 도메인 경계 표시 및 전 방향 SSR 수직 반사 제공)
+    // [KO] 2. 8각 원형 반사 열주 아레나 (반경 7.4m: 시뮬레이션 도메인 경계 표시 및 전 방향 SSR 반사 제공)
+    // [EN] 2. Octagonal reflective colonnade arena (radius 7.4m: marks simulation bounds and provides 360-degree SSR)
     const plinthMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     plinthMaterial.baseColorFactor = [0.78, 0.80, 0.83, 1.0];
     plinthMaterial.roughnessFactor = 0.35;
