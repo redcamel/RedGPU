@@ -298,7 +298,9 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_endIf
         if (resultAlpha <= effectiveCutOff) { discard; }
     #redgpu_endIf
-    resultAlpha = u_opacity;
+    if (uniforms.alphaBlend != 2u) {
+        resultAlpha = u_opacity;
+    }
 
 
 

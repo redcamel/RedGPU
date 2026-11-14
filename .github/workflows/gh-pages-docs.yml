@@ -3,7 +3,8 @@ name: Build Docs and Code on gh-pages
 on:
   push:
     branches:
-      - gh-pages
+      - master
+  workflow_dispatch:
 
 jobs:
   build-all:
@@ -11,9 +12,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      # 1. 소스 코드 체크아웃
+      # 1. 소스 코드 체크아웃 (master 브랜치 기준)
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: master
 
       # 2. Node.js 환경 설정
       - name: Set up Node.js
@@ -34,7 +37,14 @@ jobs:
       - name: Build code
         run: npm run build
 
-      # 6. Example Helper 빌드 및 정적 SEO 콘텐츠 주입
+      # 6. Inspector 빌드
+      - name: Build Inspector
+        run: |
+          cd inspector
+          npm ci
+          npm run build
+
+      # 7. Example Helper 빌드 및 정적 SEO 콘텐츠 주입
       - name: Build Example Helper and SEO tags
         run: |
           cd examples/exampleHelper
@@ -43,35 +53,34 @@ jobs:
           cd ../..
           node buildScripts/github/generate-example-version.js
 
-      # 7. 매뉴얼 빌드 (VitePress & TypeDoc API)
+      # 8. 매뉴얼 빌드 (VitePress & TypeDoc API)
       - name: Build documentation
         run: |
           cd manual
           npm ci
           npm run build
 
-      # 8. 전체 사이트맵 인덱스 생성 (SEO 최적화)
+      # 9. 전체 사이트맵 인덱스 생성 (SEO 최적화)
       - name: Build sitemap
         run: node buildScripts/github/generate-sitemap.js
 
-      # 9. 변경된 빌드 결과물을 gh-pages 브랜치에 강제 커밋 및 푸시
-      - name: Commit and push build files
+      # 10. 변경된 빌드 결과물을 gh-pages 브랜치에 강제 커밋 및 푸시 (충돌 원천 차단)
+      - name: Commit and force-push to gh-pages
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # manual 및 exampleHelper 내부 임시 빌드/의존성 폴더 제외 처리
-          rm -rf manual/node_modules manual/.vitepress/dist manual/.vitepress/cache examples/exampleHelper/node_modules
+          # manual, inspector, exampleHelper 내부 임시 빌드/의존성 폴더 제외 처리
+          rm -rf manual/node_modules manual/.vitepress/dist manual/.vitepress/cache examples/exampleHelper/node_modules inspector/node_modules
           
           # docs 폴더 및 기존 sitemap_v2.xml 삭제 반영 (존재할 경우에만)
           git rm -rf --ignore-unmatch docs/ sitemap/ sitemap_v2.xml
           
           # 빌드 결과물 및 사이트맵 파일 추가
-          git add dist/ manual/ examples/ sitemap.xml sitemap-examples.xml -f
+          git add dist/ inspector/dist/ manual/ examples/ sitemap.xml sitemap-examples.xml -f
           
-          # sitemap 폴더가 있을 경우 추가 (없을 수도 있음)
-          git add sitemap/ -f || true
-          
-          # 변경사항이 있는 경우에만 커밋 (무한 루프 방지를 위해 [skip ci] 포함)
+          # 변경사항이 있는 경우 커밋 생성
           git diff --staged --quiet || git commit -m "chore: auto-build dist and docs with cache bursting [skip ci]"
-          git push
+          
+          # master 기반 빌드 커밋을 gh-pages 브랜치에 충돌 없이 강제 덮어쓰기 배포
+          git push --force origin HEAD:gh-pages
