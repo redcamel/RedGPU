@@ -298,6 +298,9 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_endIf
         if (resultAlpha <= effectiveCutOff) { discard; }
     #redgpu_endIf
+    if (uniforms.alphaBlend != 2u) {
+        resultAlpha = u_opacity;
+    }
 
 
 
@@ -623,6 +626,9 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_else
         output.color = finalColor;
     #redgpu_endIf
+    if (uniforms.alphaBlend == 2u && output.color.a == 0.0) {
+        discard;
+    }
 
     {
         let smoothness = 1.0 - roughnessParameter;

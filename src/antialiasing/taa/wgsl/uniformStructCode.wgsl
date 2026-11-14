@@ -10,6 +10,8 @@ const NEIGHBORHOOD_SAMPLE_COUNT: i32 = NEIGHBORHOOD_AXIS_COUNT * NEIGHBORHOOD_AX
 const SHARED_TILE_SIDE: i32 = WORKGROUP_TILE_SIZE + NEIGHBORHOOD_RADIUS * 2;
 const SHARED_TILE_TEXEL_COUNT: i32 = SHARED_TILE_SIDE * SHARED_TILE_SIDE;
 const WORKGROUP_THREAD_COUNT: i32 = WORKGROUP_TILE_SIZE * WORKGROUP_TILE_SIZE;
+const SKY_MOTION_SENTINEL_THRESHOLD: f32 = 10.0;
+const OVERLAY_MOTION_SENTINEL_THRESHOLD: f32 = 500.0;
 
 // TAA uniform buffer layout (16-byte aligned)
 struct Uniforms {
@@ -166,10 +168,15 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
 
 // Computes local screen-space velocity variance across 4-cardinal neighbors to detect motion boundaries
 fn calculate_velocity_variance(tex: texture_2d<f32>, centerCoord: vec2<i32>, centerVel: vec2<f32>, screenSize: vec2<f32>) -> f32 {
-    let velR = textureLoad(tex, centerCoord + vec2<i32>(1, 0), 0).xy;
-    let velL = textureLoad(tex, centerCoord - vec2<i32>(1, 0), 0).xy;
-    let velU = textureLoad(tex, centerCoord + vec2<i32>(0, 1), 0).xy;
-    let velD = textureLoad(tex, centerCoord - vec2<i32>(0, 1), 0).xy;
+    let rawVelR = textureLoad(tex, centerCoord + vec2<i32>(1, 0), 0).xy;
+    let rawVelL = textureLoad(tex, centerCoord - vec2<i32>(1, 0), 0).xy;
+    let rawVelU = textureLoad(tex, centerCoord + vec2<i32>(0, 1), 0).xy;
+    let rawVelD = textureLoad(tex, centerCoord - vec2<i32>(0, 1), 0).xy;
+
+    let velR = select(rawVelR, centerVel, rawVelR.x > SKY_MOTION_SENTINEL_THRESHOLD);
+    let velL = select(rawVelL, centerVel, rawVelL.x > SKY_MOTION_SENTINEL_THRESHOLD);
+    let velU = select(rawVelU, centerVel, rawVelU.x > SKY_MOTION_SENTINEL_THRESHOLD);
+    let velD = select(rawVelD, centerVel, rawVelD.x > SKY_MOTION_SENTINEL_THRESHOLD);
 
     let dR = (velR - centerVel) * screenSize;
     let dL = (velL - centerVel) * screenSize;

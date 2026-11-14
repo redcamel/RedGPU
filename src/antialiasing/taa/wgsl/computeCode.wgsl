@@ -93,8 +93,8 @@
     let centerVelocity = textureLoad(gBufferMotionVector, pixelCoord, 0).xy;
     let velocity = textureLoad(gBufferMotionVector, closestCoord, 0).xy;
 
-    // Bypass history accumulation and output unjittered center pixel when the reactive mask sentinel (velocity.x > 10.0) is set
-    if (centerVelocity.x > 10.0 || velocity.x > 10.0) {
+    // Bypass history accumulation for foreground unjittered overlays (center pixel) or pure unjittered sky background (dilated closest depth)
+    if (centerVelocity.x > OVERLAY_MOTION_SENTINEL_THRESHOLD || velocity.x > SKY_MOTION_SENTINEL_THRESHOLD) {
         let centerRGBA = s_color[localCoord.y][localCoord.x];
         let finalHDR_RGB = select(inverse_tonemap(centerRGBA.rgb), vec3<f32>(0.0), all(centerRGBA.rgb == vec3<f32>(0.0)));
         textureStore(outputTexture, pixelCoord, vec4<f32>(finalHDR_RGB, centerRGBA.a));

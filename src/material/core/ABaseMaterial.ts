@@ -1,6 +1,7 @@
 import ColorRGB from "../../color/ColorRGB";
 import ColorRGBA from "../../color/ColorRGBA";
 import RedGPUContext from "../../context/RedGPUContext";
+import GPU_BLEND_FACTOR from "../../gpuConst/GPU_BLEND_FACTOR";
 import BlendState from "../../renderState/BlendState";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceBase from "../../resources/core/ResourceBase";
@@ -153,7 +154,7 @@ abstract class ABaseMaterial extends ResourceBase {
             getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex)
         )
         this.#blendColorState = new BlendState(this)
-        this.#blendAlphaState = new BlendState(this)
+        this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.ONE, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA)
 
         this.#basicGPUSampler = resourceManager.basicSampler.gpuSampler
         this.#emptyBitmapGPUTextureView = resourceManager.emptyBitmapTextureView
@@ -442,7 +443,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Configured GPUFragmentState object
      */
     getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
-        const gBufferWriteMask = ((this.#transparent || this['alphaBlend'] === 2) && !this.use2PathRender) ? 0 : this.writeMaskState;
+        const gBufferNormalWriteMask = ((this.#transparent || this['alphaBlend'] === 2) && !this.use2PathRender) ? 0 : this.writeMaskState;
         return {
             module: this.gpuRenderInfo.fragmentShaderModule,
             entryPoint,
@@ -458,12 +459,12 @@ abstract class ABaseMaterial extends ResourceBase {
                 {
                     format: navigator.gpu.getPreferredCanvasFormat(),
                     blend: undefined,
-                    writeMask: gBufferWriteMask,
+                    writeMask: gBufferNormalWriteMask,
                 },
                 {
                     format: 'rg16float',
                     blend: undefined,
-                    writeMask: gBufferWriteMask,
+                    writeMask: this.writeMaskState,
                 },
             ]
         }

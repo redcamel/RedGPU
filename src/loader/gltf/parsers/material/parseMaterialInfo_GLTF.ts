@@ -200,7 +200,7 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
             currentMaterial.alphaBlend = 2;
             blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA
             blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA
-            blendAlphaState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA
+            blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE
             blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA
             currentMaterial.transparent = true
             break;
