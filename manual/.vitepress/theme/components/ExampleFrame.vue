@@ -1,6 +1,10 @@
 <script setup>
 import {computed} from 'vue'
 
+defineOptions({
+  inheritAttrs: false
+})
+
 const props = defineProps({
   src: {
     type: String,

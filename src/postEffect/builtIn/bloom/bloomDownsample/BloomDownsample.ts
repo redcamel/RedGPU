@@ -12,7 +12,7 @@ import computeCode from "./wgsl/computeCode.wgsl";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Visual Effects
+ * @category PostEffect
  */
 class BloomDownsample extends ASingleComputePassPostEffect {
     /**

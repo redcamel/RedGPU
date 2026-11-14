@@ -77,6 +77,26 @@ class RadialBlur extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 방사형 회전 블러(Radial Blur) 효과를 렌더링합니다.
+     * [EN] Renders the radial rotational blur effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 방사형 블러가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with radial blur applied (`IPostEffectResult`)
+     */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         if (this.amount <= 0) return sourceTextureInfo;
         return super.render(view, width, height, sourceTextureInfo);

@@ -39,6 +39,14 @@ class DOFAutoFocus extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 수동 초점 거리를 반환합니다.
+     * [EN] Returns the manual focus distance.
+     *
+     * @returns
+     * [KO] 수동 초점 거리
+     * [EN] Manual focus distance
+     */
     get focusDistance(): number {
         return this.#focusDistance;
     }
@@ -50,6 +58,14 @@ class DOFAutoFocus extends ASingleComputePassPostEffect {
         this.updateUniform('focusDistance', value);
     }
 
+    /**
+     * [KO] 자동 초점 히스토리 모드를 반환합니다.
+     * [EN] Returns the autofocus history mode.
+     *
+     * @returns
+     * [KO] 자동 초점 히스토리 모드
+     * [EN] Autofocus history mode
+     */
     get historyMode(): number {
         return this.#historyMode;
     }

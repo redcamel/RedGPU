@@ -37,22 +37,74 @@ export interface LakeActiveMeshEntry {
     footSide: number;
 }
 
+/**
+ * [KO] 수면 상호작용 대상 메시의 프레임 간 이동 속도와 보행 주기를 추적하는 내부 헬퍼 클래스입니다.
+ * [EN] Internal helper class that tracks frame-to-frame movement speed and stride cycle of water-interacting meshes.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Water
+ */
 class MeshMotionTracker {
     data: Float32Array = new Float32Array(7);
     isInitialized: boolean = false;
 
+    /**
+     * [KO] 평활화된 수평 이동 속도를 반환합니다.
+     * [EN] Returns the smoothed horizontal movement speed.
+     *
+     * @returns
+     * [KO] 이동 속도
+     * [EN] Movement speed
+     */
     get speed(): number {
         return this.data[3];
     }
 
+    /**
+     * [KO] 보행 시 발걸음 파동 펄스 강도를 반환합니다.
+     * [EN] Returns the stride ripple pulse intensity during walking.
+     *
+     * @returns
+     * [KO] 발걸음 펄스 강도
+     * [EN] Stride pulse intensity
+     */
     get stepPulse(): number {
         return this.data[5];
     }
 
+    /**
+     * [KO] 현재 보행 주기의 좌/우 발 방향 부호(`-1.0` 또는 `1.0`)를 반환합니다.
+     * [EN] Returns the left/right foot sign (`-1.0` or `1.0`) of the current stride cycle.
+     *
+     * @returns
+     * [KO] 좌/우 발 부호
+     * [EN] Left/right foot sign
+     */
     get footSide(): number {
         return this.data[6];
     }
 
+    /**
+     * [KO] 현재 프레임의 월드 좌표와 경과 시간을 기반으로 속도 및 보행 펄스 상태를 갱신합니다.
+     * [EN] Updates speed and stride pulse state based on the current frame's world coordinates and delta time.
+     *
+     * @param x -
+     * [KO] 월드 X 좌표
+     * [EN] World X coordinate
+     * @param y -
+     * [KO] 월드 Y 좌표
+     * [EN] World Y coordinate
+     * @param z -
+     * [KO] 월드 Z 좌표
+     * [EN] World Z coordinate
+     * @param dt -
+     * [KO] 프레임 경과 시간 (초)
+     * [EN] Frame delta time in seconds
+     */
     update(x: number, y: number, z: number, dt: number): void {
         const d = this.data;
         if (!this.isInitialized) {

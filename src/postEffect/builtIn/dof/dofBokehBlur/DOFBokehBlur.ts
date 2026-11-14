@@ -47,6 +47,14 @@ class DOFBokehBlur extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 보케 하이라이트 부스트 배율을 반환합니다.
+     * [EN] Returns the bokeh highlight boost multiplier.
+     *
+     * @returns
+     * [KO] 보케 하이라이트 부스트 배율
+     * [EN] Bokeh highlight boost multiplier
+     */
     get bokehBrightness(): number {
         return this.#bokehBrightness;
     }
@@ -58,6 +66,14 @@ class DOFBokehBlur extends ASingleComputePassPostEffect {
         this.updateUniform('bokehBrightness', value);
     }
 
+    /**
+     * [KO] 조리개 날 개수를 반환합니다.
+     * [EN] Returns the number of aperture blades.
+     *
+     * @returns
+     * [KO] 조리개 날 개수
+     * [EN] Number of aperture blades
+     */
     get bladeCount(): number {
         return this.#bladeCount;
     }
@@ -69,10 +85,47 @@ class DOFBokehBlur extends ASingleComputePassPostEffect {
         this.updateUniform('bladeCount', value);
     }
 
+    /**
+     * [KO] 패스 모드(`0`: 배경 보케, `1`: 전경 보케)를 반환합니다.
+     * [EN] Returns the pass mode (`0`: background bokeh, `1`: foreground bokeh).
+     *
+     * @returns
+     * [KO] 패스 모드
+     * [EN] Pass mode
+     */
     get passMode(): number {
         return this.#passMode;
     }
 
+    /**
+     * [KO] 다중 해상도 CoC 밉맵과 타일 최대 CoC 정보를 기반으로 보케 블러를 렌더링합니다.
+     * [EN] Renders bokeh blur based on multi-resolution CoC mipmaps and tile maximum CoC information.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param cocMip0Info -
+     * [KO] `1/2` 해상도 CoC 텍스처 정보 (`Mip 0`)
+     * [EN] `1/2` resolution CoC texture information (`Mip 0`)
+     * @param cocMip1Info -
+     * [KO] `1/4` 해상도 CoC 텍스처 정보 (`Mip 1`)
+     * [EN] `1/4` resolution CoC texture information (`Mip 1`)
+     * @param cocMip2Info -
+     * [KO] `1/8` 해상도 CoC 텍스처 정보 (`Mip 2`)
+     * [EN] `1/8` resolution CoC texture information (`Mip 2`)
+     * @param tileMaxTextureInfo -
+     * [KO] 타일별 최대 CoC 텍스처 정보
+     * [EN] Per-tile maximum CoC texture information
+     * @returns
+     * [KO] 렌더링된 보케 블러 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Rendered bokeh blur texture information (`IPostEffectResult`)
+     */
     render(
         view: View3D,
         width: number,

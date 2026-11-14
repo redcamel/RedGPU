@@ -56,6 +56,14 @@ class DOFComposite extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 초점 거리를 반환합니다.
+     * [EN] Returns the focus distance.
+     *
+     * @returns
+     * [KO] 초점 거리
+     * [EN] Focus distance
+     */
     get focusDistance(): number {
         return this.#focusDistance;
     }
@@ -67,6 +75,14 @@ class DOFComposite extends ASingleComputePassPostEffect {
         this.updateUniform('focusDistance', value);
     }
 
+    /**
+     * [KO] 조리개 값(F-Stop)을 반환합니다.
+     * [EN] Returns the aperture value (F-Stop).
+     *
+     * @returns
+     * [KO] 조리개 값
+     * [EN] Aperture value
+     */
     get aperture(): number {
         return this.#aperture;
     }
@@ -78,6 +94,14 @@ class DOFComposite extends ASingleComputePassPostEffect {
         this.updateUniform('aperture', value);
     }
 
+    /**
+     * [KO] 렌즈 초점 거리(mm)를 반환합니다.
+     * [EN] Returns the lens focal length (mm).
+     *
+     * @returns
+     * [KO] 렌즈 초점 거리
+     * [EN] Lens focal length
+     */
     get focalLength(): number {
         return this.#focalLength;
     }
@@ -89,6 +113,14 @@ class DOFComposite extends ASingleComputePassPostEffect {
         this.updateUniform('focalLength', value);
     }
 
+    /**
+     * [KO] 자동 초점 사용 여부 플래그(`0` 또는 `1`)를 반환합니다.
+     * [EN] Returns the autofocus usage flag (`0` or `1`).
+     *
+     * @returns
+     * [KO] 자동 초점 사용 여부 플래그
+     * [EN] Autofocus usage flag
+     */
     get useAutoFocus(): number {
         return this.#useAutoFocus;
     }
@@ -100,6 +132,14 @@ class DOFComposite extends ASingleComputePassPostEffect {
         this.updateUniform('useAutoFocus', value);
     }
 
+    /**
+     * [KO] 이전 프레임 히스토리 유효성 플래그(`0` 또는 `1`)를 반환합니다.
+     * [EN] Returns the previous frame history validity flag (`0` or `1`).
+     *
+     * @returns
+     * [KO] 히스토리 유효성 플래그
+     * [EN] History validity flag
+     */
     get historyValid(): number {
         return this.#historyValid;
     }

@@ -28,7 +28,7 @@ import BloomUpsample from "./bloomUpsample/BloomUpsample";
  * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/bloom/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Bloom example](/RedGPU/examples/postEffect/builtIn/lens/bloom/)
- * @category Visual Effects
+ * @category PostEffect
  */
 class Bloom extends AMultiPassPostEffect {
     #prefilterPass: BloomPrefilter;

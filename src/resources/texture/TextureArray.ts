@@ -89,22 +89,62 @@ class TextureArray extends ManagementResourceBase {
         }
     }
 
+    /**
+     * [KO] 배열 텍스처의 가로 크기(픽셀)를 반환합니다.
+     * [EN] Returns the width of the texture array in pixels.
+     *
+     * @returns
+     * [KO] 가로 크기 (픽셀)
+     * [EN] Width in pixels
+     */
     get width(): number {
         return this.#width
     }
 
+    /**
+     * [KO] 배열 텍스처의 세로 크기(픽셀)를 반환합니다.
+     * [EN] Returns the height of the texture array in pixels.
+     *
+     * @returns
+     * [KO] 세로 크기 (픽셀)
+     * [EN] Height in pixels
+     */
     get height(): number {
         return this.#height
     }
 
+    /**
+     * [KO] 생성된 `GPUTexture` 인스턴스를 반환합니다.
+     * [EN] Returns the created `GPUTexture` instance.
+     *
+     * @returns
+     * [KO] `GPUTexture` 인스턴스
+     * [EN] `GPUTexture` instance
+     */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture
     }
 
+    /**
+     * [KO] 생성된 밉맵 레벨 개수를 반환합니다.
+     * [EN] Returns the number of generated mipmap levels.
+     *
+     * @returns
+     * [KO] 밉맵 레벨 개수
+     * [EN] Mipmap level count
+     */
     get mipLevelCount(): number {
         return this.#mipLevelCount
     }
 
+    /**
+     * [KO] 밉맵 사용 여부를 반환합니다.
+     * [EN] Returns whether mipmaps are enabled.
+     *
+     * @returns
+     * [KO] 밉맵 사용 여부
+     * [EN] Whether mipmaps are enabled
+     */
     get useMipmap(): boolean {
         return this.#useMipmap
     }

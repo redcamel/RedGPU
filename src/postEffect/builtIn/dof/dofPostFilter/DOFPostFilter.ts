@@ -38,6 +38,14 @@ class DOFPostFilter extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 패스 모드(`0`: 배경 보케, `1`: 전경 보케)를 반환합니다.
+     * [EN] Returns the pass mode (`0`: background bokeh, `1`: foreground bokeh).
+     *
+     * @returns
+     * [KO] 패스 모드
+     * [EN] Pass mode
+     */
     get passMode(): number {
         return this.#passMode;
     }

@@ -59,21 +59,91 @@ Experience the live behavior of each controller directly in the interactive prev
 ### OrbitController
 
 Optimized for rotating around and inspecting a specific target.
+
+```javascript
+const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+controller.centerX = 0;
+controller.centerY = 1;
+controller.centerZ = 0;
+controller.distance = 10; // Distance from target center
+controller.pan = 45;      // Horizontal rotation angle (degrees)
+controller.tilt = -20;    // Vertical tilt angle (degrees)
+```
+
 <iframe src="/RedGPU/examples/3d/controller/orbitController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### FreeController
 
 Freely explore 3D space from a first-person perspective using the **W, A, S, D** keys and mouse.
+
+```javascript
+const controller = new RedGPU.Camera.FreeController(redGPUContext);
+controller.x = 0;
+controller.y = 5;
+controller.z = 20;
+controller.moveSpeed = 20;        // Movement speed
+controller.mouseSensitivity = 0.15; // Mouse rotation sensitivity
+```
+
 <iframe src="/RedGPU/examples/3d/controller/freeController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### IsometricController
 
-Maintains a fixed viewing angle suitable for strategy simulations or infographics.
+Uses an internal `OrthographicCamera` to maintain a fixed quarter-view angle without perspective distortion, ideal for
+strategy simulations or infographics.
+
+```javascript
+const controller = new RedGPU.Camera.IsometricController(redGPUContext);
+controller.viewHeight = 15; // Orthographic view height
+controller.zoom = 1.0;      // Zoom multiplier (minZoom ~ maxZoom)
+controller.cameraAngle = 45; // Isometric horizontal rotation angle
+```
+
 <iframe src="/RedGPU/examples/3d/controller/isometricController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### FollowController
-Provides a viewpoint that smoothly follows characters or moving objects.
+
+Provides a third-person viewpoint that smoothly tracks the movement and rotation of a character or moving object
+(`targetMesh`).
+
+```javascript
+const controller = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
+controller.distance = 8;  // Distance behind the target
+controller.height = 2;    // Camera height relative to the target
+controller.pan = 0;       // Horizontal offset angle relative to the target
+controller.tilt = 15;     // Vertical look-down angle
+```
+
 <iframe src="/RedGPU/examples/3d/controller/followController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
+
+---
+
+## 3. Character Movement Controller
+
+When you need keyboard-driven 3D character movement (WASD/Arrow keys, running, jumping) and terrain height
+synchronization (`getFloorHeight`) alongside camera control, you can combine `SimpleCharacterController` with your view
+camera.
+
+```javascript
+const characterController = new RedGPU.Charactor.SimpleCharacterController(
+        redGPUContext,
+        characterMesh,
+        view.camera,
+        {
+          speed: 3.0,
+          runSpeed: 7.0,
+          rotationSpeed: 8.0,
+          jumpForce: 5.0,
+          floorHeight: 0.0,
+          getFloorHeight: (x, z) => landscape.getHeightAt(x, z), // Optional: dynamic terrain height callback
+        }
+);
+
+// Pass deltaTime (seconds) every frame in the render loop
+renderer.start(redGPUContext, (time) => {
+  characterController.update(deltaTime);
+});
+```
 
 ---
 
@@ -83,6 +153,7 @@ Provides a viewpoint that smoothly follows characters or moving objects.
 - [FreeController](/RedGPU/examples/3d/controller/freeController/)
 - [FollowController](/RedGPU/examples/3d/controller/followController/)
 - [IsometricController](/RedGPU/examples/3d/controller/isometricController/)
+- [Keyboard Character Control](/RedGPU/examples/gltf/animation/keyboardCharacterControl/)
 
 ---
 

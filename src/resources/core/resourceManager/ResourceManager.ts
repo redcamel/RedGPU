@@ -1413,6 +1413,17 @@ export class ImmutableKeyMap extends Map {
     }
 }
 
+/**
+ * [KO] 등록된 리소스의 비디오 메모리 합계를 자동으로 추적하는 내부 `Map` 확장 클래스입니다.
+ * [EN] Internal `Map` extension class that automatically tracks total video memory of registered resources.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Resource
+ */
 class MemoryTrackingMap<K, V> extends Map<K, V> {
     #videoMemory: number = 0;
 
@@ -1420,10 +1431,32 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
         super();
     }
 
+    /**
+     * [KO] 추적 중인 총 비디오 메모리 크기(바이트)를 반환합니다.
+     * [EN] Returns the total tracked video memory size in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 크기 (바이트)
+     * [EN] Video memory size in bytes
+     */
     get videoMemory(): number {
         return this.#videoMemory;
     }
 
+    /**
+     * [KO] 리소스를 맵에 등록하고 비디오 메모리 사용량을 갱신합니다.
+     * [EN] Registers a resource in the map and updates video memory usage.
+     *
+     * @param key -
+     * [KO] 리소스 키
+     * [EN] Resource key
+     * @param value -
+     * [KO] 리소스 값
+     * [EN] Resource value
+     * @returns
+     * [KO] 현재 맵 인스턴스
+     * [EN] Current map instance
+     */
     set(key: K, value: V): this {
         const videoMemoryKey =
             (value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
@@ -1442,6 +1475,17 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
         return super.set(key, value);
     }
 
+    /**
+     * [KO] 리소스를 맵에서 제거하고 비디오 메모리 사용량을 차감합니다.
+     * [EN] Removes a resource from the map and subtracts its video memory usage.
+     *
+     * @param key -
+     * [KO] 삭제할 리소스 키
+     * [EN] Resource key to delete
+     * @returns
+     * [KO] 삭제 성공 여부
+     * [EN] Whether deletion succeeded
+     */
     delete(key: K): boolean {
         if (this.has(key)) {
             const value = this.get(key) as any;
@@ -1456,6 +1500,10 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
         return super.delete(key);
     }
 
+    /**
+     * [KO] 모든 리소스를 제거하고 비디오 메모리 사용량을 초기화합니다.
+     * [EN] Clears all resources and resets video memory usage to zero.
+     */
     clear(): void {
         this.#videoMemory = 0;
         super.clear();

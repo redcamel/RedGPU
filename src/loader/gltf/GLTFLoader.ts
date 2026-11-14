@@ -346,7 +346,7 @@ export default GLTFLoader;
  * [KO] 재생 중인 애니메이션 상태 및 모션 블렌딩 정보를 담는 클래스입니다.
  * [EN] Class containing active animation state and motion blending information.
  *
- * @category Animation
+ * @category Loader
  */
 export class PlayAnimationInfo {
     /**

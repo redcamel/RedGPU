@@ -144,6 +144,28 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## 3. Supported glTF 2.0 Material Extensions
+
+In addition to the standard Metallic-Roughness workflow, `GLTFLoader` and `PBRMaterial` automatically parse and render
+official Khronos glTF 2.0 PBR extensions out of the box.
+
+| glTF Extension                                  | Visual Effect & Role                                              | Live Sample                                                                                                        |
+|:------------------------------------------------|:------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------|
+| `KHR_materials_clearcoat`                       | Transparent clearcoat reflective layer for car paint and lacquers | [ClearCoat Car Paint](/RedGPU/examples/gltf/gltfExtensions/clearcoat/clearCoatCarPaint/)                           |
+| `KHR_materials_transmission`                    | Physical light transmission with refraction for glass and liquids | [Mosquito In Amber](/RedGPU/examples/gltf/gltfExtensions/transmission/mosquitoInAmber/)                            |
+| `KHR_materials_volume`                          | Volumetric medium with thickness and light attenuation            | [Dragon Attenuation](/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/)                               |
+| `KHR_materials_ior`                             | Index of Refraction control for dielectric media                  | [IOR Test Grid](/RedGPU/examples/gltf/gltfExtensions/volume/IORTestGrid/)                                          |
+| `KHR_materials_dispersion`                      | Wavelength-dependent chromatic dispersion in prisms and gemstones | [Dragon Dispersion](/RedGPU/examples/gltf/gltfExtensions/dispersion/dragonDispersion/)                             |
+| `KHR_materials_sheen`                           | Microfiber grazing-angle scattering for velvet and cloth fabrics  | [Glam Velvet Sofa](/RedGPU/examples/gltf/gltfExtensions/sheen/glamVelvetSofa/)                                     |
+| `KHR_materials_iridescence`                     | Thin-film interference rainbow shift on soap bubbles and coatings | [Iridescence Lamp](/RedGPU/examples/gltf/gltfExtensions/iridescence/iridescenceLamp/)                              |
+| `KHR_materials_anisotropy`                      | Directional anisotropic highlights on brushed metal and silk      | [Anisotropy Barn Lamp](/RedGPU/examples/gltf/gltfExtensions/anisotropy/anisotropyBarnLamp/)                        |
+| `KHR_materials_specular`                        | Fine control over dielectric specular strength and specular color | [Specular Silk Pouf](/RedGPU/examples/gltf/gltfExtensions/specular/specularSilkPouf/)                              |
+| `KHR_materials_diffuse_transmission`            | Translucent diffuse transmission for porcelain teacups and leaves | [Diffuse Transmission Teacup](/RedGPU/examples/gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup/) |
+| `KHR_materials_emissive_strength`               | High-intensity HDR emissive multiplier above `1.0`                | [Emissive Strength](/RedGPU/examples/gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/)                   |
+| `KHR_materials_unlit` / `KHR_texture_transform` | Unlit shading bypassing lighting and UV offset/rotation/scale     | [Texture Transform](/RedGPU/examples/gltf/gltfExtensions/textureTransform/textureTransformTest/)                   |
+
+---
+
 ## Related Examples
 
 - [DamagedHelmet Model Loading](/RedGPU/examples/gltf/models/helmets/)

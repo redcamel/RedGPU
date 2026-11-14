@@ -63,6 +63,26 @@ class Vibrance extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 생동감(Vibrance) 및 채도 조절 효과를 렌더링합니다.
+     * [EN] Renders the vibrance and saturation adjustment effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 생동감이 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with vibrance applied (`IPostEffectResult`)
+     */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         if (this.vibrance === 0 && this.saturation === 0) return sourceTextureInfo;
         return super.render(view, width, height, sourceTextureInfo);

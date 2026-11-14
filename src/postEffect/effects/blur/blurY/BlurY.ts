@@ -65,6 +65,26 @@ class BlurY extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 세로 방향(Y축) 1차원 블러 효과를 렌더링합니다.
+     * [EN] Renders the vertical (Y-axis) 1D blur effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 세로 블러가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with vertical blur applied (`IPostEffectResult`)
+     */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         if (this.size <= 0) return sourceTextureInfo;
         return super.render(view, width, height, sourceTextureInfo);

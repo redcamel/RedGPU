@@ -148,6 +148,26 @@ class ColorTemperatureTint extends ASingleRenderPassPostEffect {
         this.tint = 15;
     }
 
+    /**
+     * [KO] 색온도 및 색조(Temperature & Tint) 조절 효과를 렌더링합니다.
+     * [EN] Renders the color temperature and tint adjustment effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 색온도 및 색조가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with color temperature and tint applied (`IPostEffectResult`)
+     */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         if (this.amount <= 0 || (this.temperature === 6500 && this.tint === 0)) return sourceTextureInfo;
         return super.render(view, width, height, sourceTextureInfo);

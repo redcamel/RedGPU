@@ -89,6 +89,26 @@ class SSR extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 화면 공간 반사(SSR) 효과를 렌더링합니다.
+     * [EN] Renders the Screen Space Reflection (SSR) effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] SSR 효과가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with SSR applied (`IPostEffectResult`)
+     */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         if (this.reflectionIntensity <= 0) return sourceTextureInfo;
         return super.render(view, width, height, sourceTextureInfo);

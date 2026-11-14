@@ -46,6 +46,14 @@ class DOFCoCDownsample extends ASingleComputePassPostEffect {
         );
     }
 
+    /**
+     * [KO] 초점 거리를 반환합니다.
+     * [EN] Returns the focus distance.
+     *
+     * @returns
+     * [KO] 초점 거리
+     * [EN] Focus distance
+     */
     get focusDistance(): number {
         return this.#focusDistance;
     }
@@ -57,6 +65,14 @@ class DOFCoCDownsample extends ASingleComputePassPostEffect {
         this.updateUniform('focusDistance', value);
     }
 
+    /**
+     * [KO] 조리개 값(F-Stop)을 반환합니다.
+     * [EN] Returns the aperture value (F-Stop).
+     *
+     * @returns
+     * [KO] 조리개 값
+     * [EN] Aperture value
+     */
     get aperture(): number {
         return this.#aperture;
     }
@@ -68,6 +84,14 @@ class DOFCoCDownsample extends ASingleComputePassPostEffect {
         this.updateUniform('aperture', value);
     }
 
+    /**
+     * [KO] 렌즈 초점 거리(mm)를 반환합니다.
+     * [EN] Returns the lens focal length (mm).
+     *
+     * @returns
+     * [KO] 렌즈 초점 거리
+     * [EN] Lens focal length
+     */
     get focalLength(): number {
         return this.#focalLength;
     }
@@ -79,6 +103,14 @@ class DOFCoCDownsample extends ASingleComputePassPostEffect {
         this.updateUniform('focalLength', value);
     }
 
+    /**
+     * [KO] 자동 초점 사용 여부 플래그(`0` 또는 `1`)를 반환합니다.
+     * [EN] Returns the autofocus usage flag (`0` or `1`).
+     *
+     * @returns
+     * [KO] 자동 초점 사용 여부 플래그
+     * [EN] Autofocus usage flag
+     */
     get useAutoFocus(): number {
         return this.#useAutoFocus;
     }
@@ -90,6 +122,14 @@ class DOFCoCDownsample extends ASingleComputePassPostEffect {
         this.updateUniform('useAutoFocus', value);
     }
 
+    /**
+     * [KO] 이전 프레임 CoC 히스토리 유효성 플래그(`0` 또는 `1`)를 반환합니다.
+     * [EN] Returns the previous frame CoC history validity flag (`0` or `1`).
+     *
+     * @returns
+     * [KO] 히스토리 유효성 플래그
+     * [EN] History validity flag
+     */
     get historyValid(): number {
         return this.#historyValid;
     }
@@ -101,6 +141,32 @@ class DOFCoCDownsample extends ASingleComputePassPostEffect {
         this.updateUniform('historyValid', value);
     }
 
+    /**
+     * [KO] 원본 HDR 텍스처와 깊이 정보를 기반으로 절반 해상도(`1/2`) CoC 계산 및 양방향 다운샘플링을 수행합니다.
+     * [EN] Computes half-resolution (`1/2`) CoC and performs bilateral downsampling based on the original HDR texture and depth information.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 원본 풀해상도 HDR 텍스처 정보
+     * [EN] Original full-resolution HDR texture information
+     * @param focusTextureInfo -
+     * [KO] `1x1` 유효 초점 거리 상태 텍스처 정보
+     * [EN] `1x1` effective focus distance state texture information
+     * @param prevCoCTextureInfo -
+     * [KO] 이전 프레임의 `1/2` 해상도 CoC 텍스처 정보
+     * [EN] Previous frame's `1/2` resolution CoC texture information
+     * @returns
+     * [KO] 다운샘플링된 `1/2` 해상도 CoC 및 컬러 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Downsampled `1/2` resolution CoC and color texture information (`IPostEffectResult`)
+     */
     render(
         view: View3D,
         width: number,
