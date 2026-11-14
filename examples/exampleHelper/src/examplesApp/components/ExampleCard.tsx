@@ -40,7 +40,7 @@ const ExampleCard: React.FC<ExampleCardProps> = ({item, lcpCounter}) => {
 
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
-    const plainDescription = description.replace(/<[^>]*>/g, '').replace(/[<>]/g, '').trim();
+    const plainDescription = description.trim();
     const altSuffix = language === 'ko' ? 'RedGPU WebGPU 예제' : 'RedGPU WebGPU Example';
     const imageAlt = `${item.name} - ${altSuffix}`;
     const imageTitle = plainDescription || item.name;
