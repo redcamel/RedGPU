@@ -96,4 +96,4 @@ const postEffectGraph = `
 
 ---
 
-[다음 단계: 일반 이펙트 배우기](./general-effects.md)
+[다음 단계: 빌트인 이펙트 배우기](./builtin-effects.md)
