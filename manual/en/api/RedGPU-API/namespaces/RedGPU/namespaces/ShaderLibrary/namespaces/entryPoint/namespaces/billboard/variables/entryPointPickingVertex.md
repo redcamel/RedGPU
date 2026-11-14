@@ -1,0 +1,91 @@
+[**RedGPU API v4.5.0-Alpha**](../../../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../../../README.md) / [RedGPU](../../../../../../../README.md) / [ShaderLibrary](../../../../../README.md) / [entryPoint](../../../README.md) / [billboard](../README.md) / entryPointPickingVertex
+
+# Variable: entryPointPickingVertex
+
+> `const` **entryPointPickingVertex**: `string` = `billboardEntryPointPickingVertex_wgsl`
+
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2312](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/systemCodeManager/ShaderLibrary.ts#L2312)
+
+Vertex shader entry point for billboard picking.
+
+//
+
+## Param
+
+**inputData**
+
+Vertex input data
+//
+
+## Returns
+
+Vertex output data
+
+```wgsl
+@vertex
+fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
+    let u_resolution = systemUniforms.resolution;
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
+
+    let u_viewMatrix = systemUniforms.camera.viewMatrix;
+    let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
+    let u_useBillboard = vertexUniforms.useBillboard;
+    let u_usePixelSize = vertexUniforms.usePixelSize;
+    let u_pixelSize = vertexUniforms.pixelSize;
+    let u_renderRatioX = vertexUniforms.renderRatioX;
+    let u_renderRatioY = vertexUniforms.renderRatioY;
+
+    var ratioScaleMatrix: mat4x4<f32> = mat4x4<f32>(
+        u_renderRatioX, 0, 0, 0,
+        0, u_renderRatioY, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    );
+
+    if (u_useBillboard == 1) {
+        let billboardMatrix = getBillboardMatrix(u_viewMatrix, u_modelMatrix, 1u);
+
+        if (u_usePixelSize == 1) {
+            let viewPositionCenter = billboardMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            let clipCenter = u_projectionMatrix * viewPositionCenter;
+            let scaleX = (u_pixelSize / u_resolution.x) * 2.0 * u_renderRatioX;
+            let scaleY = (u_pixelSize / u_resolution.y) * 2.0 * u_renderRatioY;
+
+            output.position = vec4<f32>(
+                clipCenter.xy + inputData.position.xy * vec2<f32>(scaleX, scaleY) * clipCenter.w,
+                clipCenter.zw
+            );
+        } else {
+            output.position = u_projectionMatrix * billboardMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+        }
+    } else {
+        if (u_usePixelSize == 1) {
+            let viewPositionCenter = u_viewMatrix * u_modelMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            let clipCenter = u_projectionMatrix * viewPositionCenter;
+            let pixelWorldScale = (u_pixelSize / u_resolution.y) * (2.0 * clipCenter.w / abs(u_projectionMatrix[1][1]));
+            let pixelRatioScaleMatrix = mat4x4<f32>(
+                u_renderRatioX * pixelWorldScale, 0, 0, 0,
+                0, u_renderRatioY * pixelWorldScale, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            );
+            output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * pixelRatioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+        } else {
+            output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+        }
+    }
+
+    output.position = vec4<f32>(
+        (output.position.xy - systemUniforms.pickingOffset * output.position.w) * u_resolution,
+        output.position.zw
+    );
+    output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
+    return output;
+}
+```

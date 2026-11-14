@@ -1,0 +1,15 @@
+[**RedGPU API v4.5.0-Alpha**](../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../README.md) / [RedGPU](../../../README.md) / [Physics](../README.md) / PhysicsShape
+
+# Type Alias: PhysicsShape
+
+> **PhysicsShape** = *typeof* [`PHYSICS_SHAPE`](../variables/PHYSICS_SHAPE.md)\[keyof *typeof* [`PHYSICS_SHAPE`](../variables/PHYSICS_SHAPE.md)\]
+
+Defined in: [src/physics/PhysicsShape.ts:52](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/physics/PhysicsShape.ts#L52)
+
+**`Experimental`**
+
+Union type for the values of `PHYSICS_SHAPE`.

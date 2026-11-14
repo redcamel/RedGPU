@@ -1,0 +1,710 @@
+[**RedGPU API v4.5.0-Alpha**](../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../README.md) / [RedGPU](../../../README.md) / [Resource](../README.md) / DirectTexture
+
+# Class: DirectTexture
+
+Defined in: [src/resources/texture/DirectTexture.ts:18](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/DirectTexture.ts#L18)
+
+외부에서 생성된 `GPUTexture`를 직접 주입받아 관리하는 2D 텍스처 클래스입니다.
+
+***
+
+### Example
+```typescript
+const directTexture = new RedGPU.Resource.DirectTexture(redGPUContext, 'myDirectTexture', gpuTexture);
+```
+
+## Extends
+
+- `ADirectTexture`
+
+## Constructors
+
+
+
+***
+
+### Constructor
+
+> **new DirectTexture**(`redGPUContext`, `cacheKey`, `gpuTexture?`): `DirectTexture`
+
+Defined in: [src/resources/texture/DirectTexture.ts:38](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/DirectTexture.ts#L38)
+
+DirectTexture 인스턴스를 생성합니다.
+
+#### Example
+```typescript
+const directTexture = new RedGPU.Resource.DirectTexture(redGPUContext, 'myDirectTexture', gpuTexture);
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스 |
+| `cacheKey` | `string` | 캐시 키 (동일 키가 존재하면 기존 인스턴스를 반환) |
+| `gpuTexture?` | `GPUTexture` | 외부 `GPUTexture` 인스턴스 (선택) |
+
+#### Returns
+
+`DirectTexture`
+
+#### Overrides
+
+`ADirectTexture.constructor`
+
+## Accessors
+
+
+
+***
+
+### viewDescriptor
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **viewDescriptor**(): `GPUTextureViewDescriptor`
+
+Defined in: [src/resources/texture/DirectTexture.ts:64](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/DirectTexture.ts#L64)
+
+2D 텍스처 뷰 생성을 위한 `GPUTextureViewDescriptor`를 반환합니다.
+
+##### Returns
+
+`GPUTextureViewDescriptor`
+
+`GPUTextureViewDescriptor` 객체
+
+#### Overrides
+
+`ADirectTexture.viewDescriptor`
+
+## Methods
+
+
+
+***
+
+### registerResource()
+
+> `protected` **registerResource**(): `void`
+
+Defined in: [src/resources/texture/DirectTexture.ts:80](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/DirectTexture.ts#L80)
+
+텍스처를 `ResourceManager`에 등록합니다.
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+`ADirectTexture.registerResource`
+
+***
+
+***
+
+### unregisterResource()
+
+> `protected` **unregisterResource**(): `void`
+
+Defined in: [src/resources/texture/DirectTexture.ts:88](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/DirectTexture.ts#L88)
+
+텍스처를 `ResourceManager`에서 등록 해제합니다.
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+`ADirectTexture.unregisterResource`
+
+***
+
+## 상속받은 속성
+
+<details>
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:80](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/RedGPUObject.ts#L80)
+
+안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
+
+##### Returns
+
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+`AntialiasingManager` 인스턴스
+
+#### Inherited from
+
+`ADirectTexture.antialiasingManager`
+
+***
+
+***
+
+### cacheKey
+
+#### Get Signature
+
+> **get** **cacheKey**(): `string`
+
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ResourceBase.ts#L61)
+
+캐시 키를 반환하거나 설정합니다.
+
+##### Returns
+
+`string`
+
+캐시 키 문자열
+
+#### Set Signature
+
+> **set** **cacheKey**(`value`): `void`
+
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ResourceBase.ts#L65)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+`ADirectTexture.cacheKey`
+
+***
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:92](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/RedGPUObject.ts#L92)
+
+WebGPU 커맨드 인코딩을 관리하는 `CommandEncoderManager` 인스턴스를 반환합니다.
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+`CommandEncoderManager` 인스턴스
+
+#### Inherited from
+
+`ADirectTexture.commandEncoderManager`
+
+***
+
+***
+
+### format
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **format**(): `GPUTextureFormat`
+
+Defined in: [src/resources/texture/core/ADirectTexture.ts:80](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/core/ADirectTexture.ts#L80)
+
+텍스처의 GPU 포맷을 반환합니다.
+
+##### Returns
+
+`GPUTextureFormat`
+
+#### Inherited from
+
+`ADirectTexture.format`
+
+***
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ResourceBase.ts#L89)
+
+연관된 GPUDevice를 반환합니다.
+
+##### Returns
+
+`GPUDevice`
+
+GPUDevice 인스턴스
+
+#### Inherited from
+
+`ADirectTexture.gpuDevice`
+
+***
+
+***
+
+### gpuTexture
+
+#### Get Signature
+
+> **get** **gpuTexture**(): `GPUTexture`
+
+Defined in: [src/resources/texture/core/ADirectTexture.ts:52](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/core/ADirectTexture.ts#L52)
+
+내부 WebGPU 텍스처 인스턴스를 반환하거나 설정합니다.
+
+##### Returns
+
+`GPUTexture`
+
+#### Set Signature
+
+> **set** **gpuTexture**(`value`): `void`
+
+Defined in: [src/resources/texture/core/ADirectTexture.ts:56](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/core/ADirectTexture.ts#L56)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `GPUTexture` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+`ADirectTexture.gpuTexture`
+
+***
+
+***
+
+### gpuTextureView
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **gpuTextureView**(): `GPUTextureView`
+
+Defined in: [src/resources/texture/core/ADirectTexture.ts:64](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/core/ADirectTexture.ts#L64)
+
+내부 WebGPU 텍스처 뷰를 반환합니다.
+
+##### Returns
+
+`GPUTextureView`
+
+#### Inherited from
+
+`ADirectTexture.gpuTextureView`
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/BaseObject.ts#L36)
+
+클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+
+##### Returns
+
+`number`
+
+클래스별 고유 인스턴스 번호
+
+#### Inherited from
+
+`ADirectTexture.instanceId`
+
+***
+
+***
+
+### mipLevelCount
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **mipLevelCount**(): `number`
+
+Defined in: [src/resources/texture/core/ADirectTexture.ts:88](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/core/ADirectTexture.ts#L88)
+
+텍스처의 밉 레벨 수를 반환합니다.
+
+##### Returns
+
+`number`
+
+#### Inherited from
+
+`ADirectTexture.mipLevelCount`
+
+***
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/BaseObject.ts#L63)
+
+객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
+
+##### Returns
+
+`string`
+
+객체 이름 문자열
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/BaseObject.ts#L70)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+`ADirectTexture.name`
+
+***
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:44](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/RedGPUObject.ts#L44)
+
+바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
+
+##### Returns
+
+[`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+
+`RedGPUContext` 인스턴스
+
+#### Inherited from
+
+`ADirectTexture.redGPUContext`
+
+***
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:68](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/RedGPUObject.ts#L68)
+
+전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
+
+##### Returns
+
+[`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+`ResourceManager` 인스턴스
+
+#### Inherited from
+
+`ADirectTexture.resourceManager`
+
+***
+
+***
+
+### resourceManagerKey
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **resourceManagerKey**(): `string`
+
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ResourceBase.ts#L77)
+
+리소스 매니저 키를 반환합니다.
+
+##### Returns
+
+`string`
+
+리소스 매니저 키 문자열
+
+#### Inherited from
+
+`ADirectTexture.resourceManagerKey`
+
+***
+
+***
+
+### revision
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **revision**(): `number`
+
+Defined in: [src/resources/core/ResourceBase.ts:49](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ResourceBase.ts#L49)
+
+리소스의 리비전(업데이트 횟수)을 반환합니다.
+
+##### Returns
+
+`number`
+
+리소스 리비전 번호
+
+#### Inherited from
+
+`ADirectTexture.revision`
+
+***
+
+***
+
+### targetResourceManagedState
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
+
+Defined in: [src/resources/core/ManagementResourceBase.ts:50](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ManagementResourceBase.ts#L50)
+
+리소스의 관리 상태 정보를 반환합니다.
+
+##### Returns
+
+[`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
+
+리소스 관리 상태 정보 객체
+
+#### Inherited from
+
+`ADirectTexture.targetResourceManagedState`
+
+***
+
+***
+
+### uuid
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/BaseObject.ts#L48)
+
+객체의 고유 식별자(UUID)를 반환합니다.
+
+##### Returns
+
+`string`
+
+객체의 UUID 문자열
+
+#### Inherited from
+
+`ADirectTexture.uuid`
+
+***
+
+***
+
+### videoMemorySize
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **videoMemorySize**(): `number`
+
+Defined in: [src/resources/texture/core/ADirectTexture.ts:72](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/core/ADirectTexture.ts#L72)
+
+텍스처의 비디오 메모리 사용량(바이트 단위)을 반환합니다.
+
+##### Returns
+
+`number`
+
+#### Inherited from
+
+`ADirectTexture.videoMemorySize`
+
+***
+
+</details>
+
+
+***
+
+## 상속받은 메서드
+
+<details>
+<summary>상속받은 메서드 보기 (클릭하여 확장)</summary>
+
+### \_\_addDirtyPipelineListener()
+
+> **\_\_addDirtyPipelineListener**(`listener`): `void`
+
+Defined in: [src/resources/core/ResourceBase.ts:102](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ResourceBase.ts#L102)
+
+리소스 변경 시 호출될 파이프라인 더티 리스너를 추가합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `listener` | () => `void` | 등록할 리스너 함수 |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+`ADirectTexture.__addDirtyPipelineListener`
+
+***
+
+***
+
+### \_\_removeDirtyPipelineListener()
+
+> **\_\_removeDirtyPipelineListener**(`listener`): `void`
+
+Defined in: [src/resources/core/ResourceBase.ts:115](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ResourceBase.ts#L115)
+
+등록된 파이프라인 더티 리스너를 제거합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `listener` | () => `void` | 제거할 리스너 함수 |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+`ADirectTexture.__removeDirtyPipelineListener`
+
+***
+
+***
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/resources/texture/core/ADirectTexture.ts:96](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/core/ADirectTexture.ts#L96)
+
+텍스처 리소스를 파괴하고 비디오 메모리를 해제합니다.
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+`ADirectTexture.destroy`
+
+***
+
+***
+
+### notifyUpdate()
+
+> **notifyUpdate**(`resetList?`): `void`
+
+Defined in: [src/resources/core/ResourceBase.ts:131](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/core/ResourceBase.ts#L131)
+
+리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `resetList?` | `boolean` | `false` | 알림 실행 후 리스너 목록 초기화 여부 (기본값: false) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+`ADirectTexture.notifyUpdate`
+
+***
+
+***
+
+### setGpuTexture()
+
+> `protected` **setGpuTexture**(`value`): `void`
+
+Defined in: [src/resources/texture/core/ADirectTexture.ts:115](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/texture/core/ADirectTexture.ts#L115)
+
+GPUTexture 객체를 설정하고 내부 상태 및 비디오 메모리를 동기화합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `GPUTexture` | 설정할 GPUTexture 객체 |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+`ADirectTexture.setGpuTexture`
+
+***
+
+</details>

@@ -1,0 +1,69 @@
+[**RedGPU API v4.5.0-Alpha**](../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../README.md) / [RedGPU](../../../../../README.md) / [Resource](../../../README.md) / [CoreWGSLParser](../README.md) / TypeUniform
+
+# Type Alias: TypeUniform
+
+> **TypeUniform** = `object`
+
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:21](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/wgslParser/core/WGSLUniformTypes.ts#L21)
+
+WGSL 유니폼 타입의 메타데이터(요소 수, 정렬, 크기, 뷰 생성자 등)를 정의하는 타입입니다.
+
+## Properties
+
+### align
+
+> **align**: `number`
+
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:23](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/wgslParser/core/WGSLUniformTypes.ts#L23)
+
+***
+
+### numElements
+
+> **numElements**: `number`
+
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:22](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/wgslParser/core/WGSLUniformTypes.ts#L22)
+
+***
+
+### pad?
+
+> `optional` **pad?**: `number`[]
+
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:27](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/wgslParser/core/WGSLUniformTypes.ts#L27)
+
+***
+
+### size
+
+> **size**: `number`
+
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:24](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/wgslParser/core/WGSLUniformTypes.ts#L24)
+
+***
+
+### type
+
+> **type**: `string`
+
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:25](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/wgslParser/core/WGSLUniformTypes.ts#L25)
+
+***
+
+### View
+
+> **View**: [`TypedArrayConstructor`](TypedArrayConstructor.md)
+
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:26](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/wgslParser/core/WGSLUniformTypes.ts#L26)
+
+***
+
+### wgslType
+
+> **wgslType**: `string`
+
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:28](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/resources/wgslParser/core/WGSLUniformTypes.ts#L28)

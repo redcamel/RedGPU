@@ -1,0 +1,45 @@
+[**RedGPU API v4.5.0-Alpha**](../../../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../../../README.md) / [RedGPU](../../../../../../../README.md) / [ShaderLibrary](../../../../../README.md) / [math](../../../README.md) / [tnb](../README.md) / getTBNFromVertexTangent
+
+# Variable: getTBNFromVertexTangent
+
+> `const` **getTBNFromVertexTangent**: `string` = `getTBNFromVertexTangent_wgsl`
+
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:812](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/systemCodeManager/ShaderLibrary.ts#L812)
+
+Constructs a TBN (Tangent, Bitangent, Normal) matrix using the normal and vertex tangent (vec4).
+
+//
+
+## Param
+
+**inputNormal**
+
+Normalized normal vector
+//
+
+## Param
+
+**inputVertexTangent**
+
+Vertex tangent data
+//
+
+## Returns
+
+3x3 TBN matrix
+
+```wgsl
+fn getTBNFromVertexTangent(inputNormal: vec3<f32>, inputVertexTangent: vec4<f32>) -> mat3x3<f32> {
+    // Gram-Schmidt orthonormalization: Corrects the tangent to be perfectly perpendicular to the normal
+    let tangent = normalize(inputVertexTangent.xyz - inputNormal * dot(inputVertexTangent.xyz, inputNormal));
+
+    // Adheres to glTF standard and right-hand rule (N x T = B)
+    let bitangent = cross(inputNormal, tangent) * inputVertexTangent.w;
+
+    return mat3x3<f32>(tangent, bitangent, inputNormal);
+}
+```

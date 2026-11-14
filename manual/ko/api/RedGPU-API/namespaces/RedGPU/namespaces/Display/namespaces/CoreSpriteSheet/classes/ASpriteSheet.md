@@ -1,0 +1,2903 @@
+[**RedGPU API v4.5.0-Alpha**](../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../README.md) / [RedGPU](../../../../../README.md) / [Display](../../../README.md) / [CoreSpriteSheet](../README.md) / ASpriteSheet
+
+# Class: ASpriteSheet
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:19](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L19)
+
+2D 및 3D 스프라이트 시트 애니메이션의 공통 동작을 정의하는 추상 클래스입니다.
+
+::: warning
+이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+:::
+
+## See
+
+- [SpriteSheet2D Basic Example](https://redcamel.github.io/RedGPU/examples/2d/spriteSheet2D/basic/)
+ - [SpriteSheet3D Basic Example](https://redcamel.github.io/RedGPU/examples/3d/sprite/spriteSheet3D/)
+ - [SpriteSheet3D Compare Example](https://redcamel.github.io/RedGPU/examples/3d/sprite/spriteSheet3DCompare/)
+ - [SpriteSheet2D MouseEvent Example](https://redcamel.github.io/RedGPU/examples/2d/interaction/mouseEvent/spriteSheet2D/)
+ - [SpriteSheet3D MouseEvent Example](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
+
+## Extends
+
+- [`Mesh`](../../../classes/Mesh.md)
+
+## Extended by
+
+- [`SpriteSheet3D`](../../../classes/SpriteSheet3D.md)
+
+## Constructors
+
+
+
+***
+
+### Constructor
+
+> **new ASpriteSheet**(`redGPUContext`, `spriteSheetInfo`, `setRenderSize`): `ASpriteSheet`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:82](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L82)
+
+ASpriteSheet 인스턴스를 초기화합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스 |
+| `spriteSheetInfo` | [`SpriteSheetInfo`](../../../classes/SpriteSheetInfo.md) | 스프라이트 시트 정보 객체 |
+| `setRenderSize` | (`texture`, `segmentW`, `segmentH`) => `void` | 세그먼트 크기 갱신 콜백 함수 |
+
+#### Returns
+
+`ASpriteSheet`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`constructor`](../../../classes/Mesh.md#constructor)
+
+## Properties
+
+
+
+***
+
+### currentIndex
+
+> **currentIndex**: `number`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:39](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L39)
+
+현재 프레임 인덱스
+
+***
+
+***
+
+### segmentH
+
+> **segmentH**: `number`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:29](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L29)
+
+세로 세그먼트 분할 수
+
+***
+
+***
+
+### segmentW
+
+> **segmentW**: `number`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:24](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L24)
+
+가로 세그먼트 분할 수
+
+***
+
+***
+
+### totalFrame
+
+> **totalFrame**: `number`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:34](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L34)
+
+총 프레임 수
+
+***
+
+## Accessors
+
+
+
+***
+
+### frameRate
+
+#### Get Signature
+
+> **get** **frameRate**(): `number`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:131](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L131)
+
+초당 프레임 수(FPS)를 반환하거나 설정합니다. 음수 입력 시 `0`으로 보정됩니다.
+
+##### Returns
+
+`number`
+
+초당 프레임 수 (FPS)
+
+#### Set Signature
+
+> **set** **frameRate**(`value`): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:135](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L135)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+***
+
+### loop
+
+#### Get Signature
+
+> **get** **loop**(): `boolean`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:115](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L115)
+
+애니메이션 반복 재생 여부를 반환하거나 설정합니다.
+
+##### Returns
+
+`boolean`
+
+반복 재생 여부
+
+#### Set Signature
+
+> **set** **loop**(`value`): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:119](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L119)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
+
+##### Returns
+
+`void`
+
+***
+
+***
+
+### spriteSheetInfo
+
+#### Get Signature
+
+> **get** **spriteSheetInfo**(): [`SpriteSheetInfo`](../../../classes/SpriteSheetInfo.md)
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:184](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L184)
+
+적용된 스프라이트 시트 정보를 반환하거나 설정합니다.
+
+##### Returns
+
+[`SpriteSheetInfo`](../../../classes/SpriteSheetInfo.md)
+
+SpriteSheetInfo 인스턴스
+
+#### Set Signature
+
+> **set** **spriteSheetInfo**(`value`): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:188](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L188)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`SpriteSheetInfo`](../../../classes/SpriteSheetInfo.md) |
+
+##### Returns
+
+`void`
+
+***
+
+***
+
+### state
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **state**(): `string`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:103](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L103)
+
+현재 애니메이션 재생 상태를 반환합니다.
+
+##### Returns
+
+`string`
+
+재생 상태 문자열 (`'play'`, `'pause'`, `'stop'`)
+
+***
+
+## Methods
+
+
+
+***
+
+### pause()
+
+> **pause**(): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:214](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L214)
+
+현재 프레임에서 애니메이션을 일시정지하고 상태를 `'pause'`로 변경합니다.
+
+#### Returns
+
+`void`
+
+***
+
+***
+
+### play()
+
+> **play**(): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:204](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L204)
+
+애니메이션 재생을 시작하고 상태를 `'play'`로 변경합니다.
+
+#### Returns
+
+`void`
+
+***
+
+***
+
+### stop()
+
+> **stop**(): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:223](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L223)
+
+애니메이션을 정지하고 첫 번째 프레임(`0`)으로 초기화한 뒤 상태를 `'stop'`으로 변경합니다.
+
+#### Returns
+
+`void`
+
+***
+
+***
+
+## 상속받은 속성
+
+<details>
+<summary>상속받은 속성 보기 (클릭하여 확장)</summary>
+
+### \_geometry
+
+> **\_geometry**: [`Geometry`](../../../../../classes/Geometry.md) \| [`Primitive`](../../../../Primitive/namespaces/Core/classes/Primitive.md)
+
+Defined in: [src/display/mesh/Mesh.ts:302](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L302)
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`_geometry`](../../../classes/Mesh.md#_geometry)
+
+***
+
+***
+
+### \_material
+
+> **\_material**: `any`
+
+Defined in: [src/display/mesh/Mesh.ts:280](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L280)
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`_material`](../../../classes/Mesh.md#_material)
+
+***
+
+***
+
+### animationInfo
+
+> **animationInfo**: `object`
+
+Defined in: [src/display/mesh/core/MeshBase.ts:42](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L42)
+
+GLTF 모프, 스킨 및 클립 애니메이션 정보입니다.
+
+#### animationsList
+
+> **animationsList**: [`ClipAnimState`](../../../../../classes/ClipAnimState.md)[]
+
+#### jointBuffer
+
+> **jointBuffer**: [`IndexBuffer`](../../../../Resource/classes/IndexBuffer.md)
+
+#### morphInfo
+
+> **morphInfo**: `MorphInfo_GLTF`
+
+#### skinInfo
+
+> **skinInfo**: `ParsedSkinInfo_GLTF`
+
+#### weightBuffer
+
+> **weightBuffer**: [`VertexBuffer`](../../../../Resource/classes/VertexBuffer.md)
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`animationInfo`](../../../classes/Mesh.md#animationinfo)
+
+***
+
+***
+
+### castShadow
+
+> **castShadow**: `boolean` = `false`
+
+Defined in: [src/display/mesh/Mesh.ts:99](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L99)
+
+그림자 캐스팅 여부
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`castShadow`](../../../classes/Mesh.md#castshadow)
+
+***
+
+***
+
+### createCustomMeshVertexShaderModule?
+
+> `optional` **createCustomMeshVertexShaderModule?**: () => `GPUShaderModule`
+
+Defined in: [src/display/mesh/Mesh.ts:114](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L114)
+
+커스텀 버텍스 셰이더 모듈 생성 함수
+
+#### Returns
+
+`GPUShaderModule`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`createCustomMeshVertexShaderModule`](../../../classes/Mesh.md#createcustommeshvertexshadermodule)
+
+***
+
+***
+
+### dirtyLOD
+
+> **dirtyLOD**: `boolean` = `false`
+
+Defined in: [src/display/mesh/Mesh.ts:104](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L104)
+
+LOD 정보 변경 필요 여부
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`dirtyLOD`](../../../classes/Mesh.md#dirtylod)
+
+***
+
+***
+
+### dirtyOpacity
+
+> **dirtyOpacity**: `boolean` = `true`
+
+Defined in: [src/display/mesh/core/MeshBase.ts:74](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L74)
+
+불투명도(Opacity) 갱신이 필요한지 여부입니다.
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`dirtyOpacity`](../../../classes/Mesh.md#dirtyopacity)
+
+***
+
+***
+
+### dirtyPipeline
+
+> **dirtyPipeline**: `boolean` = `true`
+
+Defined in: [src/display/mesh/core/MeshBase.ts:64](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L64)
+
+렌더 파이프라인 갱신이 필요한지 여부입니다.
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`dirtyPipeline`](../../../classes/Mesh.md#dirtypipeline)
+
+***
+
+***
+
+### dirtyTransform
+
+> **dirtyTransform**: `boolean` = `true`
+
+Defined in: [src/display/mesh/core/MeshBase.ts:69](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L69)
+
+트랜스폼 행렬 갱신이 필요한지 여부입니다.
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`dirtyTransform`](../../../classes/Mesh.md#dirtytransform)
+
+***
+
+***
+
+### gltfLoaderInfo
+
+> **gltfLoaderInfo**: [`GLTFLoader`](../../../../../classes/GLTFLoader.md)
+
+Defined in: [src/display/mesh/core/MeshBase.ts:59](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L59)
+
+이 객체를 로드한 GLTFLoader 인스턴스 정보입니다.
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`gltfLoaderInfo`](../../../classes/Mesh.md#gltfloaderinfo)
+
+***
+
+***
+
+### gpuRenderInfo
+
+> **gpuRenderInfo**: [`VertexGPURenderInfo`](../../CoreMesh/classes/VertexGPURenderInfo.md)
+
+Defined in: [src/display/mesh/core/MeshBase.ts:37](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L37)
+
+GPU 버텍스 렌더링 정보 객체입니다.
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`gpuRenderInfo`](../../../classes/Mesh.md#gpurenderinfo)
+
+***
+
+***
+
+### isInstanceofMesh
+
+> **isInstanceofMesh**: `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:60](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L60)
+
+Mesh 인스턴스 여부 판별 식별자
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`isInstanceofMesh`](../../../classes/Mesh.md#isinstanceofmesh)
+
+***
+
+***
+
+### localMatrix
+
+> **localMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
+
+Defined in: [src/display/mesh/core/MeshBase.ts:84](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L84)
+
+부모 기준 로컬 변환 행렬입니다.
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`localMatrix`](../../../classes/Mesh.md#localmatrix)
+
+***
+
+***
+
+### modelMatrix
+
+> **modelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
+
+Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L79)
+
+월드 변환이 적용된 모델 행렬입니다.
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`modelMatrix`](../../../classes/Mesh.md#modelmatrix)
+
+***
+
+***
+
+### normalModelMatrix
+
+> **normalModelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
+
+Defined in: [src/display/mesh/core/MeshBase.ts:89](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L89)
+
+법선 벡터 변환에 사용되는 노멀 모델 행렬입니다.
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`normalModelMatrix`](../../../classes/Mesh.md#normalmodelmatrix)
+
+***
+
+***
+
+### passFrustumCulling
+
+> **passFrustumCulling**: `boolean` = `true`
+
+Defined in: [src/display/mesh/Mesh.ts:109](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L109)
+
+프러스텀 컬링 통과 여부
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`passFrustumCulling`](../../../classes/Mesh.md#passfrustumculling)
+
+***
+
+***
+
+### receiveShadow
+
+> **receiveShadow**: `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L45)
+
+그림자 수신 여부
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`receiveShadow`](../../../classes/Mesh.md#receiveshadow)
+
+***
+
+***
+
+### useDisplacementTexture
+
+> **useDisplacementTexture**: `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:55](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L55)
+
+변위 텍스처(Displacement Texture) 사용 여부
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`useDisplacementTexture`](../../../classes/Mesh.md#usedisplacementtexture)
+
+***
+
+### boundingAABB
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **boundingAABB**(): [`AABB`](../../../../Bound/classes/AABB.md)
+
+Defined in: [src/display/mesh/Mesh.ts:752](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L752)
+
+AABB(Axis-Aligned Bounding Box) 정보를 반환합니다. (Zero-GC 인플레이스 재사용)
+
+##### Returns
+
+[`AABB`](../../../../Bound/classes/AABB.md)
+
+계산된 AABB 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`boundingAABB`](../../../classes/Mesh.md#boundingaabb)
+
+***
+
+***
+
+### boundingOBB
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **boundingOBB**(): [`OBB`](../../../../Bound/classes/OBB.md)
+
+Defined in: [src/display/mesh/Mesh.ts:737](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L737)
+
+OBB(Oriented Bounding Box) 정보를 반환합니다.
+
+##### Returns
+
+[`OBB`](../../../../Bound/classes/OBB.md)
+
+계산된 OBB 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`boundingOBB`](../../../classes/Mesh.md#boundingobb)
+
+***
+
+***
+
+### children
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **children**(): [`Mesh`](../../../classes/Mesh.md)[]
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:46](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L46)
+
+자식 객체 배열을 반환합니다.
+
+##### Returns
+
+[`Mesh`](../../../classes/Mesh.md)[]
+
+자식 Mesh 배열 (`Mesh[]`)
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`children`](../../../classes/Mesh.md#children)
+
+***
+
+***
+
+### combinedBoundingAABB
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **combinedBoundingAABB**(): [`AABB`](../../../../Bound/classes/AABB.md)
+
+Defined in: [src/display/mesh/Mesh.ts:772](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L772)
+
+자식 객체들을 포함한 통합 AABB 정보를 반환합니다.
+
+##### Returns
+
+[`AABB`](../../../../Bound/classes/AABB.md)
+
+통합된 AABB 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`combinedBoundingAABB`](../../../classes/Mesh.md#combinedboundingaabb)
+
+***
+
+***
+
+### currentShaderModuleName
+
+#### Get Signature
+
+> **get** **currentShaderModuleName**(): `string`
+
+Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L121)
+
+현재 적용된 버텍스 셰이더 모듈의 이름을 가져오거나 설정합니다.
+
+##### Returns
+
+`string`
+
+현재 버텍스 셰이더 모듈 이름
+
+#### Set Signature
+
+> **set** **currentShaderModuleName**(`value`): `void`
+
+Defined in: [src/display/mesh/core/MeshBase.ts:125](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L125)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`currentShaderModuleName`](../../../classes/Mesh.md#currentshadermodulename)
+
+***
+
+***
+
+### depthStencilState
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **depthStencilState**(): [`DepthStencilState`](../../../../RenderState/classes/DepthStencilState.md)
+
+Defined in: [src/display/mesh/core/MeshBase.ts:149](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L149)
+
+객체의 깊이/스텐실 렌더링 상태(`DepthStencilState`)를 반환합니다.
+
+##### Returns
+
+[`DepthStencilState`](../../../../RenderState/classes/DepthStencilState.md)
+
+DepthStencilState 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`depthStencilState`](../../../classes/Mesh.md#depthstencilstate)
+
+***
+
+***
+
+### drawBufferManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **drawBufferManager**(): `DrawBufferManager`
+
+Defined in: [src/display/mesh/Mesh.ts:235](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L235)
+
+드로우 버퍼 매니저를 반환합니다.
+
+##### Returns
+
+`DrawBufferManager`
+
+DrawBufferManager 인스턴스 또는 `null`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`drawBufferManager`](../../../classes/Mesh.md#drawbuffermanager)
+
+***
+
+***
+
+### drawCommandSlot
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **drawCommandSlot**(): `DrawCommandSlot`
+
+Defined in: [src/display/mesh/Mesh.ts:223](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L223)
+
+드로우 커맨드 슬롯을 반환합니다.
+
+##### Returns
+
+`DrawCommandSlot`
+
+DrawCommandSlot 인스턴스 또는 `null`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`drawCommandSlot`](../../../classes/Mesh.md#drawcommandslot)
+
+***
+
+***
+
+### drawDebugger
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **drawDebugger**(): [`DrawDebuggerMesh`](../../DrawDebugger/classes/DrawDebuggerMesh.md)
+
+Defined in: [src/display/mesh/Mesh.ts:276](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L276)
+
+디버그 메시 객체를 반환합니다.
+
+##### Returns
+
+[`DrawDebuggerMesh`](../../DrawDebugger/classes/DrawDebuggerMesh.md)
+
+DrawDebuggerMesh 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`drawDebugger`](../../../classes/Mesh.md#drawdebugger)
+
+***
+
+***
+
+### enableDebugger
+
+#### Get Signature
+
+> **get** **enableDebugger**(): `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:259](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L259)
+
+디버거 활성화 여부를 가져오거나 설정합니다.
+
+##### Returns
+
+`boolean`
+
+디버거 활성화 여부
+
+#### Set Signature
+
+> **set** **enableDebugger**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:263](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L263)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`enableDebugger`](../../../classes/Mesh.md#enabledebugger)
+
+***
+
+***
+
+### enableWaterInteraction
+
+#### Get Signature
+
+> **get** **enableWaterInteraction**(): `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:448](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L448)
+
+물(Lake)과의 실시간 파동 인터랙션 활성화 여부를 가져오거나 설정합니다.
+
+##### Returns
+
+`boolean`
+
+물 파동 인터랙션 활성화 여부
+
+#### Set Signature
+
+> **set** **enableWaterInteraction**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:452](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L452)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`enableWaterInteraction`](../../../classes/Mesh.md#enablewaterinteraction)
+
+***
+
+***
+
+### events
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **events**(): `any`
+
+Defined in: [src/display/mesh/Mesh.ts:408](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L408)
+
+등록된 이벤트 맵 객체를 반환합니다.
+
+##### Returns
+
+`any`
+
+등록된 이벤트 객체
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`events`](../../../classes/Mesh.md#events)
+
+***
+
+***
+
+### geometry
+
+#### Get Signature
+
+> **get** **geometry**(): [`Geometry`](../../../../../classes/Geometry.md) \| [`Primitive`](../../../../Primitive/namespaces/Core/classes/Primitive.md)
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:152](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L152)
+
+현재 지오메트리를 반환합니다. 지오메트리 변경 시도는 에러를 발생시킵니다.
+
+##### Returns
+
+[`Geometry`](../../../../../classes/Geometry.md) \| [`Primitive`](../../../../Primitive/namespaces/Core/classes/Primitive.md)
+
+지오메트리 인스턴스
+
+#### Set Signature
+
+> **set** **geometry**(`value`): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:156](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L156)
+
+지오메트리를 가져오거나 설정합니다.
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`Geometry`](../../../../../classes/Geometry.md) \| [`Primitive`](../../../../Primitive/namespaces/Core/classes/Primitive.md) |
+
+##### Returns
+
+`void`
+
+Geometry 또는 Primitive 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`geometry`](../../../classes/Mesh.md#geometry)
+
+***
+
+***
+
+### globalVertexSlotIndex
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **globalVertexSlotIndex**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:211](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L211)
+
+글로벌 버퍼 슬롯 인덱스를 반환합니다.
+
+##### Returns
+
+`number`
+
+글로벌 버텍스 슬롯 인덱스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`globalVertexSlotIndex`](../../../classes/Mesh.md#globalvertexslotindex)
+
+***
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/display/mesh/core/MeshBase.ts:161](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L161)
+
+현재 인스턴스에 연결된 WebGPU 디바이스를 반환합니다.
+
+##### Returns
+
+`GPUDevice`
+
+GPUDevice 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`gpuDevice`](../../../classes/Mesh.md#gpudevice)
+
+***
+
+***
+
+### ignoreFrustumCulling
+
+#### Get Signature
+
+> **get** **ignoreFrustumCulling**(): `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:348](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L348)
+
+프러스텀 컬링 무시 여부를 가져오거나 설정합니다.
+
+##### Returns
+
+`boolean`
+
+프러스텀 컬링 무시 여부
+
+#### Set Signature
+
+> **set** **ignoreFrustumCulling**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:352](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L352)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`ignoreFrustumCulling`](../../../classes/Mesh.md#ignorefrustumculling)
+
+***
+
+***
+
+### instanceId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **instanceId**(): `number`
+
+Defined in: [src/base/BaseObject.ts:36](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/BaseObject.ts#L36)
+
+클래스별로 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+
+##### Returns
+
+`number`
+
+클래스별 고유 인스턴스 번호
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`instanceId`](../../../classes/Mesh.md#instanceid)
+
+***
+
+***
+
+### LODManager
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **LODManager**(): [`LODManager`](../../CoreMesh/classes/LODManager.md)
+
+Defined in: [src/display/mesh/Mesh.ts:247](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L247)
+
+LOD(Level of Detail) 매니저를 반환합니다.
+
+##### Returns
+
+[`LODManager`](../../CoreMesh/classes/LODManager.md)
+
+LODManager 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`LODManager`](../../../classes/Mesh.md#lodmanager)
+
+***
+
+***
+
+### material
+
+#### Get Signature
+
+> **get** **material**(): `any`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:168](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L168)
+
+현재 머티리얼을 반환합니다. 머티리얼 변경 시도는 에러를 발생시킵니다.
+
+##### Returns
+
+`any`
+
+머티리얼 인스턴스
+
+#### Set Signature
+
+> **set** **material**(`value`): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:172](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L172)
+
+머티리얼을 가져오거나 설정합니다.
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `any` |
+
+##### Returns
+
+`void`
+
+설정된 머티리얼 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`material`](../../../classes/Mesh.md#material)
+
+***
+
+***
+
+### minScreenSpaceSize
+
+#### Get Signature
+
+> **get** **minScreenSpaceSize**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:380](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L380)
+
+투영 면적 컬링의 화면상 크기 비율 임계값을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+화면상 크기 비율 임계값
+
+#### Set Signature
+
+> **set** **minScreenSpaceSize**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:384](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L384)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`minScreenSpaceSize`](../../../classes/Mesh.md#minscreenspacesize)
+
+***
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:63](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/BaseObject.ts#L63)
+
+객체의 이름을 반환하거나 설정합니다. 미설정 시 기본 이름(`ClassName Instance N`)을 반환합니다.
+
+##### Returns
+
+`string`
+
+객체 이름 문자열
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/BaseObject.ts#L70)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`name`](../../../classes/Mesh.md#name)
+
+***
+
+***
+
+### numChildren
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **numChildren**(): `number`
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:58](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L58)
+
+등록된 자식 객체의 개수를 반환합니다.
+
+##### Returns
+
+`number`
+
+자식 객체 개수
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`numChildren`](../../../classes/Mesh.md#numchildren)
+
+***
+
+***
+
+### opacity
+
+#### Get Signature
+
+> **get** **opacity**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:330](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L330)
+
+메시의 투명도를 가져오거나 설정합니다 (0~1).
+
+##### Returns
+
+`number`
+
+투명도 값 (0~1)
+
+#### Set Signature
+
+> **set** **opacity**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:334](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L334)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`opacity`](../../../classes/Mesh.md#opacity)
+
+***
+
+***
+
+### parent
+
+#### Get Signature
+
+> **get** **parent**(): [`Object3DContainer`](../../CoreMesh/classes/Object3DContainer.md)
+
+Defined in: [src/display/mesh/Mesh.ts:432](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L432)
+
+설정된 부모 컨테이너 객체를 가져오거나 설정합니다.
+
+##### Returns
+
+[`Object3DContainer`](../../CoreMesh/classes/Object3DContainer.md)
+
+부모 Object3DContainer 인스턴스
+
+#### Set Signature
+
+> **set** **parent**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:436](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L436)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | [`Object3DContainer`](../../CoreMesh/classes/Object3DContainer.md) |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`parent`](../../../classes/Mesh.md#parent)
+
+***
+
+***
+
+### pickingId
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **pickingId**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:396](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L396)
+
+피킹 ID를 반환합니다.
+
+##### Returns
+
+`number`
+
+피킹 식별자 값
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`pickingId`](../../../classes/Mesh.md#pickingid)
+
+***
+
+***
+
+### pivotX
+
+#### Get Signature
+
+> **get** **pivotX**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:497](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L497)
+
+피벗 X 좌표를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+피벗 X 좌표
+
+#### Set Signature
+
+> **set** **pivotX**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:501](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L501)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`pivotX`](../../../classes/Mesh.md#pivotx)
+
+***
+
+***
+
+### pivotY
+
+#### Get Signature
+
+> **get** **pivotY**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:514](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L514)
+
+피벗 Y 좌표를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+피벗 Y 좌표
+
+#### Set Signature
+
+> **set** **pivotY**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:518](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L518)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`pivotY`](../../../classes/Mesh.md#pivoty)
+
+***
+
+***
+
+### pivotZ
+
+#### Get Signature
+
+> **get** **pivotZ**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:531](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L531)
+
+피벗 Z 좌표를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+피벗 Z 좌표
+
+#### Set Signature
+
+> **set** **pivotZ**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:535](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L535)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`pivotZ`](../../../classes/Mesh.md#pivotz)
+
+***
+
+***
+
+### position
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **position**(): `Float32Array`
+
+Defined in: [src/display/mesh/Mesh.ts:599](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L599)
+
+현재 위치를 반환합니다. [x, y, z]
+
+##### Returns
+
+`Float32Array`
+
+위치 배열
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`position`](../../../classes/Mesh.md#position)
+
+***
+
+***
+
+### primitiveState
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **primitiveState**(): [`PrimitiveState`](../../../../RenderState/classes/PrimitiveState.md)
+
+Defined in: [src/display/mesh/core/MeshBase.ts:137](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L137)
+
+객체의 프리미티브 렌더링 상태(`PrimitiveState`)를 반환합니다.
+
+##### Returns
+
+[`PrimitiveState`](../../../../RenderState/classes/PrimitiveState.md)
+
+PrimitiveState 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`primitiveState`](../../../classes/Mesh.md#primitivestate)
+
+***
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/display/mesh/core/MeshBase.ts:173](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L173)
+
+현재 인스턴스에 연결된 RedGPUContext를 반환합니다.
+
+##### Returns
+
+[`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+RedGPUContext 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`redGPUContext`](../../../classes/Mesh.md#redgpucontext)
+
+***
+
+***
+
+### rotation
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **rotation**(): `Float32Array`
+
+Defined in: [src/display/mesh/Mesh.ts:725](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L725)
+
+현재 회전값을 반환합니다. [x, y, z] (도)
+
+##### Returns
+
+`Float32Array`
+
+회전값 배열 (도)
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`rotation`](../../../classes/Mesh.md#rotation)
+
+***
+
+***
+
+### rotationX
+
+#### Get Signature
+
+> **get** **rotationX**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:674](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L674)
+
+X축 회전값을 가져오거나 설정합니다 (도).
+
+##### Returns
+
+`number`
+
+X축 회전값 (도)
+
+#### Set Signature
+
+> **set** **rotationX**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:678](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L678)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`rotationX`](../../../classes/Mesh.md#rotationx)
+
+***
+
+***
+
+### rotationY
+
+#### Get Signature
+
+> **get** **rotationY**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:691](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L691)
+
+Y축 회전값을 가져오거나 설정합니다 (도).
+
+##### Returns
+
+`number`
+
+Y축 회전값 (도)
+
+#### Set Signature
+
+> **set** **rotationY**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:695](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L695)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`rotationY`](../../../classes/Mesh.md#rotationy)
+
+***
+
+***
+
+### rotationZ
+
+#### Get Signature
+
+> **get** **rotationZ**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:708](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L708)
+
+Z축 회전값을 가져오거나 설정합니다 (도).
+
+##### Returns
+
+`number`
+
+Z축 회전값 (도)
+
+#### Set Signature
+
+> **set** **rotationZ**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:712](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L712)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`rotationZ`](../../../classes/Mesh.md#rotationz)
+
+***
+
+***
+
+### scale
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **scale**(): `Float32Array`
+
+Defined in: [src/display/mesh/Mesh.ts:662](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L662)
+
+현재 스케일을 반환합니다. [x, y, z]
+
+##### Returns
+
+`Float32Array`
+
+스케일 배열
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`scale`](../../../classes/Mesh.md#scale)
+
+***
+
+***
+
+### scaleX
+
+#### Get Signature
+
+> **get** **scaleX**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:611](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L611)
+
+X축 스케일을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+X축 스케일 값
+
+#### Set Signature
+
+> **set** **scaleX**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:615](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L615)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`scaleX`](../../../classes/Mesh.md#scalex)
+
+***
+
+***
+
+### scaleY
+
+#### Get Signature
+
+> **get** **scaleY**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:628](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L628)
+
+Y축 스케일을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+Y축 스케일 값
+
+#### Set Signature
+
+> **set** **scaleY**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:632](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L632)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`scaleY`](../../../classes/Mesh.md#scaley)
+
+***
+
+***
+
+### scaleZ
+
+#### Get Signature
+
+> **get** **scaleZ**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:645](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L645)
+
+Z축 스케일을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+Z축 스케일 값
+
+#### Set Signature
+
+> **set** **scaleZ**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:649](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L649)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`scaleZ`](../../../classes/Mesh.md#scalez)
+
+***
+
+***
+
+### useScreenSpaceSizeCulling
+
+#### Get Signature
+
+> **get** **useScreenSpaceSizeCulling**(): `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:364](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L364)
+
+투영 면적 컬링(Screen Space Size Culling) 사용 여부를 가져오거나 설정합니다.
+
+##### Returns
+
+`boolean`
+
+투영 면적 컬링 사용 여부
+
+#### Set Signature
+
+> **set** **useScreenSpaceSizeCulling**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:368](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L368)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `boolean` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`useScreenSpaceSizeCulling`](../../../classes/Mesh.md#usescreenspacesizeculling)
+
+***
+
+***
+
+### uuid
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:48](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/base/BaseObject.ts#L48)
+
+객체의 고유 식별자(UUID)를 반환합니다.
+
+##### Returns
+
+`string`
+
+객체의 UUID 문자열
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`uuid`](../../../classes/Mesh.md#uuid)
+
+***
+
+***
+
+### vertexStateBuffers
+
+#### Get Signature
+
+> <span class="readonly-badge">readonly</span> **get** **vertexStateBuffers**(): `GPUVertexBufferLayout`[]
+
+Defined in: [src/display/mesh/Mesh.ts:420](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L420)
+
+버텍스 상태 버퍼 레이아웃 배열을 반환합니다.
+
+##### Returns
+
+`GPUVertexBufferLayout`[]
+
+GPUVertexBufferLayout 배열
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`vertexStateBuffers`](../../../classes/Mesh.md#vertexstatebuffers)
+
+***
+
+***
+
+### waterWaveStrength
+
+#### Get Signature
+
+> **get** **waterWaveStrength**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:473](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L473)
+
+물 파동 생성 강도 배율을 가져오거나 설정합니다 (기본값: 1.0).
+
+##### Returns
+
+`number`
+
+물 파동 생성 강도 배율
+
+#### Set Signature
+
+> **set** **waterWaveStrength**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:477](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L477)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`waterWaveStrength`](../../../classes/Mesh.md#waterwavestrength)
+
+***
+
+***
+
+### x
+
+#### Get Signature
+
+> **get** **x**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:548](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L548)
+
+X 위치 좌표를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+X 위치 좌표
+
+#### Set Signature
+
+> **set** **x**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:552](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L552)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`x`](../../../classes/Mesh.md#x)
+
+***
+
+***
+
+### y
+
+#### Get Signature
+
+> **get** **y**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:565](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L565)
+
+Y 위치 좌표를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+Y 위치 좌표
+
+#### Set Signature
+
+> **set** **y**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:569](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L569)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`y`](../../../classes/Mesh.md#y)
+
+***
+
+***
+
+### z
+
+#### Get Signature
+
+> **get** **z**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:582](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L582)
+
+Z 위치 좌표를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+Z 위치 좌표
+
+#### Set Signature
+
+> **set** **z**(`value`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:586](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L586)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`z`](../../../classes/Mesh.md#z)
+
+</details>
+
+
+***
+
+## 상속받은 메서드
+
+<details>
+<summary>상속받은 메서드 보기 (클릭하여 확장)</summary>
+
+### addChild()
+
+> **addChild**(`child`): [`Mesh`](../../../classes/Mesh.md)
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L89)
+
+자식 객체를 컨테이너 끝에 추가합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | 추가할 자식 객체 |
+
+#### Returns
+
+[`Mesh`](../../../classes/Mesh.md)
+
+추가된 자식 객체 (실패 시 `null`)
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`addChild`](../../../classes/Mesh.md#addchild)
+
+***
+
+***
+
+### addChildAt()
+
+> **addChildAt**(`child`, `index`): `ASpriteSheet`
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:115](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L115)
+
+지정한 인덱스 위치에 자식 객체를 추가합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | 추가할 자식 객체 |
+| `index` | `number` | 삽입할 인덱스 위치 |
+
+#### Returns
+
+`ASpriteSheet`
+
+현재 컨테이너 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`addChildAt`](../../../classes/Mesh.md#addchildat)
+
+***
+
+***
+
+### addListener()
+
+> **addListener**(`eventName`, `callback`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:889](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L889)
+
+이벤트 리스너를 추가합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `eventName` | `string` | 이벤트 이름 |
+| `callback` | `Function` | 콜백 함수 |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`addListener`](../../../classes/Mesh.md#addlistener)
+
+***
+
+***
+
+### clone()
+
+> **clone**(): [`Mesh`](../../../classes/Mesh.md)
+
+Defined in: [src/display/mesh/Mesh.ts:1003](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L1003)
+
+**`Experimental`**
+
+메시를 복제합니다.
+
+#### Returns
+
+[`Mesh`](../../../classes/Mesh.md)
+
+복제된 Mesh 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`clone`](../../../classes/Mesh.md#clone)
+
+***
+
+***
+
+### contains()
+
+> **contains**(`child`): `boolean`
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:73](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L73)
+
+지정한 객체가 현재 컨테이너의 자식인지 확인합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | 확인할 자식 객체 |
+
+#### Returns
+
+`boolean`
+
+포함 여부
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`contains`](../../../classes/Mesh.md#contains)
+
+***
+
+***
+
+### createMeshVertexShaderModuleBASIC()
+
+> **createMeshVertexShaderModuleBASIC**(`VERTEX_SHADER_MODULE_NAME`, `SHADER_INFO`, `UNIFORM_STRUCT_BASIC`, `vertexModuleSource`): `GPUShaderModule`
+
+Defined in: [src/display/mesh/Mesh.ts:1732](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L1732)
+
+기본 메시 버텍스 셰이더 모듈과 유니폼 바인드 그룹을 생성하고 반환합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `VERTEX_SHADER_MODULE_NAME` | `any` | 버텍스 셰이더 모듈 이름 |
+| `SHADER_INFO` | `any` | 파싱된 WGSL 셰이더 정보 |
+| `UNIFORM_STRUCT_BASIC` | `any` | 버텍스 유니폼 구조체 정보 |
+| `vertexModuleSource` | `any` | 버텍스 셰이더 WGSL 소스 코드 |
+
+#### Returns
+
+`GPUShaderModule`
+
+생성된 GPUShaderModule 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`createMeshVertexShaderModuleBASIC`](../../../classes/Mesh.md#createmeshvertexshadermodulebasic)
+
+***
+
+***
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:1751](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L1751)
+
+Mesh 인스턴스를 파기하고 할당된 드로우 커맨드 슬롯, 전역 버퍼 슬롯 및 리소스를 즉시 해제합니다.
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`destroy`](../../../classes/Mesh.md#destroy)
+
+***
+
+***
+
+### getChildAt()
+
+> **getChildAt**(`index`): [`Mesh`](../../../classes/Mesh.md)
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:143](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L143)
+
+지정한 인덱스에 위치한 자식 객체를 반환합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `index` | `number` | 조회할 인덱스 위치 |
+
+#### Returns
+
+[`Mesh`](../../../classes/Mesh.md)
+
+해당 위치의 자식 객체 (범위 초과 시 `undefined`)
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`getChildAt`](../../../classes/Mesh.md#getchildat)
+
+***
+
+***
+
+### getChildIndex()
+
+> **getChildIndex**(`child`): `number`
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L163)
+
+지정한 자식 객체의 인덱스를 반환합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | 인덱스를 조회할 자식 객체 |
+
+#### Returns
+
+`number`
+
+자식 객체의 인덱스 (존재하지 않으면 `-1`)
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`getChildIndex`](../../../classes/Mesh.md#getchildindex)
+
+***
+
+***
+
+### getCombinedOpacity()
+
+> **getCombinedOpacity**(): `number`
+
+Defined in: [src/display/mesh/Mesh.ts:870](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L870)
+
+부모 계층을 고려한 통합 투명도를 계산하여 반환합니다.
+
+#### Returns
+
+`number`
+
+통합 투명도 값
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`getCombinedOpacity`](../../../classes/Mesh.md#getcombinedopacity)
+
+***
+
+***
+
+### getScreenPoint()
+
+> **getScreenPoint**(`view`): \[`number`, `number`\]
+
+Defined in: [src/display/mesh/core/MeshBase.ts:245](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L245)
+
+지정된 뷰를 기준으로 이 객체의 2D 화면 좌표를 반환합니다.
+
+#### Example
+```typescript
+const screenPos = mesh.getScreenPoint(view3D);
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `view` | [`View3D`](../../../classes/View3D.md) | 기준이 되는 View3D 인스턴스 |
+
+#### Returns
+
+\[`number`, `number`\]
+
+화면 좌표 `[x, y]`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`getScreenPoint`](../../../classes/Mesh.md#getscreenpoint)
+
+***
+
+***
+
+### initGPURenderInfos()
+
+> **initGPURenderInfos**(): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:1698](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L1698)
+
+메시의 GPU 렌더링 정보(VertexGPURenderInfo)를 초기화하고 파이프라인을 갱신합니다.
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`initGPURenderInfos`](../../../classes/Mesh.md#initgpurenderinfos)
+
+***
+
+***
+
+### localToWorld()
+
+> **localToWorld**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
+
+Defined in: [src/display/mesh/core/MeshBase.ts:225](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L225)
+
+이 객체의 로컬 공간 좌표를 월드 공간 좌표로 변환합니다.
+
+#### Example
+```typescript
+const worldPos = mesh.localToWorld(0, 1, 0);
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `x` | `number` | 로컬 X 좌표 |
+| `y` | `number` | 로컬 Y 좌표 |
+| `z` | `number` | 로컬 Z 좌표 |
+
+#### Returns
+
+\[`number`, `number`, `number`\]
+
+변환된 월드 좌표 `[x, y, z]`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`localToWorld`](../../../classes/Mesh.md#localtoworld)
+
+***
+
+***
+
+### lookAt()
+
+> **lookAt**(`targetX`, `targetY?`, `targetZ?`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:908](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L908)
+
+메시가 특정 좌표를 바라보도록 회전시킵니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `targetX` | `number` \| \[`number`, `number`, `number`\] | 대상 X 좌표 또는 [x, y, z] 배열 |
+| `targetY?` | `number` | 대상 Y 좌표 (targetX가 배열인 경우 무시됨) |
+| `targetZ?` | `number` | 대상 Z 좌표 (targetX가 배열인 경우 무시됨) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`lookAt`](../../../classes/Mesh.md#lookat)
+
+***
+
+***
+
+### removeAllChildren()
+
+> **removeAllChildren**(): `ASpriteSheet`
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:309](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L309)
+
+컨테이너의 모든 자식 객체를 제거합니다.
+
+#### Returns
+
+`ASpriteSheet`
+
+현재 컨테이너 인스턴스
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`removeAllChildren`](../../../classes/Mesh.md#removeallchildren)
+
+***
+
+***
+
+### removeChild()
+
+> **removeChild**(`child`): [`Mesh`](../../../classes/Mesh.md)
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:265](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L265)
+
+지정한 자식 객체를 컨테이너에서 제거합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | 제거할 자식 객체 |
+
+#### Returns
+
+[`Mesh`](../../../classes/Mesh.md)
+
+제거된 자식 객체
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`removeChild`](../../../classes/Mesh.md#removechild)
+
+***
+
+***
+
+### removeChildAt()
+
+> **removeChildAt**(`index`): [`Mesh`](../../../classes/Mesh.md)
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:290](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L290)
+
+지정한 인덱스의 자식 객체를 컨테이너에서 제거합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `index` | `number` | 제거할 자식 객체의 인덱스 |
+
+#### Returns
+
+[`Mesh`](../../../classes/Mesh.md)
+
+제거된 자식 객체
+
+#### Throws
+
+해당 인덱스에 자식 객체가 존재하지 않을 경우 Error 발생
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`removeChildAt`](../../../classes/Mesh.md#removechildat)
+
+***
+
+***
+
+### render()
+
+> **render**(`renderViewStateData`): `void`
+
+Defined in: [src/display/sprites/spriteSheets/core/ASpriteSheet.ts:237](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/sprites/spriteSheets/core/ASpriteSheet.ts#L237)
+
+경과 시간에 따라 현재 프레임 인덱스를 갱신하고 스프라이트 시트를 렌더링합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `renderViewStateData` | [`RenderViewStateData`](../../CoreView/classes/RenderViewStateData.md) | 뷰 렌더링 상태 데이터 |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`render`](../../../classes/Mesh.md#render)
+
+***
+
+***
+
+### setCastShadowRecursively()
+
+> **setCastShadowRecursively**(`value?`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:803](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L803)
+
+하위 계층의 모든 객체에 그림자 캐스팅 여부를 설정합니다.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `value?` | `boolean` | `false` | 캐스팅 여부 (기본값: false) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`setCastShadowRecursively`](../../../classes/Mesh.md#setcastshadowrecursively)
+
+***
+
+***
+
+### setChildIndex()
+
+> **setChildIndex**(`child`, `index`): `void`
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:184](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L184)
+
+자식 객체의 인덱스 위치를 변경합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `child` | [`Mesh`](../../../classes/Mesh.md) | 위치를 변경할 자식 객체 |
+| `index` | `number` | 새로 지정할 인덱스 |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`setChildIndex`](../../../classes/Mesh.md#setchildindex)
+
+***
+
+***
+
+### setEnableDebuggerRecursively()
+
+> **setEnableDebuggerRecursively**(`enableDebugger?`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:784](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L784)
+
+하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `enableDebugger?` | `boolean` | `false` | 활성화 여부 (기본값: false) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`setEnableDebuggerRecursively`](../../../classes/Mesh.md#setenabledebuggerrecursively)
+
+***
+
+***
+
+### setIgnoreFrustumCullingRecursively()
+
+> **setIgnoreFrustumCullingRecursively**(`value?`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:841](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L841)
+
+하위 계층의 모든 객체에 프러스텀 컬링 무시 여부를 설정합니다.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `value?` | `boolean` | `false` | 무시 여부 (기본값: false) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`setIgnoreFrustumCullingRecursively`](../../../classes/Mesh.md#setignorefrustumcullingrecursively)
+
+***
+
+***
+
+### setPosition()
+
+> **setPosition**(`x`, `y?`, `z?`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:960](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L960)
+
+위치를 설정합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `x` | `number` | X 좌표 |
+| `y?` | `number` | Y 좌표 (생략 시 x와 동일) |
+| `z?` | `number` | Z 좌표 (생략 시 x와 동일) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`setPosition`](../../../classes/Mesh.md#setposition)
+
+***
+
+***
+
+### setReceiveShadowRecursively()
+
+> **setReceiveShadowRecursively**(`value?`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:822](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L822)
+
+하위 계층의 모든 객체에 그림자 수신 여부를 설정합니다.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `value?` | `boolean` | `false` | 수신 여부 (기본값: false) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`setReceiveShadowRecursively`](../../../classes/Mesh.md#setreceiveshadowrecursively)
+
+***
+
+***
+
+### setRotation()
+
+> **setRotation**(`rotationX`, `rotationY?`, `rotationZ?`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:984](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L984)
+
+회전값을 설정합니다. (도)
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `rotationX` | `number` | X축 회전 |
+| `rotationY?` | `number` | Y축 회전 (생략 시 rotationX와 동일) |
+| `rotationZ?` | `number` | Z축 회전 (생략 시 rotationX와 동일) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`setRotation`](../../../classes/Mesh.md#setrotation)
+
+***
+
+***
+
+### setScale()
+
+> **setScale**(`x`, `y?`, `z?`): `void`
+
+Defined in: [src/display/mesh/Mesh.ts:936](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/Mesh.ts#L936)
+
+스케일을 설정합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `x` | `number` | X축 스케일 |
+| `y?` | `number` | Y축 스케일 (생략 시 x와 동일) |
+| `z?` | `number` | Z축 스케일 (생략 시 x와 동일) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`setScale`](../../../classes/Mesh.md#setscale)
+
+***
+
+***
+
+### swapChildren()
+
+> **swapChildren**(`child1`, `child2`): `void`
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:213](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L213)
+
+두 자식 객체의 배열 내 순서(인덱스)를 서로 맞바꿉니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `child1` | [`Mesh`](../../../classes/Mesh.md) | 첫 번째 자식 객체 |
+| `child2` | [`Mesh`](../../../classes/Mesh.md) | 두 번째 자식 객체 |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`swapChildren`](../../../classes/Mesh.md#swapchildren)
+
+***
+
+***
+
+### swapChildrenAt()
+
+> **swapChildrenAt**(`index1`, `index2`): `void`
+
+Defined in: [src/display/mesh/core/Object3DContainer.ts:239](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/Object3DContainer.ts#L239)
+
+지정된 두 인덱스에 있는 자식 객체들의 위치를 서로 맞바꿉니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `index1` | `number` | 첫 번째 인덱스 |
+| `index2` | `number` | 두 번째 인덱스 |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`swapChildrenAt`](../../../classes/Mesh.md#swapchildrenat)
+
+***
+
+***
+
+### worldToLocal()
+
+> **worldToLocal**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
+
+Defined in: [src/display/mesh/core/MeshBase.ts:199](https://github.com/redcamel/RedGPU/blob/f63d8861781a3d693b7b3a5a73ed96b0cc3859a6/src/display/mesh/core/MeshBase.ts#L199)
+
+월드 공간 좌표를 이 객체의 로컬 공간 좌표로 변환합니다.
+
+#### Example
+```typescript
+const localPos = mesh.worldToLocal(10, 5, 0);
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `x` | `number` | 월드 X 좌표 |
+| `y` | `number` | 월드 Y 좌표 |
+| `z` | `number` | 월드 Z 좌표 |
+
+#### Returns
+
+\[`number`, `number`, `number`\]
+
+변환된 로컬 좌표 `[x, y, z]`
+
+#### Inherited from
+
+[`Mesh`](../../../classes/Mesh.md).[`worldToLocal`](../../../classes/Mesh.md#worldtolocal)
+
+</details>
