@@ -34,7 +34,7 @@ interface HueSaturation {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/"></iframe>
  *
  * @see [HueSaturation example](/RedGPU/examples/postEffect/adjustments/hueSaturation/)
  * @category Adjustments

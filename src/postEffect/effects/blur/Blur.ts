@@ -16,7 +16,7 @@ import uniformStructCode from "../convolution/wgsl/uniformStructCode.wgsl";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/blur/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/blur/"></iframe>
  *
  * @see [Blur example](/RedGPU/examples/postEffect/blur/blur/)
  * @category Blur

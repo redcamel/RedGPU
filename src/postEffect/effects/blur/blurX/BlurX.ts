@@ -27,7 +27,7 @@ interface BlurX {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/blurX/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/blurX/"></iframe>
  *
  * @see [BlurX example](/RedGPU/examples/postEffect/blur/blurX/)
  * @category Blur

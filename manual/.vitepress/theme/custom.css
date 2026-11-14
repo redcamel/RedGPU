@@ -36,6 +36,7 @@
 .VPDoc .content-container {
     max-width: 100% !important;
     width: 100% !important;
+    min-width: 0;
 }
 
 /* 테이블 가용 너비 100% 설정 및 넘침 방지 */
@@ -45,6 +46,15 @@
     table-layout: auto;
     margin: 1.5rem 0;
 }
+
+@media (max-width: 959px) {
+    .vp-doc table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+}
+
 
 .vp-doc th {
     white-space: nowrap;

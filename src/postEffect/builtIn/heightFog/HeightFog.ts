@@ -86,7 +86,7 @@ interface HeightFog {
  * heightFog.fogColor.setColorByRGB(200, 210, 255);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/builtIn/fog/heightFog/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/fog/heightFog/"></iframe>
  *
  * @see [HeightFog example](/RedGPU/examples/postEffect/builtIn/fog/heightFog/)
  * @category PostEffect

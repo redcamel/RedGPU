@@ -27,7 +27,7 @@ interface Invert {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/"></iframe>
  *
  * @see [Invert example](/RedGPU/examples/postEffect/adjustments/invert/)
  * @category Adjustments

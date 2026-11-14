@@ -5,57 +5,57 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
  * [KO] AutoExposure (자동 노출 및 눈 적응) 예제
  * [EN] AutoExposure (Auto-Exposure & Eye Adaptation) example
  *
- * [KO] 256-bin 로그 휘도 히스토그램 분석, 백분위 절삭, 측광 모드, 노출 보정 및 디버그 히스토그램 HUD를 시연합니다.
- * [EN] Demonstrates 256-bin log-luminance histogram analysis, percentile trimming, metering modes, exposure compensation, and the debug histogram HUD.
+ * [KO] 256-bin 로그 휘도 히스토그램 분석, 백분위 절삭, 측광 모드 및 노출 보정을 시연합니다.
+ * [EN] Demonstrates 256-bin log-luminance histogram analysis, percentile trimming, metering modes, and exposure compensation.
  */
 
 const VIEWPOINT_STAGES = [
     {
         title: 'Midday Courtyard (100k lux)',
         centerX: 0.0,
-        centerY: -0.2,
-        centerZ: 3.6,
-        distance: 6.4,
-        pan: -28,
-        tilt: -11,
+        centerY: -0.15,
+        centerZ: 3.4,
+        distance: 5.2,
+        pan: -24,
+        tilt: -12,
         sunLux: 100000,
-        sunElevation: 42,
-        sunAzimuth: 45
+        sunElevation: 44,
+        sunAzimuth: 38
     },
     {
         title: 'Window Backlight (Interior -> Sky)',
         centerX: 0.0,
-        centerY: -0.25,
-        centerZ: -1.6,
-        distance: 4.8,
-        pan: 180,
-        tilt: 2,
+        centerY: -0.05,
+        centerZ: -0.6,
+        distance: 4.2,
+        pan: 168,
+        tilt: 4,
         sunLux: 85000,
-        sunElevation: 20,
-        sunAzimuth: -162
+        sunElevation: 18,
+        sunAzimuth: -165
     },
     {
         title: 'Golden Sunset (12k lux)',
         centerX: 0.0,
-        centerY: -0.15,
-        centerZ: 2.8,
-        distance: 6.8,
-        pan: 22,
-        tilt: -7,
+        centerY: -0.1,
+        centerZ: 2.6,
+        distance: 5.8,
+        pan: 26,
+        tilt: -6,
         sunLux: 12000,
-        sunElevation: 3.2,
-        sunAzimuth: -148
+        sunElevation: 3.5,
+        sunAzimuth: -145
     },
     {
         title: 'Night Gallery Vault (PointLights)',
         centerX: 0.0,
-        centerY: -0.35,
-        centerZ: -5.4,
-        distance: 4.2,
-        pan: 18,
-        tilt: -9,
-        sunLux: 0,
-        sunElevation: -12,
+        centerY: -0.15,
+        centerZ: -6.0,
+        distance: 3.4,
+        pan: 16,
+        tilt: -10,
+        sunLux: 650,
+        sunElevation: 2.0,
         sunAzimuth: 45
     }
 ];
@@ -90,8 +90,8 @@ RedGPU.init(
         view.skyAtmosphere.cloudDensity = 0.65;
         redGPUContext.addView(view);
 
+        view.builtInEffectManager.useBloom = true;
         const autoExposure = view.builtInEffectManager.autoExposure;
-        autoExposure.useDebugOverlay = true;
 
         setupColonnadeGalleryScene(redGPUContext, scene);
 
@@ -126,13 +126,22 @@ const addArchitecturePiece = (redGPUContext, parent, geo, mat, x, y, z) => {
     return mesh;
 };
 
+const addPedestal = (redGPUContext, parent, baseGeo, columnGeo, capGeo, plinthMat, trimMat, x, z) => {
+    // [KO] 지면(y = -1.6) 기준 3단 갤러리 좌대 (상단 표면 y = -0.92)
+    // [EN] 3-tier gallery pedestal grounded at y = -1.6 (top surface at y = -0.92)
+    addArchitecturePiece(redGPUContext, parent, baseGeo, plinthMat, x, -1.52, z);
+    addArchitecturePiece(redGPUContext, parent, columnGeo, plinthMat, x, -1.20, z);
+    addArchitecturePiece(redGPUContext, parent, capGeo, trimMat, x, -0.95, z);
+};
+
 const setupColonnadeGalleryScene = (redGPUContext, scene) => {
-    // [KO] 물리적 18~32% 선형 반사율 범위로 교정된 석재·콘크리트·현무암 PBR 재질
-    // [EN] Physically calibrated stone, concrete, and basalt PBR materials in the 18~32% linear reflectance range
+    // [KO] 물리적 18~34% 선형 반사율 범위로 교정된 석재·콘크리트·현무암 PBR 재질
+    // [EN] Physically calibrated stone, concrete, and basalt PBR materials in the 18~34% linear reflectance range
     const plazaFloorMat = createPBR(redGPUContext, [0.21, 0.20, 0.185, 1.0], 0.0, 0.85);
     const limestoneMat = createPBR(redGPUContext, [0.34, 0.31, 0.27, 1.0], 0.0, 0.72);
     const vaultWallMat = createPBR(redGPUContext, [0.14, 0.145, 0.16, 1.0], 0.0, 0.78);
-    const basaltPlinthMat = createPBR(redGPUContext, [0.075, 0.08, 0.09, 1.0], 0.05, 0.52);
+    const basaltPlinthMat = createPBR(redGPUContext, [0.075, 0.08, 0.09, 1.0], 0.08, 0.48);
+    const bronzeTrimMat = createPBR(redGPUContext, [0.55, 0.43, 0.28, 1.0], 0.85, 0.32);
 
     const floor = new RedGPU.Display.Mesh(
         redGPUContext,
@@ -143,76 +152,117 @@ const setupColonnadeGalleryScene = (redGPUContext, scene) => {
     floor.receiveShadow = true;
     scene.addChild(floor);
 
-    // [KO] 1. 실내 암실 갤러리 볼트 (Z: -9.2 ~ -2.8)
-    // [EN] 1. Enclosed inner gallery vault (Z: -9.2 to -2.8)
-    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 10.4, 0.5, 6.8), vaultWallMat, 0, 2.55, -6.0);
-    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.55, 4.4, 6.8), vaultWallMat, -4.92, 0.5, -6.0);
-    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.55, 4.4, 6.8), vaultWallMat, 4.92, 0.5, -6.0);
-    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 10.4, 4.4, 0.55), vaultWallMat, 0, 0.5, -9.15);
+    // [KO] 광장 중앙 석재 카펫 런웨이 (시선 유도선)
+    // [EN] Central stone runway runner guiding sightlines from plaza to vault
+    addArchitecturePiece(
+        redGPUContext,
+        scene,
+        new RedGPU.Primitive.Box(redGPUContext, 3.6, 0.04, 15.6),
+        limestoneMat,
+        0, -1.58, -1.2
+    );
 
-    // [KO] 2. 채광 루버 열주 회랑 (Z: -2.6 ~ +2.4) — 직사광과 그림자 줄무늬 교차
-    // [EN] 2. Skylight louver colonnade (Z: -2.6 to +2.4) — alternating sun shafts and shadow bands
-    const columnGeo = new RedGPU.Primitive.Box(redGPUContext, 0.65, 4.3, 0.65);
-    const columnZList = [-2.2, -0.4, 1.4, 3.2];
+    // [KO] 1. 실내 암실 갤러리 볼트 (Z: -9.4 ~ -2.6, 개방형 아치 입구 폭 5.6m)
+    // [EN] 1. Enclosed inner gallery vault (Z: -9.4 to -2.6, wide 5.6m portal opening)
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 11.2, 0.5, 7.0), vaultWallMat, 0, 2.85, -6.0);
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.55, 4.7, 7.0), vaultWallMat, -5.32, 0.65, -6.0);
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.55, 4.7, 7.0), vaultWallMat, 5.32, 0.65, -6.0);
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 11.2, 4.7, 0.55), vaultWallMat, 0, 0.65, -9.25);
+
+    // [KO] 회랑-볼트 경계 포털 게이트 (중앙 5.6m 개방으로 카메라 가림 방지)
+    // [EN] Portal archway frame with wide 5.6m central opening to prevent camera occlusion
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 2.2, 4.7, 0.55), limestoneMat, -3.95, 0.65, -2.6);
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 2.2, 4.7, 0.55), limestoneMat, 3.95, 0.65, -2.6);
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 10.1, 0.65, 0.65), limestoneMat, 0, 2.68, -2.6);
+
+    // [KO] 2. 채광 루버 열주 회랑 (Z: -2.6 ~ +2.2)
+    // [EN] 2. Skylight louver colonnade (Z: -2.6 to +2.2)
+    const columnGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.32, 0.36, 4.5, 24);
+    const columnCapGeo = new RedGPU.Primitive.Box(redGPUContext, 0.86, 0.22, 0.86);
+    const columnZList = [-1.0, 0.6, 2.2];
     columnZList.forEach((zPos) => {
-        addArchitecturePiece(redGPUContext, scene, columnGeo, limestoneMat, -4.6, 0.55, zPos);
-        addArchitecturePiece(redGPUContext, scene, columnGeo, limestoneMat, 4.6, 0.55, zPos);
+        addArchitecturePiece(redGPUContext, scene, columnCapGeo, basaltPlinthMat, -4.4, -1.49, zPos);
+        addArchitecturePiece(redGPUContext, scene, columnGeo, limestoneMat, -4.4, 0.65, zPos);
+        addArchitecturePiece(redGPUContext, scene, columnCapGeo, basaltPlinthMat, 4.4, -1.49, zPos);
+        addArchitecturePiece(redGPUContext, scene, columnGeo, limestoneMat, 4.4, 0.65, zPos);
     });
 
-    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.65, 0.45, 6.4), limestoneMat, -4.6, 2.55, 0.5);
-    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.65, 0.45, 6.4), limestoneMat, 4.6, 2.55, 0.5);
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.75, 0.45, 5.4), limestoneMat, -4.4, 2.85, -0.2);
+    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.75, 0.45, 5.4), limestoneMat, 4.4, 2.85, -0.2);
 
-    const louverGeo = new RedGPU.Primitive.Box(redGPUContext, 9.8, 0.32, 0.55);
-    for (let i = 0; i < 5; i++) {
-        addArchitecturePiece(redGPUContext, scene, louverGeo, limestoneMat, 0, 2.6, -2.0 + i * 1.3);
+    const louverGeo = new RedGPU.Primitive.Box(redGPUContext, 9.5, 0.28, 0.42);
+    for (let i = 0; i < 4; i++) {
+        addArchitecturePiece(redGPUContext, scene, louverGeo, limestoneMat, 0, 2.9, -1.6 + i * 1.15);
     }
 
-    // [KO] 회랑 입구 프레임 게이트
-    // [EN] Portal archway frame
-    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 2.6, 4.3, 0.55), limestoneMat, -3.6, 0.55, -2.6);
-    addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 2.6, 4.3, 0.55), limestoneMat, 3.6, 0.55, -2.6);
+    // [KO] 3. 메인 피사체용 3단 좌대 (야외 광장 / 채광 회랑 / 암실 갤러리)
+    // [EN] 3. 3-tier hero pedestals across outdoor plaza, skylight colonnade, and dark vault
+    const heroBaseGeo = new RedGPU.Primitive.Box(redGPUContext, 1.55, 0.16, 1.55);
+    const heroColGeo = new RedGPU.Primitive.Box(redGPUContext, 1.18, 0.48, 1.18);
+    const heroCapGeo = new RedGPU.Primitive.Box(redGPUContext, 1.32, 0.06, 1.32);
 
-    // [KO] 3. 전시 좌대 및 광학 레퍼런스 구체 (18% 미들 그레이 / 크롬 / 브러시드 골드 / 화이트 세라믹)
-    // [EN] 3. Plinths and optical calibration spheres (18% Middle-Gray / Chrome / Brushed Gold / White Ceramic)
-    const plinthGeo = new RedGPU.Primitive.Box(redGPUContext, 1.5, 0.42, 1.5);
-    addArchitecturePiece(redGPUContext, scene, plinthGeo, basaltPlinthMat, 0, -1.39, 3.8);
-    addArchitecturePiece(redGPUContext, scene, plinthGeo, basaltPlinthMat, 0, -1.39, -1.2);
-    addArchitecturePiece(redGPUContext, scene, plinthGeo, basaltPlinthMat, 0, -1.39, -5.6);
-
-    const sphereGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.42, 32, 32);
-    const refSpheres = [
-        {x: -2.2, z: 4.2, mat: createPBR(redGPUContext, [0.18, 0.18, 0.18, 1.0], 0.0, 0.65)},
-        {x: 2.2, z: 4.2, mat: createPBR(redGPUContext, [0.95, 0.96, 0.98, 1.0], 1.0, 0.06)},
-        {x: -2.2, z: 2.2, mat: createPBR(redGPUContext, [1.0, 0.78, 0.34, 1.0], 1.0, 0.22)},
-        {x: 2.2, z: 2.2, mat: createPBR(redGPUContext, [0.80, 0.80, 0.78, 1.0], 0.0, 0.35)}
+    const heroPlacements = [
+        {x: 0.0, y: 0.02, z: 3.4, scale: 0.96, rotY: -22},
+        {x: -1.15, y: 0.02, z: -0.6, scale: 0.92, rotY: 155},
+        {x: 0.0, y: 0.02, z: -6.0, scale: 0.96, rotY: 18}
     ];
-    refSpheres.forEach((item) => {
-        addArchitecturePiece(redGPUContext, scene, new RedGPU.Primitive.Box(redGPUContext, 0.9, 0.36, 0.9), basaltPlinthMat, item.x, -1.42, item.z);
-        addArchitecturePiece(redGPUContext, scene, sphereGeo, item.mat, item.x, -0.82, item.z);
+
+    heroPlacements.forEach((p) => {
+        addPedestal(redGPUContext, scene, heroBaseGeo, heroColGeo, heroCapGeo, basaltPlinthMat, bronzeTrimMat, p.x, p.z);
     });
 
-    // [KO] 4. 암실 갤러리 내부 점광원 배치
-    // [EN] 4. Interior gallery point lights
+    // [KO] 4. 광학 교정 구체 4종 — 야외 피사체 좌우에 반원형 아치 배치로 한 화면에서 동시 비교
+    // [EN] 4. 4 optical calibration spheres arranged in a semi-circular arc flanking the courtyard subject
+    const orbBaseGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.42, 0.46, 0.56, 24);
+    const orbCapGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.45, 0.45, 0.05, 24);
+    const sphereGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.36, 32, 32);
+
+    const refSpheres = [
+        // 18% Middle-Gray (측광 기준점)
+        {x: -2.35, z: 3.85, mat: createPBR(redGPUContext, [0.18, 0.18, 0.18, 1.0], 0.0, 0.55)},
+        // Brushed Gold (웜 스페큘러 하이라이트)
+        {x: -1.65, z: 2.15, mat: createPBR(redGPUContext, [1.0, 0.78, 0.34, 1.0], 1.0, 0.20)},
+        // Matte Ceramic White (80% 고반사 디퓨즈 클리핑 검증)
+        {x: 1.65, z: 2.15, mat: createPBR(redGPUContext, [0.82, 0.81, 0.78, 1.0], 0.0, 0.32)},
+        // Chrome Mirror (태양 및 하늘 정반사 피크 휘도 검증)
+        {x: 2.35, z: 3.85, mat: createPBR(redGPUContext, [0.96, 0.97, 0.99, 1.0], 1.0, 0.05)}
+    ];
+
+    refSpheres.forEach((item) => {
+        addArchitecturePiece(redGPUContext, scene, orbBaseGeo, basaltPlinthMat, item.x, -1.32, item.z);
+        addArchitecturePiece(redGPUContext, scene, orbCapGeo, bronzeTrimMat, item.x, -1.02, item.z);
+        addArchitecturePiece(redGPUContext, scene, sphereGeo, item.mat, item.x, -0.64, item.z);
+    });
+
+    // [KO] 암실 갤러리 내부에도 보조 레퍼런스 구체 2기 배치 (야간 점광원 반사 확인용)
+    // [EN] 2 secondary reference spheres inside the dark vault for night point-light evaluation
+    const vaultSpheres = [
+        {x: -1.85, z: -6.3, mat: createPBR(redGPUContext, [1.0, 0.78, 0.34, 1.0], 1.0, 0.18)},
+        {x: 1.85, z: -6.3, mat: createPBR(redGPUContext, [0.82, 0.83, 0.86, 1.0], 0.15, 0.28)}
+    ];
+    vaultSpheres.forEach((item) => {
+        addArchitecturePiece(redGPUContext, scene, orbBaseGeo, basaltPlinthMat, item.x, -1.32, item.z);
+        addArchitecturePiece(redGPUContext, scene, orbCapGeo, bronzeTrimMat, item.x, -1.02, item.z);
+        addArchitecturePiece(redGPUContext, scene, sphereGeo, item.mat, item.x, -0.64, item.z);
+    });
+
+    // [KO] 5. 암실 갤러리 내부 점광원 배치
+    // [EN] 5. Interior gallery point lights
     const warmVaultLight = new RedGPU.Light.PointLight('#ffaa55', 2600);
-    warmVaultLight.setPosition(-2.6, 1.6, -5.4);
+    warmVaultLight.setPosition(-2.4, 1.8, -5.2);
     warmVaultLight.radius = 10.0;
     scene.lightManager.addPointLight(warmVaultLight);
 
-    const coolVaultLight = new RedGPU.Light.PointLight('#66aaff', 1800);
-    coolVaultLight.setPosition(2.6, 1.5, -6.2);
+    const coolVaultLight = new RedGPU.Light.PointLight('#66aaff', 1900);
+    coolVaultLight.setPosition(2.4, 1.7, -6.4);
     coolVaultLight.radius = 9.5;
     scene.lightManager.addPointLight(coolVaultLight);
 
-    // [KO] 5. 야외 광장 / 채광 회랑 / 심층 암실 3개 조도 구역 피사체 배치
-    // [EN] 5. Hero subjects across outdoor plaza, skylight colonnade, and dark vault
+    // [KO] 6. 3개 조도 구역 메인 피사체(DamagedHelmet) 로드 및 좌대 상단 정위치 안착
+    // [EN] 6. Load hero subjects (DamagedHelmet) seated cleanly on the 3-tier pedestals
     const helmetUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
-    const placements = [
-        {x: 0.0, y: -0.22, z: 3.8, scale: 1.05, rotY: -24},
-        {x: 0.0, y: -0.22, z: -1.2, scale: 0.98, rotY: 180},
-        {x: 0.0, y: -0.22, z: -5.6, scale: 1.02, rotY: 20}
-    ];
 
-    placements.forEach((item, idx) => {
+    heroPlacements.forEach((item, idx) => {
         new RedGPU.GLTFLoader(
             redGPUContext,
             helmetUrl,
@@ -262,7 +312,6 @@ const renderTestPane = (redGPUContext, targetView, autoExposure, controller, dir
             };
 
             const controls = [
-                exposureFolder.addBinding(autoExposure, 'useDebugOverlay'),
                 exposureFolder.addBinding(autoExposure, 'meteringMode', {options: meteringOptions}),
                 exposureFolder.addBinding(autoExposure, 'exposureCompensation', {min: -4, max: 4, step: 0.05}),
                 exposureFolder.addBinding(autoExposure, 'targetLuminance', {min: 0.01, max: 1.0, step: 0.01}),

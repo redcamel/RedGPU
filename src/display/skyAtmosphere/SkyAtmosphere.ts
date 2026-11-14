@@ -42,7 +42,7 @@ interface CachedUniformMember {
  * view.skyAtmosphere = skyAtmosphere;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/"></iframe>
  *
  * @see [SkyAtmosphere Basic Example](/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
  * @see [SkyAtmosphere Scattering Test](/RedGPU/examples/3d/skyAtmosphere/scatteringTest/)

@@ -35,6 +35,19 @@ const checkIsMobileLandscape = (): boolean => {
 };
 
 /**
+ * [KO] 현재 페이지가 iframe 내부에 임베드되어 있는지 여부를 판별합니다.
+ * [EN] Determines whether the current page is embedded inside an iframe.
+ */
+const checkIsIframe = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    try {
+        return window.self !== window.top;
+    } catch {
+        return true;
+    }
+};
+
+/**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
  * [EN] Main application component of the example helper.
  */
@@ -43,13 +56,16 @@ const App = () => {
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
     const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
+    const isIframe = React.useMemo(() => checkIsIframe(), []);
 
     // [KO] 모바일 환경(세로 협소 화면 또는 모바일 가로 모드) 진입 시 설정 패널을 1초 후 자동으로 닫음 (사용자 경험 개선)
     // [EN] Automatically close the settings panel after 1 second on mobile (narrow portrait or mobile landscape) for better UX
     const autoCloseTriggered = React.useRef(false);
     React.useEffect(() => {
         if (autoCloseTriggered.current || !showSettingsPanel) return;
-        const shouldAutoClose = isNarrow || checkIsMobileLandscape();
+        const shouldAutoClose = isIframe
+            ? (window.innerWidth <= 540 || checkIsMobileLandscape())
+            : (isNarrow || checkIsMobileLandscape());
         if (shouldAutoClose) {
             const timer = setTimeout(() => {
                 autoCloseTriggered.current = true;
@@ -60,7 +76,7 @@ const App = () => {
         } else {
             autoCloseTriggered.current = true;
         }
-    }, [isNarrow, showSettingsPanel, setShowSettingsPanel]);
+    }, [isIframe, isNarrow, showSettingsPanel, setShowSettingsPanel]);
 
     // [KO] 뷰포트 상태 동기화
     useViewportSync();
@@ -73,9 +89,9 @@ const App = () => {
 
     const dynamicPanelStyle: React.CSSProperties = {
         ...panelStyle,
-        top: isNarrow ? '74px' : '80px',
-        right: isNarrow ? '16px' : '20px',
-        maxHeight: isNarrow ? 'calc(100dvh - 238px)' : 'calc(100dvh - 158px)',
+        top: isIframe ? '68px' : (isNarrow ? '74px' : '80px'),
+        right: (isIframe || isNarrow) ? '16px' : '20px',
+        maxHeight: isIframe ? 'calc(100dvh - 84px)' : (isNarrow ? 'calc(100dvh - 238px)' : 'calc(100dvh - 158px)'),
         transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 24px))',
         opacity: showSettingsPanel ? 1 : 0,
         pointerEvents: showSettingsPanel ? 'auto' : 'none',
@@ -84,8 +100,8 @@ const App = () => {
 
     return (
         <>
-            <ExampleHeader/>
-            <Description/>
+            <ExampleHeader isIframe={isIframe}/>
+            {!isIframe && <Description/>}
 
             <div style={dynamicPanelStyle}>
                 <div style={contentStyle}>
@@ -97,12 +113,16 @@ const App = () => {
 
             <GuiCompareLabelHelper/>
 
-            <Footer
-                narrowTitle={<Title/>}
-                narrowSettings={<RenderingSettingsGroup/>}
-                isNarrow={isNarrow}
-            />
-            <SourceModal/>
+            {!isIframe && (
+                <>
+                    <Footer
+                        narrowTitle={<Title/>}
+                        narrowSettings={<RenderingSettingsGroup/>}
+                        isNarrow={isNarrow}
+                    />
+                    <SourceModal/>
+                </>
+            )}
             <LoadingUI/>
         </>
     );

@@ -65,7 +65,7 @@ interface SSR {
  * ssr.reflectionIntensity = 0.8;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/"></iframe>
  *
  * @see [SSR example](/RedGPU/examples/postEffect/builtIn/screenSpace/ssr/)
  * @category PostEffect

@@ -27,7 +27,7 @@ interface Grayscale {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/grayscale/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/grayscale/"></iframe>
  *
  * @see [Grayscale example](/RedGPU/examples/postEffect/adjustments/grayscale/)
  * @category Adjustments

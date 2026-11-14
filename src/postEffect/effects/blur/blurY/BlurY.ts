@@ -27,7 +27,7 @@ interface BlurY {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/blurY/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/blurY/"></iframe>
  *
  * @see [BlurY example](/RedGPU/examples/postEffect/blur/blurY/)
  * @category Blur

@@ -39,7 +39,7 @@ const UNIFORM_BUFFER_BYTE_SIZE = 80;
  * autoExposure.meteringMode = RedGPU.PostEffect.BuiltIn.METERING_MODE.CENTER_WEIGHTED;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/autoExposure/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/autoExposure/"></iframe>
  *
  * @see [AutoExposure Example](/RedGPU/examples/postEffect/builtIn/lens/autoExposure/)
  * @category PostEffect

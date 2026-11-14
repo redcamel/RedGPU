@@ -199,7 +199,7 @@ interface LakeMaterial {
  * const material = lake.material;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/water/lake/lakeMaterial/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/water/lake/lakeMaterial/"></iframe>
  *
  * @see [Basic lake example](/RedGPU/examples/3d/water/lake/basicLake/)
  * @see [Lake material example](/RedGPU/examples/3d/water/lake/lakeMaterial/)

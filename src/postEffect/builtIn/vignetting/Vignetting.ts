@@ -34,7 +34,7 @@ interface Vignetting {
  * view.builtInEffectManager.vignetting.intensity = 0.4;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/vignetting/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/lens/vignetting/"></iframe>
  *
  * @see [Vignetting example](/RedGPU/examples/postEffect/builtIn/lens/vignetting/)
  * @category PostEffect

@@ -10,7 +10,7 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * ```typescript
  * const box = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1, 1, 1, 1);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/box/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/box/"></iframe>
  *
  * @see [Box example](/RedGPU/examples/3d/primitive/box/)
  * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)

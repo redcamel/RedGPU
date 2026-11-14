@@ -15,7 +15,7 @@ import uniformStructCode from "./convolution/wgsl/uniformStructCode.wgsl";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/sharpen/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/sharpen/"></iframe>
  *
  * @see [Sharpen example](/RedGPU/examples/postEffect/sharpen/)
  * @category PostEffect

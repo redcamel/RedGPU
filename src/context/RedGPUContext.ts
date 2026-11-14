@@ -31,7 +31,7 @@ import Renderer from "../renderer/Renderer";
  * });
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/helloWorld/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/helloWorld/"></iframe>
  * @see [Hello World example](/RedGPU/examples/3d/helloWorld/)
  * @category Context
  */

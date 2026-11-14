@@ -87,7 +87,7 @@ interface ColorBalance {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/colorBalance/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/colorBalance/"></iframe>
  *
  * @see [ColorBalance example](/RedGPU/examples/postEffect/adjustments/colorBalance/)
  * @category Adjustments

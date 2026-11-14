@@ -42,7 +42,7 @@ interface ColorTemperatureTint {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/"></iframe>
  *
  * @see [ColorTemperatureTint example](/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/)
  * @category Adjustments

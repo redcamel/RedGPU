@@ -34,7 +34,7 @@ interface BrightnessContrast {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/brightnessContrast/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/brightnessContrast/"></iframe>
  *
  * @see [BrightnessContrast example](/RedGPU/examples/postEffect/adjustments/brightnessContrast/)
  * @category Adjustments

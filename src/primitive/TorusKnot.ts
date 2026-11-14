@@ -13,7 +13,7 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * const torusKnot = new RedGPU.Primitive.TorusKnot(redGPUContext, 1, 0.4, 128, 16, 2, 3);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/primitive/torusKnot/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/torusKnot/"></iframe>
  *
  * @see [TorusKnot Basic Example](/RedGPU/examples/3d/primitive/torusKnot/)
  * @see [Primitives Overview Example](/RedGPU/examples/3d/primitive/primitives/)

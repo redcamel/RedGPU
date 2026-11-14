@@ -10,7 +10,7 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * ```typescript
  * const torus = new RedGPU.Primitive.Torus(redGPUContext, 1, 0.5, 16, 16);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/torus/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/torus/"></iframe>
  *
  * @see [Torus example](/RedGPU/examples/3d/primitive/torus/)
  * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)

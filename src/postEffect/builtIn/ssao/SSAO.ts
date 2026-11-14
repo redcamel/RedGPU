@@ -26,7 +26,7 @@ import SSAOBlend from "./ssao_blend/SSAOBlend";
  * ssao.useMultiBounce = true;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/"></iframe>
  *
  * @see [SSAO example](/RedGPU/examples/postEffect/builtIn/screenSpace/ssao/)
  * @category PostEffect

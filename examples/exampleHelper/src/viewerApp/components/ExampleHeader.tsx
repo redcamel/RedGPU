@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
-import {CodeIcon, HomeIcon} from '../../common/components/Icons';
+import {CodeIcon, ExternalLinkIcon, HomeIcon} from '../../common/components/Icons';
 import IconButton from '../../common/components/basic/IconButton';
 import IconToggleButton from '../../common/components/basic/IconToggleButton';
 import LabelButton from '../../common/components/basic/LabelButton';
@@ -8,11 +8,15 @@ import RenderingSettingsGroup from '../../viewerApp/components/RenderingSettings
 import Title from '../../viewerApp/components/Title';
 import {glassCircleIslandStyle, glassPillContainerStyle, verticalDividerStyle} from '../../common/styles/uiStyles';
 
+interface ExampleHeaderProps {
+    isIframe?: boolean;
+}
+
 /**
  * [KO] 예제 헬퍼의 상단 네비게이션 바 컴포넌트입니다.
  * [EN] Top navigation bar component of the example helper.
  */
-const ExampleHeader = () => {
+const ExampleHeader: React.FC<ExampleHeaderProps> = ({isIframe = false}) => {
     const topBarRightActions = useExampleHelperStore((state: ExampleHelperState) => state.topBarRightActions);
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
@@ -48,6 +52,51 @@ const ExampleHeader = () => {
 
     const viewportActions = topBarRightActions.filter((action) => action.id !== 'setting-toggle');
     const settingAction = topBarRightActions.find((action) => action.id === 'setting-toggle');
+
+    if (isIframe) {
+        return (
+            <header>
+                <div
+                    style={{
+                        ...headerLeftGroupStyle,
+                        top: '16px',
+                        left: '16px',
+                    }}
+                >
+                    <div style={rightSectionStyle}>
+                        <LabelButton
+                            icon={<ExternalLinkIcon color="#fdb48d" size={15}/>}
+                            label="NEW TAB"
+                            title="Open in new tab"
+                            onClick={() => {
+                                window.open(window.location.href, '_blank', 'noopener,noreferrer');
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {redGPUContext && settingAction && (
+                    <div
+                        style={{
+                            ...headerRightGroupStyle,
+                            top: '16px',
+                            right: '16px',
+                        }}
+                    >
+                        <div style={circleIslandStyle}>
+                            <IconToggleButton
+                                key={settingAction.id}
+                                icon={settingAction.icon}
+                                label={settingAction.label}
+                                onClick={settingAction.onClick}
+                                isActive={!!settingAction.isActive}
+                            />
+                        </div>
+                    </div>
+                )}
+            </header>
+        );
+    }
 
     return (
         <header>
