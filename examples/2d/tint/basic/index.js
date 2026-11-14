@@ -73,10 +73,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 const renderTestPane = (redGPUContext, sprite) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
@@ -104,32 +100,30 @@ const renderTestPane = (redGPUContext, sprite) => {
                 pane.refresh();
             };
 
-            folder.addBinding(tintSettings, 'useTint', {label: 'Use Tint'}).on('change', (ev) => {
+            folder.addBinding(tintSettings, 'useTint').on('change', (ev) => {
                 sprite.material.useTint = ev.value;
             });
 
             folder.addBinding(tintSettings, 'tintBlendMode', {
-                label: 'tintBlendMode',
                 options: RedGPU.Material.TINT_BLEND_MODE,
             }).on('change', (ev) => {
                 sprite.material.tintBlendMode = ev.value;
                 refresh();
             });
 
-            folder.addBinding(tintSettings, 'tintR', {label: 'Tint R', min: 0, max: 255, step: 1}).on('change', (ev) => {
+            folder.addBinding(tintSettings, 'tintR', {min: 0, max: 255, step: 1}).on('change', (ev) => {
                 sprite.material.tint.r = ev.value;
                 refresh();
             });
-            folder.addBinding(tintSettings, 'tintG', {label: 'Tint G', min: 0, max: 255, step: 1}).on('change', (ev) => {
+            folder.addBinding(tintSettings, 'tintG', {min: 0, max: 255, step: 1}).on('change', (ev) => {
                 sprite.material.tint.g = ev.value;
                 refresh();
             });
-            folder.addBinding(tintSettings, 'tintB', {label: 'Tint B', min: 0, max: 255, step: 1}).on('change', (ev) => {
+            folder.addBinding(tintSettings, 'tintB', {min: 0, max: 255, step: 1}).on('change', (ev) => {
                 sprite.material.tint.b = ev.value;
                 refresh();
             });
             folder.addBinding(tintSettings, 'tintA', {
-                label: 'Tint A (Alpha)',
                 min: 0,
                 max: 1,
                 step: 0.01

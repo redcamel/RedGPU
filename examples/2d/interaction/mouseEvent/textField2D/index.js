@@ -1,6 +1,8 @@
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
-import {createEventInfoBox, updateEventInfo} from "../../../../3d/interaction/mouseEvent/eventInfoBox.js?t=1792986333865";
+import {
+    createEventInfoBox,
+    updateEventInfo
+} from "../../../../3d/interaction/mouseEvent/eventInfoBox.js?t=1792986333865";
 
 /**
  * [KO] TextField2D 마우스 이벤트 예제
@@ -30,10 +32,6 @@ RedGPU.init(
 
 		const renderer = new RedGPU.Renderer();
 
-		/**
-		 * [KO] 렌더 루프
-		 * [EN] Render loop
-		 */
 		const render = () => {
 			const radius = 250;
 			const numChildren = view.scene.children.length;
@@ -63,10 +61,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 샘플 TextField2D 객체 생성 및 이벤트 등록
- * [EN] Create sample TextField2D objects and register events
- */
 const createSampleTextField2D = async (redGPUContext, scene, infoBox) => {
 	// [KO] 모든 픽킹 이벤트 타입별로 TextField2D 생성
 	// [EN] Create TextField2D for each picking event type
@@ -94,10 +88,6 @@ const createSampleTextField2D = async (redGPUContext, scene, infoBox) => {
 	});
 };
 
-/**
- * [KO] 무작위 16진수 색상 값 반환
- * [EN] Return random hex color value
- */
 const getRandomHexValue = () => {
 	let result = '';
 	const characters = '0123456789ABCDEF';

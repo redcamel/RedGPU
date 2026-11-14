@@ -23,10 +23,6 @@ RedGPU.init(
         const parentSprite2D = createParentSprite2D(redGPUContext, rootGroup);
         const childSprite2D = createChildSprite2D(redGPUContext, parentSprite2D);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
         redGPUContext.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
             rootGroup.x = width / 2;
@@ -53,13 +49,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 루트 그룹을 생성합니다.
- * [EN] Creates the root group.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Display.Group2D}
- */
 const createRootGroup = (redGPUContext, scene) => {
     const group = new RedGPU.Display.Group2D();
     group.x = redGPUContext.screenRectObject.width / 2;
@@ -69,13 +58,6 @@ const createRootGroup = (redGPUContext, scene) => {
     return group;
 };
 
-/**
- * [KO] 부모 Sprite2D를 생성하여 그룹에 추가합니다.
- * [EN] Creates a parent Sprite2D and adds it to the group.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Group2D} rootGroup
- * @returns {RedGPU.Display.Sprite2D}
- */
 const createParentSprite2D = (redGPUContext, rootGroup) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -90,13 +72,6 @@ const createParentSprite2D = (redGPUContext, rootGroup) => {
     return sprite2D;
 };
 
-/**
- * [KO] 자식 Sprite2D를 생성하여 부모에 추가합니다.
- * [EN] Creates a child Sprite2D and adds it to the parent.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @returns {RedGPU.Display.Sprite2D}
- */
 const createChildSprite2D = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -108,14 +83,6 @@ const createChildSprite2D = (redGPUContext, parent) => {
     return sprite2D;
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Group2D} rootGroup
- * @param {RedGPU.Display.Sprite2D} parent
- * @param {RedGPU.Display.Sprite2D} child
- */
 const renderTestPane = (redGPUContext, rootGroup, parent, child) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {

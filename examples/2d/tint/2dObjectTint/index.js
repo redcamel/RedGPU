@@ -93,10 +93,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
@@ -112,14 +108,13 @@ const renderTestPane = (redGPUContext, scene) => {
                 tintBlendMode: firstChild ? RedGPU.Material.TINT_BLEND_MODE[firstChild.material.tintBlendMode] : 0,
             };
 
-            pane.addBinding(tintSettings, 'useTint', {label: 'Use Tint'}).on('change', (ev) => {
+            pane.addBinding(tintSettings, 'useTint').on('change', (ev) => {
                 scene.children.forEach((sprite) => {
                     sprite.material.useTint = ev.value;
                 });
             });
 
             pane.addBinding(tintSettings, 'tintBlendMode', {
-                label: 'Tint Mode',
                 options: RedGPU.Material.TINT_BLEND_MODE,
             }).on('change', (ev) => {
                 scene.children.forEach((sprite) => {
@@ -127,22 +122,22 @@ const renderTestPane = (redGPUContext, scene) => {
                 });
             });
 
-            pane.addBinding(tintSettings, 'tintR', {label: 'Tint R', min: 0, max: 255, step: 1}).on('change', (ev) => {
+            pane.addBinding(tintSettings, 'tintR', {min: 0, max: 255, step: 1}).on('change', (ev) => {
                 scene.children.forEach((sprite) => {
                     sprite.material.tint.r = ev.value;
                 });
             });
-            pane.addBinding(tintSettings, 'tintG', {label: 'Tint G', min: 0, max: 255, step: 1}).on('change', (ev) => {
+            pane.addBinding(tintSettings, 'tintG', {min: 0, max: 255, step: 1}).on('change', (ev) => {
                 scene.children.forEach((sprite) => {
                     sprite.material.tint.g = ev.value;
                 });
             });
-            pane.addBinding(tintSettings, 'tintB', {label: 'Tint B', min: 0, max: 255, step: 1}).on('change', (ev) => {
+            pane.addBinding(tintSettings, 'tintB', {min: 0, max: 255, step: 1}).on('change', (ev) => {
                 scene.children.forEach((sprite) => {
                     sprite.material.tint.b = ev.value;
                 });
             });
-            pane.addBinding(tintSettings, 'tintA', {label: 'Tint A (Alpha)', min: 0, max: 1, step: 0.01}).on('change', (ev) => {
+            pane.addBinding(tintSettings, 'tintA', {min: 0, max: 1, step: 0.01}).on('change', (ev) => {
                 scene.children.forEach((sprite) => {
                     sprite.material.tint.a = ev.value;
                 });

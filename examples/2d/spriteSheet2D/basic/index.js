@@ -72,10 +72,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 const renderTestPane = (scene, redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {

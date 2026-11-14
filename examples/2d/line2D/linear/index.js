@@ -44,10 +44,8 @@ RedGPU.init(
             const centerX = width / 2;
             const centerY = height / 2;
 
-            // 기존 그룹 제거
             groups.splice(0).forEach(group => scene.removeChild(group));
 
-            // 새로운 라인 그룹 생성
             centerLineSettings.forEach(({title, offsetX, offsetY, color, rainbow}) => {
                 const group = createLineGroup(
                     redGPUContext,
@@ -84,19 +82,13 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] Group2D 기반 라인 및 텍스트 생성 함수
- * [EN] Function to create line group based on Group2D
- */
 function createLineGroup(redGPUContext, title, posX, posY, baseColor, useRainbow, pointsPerLine) {
     const group = new RedGPU.Display.Group2D();
 
-    // 라인 생성
     const line2D = new RedGPU.Display.Line2D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, baseColor);
     generatePoints(line2D, baseColor, useRainbow, pointsPerLine);
     group.addChild(line2D);
 
-    // 라벨 생성
     const label = new RedGPU.Display.TextField2D(redGPUContext);
     label.text = title;
     label.fontSize = 14;
@@ -108,10 +100,6 @@ function createLineGroup(redGPUContext, title, posX, posY, baseColor, useRainbow
     return group;
 }
 
-/**
- * [KO] 라인의 포인트 생성
- * [EN] Generate points for the line
- */
 function generatePoints(line2D, baseColor, useRainbow, pointsPerLine) {
     line2D.removeAllPoint();
 
@@ -129,10 +117,6 @@ function generatePoints(line2D, baseColor, useRainbow, pointsPerLine) {
     }
 }
 
-/**
- * [KO] 무지개 색상 계산
- * [EN] Calculate rainbow color
- */
 function getRainbowColor(t) {
     const r = Math.floor(255 * Math.abs(Math.sin(Math.PI * t)));
     const g = Math.floor(255 * Math.abs(Math.sin(Math.PI * t + (2 * Math.PI) / 3)));
@@ -140,10 +124,6 @@ function getRainbowColor(t) {
     return RedGPU.Color.convertRgbToHex(r, g, b);
 }
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 function renderTestPane(redGPUContext, groups, updateLinesCallback, getPointsPerLine, setPointsPerLine) {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
@@ -173,12 +153,11 @@ function renderTestPane(redGPUContext, groups, updateLinesCallback, getPointsPer
                 });
             };
 
-            pane.addBinding(debugOptions, "showDebugPoints", {label: "Show Debug Points"}).on("change", () => {
+            pane.addBinding(debugOptions, "showDebugPoints").on("change", () => {
                 debugPoints.forEach(point => point.setScale(debugOptions.showDebugPoints ? 1 : 0));
             });
 
             pane.addBinding(debugOptions, "pointsPerLine", {
-                label: "Points Per Line",
                 min: 5,
                 max: 50,
                 step: 1

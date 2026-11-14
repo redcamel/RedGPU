@@ -57,10 +57,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 부모 Sprite2D를 생성합니다.
- * [EN] Creates a parent Sprite2D.
- */
 const createParentSprite2D = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'));
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -76,10 +72,6 @@ const createParentSprite2D = (redGPUContext, scene) => {
     return sprite2D;
 };
 
-/**
- * [KO] 자식 Sprite2D를 생성합니다.
- * [EN] Creates a child Sprite2D.
- */
 const createChildSprite2D = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -96,10 +88,6 @@ const createChildSprite2D = (redGPUContext, parent) => {
     return sprite2D;
 };
 
-/**
- * [KO] 자식 SpriteSheet2D를 생성합니다.
- * [EN] Creates a child SpriteSheet2D.
- */
 const createChildSpriteSheet2D = (redGPUContext, parent) => {
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     const sprite2D = new RedGPU.Display.SpriteSheet2D(redGPUContext, spriteSheetInfo);
@@ -115,10 +103,6 @@ const createChildSpriteSheet2D = (redGPUContext, parent) => {
     return sprite2D;
 };
 
-/**
- * [KO] 자식 TextField2D를 생성합니다.
- * [EN] Creates a child TextField2D.
- */
 const createChildTextField2D = (redGPUContext, parent) => {
     const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
     textField2D.x = 0;
@@ -128,10 +112,6 @@ const createChildTextField2D = (redGPUContext, parent) => {
     return textField2D;
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 const renderTestPane = (redGPUContext, parent, children) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
