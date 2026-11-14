@@ -54,17 +54,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 샘플 Line3D를 생성합니다.
- * [EN] Creates a sample Line3D.
- * @param {string} title
- * @param {RedGPU.Display.View3D} view
- * @param {number} pointsPerLayer
- * @param {number} posX
- * @param {number} posZ
- * @param {string} baseColor
- * @param {boolean} [useRainbowColor=false]
- */
 function createSampleLine3D(title, view, pointsPerLayer, posX, posZ, baseColor, useRainbowColor = false) {
     // 뷰에서 씬(Scene) 및 RedGPU Context를 참조
     const {scene, redGPUContext} = view;

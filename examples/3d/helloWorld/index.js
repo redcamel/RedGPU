@@ -57,11 +57,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI 패널을 구성합니다.
- * [EN] Configures the GUI panel for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
         redGPUContext: true

@@ -40,13 +40,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 서로 다른 maxAnisotropy 값이 적용된 비교 차선(Ground)들을 생성합니다.
- * [EN] Creates comparison lanes (Ground) with different maxAnisotropy values applied.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {{texture: RedGPU.Resource.BitmapTexture, lanes: Array<{sampler: RedGPU.Resource.Sampler, label: RedGPU.Display.TextField3D}>}}
- */
 const createComparisonLanes = (redGPUContext, scene) => {
     const anisotropyValues = [1, 4, 16];
     const laneWidth = 8;
@@ -87,13 +80,6 @@ const createComparisonLanes = (redGPUContext, scene) => {
     return {texture, lanes};
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Resource.BitmapTexture} texture
- * @param {Array<{sampler: RedGPU.Resource.Sampler, label: RedGPU.Display.TextField3D}>} lanes
- */
 const renderTestPane = (redGPUContext, texture, lanes) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {

@@ -44,13 +44,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] minFilter, magFilter, mipmapFilter의 4x2(8가지) 전체 조합 그리드를 생성합니다.
- * [EN] Creates a 4x2 (8 combinations) grid of all minFilter, magFilter, and mipmapFilter settings.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {Array<RedGPU.Display.Mesh>}
- */
 const createFilterCombinationGrid = (redGPUContext, scene) => {
     const filterModes = [
         RedGPU.GPU_FILTER_MODE.NEAREST,
@@ -105,11 +98,6 @@ const createFilterCombinationGrid = (redGPUContext, scene) => {
     return meshes;
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };

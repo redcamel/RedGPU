@@ -57,23 +57,10 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 구성합니다.
- * [EN] Configures GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };
 
-/**
- * [KO] 간단한 데모 씬을 설정합니다.
- * [EN] Sets up a simple demo scene.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {RedGPU.Display.View3D} view
- * @returns {object} Demo object
- */
 function setupSimpleDemo(redGPUContext, scene, view) {
     // [KO] 타겟 메시 생성 (빨간색 구체)
     // [EN] Create target mesh (red sphere)
@@ -111,14 +98,6 @@ function setupSimpleDemo(redGPUContext, scene, view) {
     };
 }
 
-/**
- * [KO] 마우스 이벤트를 설정하여 3D 위치를 실시간으로 업데이트합니다.
- * [EN] Sets up mouse events to update 3D position in real-time.
- * @param {HTMLCanvasElement} canvas
- * @param {RedGPU.Display.View3D} view
- * @param {RedGPU.Display.Mesh} targetMesh
- * @param {object} mouseData
- */
 function setupMouseEvents(canvas, view, targetMesh, mouseData) {
     canvas.addEventListener('mousemove', (event) => {
         const rect = canvas.getBoundingClientRect();
@@ -159,11 +138,6 @@ function setupMouseEvents(canvas, view, targetMesh, mouseData) {
     });
 }
 
-/**
- * [KO] 정보 표시용 DOM 엘리먼트를 생성합니다.
- * [EN] Creates a DOM element for information display.
- * @returns {HTMLDivElement}
- */
 function createInfoDisplay() {
     const infoDisplay = document.createElement('div');
     Object.assign(infoDisplay.style, {
@@ -188,11 +162,6 @@ function createInfoDisplay() {
     return infoDisplay;
 }
 
-/**
- * [KO] 현재 좌표 정보를 UI에 업데이트합니다.
- * [EN] Updates current coordinate information on the UI.
- * @param {object} demo
- */
 function updateInfoDisplay(demo) {
     const {targetMesh, mouseData, view} = demo;
     const devicePixelRatio = window.devicePixelRatio || 1;
@@ -259,11 +228,6 @@ function updateInfoDisplay(demo) {
     `;
 }
 
-/**
- * [KO] 장면에 조명을 설정합니다.
- * [EN] Sets up lighting in the scene.
- * @param {RedGPU.Display.Scene} scene
- */
 function setupLighting(scene) {
     const directionalLight = new RedGPU.Light.DirectionalLight();
     directionalLight.direction = [-0.5, -1, -0.5];

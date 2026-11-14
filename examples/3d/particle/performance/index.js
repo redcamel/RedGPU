@@ -59,10 +59,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 성능 테스트를 위한 대량의 파티클 이미터들을 생성합니다.
- * [EN] Creates a large number of particle emitters for performance testing.
- */
 const createParticlePerformanceTest = (redGPUContext, scene) => {
     const texture1 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle.png');
     const texture2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
@@ -97,10 +93,6 @@ const createParticlePerformanceTest = (redGPUContext, scene) => {
     return {particleWrap};
 };
 
-/**
- * [KO] 예제 도우미 패널을 렌더링합니다.
- * [EN] Renders the example helper panel.
- */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
 };

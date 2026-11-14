@@ -65,10 +65,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 무작위 메시들을 씬에 추가합니다.
- * [EN] Adds random meshes to the scene.
- */
 const addRandomMeshes = (redGPUContext, scene) => {
     const geometries = [
         new RedGPU.Primitive.Sphere(redGPUContext, 2, 16, 16),
@@ -111,19 +107,11 @@ const addRandomMeshes = (redGPUContext, scene) => {
     }
 };
 
-/**
- * [KO] 무작위 16진수 색상 값을 반환합니다.
- * [EN] Returns a random hex color value.
- */
 const getRandomHexValue = () => {
     const randomColor = Math.floor(Math.random() * 0xffffff);
     return `#${randomColor.toString(16).padStart(6, "0")}`;
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,

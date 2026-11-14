@@ -56,10 +56,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트를 위한 파티클 이미터와 컨테이너를 생성합니다.
- * [EN] Creates a particle emitter and container for testing.
- */
 const createParticleTest = (redGPUContext, scene) => {
     // 파티클의 중심점을 시각화하기 위한 빨간색 구체 컨테이너
     const particleContainer = new RedGPU.Display.Mesh(
@@ -81,10 +77,6 @@ const createParticleTest = (redGPUContext, scene) => {
     return {particleEmitter, particleContainer};
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링하고 파티클 속성을 제어합니다.
- * [EN] Renders the GUI for testing and controls particle properties.
- */
 const renderTestPane = (redGPUContext, particleEmitter) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
