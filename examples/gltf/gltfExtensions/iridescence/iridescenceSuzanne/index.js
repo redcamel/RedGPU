@@ -1,6 +1,14 @@
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
 
+/**
+ * [KO] Iridescence Suzanne 예제
+ * [EN] Iridescence Suzanne example
+ *
+ * [KO] GLTF Iridescence Suzanne 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Iridescence Suzanne model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

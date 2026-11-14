@@ -59,22 +59,13 @@ RedGPU.init(
 );
 
 let num = 0;
-const gridSpacingV = 5; // 격자 간격 (고정)
-const gridSpacingH = 2; // 격자 간격 (고정)
+const gridSpacingV = 5;
+const gridSpacingH = 2;
 
-/**
- * [KO] 격자 위치를 계산합니다.
- * [EN] Calculates grid position.
- * @param {number} index
- * @param {number} totalCount
- * @returns {{x: number, z: number}}
- */
 function getGridPosition(index, totalCount) {
-    // 전체 개수를 기준으로 격자 크기 계산
     const gridSize = Math.ceil(Math.sqrt(totalCount));
     const halfGrid = Math.floor(gridSize / 2);
 
-    // index를 2D 격자 좌표로 변환
     const row = Math.floor(index / gridSize);
     const col = index % gridSize;
 
@@ -84,13 +75,8 @@ function getGridPosition(index, totalCount) {
     return {x, z};
 }
 
-/**
- * [KO] 모든 메시의 위치를 재배치합니다.
- * [EN] Redistributes the positions of all meshes.
- * @param {RedGPU.Display.Scene} scene
- */
 function redistributeGrid(scene) {
-    const meshes = scene.children.filter(child => child); // 유효한 메시들만
+    const meshes = scene.children.filter(child => child);
     const totalCount = meshes.length;
 
     meshes.forEach((mesh, index) => {
@@ -105,12 +91,6 @@ let first = true
 let pane;
 let helper;
 
-/**
- * [KO] 테스트용 GUI 패널을 렌더링합니다.
- * [EN] Renders a GUI panel for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
 const renderTestPane = (redGPUContext, targetView) => {
     helper = new RedGPUExampleHelper(redGPUContext, {
 
@@ -135,12 +115,6 @@ const renderTestPane = (redGPUContext, targetView) => {
     });
 };
 
-/**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
- * @param {RedGPU.Display.View3D} view
- * @param {string} url
- */
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
 
@@ -156,7 +130,8 @@ function loadGLTF(view, url) {
             scene.addChild(mesh)
             num++
 
-            // 새 메시가 추가될 때마다 전체 격자 재배치
+            // [KO] 새 메시가 추가될 때마다 전체 격자 재배치
+            // [EN] Redistribute the entire grid whenever a new mesh is added
             redistributeGrid(scene);
             
             pane?.refresh();

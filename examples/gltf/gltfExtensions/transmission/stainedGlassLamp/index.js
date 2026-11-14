@@ -1,6 +1,14 @@
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
 
+/**
+ * [KO] Stained Glass Lamp 예제
+ * [EN] Stained Glass Lamp example
+ *
+ * [KO] GLTF Stained Glass Lamp 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Stained Glass Lamp model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

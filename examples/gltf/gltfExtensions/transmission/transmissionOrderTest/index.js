@@ -12,15 +12,12 @@ import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
 
-        // Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
@@ -29,17 +26,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // Load GLTF model
         const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionOrderTest/glTF-Binary/TransmissionOrderTest.glb';
         loadGLTF(view, MODEL_URL);
 
-        // Start renderer
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // Add additional per-frame logic here if needed
         });
 
-        // Configure test panel
         renderTestPane(redGPUContext, view);
     },
     (failReason) => {

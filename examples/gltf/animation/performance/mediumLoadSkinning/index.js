@@ -63,12 +63,6 @@ let first = true
 let pane;
 let helper;
 
-/**
- * [KO] 테스트용 GUI 패널을 렌더링합니다.
- * [EN] Renders a GUI panel for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
 const renderTestPane = (redGPUContext, targetView) => {
     helper = new RedGPUExampleHelper(redGPUContext, {
         gui: (gui) => {
@@ -92,12 +86,6 @@ const renderTestPane = (redGPUContext, targetView) => {
     });
 };
 
-/**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
- * @param {RedGPU.Display.View3D} view
- * @param {string} url
- */
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     

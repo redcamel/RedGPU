@@ -1,6 +1,14 @@
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
 
+/**
+ * [KO] Compare Iridescence 예제
+ * [EN] Compare Iridescence example
+ *
+ * [KO] GLTF Compare Iridescence 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Compare Iridescence model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

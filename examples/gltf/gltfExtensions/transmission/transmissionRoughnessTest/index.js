@@ -1,6 +1,14 @@
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
 
+/**
+ * [KO] Transmission Roughness Test 예제
+ * [EN] Transmission Roughness Test example
+ *
+ * [KO] GLTF Transmission Roughness Test 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Transmission Roughness Test model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

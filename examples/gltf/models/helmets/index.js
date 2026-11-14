@@ -1,22 +1,22 @@
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../dist/index.js?t=1792986333865";
-// 1. Create and append a canvas
-// 1. 캔버스를 생성하고 문서에 추가
+
+/**
+ * [KO] Helmets 예제
+ * [EN] Helmets example
+ *
+ * [KO] 여러 GLTF 헬멧 모델을 로드하고 비교 렌더링합니다.
+ * [EN] Loads and renders multiple GLTF helmet models for comparison.
+ */
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// 2. Initialize RedGPU
-// 2. RedGPU 초기화
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // Create a camera controller (Orbit type)
-        // 궤도형 카메라 컨트롤러 생성
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0
 
-        // Create a scene and add a view with the camera controller
-        // 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
@@ -34,8 +34,6 @@ RedGPU.init(
             ]
         );
 
-        // Create a renderer and start rendering
-        // 렌더러 생성 후 렌더링 시작
         const renderer = new RedGPU.Renderer();
         const render = () => {
 
@@ -44,10 +42,9 @@ RedGPU.init(
         renderTestPane(redGPUContext, view);
     },
     (failReason) => {
-        // Handle initialization failure
-        console.error('Initialization failed:', failReason); // 초기화 실패 로그 출력
+        console.error('Initialization failed:', failReason);
         const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason; // 실패 원인 메시지를 표시
+        errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
@@ -55,13 +52,13 @@ RedGPU.init(
 function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
     const {redGPUContext, scene} = view;
 
-    // 그리드 크기 계산
-    const totalCols = Math.min(gridSize, urls.length); // 한 줄의 최대 컬럼 수
-    const totalRows = Math.ceil(urls.length / gridSize); // 필요한 줄 수
-    const totalWidth = (totalCols - 1) * spacing; // 전체 넓이 (X)
-    const totalDepth = (totalRows - 1) * spacing; // 전체 깊이 (Z)
+    const totalCols = Math.min(gridSize, urls.length);
+    const totalRows = Math.ceil(urls.length / gridSize);
+    const totalWidth = (totalCols - 1) * spacing;
+    const totalDepth = (totalRows - 1) * spacing;
 
-    // GLTF 모델 로드 및 그리드 배치
+    // [KO] GLTF 모델 로드 및 그리드 배치
+    // [EN] Load GLTF models and arrange them in a grid
     let loadedNum = 0
     const container = new RedGPU.Display.Mesh(view.redGPUContext)
     view.scene.addChild(container)
@@ -70,15 +67,13 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
                 const mesh = v['resultMesh'];
                 container.addChild(mesh);
 
-                // 그리드 위치 계산 (X, Z 축 기준)
                 const row = Math.floor(index / gridSize);
                 const col = index % gridSize;
-                const x = col * spacing - totalWidth / 2; // 중심 정렬
-                const z = row * spacing - totalDepth / 2; // 중심 정렬
+                const x = col * spacing - totalWidth / 2;
+                const z = row * spacing - totalDepth / 2;
 
-                // 메쉬 위치 설정
                 mesh.x = x;
-                mesh.y = 0; // Y축은 고정
+                mesh.y = 0;
                 mesh.z = z;
                 if (index === 0) {
                     mesh.setScale(1.5)

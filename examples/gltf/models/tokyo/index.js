@@ -1,19 +1,24 @@
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../dist/index.js?t=1792986333865";
 
+/**
+ * [KO] Tokyo 예제
+ * [EN] Tokyo example
+ *
+ * [KO] GLTF Tokyo 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Tokyo model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
         controller.camera.nearClipping = 1
 
-        // Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
@@ -22,17 +27,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // Load GLTF model
         const MODEL_URL = 'https://redcamel.github.io/RedGL-Examples-test/asset/glTF/tokyo/scene.gltf'
         loadGLTF(view, MODEL_URL);
 
-        // Start renderer
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // Add additional per-frame logic here if needed
         });
 
-        // Configure test panel
         renderTestPane(redGPUContext, view);
     },
     (failReason) => {

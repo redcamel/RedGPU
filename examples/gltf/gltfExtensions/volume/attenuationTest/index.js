@@ -1,6 +1,14 @@
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
 
+/**
+ * [KO] Attenuation Test 예제
+ * [EN] Attenuation Test example
+ *
+ * [KO] GLTF Attenuation Test 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Attenuation Test model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

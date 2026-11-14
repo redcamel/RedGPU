@@ -2,70 +2,52 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17929863
 import * as RedGPU from "../../../../dist/index.js?t=1792986333865";
 
 /**
- * Keyboard Character Control 예제
+ * [KO] Keyboard Character Control 예제
+ * [EN] Keyboard Character Control example
  *
- * - WASD / 방향키 : 캐릭터 이동 (카메라 기준 방향)
- * - Shift         : 달리기 (Run)
- * - 이동 없음      : Idle
- * - 카메라는 FollowController로 캐릭터를 자동 추적
+ * [KO] 키보드(WASD/방향키, Shift)로 GLTF 캐릭터를 이동시키고 상태 머신으로 애니메이션을 제어합니다.
+ * [EN] Controls GLTF character movement with the keyboard (WASD/Arrow keys, Shift) and animation transitions via a state machine.
  */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// ──────────────────────────────────────────
-// 상태 변수
-// ──────────────────────────────────────────
 let characterController = null;
 
-// 이동 속도 (단위/초)
 const WALK_SPEED = 3.0;
 const RUN_SPEED = 7.0;
 
-// ──────────────────────────────────────────
-// 상태 변수
-// ──────────────────────────────────────────
-let stateMachine = null;   // AnimStateMachine
+let stateMachine = null;
 let targetStateName = 'Idle';
 let lastTime = null;
 let updateState = null;
 
-// ──────────────────────────────────────────
-// RedGPU 초기화
-// ──────────────────────────────────────────
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // ── 씬 ──────────────────────────────
         const scene = new RedGPU.Display.Scene();
 
-        // ── 조명 ────────────────────────────
         const dirLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(dirLight);
 
-        // ── OrbitController ─────────────────
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 5;
         controller.pan = 110;
         controller.distance = 4;
 
-        // ── View ─────────────────────────────
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
         view.builtInEffectManager.useBloom = true;
 
-        // ── GLTF 로드 ────────────────────────
         loadCharacter(redGPUContext, scene, view);
 
-        // ── 렌더 루프 ────────────────────────
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (timestamp) => {
             updateCharacter(timestamp, view, scene.getChildAt(0));
             if (updateState) updateState();
         });
 
-        // ── GUI ──────────────────────────────
         renderTestPane(redGPUContext, view);
     },
     (failReason) => {
@@ -76,9 +58,6 @@ RedGPU.init(
     }
 );
 
-// ──────────────────────────────────────────
-// GLTF 캐릭터 로드
-// ──────────────────────────────────────────
 function loadCharacter(redGPUContext, scene, view) {
     // [KO] 캐릭터 모델 로드 (출처: https://threejs.org/examples/models/gltf/Soldier.glb)
     // [EN] Load character model (Source: https://threejs.org/examples/models/gltf/Soldier.glb)
@@ -92,14 +71,14 @@ function loadCharacter(redGPUContext, scene, view) {
             const mesh = loader.resultMesh;
             mesh.rotationY = view.camera.pan + 180 + 45;
 
-            // character(빈 Mesh) 의 자식으로 추가
             scene.addChild(mesh);
             view.camera.centerX = mesh.x;
             view.camera.centerY = mesh.y + 1.0;
             view.camera.centerZ = mesh.z;
             view.camera.distance = 4;
 
-            // 캐릭터 컨트롤러 생성
+            // [KO] 캐릭터 컨트롤러 생성
+            // [EN] Create character controller
             characterController = new RedGPU.Charactor.SimpleCharacterController(
                 redGPUContext,
                 mesh,
@@ -111,14 +90,10 @@ function loadCharacter(redGPUContext, scene, view) {
                     floorHeight: 0.0,
                 }
             );
-            // mesh.x = 50
-            // mesh.z = 50
-            // FollowController 가 이미 character 를 추적 중이므로
-            // 별도 fitMeshToScreenCenter 불필요
 
-            // ── 애니메이션 클립 매핑 ─────────
+            // [KO] 애니메이션 클립 매핑 (Soldier.glb: 0=Idle, 1=Run, 2=TPose, 3=Walk)
+            // [EN] Map animation clips (Soldier.glb: 0=Idle, 1=Run, 2=TPose, 3=Walk)
             const clips = loader.parsingResult.animations;
-            // Soldier.glb: 0=Idle, 1=Run, 2=TPose, 3=Walk
             if (clips && clips.length > 0) {
                 const idleState = clips[0];
                 const runState = clips[1];
@@ -128,14 +103,14 @@ function loadCharacter(redGPUContext, scene, view) {
                 walkState.name = 'Walk';
                 runState.name = 'Run';
 
-                // ── 상태 머신 ──────────────────
+                // [KO] 상태 머신 및 전이 그래프 설정
+                // [EN] Set up state machine and transition graph
                 stateMachine = new RedGPU.AnimStateMachine(idleState);
                 stateMachine.addState(walkState);
                 stateMachine.addState(runState);
 
-                const BLEND = 0.25; // 전이 시간 (초)
+                const BLEND = 0.25;
 
-                // Idle ↔ Walk ↔ Run 전이 그래프
                 const pairs = [
                     ['Idle', 'Walk'], ['Idle', 'Run'],
                     ['Walk', 'Idle'], ['Walk', 'Run'],
@@ -150,7 +125,6 @@ function loadCharacter(redGPUContext, scene, view) {
                     });
                 });
 
-                // 기존 자동 재생 정지 후, 재생 시작 + 상태 머신 주입
                 loader.stopAnimation();
                 loader.playAnimation(idleState);
                 if (loader.activeAnimations.length > 0) {
@@ -162,9 +136,6 @@ function loadCharacter(redGPUContext, scene, view) {
     );
 }
 
-// ──────────────────────────────────────────
-// 매 프레임 캐릭터 이동 처리
-// ──────────────────────────────────────────
 function updateCharacter(timestamp, view, targetMesh) {
     const character = targetMesh;
     if (!character || !characterController) return;
@@ -173,29 +144,24 @@ function updateCharacter(timestamp, view, targetMesh) {
     lastTime = timestamp;
     if (dt <= 0) return;
 
-    // ── 캐릭터 컨트롤러 업데이트 ──
     characterController.update(view, timestamp);
 
-    // ── OrbitController 카메라가 캐릭터 위치를 부드럽게 추적하도록 갱신 ──
+    // [KO] OrbitController가 캐릭터 눈높이를 추적하도록 갱신
+    // [EN] Update OrbitController target to track the character's eye level
     const controller = view.camera;
     controller.centerX = character.x;
-    controller.centerY = character.y + 1.0; // 캐릭터 눈높이에 맞춰 약간 높여 추적합니다.
+    controller.centerY = character.y + 1.0;
     controller.centerZ = character.z;
 
-    // ── 상태 전이 판단 ────────────────────
     if (characterController.isRunning) targetStateName = 'Run';
     else if (characterController.isMoving) targetStateName = 'Walk';
     else targetStateName = 'Idle';
 }
 
-// ──────────────────────────────────────────
-// GUI 패널
-// ──────────────────────────────────────────
 function renderTestPane(redGPUContext, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         gui: (pane) => {
-            // 조작 안내
             const helpFolder = pane.addFolder({title: '⌨️ Controls'});
             const config = {
                 move: 'W / S / A / D (Move)',
@@ -203,13 +169,12 @@ function renderTestPane(redGPUContext, view) {
                 run: 'Hold  Shift  while moving',
                 state: 'Idle',
             };
-            helpFolder.addBinding(config, 'move', {readonly: true, label: 'Move'});
-            helpFolder.addBinding(config, 'turn', {readonly: true, label: 'Camera'});
-            helpFolder.addBinding(config, 'run', {readonly: true, label: 'Run'});
+            helpFolder.addBinding(config, 'move', {readonly: true});
+            helpFolder.addBinding(config, 'turn', {readonly: true});
+            helpFolder.addBinding(config, 'run', {readonly: true});
 
-            // 현재 상태 모니터
             const stateBinding = helpFolder.addBinding(config, 'state', {
-                readonly: true, label: 'Anim State'
+                readonly: true
             });
             updateState = () => {
                 if (stateMachine?.currentState) {

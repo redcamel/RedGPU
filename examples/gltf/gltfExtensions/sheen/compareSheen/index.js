@@ -1,6 +1,14 @@
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
 
+/**
+ * [KO] Compare Sheen 예제
+ * [EN] Compare Sheen example
+ *
+ * [KO] GLTF Compare Sheen 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Compare Sheen model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

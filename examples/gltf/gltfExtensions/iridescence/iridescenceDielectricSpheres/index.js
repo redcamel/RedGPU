@@ -1,6 +1,14 @@
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1792986333865";
 import * as RedGPU from "../../../../../dist/index.js?t=1792986333865";
 
+/**
+ * [KO] Iridescence Dielectric Spheres 예제
+ * [EN] Iridescence Dielectric Spheres example
+ *
+ * [KO] GLTF Iridescence Dielectric Spheres 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the GLTF Iridescence Dielectric Spheres model.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
