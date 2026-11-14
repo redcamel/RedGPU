@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import { IPostEffectResult } from "../../../core/types";
 interface BrightnessContrast {
     /**
      * [KO] 밝기 조절 값 (-150 ~ 150)
@@ -26,12 +28,12 @@ interface BrightnessContrast {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/brightnessContrast/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/brightnessContrast/"></iframe>
  *
  * @see [BrightnessContrast example](/RedGPU/examples/postEffect/adjustments/brightnessContrast/)
  * @category Adjustments
  */
-declare class BrightnessContrast extends ASinglePassPostEffect {
+declare class BrightnessContrast extends ASingleComputePassPostEffect {
     /**
      * [KO] BrightnessContrast 인스턴스를 생성합니다.
      * [EN] Creates a BrightnessContrast instance.
@@ -46,5 +48,26 @@ declare class BrightnessContrast extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
+    /**
+     * [KO] 밝기 및 대비 조절 효과를 렌더링합니다.
+     * [EN] Renders the brightness and contrast adjustment effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 밝기 및 대비가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with brightness and contrast applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }
 export default BrightnessContrast;

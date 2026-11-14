@@ -103,16 +103,16 @@ declare class ColorRGBA extends ColorRGB {
      */
     get rgbaNormal(): number[];
     /**
-     * [KO] 감마 보정된(Linear) 정규화된 RGBA 값을 배열로 반환합니다.
-     * [EN] Returns gamma-corrected (Linear) normalized RGBA values as an array.
+     * [KO] 표준 sRGB 전달 함수(IEC 61966-2-1)로 변환된 리니어(Linear) 정규화 RGBA 값을 배열로 반환합니다. 알파 값은 변환하지 않습니다.
+     * [EN] Returns linear normalized RGBA values converted with the standard sRGB transfer function (IEC 61966-2-1) as an array. The alpha value is not converted.
      * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.8);
-     * console.log(color.rgbaNormalLinear);
+     * console.log(color.rgbaNormalLinear); // [1, 0.2158..., 0, 0.8]
      * ```
      * @returns
-     * [KO] 감마 보정된(2.2) 정규화된 RGBA 값을 포함하는 배열
-     * [EN] Array containing gamma-corrected (2.2) normalized RGBA values
+     * [KO] 리니어 정규화 RGBA 값을 포함하는 배열
+     * [EN] Array containing linear normalized RGBA values
      */
     get rgbaNormalLinear(): number[];
     /**

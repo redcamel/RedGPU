@@ -3,10 +3,10 @@ import SkyAtmosphere from "../../SkyAtmosphere";
 import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import Sampler from "../../../../resources/sampler/Sampler";
 import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuffer";
-import RedGPUObject from "../../../../base/RedGPUObject";
+import ASkyAtmosphereLUTGenerator from "../generator/ASkyAtmosphereLUTGenerator";
 /**
- * [KO] SkyAtmosphere의 대기 산란 데이터를 기반으로 실시간 간접 조명(IBL)용 난반사(Irradiance) 및 정반사(Reflection) 큐브맵을 생성하는 클래스입니다.
- * [EN] Class that generates diffuse (Irradiance) and specular (Reflection) cubemaps for real-time indirect lighting (IBL) based on SkyAtmosphere's atmospheric scattering data.
+ * [KO] SkyAtmosphere의 대기 산란 데이터를 기반으로 실시간 간접 조명(IBL)용 정반사(Reflection, Cube 0) 및 난반사(Irradiance, Cube 1) 통합 큐브맵 배열(`texture_cube_array<f32>`)을 생성하는 클래스입니다.
+ * [EN] Class that generates an integrated specular (Reflection, Cube 0) and diffuse (Irradiance, Cube 1) cubemap array (`texture_cube_array<f32>`) for real-time indirect lighting (IBL) based on SkyAtmosphere's atmospheric scattering data.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -15,7 +15,7 @@ import RedGPUObject from "../../../../base/RedGPUObject";
  *
  * @category SkyAtmosphere
  */
-declare class SkyLight extends RedGPUObject {
+declare class SkyLight extends ASkyAtmosphereLUTGenerator {
     #private;
     /**
      * [KO] SkyLight 인스턴스를 생성합니다.
@@ -33,26 +33,17 @@ declare class SkyLight extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler);
     /**
-     * [KO] 간접 난반사 조명용 Irradiance 큐브 텍스처를 반환합니다.
-     * [EN] Returns the Irradiance cube texture for indirect diffuse lighting.
+     * [KO] 생성된 통합 IBL 큐브맵 배열 텍스처(`DirectCubeTexture`)를 반환합니다.
+     * [EN] Returns the generated integrated IBL cubemap array texture (`DirectCubeTexture`).
      *
      * @returns
-     * [KO] Irradiance 큐브 텍스처
-     * [EN] Irradiance cube texture
+     * [KO] 통합 IBL `DirectCubeTexture` 인스턴스
+     * [EN] Integrated IBL `DirectCubeTexture` instance
      */
-    get irradianceLUT(): DirectCubeTexture;
+    get lutTexture(): DirectCubeTexture;
     /**
-     * [KO] 간접 정반사 조명용 Reflection 큐브 텍스처를 반환합니다.
-     * [EN] Returns the Reflection cube texture for indirect specular lighting.
-     *
-     * @returns
-     * [KO] Reflection 큐브 텍스처
-     * [EN] Reflection cube texture
-     */
-    get reflectionLUT(): DirectCubeTexture;
-    /**
-     * [KO] SkyAtmosphere의 LUT 데이터를 기반으로 난반사 및 정반사 IBL 큐브맵을 베이킹합니다.
-     * [EN] Bakes diffuse and specular IBL cubemaps based on SkyAtmosphere's LUT data.
+     * [KO] SkyAtmosphere의 LUT 데이터를 기반으로 정반사 및 난반사 소스 큐브맵을 단일 패스로 베이킹하고 통합 IBL 큐브맵 배열을 갱신합니다.
+     * [EN] Bakes specular and diffuse source cubemaps in a single pass based on SkyAtmosphere's LUT data and updates the integrated IBL cubemap array.
      *
      * @param skyAtmosphere -
      * [KO] 소스 SkyAtmosphere 인스턴스
@@ -60,8 +51,8 @@ declare class SkyLight extends RedGPUObject {
      */
     update(skyAtmosphere: SkyAtmosphere): void;
     /**
-     * [KO] SkyLight 인스턴스 및 내부 IBL 생성기 리소스를 해제합니다.
-     * [EN] Releases the SkyLight instance and internal IBL generator resources.
+     * [KO] SkyLight 인스턴스 및 내부 GPU 텍스처 리소스를 해제합니다.
+     * [EN] Releases the SkyLight instance and internal GPU texture resources.
      */
     destroy(): void;
 }

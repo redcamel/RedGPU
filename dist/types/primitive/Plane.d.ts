@@ -8,7 +8,7 @@ import Primitive from "./core/Primitive";
  * ```typescript
  * const plane = new RedGPU.Primitive.Plane(redGPUContext, 2, 2, 1, 1, false);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/plane/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/plane/"></iframe>
  *
  * @see [Plane example](/RedGPU/examples/3d/primitive/plane/)
  * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)

@@ -7,4 +7,5 @@ import ColorRGB from "./ColorRGB";
 import ColorRGBA from "./ColorRGBA";
 import convertHexToRgb from "./convertHexToRgb";
 import convertRgbToHex from "./convertRgbToHex";
-export { ColorRGBA, ColorRGB, convertHexToRgb, convertRgbToHex };
+import convertSrgbToLinear from "./convertSrgbToLinear";
+export { ColorRGBA, ColorRGB, convertHexToRgb, convertRgbToHex, convertSrgbToLinear };

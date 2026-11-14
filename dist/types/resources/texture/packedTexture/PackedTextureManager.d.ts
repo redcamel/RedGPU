@@ -1,18 +1,15 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 /**
- * ::: warning [KO] 직접 인스턴스 생성 금지
- * 이 클래스는 RedGPU 시스템 내부에서 자동으로 생성 및 관리되므로 사용자가 직접 인스턴스를 생성할 수 없습니다.
- * :::
- *
- * ::: warning [EN] Do Not Instantiate Directly
- * This class is automatically instantiated and managed internally by the RedGPU system. Direct instantiation is prohibited.
- * :::
- *
  * [KO] 여러 텍스처를 단일 GPUTexture로 패킹하고 캐싱을 관리하는 클래스입니다.
  * [EN] Class that packs multiple textures into a single GPUTexture and manages caching.
  *
- * @category Manager
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Texture
  */
 declare class PackedTextureManager extends RedGPUObject {
     #private;

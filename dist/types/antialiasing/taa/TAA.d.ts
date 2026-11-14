@@ -1,9 +1,8 @@
 import { mat4 } from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
+import ASingleComputePassPostEffect from "../../postEffect/core/ASingleComputePassPostEffect";
 import { IPostEffectResult } from "../../postEffect/core/types";
-import TAACASPass from "./cas/TAACASPass";
 /**
  * [KO] 이전 프레임의 화면 정보와 픽셀 이동 경로(모션 벡터)를 활용해 고품질 안티앨리어싱을 수행하는 TAA(Temporal Anti-Aliasing) 클래스입니다.
  * [EN] TAA (Temporal Anti-Aliasing) class that delivers high-quality anti-aliasing by combining previous frame history with pixel motion vectors.
@@ -26,8 +25,17 @@ import TAACASPass from "./cas/TAACASPass";
  *
  * @category Antialiasing
  */
-declare class TAA extends ASinglePassPostEffect {
+declare class TAA extends ASingleComputePassPostEffect {
     #private;
+    /**
+     * [KO] `TAA` 인스턴스를 초기화합니다.
+     * [EN] Initializes the `TAA` instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
+    constructor(redGPUContext: RedGPUContext);
     /**
      * [KO] TAA 후속 CAS(Contrast Adaptive Sharpening) 패스의 선명도 강도를 반환하거나 설정합니다. 허용 범위는 `0.0` ~ `1.0`이며 기본값은 `0.5`입니다.
      * [EN] Gets or sets the sharpening strength of the post-TAA CAS (Contrast Adaptive Sharpening) pass. Valid range is `0.0` to `1.0`, and the default value is `0.5`.
@@ -44,15 +52,6 @@ declare class TAA extends ASinglePassPostEffect {
      * [EN] CAS sharpening strength (`0.0` to `1.0`)
      */
     get sharpness(): number;
-    /**
-     * [KO] `TAA` 인스턴스 및 내부 `TAACASPass`를 초기화합니다.
-     * [EN] Initializes the `TAA` instance and its internal `TAACASPass`.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     */
-    constructor(redGPUContext: RedGPUContext);
     set sharpness(value: number);
     /**
      * [KO] 현재 프레임의 소스 텍스처와 이전 프레임 히스토리를 결합하여 TAA 패스를 렌더링합니다.
@@ -76,15 +75,6 @@ declare class TAA extends ASinglePassPostEffect {
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
     /**
-     * [KO] TAA의 시간적 블렌딩 블러를 보완하는 내장 `TAACASPass` 인스턴스를 반환합니다.
-     * [EN] Returns the built-in `TAACASPass` instance that compensates for TAA temporal blending blur.
-     *
-     * @returns
-     * [KO] 내장 `TAACASPass` 인스턴스
-     * [EN] Built-in `TAACASPass` instance
-     */
-    get casPass(): TAACASPass;
-    /**
      * [KO] 이전 프레임의 지터가 제거된 투영-뷰 행렬(`mat4`)을 반환합니다.
      * [EN] Returns the unjittered projection-view matrix (`mat4`) from the previous frame.
      *
@@ -103,8 +93,8 @@ declare class TAA extends ASinglePassPostEffect {
      */
     get frameIndex(): number;
     /**
-     * [KO] TAA 히스토리 텍스처, 유니폼 버퍼 및 CAS 패스가 점유 중인 총 비디오 메모리 크기(Byte)를 반환합니다.
-     * [EN] Returns the total video memory size (in bytes) occupied by the TAA history textures, uniform buffer, and CAS pass.
+     * [KO] TAA 히스토리 텍스처 및 유니폼 버퍼가 점유 중인 총 비디오 메모리 크기(Byte)를 반환합니다.
+     * [EN] Returns the total video memory size (in bytes) occupied by the TAA history textures and uniform buffer.
      *
      * @returns
      * [KO] 점유 중인 총 비디오 메모리 크기 (Byte)
@@ -124,13 +114,13 @@ declare class TAA extends ASinglePassPostEffect {
      */
     reset(): void;
     /**
-     * [KO] 할당된 핑퐁 히스토리 텍스처와 CAS 패스의 캐시 리소스를 모두 정리하고 초기 상태로 되돌립니다.
-     * [EN] Clears all allocated ping-pong history textures and CAS pass cache resources, restoring the initial state.
+     * [KO] 할당된 핑퐁 히스토리 텍스처와 캐시 리소스를 모두 정리하고 초기 상태로 되돌립니다.
+     * [EN] Clears all allocated ping-pong history textures and cache resources, restoring the initial state.
      */
     clear(): void;
     /**
-     * [KO] TAA 인스턴스와 내부 CAS 패스 및 모든 GPU 리소스를 영구 파기합니다.
-     * [EN] Permanently destroys the TAA instance, internal CAS pass, and all associated GPU resources.
+     * [KO] TAA 인스턴스와 모든 GPU 리소스를 영구 파기합니다.
+     * [EN] Permanently destroys the TAA instance and all associated GPU resources.
      */
     destroy(): void;
 }

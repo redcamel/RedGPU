@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rigged Simple - RedGPU WebGPU Example</title>
     <meta name="description" content="Verifies skinning behavior via a simply rigged cylindrical mesh.">
-    <meta name="keywords"
-          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, animation, riggedSimple, Rigged Simple">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, animation, riggedSimple, Rigged Simple">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/animation/riggedSimple/">
 
     <!-- Open Graph / Facebook -->
@@ -26,73 +25,73 @@
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "Rigged Simple",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Verifies skinning behavior via a simply rigged cylindrical mesh.",
-                "url": "https://redcamel.github.io/RedGPU/examples/gltf/animation/riggedSimple/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/animation/riggedSimple/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "GLTF"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Animation"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Rigged Simple",
-                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/animation/riggedSimple/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Rigged Simple",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Verifies skinning behavior via a simply rigged cylindrical mesh.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/animation/riggedSimple/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/animation/riggedSimple/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Animation"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Rigged Simple",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/animation/riggedSimple/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>GLTF &gt; Animation</p>
+        <p>GLTF Animation</p>
         <h1>Rigged Simple - RedGPU WebGPU Example</h1>
         <p>Verifies skinning behavior via a simply rigged cylindrical mesh.</p>
         <p lang="ko">간단하게 리깅된 원통형 메쉬를 통해 스키닝 동작을 확인합니다.</p>
@@ -101,12 +100,12 @@
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/gltf/animation/basicAnimations/">Basic Animations</a></li>
-                <li><a href="/RedGPU/examples/gltf/animation/simpleSkin/">Simple Skin</a></li>
-                <li><a href="/RedGPU/examples/gltf/animation/simpleMorph/">Simple Morph</a></li>
-                <li><a href="/RedGPU/examples/gltf/animation/riggedFigure/">Rigged Figure</a></li>
-                <li><a href="/RedGPU/examples/gltf/animation/interpolationTest/">Interpolation Test</a></li>
-                <li><a href="/RedGPU/examples/gltf/animation/cesiumMan/">Cesium Man &amp; Milk Truck</a></li>
+                    <li><a href="/RedGPU/examples/gltf/animation/basicAnimations/">Basic Animations</a></li>
+                    <li><a href="/RedGPU/examples/gltf/animation/simpleSkin/">Simple Skin</a></li>
+                    <li><a href="/RedGPU/examples/gltf/animation/simpleMorph/">Simple Morph</a></li>
+                    <li><a href="/RedGPU/examples/gltf/animation/riggedFigure/">Rigged Figure</a></li>
+                    <li><a href="/RedGPU/examples/gltf/animation/interpolationTest/">Interpolation Test</a></li>
+                    <li><a href="/RedGPU/examples/gltf/animation/cesiumMan/">Cesium Man &amp; Milk Truck</a></li>
             </ul>
         </nav>
     </article>

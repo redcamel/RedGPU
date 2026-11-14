@@ -16,7 +16,7 @@ import AController from "../core/AController";
  * controller.pan = 45;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/controller/orbitController/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/controller/orbitController/"></iframe>
  * @see [OrbitController example](/RedGPU/examples/3d/controller/orbitController/)
  * @category Controller
  */

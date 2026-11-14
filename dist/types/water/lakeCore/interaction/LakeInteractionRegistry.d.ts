@@ -18,7 +18,7 @@ import type Mesh from "../../../display/mesh/Mesh";
  * mesh.enableWaterInteraction = true;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/water/lake/interaction/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/water/lake/interaction/"></iframe>
  *
  * @see [Lake interaction example](/RedGPU/examples/3d/water/lake/interaction/)
  * @see [Character walking example](/RedGPU/examples/3d/water/lake/characterWalking/)

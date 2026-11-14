@@ -5,121 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chromatic Aberration - RedGPU WebGPU Example</title>
     <meta name="description" content="Example of Chromatic Aberration effect.">
-    <meta name="keywords"
-          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, postEffect, builtIn, lens, chromaticAberration, Chromatic Aberration">
-    <link rel="canonical"
-          href="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, postEffect, builtIn, lens, chromaticAberration, Chromatic Aberration">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url"
-          content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/">
     <meta property="og:title" content="Chromatic Aberration - RedGPU WebGPU Example">
     <meta property="og:description" content="Example of Chromatic Aberration effect.">
-    <meta property="og:image"
-          content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/thumb.webp">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url"
-          content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/">
     <meta property="twitter:title" content="Chromatic Aberration - RedGPU WebGPU Example">
     <meta property="twitter:description" content="Example of Chromatic Aberration effect.">
-    <meta property="twitter:image"
-          content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/thumb.webp">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
-        "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "Chromatic Aberration",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Example of Chromatic Aberration effect.",
-                "url": "https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "PostEffect"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "BuiltInEffect"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Camera & Lens"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 6,
-                        "name": "Chromatic Aberration",
-                        "item": "https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/"
-                    }
-                ]
-            }
-        ]
-    }</script>
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Chromatic Aberration",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Example of Chromatic Aberration effect.",
+      "url": "https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "PostEffect"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "BuiltInEffect"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Camera & Lens"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Chromatic Aberration",
+          "item": "https://redcamel.github.io/RedGPU/examples/postEffect/builtIn/lens/chromaticAberration/"
+        }
+      ]
+    }
+  ]
+}</script>
 
     <!-- Module Preload -->
-    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>PostEffect &gt; BuiltInEffect &gt; Camera &amp; Lens</p>
+        <p>PostEffect BuiltInEffect Camera &amp; Lens</p>
         <h1>Chromatic Aberration - RedGPU WebGPU Example</h1>
         <p>Example of Chromatic Aberration effect.</p>
         <p lang="ko">색수차 효과 예제입니다.</p>
-        <img src="thumb.webp" alt="Chromatic Aberration - RedGPU WebGPU Example" width="600" height="450"
-             loading="eager">
+        <img src="thumb.webp" alt="Chromatic Aberration - RedGPU WebGPU Example" width="600" height="450" loading="eager">
         <nav aria-label="Example Navigation">
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/autoExposure/">Auto Exposure</a></li>
-                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/dof/">Depth of Field</a></li>
-                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/">Depth of Field (Auto Focus)</a>
-                </li>
-                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/bloom/">Bloom</a></li>
-                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyAtmosphere/">Lens Flare
-                    (SkyAtmosphere)</a></li>
-                <li><a href="/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyBox/">Lens Flare (SkyBox)</a></li>
+                    <li><a href="/RedGPU/examples/postEffect/builtIn/lens/autoExposure/">Auto Exposure</a></li>
+                    <li><a href="/RedGPU/examples/postEffect/builtIn/lens/dof/">Depth of Field</a></li>
+                    <li><a href="/RedGPU/examples/postEffect/builtIn/lens/dofAutoFocus/">Depth of Field (Auto Focus)</a></li>
+                    <li><a href="/RedGPU/examples/postEffect/builtIn/lens/bloom/">Bloom</a></li>
+                    <li><a href="/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyAtmosphere/">Lens Flare (SkyAtmosphere)</a></li>
+                    <li><a href="/RedGPU/examples/postEffect/builtIn/lens/lensFlareSkyBox/">Lens Flare (SkyBox)</a></li>
             </ul>
         </nav>
     </article>

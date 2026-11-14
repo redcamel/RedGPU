@@ -1,8 +1,9 @@
 /**
- * [KO] 후처리 이펙트(색상 보정, 블러, 렌즈 효과, 환경 효과 등)와 `PostEffectManager`, 단일/다중 패스 코어 클래스를 제공합니다.
- * [EN] Provides post-processing effects (color adjustments, blur, lens effects, environmental effects, etc.), `PostEffectManager`, and single/multi-pass core classes.
+ * [KO] 후처리 이펙트(색상 보정, 블러, 렌즈 효과, 환경 효과 등)와 `PostEffectManager`, `BuiltInEffectManager`, 단일/다중 패스 코어 클래스를 제공합니다.
+ * [EN] Provides post-processing effects (color adjustments, blur, lens effects, environmental effects, etc.), `PostEffectManager`, `BuiltInEffectManager`, and single/multi-pass core classes.
  * @packageDocumentation
  */
+import BuiltInEffectManager from "./builtIn/BuiltInEffectManager";
 import BrightnessContrast from "./effects/adjustments/brightnessContrast/BrightnessContrast";
 import ColorBalance from "./effects/adjustments/colorBalance/ColorBalance";
 import ColorTemperatureTint from "./effects/adjustments/colorTemperatureTint/ColorTemperatureTint";
@@ -19,15 +20,8 @@ import GaussianBlur from "./effects/blur/GaussianBlur";
 import RadialBlur from "./effects/blur/radialBlur/RadialBlur";
 import ZoomBlur from "./effects/blur/zoomBlur/ZoomBlur";
 import Convolution from "./effects/convolution/Convolution";
-import FilmGrain from "./effects/filmGrain/FilmGrain";
-import Fog from "./effects/fog/fog/Fog";
-import HeightFog from "./effects/fog/heightFog/HeightFog";
-import ChromaticAberration from "./effects/lens/chromaticAberration/ChromaticAberration";
-import DOF from "./effects/lens/dof/DOF";
-import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
-import Vignetting from "./effects/lens/vignetting/Vignetting";
-import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
 export * as Core from './core';
-export { PostEffectManager, BrightnessContrast, ColorBalance, ColorTemperatureTint, Grayscale, HueSaturation, Invert, Threshold, Vibrance, Blur, BlurX, BlurY, DirectionalBlur, GaussianBlur, RadialBlur, ZoomBlur, ChromaticAberration, DOF, LensDistortion, Vignetting, Fog, HeightFog, FilmGrain, OldBloom, Sharpen, Convolution, };
+export * as BuiltIn from './builtIn';
+export { PostEffectManager, BuiltInEffectManager, BrightnessContrast, ColorBalance, ColorTemperatureTint, Grayscale, HueSaturation, Invert, Threshold, Vibrance, Blur, BlurX, BlurY, DirectionalBlur, GaussianBlur, RadialBlur, ZoomBlur, Sharpen, Convolution, };

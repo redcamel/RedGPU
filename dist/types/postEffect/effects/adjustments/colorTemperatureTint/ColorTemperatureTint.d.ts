@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import View3D from "../../../../display/view/View3D";
+import ASingleRenderPassPostEffect from "../../../core/ASingleRenderPassPostEffect";
+import { IPostEffectResult } from "../../../core/types";
 interface ColorTemperatureTint {
     /**
      * [KO] 효과 적용 강도 (0 ~ 1)
@@ -33,12 +35,12 @@ interface ColorTemperatureTint {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/"></iframe>
  *
  * @see [ColorTemperatureTint example](/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/)
  * @category Adjustments
  */
-declare class ColorTemperatureTint extends ASinglePassPostEffect {
+declare class ColorTemperatureTint extends ASingleRenderPassPostEffect {
     /**
      * [KO] ColorTemperatureTint 인스턴스를 생성합니다.
      * [EN] Creates a ColorTemperatureTint instance.
@@ -88,5 +90,26 @@ declare class ColorTemperatureTint extends ASinglePassPostEffect {
      * [EN] Applies the Neon Light preset (9000K, tint 15).
      */
     setNeonLight(): void;
+    /**
+     * [KO] 색온도 및 색조(Temperature & Tint) 조절 효과를 렌더링합니다.
+     * [EN] Renders the color temperature and tint adjustment effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 색온도 및 색조가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with color temperature and tint applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }
 export default ColorTemperatureTint;

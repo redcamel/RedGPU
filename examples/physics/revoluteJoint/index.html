@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revolute Joints &amp; Motors - RedGPU WebGPU Example</title>
     <meta name="description" content="Simulates motorized rotating mechanisms using Revolute Joints.">
-    <meta name="keywords"
-          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, physics, revoluteJoint, Revolute Joints &amp; Motors">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, physics, revoluteJoint, Revolute Joints &amp; Motors">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/">
 
     <!-- Open Graph / Facebook -->
@@ -27,87 +26,86 @@
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "Revolute Joints & Motors",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Simulates motorized rotating mechanisms using Revolute Joints.",
-                "url": "https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "Physics"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Joints & Constraints"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Revolute Joints & Motors",
-                        "item": "https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Revolute Joints & Motors",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Simulates motorized rotating mechanisms using Revolute Joints.",
+      "url": "https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Physics"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Joints & Constraints"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Revolute Joints & Motors",
+          "item": "https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>Physics &gt; Joints &amp; Constraints</p>
+        <p>Physics Joints &amp; Constraints</p>
         <h1>Revolute Joints &amp; Motors - RedGPU WebGPU Example</h1>
         <p>Simulates motorized rotating mechanisms using Revolute Joints.</p>
         <p lang="ko">단일 축 회전 관절(Revolute Joint)과 모터로 회전 장치를 구현합니다.</p>
-        <img src="thumb.webp" alt="Revolute Joints &amp; Motors - RedGPU WebGPU Example" width="600" height="450"
-             loading="eager">
+        <img src="thumb.webp" alt="Revolute Joints &amp; Motors - RedGPU WebGPU Example" width="600" height="450" loading="eager">
         <nav aria-label="Example Navigation">
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/physics/joints/">Basic Joints</a></li>
-                <li><a href="/RedGPU/examples/physics/prismaticJoint/">Prismatic Joints &amp; Sliders</a></li>
-                <li><a href="/RedGPU/examples/physics/springJoint/">Spring Joint</a></li>
-                <li><a href="/RedGPU/examples/physics/softBody/">Soft Body</a></li>
-                <li><a href="/RedGPU/examples/physics/compound/">Compound Shapes</a></li>
+                    <li><a href="/RedGPU/examples/physics/joints/">Basic Joints</a></li>
+                    <li><a href="/RedGPU/examples/physics/prismaticJoint/">Prismatic Joints &amp; Sliders</a></li>
+                    <li><a href="/RedGPU/examples/physics/springJoint/">Spring Joint</a></li>
+                    <li><a href="/RedGPU/examples/physics/softBody/">Soft Body</a></li>
+                    <li><a href="/RedGPU/examples/physics/compound/">Compound Shapes</a></li>
             </ul>
         </nav>
     </article>

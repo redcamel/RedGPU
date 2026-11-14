@@ -5,96 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Water Bottle - RedGPU WebGPU Example</title>
     <meta name="description" content="Standard PBR water bottle model with Normal, Occlusion, and Emissive maps.">
-    <meta name="keywords"
-          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, basic, waterBottle, Water Bottle">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, basic, waterBottle, Water Bottle">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/">
     <meta property="og:title" content="Water Bottle - RedGPU WebGPU Example">
-    <meta property="og:description"
-          content="Standard PBR water bottle model with Normal, Occlusion, and Emissive maps.">
+    <meta property="og:description" content="Standard PBR water bottle model with Normal, Occlusion, and Emissive maps.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/">
     <meta property="twitter:title" content="Water Bottle - RedGPU WebGPU Example">
-    <meta property="twitter:description"
-          content="Standard PBR water bottle model with Normal, Occlusion, and Emissive maps.">
+    <meta property="twitter:description" content="Standard PBR water bottle model with Normal, Occlusion, and Emissive maps.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "Water Bottle",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Standard PBR water bottle model with Normal, Occlusion, and Emissive maps.",
-                "url": "https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "GLTF"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "Basic"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Water Bottle",
-                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Water Bottle",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Standard PBR water bottle model with Normal, Occlusion, and Emissive maps.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Basic"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Water Bottle",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/basic/waterBottle/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>GLTF &gt; Basic</p>
+        <p>GLTF Basic</p>
         <h1>Water Bottle - RedGPU WebGPU Example</h1>
         <p>Standard PBR water bottle model with Normal, Occlusion, and Emissive maps.</p>
         <p lang="ko">Normal, Occlusion, Emissive 맵이 적용된 PBR 물병 모델입니다.</p>
@@ -103,13 +100,12 @@
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/textureEncodingTest/">Texture Encoding Test</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/textureLinearInterpolationTest/">Texture Linear Interpolation
-                    Test</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/vertexColorTest/">Vertex Color Test</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/boxVertexColors/">Box Vertex Colors</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/orientationTest/">Orientation Test</a></li>
-                <li><a href="/RedGPU/examples/gltf/basic/textureCoordinateTest/">Texture Coordinate Test</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/textureEncodingTest/">Texture Encoding Test</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/textureLinearInterpolationTest/">Texture Linear Interpolation Test</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/vertexColorTest/">Vertex Color Test</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/boxVertexColors/">Box Vertex Colors</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/orientationTest/">Orientation Test</a></li>
+                    <li><a href="/RedGPU/examples/gltf/basic/textureCoordinateTest/">Texture Coordinate Test</a></li>
             </ul>
         </nav>
     </article>

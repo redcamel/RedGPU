@@ -19,7 +19,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
  * view.skybox = skybox;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/"></iframe>
  *
  * @see [SkyBox basic example](/RedGPU/examples/3d/skybox/skybox/)
  * @see [SkyBox IBL example](/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)

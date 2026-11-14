@@ -5,116 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Landscape &amp; Water System - RedGPU WebGPU Example</title>
     <meta name="description" content="Combines streaming terrain and Lake water with optics and walking ripples.">
-    <meta name="keywords"
-          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, landscapeAndWater, Landscape &amp; Water System">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, landscape, landscapeAndWater, Landscape &amp; Water System">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/">
     <meta property="og:title" content="Landscape &amp; Water System - RedGPU WebGPU Example">
-    <meta property="og:description"
-          content="Combines streaming terrain and Lake water with optics and walking ripples.">
+    <meta property="og:description" content="Combines streaming terrain and Lake water with optics and walking ripples.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/">
     <meta property="twitter:title" content="Landscape &amp; Water System - RedGPU WebGPU Example">
-    <meta property="twitter:description"
-          content="Combines streaming terrain and Lake water with optics and walking ripples.">
+    <meta property="twitter:description" content="Combines streaming terrain and Lake water with optics and walking ripples.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "Landscape & Water System",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Combines streaming terrain and Lake water with optics and walking ripples.",
-                "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "3D"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "World & Simulation"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "Landscape"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 6,
-                        "name": "Landscape & Water System",
-                        "item": "https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Landscape & Water System",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Combines streaming terrain and Lake water with optics and walking ripples.",
+      "url": "https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "3D"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "World & Simulation"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Landscape"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Landscape & Water System",
+          "item": "https://redcamel.github.io/RedGPU/examples/3d/landscape/landscapeAndWater/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>3D &gt; World &amp; Simulation &gt; Landscape</p>
+        <p>3D World &amp; Simulation Landscape</p>
         <h1>Landscape &amp; Water System - RedGPU WebGPU Example</h1>
         <p>Combines streaming terrain and Lake water with optics and walking ripples.</p>
         <p lang="ko">스트리밍 지형과 호수(Lake)를 결합해 수중 굴절과 보행 물결을 시연합니다.</p>
-        <img src="thumb.webp" alt="Landscape &amp; Water System - RedGPU WebGPU Example" width="600" height="450"
-             loading="eager">
+        <img src="thumb.webp" alt="Landscape &amp; Water System - RedGPU WebGPU Example" width="600" height="450" loading="eager">
         <nav aria-label="Example Navigation">
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/3d/landscape/basicTerrain/">Basic Terrain</a></li>
-                <li><a href="/RedGPU/examples/3d/landscape/multiLayerSplatting/">Multi-Layer Splatting</a></li>
-                <li><a href="/RedGPU/examples/3d/landscape/tileStreaming/">Tile Streaming</a></li>
-                <li><a href="/RedGPU/examples/3d/landscape/proceduralGrass/">Procedural Grass Field</a></li>
-                <li><a href="/RedGPU/examples/3d/landscape/foliageAndImpostors/">Foliage &amp; Impostors</a></li>
-                <li><a href="/RedGPU/examples/3d/landscape/openWorldIntegration/">Open World Integration</a></li>
+                    <li><a href="/RedGPU/examples/3d/landscape/basicTerrain/">Basic Terrain</a></li>
+                    <li><a href="/RedGPU/examples/3d/landscape/multiLayerSplatting/">Multi-Layer Splatting</a></li>
+                    <li><a href="/RedGPU/examples/3d/landscape/tileStreaming/">Tile Streaming</a></li>
+                    <li><a href="/RedGPU/examples/3d/landscape/proceduralGrass/">Procedural Grass Field</a></li>
+                    <li><a href="/RedGPU/examples/3d/landscape/foliageAndImpostors/">Foliage &amp; Impostors</a></li>
+                    <li><a href="/RedGPU/examples/3d/landscape/openWorldIntegration/">Open World Integration</a></li>
             </ul>
         </nav>
     </article>

@@ -4,6 +4,7 @@ import OrthographicCamera from "../../camera/camera/OrthographicCamera";
 import PerspectiveCamera from "../../camera/camera/PerspectiveCamera";
 import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
+import BuiltInEffectManager from "../../postEffect/builtIn/BuiltInEffectManager";
 import PostEffectManager from "../../postEffect/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import IBL from "../../resources/texture/ibl/IBL";
@@ -31,7 +32,7 @@ import HierarchicalZBuffer from "./hzb/HierarchicalZBuffer";
  * redGPUContext.addView(view);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/view/singleView/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/view/singleView/"></iframe>
  *
  * @see [singleView Example](/RedGPU/examples/3d/view/singleView/)
  * @see [multiView Example](/RedGPU/examples/3d/view/multiView/)
@@ -118,6 +119,15 @@ declare class View3D extends AView {
      */
     get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup;
     /**
+     * [KO] 디버거 렌더링 패스 전용 시스템 버텍스 유니폼 바인드 그룹을 반환합니다.
+     * [EN] Returns the system vertex uniform bind group dedicated to the debugger rendering pass.
+     *
+     * @returns
+     * [KO] 디버거용 시스템 유니폼 `GPUBindGroup`
+     * [EN] Debugger system uniform `GPUBindGroup`
+     */
+    get systemUniform_Debugger_UniformBindGroup(): GPUBindGroup;
+    /**
      * [KO] 시스템 버텍스 유니폼 버퍼를 반환합니다.
      * [EN] Returns the system vertex uniform buffer.
      *
@@ -144,6 +154,15 @@ declare class View3D extends AView {
      * [EN] `PostEffectManager` instance
      */
     get postEffectManager(): PostEffectManager;
+    /**
+     * [KO] 빌트인 이펙트 매니저를 반환합니다.
+     * [EN] Returns the built-in effect manager.
+     *
+     * @returns
+     * [KO] `BuiltInEffectManager` 인스턴스
+     * [EN] `BuiltInEffectManager` instance
+     */
+    get builtInEffectManager(): BuiltInEffectManager;
     set ibl(value: IBL);
     /**
      * [KO] 톤 매핑 매니저를 반환합니다.

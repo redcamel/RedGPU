@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import { IPostEffectResult } from "../../../core/types";
 interface Vibrance {
     /**
      * [KO] 바이브런스 조절 값 (-100 ~ 100)
@@ -26,12 +28,12 @@ interface Vibrance {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/vibrance/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/vibrance/"></iframe>
  *
  * @see [Vibrance example](/RedGPU/examples/postEffect/adjustments/vibrance/)
  * @category Adjustments
  */
-declare class Vibrance extends ASinglePassPostEffect {
+declare class Vibrance extends ASingleComputePassPostEffect {
     /**
      * [KO] Vibrance 인스턴스를 생성합니다.
      * [EN] Creates a Vibrance instance.
@@ -46,5 +48,26 @@ declare class Vibrance extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
+    /**
+     * [KO] 생동감(Vibrance) 및 채도 조절 효과를 렌더링합니다.
+     * [EN] Renders the vibrance and saturation adjustment effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 생동감이 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with vibrance applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }
 export default Vibrance;

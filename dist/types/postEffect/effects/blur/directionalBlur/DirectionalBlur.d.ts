@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import View3D from "../../../../display/view/View3D";
+import ASingleComputePassPostEffect from "../../../core/ASingleComputePassPostEffect";
+import { IPostEffectResult } from "../../../core/types";
 interface DirectionalBlur {
     /**
      * [KO] 블러 강도 (0 이상)
@@ -27,12 +29,12 @@ interface DirectionalBlur {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/directionalBlur/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/directionalBlur/"></iframe>
  *
  * @see [DirectionalBlur example](/RedGPU/examples/postEffect/blur/directionalBlur/)
  * @category Blur
  */
-declare class DirectionalBlur extends ASinglePassPostEffect {
+declare class DirectionalBlur extends ASingleComputePassPostEffect {
     #private;
     /**
      * [KO] DirectionalBlur 인스턴스를 생성합니다.
@@ -59,5 +61,26 @@ declare class DirectionalBlur extends ASinglePassPostEffect {
      */
     get angle(): number;
     set angle(value: number);
+    /**
+     * [KO] 방향성 블러(Directional Blur) 효과를 렌더링합니다.
+     * [EN] Renders the directional blur effect.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param width -
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
+     * @returns
+     * [KO] 방향성 블러가 적용된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Result texture information with directional blur applied (`IPostEffectResult`)
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
 }
 export default DirectionalBlur;

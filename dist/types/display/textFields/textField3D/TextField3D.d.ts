@@ -16,11 +16,11 @@ import RenderViewStateData from "../../view/core/RenderViewStateData";
  * scene.addChild(textField);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/textField/textField3D/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/textField/textField3D/"></iframe>
  *
  * [KO] 월드 사이즈와 픽셀 사이즈 모드를 비교하는 예제입니다.
  * [EN] An example comparing World Size and Pixel Size modes.
- * <iframe src="/RedGPU/examples/3d/textField/textField3DCompare/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/textField/textField3DCompare/"></iframe>
  *
  * @see [TextField3D Basic Example](/RedGPU/examples/3d/textField/textField3D/)
  * @see [TextField3D Comparison (World vs Pixel)](/RedGPU/examples/3d/textField/textField3DCompare/)

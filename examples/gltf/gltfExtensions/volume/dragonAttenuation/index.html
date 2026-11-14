@@ -5,101 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dragon Attenuation - RedGPU WebGPU Example</title>
     <meta name="description" content="Renders colored glass attenuation using transmission and volume extensions.">
-    <meta name="keywords"
-          content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, gltfExtensions, volume, dragonAttenuation, Dragon Attenuation">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, gltfExtensions, volume, dragonAttenuation, Dragon Attenuation">
     <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/">
     <meta property="og:title" content="Dragon Attenuation - RedGPU WebGPU Example">
-    <meta property="og:description"
-          content="Renders colored glass attenuation using transmission and volume extensions.">
+    <meta property="og:description" content="Renders colored glass attenuation using transmission and volume extensions.">
     <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/thumb.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/">
     <meta property="twitter:title" content="Dragon Attenuation - RedGPU WebGPU Example">
-    <meta property="twitter:description"
-          content="Renders colored glass attenuation using transmission and volume extensions.">
+    <meta property="twitter:description" content="Renders colored glass attenuation using transmission and volume extensions.">
     <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/thumb.webp">
 
     <!-- Structured Data -->
     <script type="application/ld+json">{
   "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "SoftwareApplication",
-                "name": "Dragon Attenuation",
-                "applicationCategory": "DeveloperApplication",
-                "operatingSystem": "Web",
-                "description": "Renders colored glass attenuation using transmission and volume extensions.",
-                "url": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/",
-                "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/thumb.webp",
-                "isPartOf": {
-                    "@type": "CollectionPage",
-                    "name": "RedGPU Examples",
-                    "url": "https://redcamel.github.io/RedGPU/examples/"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": "redcamel"
-                }
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "RedGPU",
-                        "item": "https://redcamel.github.io/RedGPU/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Examples",
-                        "item": "https://redcamel.github.io/RedGPU/examples/"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": "GLTF"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 4,
-                        "name": "GLTF Extensions"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 5,
-                        "name": "KHR_materials_volume"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 6,
-                        "name": "Dragon Attenuation",
-                        "item": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/"
-                    }
-                ]
-            }
-        ]
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Dragon Attenuation",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Renders colored glass attenuation using transmission and volume extensions.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "GLTF Extensions"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "KHR_materials_volume"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Dragon Attenuation",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/"
+        }
+      ]
+    }
+  ]
 }</script>
 
     <!-- Module Preload -->
-    <link href="../../../../../dist/index.js?t=1794640510497" rel="modulepreload">
-    <link href="../../../../exampleHelper/dist/index.js?t=1794640510497" rel="modulepreload">
+    <link rel="modulepreload" href="../../../../../dist/index.js?t=1794645384845">
+    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1794645384845">
 
     <!-- Assets -->
-    <link href="../../../../assets/css/example.css?t=1794640510497" rel="stylesheet">
-    <script src="index.js?t=1794640510497" type="module"></script>
+    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1794645384845">
+    <script src="index.js?t=1794645384845" type="module"></script>
 </head>
 <body>
 <main id="seo-static-content" class="seo-static-content">
     <article>
-        <p>GLTF &gt; GLTF Extensions &gt; KHR_materials_volume</p>
+        <p>GLTF GLTF Extensions KHR_materials_volume</p>
         <h1>Dragon Attenuation - RedGPU WebGPU Example</h1>
         <p>Renders colored glass attenuation using transmission and volume extensions.</p>
         <p lang="ko">투과(Transmission)와 볼륨 감쇠로 두꺼운 색유리 재질을 표현합니다.</p>
@@ -108,13 +105,12 @@
             <ul>
                 <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
                 <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
-                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/compareIor/">Compare IOR</a></li>
-                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/IORTestGrid/">IOR Test Grid</a></li>
-                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/compareVolume/">Compare Volume</a></li>
-                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/attenuationTest/">Attenuation Test</a></li>
-                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/glassVaseFlowers/">Glass Vase Flowers</a></li>
-                <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/glassHurricaneCandleHolder/">Glass Hurricane
-                    Candle Holder</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/compareIor/">Compare IOR</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/IORTestGrid/">IOR Test Grid</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/compareVolume/">Compare Volume</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/attenuationTest/">Attenuation Test</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/glassVaseFlowers/">Glass Vase Flowers</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/glassHurricaneCandleHolder/">Glass Hurricane Candle Holder</a></li>
             </ul>
         </nav>
     </article>
