@@ -21,7 +21,7 @@ RedGPU.init(
         // 2-1. 카메라 컨트롤 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 30; // 카메라의 줌/거리
-        controller.speed = 0.5;   // 카메라 회전 속도
+        controller.speedRotation = 0.5;   // 카메라 회전 속도
 
         // 2-2. 씬(Scene) 및 뷰(View3D) 설정
         const scene = new RedGPU.Display.Scene(); // 객체들이 추가될 씬

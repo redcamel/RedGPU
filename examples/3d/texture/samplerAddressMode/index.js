@@ -85,7 +85,6 @@ const createAddressModeGrid = (redGPUContext, scene) => {
             label.color = '#ffffff';
             label.worldSize = 0.85;
             label.useBillboard = true;
-            label.useBillboardPerspective = true;
             label.setPosition(x, y - 1.8, 0);
             scene.addChild(label);
         });

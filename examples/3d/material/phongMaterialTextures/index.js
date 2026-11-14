@@ -117,7 +117,7 @@ RedGPU.init(
                 label.worldSize = 0.9;
                 label.setPosition(0, -2, 0);
                 label.useBillboard = true;
-                label.useBillboardPerspective = true;
+
                 mesh.addChild(label);
             });
         });

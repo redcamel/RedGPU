@@ -98,7 +98,6 @@ const createFilterCombinationGrid = (redGPUContext, scene) => {
         label.color = '#ffffff';
         label.worldSize = 0.85;
         label.useBillboard = true;
-        label.useBillboardPerspective = true;
         label.setPosition(x, y - 2.1, 0);
         scene.addChild(label);
     });

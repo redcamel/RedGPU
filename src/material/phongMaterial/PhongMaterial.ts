@@ -41,6 +41,11 @@ interface PhongMaterial {
      */
     specularStrength: number
     /**
+     * [KO] 스펙큘러 광택도 (기본값: `32`)
+     * [EN] Specular shininess (default: `32`)
+     */
+    shininess: number
+    /**
      * [KO] 알파(불투명도) 맵 텍스처
      * [EN] Alpha (opacity) map texture
      */
