@@ -34,25 +34,34 @@ jobs:
       - name: Build code
         run: npm run build
 
-      # 6. 매뉴얼 빌드 (VitePress & TypeDoc API)
+      # 6. Example Helper 빌드 및 정적 SEO 콘텐츠 주입
+      - name: Build Example Helper and SEO tags
+        run: |
+          cd examples/exampleHelper
+          npm ci
+          npm run build
+          cd ../..
+          node buildScripts/github/generate-example-version.js
+
+      # 7. 매뉴얼 빌드 (VitePress & TypeDoc API)
       - name: Build documentation
         run: |
           cd manual
           npm ci
           npm run build
 
-      # 7. 전체 사이트맵 인덱스 생성 (SEO 최적화)
+      # 8. 전체 사이트맵 인덱스 생성 (SEO 최적화)
       - name: Build sitemap
         run: node buildScripts/github/generate-sitemap.js
 
-      # 8. 변경된 빌드 결과물을 gh-pages 브랜치에 강제 커밋 및 푸시
+      # 9. 변경된 빌드 결과물을 gh-pages 브랜치에 강제 커밋 및 푸시
       - name: Commit and push build files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # manual 내부 임시 빌드/의존성 폴더 제외 처리
-          rm -rf manual/node_modules manual/.vitepress/dist manual/.vitepress/cache
+          # manual 및 exampleHelper 내부 임시 빌드/의존성 폴더 제외 처리
+          rm -rf manual/node_modules manual/.vitepress/dist manual/.vitepress/cache examples/exampleHelper/node_modules
           
           # docs 폴더 및 기존 sitemap_v2.xml 삭제 반영 (존재할 경우에만)
           git rm -rf --ignore-unmatch docs/ sitemap/ sitemap_v2.xml
