@@ -270,10 +270,15 @@ try {
                     ];
 
                     crumbSegments.forEach((seg, idx) => {
+                        const tabParam = encodeURIComponent(crumbSegments[0]);
+                        const itemUrl = idx === 0
+                            ? `https://redcamel.github.io/RedGPU/examples/?tab=${tabParam}`
+                            : `https://redcamel.github.io/RedGPU/examples/?tab=${tabParam}&q=${encodeURIComponent(seg)}`;
                         breadcrumbItems.push({
                             "@type": "ListItem",
                             "position": idx + 3,
-                            "name": seg
+                            "name": seg,
+                            "item": itemUrl
                         });
                     });
 
