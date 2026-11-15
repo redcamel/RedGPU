@@ -65,6 +65,8 @@ class OrbitController extends AController {
                 HD_Move: (deltaX: number, deltaY: number) => {
                     this.#pan -= deltaX * this.#speedRotation * 0.1;
                     this.#tilt -= deltaY * this.#speedRotation * 0.1;
+                    if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
+                    if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
                 },
                 HD_Wheel: (e: WheelEvent) => {
                     this.#distance += e.deltaY / 100 * this.#speedDistance;
@@ -376,15 +378,47 @@ class OrbitController extends AController {
 
         const panRad = this.#currentPan * PER_PI;
         const tiltRad = this.#currentTilt * PER_PI;
+        const sinPan = Math.sin(panRad);
+        const cosPan = Math.cos(panRad);
+        const sinTilt = Math.sin(tiltRad);
         const cosTilt = Math.cos(tiltRad);
-        const distanceCosTilt = this.#currentDistance * cosTilt;
 
-        camera.setPosition(
-            this.#centerX + Math.sin(panRad) * distanceCosTilt,
-            this.#centerY - Math.sin(tiltRad) * this.#currentDistance,
-            this.#centerZ + Math.cos(panRad) * distanceCosTilt
-        );
-        camera.lookAt(this.#centerX, this.#centerY, this.#centerZ);
+        const x0 = cosPan;
+        const x2 = -sinPan;
+
+        const y0 = sinPan * sinTilt;
+        const y1 = cosTilt;
+        const y2 = cosPan * sinTilt;
+
+        const z0 = sinPan * cosTilt;
+        const z1 = -sinTilt;
+        const z2 = cosPan * cosTilt;
+
+        const eyeX = this.#centerX + z0 * this.#currentDistance;
+        const eyeY = this.#centerY + z1 * this.#currentDistance;
+        const eyeZ = this.#centerZ + z2 * this.#currentDistance;
+
+        camera.setPosition(eyeX, eyeY, eyeZ);
+        camera.rotationX = this.#currentTilt;
+        camera.rotationY = this.#currentPan;
+
+        const viewMatrix = camera.viewMatrix;
+        viewMatrix[0] = x0;
+        viewMatrix[1] = y0;
+        viewMatrix[2] = z0;
+        viewMatrix[3] = 0;
+        viewMatrix[4] = 0;
+        viewMatrix[5] = y1;
+        viewMatrix[6] = z1;
+        viewMatrix[7] = 0;
+        viewMatrix[8] = x2;
+        viewMatrix[9] = y2;
+        viewMatrix[10] = z2;
+        viewMatrix[11] = 0;
+        viewMatrix[12] = -(x0 * eyeX + x2 * eyeZ);
+        viewMatrix[13] = -(y0 * eyeX + y1 * eyeY + y2 * eyeZ);
+        viewMatrix[14] = -(z0 * eyeX + z1 * eyeY + z2 * eyeZ);
+        viewMatrix[15] = 1;
     };
 }
 
