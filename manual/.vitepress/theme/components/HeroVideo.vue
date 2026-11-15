@@ -20,7 +20,11 @@ const topics = computed(() => {
       {title: '기본 객체 (Basic Objects)', desc: 'Mesh · Geometry · Material · 텍스처', link: `${prefix}/basic-objects/`},
       {title: '조명과 그림자', desc: 'PBR · 라이트 · 캐스케이드 섀도우', link: `${prefix}/lighting-and-shadow/`},
       {title: '환경 설정 (Environment)', desc: 'SkyBox · IBL · 안개 · 전역 바람', link: `${prefix}/environment/`},
-      {title: '확장 객체 (Extended Objects)', desc: 'glTF 2.0 · 인스턴스 메시 · 스프라이트 · 텍스트', link: `${prefix}/extended-objects/`},
+      {
+        title: '확장 객체 (Extended Objects)',
+        desc: 'glTF 2.0 · 인스턴스 메시 · 스프라이트 · 텍스트',
+        link: `${prefix}/extended-objects/`
+      },
       {title: '사용자 인터랙션', desc: '마우스 피킹 및 키보드 이벤트', link: `${prefix}/interaction/`},
       {title: '포스트 이펙트', desc: 'SSR · DOF · Bloom · 톤 매핑', link: `${prefix}/post-effect/`},
       {title: 'LOD 시스템', desc: '거리 기반 메시 · 인스턴스 최적화', link: `${prefix}/lod/`},
@@ -64,33 +68,49 @@ const topics = computed(() => {
             }}
           </p>
         </div>
-        <div class="hero-video-container">
-          <video
-              autoplay
-              class="hero-video"
-              controls
-              loop
-              muted
-              playsinline
-          >
-            <source src="https://github.com/user-attachments/assets/e46b2e21-3173-43fb-948f-a68f6fcfb424"
-                    type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
-        </div>
-        <div class="hero-video-container">
-          <video
-              autoplay
-              class="hero-video"
-              controls
-              loop
-              muted
-              playsinline
-          >
-            <source src="https://github.com/user-attachments/assets/3115b699-9b3e-45f2-9e3b-682db04bcc03"
-                    type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="hero-video-container">
+            <video
+                autoplay
+                class="hero-video"
+                controls
+                loop
+                muted
+                playsinline
+            >
+              <source src="https://github.com/user-attachments/assets/b077eca0-81e3-47f5-a710-49033f3219b4"
+                      type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <div class="hero-video-container">
+            <video
+                autoplay
+                class="hero-video"
+                controls
+                loop
+                muted
+                playsinline
+            >
+              <source src="https://github.com/user-attachments/assets/e46b2e21-3173-43fb-948f-a68f6fcfb424"
+                      type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <div class="hero-video-container">
+            <video
+                autoplay
+                class="hero-video"
+                controls
+                loop
+                muted
+                playsinline
+            >
+              <source src="https://github.com/user-attachments/assets/3115b699-9b3e-45f2-9e3b-682db04bcc03"
+                      type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
         </div>
       </div>
 
