@@ -8,7 +8,7 @@
     "api:en": "node ../buildScripts/syncShaderDoc.js && cross-env DOC_LANG=en npx typedoc --options typedoc.config.js && node ../buildScripts/github/filterLanguageFiles.js en",
     "api:all": "npm run api:ko && npm run api:en",
     "dev": "npm run api:all && vitepress dev",
-    "build": "cross-env NODE_ENV=production npm run api:all && vitepress build && node ../buildScripts/github/deploy-manual.js",
+    "build": "cross-env NODE_ENV=production NODE_OPTIONS=--max-old-space-size=8192 npm run api:all && cross-env NODE_OPTIONS=--max-old-space-size=8192 vitepress build && node ../buildScripts/github/deploy-manual.js",
     "preview": "vitepress preview"
   },
   "devDependencies": {

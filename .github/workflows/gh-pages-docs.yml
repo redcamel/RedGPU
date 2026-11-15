@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      NODE_OPTIONS: "--max-old-space-size=8192"
     steps:
       # 1. 소스 코드 체크아웃 (master 브랜치 기준)
       - name: Checkout repository
