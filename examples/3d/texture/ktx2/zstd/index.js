@@ -1,6 +1,6 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1794646734270';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1794646734270';
-import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1794646734270';
+import * as RedGPU from '../../../../../dist/index.js?t=1794710896984';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1794710896984';
+import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1794710896984';
 
 /**
  * [KO] KTX2 ZSTD 예제
