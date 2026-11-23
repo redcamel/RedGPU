@@ -2,51 +2,79 @@ import {test as rawTest} from '@playwright/test';
 import {expect, openWebGPUHarness, test} from '../fixtures/webgpuTest';
 
 test.describe('RedGPU.init', () => {
-    // 최소 인자, opaque alphaMode, 커스텀 어댑터 옵션 초기화 및 validateRedGPUContext 검증
-    test('initializes RedGPUContext with minimal args, opaque alphaMode, custom adapter options, and validates context', async ({page}) => {
+    // 최소 인자 초기화 및 validateRedGPUContext 정상 통과 검증
+    test('initializes RedGPUContext with minimal arguments and passes validateRedGPUContext', async ({page}) => {
         await openWebGPUHarness(page);
 
-        const result = await page.evaluate(async () => {
+        const res = await page.evaluate(async () => {
             const RedGPU = (window as any).RedGPU;
-
-            // 콜백 기반 RedGPU.init을 Promise로 감싸 순차 검증
-            const initAsync = (...args: any[]) =>
-                new Promise<any>((resolve, reject) => {
-                    const [canvas, ...rest] = args;
-                    RedGPU.init(
-                        canvas,
-                        (ctx: any) => resolve(ctx),
-                        (err: any) => reject(err),
-                        ...rest
-                    );
-                });
-
-            // 1. 최소 인자 초기화 및 RuntimeChecker.validateRedGPUContext 정상 통과 검증
-            const c1 = document.createElement('canvas');
-            const ctx1 = await initAsync(c1);
-            const isInstance1 = ctx1 instanceof RedGPU.Context.RedGPUContext;
-            const isContextValid = RedGPU.RuntimeChecker.validateRedGPUContext(ctx1);
-            ctx1.destroy();
-
-            // 2. alphaMode = 'opaque' 옵션 반영 검증
-            const c2 = document.createElement('canvas');
-            const ctx2 = await initAsync(c2, undefined, 'opaque');
-            const alphaMode2 = ctx2.alphaMode;
-            ctx2.destroy();
-
-            // 3. 커스텀 requestAdapterOptions(powerPreference) 전달 초기화 검증
-            const c3 = document.createElement('canvas');
-            const ctx3 = await initAsync(c3, undefined, 'premultiplied', {powerPreference: 'low-power'});
-            const isInstance3 = ctx3 instanceof RedGPU.Context.RedGPUContext;
-            ctx3.destroy();
-
-            return {isInstance1, isContextValid, alphaMode2, isInstance3};
+            const canvas = document.createElement('canvas');
+            return await new Promise<any>((resolve, reject) => {
+                RedGPU.init(
+                    canvas,
+                    (ctx: any) => {
+                        const isInstance = ctx instanceof RedGPU.Context.RedGPUContext;
+                        const isValid = RedGPU.RuntimeChecker.validateRedGPUContext(ctx);
+                        ctx.destroy();
+                        resolve({isInstance, isValid});
+                    },
+                    (err: any) => reject(err)
+                );
+            });
         });
 
-        expect(result.isInstance1).toBe(true);
-        expect(result.isContextValid).toBe(true);
-        expect(result.alphaMode2).toBe('opaque');
-        expect(result.isInstance3).toBe(true);
+        expect(res).toEqual({isInstance: true, isValid: true});
+    });
+
+    // alphaMode = 'opaque' 옵션 전달 시 컨텍스트 alphaMode 반영 검증
+    test('initializes with alphaMode = opaque', async ({page}) => {
+        await openWebGPUHarness(page);
+
+        const alphaMode = await page.evaluate(async () => {
+            const RedGPU = (window as any).RedGPU;
+            const canvas = document.createElement('canvas');
+            return await new Promise<string>((resolve, reject) => {
+                RedGPU.init(
+                    canvas,
+                    (ctx: any) => {
+                        const mode = ctx.alphaMode;
+                        ctx.destroy();
+                        resolve(mode);
+                    },
+                    (err: any) => reject(err),
+                    undefined,
+                    'opaque'
+                );
+            });
+        });
+
+        expect(alphaMode).toBe('opaque');
+    });
+
+    // 커스텀 requestAdapterOptions(powerPreference) 전달 초기화 검증
+    test('initializes with custom requestAdapterOptions', async ({page}) => {
+        await openWebGPUHarness(page);
+
+        const ok = await page.evaluate(async () => {
+            const RedGPU = (window as any).RedGPU;
+            const canvas = document.createElement('canvas');
+            return await new Promise<boolean>((resolve, reject) => {
+                RedGPU.init(
+                    canvas,
+                    (ctx: any) => {
+                        const isInstance = ctx instanceof RedGPU.Context.RedGPUContext;
+                        ctx.destroy();
+                        resolve(isInstance);
+                    },
+                    (err: any) => reject(err),
+                    undefined,
+                    'premultiplied',
+                    {powerPreference: 'low-power'}
+                );
+            });
+        });
+
+        expect(ok).toBe(true);
     });
 
     // RedGPU.init 내부 errorHandler가 console.error를 출력하므로 의도된 실패 검증에는 rawTest 사용
@@ -83,9 +111,11 @@ test.describe('RedGPU.init', () => {
             };
         });
 
-        expect(results.nullCanvas).toBe(true);
-        expect(results.divCanvas).toBe(true);
-        expect(results.nullCallback).toBe(true);
-        expect(results.objectCallback).toBe(true);
+        expect(results).toEqual({
+            nullCanvas: true,
+            divCanvas: true,
+            nullCallback: true,
+            objectCallback: true
+        });
     });
 });
