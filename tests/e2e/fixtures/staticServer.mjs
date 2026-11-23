@@ -28,6 +28,11 @@ const MIME_TYPES = {
 const server = http.createServer((req, res) => {
     const reqUrl = new URL(req.url || '/', `http://127.0.0.1:${port}`);
     let relativePath = decodeURIComponent(reqUrl.pathname);
+    if (relativePath === '/favicon.ico') {
+        res.writeHead(204);
+        res.end();
+        return;
+    }
     if (relativePath.endsWith('/')) {
         relativePath += 'index.html';
     }

@@ -20,6 +20,7 @@ export default defineConfig({
             name: 'chromium-webgpu',
             use: {
                 ...devices['Desktop Chrome'],
+                channel: 'chromium',
                 launchOptions: {
                     args: [
                         '--enable-unsafe-webgpu',
