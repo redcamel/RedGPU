@@ -16,6 +16,9 @@ function rawWgslPlugin() {
 
 export default defineConfig({
     plugins: [rawWgslPlugin()],
+    resolve: {
+        extensions: ['.ts', '.mts', '.js', '.mjs', '.json'],
+    },
     test: {
         include: ['tests/unit/**/*.test.ts'],
         environment: 'node',

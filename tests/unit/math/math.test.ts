@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {mat4} from 'gl-matrix';
+import {AABB} from '../../../src/bound/AABB';
 import Ray from '../../../src/math/Ray';
 import localToWorld from '../../../src/math/coordinates/localToWorld';
 import worldToLocal from '../../../src/math/coordinates/worldToLocal';
@@ -39,7 +40,7 @@ describe('Math.Ray', () => {
 
     // AABB 박스 및 삼각형 교차 판정(무게중심 좌표 포함) 검증
     it('intersects AABB and triangles accurately', () => {
-        const box = {minX: -1, minY: -1, minZ: -1, maxX: 1, maxY: 1, maxZ: 1};
+        const box = new AABB(-1, 1, -1, 1, -1, 1);
         const hitRay = new Ray([0, 0, 5], [0, 0, -1]);
         const missRay = new Ray([0, 5, 5], [0, 0, -1]);
 

@@ -34,7 +34,7 @@ describe('Camera2D', () => {
         expect(cam.x).toBe(10);
         expect(cam.y).toBe(20);
 
-        cam.setPosition([30, 40]);
+        cam.setPosition([30, 40, 0]);
         expect(cam.x).toBe(30);
         expect(cam.y).toBe(40);
         expect(cam.z).toBe(0);

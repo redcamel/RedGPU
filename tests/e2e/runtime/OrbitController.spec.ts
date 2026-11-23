@@ -72,10 +72,10 @@ test.describe('Camera.OrbitController (Gimbal Lock Regression)', () => {
                             controller.pan = 0;
                             controller.update(view, t);
                             t += 1000;
-                            const m0 = Array.from(controller.camera.viewMatrix);
+                            const m0 = Array.from<number>(controller.camera.viewMatrix);
                             controller.pan = 90;
                             controller.update(view, t);
-                            const m90 = Array.from(controller.camera.viewMatrix);
+                            const m90 = Array.from<number>(controller.camera.viewMatrix);
                             const panChangedOrientation =
                                 Math.abs(m0[0] - m90[0]) > 0.5 || Math.abs(m0[8] - m90[8]) > 0.5;
 
