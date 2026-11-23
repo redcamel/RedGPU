@@ -1,8 +1,29 @@
+# IDE & OS
 .idea
 .vscode
+.DS_Store
+Thumbs.db
+
+# Dependencies & Logs
 node_modules/
+*.log
+npm-debug.log*
+*.tsbuildinfo
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Build & Generated Outputs
 /dist/
 /docs/
+/src/**/*.js
+/sitemap/
+/sitemap.xml
+/sitemap-examples.xml
+
+# Manual (VitePress & TypeDoc)
 /manual/.vitepress/dist/
 /manual/.vitepress/cache/
 /manual/ko/api/
@@ -11,5 +32,14 @@ node_modules/
 /manual/**/*.html
 /manual/hashmap.json
 /manual/vp-icons.css
-/src/**/*.js
-/sitemap/
+
+# Test Artifacts (Vitest & Playwright)
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/coverage/
+
+# Local R&D & Agent Config
+/Vx.x.x-Alpha-rnd/
+/.agents/
+/AGENTS.md
