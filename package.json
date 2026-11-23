@@ -12,12 +12,17 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "rollup watch": "rollup -wc"
+    "rollup watch": "rollup -wc",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "author": "RedCamel",
   "license": "MIT",
   "devDependencies": {
     "@dimforge/rapier3d-compat": "^0.19.3",
+    "@playwright/test": "^1.65.1",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-strip": "^3.0.4",
@@ -32,6 +37,7 @@
     "sharp": "^0.35.5",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
+    "vitest": "^5.1.1",
     "wgsl_reflect": "^1.6.0"
   }
 }
