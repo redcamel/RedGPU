@@ -16,16 +16,6 @@ import AccessorInfo_GLTF from "./AccessorInfo_GLTF";
  */
 class AnimationData_GLTF {
     /**
-     * [KO] `GLTFLoader` 인스턴스
-     * [EN] `GLTFLoader` instance
-     */
-    gltfLoader: GLTFLoader;
-    /**
-     * [KO] GLTF 씬 데이터
-     * [EN] GLTF scene data
-     */
-    scenesData: GLTF;
-    /**
      * [KO] 엑세서의 GLTF ID
      * [EN] GLTF ID of the accessor
      */
@@ -51,14 +41,13 @@ class AnimationData_GLTF {
      * [EN] GLTF ID of the accessor to retrieve data from
      */
     constructor(gltfLoader: GLTFLoader, gltfData: GLTF, accessorGlTfId: GlTfId) {
-        this.gltfLoader = gltfLoader;
-        this.scenesData = gltfData;
         this.accessorGlTfId = accessorGlTfId;
-        const accessorInfo = new AccessorInfo_GLTF(this.gltfLoader, this.scenesData, this.accessorGlTfId);
-        const {accessor, startIndex, componentType_BYTES_PER_ELEMENT, bufferURIDataView, getMethod} = accessorInfo
-        const {type, count, componentType, normalized} = accessor
+        const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
+        const {accessor, startIndex, componentType_BYTES_PER_ELEMENT, bufferURIDataView, getMethod} = accessorInfo;
+        const {type, count, componentType, normalized} = accessor;
         const isNormalized = normalized === true;
-        let i = startIndex, factor = 1
+        let i = startIndex;
+        let factor = 1;
         switch (type) {
             case 'SCALAR':
                 factor = 1;
@@ -75,13 +64,13 @@ class AnimationData_GLTF {
             default:
                 console.warn('알수없는 형식 엑세서 타입', accessor);
         }
-        const temp = []
-        let offset = 0;
-        for (; offset < count * factor; i++, offset++) {
+        const total = count * factor;
+        const dataList = new Float32Array(total);
+        for (let offset = 0; offset < total; i++, offset++) {
             const rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
-            temp[offset] = isNormalized ? dequantizeAccessorValue(rawValue, componentType, true) : rawValue;
+            dataList[offset] = isNormalized ? dequantizeAccessorValue(rawValue, componentType, true) : rawValue;
         }
-        this.dataList = new Float32Array(temp);
+        this.dataList = dataList;
     }
 }
 

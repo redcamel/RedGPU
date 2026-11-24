@@ -75,6 +75,31 @@ const revokeTextureBlobURLs = (gltfLoader: GLTFLoader): void => {
     });
 };
 
+const releaseTemporaryBuffers = (gltfLoader: GLTFLoader, gltfData: GLTF): void => {
+    const parsingResult = gltfLoader.parsingResult;
+    if (parsingResult?.uris?.buffers) {
+        parsingResult.uris.buffers.length = 0;
+    }
+    const rawList: any = parsingResult?.textureRawList;
+    if (rawList) {
+        if (Array.isArray(rawList)) {
+            rawList.length = 0;
+        } else {
+            for (const key in rawList) {
+                delete rawList[key];
+            }
+        }
+    }
+    if (Array.isArray(gltfData?.buffers)) {
+        for (let i = 0, len = gltfData.buffers.length; i < len; i++) {
+            const buffer = gltfData.buffers[i];
+            if (buffer && typeof buffer.uri !== 'string') {
+                delete buffer.uri;
+            }
+        }
+    }
+};
+
 /**
  * [KO] glTF 데이터를 프레임 단위로 분산 파싱하여 버퍼, 씬, 카메라, 텍스처, 애니메이션 리소스를 순차적으로 구성합니다.
  * [EN] Parses glTF data across frames via a flat async/await pipeline to sequentially construct buffers, scenes, cameras, textures, and animation resources.
@@ -103,50 +128,55 @@ const parseGLTF = async (
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
     signal?: AbortSignal
 ): Promise<void> => {
-    throwIfAborted(signal);
-    gltfLoader.parsingResult.materialVariants = extractMaterialVariantNames(gltfData);
-
-    await nextFrame(signal);
-    parseAssetVersion(gltfData);
-
-    await nextFrame(signal);
-    await loadBuffersAsync(gltfLoader, gltfData, onProgress, signal);
-
-    if (hasDracoCompression(gltfData)) {
-        await decodeDracoPrimitives(gltfData, gltfLoader.parsingResult.uris.buffers);
-        throwIfAborted(signal);
-    }
-
-    await nextFrame(signal);
-    parseScene_GLTF(gltfLoader, gltfData);
-
-    await nextFrame(signal);
-    parseCameras_GLTF(gltfLoader, gltfData);
-
     try {
-        const result = await loadTexturesAsync(gltfLoader, onProgress, signal);
         throwIfAborted(signal);
-        result.textures.forEach((textureLoaderData: TextureLoaderData) => {
-            const {
-                targetTextureKey,
-                targetSamplerKey,
-                samplerList
-            } = textureLoaderData.srcInfo;
-            textureLoaderData.srcInfo.materialList.forEach((material: TextureLoaderData, index: number) => {
-                material[targetTextureKey] = textureLoaderData.texture;
-                if (samplerList[index]) {
-                    material[targetSamplerKey] = samplerList[index];
-                }
+        gltfLoader.parsingResult.materialVariants = extractMaterialVariantNames(gltfData);
+
+        await nextFrame(signal);
+        parseAssetVersion(gltfData);
+
+        await nextFrame(signal);
+        await loadBuffersAsync(gltfLoader, gltfData, onProgress, signal);
+
+        if (hasDracoCompression(gltfData)) {
+            await decodeDracoPrimitives(gltfData, gltfLoader.parsingResult.uris.buffers);
+            throwIfAborted(signal);
+        }
+
+        await nextFrame(signal);
+        parseScene_GLTF(gltfLoader, gltfData);
+
+        await nextFrame(signal);
+        parseCameras_GLTF(gltfLoader, gltfData);
+
+        try {
+            const result = await loadTexturesAsync(gltfLoader, onProgress, signal);
+            throwIfAborted(signal);
+            result.textures.forEach((textureLoaderData: TextureLoaderData) => {
+                const {
+                    targetTextureKey,
+                    targetSamplerKey,
+                    samplerList
+                } = textureLoaderData.srcInfo;
+                textureLoaderData.srcInfo.materialList.forEach((material: TextureLoaderData, index: number) => {
+                    material[targetTextureKey] = textureLoaderData.texture;
+                    if (samplerList[index]) {
+                        material[targetSamplerKey] = samplerList[index];
+                    }
+                });
             });
-        });
+        } finally {
+            revokeTextureBlobURLs(gltfLoader);
+        }
+
+        throwIfAborted(signal);
+        await parseAnimation_GLTF(gltfLoader, gltfData);
+
+        throwIfAborted(signal);
     } finally {
-        revokeTextureBlobURLs(gltfLoader);
+        releaseTemporaryBuffers(gltfLoader, gltfData);
     }
 
-    throwIfAborted(signal);
-    await parseAnimation_GLTF(gltfLoader, gltfData);
-
-    throwIfAborted(signal);
     callBack?.();
 };
 
