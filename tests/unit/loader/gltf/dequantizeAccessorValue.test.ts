@@ -54,15 +54,16 @@ describe('KHR_mesh_quantization — parseAttributeInfo_GLTF integration', () => 
         const accessorInfo = {
             accessor: {type: 'VEC3', count: 2, componentType: 5120, normalized: true},
             startIndex: 0,
+            bufferViewOffset: 0,
+            accessorBufferOffset: 0,
             getMethod: 'getInt8',
             bufferViewByteStride: 4,
             bufferURIDataView: new DataView(raw.buffer),
             componentType_BYTES_PER_ELEMENT: 1
         } as unknown as AccessorInfo_GLTF;
 
-        const normals: number[] = [];
-        parseAttributeInfo_GLTF('NORMAL', accessorInfo, [], [], [], [], normals, [], [], [], []);
-        expect(normals).toEqual([1, 0, -1, 0, -1, 1]);
+        const normals = parseAttributeInfo_GLTF('NORMAL', accessorInfo);
+        expect(Array.from(normals!)).toEqual([1, 0, -1, 0, -1, 1]);
     });
 
     it('preserves unnormalized UINT16 POSITION integers while dequantizing normalized UINT8 COLOR_0', () => {
@@ -71,26 +72,28 @@ describe('KHR_mesh_quantization — parseAttributeInfo_GLTF integration', () => 
         const posInfo = {
             accessor: {type: 'VEC3', count: 1, componentType: 5123},
             startIndex: 0,
+            bufferViewOffset: 0,
+            accessorBufferOffset: 0,
             getMethod: 'getUint16',
             bufferViewByteStride: 0,
             bufferURIDataView: new DataView(posRaw.buffer),
             componentType_BYTES_PER_ELEMENT: 2
         } as unknown as AccessorInfo_GLTF;
-        const vertices: number[] = [];
-        parseAttributeInfo_GLTF('POSITION', posInfo, vertices, [], [], [], [], [], [], [], []);
-        expect(vertices).toEqual([100, 200, 300]);
+        const vertices = parseAttributeInfo_GLTF('POSITION', posInfo);
+        expect(Array.from(vertices!)).toEqual([100, 200, 300]);
 
         const colRaw = new Uint8Array([255, 0, 255, 255]);
         const colInfo = {
             accessor: {type: 'VEC4', count: 1, componentType: 5121, normalized: true},
             startIndex: 0,
+            bufferViewOffset: 0,
+            accessorBufferOffset: 0,
             getMethod: 'getUint8',
             bufferViewByteStride: 0,
             bufferURIDataView: new DataView(colRaw.buffer),
             componentType_BYTES_PER_ELEMENT: 1
         } as unknown as AccessorInfo_GLTF;
-        const colors: number[] = [];
-        parseAttributeInfo_GLTF('COLOR_0', colInfo, [], [], [], [], [], [], [], colors, []);
-        expect(colors).toEqual([1, 0, 1, 1]);
+        const colors = parseAttributeInfo_GLTF('COLOR_0', colInfo);
+        expect(Array.from(colors!)).toEqual([1, 0, 1, 1]);
     });
 });

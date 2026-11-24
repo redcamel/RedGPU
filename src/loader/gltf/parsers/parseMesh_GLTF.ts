@@ -17,9 +17,12 @@ import GLTFLoader from "../GLTFLoader";
 import parseMaterialInfo_GLTF from "./material/parseMaterialInfo_GLTF";
 import parseAttributeInfo_GLTF from "./parseAttributeInfo_GLTF";
 import parseIndicesInfo_GLTF from "./parseIndicesInfo_GLTF";
-import parseInterleaveData_GLTF from "./parseInterleaveData_GLTF";
+import parseInterleaveData_GLTF, {packSkinJoints_GLTF, packSkinWeights_GLTF} from "./parseInterleaveData_GLTF";
 import parseSparse_GLTF from "./parseSparse_GLTF";
 import calculateTangents from "../../../math/calculateTangents";
+
+const EMPTY_FLOAT32_ARRAY = new Float32Array(0);
+const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 
 /**
  * [KO] glTF 메시 데이터를 파싱하여 프리미티브별 지오메트리, 재질, 모프 타겟이 적용된 `Mesh` 배열을 생성합니다.
@@ -54,16 +57,15 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         const meshPrimitive: MeshPrimitive = primitives[i]
         let tMesh: Mesh;
         let tMaterial;
-        let indices = [];
-        let vertices = [];
-        let verticesColor_0 = [];
-        let uvs = [];
-        let uvs1 = [];
-        let uvs2 = [];
-        let normals = [];
-        let jointWeights = [];
-        let joints = [];
-        let tangents = [];
+        let indices: Uint32Array = EMPTY_UINT32_ARRAY;
+        let vertices: Float32Array = EMPTY_FLOAT32_ARRAY;
+        let verticesColor_0: Float32Array = EMPTY_FLOAT32_ARRAY;
+        let uvs: Float32Array = EMPTY_FLOAT32_ARRAY;
+        let uvs1: Float32Array = EMPTY_FLOAT32_ARRAY;
+        let normals: Float32Array = EMPTY_FLOAT32_ARRAY;
+        let jointWeights: Float32Array = EMPTY_FLOAT32_ARRAY;
+        let joints: Float32Array = EMPTY_FLOAT32_ARRAY;
+        let tangents: Float32Array = EMPTY_FLOAT32_ARRAY;
         let tDrawMode: GPUPrimitiveTopology;
         const {attributes} = meshPrimitive
         const temp = new Map()
@@ -77,14 +79,36 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                     temp.set(key, name)
                 }
 
-                parseAttributeInfo_GLTF(
-                    isTexcoord ? temp.get(key) : key, accessorInfo,
-                    vertices,
-                    uvs, uvs1, uvs2,
-                    normals,
-                    jointWeights, joints,
-                    verticesColor_0, tangents
-                );
+                const targetKey = isTexcoord ? temp.get(key) : key;
+                const parsed = parseAttributeInfo_GLTF(targetKey, accessorInfo);
+                if (parsed) {
+                    switch (targetKey) {
+                        case 'POSITION':
+                            vertices = parsed;
+                            break;
+                        case 'NORMAL':
+                            normals = parsed;
+                            break;
+                        case 'TEXCOORD_0':
+                            uvs = parsed;
+                            break;
+                        case 'TEXCOORD_1':
+                            uvs1 = parsed;
+                            break;
+                        case 'COLOR_0':
+                            verticesColor_0 = parsed;
+                            break;
+                        case 'TANGENT':
+                            tangents = parsed;
+                            break;
+                        case 'WEIGHTS_0':
+                            jointWeights = parsed;
+                            break;
+                        case 'JOINTS_0':
+                            joints = parsed;
+                            break;
+                    }
+                }
                 if (accessorInfo.accessor.sparse) {
                     parseSparse_GLTF(
                         gltfLoader, key,
@@ -96,9 +120,9 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             }
         }
         if ('indices' in meshPrimitive) {
-            let accessorGlTfId = meshPrimitive.indices;
-            let accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
-            parseIndicesInfo_GLTF(accessorInfo, indices);
+            const accessorGlTfId = meshPrimitive.indices;
+            const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
+            indices = parseIndicesInfo_GLTF(accessorInfo);
         }
         tMaterial = parseMaterialInfo_GLTF(gltfLoader, gltfData, meshPrimitive);
         if (tMaterial instanceof PBRMaterial) {
@@ -136,31 +160,26 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             tMaterial.useVertexColor = true;
         }
 
-        let normalData;
-        if (!normals.length) {
-            normalData = calculateNormals(vertices, indices);
-
-        } else normalData = normals;
+        const normalData: Float32Array = normals.length ? normals : calculateNormals(vertices, indices);
 
         if (!tangents.length) {
-            tangents = Array.from(calculateTangents(vertices, normalData, uvs, indices));
+            tangents = calculateTangents(vertices, normalData, uvs, indices);
         }
         if (tangents.length) tMaterial.useVertexTangent = true;
-        let interleaveData = [];
-        parseInterleaveData_GLTF(interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents);
+        const interleaveData = parseInterleaveData_GLTF(vertices, verticesColor_0, normalData, uvs, uvs1, tangents);
+        const vertexCount = (vertices.length / 3) | 0;
         let tGeo: Geometry;
-        let tInterleaveInfoList = {};
-        if (vertices.length) tInterleaveInfoList['aVertexPosition'] = VertexInterleaveType.float32x3
-        if (normalData.length) tInterleaveInfoList['aVertexNormal'] = VertexInterleaveType.float32x3
-        if (uvs.length) tInterleaveInfoList['aTexcoord'] = VertexInterleaveType.float32x2
-        if (uvs1.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
-        else if (uvs.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
-        tInterleaveInfoList['aVertexColor_0'] = VertexInterleaveType.float32x4
-        tInterleaveInfoList['aVertexTangent'] = VertexInterleaveType.float32x4
-        const weightData = []
-        const jointData = []
-        parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, true)
-        parseInterleaveData_GLTF(jointData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, false, true)
+        const tInterleaveInfoList = {};
+        if (vertexCount > 0) {
+            tInterleaveInfoList['aVertexPosition'] = VertexInterleaveType.float32x3
+            tInterleaveInfoList['aVertexNormal'] = VertexInterleaveType.float32x3
+            tInterleaveInfoList['aTexcoord'] = VertexInterleaveType.float32x2
+            tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
+            tInterleaveInfoList['aVertexColor_0'] = VertexInterleaveType.float32x4
+            tInterleaveInfoList['aVertexTangent'] = VertexInterleaveType.float32x4
+        }
+        const weightData = packSkinWeights_GLTF(vertexCount, jointWeights);
+        const jointData = packSkinJoints_GLTF(vertexCount, joints);
         const weightBuffer = new VertexBuffer(
             redGPUContext,
             weightData,
@@ -195,7 +214,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             ),
             !noIndexBuffer && indices.length ? new IndexBuffer(
                 redGPUContext,
-                new Uint32Array(indices),
+                indices,
                 undefined,
                 `Index_${gltfLoader.url}_${nodeGlTfId}_${i}`
             ) : null
@@ -256,33 +275,35 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             }
         }
         tMesh.animationInfo.morphInfo = morphInfo;
-        let targetGeometryData = tMesh.geometry.vertexBuffer.data
         if (!tMesh.gpuRenderInfo) tMesh.initGPURenderInfos()
-        let NUM = 0;
-        for (const k in tInterleaveInfoList) {
-            NUM += tInterleaveInfoList[k].numElements
-        }
-        if (!hasVertexBuffer) {
-            const list = tMesh.animationInfo.morphInfo.morphInfoDataList;
-            let index = 0;
-            const listLen = list.length
-            const targetGeometryDataLen = targetGeometryData.length
-            while (index < listLen) {
-                let v = list[index];
-                const vertices = v.vertices
-                let i = 0, len = targetGeometryDataLen / NUM;
-                let tWeights = tMesh.animationInfo.morphInfo.weights[index] == undefined ? 0.5 : tMesh.animationInfo.morphInfo.weights[index];
-                while (i < len) {
-                    targetGeometryData[i * NUM] += vertices[i * 3] * tWeights;
-                    targetGeometryData[i * NUM + 1] += vertices[i * 3 + 1] * tWeights;
-                    targetGeometryData[i * NUM + 2] += vertices[i * 3 + 2] * tWeights;
-                    i++;
-                }
-                index++;
+        const morphList = tMesh.animationInfo.morphInfo.morphInfoDataList;
+        if (morphList.length > 0) {
+            const targetGeometryData = tMesh.geometry.vertexBuffer.data;
+            let NUM = 0;
+            for (const k in tInterleaveInfoList) {
+                NUM += tInterleaveInfoList[k].numElements;
             }
+            if (!hasVertexBuffer) {
+                const listLen = morphList.length;
+                const targetGeometryDataLen = targetGeometryData.length;
+                const morphVertexCount = targetGeometryDataLen / NUM;
+                for (let index = 0; index < listLen; index++) {
+                    const morphVertices = morphList[index].vertices;
+                    const tWeights = tMesh.animationInfo.morphInfo.weights[index] == undefined
+                        ? 0.5
+                        : tMesh.animationInfo.morphInfo.weights[index];
+                    for (let vi = 0; vi < morphVertexCount; vi++) {
+                        const base = vi * NUM;
+                        const v3 = vi * 3;
+                        targetGeometryData[base] += morphVertices[v3] * tWeights;
+                        targetGeometryData[base + 1] += morphVertices[v3 + 1] * tWeights;
+                        targetGeometryData[base + 2] += morphVertices[v3 + 2] * tWeights;
+                    }
+                }
+                tMesh.geometry.vertexBuffer.updateAllData(targetGeometryData);
+            }
+            tMesh.animationInfo.morphInfo.origin = new Float32Array(targetGeometryData);
         }
-        tMesh.geometry.vertexBuffer.updateAllData(targetGeometryData);
-        tMesh.animationInfo.morphInfo.origin = new Float32Array(targetGeometryData);
         meshPrimitive['Mesh'] = tMesh;
         tMeshList.push(tMesh);
     }
