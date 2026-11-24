@@ -100,18 +100,13 @@ const parseFileGLTF = async (
                 transferred: formatBytes(totalSize),
                 totalSize: formatBytes(totalSize)
             }
-            {
-
-                const buffers = gltfData.buffers
-                const totalBuffers = buffers ? buffers.length : 0;
-                if (totalBuffers) {
-                    let loadedBuffers = 0;
-                    gltfLoader.loadingProgressInfo.buffers = {
-                        loaded: loadedBuffers,
-                        total: totalBuffers,
-                        percent: Math.min(100, parseFloat(((loadedBuffers / totalBuffers) * 100).toFixed(2)))
-                    }
-                }
+            const totalBuffers = gltfData.buffers ? gltfData.buffers.length : 0;
+            if (totalBuffers) {
+                gltfLoader.loadingProgressInfo.buffers = {
+                    loaded: 0,
+                    total: totalBuffers,
+                    percent: 0
+                };
             }
             if (!signal?.aborted) {
                 onProgress?.(gltfLoader.loadingProgressInfo);

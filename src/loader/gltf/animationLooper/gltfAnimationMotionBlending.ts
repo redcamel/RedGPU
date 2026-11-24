@@ -657,16 +657,17 @@ export default function gltfAnimationMotionBlending(
     computePassEncoder: GPUComputePassEncoder,
     targetPlayAnimationInfo: PlayAnimationInfo
 ) {
-    let fromClip = targetPlayAnimationInfo.fromClip!;
-    let toClip = targetPlayAnimationInfo.toClip!;
+    const fromClip = targetPlayAnimationInfo.fromClip;
+    const toClip = targetPlayAnimationInfo.toClip;
+    if (!fromClip || !toClip) return;
     let blendWeight = targetPlayAnimationInfo.blendWeight ?? 0.5;
 
     let maxTimeFrom = fromClip.clip.maxTime;
-    let startTimeFrom = targetPlayAnimationInfo.startTimeFrom!;
+    let startTimeFrom = targetPlayAnimationInfo.startTimeFrom ?? timestamp;
     let timeFrom = ((timestamp - startTimeFrom) % (maxTimeFrom * 1000)) / 1000;
 
     let maxTimeTo = toClip.clip.maxTime;
-    let startTimeTo = targetPlayAnimationInfo.startTimeTo!;
+    let startTimeTo = targetPlayAnimationInfo.startTimeTo ?? timestamp;
     let timeTo = ((timestamp - startTimeTo) % (maxTimeTo * 1000)) / 1000;
 
     let i: number;

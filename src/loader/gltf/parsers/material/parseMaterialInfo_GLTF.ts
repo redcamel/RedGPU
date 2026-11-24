@@ -11,7 +11,7 @@ import parse_KHR_materials_sheen from "./extensions/parse_KHR_materials_sheen";
 import parse_KHR_materials_specular from "./extensions/parse_KHR_materials_specular";
 import parse_KHR_materials_transmission from "./extensions/parse_KHR_materials_transmission";
 import parse_KHR_materials_volume from "./extensions/parse_KHR_materials_volume";
-import parseMaterialTexture from "./parseMaterialTexture";
+import parseMaterialTexture, {getSRGBTextureFormat} from "./parseMaterialTexture";
 
 /**
  * [KO] GLTF 메쉬 프리미티브의 재질(Material) 정보 및 확장(Extensions)을 파싱하여 PBRMaterial 인스턴스를 생성합니다.
@@ -79,7 +79,7 @@ const parseMaterialInfo_GLTF = (
                     currentMaterial,
                     baseColorTextureInfo,
                     'baseColorTexture',
-                    `${navigator.gpu.getPreferredCanvasFormat()}-srgb`,
+                    getSRGBTextureFormat(),
                 )
             }
             if (metallicRoughnessTextureInfo) {
@@ -109,7 +109,7 @@ const parseMaterialInfo_GLTF = (
                 currentMaterial,
                 emissiveTextureInfo,
                 'emissiveTexture',
-                `${navigator.gpu.getPreferredCanvasFormat()}-srgb`
+                getSRGBTextureFormat()
             )
         }
         if (occlusionTextureInfo) {

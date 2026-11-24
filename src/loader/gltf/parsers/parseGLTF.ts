@@ -82,12 +82,11 @@ const releaseTemporaryBuffers = (gltfLoader: GLTFLoader, gltfData: GLTF): void =
     }
     const rawList: any = parsingResult?.textureRawList;
     if (rawList) {
+        for (const key in rawList) {
+            delete rawList[key];
+        }
         if (Array.isArray(rawList)) {
             rawList.length = 0;
-        } else {
-            for (const key in rawList) {
-                delete rawList[key];
-            }
         }
     }
     if (Array.isArray(gltfData?.buffers)) {

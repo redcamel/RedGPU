@@ -21,6 +21,7 @@ const BINPACKER_CHUNK_TYPE_JSON = 0x4e4f534a;
  */
 const BINPACKER_CHUNK_TYPE_BINARY = 0x004e4942;
 const UTF8_TEXT_DECODER = new TextDecoder('utf-8');
+const SUPPORTED_IMAGE_FORMATS = Object.freeze(['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/ktx2']);
 /**
  * [KO] GLB 파일을 로드 및 파싱하고 완료 시 콜백 함수를 호출합니다.
  * [EN] Loads and parses a GLB file and invokes the callback function upon completion.
@@ -191,15 +192,14 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
  * [KO] 버퍼 키와 생성된 Object URL의 매핑(`Map<string, string>`)
  * [EN] Mapping of buffer keys to created Object URLs (`Map<string, string>`)
  */
-const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
+const processImagesIfExist = (gltfData: GLTF, binaryChunk: any): void => {
     const {images, bufferViews} = gltfData;
-    const supportedFormats = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/ktx2'];
     const bufferHashMap = new Map<string, string>();
     if (images) {
         for (let i = 0; i < images.length; i++) {
             const image = images[i];
             const {mimeType, bufferView: bufferViewGlTfId} = image;
-            if (supportedFormats.includes(mimeType) && bufferViewGlTfId !== undefined) {
+            if (SUPPORTED_IMAGE_FORMATS.includes(mimeType) && bufferViewGlTfId !== undefined) {
                 const sliceStartIndex = bufferViews[bufferViewGlTfId].byteOffset || 0;
                 const byteLength = bufferViews[bufferViewGlTfId].byteLength;
                 const bufferKey = `${sliceStartIndex}_${byteLength}_${mimeType}`;
@@ -215,7 +215,6 @@ const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
             }
         }
     }
-    return bufferHashMap;
 };
 export default parseFileGLB
 

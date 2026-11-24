@@ -67,10 +67,10 @@ export const getDracoExtension = (primitive: MeshPrimitive): DracoPrimitiveExten
 };
 
 /**
- * [KO] Google Draco 공식 CDN(`1.5.7`)에서 `DracoDecoderModule` WASM을 온디맨드 싱글톤으로 로드·초기화합니다.
- * [EN] Lazily loads and initializes the `DracoDecoderModule` WASM singleton from the official Google Draco CDN (`1.5.7`).
+ * [KO] Google Draco 공식 CDN(`1.5.9`)에서 `DracoDecoderModule` WASM을 온디맨드 싱글톤으로 로드·초기화합니다.
+ * [EN] Lazily loads and initializes the `DracoDecoderModule` WASM singleton from the official Google Draco CDN (`1.5.9`).
  */
-export const initDracoDecoder = async (): Promise<any> => {
+const initDracoDecoder = async (): Promise<any> => {
     if (dracoModuleInstance) return dracoModuleInstance;
     if (!dracoModulePromise) {
         dracoModulePromise = (async () => {
@@ -163,6 +163,7 @@ export const applyDecodedDracoPrimitives = (
     if (!meshes || meshes.length === 0) return 0;
     if (!gltfData.accessors) gltfData.accessors = [];
     if (!gltfData.bufferViews) gltfData.bufferViews = [];
+    const accessors = gltfData.accessors;
 
     let decodedPrimitives = 0;
     const claimedAccessors = new Set<number>();
@@ -175,12 +176,12 @@ export const applyDecodedDracoPrimitives = (
     ): number => {
         const bufferViewIndex = registerDecodedBufferView(gltfData, bufferDataViews, bytes);
         let targetIndex = accessorIndex;
-        let accessor: Accessor = gltfData.accessors![targetIndex];
+        let accessor: Accessor = accessors[targetIndex];
 
         if (claimedAccessors.has(targetIndex)) {
             accessor = {...accessor};
-            targetIndex = gltfData.accessors!.length;
-            gltfData.accessors!.push(accessor);
+            targetIndex = accessors.length;
+            accessors.push(accessor);
         }
 
         accessor.bufferView = bufferViewIndex;

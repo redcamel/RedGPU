@@ -1,6 +1,6 @@
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import WEBGL_COMPONENT_TYPES from "../core/WEBGL_COMPONENT_TYPES";
-import {Accessor, Buffer, BufferView, GLTF, GlTfId} from "../GLTF";
+import GLTF_COMPONENT_TYPES from "../core/GLTF_COMPONENT_TYPES";
+import {Accessor, GLTF, GlTfId} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 
 /**
@@ -20,21 +20,6 @@ class AccessorInfo_GLTF {
      * [EN] GLTF accessor object
      */
     accessor: Accessor;
-    /**
-     * [KO] GLTF 버퍼 뷰 객체
-     * [EN] GLTF buffer view object
-     */
-    bufferView: BufferView;
-    /**
-     * [KO] 버퍼의 GLTF 식별자
-     * [EN] GLTF identifier of the buffer
-     */
-    bufferGlTfId: GlTfId;
-    /**
-     * [KO] GLTF 버퍼 객체
-     * [EN] GLTF buffer object
-     */
-    buffer: Buffer;
     /**
      * [KO] 버퍼 URI의 `DataView` 인스턴스
      * [EN] `DataView` instance of the buffer URI
@@ -92,18 +77,17 @@ class AccessorInfo_GLTF {
      */
     constructor(gltfLoader: GLTFLoader, gltfData: GLTF, accessorGlTfId: GlTfId) {
         this.accessor = gltfData.accessors[accessorGlTfId];
-        const hasBufferView = this.accessor.bufferView !== undefined;
-        this.bufferView = hasBufferView ? gltfData.bufferViews[this.accessor.bufferView] : undefined;
-        this.bufferGlTfId = this.bufferView ? this.bufferView.buffer : -1;
-        this.buffer = this.bufferView ? gltfData.buffers[this.bufferGlTfId] : undefined;
+        const bufferView = this.accessor.bufferView !== undefined
+            ? gltfData.bufferViews[this.accessor.bufferView]
+            : undefined;
         this.bufferURIDataView = null;
-        if (this.bufferView) {
-            const bufferDataView = gltfLoader.parsingResult.uris.buffers[this.bufferGlTfId];
+        if (bufferView) {
+            const bufferDataView = gltfLoader.parsingResult.uris.buffers[bufferView.buffer];
             if (bufferDataView) {
                 this.bufferURIDataView = bufferDataView;
             }
         }
-        this.componentType = WEBGL_COMPONENT_TYPES[this.accessor.componentType];
+        this.componentType = GLTF_COMPONENT_TYPES[this.accessor.componentType];
         this.componentType_BYTES_PER_ELEMENT = this.componentType.BYTES_PER_ELEMENT;
         switch (this.componentType) {
             case Float32Array:
@@ -128,8 +112,8 @@ class AccessorInfo_GLTF {
                 consoleAndThrowError('파싱할수없는 타입', this.componentType);
         }
         this.accessorBufferOffset = this.accessor.byteOffset || 0;
-        this.bufferViewOffset = this.bufferView?.byteOffset || 0;
-        this.bufferViewByteStride = this.bufferView?.byteStride || 0;
+        this.bufferViewOffset = bufferView?.byteOffset || 0;
+        this.bufferViewByteStride = bufferView?.byteStride || 0;
         this.startIndex = (this.bufferViewOffset + this.accessorBufferOffset) / this.componentType_BYTES_PER_ELEMENT;
     }
 }

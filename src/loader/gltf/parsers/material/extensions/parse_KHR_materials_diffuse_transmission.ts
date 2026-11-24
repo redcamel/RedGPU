@@ -1,5 +1,5 @@
 import PBRMaterial from "../../../../../material/pbrMaterial/PBRMaterial";
-import parseMaterialTexture from "../parseMaterialTexture";
+import parseMaterialTexture, {getSRGBTextureFormat} from "../parseMaterialTexture";
 
 /**
  * [KO] glTF `KHR_materials_diffuse_transmission` 확장 데이터를 파싱하여 `PBRMaterial`에 적용합니다.
@@ -38,7 +38,7 @@ const parse_KHR_materials_diffuse_transmission = (currentMaterial: PBRMaterial, 
             currentMaterial,
             diffuseTransmissionColorTextureInfo,
             'KHR_diffuseTransmissionColorTexture',
-            `${navigator.gpu.getPreferredCanvasFormat()}-srgb`,
+            getSRGBTextureFormat(),
             false
         )
     }

@@ -175,10 +175,10 @@ class GLTFLoader extends RedGPUObject {
      * [EN] List of currently playing animation information
      */
     activeAnimations: any[] = []
-    readonly #filePath: string
-    readonly #fileName: string
-    readonly #url: string
-    readonly #fileExtension: string
+    #filePath: string
+    #fileName: string
+    #url: string
+    #fileExtension: string
     #gltfData: GLTF
     #activeMaterialVariant: string | null = null
     #isDestroyed: boolean = false

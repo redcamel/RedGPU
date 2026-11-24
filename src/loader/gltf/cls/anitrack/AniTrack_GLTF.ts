@@ -82,11 +82,6 @@ class AniTrack_GLTF {
     cacheTable = {};
 
     /**
-     * [KO] 애니메이션 대상 속성 키 (`'rotation'`, `'translation'`, `'scale'`, `'weights'`)
-     * [EN] Animation target property key (`'rotation'`, `'translation'`, `'scale'`, `'weights'`)
-     */
-    key;
-    /**
      * [KO] 정수형으로 인코딩된 애니메이션 키 타입 (1: 회전, 2: 이동, 3: 스케일, 4: 모프 가중치, 5: JSON Pointer)
      * [EN] Integer-encoded animation key type (1: rotation, 2: translation, 3: scale, 4: morph weights, 5: JSON Pointer)
      */
@@ -96,11 +91,6 @@ class AniTrack_GLTF {
      * [EN] Runtime property binding for a `KHR_animation_pointer` track
      */
     pointerBinding: PointerTargetBinding | null = null;
-    /**
-     * [KO] 보간 방식 문자열 (`'CUBICSPLINE'`, `'STEP'`, `'LINEAR'`)
-     * [EN] Interpolation mode string (`'CUBICSPLINE'`, `'STEP'`, `'LINEAR'`)
-     */
-    interpolation: "CUBICSPLINE" | "STEP" | "LINEAR" | string;
     /**
      * [KO] 정수형으로 인코딩된 보간 방식 (0: STEP, 1: LINEAR, 2: CUBICSPLINE)
      * [EN] Integer-encoded interpolation mode (0: STEP, 1: LINEAR, 2: CUBICSPLINE)
@@ -148,10 +138,8 @@ class AniTrack_GLTF {
      * [EN] Array of target meshes for morph weight application
      */
     constructor(key, time, data, interpolation, targetMesh: Mesh, weightMeshes, pointerBinding: PointerTargetBinding | null = null) {
-        this.key = key
         this.timeAnimationInfo = time
         this.aniDataAnimationInfo = data
-        this.interpolation = interpolation
         this.animationTargetMesh = targetMesh
         this.weightMeshes = weightMeshes
         this.pointerBinding = pointerBinding
@@ -227,7 +215,8 @@ class AniTrack_GLTF {
         if (!this.#meshResourcesMap.has(targetMesh)) {
             this.#initMeshResources(redGPUContext, targetMesh);
         }
-        const resources = this.#meshResourcesMap.get(targetMesh)!;
+        const resources = this.#meshResourcesMap.get(targetMesh);
+        if (!resources) return;
         this.#uniformData.set([
             interpolationValue,
             prevIDX,

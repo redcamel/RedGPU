@@ -1,6 +1,6 @@
 import PBRMaterial from "../../../../../material/pbrMaterial/PBRMaterial";
 import GLTFLoader from "../../../GLTFLoader";
-import parseMaterialTexture from "../parseMaterialTexture";
+import parseMaterialTexture, {getSRGBTextureFormat} from "../parseMaterialTexture";
 
 /**
  * [KO] glTF의 `KHR_materials_sheen` 확장을 파싱하여 재질에 적용합니다.
@@ -31,7 +31,7 @@ const parse_KHR_materials_sheen = (currentMaterial: PBRMaterial, KHR_materials_s
             currentMaterial,
             sheenColorTextureInfo,
             'KHR_sheenColorTexture',
-            `${navigator.gpu.getPreferredCanvasFormat()}-srgb`,
+            getSRGBTextureFormat(),
             false
         )
     }

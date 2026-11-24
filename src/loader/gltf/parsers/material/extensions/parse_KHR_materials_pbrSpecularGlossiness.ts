@@ -1,6 +1,6 @@
 import PBRMaterial from "../../../../../material/pbrMaterial/PBRMaterial";
 import GLTFLoader from "../../../GLTFLoader";
-import parseMaterialTexture from "../parseMaterialTexture";
+import parseMaterialTexture, {getSRGBTextureFormat} from "../parseMaterialTexture";
 
 /**
  * [KO] glTF의 `KHR_materials_pbrSpecularGlossiness` 확장을 파싱하여 `PBRMaterial`에 매핑합니다.
@@ -34,7 +34,7 @@ const parse_KHR_materials_pbrSpecularGlossiness = (
             currentMaterial,
             specGlossInfo.diffuseTexture,
             'baseColorTexture',
-            `${navigator.gpu.getPreferredCanvasFormat()}-srgb`,
+            getSRGBTextureFormat(),
         );
     }
 

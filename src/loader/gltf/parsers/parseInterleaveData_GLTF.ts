@@ -1,4 +1,5 @@
 const EMPTY_FLOAT32_ARRAY = new Float32Array(0);
+const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 const INTERLEAVE_STRIDE = 18; // pos(3) + normal(3) + uv0(2) + uv1(2) + color(4) + tangent(4)
 
 type FloatAttributeArray = Float32Array | number[];
@@ -168,7 +169,7 @@ export const packSkinJoints_GLTF = (
     joints?: JointAttributeArray | null
 ): Uint32Array => {
     const expectedLen = vertexCount * 4;
-    if (expectedLen <= 0) return new Uint32Array(0);
+    if (expectedLen <= 0) return EMPTY_UINT32_ARRAY;
     if (!joints || joints.length === 0) {
         return new Uint32Array(expectedLen);
     }

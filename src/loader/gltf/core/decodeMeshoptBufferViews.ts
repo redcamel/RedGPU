@@ -73,7 +73,7 @@ export const getMeshoptExtension = (bufferView: BufferView): MeshoptBufferViewEx
  * [KO] 공식 `meshoptimizer` CDN에서 `MeshoptDecoder` WASM 모듈을 온디맨드 싱글톤으로 로드·초기화합니다.
  * [EN] Lazily loads and initializes the `MeshoptDecoder` WASM singleton from the official `meshoptimizer` CDN.
  */
-export const initMeshoptDecoder = async (): Promise<MeshoptDecoderLike> => {
+const initMeshoptDecoder = async (): Promise<MeshoptDecoderLike> => {
     if (meshoptDecoderInstance) return meshoptDecoderInstance;
     if (!meshoptDecoderPromise) {
         meshoptDecoderPromise = (async () => {

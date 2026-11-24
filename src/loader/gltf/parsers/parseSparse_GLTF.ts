@@ -1,5 +1,5 @@
 import dequantizeAccessorValue from "../core/dequantizeAccessorValue";
-import WEBGL_COMPONENT_TYPES from "../core/WEBGL_COMPONENT_TYPES";
+import GLTF_COMPONENT_TYPES from "../core/GLTF_COMPONENT_TYPES";
 import {Accessor, GLTF} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 
@@ -63,7 +63,7 @@ const parseSparse_GLTF = (
     const indicesDataView = gltfLoader.parsingResult.uris.buffers[indicesBufferView.buffer] ?? null;
     if (!valuesDataView || !indicesDataView) return;
 
-    const valueComponentType = WEBGL_COMPONENT_TYPES[targetAccessor.componentType];
+    const valueComponentType = GLTF_COMPONENT_TYPES[targetAccessor.componentType];
     const valueBytes = valueComponentType.BYTES_PER_ELEMENT;
     let valueGetMethod: string;
     switch (valueComponentType) {
@@ -90,7 +90,7 @@ const parseSparse_GLTF = (
             return;
     }
 
-    const indicesComponentType = WEBGL_COMPONENT_TYPES[sparseIndices.componentType];
+    const indicesComponentType = GLTF_COMPONENT_TYPES[sparseIndices.componentType];
     const indicesBytes = indicesComponentType.BYTES_PER_ELEMENT;
     let indicesGetMethod: string;
     switch (indicesComponentType) {

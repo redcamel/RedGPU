@@ -169,16 +169,16 @@ export class AnimStateMachine {
      * [KO] 현재 활성 애니메이션 상태
      * [EN] Currently active animation state
      */
-    public currentState: AnimState | null = null;
+    currentState: AnimState | null = null;
     /**
      * [KO] 전이 목표 애니메이션 상태
      * [EN] Target animation state for transition
      */
-    public targetState: AnimState | null = null;
-    private states: Map<string, AnimState> = new Map();
-    private transitions: AnimTransition[] = [];
-    private blendTime: number = 0;
-    private maxBlendDuration: number = 0;
+    targetState: AnimState | null = null;
+    #states: Map<string, AnimState> = new Map();
+    #transitions: AnimTransition[] = [];
+    #blendTime: number = 0;
+    #maxBlendDuration: number = 0;
 
     /**
      * [KO] AnimStateMachine 인스턴스를 생성합니다.
@@ -204,7 +204,7 @@ export class AnimStateMachine {
      * [EN] Animation state instance to add
      */
     addState(state: AnimState) {
-        this.states.set(state.name, state);
+        this.#states.set(state.name, state);
     }
 
     /**
@@ -216,7 +216,7 @@ export class AnimStateMachine {
      * [EN] Transition rule object to add
      */
     addTransition(transition: AnimTransition) {
-        this.transitions.push(transition);
+        this.#transitions.push(transition);
     }
 
     /**
@@ -234,31 +234,32 @@ export class AnimStateMachine {
      * [EN] Animation playback info object to update
      */
     update(deltaTime: number, timestamp: number, playInfo: PlayAnimationInfo) {
-        if (!this.currentState) return;
+        const currentState = this.currentState;
+        if (!currentState) return;
 
-        if (this.currentState.startTime === 0) {
-            this.currentState.enter(timestamp);
+        if (currentState.startTime === 0) {
+            currentState.enter(timestamp);
             playInfo.startTime = timestamp;
         }
 
         if (!this.targetState) {
-            const activeTransition = this.transitions.find(t =>
-                t.fromState === this.currentState!.name && t.conditions()
+            const activeTransition = this.#transitions.find(t =>
+                t.fromState === currentState.name && t.conditions()
             );
 
             if (activeTransition) {
-                const toState = this.states.get(activeTransition.toState);
+                const toState = this.#states.get(activeTransition.toState);
                 if (toState) {
                     this.targetState = toState;
                     this.targetState.enter(timestamp);
 
-                    this.blendTime = 0;
-                    this.maxBlendDuration = activeTransition.duration * 1000;
+                    this.#blendTime = 0;
+                    this.#maxBlendDuration = activeTransition.duration * 1000;
 
                     playInfo.isBlending = true;
-                    if (this.currentState instanceof ClipAnimState) {
-                        playInfo.fromClip = this.currentState;
-                        playInfo.startTimeFrom = this.currentState.startTime;
+                    if (currentState instanceof ClipAnimState) {
+                        playInfo.fromClip = currentState;
+                        playInfo.startTimeFrom = currentState.startTime;
                     }
                     if (this.targetState instanceof ClipAnimState) {
                         playInfo.toClip = this.targetState;
@@ -270,12 +271,12 @@ export class AnimStateMachine {
         }
 
         if (this.targetState) {
-            this.blendTime += deltaTime;
-            const alpha = Math.min(this.blendTime / this.maxBlendDuration, 1.0);
+            this.#blendTime += deltaTime;
+            const alpha = Math.min(this.#blendTime / this.#maxBlendDuration, 1.0);
             playInfo.blendWeight = alpha;
 
             if (alpha >= 1.0) {
-                this.currentState.exit();
+                currentState.exit();
                 this.currentState = this.targetState;
                 this.targetState = null;
 
@@ -292,11 +293,11 @@ export class AnimStateMachine {
                 playInfo.startTimeTo = undefined;
             }
         } else {
-            this.currentState.update(deltaTime, timestamp);
+            currentState.update(deltaTime, timestamp);
             playInfo.isBlending = false;
-            if (this.currentState instanceof ClipAnimState) {
-                playInfo.targetGLTFParsedSingleClip = this.currentState;
-                playInfo.startTime = this.currentState.startTime;
+            if (currentState instanceof ClipAnimState) {
+                playInfo.targetGLTFParsedSingleClip = currentState;
+                playInfo.startTime = currentState.startTime;
             }
         }
     }

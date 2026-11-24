@@ -53,46 +53,22 @@ class MorphInfo_GLTF {
     constructor(gltfLoader: GLTFLoader, gltfData: GLTF, meshPrimitive: MeshPrimitive, weightsValue: number[]) {
         if (meshPrimitive.targets) {
             this.morphInfoDataList = meshPrimitive.targets.map((target) => {
-                const morphData = new MorphInfoData_GLTF()
-                for (let key in target) {
-                    const accessorGlTfId = target[key];
-                    const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
+                const morphData = new MorphInfoData_GLTF();
+                if ('POSITION' in target) {
+                    const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, target.POSITION);
                     const {accessor} = accessorInfo;
-                    const parsed = parseAttributeInfo_GLTF(key, accessorInfo);
+                    const parsed = parseAttributeInfo_GLTF('POSITION', accessorInfo);
                     if (parsed) {
-                        switch (key) {
-                            case 'POSITION':
-                                morphData.vertices = parsed;
-                                break;
-                            case 'NORMAL':
-                                morphData.normals = parsed;
-                                break;
-                            case 'TEXCOORD_0':
-                                morphData.uvs = parsed;
-                                break;
-                            case 'TEXCOORD_1':
-                                morphData.uvs1 = parsed;
-                                break;
-                            case 'COLOR_0':
-                                morphData.verticesColor_0 = parsed;
-                                break;
-                            case 'TANGENT':
-                                morphData.tangents = parsed;
-                                break;
-                            case 'WEIGHTS_0':
-                                morphData.jointWeights = parsed;
-                                break;
-                            case 'JOINTS_0':
-                                morphData.joints = parsed;
-                                break;
+                        morphData.vertices = parsed;
+                        if (accessor.sparse) {
+                            parseSparse_GLTF(gltfLoader, 'POSITION', accessor, gltfData, parsed);
                         }
                     }
-                    if (accessor.sparse && parsed) parseSparse_GLTF(gltfLoader, key, accessor, gltfData, parsed);
                 }
                 if (weightsValue?.length) {
                     morphData.interleaveData = morphData.vertices;
                 }
-                return morphData
+                return morphData;
             });
         }
         this.weights = weightsValue || [];

@@ -1,8 +1,8 @@
 const EMPTY_FLOAT32_ARRAY = new Float32Array(0);
 
 /**
- * [KO] GLTF 모프 타겟(Morph Target)의 정점 속성 데이터를 보관하는 클래스입니다.
- * [EN] Class that stores vertex attribute data of a GLTF morph target.
+ * [KO] GLTF 모프 타겟(Morph Target)의 정점 위치 델타 데이터를 보관하는 클래스입니다.
+ * [EN] Class that stores vertex position delta data of a GLTF morph target.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -13,109 +13,15 @@ const EMPTY_FLOAT32_ARRAY = new Float32Array(0);
  */
 class MorphInfoData_GLTF {
     /**
-     * [KO] 정점 위치 데이터 배열
-     * [EN] Vertex position data array
+     * [KO] 정점 위치 델타 데이터 배열
+     * [EN] Vertex position delta data array
      */
     vertices: Float32Array = EMPTY_FLOAT32_ARRAY;
-    /**
-     * [KO] 정점 색상 데이터 배열
-     * [EN] Vertex color data array
-     */
-    verticesColor_0: Float32Array = EMPTY_FLOAT32_ARRAY;
-    /**
-     * [KO] 법선 벡터 데이터 배열
-     * [EN] Normal vector data array
-     */
-    normals: Float32Array = EMPTY_FLOAT32_ARRAY;
-    /**
-     * [KO] 텍스처 좌표(UV 0) 데이터 배열
-     * [EN] Texture coordinate (UV 0) data array
-     */
-    uvs: Float32Array = EMPTY_FLOAT32_ARRAY;
-    /**
-     * [KO] 추가 텍스처 좌표(UV 1) 데이터 배열
-     * [EN] Additional texture coordinate (UV 1) data array
-     */
-    uvs1: Float32Array = EMPTY_FLOAT32_ARRAY;
-    /**
-     * [KO] 추가 텍스처 좌표(UV 2) 데이터 배열
-     * [EN] Additional texture coordinate (UV 2) data array
-     */
-    uvs2: Float32Array = EMPTY_FLOAT32_ARRAY;
-    /**
-     * [KO] 조인트 가중치 데이터 배열
-     * [EN] Joint weight data array
-     */
-    jointWeights: Float32Array = EMPTY_FLOAT32_ARRAY;
-    /**
-     * [KO] 조인트 인덱스 데이터 배열
-     * [EN] Joint index data array
-     */
-    joints: Float32Array = EMPTY_FLOAT32_ARRAY;
-    /**
-     * [KO] 탄젠트 벡터 데이터 배열
-     * [EN] Tangent vector data array
-     */
-    tangents: Float32Array = EMPTY_FLOAT32_ARRAY;
     /**
      * [KO] 인터리브된 모프 정점 데이터
      * [EN] Interleaved morph vertex data
      */
-    interleaveData: Float32Array
-
-    /**
-     * [KO] `MorphInfoData_GLTF` 인스턴스를 생성합니다.
-     * [EN] Creates an instance of `MorphInfoData_GLTF`.
-     *
-     * @param vertices -
-     * [KO] 정점 위치 데이터 배열
-     * [EN] Vertex position data array
-     * @param verticesColor_0 -
-     * [KO] 정점 색상 데이터 배열
-     * [EN] Vertex color data array
-     * @param normals -
-     * [KO] 법선 벡터 데이터 배열
-     * [EN] Normal vector data array
-     * @param uvs -
-     * [KO] 텍스처 좌표(UV 0) 데이터 배열
-     * [EN] Texture coordinate (UV 0) data array
-     * @param uvs1 -
-     * [KO] 추가 텍스처 좌표(UV 1) 데이터 배열
-     * [EN] Additional texture coordinate (UV 1) data array
-     * @param uvs2 -
-     * [KO] 추가 텍스처 좌표(UV 2) 데이터 배열
-     * [EN] Additional texture coordinate (UV 2) data array
-     * @param jointWeights -
-     * [KO] 조인트 가중치 데이터 배열
-     * [EN] Joint weight data array
-     * @param joints -
-     * [KO] 조인트 인덱스 데이터 배열
-     * [EN] Joint index data array
-     * @param tangents -
-     * [KO] 탄젠트 벡터 데이터 배열
-     * [EN] Tangent vector data array
-     */
-    constructor(
-        vertices: Float32Array = EMPTY_FLOAT32_ARRAY,
-        verticesColor_0: Float32Array = EMPTY_FLOAT32_ARRAY,
-        normals: Float32Array = EMPTY_FLOAT32_ARRAY,
-        uvs: Float32Array = EMPTY_FLOAT32_ARRAY,
-        uvs1: Float32Array = EMPTY_FLOAT32_ARRAY,
-        uvs2: Float32Array = EMPTY_FLOAT32_ARRAY,
-        jointWeights: Float32Array = EMPTY_FLOAT32_ARRAY,
-        joints: Float32Array = EMPTY_FLOAT32_ARRAY,
-        tangents: Float32Array = EMPTY_FLOAT32_ARRAY
-    ) {
-        this.vertices = vertices;
-        this.verticesColor_0 = verticesColor_0;
-        this.normals = normals;
-        this.uvs = uvs;
-        this.uvs1 = uvs1;
-        this.uvs2 = uvs2;
-        this.jointWeights = jointWeights;
-        this.joints = joints;
-        this.tangents = tangents;
-    }
+    interleaveData: Float32Array;
 }
 
-export default MorphInfoData_GLTF
+export default MorphInfoData_GLTF;

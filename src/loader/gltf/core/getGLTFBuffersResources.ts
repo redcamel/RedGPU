@@ -179,12 +179,14 @@ const arrayBufferLoader = (gltfLoader: GLTFLoader, url: string, onSuccess, onErr
     const {cache, pending} = gltfLoader.redGPUContext.resourceManager.gltfCacheManager.bufferCache;
 
     url = getAbsoluteURL(window.location.href, url)
-    if (cache.has(url)) {
-        onSuccess?.(cache.get(url)!);
+    const cachedBuffer = cache.get(url);
+    if (cachedBuffer) {
+        onSuccess?.(cachedBuffer);
         return;
     }
-    if (pending.has(url)) {
-        pending.get(url)!.then(data => onSuccess?.(data)).catch(err => onError?.(err));
+    const pendingPromise = pending.get(url);
+    if (pendingPromise) {
+        pendingPromise.then(data => onSuccess?.(data)).catch(err => onError?.(err));
         return;
     }
     const promise = fetch(url)

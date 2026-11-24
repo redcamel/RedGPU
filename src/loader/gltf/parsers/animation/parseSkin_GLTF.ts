@@ -30,7 +30,7 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
     const {joints, skeleton} = skin
     for (let j = 0, jointLen = joints.length; j < jointLen; j++) {
         const jointGlTfId = joints[j]
-        parseJoint_GLTF(gltfLoader, parsedSkinInfo, NODES, jointGlTfId);
+        parseJoint_GLTF(parsedSkinInfo, NODES, jointGlTfId);
     }
     if (skeleton) {
         parsedSkinInfo.skeletonMesh = NODES[skeleton]['Mesh'];
@@ -53,7 +53,7 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
     switch (type) {
         case 'MAT4' :
             if (bufferViewByteStride) {
-                len = i + count * (bufferViewByteStride / componentType_BYTES_PER_ELEMENT);
+                len = i + count * stridePerElement;
                 for (i; i < len; i++) {
                     if (strideIndex % stridePerElement < 16) {
                         inverseBindMatrices.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
@@ -97,6 +97,6 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
         )
     }
     mesh.animationInfo.skinInfo = parsedSkinInfo;
-    mesh.material.useSkin = !!mesh.animationInfo.skinInfo;
+    mesh.material.useSkin = true;
 };
 export default parseSkin_GLTF;

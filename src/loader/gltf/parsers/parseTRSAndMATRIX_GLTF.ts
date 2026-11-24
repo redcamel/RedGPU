@@ -6,6 +6,10 @@ import quaternionToRotationMat4 from "../../../math/quaternionToRotationMat4";
 import {Node} from "../GLTF";
 
 const RAD_TO_DEG = 180 / Math.PI;
+const TEMP_ROTATION_MTX = mat4.create();
+const TEMP_UNSCALED_ROT = mat4.create();
+const TEMP_SCALE = vec3.create();
+const TEMP_ROTATION = new Float32Array(3);
 /**
  * [KO] 라디안 단위의 회전 배열을 각도(degree)로 변환하여 메쉬의 회전을 설정합니다.
  * [EN] Converts a rotation array in radians to degrees and sets the rotation of the mesh.
@@ -17,13 +21,12 @@ const RAD_TO_DEG = 180 / Math.PI;
  * [KO] 회전을 적용할 대상 메쉬
  * [EN] Target mesh to apply the rotation to
  */
-const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
+const setMeshRotation = (tRotation: number[] | Float32Array, mesh: Mesh) => {
     mesh.setRotation(
         (tRotation[0] * RAD_TO_DEG),
         (tRotation[1] * RAD_TO_DEG),
         (tRotation[2] * RAD_TO_DEG)
     );
-
 }
 /**
  * [KO] GLTF 노드의 변환(TRS) 및 행렬(Matrix) 정보를 파싱하여 메쉬에 적용합니다.
@@ -39,44 +42,45 @@ const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
  */
 const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
     const {rotation: quaternion, translation, scale} = nodeInfo;
-    let rotationMTX = mat4.create();
-    let tRotation: any;
 
     if ('matrix' in nodeInfo) {
         const matrix = nodeInfo.matrix;
-        const tempScale = vec3.fromValues(1, 1, 1);
-        mat4.getScaling(tempScale, matrix);
-        mesh.setScale(tempScale[0], tempScale[1], tempScale[2]);
+        mat4.getScaling(TEMP_SCALE, matrix);
+        mesh.setScale(TEMP_SCALE[0], TEMP_SCALE[1], TEMP_SCALE[2]);
         mesh.setPosition(matrix[12], matrix[13], matrix[14]);
 
-        const unscaledRot = mat4.clone(matrix);
-        const invSx = tempScale[0] !== 0 ? (1 / tempScale[0]) : 1;
-        const invSy = tempScale[1] !== 0 ? (1 / tempScale[1]) : 1;
-        const invSz = tempScale[2] !== 0 ? (1 / tempScale[2]) : 1;
+        mat4.copy(TEMP_UNSCALED_ROT, matrix);
+        const invSx = TEMP_SCALE[0] !== 0 ? (1 / TEMP_SCALE[0]) : 1;
+        const invSy = TEMP_SCALE[1] !== 0 ? (1 / TEMP_SCALE[1]) : 1;
+        const invSz = TEMP_SCALE[2] !== 0 ? (1 / TEMP_SCALE[2]) : 1;
 
-        unscaledRot[0] *= invSx;
-        unscaledRot[1] *= invSx;
-        unscaledRot[2] *= invSx;
-        unscaledRot[4] *= invSy;
-        unscaledRot[5] *= invSy;
-        unscaledRot[6] *= invSy;
-        unscaledRot[8] *= invSz;
-        unscaledRot[9] *= invSz;
-        unscaledRot[10] *= invSz;
-        unscaledRot[12] = 0;
-        unscaledRot[13] = 0;
-        unscaledRot[14] = 0;
-        unscaledRot[15] = 1;
+        TEMP_UNSCALED_ROT[0] *= invSx;
+        TEMP_UNSCALED_ROT[1] *= invSx;
+        TEMP_UNSCALED_ROT[2] *= invSx;
+        TEMP_UNSCALED_ROT[4] *= invSy;
+        TEMP_UNSCALED_ROT[5] *= invSy;
+        TEMP_UNSCALED_ROT[6] *= invSy;
+        TEMP_UNSCALED_ROT[8] *= invSz;
+        TEMP_UNSCALED_ROT[9] *= invSz;
+        TEMP_UNSCALED_ROT[10] *= invSz;
+        TEMP_UNSCALED_ROT[12] = 0;
+        TEMP_UNSCALED_ROT[13] = 0;
+        TEMP_UNSCALED_ROT[14] = 0;
+        TEMP_UNSCALED_ROT[15] = 1;
 
-        tRotation = vec3.create();
-        mat4ToEuler(unscaledRot, tRotation, 'XYZ');
-        setMeshRotation(tRotation, mesh);
+        TEMP_ROTATION[0] = 0;
+        TEMP_ROTATION[1] = 0;
+        TEMP_ROTATION[2] = 0;
+        mat4ToEuler(TEMP_UNSCALED_ROT, TEMP_ROTATION, 'XYZ');
+        setMeshRotation(TEMP_ROTATION, mesh);
     } else {
         if ('rotation' in nodeInfo) {
-            tRotation = vec3.create();
-            quaternionToRotationMat4(quaternion, rotationMTX);
-            mat4ToEuler(rotationMTX, tRotation);
-            setMeshRotation(tRotation, mesh);
+            TEMP_ROTATION[0] = 0;
+            TEMP_ROTATION[1] = 0;
+            TEMP_ROTATION[2] = 0;
+            quaternionToRotationMat4(quaternion, TEMP_ROTATION_MTX);
+            mat4ToEuler(TEMP_ROTATION_MTX, TEMP_ROTATION);
+            setMeshRotation(TEMP_ROTATION, mesh);
         }
         if ('translation' in nodeInfo)
             mesh.setPosition(translation[0], translation[1], translation[2]);
@@ -87,6 +91,5 @@ const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
             }
         }
     }
-
 }
 export default parseTRSAndMATRIX_GLTF;

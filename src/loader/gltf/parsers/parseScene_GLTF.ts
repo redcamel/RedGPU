@@ -12,12 +12,9 @@ import parseNode_GLTF from "./parseNode_GLTF";
  * @param gltfData -
  * [KO] GLTF 데이터 객체
  * [EN] GLTF data object
- * @param callback -
- * [KO] 씬 파싱 완료 후 호출될 콜백 함수
- * [EN] Optional callback function invoked after parsing the scene
  * @category Loader
  */
-const parseScene_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callback?: Function) => {
+const parseScene_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
     const SCENE_INDEX = gltfData.scene ?? 0;
     const {scenes: SCENES} = gltfData;
     const nodesInScene = SCENES[SCENE_INDEX].nodes;
@@ -29,6 +26,5 @@ const parseScene_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callback?: Func
             gltfLoader.resultMesh
         );
     });
-    callback?.();
 };
 export default parseScene_GLTF;

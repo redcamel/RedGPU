@@ -16,11 +16,6 @@ import AccessorInfo_GLTF from "./AccessorInfo_GLTF";
  */
 class AnimationData_GLTF {
     /**
-     * [KO] 엑세서의 GLTF ID
-     * [EN] GLTF ID of the accessor
-     */
-    accessorGlTfId: GlTfId;
-    /**
      * [KO] 파싱된 애니메이션 데이터 배열
      * [EN] Parsed animation data array
      */
@@ -41,7 +36,6 @@ class AnimationData_GLTF {
      * [EN] GLTF ID of the accessor to retrieve data from
      */
     constructor(gltfLoader: GLTFLoader, gltfData: GLTF, accessorGlTfId: GlTfId) {
-        this.accessorGlTfId = accessorGlTfId;
         const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
         const {accessor, startIndex, componentType_BYTES_PER_ELEMENT, bufferURIDataView, getMethod} = accessorInfo;
         const {type, count, componentType, normalized} = accessor;

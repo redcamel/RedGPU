@@ -102,7 +102,6 @@ class ParsedSkinInfo_GLTF {
      * [EN] Creates a ParsedSkinInfo_GLTF instance.
      */
     constructor() {
-        this.joints = [];
         this.inverseBindMatrices = null;
         this.skeletonMesh = null;
     }
