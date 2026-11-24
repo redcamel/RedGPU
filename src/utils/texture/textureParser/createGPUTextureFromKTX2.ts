@@ -1,5 +1,6 @@
 import {KTX2Container, read} from 'ktx-parse';
 import {decompress as decompressZstd} from 'fzstd';
+import keepLog from "../../keepLog";
 
 
 const BASIS_JS_CDN_URL = 'https://unpkg.com/three@latest/examples/jsm/libs/basis/basis_transcoder.js';
@@ -242,7 +243,10 @@ async function initBasisTranscoder(): Promise<any> {
                     script.src = BASIS_JS_CDN_URL;
                     script.async = true;
                     script.onload = () => resolve();
-                    script.onerror = (err) => reject(new Error(`[KTX2 Loader ❌] basis_transcoder.js 스크립트 로드 실패: ${BASIS_JS_CDN_URL}`));
+                    script.onerror = () => {
+                        script.remove();
+                        reject(new Error(`[KTX2 Loader ❌] basis_transcoder.js 스크립트 로드 실패: ${BASIS_JS_CDN_URL}`));
+                    };
                     document.head.appendChild(script);
                 });
 
@@ -263,6 +267,7 @@ async function initBasisTranscoder(): Promise<any> {
             });
 
             module.initializeBasis();
+            keepLog(`[RedGPU KTX2] Basis Universal Transcoder initialized (Three.js WASM: ${BASIS_WASM_CDN_URL})`);
             basisModule = module;
             return module;
         })().catch((err) => {
