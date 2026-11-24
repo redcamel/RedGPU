@@ -1,5 +1,6 @@
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
+import dequantizeAccessorValue from "../core/dequantizeAccessorValue";
 
 /**
  * [KO] GLTF accessor 데이터를 attribute 키(POSITION, NORMAL, TEXCOORD_n, COLOR_0, TANGENT, WEIGHTS_0, JOINTS_0)에 따라 해당 배열에 push합니다.
@@ -60,21 +61,25 @@ const parseAttributeInfo_GLTF = function (
         bufferURIDataView,
         componentType_BYTES_PER_ELEMENT
     } = accessorInfo
-    const {type, count} = accessor
+    const {type, count, componentType, normalized} = accessor
+    const isNormalized = normalized === true;
     let strideIndex = 0;
     const stridePerElement = bufferViewByteStride / componentType_BYTES_PER_ELEMENT;
     let i = startIndex;
     let len;
+    let rawValue: number;
     switch (type) {
         case 'VEC4' :
             if (bufferViewByteStride) {
                 len = i + count * (bufferViewByteStride / componentType_BYTES_PER_ELEMENT);
                 for (i; i < len; i++) {
                     if (strideIndex % stridePerElement < 4) {
-                        if (key == 'WEIGHTS_0') jointWeights.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                        else if (key == 'JOINTS_0') joints.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                        else if (key == 'COLOR_0') verticesColor_0.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                        else if (key == 'TANGENT') tangents.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                        rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+                        if (isNormalized) rawValue = dequantizeAccessorValue(rawValue, componentType, true);
+                        if (key == 'WEIGHTS_0') jointWeights.push(rawValue);
+                        else if (key == 'JOINTS_0') joints.push(rawValue);
+                        else if (key == 'COLOR_0') verticesColor_0.push(rawValue);
+                        else if (key == 'TANGENT') tangents.push(rawValue);
                         else consoleAndThrowError('VEC4에서 현재 지원하고 있지 않는 키', key)
                     }
                     strideIndex++;
@@ -82,10 +87,12 @@ const parseAttributeInfo_GLTF = function (
             } else {
                 len = i + count * 4;
                 for (i; i < len; i++) {
-                    if (key == 'WEIGHTS_0') jointWeights.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    else if (key == 'JOINTS_0') joints.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    else if (key == 'COLOR_0') verticesColor_0.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    else if (key == 'TANGENT') tangents.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                    rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+                    if (isNormalized) rawValue = dequantizeAccessorValue(rawValue, componentType, true);
+                    if (key == 'WEIGHTS_0') jointWeights.push(rawValue);
+                    else if (key == 'JOINTS_0') joints.push(rawValue);
+                    else if (key == 'COLOR_0') verticesColor_0.push(rawValue);
+                    else if (key == 'TANGENT') tangents.push(rawValue);
                     else consoleAndThrowError('VEC4에서 현재 지원하고 있지 않는 키', key)
                 }
             }
@@ -95,12 +102,14 @@ const parseAttributeInfo_GLTF = function (
                 len = i + count * (bufferViewByteStride / componentType_BYTES_PER_ELEMENT);
                 for (i; i < len; i++) {
                     if (strideIndex % stridePerElement < 3) {
-                        if (key == 'NORMAL') normals.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                        else if (key == 'POSITION') vertices.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                        rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+                        if (isNormalized) rawValue = dequantizeAccessorValue(rawValue, componentType, true);
+                        if (key == 'NORMAL') normals.push(rawValue);
+                        else if (key == 'POSITION') vertices.push(rawValue);
                         else if (key == 'COLOR_0') {
-                            verticesColor_0.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                            verticesColor_0.push(rawValue);
                             if (strideIndex % stridePerElement == 2) verticesColor_0.push(1);
-                        } else if (key == 'TANGENT') tangents.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true))
+                        } else if (key == 'TANGENT') tangents.push(rawValue)
                         else consoleAndThrowError('VEC3에서 현재 지원하고 있지 않는 키', key)
                     }
                     strideIndex++;
@@ -108,12 +117,14 @@ const parseAttributeInfo_GLTF = function (
             } else {
                 len = i + count * 3;
                 for (i; i < len; i++) {
-                    if (key == 'NORMAL') normals.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    else if (key == 'POSITION') vertices.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                    rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+                    if (isNormalized) rawValue = dequantizeAccessorValue(rawValue, componentType, true);
+                    if (key == 'NORMAL') normals.push(rawValue);
+                    else if (key == 'POSITION') vertices.push(rawValue);
                     else if (key == 'COLOR_0') {
-                        verticesColor_0.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                        verticesColor_0.push(rawValue);
                         if (strideIndex % 3 == 2) verticesColor_0.push(1);
-                    } else if (key == 'TANGENT') tangents.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true))
+                    } else if (key == 'TANGENT') tangents.push(rawValue)
                     else consoleAndThrowError('VEC3에서 현재 지원하고 있지 않는 키', key)
                     strideIndex++;
                 }
@@ -124,10 +135,12 @@ const parseAttributeInfo_GLTF = function (
                 len = i + count * (bufferViewByteStride / componentType_BYTES_PER_ELEMENT);
                 for (i; i < len; i++) {
                     if (strideIndex % stridePerElement < 2) {
+                        rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+                        if (isNormalized) rawValue = dequantizeAccessorValue(rawValue, componentType, true);
                         if (key == 'TEXCOORD_0') {
-                            uvs.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                            uvs.push(rawValue);
                         } else if (key == 'TEXCOORD_1') {
-                            uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                            uvs1.push(rawValue);
                         }
                     }
                     strideIndex++;
@@ -135,10 +148,12 @@ const parseAttributeInfo_GLTF = function (
             } else {
                 len = i + count * 2;
                 for (i; i < len; i++) {
+                    rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+                    if (isNormalized) rawValue = dequantizeAccessorValue(rawValue, componentType, true);
                     if (key == 'TEXCOORD_0') {
-                        uvs.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                        uvs.push(rawValue);
                     } else if (key == 'TEXCOORD_1') {
-                        uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                        uvs1.push(rawValue);
                     }
                 }
             }

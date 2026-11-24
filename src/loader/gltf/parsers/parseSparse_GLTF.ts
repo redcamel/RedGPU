@@ -1,3 +1,4 @@
+import dequantizeAccessorValue from "../core/dequantizeAccessorValue";
 import WEBGL_COMPONENT_TYPES from "../core/WEBGL_COMPONENT_TYPES";
 import {Accessor, GLTF} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
@@ -65,12 +66,15 @@ const parseSparse_GLTF = (gltfLoader: GLTFLoader, propertyKey: string, targetAcc
     const bufferViewOffset = targetBufferView.byteOffset || 0;
     let initialIndex = (bufferViewOffset + accessorBufferOffset) / BYTES_PER_ELEMENT;
     let finalIndex;
+    const isNormalized = targetAccessor.normalized === true;
+    const targetComponentType = targetAccessor.componentType;
     switch (targetAccessor.type) {
         case 'VEC3':
             if (propertyKey == 'POSITION') {
                 finalIndex = initialIndex + (BYTES_PER_ELEMENT * sparseCount) / BYTES_PER_ELEMENT * 3;
                 for (initialIndex; initialIndex < finalIndex; initialIndex++) {
-                    arraySparseVertices.push(targetBufferURIDataView[methodToGetData](initialIndex * BYTES_PER_ELEMENT, true));
+                    const rawValue = targetBufferURIDataView[methodToGetData](initialIndex * BYTES_PER_ELEMENT, true);
+                    arraySparseVertices.push(isNormalized ? dequantizeAccessorValue(rawValue, targetComponentType, true) : rawValue);
                 }
             }
             break;

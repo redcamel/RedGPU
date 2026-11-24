@@ -1,3 +1,4 @@
+import dequantizeAccessorValue from "../core/dequantizeAccessorValue";
 import {GLTF, GlTfId} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 import AccessorInfo_GLTF from "./AccessorInfo_GLTF";
@@ -55,7 +56,8 @@ class AnimationData_GLTF {
         this.accessorGlTfId = accessorGlTfId;
         const accessorInfo = new AccessorInfo_GLTF(this.gltfLoader, this.scenesData, this.accessorGlTfId);
         const {accessor, startIndex, componentType_BYTES_PER_ELEMENT, bufferURIDataView, getMethod} = accessorInfo
-        const {type, count} = accessor
+        const {type, count, componentType, normalized} = accessor
+        const isNormalized = normalized === true;
         let i = startIndex, factor = 1
         switch (type) {
             case 'SCALAR':
@@ -73,7 +75,8 @@ class AnimationData_GLTF {
         const temp = []
         let offset = 0;
         for (; offset < count * factor; i++, offset++) {
-            temp[offset] = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+            const rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+            temp[offset] = isNormalized ? dequantizeAccessorValue(rawValue, componentType, true) : rawValue;
         }
         this.dataList = new Float32Array(temp);
     }
