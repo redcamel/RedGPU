@@ -1,6 +1,7 @@
 import {KTX2Container, read} from 'ktx-parse';
 import {decompress as decompressZstd} from 'fzstd';
 import keepLog from "../../keepLog";
+import createUUID from "../../uuid/createUUID";
 
 
 const BASIS_JS_CDN_URL = 'https://cdn.jsdelivr.net/gh/BinomialLLC/basis_universal@v2_50/webgl/transcoder/build/basis_transcoder.js';
@@ -601,7 +602,7 @@ export async function createGPUTextureFromKTX2({
     }
 
     const texture = device.createTexture({
-        label: label ?? `KTX2_Texture_${width}x${height}`,
+        label: label ?? `KTX2_Texture_${width}x${height}_${createUUID()}`,
         size: {
             width: textureWidth,
             height: textureHeight,

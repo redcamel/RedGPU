@@ -358,6 +358,7 @@ class BitmapTexture extends ManagementResourceBase {
                 const newGPUTexture = await createGPUTextureFromKTX2({
                     device: this.gpuDevice,
                     container: container,
+                    label: this.cacheKey,
                 });
 
                 this.#format = newGPUTexture.format;

@@ -2266,6 +2266,38 @@ export const ExampleList: ExampleListType = [
                             },
                         ]
                     },
+                    {
+                        name: 'KHR_draco_mesh_compression',
+                        list: [
+                            {
+                                name: 'CarConcept (Draco + KTX2 + Variants)',
+                                path: 'gltf/gltfExtensions/dracoMeshCompression/carConcept',
+                                extensionList: ['KHR_draco_mesh_compression', 'KHR_texture_basisu', 'KHR_materials_variants', 'KHR_materials_clearcoat', 'KHR_materials_transmission'],
+                                description: {
+                                    ko: 'Khronos 공식 CarConcept (glTF-KTX-BasisU-Draco) 모델로 Draco 압축·KTX2 텍스처·재질 바리에이션 복합 로딩을 검증합니다.',
+                                    en: 'Loads Khronos CarConcept (glTF-KTX-BasisU-Draco) to verify combined Draco compression, KTX2 textures, and material variants.'
+                                },
+                            },
+                            {
+                                name: 'CesiumMan (Draco Skinning)',
+                                path: 'gltf/gltfExtensions/dracoMeshCompression/cesiumMan',
+                                extensionList: ['KHR_draco_mesh_compression'],
+                                description: {
+                                    ko: 'Khronos 공식 CesiumMan (glTF-Draco) 모델로 Draco 압축 스키닝(JOINTS_0/WEIGHTS_0) 및 애니메이션 재생을 검증합니다.',
+                                    en: 'Loads Khronos CesiumMan (glTF-Draco) to verify Draco-compressed skinning (JOINTS_0/WEIGHTS_0) and animation playback.'
+                                },
+                            },
+                            {
+                                name: 'A Beautiful Game (GLB Draco + KTX2)',
+                                path: 'gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame',
+                                extensionList: ['KHR_draco_mesh_compression', 'KHR_texture_basisu', 'KHR_materials_transmission', 'KHR_materials_volume'],
+                                description: {
+                                    ko: 'Khronos 공식 ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB 모델로 바이너리 Draco + KTX2 복합 렌더링을 검증합니다.',
+                                    en: 'Loads Khronos ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB to verify binary Draco and KTX2 combined rendering.'
+                                },
+                            },
+                        ]
+                    },
                 ]
             }
         ]

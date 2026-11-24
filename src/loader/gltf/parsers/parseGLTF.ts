@@ -1,4 +1,5 @@
 import TextureLoader, {TextureLoaderData} from "../../TextureLoader";
+import decodeDracoPrimitives, {hasDracoCompression} from "../core/decodeDracoPrimitives";
 import getGLTFBuffersResources from "../core/getGLTFBuffersResources";
 import {extractMaterialVariantNames} from "../core/materialVariantsHelper";
 import {GLTF} from "../GLTF";
@@ -28,52 +29,61 @@ import parseScene_GLTF from "./parseScene_GLTF";
  * @category GLTF
  */
 const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
-    if (gltfData.extensionsUsed?.includes("KHR_draco_mesh_compression")) {
-        console.warn('RedGPU GLTFLoader does not support the KHR_draco_mesh_compression extension. Models using this extension may not load properly.');
-    }
     gltfLoader.parsingResult.materialVariants = extractMaterialVariantNames(gltfData);
     requestAnimationFrame(() => {
         parseAssetVersion(gltfData);
         requestAnimationFrame(() => {
             getGLTFBuffersResources(gltfLoader, gltfData, () => {
-                requestAnimationFrame(() => {
-                    parseScene_GLTF(gltfLoader, gltfData, () => {
-                        requestAnimationFrame(() => {
-                            parseCameras_GLTF(gltfLoader, gltfData);
-                            new TextureLoader(
-                                gltfLoader.redGPUContext,
-                                Object.values(gltfLoader.parsingResult.textureRawList),
-                                result => {
-                                    result.textures.forEach((textureLoaderData: TextureLoaderData) => {
-                                        const {
-                                            targetTextureKey,
-                                            targetSamplerKey,
-                                            samplerList
-                                        } = textureLoaderData.srcInfo
-                                        textureLoaderData.srcInfo.materialList.forEach((material: TextureLoaderData, index: number) => {
-                                            material[targetTextureKey] = textureLoaderData.texture;
-                                            if (samplerList[index]) {
-                                                material[targetSamplerKey] = samplerList[index];
+                const runSceneParse = () => {
+                    requestAnimationFrame(() => {
+                        parseScene_GLTF(gltfLoader, gltfData, () => {
+                            requestAnimationFrame(() => {
+                                parseCameras_GLTF(gltfLoader, gltfData);
+                                new TextureLoader(
+                                    gltfLoader.redGPUContext,
+                                    Object.values(gltfLoader.parsingResult.textureRawList),
+                                    result => {
+                                        result.textures.forEach((textureLoaderData: TextureLoaderData) => {
+                                            const {
+                                                targetTextureKey,
+                                                targetSamplerKey,
+                                                samplerList
+                                            } = textureLoaderData.srcInfo
+                                            textureLoaderData.srcInfo.materialList.forEach((material: TextureLoaderData, index: number) => {
+                                                material[targetTextureKey] = textureLoaderData.texture;
+                                                if (samplerList[index]) {
+                                                    material[targetSamplerKey] = samplerList[index];
+                                                }
+                                            })
+                                        });
+                                        Object.values(gltfLoader.parsingResult.textureRawList).forEach((item: any) => {
+                                            if (typeof item.src === 'string' && item.src.startsWith('blob:')) {
+                                                URL.revokeObjectURL(item.src);
                                             }
-                                        })
-                                    });
-                                    Object.values(gltfLoader.parsingResult.textureRawList).forEach((item: any) => {
-                                        if (typeof item.src === 'string' && item.src.startsWith('blob:')) {
-                                            URL.revokeObjectURL(item.src);
-                                        }
-                                    });
-                                    parseAnimation_GLTF(gltfLoader, gltfData).then(_ => {
-                                        if (callBack) callBack();
-                                    });
-                                },
-                                (e) => {
-                                    gltfLoader.loadingProgressInfo.textures = e
-                                    onProgress?.(gltfLoader.loadingProgressInfo)
-                                }
-                            );
+                                        });
+                                        parseAnimation_GLTF(gltfLoader, gltfData).then(_ => {
+                                            if (callBack) callBack();
+                                        });
+                                    },
+                                    (e) => {
+                                        gltfLoader.loadingProgressInfo.textures = e
+                                        onProgress?.(gltfLoader.loadingProgressInfo)
+                                    }
+                                );
+                            });
                         });
                     });
-                });
+                };
+
+                if (hasDracoCompression(gltfData)) {
+                    decodeDracoPrimitives(gltfData, gltfLoader.parsingResult.uris.buffers)
+                        .then(() => runSceneParse())
+                        .catch((error) => {
+                            console.error(error);
+                        });
+                } else {
+                    runSceneParse();
+                }
             }, onProgress);
         });
     });
