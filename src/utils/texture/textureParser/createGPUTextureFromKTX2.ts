@@ -245,7 +245,7 @@ async function initBasisTranscoder(): Promise<any> {
                     script.onload = () => resolve();
                     script.onerror = () => {
                         script.remove();
-                        reject(new Error(`[KTX2 Loader ❌] basis_transcoder.js 스크립트 로드 실패: ${BASIS_JS_CDN_URL}`));
+                        reject(new Error(`[RedGPU KTX2] Failed to load Basis Universal Transcoder script (Three.js): ${BASIS_JS_CDN_URL}`));
                     };
                     document.head.appendChild(script);
                 });
@@ -254,7 +254,7 @@ async function initBasisTranscoder(): Promise<any> {
             }
 
             if (typeof BASIS !== 'function') {
-                throw new Error('[KTX2 Loader ❌] window.BASIS 트랜스코더 함수를 찾을 수 없습니다.');
+                throw new Error('[RedGPU KTX2] Basis Universal Transcoder (window.BASIS) was not found after loading.');
             }
 
             const module = await BASIS({
@@ -432,7 +432,7 @@ export async function createGPUTextureFromKTX2({
     if (typeof inputContainer === 'string') {
         const response = await fetch(inputContainer);
         if (!response.ok) {
-            throw new Error(`[KTX2 Loader ❌] KTX2 파일 로드 실패 (${response.status}): ${inputContainer}`);
+            throw new Error(`[RedGPU KTX2] Failed to fetch KTX2 file (${response.status}): ${inputContainer}`);
         }
         const arrayBuffer = await response.arrayBuffer();
         rawBuffer = new Uint8Array(arrayBuffer);
@@ -455,7 +455,7 @@ export async function createGPUTextureFromKTX2({
                 rawBuffer = new Uint8Array(b).slice(0);
             }
         } else {
-            throw new Error('[KTX2 Loader ❌] KTX2Container 파싱용 _rawBuffer가 존재하지 않습니다.');
+            throw new Error('[RedGPU KTX2] Missing _rawBuffer on KTX2Container.');
         }
     }
 
@@ -486,7 +486,7 @@ export async function createGPUTextureFromKTX2({
                 ktx2FileInstance.close();
                 ktx2FileInstance.delete();
             }
-            throw new Error('[KTX2 Loader ❌] Basis Transcoder 초기화 실패 (Invalid KTX2 Header)');
+            throw new Error('[RedGPU KTX2] Failed to initialize Basis Universal Transcoder (Invalid KTX2 Header).');
         }
 
         const isUASTC = ktx2FileInstance.isUASTC();
@@ -508,7 +508,7 @@ export async function createGPUTextureFromKTX2({
             } else {
                 format = 'rgba16float';
                 basisTargetFormatEnum = BASIS_FORMAT.RGBA_HALF;
-                console.warn('[KTX2 Loader] BC6H not supported, using RGBA16F instead')
+                console.warn('[RedGPU KTX2] BC6H not supported, using RGBA16F instead.');
             }
         } else if (isUASTC) {
             if (hasASTC) {
@@ -572,7 +572,7 @@ export async function createGPUTextureFromKTX2({
 
     if (missingFeature) {
         console.warn(
-            `[KTX2 Loader ⚠️] 현재 GPU 디바이스에 '${missingFeature}' 기능이 없어 '${format}' 포맷 텍스처를 생략하고 대치 텍스처(Fallback)를 생성합니다.`
+            `[RedGPU KTX2] GPU device lacks '${missingFeature}' for format '${format}'. Using fallback texture.`
         );
         if (ktx2FileInstance) {
             ktx2FileInstance.close();
@@ -756,7 +756,7 @@ export async function createGPUTextureFromKTX2({
                     try {
                         levelDataView = decompressZstd(levelDataView);
                     } catch (e) {
-                        console.warn('[KTX2 Loader ⚠️] Zstandard 디콤프레션 실패:', e);
+                        console.warn('[RedGPU KTX2] Zstandard decompression failed:', e);
                     }
                 }
 
