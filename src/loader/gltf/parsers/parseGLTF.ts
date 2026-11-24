@@ -1,5 +1,6 @@
 import TextureLoader, {TextureLoaderData} from "../../TextureLoader";
 import getGLTFBuffersResources from "../core/getGLTFBuffersResources";
+import {extractMaterialVariantNames} from "../core/materialVariantsHelper";
 import {GLTF} from "../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
 import parseAnimation_GLTF from "./animation/parseAnimations";
@@ -30,6 +31,7 @@ const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack, onProgress?
     if (gltfData.extensionsUsed?.includes("KHR_draco_mesh_compression")) {
         console.warn('RedGPU GLTFLoader does not support the KHR_draco_mesh_compression extension. Models using this extension may not load properly.');
     }
+    gltfLoader.parsingResult.materialVariants = extractMaterialVariantNames(gltfData);
     requestAnimationFrame(() => {
         parseAssetVersion(gltfData);
         requestAnimationFrame(() => {

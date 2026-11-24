@@ -2046,24 +2046,6 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'Stained Glass Lamp',
-                                path: 'gltf/gltfExtensions/transmission/stainedGlassLamp',
-                                extensionList: ['KHR_materials_transmission'],
-                                description: {
-                                    ko: `스테인드글라스 램프를 통해 색상이 있는 투과광을 보여줍니다.`,
-                                    en: `Shows colored transmitted light through a stained glass lamp.`
-                                },
-                            },
-                            {
-                                name: 'Chronograph Watch',
-                                path: 'gltf/gltfExtensions/transmission/chronographWatch',
-                                extensionList: ['KHR_materials_transmission', 'KHR_materials_variants'],
-                                description: {
-                                    ko: `시계 유리의 투명도와 내부 디테일을 보여주는 고품질 모델입니다.`,
-                                    en: `High-quality model showing watch glass transparency and internal details.`
-                                },
-                            },
-                            {
                                 name: 'Mosquito In Amber',
                                 path: 'gltf/gltfExtensions/transmission/mosquitoInAmber',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
@@ -2184,7 +2166,7 @@ export const ExampleList: ExampleListType = [
                         ]
                     },
                     {
-                        name: 'KHR_texture_basisu',
+                        name: 'KHR_texture_basisu & KHR_materials_variants',
                         list: [
                             {
                                 name: 'Chronograph Watch (KTX2)',
@@ -2196,12 +2178,21 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'Stained Glass Lamp (KTX2)',
+                                name: 'Stained Glass Lamp (KTX2 + Variants)',
                                 path: 'gltf/gltfExtensions/textureBasisu/stainedGlassLamp',
-                                extensionList: ['KHR_texture_basisu', 'KHR_materials_transmission', 'KHR_materials_volume'],
+                                extensionList: ['KHR_texture_basisu', 'KHR_materials_variants', 'KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
-                                    ko: 'Khronos 공식 StainedGlassLamp (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 sRGB/Linear 색감 정합성을 검증합니다.',
-                                    en: 'Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 texture loading and sRGB/Linear fidelity.'
+                                    ko: 'Khronos 공식 StainedGlassLamp (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 KHR_materials_variants 실시간 전환을 검증합니다.',
+                                    en: 'Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 loading and real-time KHR_materials_variants switching.'
+                                },
+                            },
+                            {
+                                name: 'Materials Variants Shoe',
+                                path: 'gltf/gltfExtensions/materialsVariants',
+                                extensionList: ['KHR_materials_variants'],
+                                description: {
+                                    ko: 'Khronos 공식 MaterialsVariantsShoe 모델의 3종 재질 바리에이션(Midnight, Beach, Street)을 런타임에 실시간 전환합니다.',
+                                    en: 'Switches between the three material variants (Midnight, Beach, Street) of Khronos MaterialsVariantsShoe in real time.'
                                 },
                             },
                         ]

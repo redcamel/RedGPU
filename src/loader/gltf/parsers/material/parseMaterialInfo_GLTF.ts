@@ -1,6 +1,6 @@
 import GPU_BLEND_FACTOR from "../../../../gpuConst/GPU_BLEND_FACTOR";
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
-import {GLTF, MeshPrimitive} from "../../GLTF";
+import {GLTF, GlTfId, MeshPrimitive} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import parse_KHR_materials_anisotropy from "./extensions/parse_KHR_materials_anisotropy";
 import parse_KHR_materials_clearcoat from "./extensions/parse_KHR_materials_clearcoat";
@@ -31,17 +31,22 @@ import parseMaterialTexture from "./parseMaterialTexture";
  * [EN] Parsed `PBRMaterial` instance
  * @category Loader
  */
-const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrimitive: MeshPrimitive) => {
+const parseMaterialInfo_GLTF = (
+    gltfLoader: GLTFLoader,
+    gltfData: GLTF,
+    meshPrimitive: MeshPrimitive,
+    overrideMaterialId?: GlTfId
+) => {
     const {redGPUContext} = gltfLoader
     let currentMaterial: PBRMaterial;
     let doubleSided = false;
     let alphaMode = 'OPAQUE'
     let alphaCutoff = 0.5;
-    if ('material' in meshPrimitive) {
+    const materialGlTfId = overrideMaterialId !== undefined ? overrideMaterialId : meshPrimitive.material;
+    if (materialGlTfId !== undefined) {
         currentMaterial = new PBRMaterial(redGPUContext);
         currentMaterial.metallicFactor = 1;
         currentMaterial.roughnessFactor = 1;
-        const materialGlTfId = meshPrimitive.material;
         const materialInfo = gltfData.materials[materialGlTfId];
         doubleSided = !!materialInfo.doubleSided;
         alphaMode = materialInfo.alphaMode ?? alphaMode;

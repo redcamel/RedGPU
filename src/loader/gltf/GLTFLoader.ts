@@ -6,6 +6,7 @@ import getFileName from "../../utils/file/getFileName";
 import getFilePath from "../../utils/file/getFilePath";
 import {GLTF} from "./GLTF";
 import {ClipAnimState} from "./animationLooper/AnimStateMachine";
+import {MaterialVariantEntry, resolveMaterialVariantIndex} from "./core/materialVariantsHelper";
 import parseFileGLB from "./parsers/loadFile/parseFileGLB";
 import parseFileGLTF from "./parsers/loadFile/parseFileGLTF";
 import RedGPUObject from "../../base/RedGPUObject";
@@ -53,7 +54,17 @@ type GLTFParsingResult = {
      * [KO] GLTF 파일에 정의된 파싱된 애니메이션 클립 목록
      * [EN] Parsed animation clips defined in the GLTF file
      */
-    animations: ClipAnimState[]
+    animations: ClipAnimState[],
+    /**
+     * [KO] `KHR_materials_variants` 확장에 정의된 재질 바리에이션 이름 목록
+     * [EN] List of material variant names defined in `KHR_materials_variants`
+     */
+    materialVariants: string[],
+    /**
+     * [KO] 메쉬별 기본/변형 머티리얼 매핑 테이블
+     * [EN] Per-mesh mapping table of default and variant materials
+     */
+    materialVariantEntries: MaterialVariantEntry[]
 }
 
 /**
@@ -139,6 +150,7 @@ class GLTFLoader extends RedGPUObject {
     readonly #url: string
     readonly #fileExtension: string
     #gltfData: GLTF
+    #activeMaterialVariant: string | null = null
     readonly #onLoad
     readonly #onError
     readonly #onProgress
@@ -185,7 +197,9 @@ class GLTFLoader extends RedGPUObject {
             textures: {},
             textureRawList: [],
             cameras: [],
-            animations: []
+            animations: [],
+            materialVariants: [],
+            materialVariantEntries: []
         };
         this.resultMesh = new Mesh(redGPUContext);
         this.resultMesh.gltfLoaderInfo = this
@@ -256,6 +270,54 @@ class GLTFLoader extends RedGPUObject {
      */
     get url(): string {
         return this.#url;
+    }
+
+    /**
+     * [KO] 모델에 정의된 `KHR_materials_variants` 바리에이션 이름 목록을 반환합니다.
+     * [EN] Returns the list of `KHR_materials_variants` variant names defined in the model.
+     *
+     * @returns
+     * [KO] 바리에이션 이름 문자열 배열
+     * [EN] Array of variant name strings
+     */
+    get materialVariants(): string[] {
+        return this.parsingResult.materialVariants;
+    }
+
+    /**
+     * [KO] 현재 적용 중인 `KHR_materials_variants` 바리에이션 이름을 반환합니다. 기본 재질 상태이면 `null`입니다.
+     * [EN] Returns the currently active `KHR_materials_variants` variant name, or `null` when default materials are active.
+     *
+     * @returns
+     * [KO] 활성 바리에이션 이름 또는 `null`
+     * [EN] Active variant name or `null`
+     */
+    get activeMaterialVariant(): string | null {
+        return this.#activeMaterialVariant;
+    }
+
+    /**
+     * [KO] 지정된 `KHR_materials_variants` 바리에이션을 모델 전체 메쉬에 적용합니다. `null`을 전달하면 기본 재질로 복원합니다.
+     * [EN] Applies the specified `KHR_materials_variants` variant across all meshes in the model. Pass `null` to restore default materials.
+     *
+     * @param variant -
+     * [KO] 바리에이션 이름(`string`), 인덱스(`number`), 또는 기본 복원용 `null`
+     * [EN] Variant name (`string`), index (`number`), or `null` to restore defaults
+     */
+    applyMaterialVariant(variant: string | number | null): void {
+        const {materialVariants, materialVariantEntries} = this.parsingResult;
+        const resolvedIdx = resolveMaterialVariantIndex(materialVariants, variant);
+        if (resolvedIdx === undefined) {
+            console.warn(`[GLTFLoader] Unknown material variant: ${variant}`);
+            return;
+        }
+        this.#activeMaterialVariant = resolvedIdx === null ? null : materialVariants[resolvedIdx];
+        for (let i = 0, len = materialVariantEntries.length; i < len; i++) {
+            const entry = materialVariantEntries[i];
+            entry.mesh.material = resolvedIdx === null
+                ? entry.defaultMaterial
+                : (entry.variantMaterials.get(resolvedIdx) ?? entry.defaultMaterial);
+        }
     }
 
     /**

@@ -201,6 +201,33 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             ) : null
         );
         tMesh = new Mesh(redGPUContext, tGeo, tMaterial);
+        const variantMappings = meshPrimitive.extensions?.KHR_materials_variants?.mappings;
+        if (Array.isArray(variantMappings) && variantMappings.length > 0) {
+            const variantMaterials = new Map<number, PBRMaterial>();
+            const parsedByMaterialId = new Map<number, PBRMaterial>();
+            for (let m = 0, mLen = variantMappings.length; m < mLen; m++) {
+                const mapping = variantMappings[m];
+                if (!mapping || typeof mapping.material !== 'number' || !Array.isArray(mapping.variants)) continue;
+                let variantMat = parsedByMaterialId.get(mapping.material);
+                if (!variantMat) {
+                    variantMat = parseMaterialInfo_GLTF(gltfLoader, gltfData, meshPrimitive, mapping.material);
+                    if (verticesColor_0.length) variantMat.useVertexColor = true;
+                    if (tangents.length) variantMat.useVertexTangent = true;
+                    if (variantMat instanceof PBRMaterial) {
+                        gltfLoader.parsingResult.materials.push(variantMat);
+                    }
+                    parsedByMaterialId.set(mapping.material, variantMat);
+                }
+                for (let v = 0, vLen = mapping.variants.length; v < vLen; v++) {
+                    variantMaterials.set(mapping.variants[v], variantMat);
+                }
+            }
+            gltfLoader.parsingResult.materialVariantEntries.push({
+                mesh: tMesh,
+                defaultMaterial: tMaterial,
+                variantMaterials
+            });
+        }
         tMesh.animationInfo.weightBuffer = weightBuffer
         tMesh.animationInfo.jointBuffer = jointBuffer
         if (tName) {
