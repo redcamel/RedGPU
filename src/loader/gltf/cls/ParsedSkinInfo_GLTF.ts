@@ -4,6 +4,11 @@ import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import Mesh from "../../../display/mesh/Mesh";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 
+const SKIN_LAYOUT_CACHE = new WeakMap<GPUDevice, {
+    skinnerBindGroupLayout: GPUBindGroupLayout;
+    pipelineLayout: GPUPipelineLayout;
+}>();
+
 /**
  * [KO] glTF 스키닝 애니메이션을 위한 조인트, 역바인드 행렬 및 컴퓨트 파이프라인 리소스를 관리하는 클래스입니다.
  * [EN] Class that manages joints, inverse bind matrices, and compute pipeline resources for glTF skinning animation.
@@ -123,14 +128,16 @@ class ParsedSkinInfo_GLTF {
         if (!jointBuffer.data.length) return [];
         const data = jointBuffer.data;
         const len = data.length;
-        for (let i = 0; i < len; i++) {
-            const baseIndex = i;
-            for (let j = 0; j < 4; j++) {
-                const jointIndex = Math.floor(data[baseIndex + j]);
-                if (jointIndex >= 0 && jointIndex < this.joints.length) {
-                    usedJoints.add(jointIndex);
-                }
-            }
+        const maxJoints = this.joints.length;
+        for (let i = 0; i < len; i += 4) {
+            const j0 = Math.floor(data[i]);
+            if (j0 >= 0 && j0 < maxJoints) usedJoints.add(j0);
+            const j1 = Math.floor(data[i + 1]);
+            if (j1 >= 0 && j1 < maxJoints) usedJoints.add(j1);
+            const j2 = Math.floor(data[i + 2]);
+            if (j2 >= 0 && j2 < maxJoints) usedJoints.add(j2);
+            const j3 = Math.floor(data[i + 3]);
+            if (j3 >= 0 && j3 < maxJoints) usedJoints.add(j3);
         }
         return Array.from(usedJoints);
     }
@@ -302,26 +309,31 @@ class ParsedSkinInfo_GLTF {
 
         const systemLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
 
-        this.skinnerBindGroupLayout = device.createBindGroupLayout({
-            label: 'calcSkinMatrix_skinnerLayout',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-                {binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}
-            ]
-        });
-
-        const pipelineLayout = device.createPipelineLayout({
-            label: 'calcSkinMatrix_pipelineLayout',
-            bindGroupLayouts: [systemLayout, this.skinnerBindGroupLayout]
-        });
+        let cachedLayouts = SKIN_LAYOUT_CACHE.get(device);
+        if (!cachedLayouts) {
+            const skinnerBindGroupLayout = device.createBindGroupLayout({
+                label: 'calcSkinMatrix_skinnerLayout',
+                entries: [
+                    {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                    {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                    {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                    {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                    {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
+                    {binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}
+                ]
+            });
+            const pipelineLayout = device.createPipelineLayout({
+                label: 'calcSkinMatrix_pipelineLayout',
+                bindGroupLayouts: [systemLayout, skinnerBindGroupLayout]
+            });
+            cachedLayouts = {skinnerBindGroupLayout, pipelineLayout};
+            SKIN_LAYOUT_CACHE.set(device, cachedLayouts);
+        }
+        this.skinnerBindGroupLayout = cachedLayouts.skinnerBindGroupLayout;
 
         this.computePipeline = device.createComputePipeline({
             label: 'calcSkinMatrix',
-            layout: pipelineLayout,
+            layout: cachedLayouts.pipelineLayout,
             compute: {
                 module: this.computeShader,
                 entryPoint: 'main',
@@ -341,7 +353,6 @@ class ParsedSkinInfo_GLTF {
         )
 
         const searchJointIndexTableData = new Uint32Array(this.joints.length * 4);
-        searchJointIndexTableData.fill(0);
         this.usedJoints.forEach((jointIdx, i) => {
             searchJointIndexTableData[jointIdx * 4] = i;
         });
@@ -351,10 +362,15 @@ class ParsedSkinInfo_GLTF {
             searchJointIndexTableData
         )
 
+        const ibmCount = this.inverseBindMatrices.length;
+        const flatInverseBind = new Float32Array(ibmCount * 16);
+        for (let i = 0; i < ibmCount; i++) {
+            flatInverseBind.set(this.inverseBindMatrices[i], i * 16);
+        }
         device.queue.writeBuffer(
             this.uniformBuffer,
             16 + (this.joints.length * 16),
-            new Float32Array(this.inverseBindMatrices.map(v => Array.from(v)).flat())
+            flatInverseBind
         )
 
         const layoutMetadata = new Uint32Array([stride, positionOffset, normalOffset, tangentOffset]);
@@ -365,7 +381,6 @@ class ParsedSkinInfo_GLTF {
         )
 
         const jointSlotIndices = new Uint32Array(jointSlotIndicesNum);
-        jointSlotIndices.fill(0);
         this.usedJoints.forEach((jointIdx, i) => {
             jointSlotIndices[i] = this.joints[jointIdx].globalVertexSlotIndex;
         });

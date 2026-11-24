@@ -4,6 +4,11 @@ import AnimationData_GLTF from "../AnimationData_GLTF";
 import {PointerTargetBinding} from "../../parsers/animation/resolveAnimationPointer_GLTF";
 import shaderCode from './compute.wgsl'
 
+const MORPH_COMPUTE_CACHE = new WeakMap<GPUDevice, {
+    shaderModule: GPUShaderModule;
+    pipeline: GPUComputePipeline;
+}>();
+
 /**
  * [KO] 모프 타겟 애니메이션 연산에 사용되는 메쉬별 GPU 리소스 구조체입니다.
  * [EN] Per-mesh GPU resource structure used for morph target animation computation.
@@ -235,14 +240,21 @@ class AniTrack_GLTF {
 
     #initCommonCompute(redGPUContext: RedGPUContext) {
         const {gpuDevice} = redGPUContext;
-        this.#computeShader = gpuDevice.createShaderModule({code: shaderCode});
-        this.#computePipeline = gpuDevice.createComputePipeline({
-            layout: 'auto',
-            compute: {
-                module: this.#computeShader,
-                entryPoint: 'main'
-            }
-        });
+        let cached = MORPH_COMPUTE_CACHE.get(gpuDevice);
+        if (!cached) {
+            const shaderModule = gpuDevice.createShaderModule({code: shaderCode});
+            const pipeline = gpuDevice.createComputePipeline({
+                layout: 'auto',
+                compute: {
+                    module: shaderModule,
+                    entryPoint: 'main'
+                }
+            });
+            cached = {shaderModule, pipeline};
+            MORPH_COMPUTE_CACHE.set(gpuDevice, cached);
+        }
+        this.#computeShader = cached.shaderModule;
+        this.#computePipeline = cached.pipeline;
         this.#animationDataListBuffer = gpuDevice.createBuffer({
             size: this.aniDataAnimationInfo.dataList.length * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
@@ -266,14 +278,24 @@ class AniTrack_GLTF {
             size: morphInfo.origin.length * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
-        const morphInterleavedData = morphInfo.morphInfoDataList
-            .flatMap(m => Array.from(m.interleaveData));
+        const morphList = morphInfo.morphInfoDataList;
+        let totalMorphFloats = 0;
+        for (let i = 0, len = morphList.length; i < len; i++) {
+            totalMorphFloats += morphList[i].interleaveData.length;
+        }
+        const morphInterleavedData = new Float32Array(totalMorphFloats);
+        let writeOffset = 0;
+        for (let i = 0, len = morphList.length; i < len; i++) {
+            const src = morphList[i].interleaveData;
+            morphInterleavedData.set(src, writeOffset);
+            writeOffset += src.length;
+        }
         const morphInterleavedBuffer = gpuDevice.createBuffer({
-            size: morphInterleavedData.length * 4,
+            size: morphInterleavedData.byteLength,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
         gpuDevice.queue.writeBuffer(originBuffer, 0, morphInfo.origin);
-        gpuDevice.queue.writeBuffer(morphInterleavedBuffer, 0, new Float32Array(morphInterleavedData));
+        gpuDevice.queue.writeBuffer(morphInterleavedBuffer, 0, morphInterleavedData);
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#computePipeline.getBindGroupLayout(0),
             entries: [

@@ -194,141 +194,144 @@ export const applyDecodedDracoPrimitives = (
         return targetIndex;
     };
 
-    for (let m = 0; m < meshes.length; m++) {
-        const primitives = meshes[m].primitives;
-        if (!primitives) continue;
+    const decoder = new draco.Decoder();
+    try {
+        for (let m = 0; m < meshes.length; m++) {
+            const primitives = meshes[m].primitives;
+            if (!primitives) continue;
 
-        for (let p = 0; p < primitives.length; p++) {
-            const primitive = primitives[p];
-            const dracoExt = getDracoExtension(primitive);
-            if (!dracoExt) continue;
+            for (let p = 0; p < primitives.length; p++) {
+                const primitive = primitives[p];
+                const dracoExt = getDracoExtension(primitive);
+                if (!dracoExt) continue;
 
-            const compressedView = gltfData.bufferViews[dracoExt.bufferView];
-            if (!compressedView) {
-                throw new Error(`[RedGPU Draco] Compressed bufferView[${dracoExt.bufferView}] not found.`);
-            }
-            const sourceDataView = bufferDataViews[compressedView.buffer];
-            if (!sourceDataView) {
-                throw new Error(`[RedGPU Draco] Source buffer[${compressedView.buffer}] not found for bufferView[${dracoExt.bufferView}].`);
-            }
-
-            const byteOffset = sourceDataView.byteOffset + (compressedView.byteOffset ?? 0);
-            const compressedBytes = new Int8Array(sourceDataView.buffer, byteOffset, compressedView.byteLength);
-
-            const decoder = new draco.Decoder();
-            const decoderBuffer = new draco.DecoderBuffer();
-            let dracoGeometry: any = null;
-
-            try {
-                decoderBuffer.Init(compressedBytes, compressedBytes.byteLength);
-                const geometryType = decoder.GetEncodedGeometryType(decoderBuffer);
-
-                let status: any;
-                if (geometryType === draco.TRIANGULAR_MESH) {
-                    dracoGeometry = new draco.Mesh();
-                    status = decoder.DecodeBufferToMesh(decoderBuffer, dracoGeometry);
-                } else if (geometryType === draco.POINT_CLOUD) {
-                    dracoGeometry = new draco.PointCloud();
-                    status = decoder.DecodeBufferToPointCloud(decoderBuffer, dracoGeometry);
-                } else {
-                    throw new Error(`[RedGPU Draco] Unsupported Draco geometry type: ${geometryType}`);
+                const compressedView = gltfData.bufferViews[dracoExt.bufferView];
+                if (!compressedView) {
+                    throw new Error(`[RedGPU Draco] Compressed bufferView[${dracoExt.bufferView}] not found.`);
+                }
+                const sourceDataView = bufferDataViews[compressedView.buffer];
+                if (!sourceDataView) {
+                    throw new Error(`[RedGPU Draco] Source buffer[${compressedView.buffer}] not found for bufferView[${dracoExt.bufferView}].`);
                 }
 
-                if (!status.ok() || dracoGeometry.ptr === 0) {
-                    throw new Error(`[RedGPU Draco] Failed to decode Draco geometry: ${status.error_msg()}`);
-                }
+                const byteOffset = sourceDataView.byteOffset + (compressedView.byteOffset ?? 0);
+                const compressedBytes = new Int8Array(sourceDataView.buffer, byteOffset, compressedView.byteLength);
 
-                const numPoints: number = dracoGeometry.num_points();
+                const decoderBuffer = new draco.DecoderBuffer();
+                let dracoGeometry: any = null;
 
-                // Decode triangle indices for triangular meshes
-                if (geometryType === draco.TRIANGULAR_MESH) {
-                    const numFaces: number = dracoGeometry.num_faces();
-                    const numIndices = numFaces * 3;
-                    const useUint32 = numPoints > 65535;
-                    const indexByteLength = numIndices * (useUint32 ? 4 : 2);
-                    const indexPtr = draco._malloc(indexByteLength);
-                    try {
-                        if (useUint32) {
-                            decoder.GetTrianglesUInt32Array(dracoGeometry, indexByteLength, indexPtr);
-                        } else {
-                            decoder.GetTrianglesUInt16Array(dracoGeometry, indexByteLength, indexPtr);
+                try {
+                    decoderBuffer.Init(compressedBytes, compressedBytes.byteLength);
+                    const geometryType = decoder.GetEncodedGeometryType(decoderBuffer);
+
+                    let status: any;
+                    if (geometryType === draco.TRIANGULAR_MESH) {
+                        dracoGeometry = new draco.Mesh();
+                        status = decoder.DecodeBufferToMesh(decoderBuffer, dracoGeometry);
+                    } else if (geometryType === draco.POINT_CLOUD) {
+                        dracoGeometry = new draco.PointCloud();
+                        status = decoder.DecodeBufferToPointCloud(decoderBuffer, dracoGeometry);
+                    } else {
+                        throw new Error(`[RedGPU Draco] Unsupported Draco geometry type: ${geometryType}`);
+                    }
+
+                    if (!status.ok() || dracoGeometry.ptr === 0) {
+                        throw new Error(`[RedGPU Draco] Failed to decode Draco geometry: ${status.error_msg()}`);
+                    }
+
+                    const numPoints: number = dracoGeometry.num_points();
+
+                    // Decode triangle indices for triangular meshes
+                    if (geometryType === draco.TRIANGULAR_MESH) {
+                        const numFaces: number = dracoGeometry.num_faces();
+                        const numIndices = numFaces * 3;
+                        const useUint32 = numPoints > 65535;
+                        const indexByteLength = numIndices * (useUint32 ? 4 : 2);
+                        const indexPtr = draco._malloc(indexByteLength);
+                        try {
+                            if (useUint32) {
+                                decoder.GetTrianglesUInt32Array(dracoGeometry, indexByteLength, indexPtr);
+                            } else {
+                                decoder.GetTrianglesUInt16Array(dracoGeometry, indexByteLength, indexPtr);
+                            }
+                            const indexBytes = new Uint8Array(draco.HEAPU8.buffer, indexPtr, indexByteLength).slice();
+                            const indexComponentType = useUint32 ? 5125 : 5123;
+
+                            if (primitive.indices !== undefined) {
+                                primitive.indices = bindAccessorBuffer(
+                                    primitive.indices,
+                                    indexBytes,
+                                    numIndices,
+                                    indexComponentType
+                                );
+                            } else {
+                                const newBufferViewIndex = registerDecodedBufferView(gltfData, bufferDataViews, indexBytes);
+                                const newAccessorIndex = accessors.length;
+                                accessors.push({
+                                    bufferView: newBufferViewIndex,
+                                    byteOffset: 0,
+                                    componentType: indexComponentType,
+                                    count: numIndices,
+                                    type: 'SCALAR',
+                                });
+                                primitive.indices = newAccessorIndex;
+                            }
+                        } finally {
+                            draco._free(indexPtr);
                         }
-                        const indexBytes = new Uint8Array(draco.HEAPU8.buffer, indexPtr, indexByteLength).slice();
-                        const indexComponentType = useUint32 ? 5125 : 5123;
+                    }
 
-                        if (primitive.indices !== undefined) {
-                            primitive.indices = bindAccessorBuffer(
-                                primitive.indices,
-                                indexBytes,
-                                numIndices,
-                                indexComponentType
+                    // Decode each compressed vertex attribute
+                    const dracoAttributes = dracoExt.attributes;
+                    for (const attrName in dracoAttributes) {
+                        const uniqueId = dracoAttributes[attrName];
+                        const accessorIndex = primitive.attributes?.[attrName];
+                        if (accessorIndex === undefined) continue;
+
+                        const accessor = accessors[accessorIndex];
+                        if (!accessor) continue;
+
+                        const dracoAttr = decoder.GetAttributeByUniqueId(dracoGeometry, uniqueId);
+                        if (!dracoAttr || dracoAttr.ptr === 0) continue;
+
+                        const numComponents =
+                            ACCESSOR_TYPE_NUM_COMPONENTS[accessor.type] ?? dracoAttr.num_components();
+                        const meta = COMPONENT_TYPE_META[accessor.componentType] ?? COMPONENT_TYPE_META[5126];
+                        const dracoDataType = draco[meta.dracoKey];
+                        const byteLength = numPoints * numComponents * meta.bytesPerElement;
+
+                        const attrPtr = draco._malloc(byteLength);
+                        try {
+                            const ok = decoder.GetAttributeDataArrayForAllPoints(
+                                dracoGeometry,
+                                dracoAttr,
+                                dracoDataType,
+                                byteLength,
+                                attrPtr
                             );
-                        } else {
-                            const newBufferViewIndex = registerDecodedBufferView(gltfData, bufferDataViews, indexBytes);
-                            const newAccessorIndex = gltfData.accessors.length;
-                            gltfData.accessors.push({
-                                bufferView: newBufferViewIndex,
-                                byteOffset: 0,
-                                componentType: indexComponentType,
-                                count: numIndices,
-                                type: 'SCALAR',
-                            });
-                            primitive.indices = newAccessorIndex;
+                            if (!ok) {
+                                throw new Error(`[RedGPU Draco] Failed to extract attribute '${attrName}' (uniqueId=${uniqueId}).`);
+                            }
+                            const attrBytes = new Uint8Array(draco.HEAPU8.buffer, attrPtr, byteLength).slice();
+                            primitive.attributes[attrName] = bindAccessorBuffer(
+                                accessorIndex,
+                                attrBytes,
+                                numPoints
+                            );
+                        } finally {
+                            draco._free(attrPtr);
                         }
-                    } finally {
-                        draco._free(indexPtr);
                     }
+
+                    decodedPrimitives++;
+                } finally {
+                    if (dracoGeometry) draco.destroy(dracoGeometry);
+                    draco.destroy(decoderBuffer);
                 }
-
-                // Decode each compressed vertex attribute
-                const dracoAttributes = dracoExt.attributes;
-                for (const attrName in dracoAttributes) {
-                    const uniqueId = dracoAttributes[attrName];
-                    const accessorIndex = primitive.attributes?.[attrName];
-                    if (accessorIndex === undefined) continue;
-
-                    const accessor = gltfData.accessors[accessorIndex];
-                    if (!accessor) continue;
-
-                    const dracoAttr = decoder.GetAttributeByUniqueId(dracoGeometry, uniqueId);
-                    if (!dracoAttr || dracoAttr.ptr === 0) continue;
-
-                    const numComponents =
-                        ACCESSOR_TYPE_NUM_COMPONENTS[accessor.type] ?? dracoAttr.num_components();
-                    const meta = COMPONENT_TYPE_META[accessor.componentType] ?? COMPONENT_TYPE_META[5126];
-                    const dracoDataType = draco[meta.dracoKey];
-                    const byteLength = numPoints * numComponents * meta.bytesPerElement;
-
-                    const attrPtr = draco._malloc(byteLength);
-                    try {
-                        const ok = decoder.GetAttributeDataArrayForAllPoints(
-                            dracoGeometry,
-                            dracoAttr,
-                            dracoDataType,
-                            byteLength,
-                            attrPtr
-                        );
-                        if (!ok) {
-                            throw new Error(`[RedGPU Draco] Failed to extract attribute '${attrName}' (uniqueId=${uniqueId}).`);
-                        }
-                        const attrBytes = new Uint8Array(draco.HEAPU8.buffer, attrPtr, byteLength).slice();
-                        primitive.attributes[attrName] = bindAccessorBuffer(
-                            accessorIndex,
-                            attrBytes,
-                            numPoints
-                        );
-                    } finally {
-                        draco._free(attrPtr);
-                    }
-                }
-
-                decodedPrimitives++;
-            } finally {
-                if (dracoGeometry) draco.destroy(dracoGeometry);
-                draco.destroy(decoderBuffer);
-                draco.destroy(decoder);
             }
         }
+    } finally {
+        draco.destroy(decoder);
     }
 
     return decodedPrimitives;

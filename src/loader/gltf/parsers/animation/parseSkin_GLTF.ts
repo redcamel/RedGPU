@@ -24,13 +24,12 @@ import parseJoint_GLTF from "./parseJoint_GLTF";
  * @category Loader
  */
 const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, mesh: Mesh) => {
-    const parsedSkinInfo = new ParsedSkinInfo_GLTF()
-    const inverseBindMatrices = []
+    const parsedSkinInfo = new ParsedSkinInfo_GLTF();
     const {nodes: NODES} = scenesData;
-    const {joints, skeleton} = skin
-    for (let j = 0, jointLen = joints.length; j < jointLen; j++) {
-        const jointGlTfId = joints[j]
-        parseJoint_GLTF(parsedSkinInfo, NODES, jointGlTfId);
+    const {joints, skeleton} = skin;
+    const jointLen = joints.length;
+    for (let j = 0; j < jointLen; j++) {
+        parseJoint_GLTF(parsedSkinInfo, NODES, joints[j]);
     }
     if (skeleton) {
         parsedSkinInfo.skeletonMesh = NODES[skeleton]['Mesh'];
@@ -38,63 +37,50 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
     const accessorGlTfId = skin.inverseBindMatrices;
     const accessorInfo = new AccessorInfo_GLTF(gltfLoader, scenesData, accessorGlTfId);
     const {
-        startIndex,
         accessor,
+        componentType,
         componentType_BYTES_PER_ELEMENT,
         bufferViewByteStride,
+        bufferViewOffset,
+        accessorBufferOffset,
         bufferURIDataView,
         getMethod
     } = accessorInfo;
-    const {type, count,} = accessor
-    let strideIndex = 0;
-    const stridePerElement = bufferViewByteStride / componentType_BYTES_PER_ELEMENT;
-    let i = startIndex;
-    let len;
-    switch (type) {
-        case 'MAT4' :
-            if (bufferViewByteStride) {
-                len = i + count * stridePerElement;
-                for (i; i < len; i++) {
-                    if (strideIndex % stridePerElement < 16) {
-                        inverseBindMatrices.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    }
-                    strideIndex++;
+    const {type, count} = accessor;
+    const flatMatrices = new Float32Array(Math.max(count, jointLen) * 16);
+
+    if (type === 'MAT4') {
+        const baseByteOffset = bufferViewOffset + accessorBufferOffset;
+        const packedByteStride = 16 * componentType_BYTES_PER_ELEMENT;
+        const byteStride = bufferViewByteStride || packedByteStride;
+        const absoluteByteOffset = bufferURIDataView instanceof DataView
+            ? bufferURIDataView.byteOffset + baseByteOffset
+            : -1;
+
+        if (
+            byteStride === packedByteStride &&
+            componentType === Float32Array &&
+            absoluteByteOffset >= 0 &&
+            (absoluteByteOffset & 3) === 0
+        ) {
+            flatMatrices.set(new Float32Array(bufferURIDataView.buffer, absoluteByteOffset, count * 16));
+        } else {
+            let byteOffset = baseByteOffset;
+            let outIdx = 0;
+            for (let m = 0; m < count; m++) {
+                for (let c = 0; c < 16; c++) {
+                    flatMatrices[outIdx++] = bufferURIDataView[getMethod](byteOffset + c * componentType_BYTES_PER_ELEMENT, true);
                 }
-            } else {
-                len = i + count * 16;
-                for (i; i < len; i++) {
-                    inverseBindMatrices.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                }
+                byteOffset += byteStride;
             }
-            break;
-        default :
-            console.warn('알수없는 형식 엑세서 타입', type);
-            break;
+        }
+    } else {
+        console.warn('알수없는 형식 엑세서 타입', type);
     }
-    parsedSkinInfo.inverseBindMatrices = []
-    for (let i = 0; i < joints.length; i++) {
-        parsedSkinInfo.inverseBindMatrices.push(
-            new Float32Array(
-                [
-                    inverseBindMatrices[i * 16],
-                    inverseBindMatrices[i * 16 + 1],
-                    inverseBindMatrices[i * 16 + 2],
-                    inverseBindMatrices[i * 16 + 3],
-                    inverseBindMatrices[i * 16 + 4],
-                    inverseBindMatrices[i * 16 + 5],
-                    inverseBindMatrices[i * 16 + 6],
-                    inverseBindMatrices[i * 16 + 7],
-                    inverseBindMatrices[i * 16 + 8],
-                    inverseBindMatrices[i * 16 + 9],
-                    inverseBindMatrices[i * 16 + 10],
-                    inverseBindMatrices[i * 16 + 11],
-                    inverseBindMatrices[i * 16 + 12],
-                    inverseBindMatrices[i * 16 + 13],
-                    inverseBindMatrices[i * 16 + 14],
-                    inverseBindMatrices[i * 16 + 15],
-                ]
-            )
-        )
+
+    parsedSkinInfo.inverseBindMatrices = new Array(jointLen);
+    for (let i = 0; i < jointLen; i++) {
+        parsedSkinInfo.inverseBindMatrices[i] = flatMatrices.subarray(i * 16, i * 16 + 16);
     }
     mesh.animationInfo.skinInfo = parsedSkinInfo;
     mesh.material.useSkin = true;

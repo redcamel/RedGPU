@@ -37,10 +37,18 @@ class AnimationData_GLTF {
      */
     constructor(gltfLoader: GLTFLoader, gltfData: GLTF, accessorGlTfId: GlTfId) {
         const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
-        const {accessor, startIndex, componentType_BYTES_PER_ELEMENT, bufferURIDataView, getMethod} = accessorInfo;
+        const {
+            accessor,
+            componentType: typedArrayCtor,
+            componentType_BYTES_PER_ELEMENT,
+            bufferViewOffset,
+            accessorBufferOffset,
+            bufferViewByteStride,
+            bufferURIDataView,
+            getMethod
+        } = accessorInfo;
         const {type, count, componentType, normalized} = accessor;
         const isNormalized = normalized === true;
-        let i = startIndex;
         let factor = 1;
         switch (type) {
             case 'SCALAR':
@@ -60,9 +68,32 @@ class AnimationData_GLTF {
         }
         const total = count * factor;
         const dataList = new Float32Array(total);
-        for (let offset = 0; offset < total; i++, offset++) {
-            const rawValue = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
-            dataList[offset] = isNormalized ? dequantizeAccessorValue(rawValue, componentType, true) : rawValue;
+        const baseByteOffset = bufferViewOffset + accessorBufferOffset;
+        const packedByteStride = factor * componentType_BYTES_PER_ELEMENT;
+        const byteStride = bufferViewByteStride || packedByteStride;
+
+        if (
+            !isNormalized &&
+            byteStride === packedByteStride &&
+            typedArrayCtor === Float32Array &&
+            bufferURIDataView instanceof DataView
+        ) {
+            const absoluteByteOffset = bufferURIDataView.byteOffset + baseByteOffset;
+            if ((absoluteByteOffset & 3) === 0) {
+                dataList.set(new Float32Array(bufferURIDataView.buffer, absoluteByteOffset, total));
+                this.dataList = dataList;
+                return;
+            }
+        }
+
+        let byteOffset = baseByteOffset;
+        let outIdx = 0;
+        for (let i = 0; i < count; i++) {
+            for (let c = 0; c < factor; c++) {
+                const rawValue = bufferURIDataView[getMethod](byteOffset + c * componentType_BYTES_PER_ELEMENT, true);
+                dataList[outIdx++] = isNormalized ? dequantizeAccessorValue(rawValue, componentType, true) : rawValue;
+            }
+            byteOffset += byteStride;
         }
         this.dataList = dataList;
     }

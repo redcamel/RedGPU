@@ -206,8 +206,7 @@ const processImagesIfExist = (gltfData: GLTF, binaryChunk: any): void => {
                 if (bufferHashMap.has(bufferKey)) {
                     image.uri = bufferHashMap.get(bufferKey);
                 } else {
-                    const slicedChunk = binaryChunk.slice(sliceStartIndex, sliceStartIndex + byteLength);
-                    const blob = new Blob([new Uint8Array(slicedChunk)], {type: mimeType});
+                    const blob = new Blob([new Uint8Array(binaryChunk, sliceStartIndex, byteLength)], {type: mimeType});
                     const objectURL = URL.createObjectURL(blob);
                     bufferHashMap.set(bufferKey, objectURL);
                     image.uri = objectURL;

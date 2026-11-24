@@ -27,12 +27,30 @@ import {createPointerTargetBinding, parseAnimationPointerPath} from "./resolveAn
  * [EN] GLTF data object
  * @category Loader
  */
+const getOrCreateAnimationData = (
+    gltfLoader: GLTFLoader,
+    gltfData: GLTF,
+    accessorGlTfId: number,
+    cache?: Map<number, parseAnimationInfo_GLTF>
+): parseAnimationInfo_GLTF => {
+    if (cache) {
+        let cached = cache.get(accessorGlTfId);
+        if (!cached) {
+            cached = new parseAnimationInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
+            cache.set(accessorGlTfId, cached);
+        }
+        return cached;
+    }
+    return new parseAnimationInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
+};
+
 const parseAnimationChannel_GLTF = (
     gltfLoader: GLTFLoader,
     parsedSingleClip: GLTFParsedSingleClip,
     animationChannel: AnimationChannel,
     animationSamplers: AnimationSampler[],
-    gltfData: GLTF
+    gltfData: GLTF,
+    animationDataCache?: Map<number, parseAnimationInfo_GLTF>
 ) => {
     let tMesh: Mesh;
     let aniTrack: AniTrack_GLTF;
@@ -58,8 +76,8 @@ const parseAnimationChannel_GLTF = (
             if (!binding) return;
             aniTrack = new AniTrack_GLTF(
                 'pointer',
-                new parseAnimationInfo_GLTF(gltfLoader, gltfData, tSampler.input),
-                new parseAnimationInfo_GLTF(gltfLoader, gltfData, tSampler.output),
+                getOrCreateAnimationData(gltfLoader, gltfData, tSampler.input, animationDataCache),
+                getOrCreateAnimationData(gltfLoader, gltfData, tSampler.output, animationDataCache),
                 tSampler.interpolation,
                 gltfLoader.resultMesh,
                 targetMeshes,
@@ -97,8 +115,8 @@ const parseAnimationChannel_GLTF = (
     ) {
         aniTrack = new AniTrack_GLTF(
             channelTargetDataPath,
-            new parseAnimationInfo_GLTF(gltfLoader, gltfData, tSampler.input),
-            new parseAnimationInfo_GLTF(gltfLoader, gltfData, tSampler.output),
+            getOrCreateAnimationData(gltfLoader, gltfData, tSampler.input, animationDataCache),
+            getOrCreateAnimationData(gltfLoader, gltfData, tSampler.output, animationDataCache),
             tSampler.interpolation,
             tMesh,
             targetMeshes
