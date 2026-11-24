@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import AccessorInfo_GLTF from '../../../../src/loader/gltf/cls/AccessorInfo_GLTF';
+import AnimationData_GLTF from '../../../../src/loader/gltf/cls/AnimationData_GLTF';
 import parseAttributeInfo_GLTF from '../../../../src/loader/gltf/parsers/parseAttributeInfo_GLTF';
 import parseIndicesInfo_GLTF from '../../../../src/loader/gltf/parsers/parseIndicesInfo_GLTF';
 import parseInterleaveData_GLTF, {
@@ -211,5 +212,22 @@ describe('GLTF TypedArray Zero-Copy Parsers', () => {
         const normalsNoIdx = calculateNormals(vertices, new Uint32Array(0));
         expect(normalsNoIdx).toBeInstanceOf(Float32Array);
         expect(Math.abs(normalsNoIdx[2])).toBeCloseTo(1);
+    });
+
+    it('AnimationData_GLTF writes directly to Float32Array without retaining gltfLoader or scenesData', () => {
+        const keyframeBuf = new Float32Array([0.0, 0.5, 1.0, 1.5]);
+        const gltfData: any = {
+            buffers: [{byteLength: keyframeBuf.byteLength}],
+            bufferViews: [{buffer: 0, byteOffset: 0, byteLength: keyframeBuf.byteLength}],
+            accessors: [{bufferView: 0, byteOffset: 0, componentType: 5126, count: 4, type: 'SCALAR'}],
+        };
+        const mockLoader: any = {
+            parsingResult: {uris: {buffers: [new DataView(keyframeBuf.buffer)]}},
+        };
+        const animData = new AnimationData_GLTF(mockLoader, gltfData, 0);
+        expect(animData.dataList).toBeInstanceOf(Float32Array);
+        expect(Array.from(animData.dataList)).toEqual([0.0, 0.5, 1.0, 1.5]);
+        expect('gltfLoader' in animData).toBe(false);
+        expect('scenesData' in animData).toBe(false);
     });
 });

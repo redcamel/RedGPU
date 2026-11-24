@@ -181,12 +181,13 @@ class GLTFLoader extends RedGPUObject {
     readonly #fileExtension: string
     #gltfData: GLTF
     #activeMaterialVariant: string | null = null
+    #isDestroyed: boolean = false
     #abortController: AbortController = new AbortController()
     #externalSignal?: AbortSignal
     #externalAbortHandler?: () => void
-    readonly #onLoad
-    readonly #onError
-    readonly #onProgress
+    #onLoad
+    #onError
+    #onProgress
     #loadingProgressInfo: GLTFLoadingProgressInfo = {
         url: '',
         model: {loaded: 0, total: 0, lengthComputable: true, percent: 0, transferred: '0', totalSize: '0'},
@@ -457,13 +458,29 @@ class GLTFLoader extends RedGPUObject {
     }
 
     /**
-     * [KO] GLTFLoader 인스턴스와 파싱된 애니메이션 트랙 및 참조 리소스를 해제합니다.
-     * [EN] Releases and destroys the GLTFLoader instance, parsed animation tracks, and referenced resources.
+     * [KO] `GLTFLoader` 인스턴스가 해제(`destroy()`)되었는지 여부를 반환합니다.
+     * [EN] Returns whether this `GLTFLoader` instance has been destroyed.
+     *
+     * @returns
+     * [KO] 해제 여부 (`true`이면 이미 해제됨)
+     * [EN] Whether the loader has been destroyed
      */
-    destroy() {
+    get isDestroyed(): boolean {
+        return this.#isDestroyed;
+    }
+
+    /**
+     * [KO] GLTFLoader 인스턴스와 파싱된 애니메이션 트랙, 씬 부착 루트 메쉬 및 내부 참조 리소스를 안전하게 해제합니다.
+     * [EN] Safely releases the GLTFLoader instance, parsed animation tracks, attached root mesh, and internal referenced resources.
+     */
+    destroy(): void {
+        if (this.#isDestroyed) return;
+        this.#isDestroyed = true;
+
         this.abort();
         this.#cleanupAbortListener();
         this.stopAnimation();
+
         if (this.parsingResult) {
             if (this.parsingResult.animations) {
                 this.parsingResult.animations.forEach(clipState => {
@@ -479,12 +496,29 @@ class GLTFLoader extends RedGPUObject {
             }
             this.parsingResult.groups = [];
             this.parsingResult.materials = [];
-            this.parsingResult.uris.buffers = [];
+            if (this.parsingResult.uris) {
+                this.parsingResult.uris.buffers = [];
+            }
             this.parsingResult.textures = {};
             this.parsingResult.textureRawList = [];
             this.parsingResult.cameras = [];
+            this.parsingResult.materialVariants = [];
+            this.parsingResult.materialVariantEntries = [];
+            this.parsingResult.materialsById?.clear();
         }
+
+        this.#activeMaterialVariant = null;
+        this.#gltfData = null;
+        this.parsingOption = null;
+        this.#onLoad = undefined;
+        this.#onError = undefined;
+        this.#onProgress = undefined;
+
         if (this.resultMesh) {
+            const parent = this.resultMesh.parent;
+            if (parent && typeof parent.removeChild === 'function') {
+                parent.removeChild(this.resultMesh);
+            }
             this.resultMesh.gltfLoaderInfo = null;
             this.resultMesh = null;
         }
