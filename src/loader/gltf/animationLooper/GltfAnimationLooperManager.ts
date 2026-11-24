@@ -306,7 +306,7 @@ class GltfAnimationLooperManager {
 
                                 rX = s0 * prevX + s1 * prevOutX * interpolationValue + s2 * nextX + s3 * nextInX * interpolationValue;
                                 rY = s0 * prevY + s1 * prevOutY * interpolationValue + s2 * nextY + s3 * nextInY * interpolationValue;
-                                rZ = s0 * prevZ + s1 * prevOutZ * interpolationValue + s2 * nextX + s3 * nextInX * interpolationValue;
+                                rZ = s0 * prevZ + s1 * prevOutZ * interpolationValue + s2 * nextZ + s3 * nextInZ * interpolationValue;
                                 rW = s0 * prevW + s1 * prevOutW * interpolationValue + s2 * nextW + s3 * nextInW * interpolationValue;
                             } else {
                                 prevIdx = previousTimeDataIDX << 2;

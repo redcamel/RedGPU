@@ -18,7 +18,7 @@ import parseNode_GLTF from "./parseNode_GLTF";
  * @category Loader
  */
 const parseScene_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callback?: Function) => {
-    const SCENE_INDEX = 0;
+    const SCENE_INDEX = gltfData.scene ?? 0;
     const {scenes: SCENES} = gltfData;
     const nodesInScene = SCENES[SCENE_INDEX].nodes;
     nodesInScene.forEach((nodeGlTfId: GlTfId) => {

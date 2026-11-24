@@ -28,7 +28,7 @@ import parseScene_GLTF from "./parseScene_GLTF";
  */
 const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
     if (gltfData.extensionsUsed?.includes("KHR_draco_mesh_compression")) {
-        alert('RedGPU GLTFLoader does not support the KHR_draco_mesh_compression extension. Models using this extension may not load properly.');
+        console.warn('RedGPU GLTFLoader does not support the KHR_draco_mesh_compression extension. Models using this extension may not load properly.');
     }
     requestAnimationFrame(() => {
         parseAssetVersion(gltfData);

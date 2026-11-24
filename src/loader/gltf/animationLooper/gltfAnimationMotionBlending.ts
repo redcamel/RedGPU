@@ -210,7 +210,7 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
 
                 pose[0] = s0 * prevX + s1 * prevOutX * interpolationValue + s2 * nextX + s3 * nextInX * interpolationValue;
                 pose[1] = s0 * prevY + s1 * prevOutY * interpolationValue + s2 * nextY + s3 * nextInY * interpolationValue;
-                pose[2] = s0 * prevZ + s1 * prevOutZ * interpolationValue + s2 * nextX + s3 * nextInX * interpolationValue;
+                pose[2] = s0 * prevZ + s1 * prevOutZ * interpolationValue + s2 * nextZ + s3 * nextInZ * interpolationValue;
                 pose[3] = s0 * prevW + s1 * prevOutW * interpolationValue + s2 * nextW + s3 * nextInW * interpolationValue;
             } else {
                 prevIdx = previousTimeDataIDX << 2;
