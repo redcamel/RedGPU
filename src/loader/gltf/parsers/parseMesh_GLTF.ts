@@ -68,21 +68,13 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         let tangents: Float32Array = EMPTY_FLOAT32_ARRAY;
         let tDrawMode: GPUPrimitiveTopology;
         const {attributes} = meshPrimitive
-        const temp = new Map()
         if (attributes) {
             for (const key in attributes) {
                 const accessorGlTfId = attributes[key];
                 const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
-                const isTexcoord = key.indexOf('TEXCOORD_') > -1
-                if (isTexcoord) {
-                    const name = `TEXCOORD_${temp.size}`
-                    temp.set(key, name)
-                }
-
-                const targetKey = isTexcoord ? temp.get(key) : key;
-                const parsed = parseAttributeInfo_GLTF(targetKey, accessorInfo);
+                const parsed = parseAttributeInfo_GLTF(key, accessorInfo);
                 if (parsed) {
-                    switch (targetKey) {
+                    switch (key) {
                         case 'POSITION':
                             vertices = parsed;
                             break;
@@ -111,7 +103,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                 }
                 if (accessorInfo.accessor.sparse && parsed) {
                     parseSparse_GLTF(
-                        gltfLoader, targetKey,
+                        gltfLoader, key,
                         accessorInfo.accessor,
                         gltfData,
                         parsed,
