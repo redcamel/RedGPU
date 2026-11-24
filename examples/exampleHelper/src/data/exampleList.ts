@@ -2203,10 +2203,42 @@ export const ExampleList: ExampleListType = [
                             {
                                 name: 'Node Visibility (2 Models)',
                                 path: 'gltf/gltfExtensions/nodeVisibility',
-                                extensionList: ['KHR_node_visibility'],
+                                extensionList: ['KHR_node_visibility', 'KHR_animation_pointer'],
                                 description: {
-                                    ko: 'Khronos 공식 NodeVisibilityTest와 CubeVisibility 모델로 초기 visible: false 반영 및 계층 가시성 상속을 검증합니다.',
-                                    en: 'Verifies initial visible: false handling and hierarchy inheritance with Khronos NodeVisibilityTest and CubeVisibility.'
+                                    ko: 'Khronos 공식 NodeVisibilityTest와 CubeVisibility 모델로 초기 visible: false 반영 및 가시성 애니메이션을 검증합니다.',
+                                    en: 'Verifies initial visible: false handling and visibility animation with Khronos NodeVisibilityTest and CubeVisibility.'
+                                },
+                            },
+                        ]
+                    },
+                    {
+                        name: 'KHR_animation_pointer',
+                        list: [
+                            {
+                                name: 'Pot Of Coals Animation Pointer',
+                                path: 'gltf/gltfExtensions/animationPointer/potOfCoalsAnimationPointer',
+                                extensionList: ['KHR_animation_pointer', 'KHR_texture_transform', 'KHR_materials_volume'],
+                                description: {
+                                    ko: 'Khronos 공식 PotOfCoalsAnimationPointer 모델로 텍스처 회전 및 열기 굴절 애니메이션을 검증합니다.',
+                                    en: 'Loads Khronos PotOfCoalsAnimationPointer to verify texture rotation and heat refraction animation.'
+                                },
+                            },
+                            {
+                                name: 'Animation Pointer UVs',
+                                path: 'gltf/gltfExtensions/animationPointer/animationPointerUVs',
+                                extensionList: ['KHR_animation_pointer', 'KHR_texture_transform'],
+                                description: {
+                                    ko: 'Khronos 공식 AnimationPointerUVs 모델로 PBR 및 확장 텍스처의 UV 스크롤·스케일·회전 애니메이션을 검증합니다.',
+                                    en: 'Loads Khronos AnimationPointerUVs to verify UV offset, scale, and rotation pointer animations across PBR and extension textures.'
+                                },
+                            },
+                            {
+                                name: 'Animated Colors Cube',
+                                path: 'gltf/gltfExtensions/animationPointer/animatedColorsCube',
+                                extensionList: ['KHR_animation_pointer'],
+                                description: {
+                                    ko: 'Khronos 공식 AnimatedColorsCube 모델로 baseColorFactor 색상 보간 포인터 애니메이션을 검증합니다.',
+                                    en: 'Loads Khronos AnimatedColorsCube to verify baseColorFactor color interpolation pointer animation.'
                                 },
                             },
                         ]

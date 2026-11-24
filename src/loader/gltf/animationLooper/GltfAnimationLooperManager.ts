@@ -533,6 +533,37 @@ class GltfAnimationLooperManager {
                             }
                             break;
                         }
+                        case 5: {
+                            const binding = trackFrom.pointerBinding;
+                            if (!binding) break;
+                            const c = binding.componentCount;
+                            let v0 = 0, v1 = 0, v2 = 0, v3 = 0;
+                            if (previousTimeDataIDX === targetTimeDataListLength - 1) {
+                                const base = isCUBICSPLINE ? (previousTimeDataIDX * c * 3 + c) : (previousTimeDataIDX * c);
+                                v0 = targetAnimationDataList[base];
+                                if (c > 1) v1 = targetAnimationDataList[base + 1];
+                                if (c > 2) v2 = targetAnimationDataList[base + 2];
+                                if (c > 3) v3 = targetAnimationDataList[base + 3];
+                            } else if (isCUBICSPLINE) {
+                                const stride = c * 3;
+                                const pBase = previousTimeDataIDX * stride;
+                                const nBase = nextTimeDataIDX * stride;
+                                const dt = targetTimeDataList[nextTimeDataIDX] - targetTimeDataList[previousTimeDataIDX];
+                                v0 = s0 * targetAnimationDataList[pBase + c] + s1 * targetAnimationDataList[pBase + c * 2] * dt + s2 * targetAnimationDataList[nBase + c] + s3 * targetAnimationDataList[nBase] * dt;
+                                if (c > 1) v1 = s0 * targetAnimationDataList[pBase + c + 1] + s1 * targetAnimationDataList[pBase + c * 2 + 1] * dt + s2 * targetAnimationDataList[nBase + c + 1] + s3 * targetAnimationDataList[nBase + 1] * dt;
+                                if (c > 2) v2 = s0 * targetAnimationDataList[pBase + c + 2] + s1 * targetAnimationDataList[pBase + c * 2 + 2] * dt + s2 * targetAnimationDataList[nBase + c + 2] + s3 * targetAnimationDataList[nBase + 2] * dt;
+                                if (c > 3) v3 = s0 * targetAnimationDataList[pBase + c + 3] + s1 * targetAnimationDataList[pBase + c * 2 + 3] * dt + s2 * targetAnimationDataList[nBase + c + 3] + s3 * targetAnimationDataList[nBase + 3] * dt;
+                            } else {
+                                const pBase = previousTimeDataIDX * c;
+                                const nBase = nextTimeDataIDX * c;
+                                v0 = targetAnimationDataList[pBase] + interpolationValue * (targetAnimationDataList[nBase] - targetAnimationDataList[pBase]);
+                                if (c > 1) v1 = targetAnimationDataList[pBase + 1] + interpolationValue * (targetAnimationDataList[nBase + 1] - targetAnimationDataList[pBase + 1]);
+                                if (c > 2) v2 = targetAnimationDataList[pBase + 2] + interpolationValue * (targetAnimationDataList[nBase + 2] - targetAnimationDataList[pBase + 2]);
+                                if (c > 3) v3 = targetAnimationDataList[pBase + 3] + interpolationValue * (targetAnimationDataList[nBase + 3] - targetAnimationDataList[pBase + 3]);
+                            }
+                            binding.apply(v0, v1, v2, v3);
+                            break;
+                        }
                     }
                 }
             }

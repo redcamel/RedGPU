@@ -59,6 +59,10 @@ RedGPU.init(
                     const mesh = result.resultMesh;
                     container.addChild(mesh);
 
+                    result.parsingResult.animations.forEach((clip) => {
+                        result.playAnimation(clip);
+                    });
+
                     updateSubtreeMatrix(mesh, view);
                     const aabb = mesh.combinedBoundingAABB;
                     const maxDim = Math.max(aabb.xSize, aabb.ySize, aabb.zSize);

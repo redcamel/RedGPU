@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import Mesh from "../../../../display/mesh/Mesh";
 import AnimationData_GLTF from "../AnimationData_GLTF";
+import {PointerTargetBinding} from "../../parsers/animation/resolveAnimationPointer_GLTF";
 import shaderCode from './compute.wgsl'
 
 /**
@@ -86,10 +87,15 @@ class AniTrack_GLTF {
      */
     key;
     /**
-     * [KO] 정수형으로 인코딩된 애니메이션 키 타입 (1: 회전, 2: 이동, 3: 스케일, 4: 모프 가중치)
-     * [EN] Integer-encoded animation key type (1: rotation, 2: translation, 3: scale, 4: morph weights)
+     * [KO] 정수형으로 인코딩된 애니메이션 키 타입 (1: 회전, 2: 이동, 3: 스케일, 4: 모프 가중치, 5: JSON Pointer)
+     * [EN] Integer-encoded animation key type (1: rotation, 2: translation, 3: scale, 4: morph weights, 5: JSON Pointer)
      */
     keyType: number;
+    /**
+     * [KO] `KHR_animation_pointer` 트랙의 런타임 프로퍼티 적용 바인딩
+     * [EN] Runtime property binding for a `KHR_animation_pointer` track
+     */
+    pointerBinding: PointerTargetBinding | null = null;
     /**
      * [KO] 보간 방식 문자열 (`'CUBICSPLINE'`, `'STEP'`, `'LINEAR'`)
      * [EN] Interpolation mode string (`'CUBICSPLINE'`, `'STEP'`, `'LINEAR'`)
@@ -141,13 +147,14 @@ class AniTrack_GLTF {
      * [KO] 모프 가중치 적용 대상 메쉬 배열
      * [EN] Array of target meshes for morph weight application
      */
-    constructor(key, time, data, interpolation, targetMesh: Mesh, weightMeshes) {
+    constructor(key, time, data, interpolation, targetMesh: Mesh, weightMeshes, pointerBinding: PointerTargetBinding | null = null) {
         this.key = key
         this.timeAnimationInfo = time
         this.aniDataAnimationInfo = data
         this.interpolation = interpolation
         this.animationTargetMesh = targetMesh
         this.weightMeshes = weightMeshes
+        this.pointerBinding = pointerBinding
         this.#uniformData = new Float32Array(8);
 
         switch (key) {
@@ -162,6 +169,9 @@ class AniTrack_GLTF {
                 break;
             case 'weights':
                 this.keyType = 4;
+                break;
+            case 'pointer':
+                this.keyType = 5;
                 break;
             default:
                 this.keyType = 0;

@@ -65,6 +65,7 @@ const parseNode_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, nodeGlTfId: GlTf
     const isVisible = resolveNodeVisibility(nodeInfo);
     if ('mesh' in nodeInfo) {
         const meshes = parseMesh_GLTF(gltfLoader, gltfData, meshData[nodeInfo.mesh], nodeGlTfId);
+        nodeInfo['Meshes'] = meshes;
         const meshCount = meshes.length;
         for (let i = 0; i < meshCount; i++) {
             let mesh = meshes[i];

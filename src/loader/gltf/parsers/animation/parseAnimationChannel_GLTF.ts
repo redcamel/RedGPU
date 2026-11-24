@@ -4,6 +4,7 @@ import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
 import {AnimationChannel, AnimationSampler, GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
+import {createPointerTargetBinding, parseAnimationPointerPath} from "./resolveAnimationPointer_GLTF";
 
 /**
  * [KO] GLTF의 단일 애니메이션 채널 데이터를 파싱하여 트랙을 생성하고 클립에 추가합니다.
@@ -39,7 +40,33 @@ const parseAnimationChannel_GLTF = (
     const targetMeshes = [];
     const {sampler: channelSamplerGlTfId, target: channelTarget} = animationChannel
     const tSampler = animationSamplers[channelSamplerGlTfId];
-    const {node: channelTargetDataNodeGlTfId, path: channelTargetDataPath} = channelTarget
+    let {node: channelTargetDataNodeGlTfId, path: channelTargetDataPath} = channelTarget
+    if (channelTargetDataPath === 'pointer') {
+        const pointerStr = channelTarget.extensions?.KHR_animation_pointer?.pointer;
+        const descriptor = parseAnimationPointerPath(pointerStr);
+        if (!descriptor) return;
+        if (descriptor.domain === 'node_standard') {
+            channelTargetDataNodeGlTfId = descriptor.nodeIndex;
+            channelTargetDataPath = descriptor.path;
+        } else {
+            const binding = createPointerTargetBinding(gltfLoader, gltfData, descriptor);
+            if (!binding) return;
+            aniTrack = new AniTrack_GLTF(
+                'pointer',
+                new parseAnimationInfo_GLTF(gltfLoader, gltfData, tSampler.input),
+                new parseAnimationInfo_GLTF(gltfLoader, gltfData, tSampler.output),
+                tSampler.interpolation,
+                gltfLoader.resultMesh,
+                targetMeshes,
+                binding
+            );
+            parsedSingleClip.tracks.push(aniTrack);
+            const {dataList} = aniTrack.timeAnimationInfo;
+            if (parsedSingleClip.minTime > dataList[0]) parsedSingleClip.minTime = dataList[0];
+            if (parsedSingleClip.maxTime < dataList[dataList.length - 1]) parsedSingleClip.maxTime = dataList[dataList.length - 1];
+            return;
+        }
+    }
     if (channelTargetDataNodeGlTfId === undefined) return;
     const tNode = NODES[channelTargetDataNodeGlTfId];
     if (!tNode) return;

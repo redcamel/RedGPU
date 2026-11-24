@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
+import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import getFileExtension from "../../utils/file/getFileExtension";
 import getFileName from "../../utils/file/getFileName";
@@ -64,7 +65,12 @@ type GLTFParsingResult = {
      * [KO] 메쉬별 기본/변형 머티리얼 매핑 테이블
      * [EN] Per-mesh mapping table of default and variant materials
      */
-    materialVariantEntries: MaterialVariantEntry[]
+    materialVariantEntries: MaterialVariantEntry[],
+    /**
+     * [KO] glTF 머티리얼 ID별 생성된 `PBRMaterial` 인스턴스 맵 (`KHR_animation_pointer` 연동용)
+     * [EN] Map of glTF material ID to created `PBRMaterial` instances (for `KHR_animation_pointer`)
+     */
+    materialsById: Map<number, PBRMaterial[]>
 }
 
 /**
@@ -199,7 +205,8 @@ class GLTFLoader extends RedGPUObject {
             cameras: [],
             animations: [],
             materialVariants: [],
-            materialVariantEntries: []
+            materialVariantEntries: [],
+            materialsById: new Map()
         };
         this.resultMesh = new Mesh(redGPUContext);
         this.resultMesh.gltfLoaderInfo = this

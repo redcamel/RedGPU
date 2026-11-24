@@ -224,6 +224,15 @@ const parseMaterialInfo_GLTF = (
             blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO
             currentMaterial.alphaBlend = 0;
     }
+    if (materialGlTfId !== undefined) {
+        const {materialsById} = gltfLoader.parsingResult;
+        let list = materialsById.get(materialGlTfId);
+        if (!list) {
+            list = [];
+            materialsById.set(materialGlTfId, list);
+        }
+        list.push(currentMaterial);
+    }
     return currentMaterial;
 };
 export default parseMaterialInfo_GLTF;

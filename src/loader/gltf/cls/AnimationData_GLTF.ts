@@ -63,6 +63,9 @@ class AnimationData_GLTF {
             case 'SCALAR':
                 factor = 1;
                 break;
+            case 'VEC2':
+                factor = 2;
+                break;
             case 'VEC4':
                 factor = 4;
                 break;
