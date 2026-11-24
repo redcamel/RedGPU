@@ -39,14 +39,14 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        const helper = renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext, view);
 
         // [KO] KHR_node_visibility 공식 모델 2종 로드 및 정규화 배치
         // [EN] Load two official KHR_node_visibility models and arrange them side by side
         const container = new RedGPU.Display.Mesh(redGPUContext);
         scene.addChild(container);
 
-        const loadedEntries = [];
+        let loadedCount = 0;
         const spacing = 4.0;
         const targetSize = 2.4;
         const halfSpan = ((MODELS.length - 1) * spacing) / 2;
@@ -70,10 +70,9 @@ RedGPU.init(
                         -aabb.centerZ * scale
                     );
 
-                    loadedEntries.push({name: item.name, mesh});
-                    if (loadedEntries.length === MODELS.length) {
+                    loadedCount++;
+                    if (loadedCount === MODELS.length) {
                         RedGPUExampleHelper.fitMeshToScreenCenter(container, view);
-                        bindVisibilityPane(helper, loadedEntries);
                     }
                 },
                 RedGPUExampleHelper.loadingProgressInfoHandler
@@ -100,18 +99,9 @@ const updateSubtreeMatrix = (mesh, view) => {
 };
 
 const renderTestPane = (redGPUContext, targetView) => {
-    return new RedGPUExampleHelper(redGPUContext, {
+    new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
         ibl: {expanded: false},
         targetView: targetView,
-    });
-};
-
-const bindVisibilityPane = (helper, entries) => {
-    helper.updateGui((pane) => {
-        entries.forEach(({name, mesh}) => {
-            const folder = pane.addFolder({title: name});
-            folder.addBinding(mesh, 'visible');
-        });
     });
 };
