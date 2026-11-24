@@ -70,6 +70,19 @@ const parseAttributeInfo_GLTF = (
 
     const isNormalized = normalized === true;
     const isVec3Color = srcComponents === 3 && key === 'COLOR_0';
+    const dstComponents = isVec3Color ? 4 : srcComponents;
+
+    // glTF 2.0 spec: when accessor.bufferView is undefined, the accessor is initialized with zeros (typically paired with sparse)
+    if (!bufferURIDataView) {
+        const zeroResult = new Float32Array(count * dstComponents);
+        if (isVec3Color) {
+            for (let i = 3, len = zeroResult.length; i < len; i += 4) {
+                zeroResult[i] = 1;
+            }
+        }
+        return zeroResult;
+    }
+
     const packedByteStride = srcComponents * componentType_BYTES_PER_ELEMENT;
     const byteStride = bufferViewByteStride || packedByteStride;
     const baseByteOffset = bufferViewOffset + accessorBufferOffset;
@@ -91,7 +104,6 @@ const parseAttributeInfo_GLTF = (
         }
     }
 
-    const dstComponents = isVec3Color ? 4 : srcComponents;
     const result = new Float32Array(count * dstComponents);
     const elemBytes = componentType_BYTES_PER_ELEMENT;
     const elemBytes2 = elemBytes * 2;

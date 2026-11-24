@@ -87,7 +87,7 @@ class MorphInfo_GLTF {
                                 break;
                         }
                     }
-                    if (accessor.sparse) parseSparse_GLTF(gltfLoader, key, accessor, gltfData, morphData.vertices);
+                    if (accessor.sparse && parsed) parseSparse_GLTF(gltfLoader, key, accessor, gltfData, parsed);
                 }
                 if (weightsValue?.length) {
                     morphData.interleaveData = morphData.vertices;

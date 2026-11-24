@@ -109,12 +109,12 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                             break;
                     }
                 }
-                if (accessorInfo.accessor.sparse) {
+                if (accessorInfo.accessor.sparse && parsed) {
                     parseSparse_GLTF(
-                        gltfLoader, key,
+                        gltfLoader, targetKey,
                         accessorInfo.accessor,
                         gltfData,
-                        vertices,
+                        parsed,
                     );
                 }
             }

@@ -92,13 +92,16 @@ class AccessorInfo_GLTF {
      */
     constructor(gltfLoader: GLTFLoader, gltfData: GLTF, accessorGlTfId: GlTfId) {
         this.accessor = gltfData.accessors[accessorGlTfId];
-        this.bufferView = gltfData.bufferViews[this.accessor.bufferView];
-        this.bufferGlTfId = this.bufferView.buffer;
-        this.buffer = gltfData.buffers[this.bufferGlTfId];
+        const hasBufferView = this.accessor.bufferView !== undefined;
+        this.bufferView = hasBufferView ? gltfData.bufferViews[this.accessor.bufferView] : undefined;
+        this.bufferGlTfId = this.bufferView ? this.bufferView.buffer : -1;
+        this.buffer = this.bufferView ? gltfData.buffers[this.bufferGlTfId] : undefined;
         this.bufferURIDataView = null;
-        const bufferDataView = gltfLoader.parsingResult.uris.buffers[this.bufferGlTfId];
-        if (bufferDataView) {
-            this.bufferURIDataView = bufferDataView;
+        if (this.bufferView) {
+            const bufferDataView = gltfLoader.parsingResult.uris.buffers[this.bufferGlTfId];
+            if (bufferDataView) {
+                this.bufferURIDataView = bufferDataView;
+            }
         }
         this.componentType = WEBGL_COMPONENT_TYPES[this.accessor.componentType];
         this.componentType_BYTES_PER_ELEMENT = this.componentType.BYTES_PER_ELEMENT;
@@ -125,8 +128,8 @@ class AccessorInfo_GLTF {
                 consoleAndThrowError('파싱할수없는 타입', this.componentType);
         }
         this.accessorBufferOffset = this.accessor.byteOffset || 0;
-        this.bufferViewOffset = this.bufferView.byteOffset || 0;
-        this.bufferViewByteStride = this.bufferView.byteStride || 0;
+        this.bufferViewOffset = this.bufferView?.byteOffset || 0;
+        this.bufferViewByteStride = this.bufferView?.byteStride || 0;
         this.startIndex = (this.bufferViewOffset + this.accessorBufferOffset) / this.componentType_BYTES_PER_ELEMENT;
     }
 }
