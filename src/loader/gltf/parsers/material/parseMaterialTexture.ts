@@ -30,6 +30,27 @@ import parse_KHR_texture_transform from "./extensions/parse_KHR_texture_transfor
  * [EN] Whether to use mipmaps (default: `true`)
  * @category Loader
  */
+/**
+ * [KO] GLTF 텍스처 정의에서 확장 우선순위(`KHR_texture_basisu` -> `EXT_texture_webp` -> 기본 `source`)에 따라 이미지 소스 ID를 결정합니다.
+ * [EN] Resolves the image source ID from a GLTF texture definition following extension priority (`KHR_texture_basisu` -> `EXT_texture_webp` -> default `source`).
+ *
+ * @param textureDef -
+ * [KO] GLTF `textures[]` 항목 객체
+ * [EN] GLTF `textures[]` entry object
+ * @returns
+ * [KO] 선택된 이미지 소스 GLTF ID 또는 `undefined`
+ * [EN] Selected image source GLTF ID or `undefined`
+ * @category GLTF
+ */
+export const resolveTextureSourceId = (textureDef: any): GlTfId | undefined => {
+    if (!textureDef) return undefined;
+    return (
+        textureDef.extensions?.KHR_texture_basisu?.source ??
+        textureDef.extensions?.EXT_texture_webp?.source ??
+        textureDef.source
+    );
+};
+
 const parseMaterialTexture = (
     gltfLoader: GLTFLoader,
     tMaterial: PBRMaterial,
@@ -42,17 +63,18 @@ const parseMaterialTexture = (
     const {textureRawList} = gltfLoader.parsingResult
     const targetTextureInfoGlTfId = textureInfo.index;
     const targetTextureInfo = gltfData.textures[targetTextureInfoGlTfId];
-    const targetSourceGlTfId = targetTextureInfo.extensions?.EXT_texture_webp?.source || targetTextureInfo.source;
-    const tURL = getURL(gltfLoader, gltfData, targetSourceGlTfId);
+    const targetSourceGlTfId = resolveTextureSourceId(targetTextureInfo);
+    const tURL = targetSourceGlTfId !== undefined ? getURL(gltfLoader, gltfData, targetSourceGlTfId) : null;
     if (tURL) {
         const samplerGlTfId = targetTextureInfo.sampler;
         const option = getSamplerInfo(gltfData, samplerGlTfId);
-        const {parsedURI, cacheKey} = tURL
+        const {parsedURI, cacheKey, mimeType} = tURL
         const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`
         if (!textureRawList[key]) {
             textureRawList[key] = ({
                 src: parsedURI,
                 cacheKey,
+                mimeType,
                 targetTextureKey: targetTextureKey,
                 targetSamplerKey: `${targetTextureKey}Sampler`,
                 materialList: [tMaterial],
@@ -89,14 +111,17 @@ export default parseMaterialTexture
  * [KO] 대상 이미지 소스의 GLTF ID
  * [EN] GLTF ID of the target image source
  * @returns
- * [KO] 파싱된 URI(`parsedURI`)와 캐시 키(`cacheKey`)를 담은 객체 또는 `null`
- * [EN] Object containing the parsed URI (`parsedURI`) and cache key (`cacheKey`), or `null`
+ * [KO] 파싱된 URI(`parsedURI`), 캐시 키(`cacheKey`), MIME 타입(`mimeType`)을 담은 객체 또는 `null`
+ * [EN] Object containing the parsed URI (`parsedURI`), cache key (`cacheKey`), and MIME type (`mimeType`), or `null`
  */
 const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId: GlTfId) {
-    if (!scenesData.images[sourceGlTfId]) {
+    if (!scenesData.images?.[sourceGlTfId]) {
         return null
     }
-    const {uri} = scenesData.images[sourceGlTfId]
+    const {uri, mimeType} = scenesData.images[sourceGlTfId]
+    if (!uri) {
+        return null
+    }
     let parsedURI
     const cacheKey = `${gltfLoader.url}_${sourceGlTfId}`
     if (uri.indexOf('blob:http') > -1) {
@@ -106,7 +131,8 @@ const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId:
     }
     return {
         parsedURI,
-        cacheKey
+        cacheKey,
+        mimeType
     }
 };
 /**

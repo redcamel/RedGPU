@@ -167,7 +167,8 @@ export default class TextureLoader extends RedGPUObject {
         if (targetClass === BitmapTexture) {
             targetTexture.texture = new targetClass(redGPUContext, {
                 src: srcInfo.src,
-                cacheKey: srcInfo.cacheKey
+                cacheKey: srcInfo.cacheKey,
+                mimeType: srcInfo.mimeType
             }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format, false);
         } else {
             targetTexture.texture = new targetClass(redGPUContext, {

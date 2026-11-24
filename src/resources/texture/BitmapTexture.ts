@@ -18,7 +18,7 @@ const MANAGED_STATE_KEY = 'managedBitmapTextureState'
  *
  * @category Texture
  */
-export type BitmapSrcInfo = string | { src: string, cacheKey: string }
+export type BitmapSrcInfo = string | { src: string, cacheKey?: string, mimeType?: string }
 
 /**
  * [KO] 일반 이미지(PNG, JPG, WebP, SVG) 및 KTX2 압축 텍스처를 로드하여 GPU 2D 텍스처로 관리하는 클래스입니다.
@@ -37,6 +37,7 @@ export type BitmapSrcInfo = string | { src: string, cacheKey: string }
 class BitmapTexture extends ManagementResourceBase {
     #gpuTexture: GPUTexture
     #src: string
+    #mimeType: string
     #mipLevelCount: number
     #useMipmap: boolean
     #width: number = 0
@@ -218,6 +219,7 @@ class BitmapTexture extends ManagementResourceBase {
 
     set src(value: BitmapSrcInfo) {
         this.#src = this.#getParsedSrc(value);
+        this.#mimeType = this.#getMimeType(value);
         this.cacheKey = this.#getCacheKey(value);
         if (this.#src) this.#loadBitmapTexture(this.#src);
     }
@@ -281,6 +283,10 @@ class BitmapTexture extends ManagementResourceBase {
         return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
     }
 
+    #getMimeType(srcInfo?: BitmapSrcInfo): string {
+        return typeof srcInfo === 'object' && srcInfo ? srcInfo.mimeType : undefined
+    }
+
     #setGpuTexture(value: GPUTexture) {
         this.#gpuTexture = value;
         this.notifyUpdate();
@@ -335,9 +341,10 @@ class BitmapTexture extends ManagementResourceBase {
             let imgBitmap: ImageBitmap;
             const premultiplyAlpha = this.#usePremultiplyAlpha ? 'premultiply' : 'none';
             const ext = getFileExtension(src).toLowerCase();
+            const isKtx2 = ext === "ktx2" || src.endsWith(".ktx2") || this.#mimeType === "image/ktx2" || src.startsWith("data:image/ktx2");
             if (ext === "svg" || src.endsWith(".svg")) {
                 imgBitmap = await convertSvgToImageBitmap(src, premultiplyAlpha);
-            } else if (ext === "ktx2" || src.endsWith(".ktx2")) {
+            } else if (isKtx2) {
                 const {container} = await loadKtx2Container(src);
 
 
@@ -415,6 +422,28 @@ export interface KTX2ParseResult {
  * [EN] Throws `Error` if network request fails, KTX2 magic identifier is invalid, or dimensions are invalid
  * @category Texture
  */
+const KTX2_MAGIC = Object.freeze([0xAB, 0x4B, 0x54, 0x58, 0x20, 0x32, 0x30, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A]);
+
+/**
+ * [KO] 바이너리 버퍼의 앞 12바이트가 KTX2 공식 매직 넘버(`«KTX 20»\r\n\x1A\n`)와 일치하는지 판별합니다.
+ * [EN] Checks whether the first 12 bytes of a binary buffer match the official KTX2 magic identifier (`«KTX 20»\r\n\x1A\n`).
+ *
+ * @param bytes -
+ * [KO] 검사할 바이트 배열(`Uint8Array`)
+ * [EN] Byte array (`Uint8Array`) to inspect
+ * @returns
+ * [KO] KTX2 파일 여부
+ * [EN] Whether the buffer starts with the KTX2 magic identifier
+ * @category Texture
+ */
+export function isKtx2Magic(bytes: Uint8Array): boolean {
+    if (!bytes || bytes.length < 12) return false;
+    for (let i = 0; i < 12; i++) {
+        if (bytes[i] !== KTX2_MAGIC[i]) return false;
+    }
+    return true;
+}
+
 export async function loadKtx2Container(src: string): Promise<KTX2ParseResult> {
     const response = await fetch(src);
     if (!response.ok) {
@@ -424,7 +453,7 @@ export async function loadKtx2Container(src: string): Promise<KTX2ParseResult> {
     const arrayBuffer = await response.arrayBuffer();
     const uint8 = new Uint8Array(arrayBuffer);
 
-    if (uint8.length < 12 || uint8[0] !== 0xAB || uint8[1] !== 0x4B || uint8[2] !== 0x54 || uint8[3] !== 0x58) {
+    if (!isKtx2Magic(uint8)) {
         throw new Error(`[loadKtx2Container ❌] Invalid KTX2 magic identifier: ${src}. (Pointer text or non-binary file)`);
     }
 

@@ -2183,6 +2183,29 @@ export const ExampleList: ExampleListType = [
                             },
                         ]
                     },
+                    {
+                        name: 'KHR_texture_basisu',
+                        list: [
+                            {
+                                name: 'Chronograph Watch (KTX2)',
+                                path: 'gltf/gltfExtensions/textureBasisu/chronographWatch',
+                                extensionList: ['KHR_texture_basisu', 'KHR_materials_transmission', 'KHR_materials_specular'],
+                                description: {
+                                    ko: 'Khronos 공식 ChronographWatch (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 PBR 색감 정합성을 검증합니다.',
+                                    en: 'Loads the official Khronos ChronographWatch (glTF-KTX-BasisU) model to verify automatic KTX2 texture loading and PBR fidelity.'
+                                },
+                            },
+                            {
+                                name: 'Stained Glass Lamp (KTX2)',
+                                path: 'gltf/gltfExtensions/textureBasisu/stainedGlassLamp',
+                                extensionList: ['KHR_texture_basisu', 'KHR_materials_transmission', 'KHR_materials_volume'],
+                                description: {
+                                    ko: 'Khronos 공식 StainedGlassLamp (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 sRGB/Linear 색감 정합성을 검증합니다.',
+                                    en: 'Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 texture loading and sRGB/Linear fidelity.'
+                                },
+                            },
+                        ]
+                    },
                 ]
             }
         ]

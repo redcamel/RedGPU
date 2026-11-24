@@ -265,7 +265,10 @@ async function initBasisTranscoder(): Promise<any> {
             module.initializeBasis();
             basisModule = module;
             return module;
-        })();
+        })().catch((err) => {
+            basisTranscoderPromise = null;
+            throw err;
+        });
     }
     return basisTranscoderPromise;
 }
