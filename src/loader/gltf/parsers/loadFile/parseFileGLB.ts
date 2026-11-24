@@ -20,6 +20,7 @@ const BINPACKER_CHUNK_TYPE_JSON = 0x4e4f534a;
  * [EN] Binary (BIN) chunk type constant in GLB format.
  */
 const BINPACKER_CHUNK_TYPE_BINARY = 0x004e4942;
+const UTF8_TEXT_DECODER = new TextDecoder('utf-8');
 /**
  * [KO] GLB 파일을 로드 및 파싱하고 완료 시 콜백 함수를 호출합니다.
  * [EN] Loads and parses a GLB file and invokes the callback function upon completion.
@@ -165,7 +166,7 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
                     BINPACKER_HEADER_LENGTH + chunkIndex,
                     chunkLength
                 );
-                content = convertUint8ArrayToString(contentArray);
+                content = UTF8_TEXT_DECODER.decode(contentArray);
                 break;
             case BINPACKER_CHUNK_TYPE_BINARY:
                 const byteOffset = BINPACKER_HEADER_LENGTH + chunkIndex;
@@ -217,22 +218,4 @@ const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
     return bufferHashMap;
 };
 export default parseFileGLB
-/**
- * [KO] `Uint8Array` 데이터를 문자열로 변환합니다.
- * [EN] Converts `Uint8Array` data to a string.
- *
- * @param array -
- * [KO] 변환할 `Uint8Array` 객체
- * [EN] `Uint8Array` object to convert
- * @returns
- * [KO] 변환된 문자열
- * [EN] Converted string
- */
-const convertUint8ArrayToString = (array: Uint8Array): string => {
-    let str = '';
-    for (let item of array) {
-        str += String.fromCharCode(item);
-    }
-    return str;
-};
 
