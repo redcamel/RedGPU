@@ -38,7 +38,7 @@ const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
  * @category Loader
  */
 const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
-    const {matrix, rotation: quaternion, translation, scale} = nodeInfo;
+    const {rotation: quaternion, translation, scale} = nodeInfo;
     let rotationMTX = mat4.create();
     let tRotation: any;
 

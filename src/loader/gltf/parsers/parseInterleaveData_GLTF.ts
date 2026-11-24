@@ -57,7 +57,6 @@ const parseInterleaveData_GLTF = (
     const has_vertices = vertices.length
     const has_normalData = normalData.length
     const has_uvs1 = uvs1.length
-    const has_uvs2 = uvs2.length
     const has_verticesColor_0 = verticesColor_0.length
     const has_jointWeights = jointWeights.length
     const has_joints = joints.length

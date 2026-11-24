@@ -20,10 +20,7 @@ const PI_180 = 180 / Math.PI;
  * @category Loader
  */
 class GltfAnimationLooperManager {
-    #targetFps: number = 60;
-    #frameTime: number = 1000 / this.#targetFps;
     #lastUpdateTime: number = 0;
-    #frameCount: number = 0;
 
     /**
      * [KO] 매 프레임 애니메이션을 처리하고 대상 메시의 변환 정보를 갱신합니다.
@@ -50,10 +47,7 @@ class GltfAnimationLooperManager {
     ) => {
         const now = timestamp;
         const deltaTime = now - this.#lastUpdateTime;
-        if (deltaTime < this.#frameTime) {
-        }
         this.#lastUpdateTime = now;
-        this.#frameCount++;
 
         let playAnimationInfoIDX: number = playAnimationInfoList.length;
         let targetPlayAnimationInfo: PlayAnimationInfo;

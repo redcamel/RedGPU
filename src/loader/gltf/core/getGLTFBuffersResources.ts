@@ -57,8 +57,6 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
 
 
     buffers.forEach((buffer, bufferIndex) => {
-        buffer['_redURIkey'] = bufferKey;
-        buffer['_redURIIndex'] = bufferIndex;
         if (buffer.uri instanceof ArrayBuffer) {
             const uriDataView = new DataView(buffer.uri);
             processArrayBuffer(uriDataView);
@@ -80,8 +78,8 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
                     resultContainer[bufferIndex] = new DataView(request);
                     checkLoadingStatus()
                 },
-                function (request, error) {
-                    console.error(request, error);
+                function (error) {
+                    console.error(error);
                 }
             );
         }

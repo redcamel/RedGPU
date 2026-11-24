@@ -45,11 +45,6 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
     let pose: Float32Array;
     let cached: any;
     let numericCacheKey: number;
-    let cosom: number;
-    let prevX: number, prevY: number, prevZ: number, prevW: number;
-    let nextX: number, nextY: number, nextZ: number, nextW: number;
-    let scale0: number, scale1: number;
-    let omega: number, sinom: number;
     let idx: number;
 
     if (lastHint < targetTimeDataListLength - 1) {

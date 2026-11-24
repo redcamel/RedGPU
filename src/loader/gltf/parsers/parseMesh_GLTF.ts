@@ -8,7 +8,6 @@ import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import calculateNormals from "../../../math/calculateNormals";
 import createUUID from "../../../utils/uuid/createUUID";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
@@ -135,7 +134,6 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         }
         if (verticesColor_0.length) {
             tMaterial.useVertexColor = true;
-            (tMaterial as any).useVertexColor_0 = true;
         }
 
         let normalData;
@@ -144,11 +142,8 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 
         } else normalData = normals;
 
-        {
-            if (tangents.length > 0) {
-            } else {
-                tangents = Array.from(calculateTangents(vertices, normalData, uvs, indices));
-            }
+        if (!tangents.length) {
+            tangents = Array.from(calculateTangents(vertices, normalData, uvs, indices));
         }
         if (tangents.length) tMaterial.useVertexTangent = true;
         let interleaveData = [];
@@ -158,8 +153,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         if (vertices.length) tInterleaveInfoList['aVertexPosition'] = VertexInterleaveType.float32x3
         if (normalData.length) tInterleaveInfoList['aVertexNormal'] = VertexInterleaveType.float32x3
         if (uvs.length) tInterleaveInfoList['aTexcoord'] = VertexInterleaveType.float32x2
-        if (uvs2.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
-        else if (uvs1.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
+        if (uvs1.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
         else if (uvs.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
         tInterleaveInfoList['aVertexColor_0'] = VertexInterleaveType.float32x4
         tInterleaveInfoList['aVertexTangent'] = VertexInterleaveType.float32x4
@@ -206,9 +200,6 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                 `Index_${gltfLoader.url}_${nodeGlTfId}_${i}`
             ) : null
         );
-        if (!tMaterial) {
-            consoleAndThrowError('재질을 파싱할수없는경우 ', meshPrimitive);
-        }
         tMesh = new Mesh(redGPUContext, tGeo, tMaterial);
         tMesh.animationInfo.weightBuffer = weightBuffer
         tMesh.animationInfo.jointBuffer = jointBuffer
@@ -241,10 +232,8 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         let targetGeometryData = tMesh.geometry.vertexBuffer.data
         if (!tMesh.gpuRenderInfo) tMesh.initGPURenderInfos()
         let NUM = 0;
-        {
-            for (const k in tInterleaveInfoList) {
-                NUM += tInterleaveInfoList[k].numElements
-            }
+        for (const k in tInterleaveInfoList) {
+            NUM += tInterleaveInfoList[k].numElements
         }
         if (!hasVertexBuffer) {
             const list = tMesh.animationInfo.morphInfo.morphInfoDataList;

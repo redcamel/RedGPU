@@ -59,7 +59,7 @@ const parseChildrenAndSkin = (gltfLoader: GLTFLoader, gltfData: GLTF, mesh: Mesh
 const parseNode_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, nodeGlTfId: GlTfId, parentMesh: Mesh) => {
     const {redGPUContext, parsingResult} = gltfLoader;
     const {nodes: nodeData, meshes: meshData, skins} = gltfData;
-    const {groups: resultGroups, cameras: resultCameras} = parsingResult;
+    const {groups: resultGroups} = parsingResult;
     const nodeInfo = nodeData[nodeGlTfId];
     if ('mesh' in nodeInfo) {
         const meshes = parseMesh_GLTF(gltfLoader, gltfData, meshData[nodeInfo.mesh], nodeGlTfId);

@@ -21,7 +21,6 @@ import GLTFLoader from "../../GLTFLoader";
  * @category Loader
  */
 const parseJoint_GLTF = (gltfLoader: GLTFLoader, skinInfo: ParsedSkinInfo_GLTF, nodes: Node[], jointGlTfId: GlTfId) => {
-    const {redGPUContext} = gltfLoader
     const jointMesh = nodes[jointGlTfId]['Mesh'];
     if (jointMesh) {
 

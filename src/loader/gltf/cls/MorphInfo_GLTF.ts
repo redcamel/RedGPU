@@ -28,11 +28,6 @@ class MorphInfo_GLTF {
      */
     weights: number[]
     /**
-     * [KO] 모프 데이터 캐시 객체
-     * [EN] Morph data cache object
-     */
-    cacheData = {}
-    /**
      * [KO] 원본 인터리브 정점 데이터
      * [EN] Original interleaved vertex data
      */

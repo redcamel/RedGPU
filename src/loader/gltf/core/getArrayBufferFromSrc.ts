@@ -18,7 +18,7 @@ type ErrorCallback = (err: any) => void;
  *
  * @category GLTF
  */
-export type ProgressCallback = (event: {
+type ProgressCallback = (event: {
     loaded: number;
     total: number;
     lengthComputable: boolean;
@@ -109,11 +109,7 @@ const getArrayBufferFromSrc = async (
         onLoad(arrayBuffer);
 
     } catch (error) {
-        if (onError) {
-            onError(error);
-        } else {
-            console.error('getArrayBufferFromSrc 로딩 중 오류 발생:', error);
-        }
+        onError(error);
     }
 };
 

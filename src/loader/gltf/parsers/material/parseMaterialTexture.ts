@@ -46,7 +46,7 @@ const parseMaterialTexture = (
     const tURL = getURL(gltfLoader, gltfData, targetSourceGlTfId);
     if (tURL) {
         const samplerGlTfId = targetTextureInfo.sampler;
-        const option = getSamplerInfo(gltfLoader, gltfData, samplerGlTfId);
+        const option = getSamplerInfo(gltfData, samplerGlTfId);
         const {parsedURI, cacheKey} = tURL
         const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`
         if (!textureRawList[key]) {
@@ -126,7 +126,7 @@ const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId:
  * [KO] 변환된 `GPUSamplerDescriptor` 객체
  * [EN] Converted `GPUSamplerDescriptor` object
  */
-const getSamplerInfo = function (gltfLoader: GLTFLoader, scenesData: GLTF, samplerGlTfId: GlTfId): GPUSamplerDescriptor {
+const getSamplerInfo = function (scenesData: GLTF, samplerGlTfId: GlTfId): GPUSamplerDescriptor {
     const result: GPUSamplerDescriptor = {
         magFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
         minFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
@@ -156,7 +156,6 @@ const getSamplerInfo = function (gltfLoader: GLTFLoader, scenesData: GLTF, sampl
             if ('wrapS' in t0) result.addressModeU = wrapTable[t0.wrapS];
             if ('wrapT' in t0) result.addressModeV = wrapTable[t0.wrapT];
         }
-    } else {
     }
     return result;
 };

@@ -23,18 +23,16 @@ const parse_KHR_materials_volume = (currentMaterial: PBRMaterial, KHR_materials_
     currentMaterial.KHR_attenuationColor = KHR_materials_volume.attenuationColor || [1, 1, 1]
     currentMaterial.use2PathRender = true
     currentMaterial.transparent = true
-    {
-        const thicknessTextureInfo = KHR_materials_volume.thicknessTexture;
-        if (thicknessTextureInfo) {
-            parseMaterialTexture(
-                gltfLoader,
-                currentMaterial,
-                thicknessTextureInfo,
-                'KHR_thicknessTexture',
-                null,
-                false
-            )
-        }
+    const thicknessTextureInfo = KHR_materials_volume.thicknessTexture;
+    if (thicknessTextureInfo) {
+        parseMaterialTexture(
+            gltfLoader,
+            currentMaterial,
+            thicknessTextureInfo,
+            'KHR_thicknessTexture',
+            null,
+            false
+        )
     }
 }
 export default parse_KHR_materials_volume

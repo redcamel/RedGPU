@@ -72,16 +72,6 @@ class ParsedSkinInfo_GLTF {
      */
     uniformBuffer: GPUBuffer
     /**
-     * [KO] 조인트 슬롯 인덱스 GPU 버퍼
-     * [EN] Joint slot indices GPU buffer
-     */
-    jointSlotIndicesBuffer: GPUBuffer
-    /**
-     * [KO] 마지막으로 적용된 메쉬 모델 행렬
-     * [EN] Last applied mesh model matrix
-     */
-    lastMeshModelMatrix: any = null;
-    /**
      * [KO] 스키닝 연산용 컴퓨트 셰이더 모듈
      * [EN] Compute shader module for skinning calculation
      */
@@ -452,10 +442,6 @@ class ParsedSkinInfo_GLTF {
         if (this.prevVertexStorageBuffer) {
             this.prevVertexStorageBuffer.destroy();
             this.prevVertexStorageBuffer = null;
-        }
-        if (this.jointSlotIndicesBuffer) {
-            this.jointSlotIndicesBuffer.destroy();
-            this.jointSlotIndicesBuffer = null;
         }
         this.computeShader = null;
         this.computePipeline = null;

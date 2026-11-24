@@ -22,9 +22,7 @@ const parseCameras_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
     if (cameras) {
         cameras.forEach(function (camera) {
             let camera3D = new PerspectiveCamera();
-            if (camera.type == 'orthographic') {
-            } else {
-
+            if (camera.type !== 'orthographic') {
                 const yfov = camera.perspective.yfov ?? camera.perspective.yfieldOfView;
                 if (yfov !== undefined) {
                     camera3D.fieldOfView = yfov * 180 / Math.PI;

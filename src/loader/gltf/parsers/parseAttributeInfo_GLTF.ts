@@ -87,7 +87,6 @@ const parseAttributeInfo_GLTF = function (
                     else if (key == 'COLOR_0') verticesColor_0.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
                     else if (key == 'TANGENT') tangents.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
                     else consoleAndThrowError('VEC4에서 현재 지원하고 있지 않는 키', key)
-                    strideIndex++;
                 }
             }
             break;
@@ -129,7 +128,6 @@ const parseAttributeInfo_GLTF = function (
                             uvs.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
                         } else if (key == 'TEXCOORD_1') {
                             uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                        } else {
                         }
                     }
                     strideIndex++;
@@ -141,9 +139,7 @@ const parseAttributeInfo_GLTF = function (
                         uvs.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
                     } else if (key == 'TEXCOORD_1') {
                         uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    } else {
                     }
-                    strideIndex++;
                 }
             }
             break;

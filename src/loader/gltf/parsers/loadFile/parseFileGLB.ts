@@ -142,7 +142,6 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
     let body = null;
     const chunkView = new DataView(buffer, BINPACKER_HEADER_LENGTH);
     const byteLength = chunkView.byteLength;
-    let num = 0
     for (let chunkIndex = 0; chunkIndex < byteLength;) {
         const chunkLength = chunkView.getUint32(chunkIndex, true);
         chunkIndex += 4;
@@ -156,7 +155,6 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
                     chunkLength
                 );
                 content = convertUint8ArrayToString(contentArray);
-                num++
                 break;
             case BINPACKER_CHUNK_TYPE_BINARY:
                 const byteOffset = BINPACKER_HEADER_LENGTH + chunkIndex;

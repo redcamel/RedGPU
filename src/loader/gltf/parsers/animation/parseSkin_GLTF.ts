@@ -28,13 +28,9 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
     const inverseBindMatrices = []
     const {nodes: NODES} = scenesData;
     const {joints, skeleton} = skin
-    {
-        let i = 0
-        const len = joints.length
-        for (i; i < len; i++) {
-            const jointGlTfId = joints[i]
-            parseJoint_GLTF(gltfLoader, parsedSkinInfo, NODES, jointGlTfId);
-        }
+    for (let j = 0, jointLen = joints.length; j < jointLen; j++) {
+        const jointGlTfId = joints[j]
+        parseJoint_GLTF(gltfLoader, parsedSkinInfo, NODES, jointGlTfId);
     }
     if (skeleton) {
         parsedSkinInfo.skeletonMesh = NODES[skeleton]['Mesh'];
@@ -68,7 +64,6 @@ const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, me
                 len = i + count * 16;
                 for (i; i < len; i++) {
                     inverseBindMatrices.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    strideIndex++;
                 }
             }
             break;
