@@ -3,8 +3,8 @@ import {decompress as decompressZstd} from 'fzstd';
 import keepLog from "../../keepLog";
 
 
-const BASIS_JS_CDN_URL = 'https://unpkg.com/three@latest/examples/jsm/libs/basis/basis_transcoder.js';
-const BASIS_WASM_CDN_URL = 'https://unpkg.com/three@latest/examples/jsm/libs/basis/basis_transcoder.wasm';
+const BASIS_JS_CDN_URL = 'https://cdn.jsdelivr.net/gh/BinomialLLC/basis_universal@v2_50/webgl/transcoder/build/basis_transcoder.js';
+const BASIS_WASM_CDN_URL = 'https://cdn.jsdelivr.net/gh/BinomialLLC/basis_universal@v2_50/webgl/transcoder/build/basis_transcoder.wasm';
 
 /**
  * [KO] KTX2 텍스처 생성을 위한 옵션 인터페이스입니다.
@@ -245,7 +245,7 @@ async function initBasisTranscoder(): Promise<any> {
                     script.onload = () => resolve();
                     script.onerror = () => {
                         script.remove();
-                        reject(new Error(`[RedGPU KTX2] Failed to load Basis Universal Transcoder script (Three.js): ${BASIS_JS_CDN_URL}`));
+                        reject(new Error(`[RedGPU KTX2] Failed to load Basis Universal Transcoder script (BinomialLLC/basis_universal): ${BASIS_JS_CDN_URL}`));
                     };
                     document.head.appendChild(script);
                 });
@@ -267,7 +267,7 @@ async function initBasisTranscoder(): Promise<any> {
             });
 
             module.initializeBasis();
-            keepLog(`[RedGPU KTX2] Basis Universal Transcoder initialized (Three.js WASM: ${BASIS_WASM_CDN_URL})`);
+            keepLog(`[RedGPU KTX2] Basis Universal Transcoder initialized (BinomialLLC/basis_universal WASM: ${BASIS_WASM_CDN_URL})`);
             basisModule = module;
             return module;
         })().catch((err) => {
