@@ -1,5 +1,6 @@
 import getAbsoluteURL from "../../../../utils/file/getAbsoluteURL";
 import getArrayBufferFromSrc from "../../core/getArrayBufferFromSrc";
+import {throwIfAborted} from "../../core/gltfAsyncUtils";
 import {GLTF} from "../../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
 import parseGLTF from "../parseGLTF";
@@ -37,7 +38,13 @@ const BINPACKER_CHUNK_TYPE_BINARY = 0x004e4942;
  * [EN] `Promise<void>` that resolves when parsing is complete
  * @category Loader
  */
-const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
+const parseFileGLB = async (
+    gltfLoader: GLTFLoader,
+    callBack?: () => void,
+    onProgress?: (info: GLTFLoadingProgressInfo) => void,
+    signal?: AbortSignal
+): Promise<void> => {
+    throwIfAborted(signal);
 
     const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName)
     const {cache, pending} = gltfLoader.redGPUContext.resourceManager.gltfCacheManager.glbCache;
@@ -57,15 +64,15 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
         }
     }
     if (cache.has(loadFilePath)) {
-
         progress()
-        await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress);
+        await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress, signal);
         return;
     }
     if (pending.has(loadFilePath)) {
         await pending.get(loadFilePath);
+        throwIfAborted(signal);
         progress()
-        await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress);
+        await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress, signal);
         return;
     }
     const promise = new Promise<ArrayBuffer>((resolve, reject) => {
@@ -79,11 +86,11 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
                 resolve(buffer);
             },
             (error) => {
-                console.error('GLB Model parsing error', error);
                 pending.delete(loadFilePath);
                 reject(error);
             },
             (info) => {
+                if (signal?.aborted) return;
                 gltfLoader.loadingProgressInfo.model = info
                 onProgress?.(gltfLoader.loadingProgressInfo);
             }
@@ -91,12 +98,9 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
     });
     pending.set(loadFilePath, promise);
 
-    try {
-        const buffer = await promise;
-        await parseArrayBuffer(gltfLoader, buffer, callBack, onProgress);
-    } catch (error) {
-        console.error(error);
-    }
+    const buffer = await promise;
+    throwIfAborted(signal);
+    await parseArrayBuffer(gltfLoader, buffer, callBack, onProgress, signal);
 }
 /**
  * [KO] GLB ArrayBuffer에서 JSON 데이터와 바이너리 청크를 추출하여 GLTF 파싱을 수행합니다.
@@ -115,7 +119,14 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
  * [KO] 로딩 진행 상태를 전달받는 콜백 함수
  * [EN] Callback function receiving loading progress information
  */
-const parseArrayBuffer = async (gltfLoader: GLTFLoader, buffer: ArrayBuffer, callBack, onProgress) => {
+const parseArrayBuffer = async (
+    gltfLoader: GLTFLoader,
+    buffer: ArrayBuffer,
+    callBack?: () => void,
+    onProgress?: (info: GLTFLoadingProgressInfo) => void,
+    signal?: AbortSignal
+): Promise<void> => {
+    throwIfAborted(signal);
     const {content, binaryChunk} = parseBuffer(buffer);
     if (content === null) {
         throw new Error('JSON content not found');
@@ -124,7 +135,7 @@ const parseArrayBuffer = async (gltfLoader: GLTFLoader, buffer: ArrayBuffer, cal
     processImagesIfExist(gltfData, binaryChunk);
     gltfData.buffers[0].uri = binaryChunk;
     gltfLoader.gltfData = gltfData
-    parseGLTF(gltfLoader, gltfData, callBack, onProgress)
+    await parseGLTF(gltfLoader, gltfData, callBack, onProgress, signal)
 }
 /**
  * [KO] GLB 버퍼를 분석하여 JSON 문자열과 바이너리 청크를 추출합니다.

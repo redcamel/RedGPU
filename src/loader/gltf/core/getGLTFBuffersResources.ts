@@ -2,6 +2,7 @@ import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
 import decodeMeshoptBufferViews, {hasMeshoptCompression, isMeshoptFallbackBuffer} from "./decodeMeshoptBufferViews";
+import {createAbortError} from "./gltfAsyncUtils";
 
 /**
  * [KO] glTF 버퍼 로딩 진행률을 계산하여 로더의 진행 상태 정보를 갱신합니다.
@@ -46,19 +47,51 @@ const checkProgress = (gltfLoader: GLTFLoader, gltfData: GLTF, loadedBuffers: nu
  * [EN] Callback function invoked when buffer loading progress updates
  * @category GLTF
  */
-const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callback, onProgress: (info: GLTFLoadingProgressInfo) => void) => {
+const getGLTFBuffersResources = (
+    gltfLoader: GLTFLoader,
+    gltfData: GLTF,
+    callback?: () => void,
+    onProgress?: (info: GLTFLoadingProgressInfo) => void,
+    onError?: (error: any) => void,
+    signal?: AbortSignal
+) => {
     const {parsingResult} = gltfLoader
     const {uris} = parsingResult
     const bufferKey = 'buffers';
     const resultContainer = uris[bufferKey]
-    const buffers = gltfData.buffers
+    const buffers = gltfData.buffers || []
     const totalBuffers = buffers.length;
     let loadedBuffers = 0;
-    checkProgress(gltfLoader, gltfData, loadedBuffers)
-    if (totalBuffers === 0) {
-        if (callback) callback();
+    let settled = false;
+
+    const fail = (error: any) => {
+        if (settled) return;
+        settled = true;
+        if (onError) onError(error);
+        else console.error(error);
+    };
+
+    const complete = () => {
+        if (settled) return;
+        if (signal?.aborted) {
+            fail(createAbortError());
+            return;
+        }
+        settled = true;
+        callback?.();
+    };
+
+    if (signal?.aborted) {
+        fail(createAbortError());
         return;
     }
+
+    if (totalBuffers === 0) {
+        complete();
+        return;
+    }
+
+    checkProgress(gltfLoader, gltfData, loadedBuffers)
 
     buffers.forEach((buffer, bufferIndex) => {
         if (buffer.uri instanceof ArrayBuffer) {
@@ -72,6 +105,7 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
         }
 
         function processArrayBuffer(uriDataView: DataView) {
+            if (settled) return;
             loadedBuffers++;
             resultContainer[bufferIndex] = uriDataView;
             checkLoadingStatus();
@@ -83,31 +117,40 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
                 gltfLoader,
                 tSrc,
                 function (request) {
+                    if (settled) return;
+                    if (signal?.aborted) {
+                        fail(createAbortError());
+                        return;
+                    }
                     loadedBuffers++;
                     resultContainer[bufferIndex] = new DataView(request);
                     checkLoadingStatus()
                 },
                 function (error) {
-                    console.error(error);
+                    fail(error);
                 }
             );
         }
 
         function checkLoadingStatus() {
-
+            if (settled) return;
+            if (signal?.aborted) {
+                fail(createAbortError());
+                return;
+            }
             checkProgress(gltfLoader, gltfData, loadedBuffers)
             onProgress?.(gltfLoader.loadingProgressInfo);
             if (loadedBuffers === totalBuffers) {
                 if (hasMeshoptCompression(gltfData)) {
                     decodeMeshoptBufferViews(gltfData, resultContainer)
                         .then(() => {
-                            if (callback) callback();
+                            complete();
                         })
                         .catch((error) => {
-                            console.error(error);
+                            fail(error);
                         });
                 } else {
-                    if (callback) callback();
+                    complete();
                 }
             }
         }
