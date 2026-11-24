@@ -28,6 +28,8 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
+        const helper = renderTestPane(redGPUContext, view);
+
         // [KO] KTX2(BasisU) 모델 로드 및 테스트 패널 연동
         // [EN] Load KTX2 (BasisU) model and bind test pane
         new RedGPU.GLTFLoader(
@@ -40,7 +42,7 @@ RedGPU.init(
                 if (result.parsingResult.animations.length > 0) {
                     result.playAnimation(result.parsingResult.animations[0]);
                 }
-                renderTestPane(redGPUContext, view, result);
+                bindMaterialVariantsPane(helper, result);
             },
             RedGPUExampleHelper.loadingProgressInfoHandler
         );
@@ -57,23 +59,25 @@ RedGPU.init(
     }
 );
 
-const renderTestPane = (redGPUContext, targetView, gltfLoader) => {
-    const variants = gltfLoader.materialVariants;
-    const config = {materialVariant: '__default__'};
-    const options = {Default: '__default__'};
-    variants.forEach((name) => {
-        options[name] = name;
-    });
-
-    new RedGPUExampleHelper(redGPUContext, {
+const renderTestPane = (redGPUContext, targetView) => {
+    return new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
-        ibl: true,
+        ibl: {expanded: false},
         targetView: targetView,
-        gui: variants.length > 0 ? (pane) => {
-            const folder = pane.addFolder({title: 'KHR_materials_variants'});
-            folder.addBinding(config, 'materialVariant', {options}).on('change', (ev) => {
-                gltfLoader.applyMaterialVariant(ev.value === '__default__' ? null : ev.value);
-            });
-        } : undefined,
+    });
+};
+
+const bindMaterialVariantsPane = (helper, gltfLoader) => {
+    const variants = gltfLoader.materialVariants;
+    if (!variants.length) return;
+
+    const config = {materialVariant: '__default__'};
+    const options = {Default: '__default__', ...Object.fromEntries(variants.map((v) => [v, v]))};
+
+    helper.updateGui((pane) => {
+        const folder = pane.addFolder({title: 'KHR_materials_variants'});
+        folder.addBinding(config, 'materialVariant', {options}).on('change', (ev) => {
+            gltfLoader.applyMaterialVariant(ev.value === '__default__' ? null : ev.value);
+        });
     });
 };

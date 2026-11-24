@@ -101,7 +101,7 @@ const updateSubtreeMatrix = (mesh, view) => {
 const renderTestPane = (redGPUContext, targetView) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
-        ibl: true,
+        ibl: {expanded: false},
         targetView: targetView,
     });
 };

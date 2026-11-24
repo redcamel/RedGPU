@@ -37,6 +37,11 @@ class RedGPUExampleHelper {
         useExampleHelperStore.getState().setShowCompareLabel(value);
     }
 
+    public updateGui(gui: (pane: any) => void): void {
+        const prev = useExampleHelperStore.getState().guiConfig || {};
+        useExampleHelperStore.getState().setGuiConfig({...prev, gui});
+    }
+
     /**
      * [KO] 메쉬가 화면 중앙에 꽉 차도록 카메라 거리를 자동으로 조절합니다.
      * [EN] Automatically adjusts the camera distance so that the mesh fills the screen center.
