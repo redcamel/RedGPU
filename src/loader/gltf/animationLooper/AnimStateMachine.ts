@@ -243,9 +243,15 @@ export class AnimStateMachine {
         }
 
         if (!this.targetState) {
-            const activeTransition = this.#transitions.find(t =>
-                t.fromState === currentState.name && t.conditions()
-            );
+            let activeTransition: AnimTransition | undefined;
+            const transitions = this.#transitions;
+            for (let i = 0, len = transitions.length; i < len; i++) {
+                const t = transitions[i];
+                if (t.fromState === currentState.name && t.conditions()) {
+                    activeTransition = t;
+                    break;
+                }
+            }
 
             if (activeTransition) {
                 const toState = this.#states.get(activeTransition.toState);

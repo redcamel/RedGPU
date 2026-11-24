@@ -5,10 +5,12 @@ import {PlayAnimationInfo} from "../GLTFLoader";
 
 const PI_180 = 180 / Math.PI;
 const EMPTY_MORPH_POSE = new Float32Array(0);
+const POSE_FROM_BUF = new Float32Array(4);
+const POSE_TO_BUF = new Float32Array(4);
 
 /**
- * [KO] 지정된 시간에서 단일 애니메이션 트랙의 키프레임 포즈를 샘플링합니다.
- * [EN] Samples the keyframe pose of a single animation track at the specified time.
+ * [KO] 지정된 시간에서 단일 애니메이션 트랙의 키프레임 포즈를 샘플링하여 출력 버퍼에 기록합니다.
+ * [EN] Samples the keyframe pose of a single animation track at the specified time and writes it into the output buffer.
  *
  * @param track -
  * [KO] 샘플링할 대상 애니메이션 트랙
@@ -16,11 +18,14 @@ const EMPTY_MORPH_POSE = new Float32Array(0);
  * @param time -
  * [KO] 샘플링할 애니메이션 시간 (초)
  * [EN] Animation time to sample (in seconds)
+ * @param out -
+ * [KO] 결과를 기록할 재사용 `Float32Array(4)` 버퍼
+ * [EN] Reusable `Float32Array(4)` buffer to store the sampled pose
  * @returns
  * [KO] 샘플링된 포즈 데이터 또는 `null`
  * [EN] Sampled pose data or `null`
  */
-function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | null {
+function sampleTrackPose(track: AniTrack_GLTF, time: number, out: Float32Array): Float32Array | null {
     let timeAnimationInfo = track.timeAnimationInfo;
     let aniDataAnimationInfo = track.aniDataAnimationInfo;
     let interpolationType = track.interpolationType;
@@ -130,7 +135,7 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
 
     switch (track.keyType) {
         case 1: {
-            pose = new Float32Array(4);
+            pose = out;
             if (previousTimeDataIDX === targetTimeDataListLength - 1) {
                 idx = previousTimeDataIDX << 2;
                 pose[0] = targetAnimationDataList[idx];
@@ -303,7 +308,7 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
         }
         case 2:
         case 3: {
-            pose = new Float32Array(3);
+            pose = out;
             if (previousTimeDataIDX === targetTimeDataListLength - 1) {
                 idx = previousTimeDataIDX * 3;
                 pose[0] = targetAnimationDataList[idx];
@@ -690,11 +695,11 @@ export default function gltfAnimationMotionBlending(
         mesh = trackFrom.animationTargetMesh;
         keyType = trackFrom.keyType;
 
-        trackTo = toClip.clip.tracks.find(t => t.animationTargetMesh === mesh && t.keyType === keyType);
+        trackTo = toClip.clip.findTrack(mesh, keyType);
 
         if (trackTo) {
-            poseFrom = sampleTrackPose(trackFrom, timeFrom);
-            poseTo = sampleTrackPose(trackTo, timeTo);
+            poseFrom = sampleTrackPose(trackFrom, timeFrom, POSE_FROM_BUF);
+            poseTo = sampleTrackPose(trackTo, timeTo, POSE_TO_BUF);
 
             if (poseFrom && poseTo) {
                 mesh.dirtyTransform = true;
@@ -711,7 +716,7 @@ export default function gltfAnimationMotionBlending(
                 );
             }
         } else {
-            poseFrom = sampleTrackPose(trackFrom, timeFrom);
+            poseFrom = sampleTrackPose(trackFrom, timeFrom, POSE_FROM_BUF);
             if (poseFrom) {
                 mesh.dirtyTransform = true;
                 applySinglePose(
@@ -731,10 +736,10 @@ export default function gltfAnimationMotionBlending(
         meshSingle = trackToSingle.animationTargetMesh;
         keyTypeSingle = trackToSingle.keyType;
 
-        trackFromSingle = fromClip.clip.tracks.find(t => t.animationTargetMesh === meshSingle && t.keyType === keyTypeSingle);
+        trackFromSingle = fromClip.clip.findTrack(meshSingle, keyTypeSingle);
 
         if (!trackFromSingle) {
-            poseToSingle = sampleTrackPose(trackToSingle, timeTo);
+            poseToSingle = sampleTrackPose(trackToSingle, timeTo, POSE_TO_BUF);
             if (poseToSingle) {
                 meshSingle.dirtyTransform = true;
                 applySinglePose(

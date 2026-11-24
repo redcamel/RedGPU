@@ -217,17 +217,16 @@ class AniTrack_GLTF {
         }
         const resources = this.#meshResourcesMap.get(targetMesh);
         if (!resources) return;
-        this.#uniformData.set([
-            interpolationValue,
-            prevIDX,
-            nextIDX,
-            targetMesh.animationInfo.morphInfo.morphInfoDataList.length,
-            targetMesh.geometry.vertexBuffer.stride,
-            targetMesh.geometry.vertexBuffer.vertexCount,
-            0,
-            0
-        ]);
-        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
+        const uniformData = this.#uniformData;
+        uniformData[0] = interpolationValue;
+        uniformData[1] = prevIDX;
+        uniformData[2] = nextIDX;
+        uniformData[3] = targetMesh.animationInfo.morphInfo.morphInfoDataList.length;
+        uniformData[4] = targetMesh.geometry.vertexBuffer.stride;
+        uniformData[5] = targetMesh.geometry.vertexBuffer.vertexCount;
+        uniformData[6] = 0;
+        uniformData[7] = 0;
+        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, uniformData as BufferSource);
         computePassEncoder.setPipeline(this.#computePipeline);
         computePassEncoder.setBindGroup(0, resources.bindGroup);
         const workgroupCount = Math.ceil(targetMesh.geometry.vertexBuffer.vertexCount / 64);
