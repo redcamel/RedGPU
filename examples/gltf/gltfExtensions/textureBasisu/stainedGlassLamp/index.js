@@ -19,6 +19,9 @@ RedGPU.init(
         controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.ibl = ibl;
