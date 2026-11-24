@@ -143,4 +143,39 @@ test.describe('Display (Scene, Object3DContainer, Mesh, View3D)', () => {
 
         expect(ok).toBe(true);
     });
+
+    // Object3DContainer.visible 기본값, 비-불리언 거부 및 부모 visible=false 시 자식 렌더링 스킵 검증
+    test('propagates visible flag across Scene, Group3D, and Mesh and skips hidden subtrees', async () => {
+        const ok = await harness.page.evaluate(() => {
+            const RedGPU = (window as any).RedGPU;
+            const ctx = (window as any).__REDGPU_CTX__;
+            const scene = new RedGPU.Display.Scene();
+            const group = new RedGPU.Display.Group3D();
+            const child = new RedGPU.Display.Mesh(ctx);
+            group.addChild(child);
+
+            const defaultsOk = scene.visible === true && group.visible === true && child.visible === true;
+
+            let nonBoolRejected = false;
+            try {
+                group.visible = 0;
+            } catch {
+                nonBoolRejected = true;
+            }
+
+            let childRendered = false;
+            const origRender = child.render.bind(child);
+            child.render = (state: any) => {
+                childRendered = true;
+                return origRender(state);
+            };
+            group.visible = false;
+            group.render({view: {}, isScene2DMode: false, renderResults: {num3DGroups: 0}});
+            const skipOk = group.visible === false && childRendered === false;
+
+            return defaultsOk && nonBoolRejected && skipOk;
+        });
+
+        expect(ok).toBe(true);
+    });
 });

@@ -40,7 +40,9 @@ const parseAnimationChannel_GLTF = (
     const {sampler: channelSamplerGlTfId, target: channelTarget} = animationChannel
     const tSampler = animationSamplers[channelSamplerGlTfId];
     const {node: channelTargetDataNodeGlTfId, path: channelTargetDataPath} = channelTarget
+    if (channelTargetDataNodeGlTfId === undefined) return;
     const tNode = NODES[channelTargetDataNodeGlTfId];
+    if (!tNode) return;
     if ('mesh' in tNode) {
         tMesh = tNode['Mesh'];
         const {primitives} = MESHES[tNode.mesh];

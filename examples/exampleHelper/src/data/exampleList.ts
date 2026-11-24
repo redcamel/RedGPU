@@ -2197,6 +2197,20 @@ export const ExampleList: ExampleListType = [
                             },
                         ]
                     },
+                    {
+                        name: 'KHR_node_visibility',
+                        list: [
+                            {
+                                name: 'Node Visibility (2 Models)',
+                                path: 'gltf/gltfExtensions/nodeVisibility',
+                                extensionList: ['KHR_node_visibility'],
+                                description: {
+                                    ko: 'Khronos 공식 NodeVisibilityTest와 CubeVisibility 모델로 초기 visible: false 반영 및 계층 가시성 상속을 검증합니다.',
+                                    en: 'Verifies initial visible: false handling and hierarchy inheritance with Khronos NodeVisibilityTest and CubeVisibility.'
+                                },
+                            },
+                        ]
+                    },
                 ]
             }
         ]

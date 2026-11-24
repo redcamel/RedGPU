@@ -1,4 +1,5 @@
 import Mesh from "../../../display/mesh/Mesh";
+import resolveNodeVisibility from "../core/resolveNodeVisibility";
 import {GLTF, GlTfId, Node, Skin} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 import parseSkin_GLTF from "./animation/parseSkin_GLTF";
@@ -61,11 +62,13 @@ const parseNode_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, nodeGlTfId: GlTf
     const {nodes: nodeData, meshes: meshData, skins} = gltfData;
     const {groups: resultGroups} = parsingResult;
     const nodeInfo = nodeData[nodeGlTfId];
+    const isVisible = resolveNodeVisibility(nodeInfo);
     if ('mesh' in nodeInfo) {
         const meshes = parseMesh_GLTF(gltfLoader, gltfData, meshData[nodeInfo.mesh], nodeGlTfId);
         const meshCount = meshes.length;
         for (let i = 0; i < meshCount; i++) {
             let mesh = meshes[i];
+            mesh.visible = isVisible;
             parentMesh.addChild(nodeInfo['Mesh'] = mesh);
             parseTRSAndMATRIX_GLTF(mesh, nodeInfo);
             parseChildrenAndSkin(gltfLoader, gltfData, mesh, nodeInfo, skins);
@@ -82,6 +85,7 @@ const parseNode_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, nodeGlTfId: GlTf
             targetGroup['name'] = nodeInfo['name'];
             resultGroups[nodeGlTfId] = targetGroup;
         }
+        targetGroup.visible = isVisible;
         parseTRSAndMATRIX_GLTF(targetGroup, nodeInfo);
         parseChildrenAndSkin(gltfLoader, gltfData, targetGroup, nodeInfo, skins);
     }
