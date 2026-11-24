@@ -3,8 +3,6 @@ import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import Mesh from "../../../display/mesh/Mesh";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
-import Sphere from "../../../primitive/Sphere";
-import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
 
 /**
  * [KO] glTF 스키닝 애니메이션을 위한 조인트, 역바인드 행렬 및 컴퓨트 파이프라인 리소스를 관리하는 클래스입니다.
@@ -108,8 +106,6 @@ class ParsedSkinInfo_GLTF {
      * [EN] Reference to the previous frame's global vertex SSBO GPU buffer
      */
     prevGlobalVertexSSBOBuffer: GPUBuffer;
-    #geometry: Sphere;
-    #material: ColorMaterial
 
     /**
      * [KO] ParsedSkinInfo_GLTF 인스턴스를 생성합니다.
@@ -119,30 +115,6 @@ class ParsedSkinInfo_GLTF {
         this.joints = [];
         this.inverseBindMatrices = null;
         this.skeletonMesh = null;
-    }
-
-    /**
-     * [KO] 디버그용 구체 지오메트리를 반환합니다.
-     * [EN] Returns the sphere geometry for debugging.
-     *
-     * @returns
-     * [KO] 구체 지오메트리 인스턴스
-     * [EN] Sphere geometry instance
-     */
-    get geometry(): Sphere {
-        return this.#geometry;
-    }
-
-    /**
-     * [KO] 디버그용 컬러 머티리얼을 반환합니다.
-     * [EN] Returns the color material for debugging.
-     *
-     * @returns
-     * [KO] 컬러 머티리얼 인스턴스
-     * [EN] Color material instance
-     */
-    get material(): ColorMaterial {
-        return this.#material;
     }
 
     /**
@@ -211,8 +183,6 @@ class ParsedSkinInfo_GLTF {
         const normalOffset = interleavedStruct.getAttributeOffset('aVertexNormal');
         const tangentOffset = interleavedStruct.define['aVertexTangent'] ? interleavedStruct.getAttributeOffset('aVertexTangent') : 0;
 
-        this.#geometry = new Sphere(redGPUContext, 0.05, 3, 3, 3);
-        this.#material = new ColorMaterial(redGPUContext, '#ff0000');
         const source = `
 			#redgpu_include SYSTEM_UNIFORM;
 
@@ -486,15 +456,6 @@ class ParsedSkinInfo_GLTF {
         if (this.jointSlotIndicesBuffer) {
             this.jointSlotIndicesBuffer.destroy();
             this.jointSlotIndicesBuffer = null;
-        }
-        if (this.#geometry) {
-            // @ts-ignore
-            if (typeof this.#geometry.destroy === 'function') this.#geometry.destroy();
-            this.#geometry = null;
-        }
-        if (this.#material) {
-            this.#material.destroy();
-            this.#material = null;
         }
         this.computeShader = null;
         this.computePipeline = null;

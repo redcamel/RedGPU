@@ -79,11 +79,6 @@ const parseInterleaveData_GLTF = (
                 interleaveData[idx++] = 0;
                 interleaveData[idx++] = 0;
             }
-            index2D += 2
-            index2D_1 += 2
-            index3D += 3
-            index3D_1 += 3
-            index3D_2 += 3
             index4D += 4
             index4D_1 += 4
             index4D_2 += 4
@@ -102,11 +97,6 @@ const parseInterleaveData_GLTF = (
                 interleaveData[idx++] = 0;
                 interleaveData[idx++] = 0;
             }
-            index2D += 2
-            index2D_1 += 2
-            index3D += 3
-            index3D_1 += 3
-            index3D_2 += 3
             index4D += 4
             index4D_1 += 4
             index4D_2 += 4

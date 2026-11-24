@@ -4,6 +4,7 @@ import AniTrack_GLTF from "../cls/anitrack/AniTrack_GLTF";
 import {PlayAnimationInfo} from "../GLTFLoader";
 
 const PI_180 = 180 / Math.PI;
+const EMPTY_MORPH_POSE = new Float32Array(0);
 
 /**
  * [KO] 지정된 시간에서 단일 애니메이션 트랙의 키프레임 포즈를 샘플링합니다.
@@ -50,8 +51,6 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
     let scale0: number, scale1: number;
     let omega: number, sinom: number;
     let idx: number;
-    let morphLength: number;
-    let weightMeshes: any[];
 
     if (lastHint < targetTimeDataListLength - 1) {
         if (targetTimeDataList[lastHint] <= time && time < targetTimeDataList[lastHint + 1]) {
@@ -352,18 +351,8 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
             }
             return pose;
         }
-        case 4: {
-            weightMeshes = track.weightMeshes;
-            morphLength = weightMeshes[0]?.animationInfo.morphInfo.morphInfoDataList.length || 0;
-            pose = new Float32Array(morphLength);
-            if (morphLength > 0) {
-                for (let i = 0; i < morphLength; i++) {
-                    pose[i] = targetAnimationDataList[previousTimeDataIDX * morphLength + i] +
-                        interpolationValue * (targetAnimationDataList[nextTimeDataIDX * morphLength + i] - targetAnimationDataList[previousTimeDataIDX * morphLength + i]);
-                }
-            }
-            return pose;
-        }
+        case 4:
+            return EMPTY_MORPH_POSE;
     }
     return null;
 }

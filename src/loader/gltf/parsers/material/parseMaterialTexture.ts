@@ -158,6 +158,5 @@ const getSamplerInfo = function (gltfLoader: GLTFLoader, scenesData: GLTF, sampl
         }
     } else {
     }
-    result['string'] = JSON.stringify(result);
     return result;
 };

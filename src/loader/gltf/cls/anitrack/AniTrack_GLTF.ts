@@ -207,9 +207,9 @@ class AniTrack_GLTF {
      * [KO] 다음 키프레임 인덱스
      * [EN] Next keyframe index
      */
-    async renderWeight(redGPUContext: RedGPUContext,
-                       computePassEncoder: GPUComputePassEncoder,
-                       targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number) {
+    renderWeight(redGPUContext: RedGPUContext,
+                 computePassEncoder: GPUComputePassEncoder,
+                 targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number) {
         const {gpuDevice} = redGPUContext;
         if (!this.#computeShader) {
             this.#initCommonCompute(redGPUContext);

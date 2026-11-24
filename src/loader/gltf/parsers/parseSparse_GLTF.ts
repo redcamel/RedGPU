@@ -25,7 +25,7 @@ import GLTFLoader from "../GLTFLoader";
  */
 const parseSparse_GLTF = (gltfLoader: GLTFLoader, propertyKey: string, targetAccessor: Accessor, gltfData: GLTF, vertices: any) => {
     const targetSparse = targetAccessor.sparse;
-    if (!targetSparse) return;
+    if (!targetSparse || propertyKey !== 'POSITION') return;
     const {values: sparseValuesAccessor, indices: sparseIndices, count: sparseCount} = targetSparse;
     const bufferViewsData = gltfData.bufferViews;
     const targetBufferView = bufferViewsData[sparseValuesAccessor.bufferView];
@@ -33,8 +33,6 @@ const parseSparse_GLTF = (gltfLoader: GLTFLoader, propertyKey: string, targetAcc
     const buffersData = gltfData.buffers;
     const targetBuffer = buffersData[targetBufferID];
     const arraySparseVertices = [];
-    const arraySparseNormals = [];
-    const arraySparseUvs = [];
     const bufferViewData = bufferViewsData[sparseIndices.bufferView];
     const bufferGlTfId = bufferViewData.buffer;
     const buffer = buffersData[bufferGlTfId];
@@ -69,18 +67,14 @@ const parseSparse_GLTF = (gltfLoader: GLTFLoader, propertyKey: string, targetAcc
     let finalIndex;
     switch (targetAccessor.type) {
         case 'VEC3':
-            finalIndex = initialIndex + (BYTES_PER_ELEMENT * sparseCount) / BYTES_PER_ELEMENT * 3;
-            for (initialIndex; initialIndex < finalIndex; initialIndex++) {
-                const data = targetBufferURIDataView[methodToGetData](initialIndex * BYTES_PER_ELEMENT, true);
-                if (propertyKey == 'NORMAL') arraySparseNormals.push(data);
-                else if (propertyKey == 'POSITION') arraySparseVertices.push(data);
+            if (propertyKey == 'POSITION') {
+                finalIndex = initialIndex + (BYTES_PER_ELEMENT * sparseCount) / BYTES_PER_ELEMENT * 3;
+                for (initialIndex; initialIndex < finalIndex; initialIndex++) {
+                    arraySparseVertices.push(targetBufferURIDataView[methodToGetData](initialIndex * BYTES_PER_ELEMENT, true));
+                }
             }
             break;
         case 'VEC2':
-            finalIndex = initialIndex + (BYTES_PER_ELEMENT * sparseCount) / BYTES_PER_ELEMENT * 2;
-            for (initialIndex; initialIndex < finalIndex; initialIndex++) {
-                if (propertyKey == 'TEXCOORD_0') arraySparseUvs.push(targetBufferURIDataView[methodToGetData](initialIndex * BYTES_PER_ELEMENT, true));
-            }
             break;
         default :
             console.warn('Unknown accessor type', targetAccessor.type);

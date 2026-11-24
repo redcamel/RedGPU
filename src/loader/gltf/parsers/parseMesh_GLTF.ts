@@ -238,7 +238,6 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             }
         }
         tMesh.animationInfo.morphInfo = morphInfo;
-        tMesh.animationInfo.morphInfo.origin = new Float32Array(interleaveData);
         let targetGeometryData = tMesh.geometry.vertexBuffer.data
         if (!tMesh.gpuRenderInfo) tMesh.initGPURenderInfos()
         let NUM = 0;
