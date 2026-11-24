@@ -3,6 +3,8 @@ import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
 import {GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 
+const RAD_TO_DEG = 180 / Math.PI;
+
 /**
  * [KO] `KHR_animation_pointer` 트랙의 런타임 Zero-GC 프로퍼티 적용 바인딩 타입입니다.
  * [EN] Runtime Zero-GC property binding type for a `KHR_animation_pointer` animation track.
@@ -31,86 +33,75 @@ export type ParsedPointerDescriptor =
     nodeIndex: number;
 }
     | {
+    domain: 'camera_perspective';
+    cameraIndex: number;
+    property: 'yfov' | 'znear' | 'zfar';
+}
+    | {
     domain: 'material_property';
     materialIndex: number;
     propertyKey: string;
-    componentCount: 1 | 3 | 4;
 }
     | {
     domain: 'material_texture_transform';
     materialIndex: number;
     textureKey: string;
     transformProp: 'offset' | 'scale' | 'rotation';
-    componentCount: 1 | 2;
 };
 
-const TEXTURE_POINTER_TO_MATERIAL_KEY: Record<string, string> = Object.freeze({
-    'pbrMetallicRoughness/baseColorTexture': 'baseColorTexture',
-    'pbrMetallicRoughness/metallicRoughnessTexture': 'metallicRoughnessTexture',
-    'normalTexture': 'normalTexture',
-    'emissiveTexture': 'emissiveTexture',
-    'occlusionTexture': 'occlusionTexture',
-    'extensions/KHR_materials_anisotropy/anisotropyTexture': 'KHR_anisotropyTexture',
-    'extensions/KHR_materials_clearcoat/clearcoatTexture': 'KHR_clearcoatTexture',
-    'extensions/KHR_materials_clearcoat/clearcoatRoughnessTexture': 'KHR_clearcoatRoughnessTexture',
-    'extensions/KHR_materials_clearcoat/clearcoatNormalTexture': 'KHR_clearcoatNormalTexture',
-    'extensions/KHR_materials_diffuse_transmission/diffuseTransmissionTexture': 'KHR_diffuseTransmissionTexture',
-    'extensions/KHR_materials_diffuse_transmission/diffuseTransmissionColorTexture': 'KHR_diffuseTransmissionColorTexture',
-    'extensions/KHR_materials_iridescence/iridescenceTexture': 'KHR_iridescenceTexture',
-    'extensions/KHR_materials_iridescence/iridescenceThicknessTexture': 'KHR_iridescenceThicknessTexture',
-    'extensions/KHR_materials_sheen/sheenColorTexture': 'KHR_sheenColorTexture',
-    'extensions/KHR_materials_sheen/sheenRoughnessTexture': 'KHR_sheenRoughnessTexture',
-    'extensions/KHR_materials_specular/specularTexture': 'KHR_specularTexture',
-    'extensions/KHR_materials_specular/specularColorTexture': 'KHR_specularColorTexture',
-    'extensions/KHR_materials_transmission/transmissionTexture': 'KHR_transmissionTexture',
-    'extensions/KHR_materials_volume/thicknessTexture': 'KHR_thicknessTexture',
-});
-
-const MATERIAL_PROPERTY_MAP: Record<string, { key: string; count: 1 | 3 | 4 }> = Object.freeze({
-    'pbrMetallicRoughness/baseColorFactor': {key: 'baseColorFactor', count: 4},
-    'pbrMetallicRoughness/metallicFactor': {key: 'metallicFactor', count: 1},
-    'pbrMetallicRoughness/roughnessFactor': {key: 'roughnessFactor', count: 1},
-    'emissiveFactor': {key: 'emissiveFactor', count: 3},
-    'alphaCutoff': {key: 'cutOff', count: 1},
-    'normalTexture/scale': {key: 'normalScale', count: 1},
-    'occlusionTexture/strength': {key: 'occlusionStrength', count: 1},
-    'extensions/KHR_materials_emissive_strength/emissiveStrength': {key: 'emissiveStrength', count: 1},
-    'extensions/KHR_materials_ior/ior': {key: 'KHR_ior', count: 1},
-    'extensions/KHR_materials_transmission/transmissionFactor': {key: 'KHR_transmissionFactor', count: 1},
-    'extensions/KHR_materials_volume/thicknessFactor': {key: 'KHR_thicknessFactor', count: 1},
-    'extensions/KHR_materials_volume/attenuationDistance': {key: 'KHR_attenuationDistance', count: 1},
-    'extensions/KHR_materials_volume/attenuationColor': {key: 'KHR_attenuationColor', count: 3},
-    'extensions/KHR_materials_clearcoat/clearcoatFactor': {key: 'KHR_clearcoatFactor', count: 1},
-    'extensions/KHR_materials_clearcoat/clearcoatRoughnessFactor': {key: 'KHR_clearcoatRoughnessFactor', count: 1},
-    'extensions/KHR_materials_sheen/sheenColorFactor': {key: 'KHR_sheenColorFactor', count: 3},
-    'extensions/KHR_materials_sheen/sheenRoughnessFactor': {key: 'KHR_sheenRoughnessFactor', count: 1},
-    'extensions/KHR_materials_specular/specularFactor': {key: 'KHR_specularFactor', count: 1},
-    'extensions/KHR_materials_specular/specularColorFactor': {key: 'KHR_specularColorFactor', count: 3},
-    'extensions/KHR_materials_iridescence/iridescenceFactor': {key: 'KHR_iridescenceFactor', count: 1},
-    'extensions/KHR_materials_iridescence/iridescenceIor': {key: 'KHR_iridescenceIor', count: 1},
-    'extensions/KHR_materials_iridescence/iridescenceThicknessMinimum': {
-        key: 'KHR_iridescenceThicknessMinimum',
-        count: 1
-    },
-    'extensions/KHR_materials_iridescence/iridescenceThicknessMaximum': {
-        key: 'KHR_iridescenceThicknessMaximum',
-        count: 1
-    },
-    'extensions/KHR_materials_anisotropy/anisotropyStrength': {key: 'KHR_anisotropyStrength', count: 1},
-    'extensions/KHR_materials_anisotropy/anisotropyRotation': {key: 'KHR_anisotropyRotation', count: 1},
-    'extensions/KHR_materials_diffuse_transmission/diffuseTransmissionFactor': {
-        key: 'KHR_diffuseTransmissionFactor',
-        count: 1
-    },
-    'extensions/KHR_materials_diffuse_transmission/diffuseTransmissionColorFactor': {
-        key: 'KHR_diffuseTransmissionColorFactor',
-        count: 3
-    },
-});
+const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
 /**
- * [KO] `KHR_animation_pointer` JSON Pointer 문자열을 해석하여 구조화된 타겟 디스크립터를 반환합니다.
- * [EN] Parses a `KHR_animation_pointer` JSON Pointer string into a structured target descriptor.
+ * [KO] RedGPU `PBRMaterial` 표준 규칙(`KHR_<prop>`, `<prop>`)에서 벗어나는 소수 예외 경로 매핑입니다.
+ * [EN] Minimal exception map for glTF material paths that deviate from RedGPU `PBRMaterial` naming rules.
+ */
+const MATERIAL_PROPERTY_EXCEPTIONS: Record<string, string> = Object.freeze({
+    'alphaCutoff': 'cutOff',
+    'normalTexture/scale': 'normalScale',
+    'occlusionTexture/strength': 'occlusionStrength',
+    'extensions/KHR_materials_emissive_strength/emissiveStrength': 'emissiveStrength',
+});
+
+const isSafeIdentifier = (name: string): boolean => (
+    name.length > 0 && !BLOCKED_KEYS.has(name) && /^[A-Za-z0-9_]+$/.test(name)
+);
+
+const resolveMaterialTextureKey = (texPrefix: string): string | null => {
+    const parts = texPrefix.split('/');
+    const last = parts[parts.length - 1];
+    if (!isSafeIdentifier(last) || !last.endsWith('Texture')) return null;
+
+    // extensions/KHR_materials_*/<texName> -> KHR_<texName>
+    if (parts.length === 3 && parts[0] === 'extensions' && parts[1].startsWith('KHR_materials_')) {
+        return `KHR_${last}`;
+    }
+    // pbrMetallicRoughness/<texName> or <texName> -> <texName>
+    if ((parts.length === 2 && parts[0] === 'pbrMetallicRoughness') || parts.length === 1) {
+        return last;
+    }
+    return null;
+};
+
+const resolveMaterialPropertyKey = (subPath: string): string | null => {
+    if (Object.prototype.hasOwnProperty.call(MATERIAL_PROPERTY_EXCEPTIONS, subPath)) {
+        return MATERIAL_PROPERTY_EXCEPTIONS[subPath];
+    }
+    const parts = subPath.split('/');
+    const last = parts[parts.length - 1];
+    if (!isSafeIdentifier(last)) return null;
+
+    if (parts.length === 3 && parts[0] === 'extensions' && parts[1].startsWith('KHR_materials_')) {
+        return `KHR_${last}`;
+    }
+    if ((parts.length === 2 && parts[0] === 'pbrMetallicRoughness') || parts.length === 1) {
+        return last;
+    }
+    return null;
+};
+
+/**
+ * [KO] `KHR_animation_pointer` JSON Pointer 문자열을 규칙 기반으로 해석하여 구조화된 타겟 디스크립터를 반환합니다.
+ * [EN] Parses a `KHR_animation_pointer` JSON Pointer string using rule-based resolution into a structured target descriptor.
  *
  * @param pointer -
  * [KO] JSON Pointer 경로 문자열 (예: `/materials/0/pbrMetallicRoughness/baseColorFactor`)
@@ -141,42 +132,42 @@ export const parseAnimationPointerPath = (pointer?: string): ParsedPointerDescri
         return null;
     }
 
+    if (root === 'cameras') {
+        if (subPath === 'perspective/yfov') return {domain: 'camera_perspective', cameraIndex: index, property: 'yfov'};
+        if (subPath === 'perspective/znear') return {
+            domain: 'camera_perspective',
+            cameraIndex: index,
+            property: 'znear'
+        };
+        if (subPath === 'perspective/zfar') return {domain: 'camera_perspective', cameraIndex: index, property: 'zfar'};
+        return null;
+    }
+
     if (root === 'materials') {
         const texTransformMarker = '/extensions/KHR_texture_transform/';
         const markerIdx = subPath.indexOf(texTransformMarker);
         if (markerIdx !== -1) {
             const texPrefix = subPath.slice(0, markerIdx);
             const transformProp = subPath.slice(markerIdx + texTransformMarker.length);
-            const textureKey = TEXTURE_POINTER_TO_MATERIAL_KEY[texPrefix];
+            const textureKey = resolveMaterialTextureKey(texPrefix);
             if (!textureKey) return null;
-            if (transformProp === 'offset' || transformProp === 'scale') {
+            if (transformProp === 'offset' || transformProp === 'scale' || transformProp === 'rotation') {
                 return {
                     domain: 'material_texture_transform',
                     materialIndex: index,
                     textureKey,
                     transformProp,
-                    componentCount: 2,
-                };
-            }
-            if (transformProp === 'rotation') {
-                return {
-                    domain: 'material_texture_transform',
-                    materialIndex: index,
-                    textureKey,
-                    transformProp: 'rotation',
-                    componentCount: 1,
                 };
             }
             return null;
         }
 
-        const propInfo = MATERIAL_PROPERTY_MAP[subPath];
-        if (propInfo) {
+        const propertyKey = resolveMaterialPropertyKey(subPath);
+        if (propertyKey) {
             return {
                 domain: 'material_property',
                 materialIndex: index,
-                propertyKey: propInfo.key,
-                componentCount: propInfo.count,
+                propertyKey,
             };
         }
         return null;
@@ -186,8 +177,8 @@ export const parseAnimationPointerPath = (pointer?: string): ParsedPointerDescri
 };
 
 /**
- * [KO] 해석된 `KHR_animation_pointer` 디스크립터를 실제 RedGPU 노드/머티리얼 인스턴스에 Zero-GC 바인딩합니다.
- * [EN] Binds a parsed `KHR_animation_pointer` descriptor to live RedGPU node/material instances with Zero-GC application.
+ * [KO] 해석된 `KHR_animation_pointer` 디스크립터를 실제 RedGPU 노드·카메라·머티리얼 인스턴스에 Zero-GC 바인딩합니다.
+ * [EN] Binds a parsed `KHR_animation_pointer` descriptor to live RedGPU node, camera, or material instances with Zero-GC application.
  *
  * @param gltfLoader -
  * [KO] 대상 `GLTFLoader` 인스턴스
@@ -198,6 +189,9 @@ export const parseAnimationPointerPath = (pointer?: string): ParsedPointerDescri
  * @param descriptor -
  * [KO] `parseAnimationPointerPath`로 해석된 디스크립터
  * [EN] Descriptor parsed by `parseAnimationPointerPath`
+ * @param componentCount -
+ * [KO] 애니메이션 output accessor의 컴포넌트 개수 (`1`~`4`)
+ * [EN] Component count (`1`~`4`) derived from the animation output accessor type
  * @returns
  * [KO] 런타임 적용 바인딩 또는 대상이 없을 경우 `null`
  * [EN] Runtime binding object, or `null` if the target does not exist
@@ -206,7 +200,8 @@ export const parseAnimationPointerPath = (pointer?: string): ParsedPointerDescri
 export const createPointerTargetBinding = (
     gltfLoader: GLTFLoader,
     gltfData: GLTF,
-    descriptor: ParsedPointerDescriptor
+    descriptor: ParsedPointerDescriptor,
+    componentCount: 1 | 2 | 3 | 4
 ): PointerTargetBinding | null => {
     if (descriptor.domain === 'node_visibility') {
         const nodeInfo = gltfData.nodes?.[descriptor.nodeIndex];
@@ -234,13 +229,41 @@ export const createPointerTargetBinding = (
         };
     }
 
+    if (descriptor.domain === 'camera_perspective') {
+        const camera = gltfLoader.parsingResult.cameras?.[descriptor.cameraIndex];
+        if (!camera) return null;
+        if (descriptor.property === 'yfov') {
+            return {
+                componentCount: 1,
+                apply: (v0: number) => {
+                    camera.fieldOfView = v0 * RAD_TO_DEG;
+                }
+            };
+        }
+        if (descriptor.property === 'znear') {
+            return {
+                componentCount: 1,
+                apply: (v0: number) => {
+                    camera.nearClipping = v0;
+                }
+            };
+        }
+        return {
+            componentCount: 1,
+            apply: (v0: number) => {
+                camera.farClipping = v0;
+            }
+        };
+    }
+
     if (descriptor.domain === 'material_property') {
         const materials: PBRMaterial[] = gltfLoader.parsingResult.materialsById.get(descriptor.materialIndex);
         if (!materials || materials.length === 0) return null;
         const propKey = descriptor.propertyKey;
+        if (!(propKey in materials[0])) return null;
         const count = materials.length;
 
-        if (descriptor.componentCount === 1) {
+        if (componentCount === 1) {
             return {
                 componentCount: 1,
                 apply: (v0: number) => {
@@ -250,7 +273,20 @@ export const createPointerTargetBinding = (
                 }
             };
         }
-        if (descriptor.componentCount === 3) {
+        if (componentCount === 2) {
+            const buf2: [number, number] = [0, 0];
+            return {
+                componentCount: 2,
+                apply: (v0: number, v1: number) => {
+                    buf2[0] = v0;
+                    buf2[1] = v1;
+                    for (let i = 0; i < count; i++) {
+                        (materials[i] as any)[propKey] = buf2;
+                    }
+                }
+            };
+        }
+        if (componentCount === 3) {
             const buf3: [number, number, number] = [0, 0, 0];
             return {
                 componentCount: 3,
@@ -282,14 +318,15 @@ export const createPointerTargetBinding = (
     if (descriptor.domain === 'material_texture_transform') {
         const materials: PBRMaterial[] = gltfLoader.parsingResult.materialsById.get(descriptor.materialIndex);
         if (!materials || materials.length === 0) return null;
-        const count = materials.length;
         const useKey = `use_${descriptor.textureKey}_KHR_texture_transform`;
         const targetKey = `${descriptor.textureKey}_KHR_texture_transform_${descriptor.transformProp}`;
+        if (!(useKey in materials[0]) || !(targetKey in materials[0])) return null;
+        const count = materials.length;
         for (let i = 0; i < count; i++) {
             (materials[i] as any)[useKey] = true;
         }
 
-        if (descriptor.componentCount === 1) {
+        if (descriptor.transformProp === 'rotation') {
             return {
                 componentCount: 1,
                 apply: (v0: number) => {

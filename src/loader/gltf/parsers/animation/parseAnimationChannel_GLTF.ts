@@ -49,7 +49,12 @@ const parseAnimationChannel_GLTF = (
             channelTargetDataNodeGlTfId = descriptor.nodeIndex;
             channelTargetDataPath = descriptor.path;
         } else {
-            const binding = createPointerTargetBinding(gltfLoader, gltfData, descriptor);
+            const outputAccessor = gltfData.accessors?.[tSampler.output];
+            let componentCount: 1 | 2 | 3 | 4 = 1;
+            if (outputAccessor?.type === 'VEC2') componentCount = 2;
+            else if (outputAccessor?.type === 'VEC3') componentCount = 3;
+            else if (outputAccessor?.type === 'VEC4') componentCount = 4;
+            const binding = createPointerTargetBinding(gltfLoader, gltfData, descriptor, componentCount);
             if (!binding) return;
             aniTrack = new AniTrack_GLTF(
                 'pointer',
