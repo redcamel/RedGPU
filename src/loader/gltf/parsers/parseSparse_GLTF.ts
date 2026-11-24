@@ -31,14 +31,10 @@ const parseSparse_GLTF = (gltfLoader: GLTFLoader, propertyKey: string, targetAcc
     const bufferViewsData = gltfData.bufferViews;
     const targetBufferView = bufferViewsData[sparseValuesAccessor.bufferView];
     const targetBufferID = targetBufferView.buffer;
-    const buffersData = gltfData.buffers;
-    const targetBuffer = buffersData[targetBufferID];
     const arraySparseVertices = [];
     const bufferViewData = bufferViewsData[sparseIndices.bufferView];
     const bufferGlTfId = bufferViewData.buffer;
-    const buffer = buffersData[bufferGlTfId];
-    let targetBufferURIDataView;
-    if (targetBuffer.uri) targetBufferURIDataView = gltfLoader.parsingResult.uris.buffers[targetBufferID];
+    const targetBufferURIDataView = gltfLoader.parsingResult.uris.buffers[targetBufferID] ?? null;
     const componentType = WEBGL_COMPONENT_TYPES[targetAccessor.componentType];
     const {BYTES_PER_ELEMENT} = componentType;
     let methodToGetData;
@@ -84,8 +80,7 @@ const parseSparse_GLTF = (gltfLoader: GLTFLoader, propertyKey: string, targetAcc
             console.warn('Unknown accessor type', targetAccessor.type);
             break;
     }
-    let bufferURIDataView;
-    if (buffer.uri) bufferURIDataView = gltfLoader.parsingResult.uris.buffers[bufferGlTfId];
+    const bufferURIDataView = gltfLoader.parsingResult.uris.buffers[bufferGlTfId] ?? null;
     const indicesComponentType = WEBGL_COMPONENT_TYPES[sparseIndices.componentType];
     const indicesComponentType_BYTES_PER_ELEMENT = indicesComponentType.BYTES_PER_ELEMENT
     const indicesMethod = indicesComponentType === Uint16Array ? 'getUint16' : 'getUint8';

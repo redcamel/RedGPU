@@ -96,8 +96,9 @@ class AccessorInfo_GLTF {
         this.bufferGlTfId = this.bufferView.buffer;
         this.buffer = gltfData.buffers[this.bufferGlTfId];
         this.bufferURIDataView = null;
-        if (this.buffer.uri) {
-            this.bufferURIDataView = gltfLoader.parsingResult.uris.buffers[this.bufferGlTfId]
+        const bufferDataView = gltfLoader.parsingResult.uris.buffers[this.bufferGlTfId];
+        if (bufferDataView) {
+            this.bufferURIDataView = bufferDataView;
         }
         this.componentType = WEBGL_COMPONENT_TYPES[this.accessor.componentType];
         this.componentType_BYTES_PER_ELEMENT = this.componentType.BYTES_PER_ELEMENT;

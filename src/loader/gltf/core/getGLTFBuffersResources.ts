@@ -1,6 +1,7 @@
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
+import decodeMeshoptBufferViews, {hasMeshoptCompression, isMeshoptFallbackBuffer} from "./decodeMeshoptBufferViews";
 
 /**
  * [KO] glTF 버퍼 로딩 진행률을 계산하여 로더의 진행 상태 정보를 갱신합니다.
@@ -54,13 +55,21 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
     const totalBuffers = buffers.length;
     let loadedBuffers = 0;
     checkProgress(gltfLoader, gltfData, loadedBuffers)
-
+    if (totalBuffers === 0) {
+        if (callback) callback();
+        return;
+    }
 
     buffers.forEach((buffer, bufferIndex) => {
         if (buffer.uri instanceof ArrayBuffer) {
             const uriDataView = new DataView(buffer.uri);
             processArrayBuffer(uriDataView);
-        } else processNonArrayBuffer(buffer.uri);
+        } else if (typeof buffer.uri === 'string') {
+            processNonArrayBuffer(buffer.uri);
+        } else if (isMeshoptFallbackBuffer(buffer) || !buffer.uri) {
+            loadedBuffers++;
+            checkLoadingStatus();
+        }
 
         function processArrayBuffer(uriDataView: DataView) {
             loadedBuffers++;
@@ -89,7 +98,17 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
             checkProgress(gltfLoader, gltfData, loadedBuffers)
             onProgress?.(gltfLoader.loadingProgressInfo);
             if (loadedBuffers === totalBuffers) {
-                if (callback) callback();
+                if (hasMeshoptCompression(gltfData)) {
+                    decodeMeshoptBufferViews(gltfData, resultContainer)
+                        .then(() => {
+                            if (callback) callback();
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                        });
+                } else {
+                    if (callback) callback();
+                }
             }
         }
     });

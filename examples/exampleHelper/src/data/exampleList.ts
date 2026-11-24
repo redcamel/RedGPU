@@ -2243,6 +2243,29 @@ export const ExampleList: ExampleListType = [
                             },
                         ]
                     },
+                    {
+                        name: 'KHR_meshopt_compression & EXT_meshopt_compression',
+                        list: [
+                            {
+                                name: 'Meshopt Cube Test (KHR)',
+                                path: 'gltf/gltfExtensions/meshoptCompression/meshoptCubeTest',
+                                extensionList: ['KHR_meshopt_compression', 'KHR_mesh_quantization'],
+                                description: {
+                                    ko: 'Khronos 공식 MeshoptCubeTest 모델로 KHR_meshopt_compression 온디맨드 WASM 디코딩을 검증합니다.',
+                                    en: 'Loads Khronos MeshoptCubeTest to verify on-demand WASM decoding for KHR_meshopt_compression.'
+                                },
+                            },
+                            {
+                                name: 'BrainStem (KHR & EXT)',
+                                path: 'gltf/gltfExtensions/meshoptCompression/brainStem',
+                                extensionList: ['KHR_meshopt_compression', 'EXT_meshopt_compression', 'KHR_mesh_quantization'],
+                                description: {
+                                    ko: 'Khronos 공식 BrainStem (glTF-Meshopt, glTF-Meshopt-EXT) 두 모델을 나란히 배치해 KHR/EXT 압축 스키닝 애니메이션을 비교 검증합니다.',
+                                    en: 'Loads Khronos BrainStem (glTF-Meshopt and glTF-Meshopt-EXT) side by side to compare KHR/EXT Meshopt skinning animation decoding.'
+                                },
+                            },
+                        ]
+                    },
                 ]
             }
         ]
