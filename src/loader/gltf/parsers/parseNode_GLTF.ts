@@ -10,10 +10,10 @@ import parseTRSAndMATRIX_GLTF from "./parseTRSAndMATRIX_GLTF";
  * [KO] glTF 노드의 하위 자식 노드를 재귀적으로 파싱하고 스킨 바인딩은 Pass 2 대기열에 적재합니다.
  * [EN] Recursively parses child nodes of a glTF node and enqueues skin bindings for Pass 2.
  */
-const parseChildrenAndEnqueueSkin = (
+const parseChildren = (
     gltfLoader: GLTFLoader,
     gltfData: GLTF,
-    mesh: Mesh,
+    parentObject: Mesh,
     nodeInfo: Node,
     parseContext: GLTFParseContext
 ) => {
@@ -21,9 +21,16 @@ const parseChildrenAndEnqueueSkin = (
         const children = nodeInfo.children;
         const childCount = children.length;
         for (let i = 0; i < childCount; i++) {
-            parseNode_GLTF(gltfLoader, gltfData, children[i], mesh, parseContext);
+            parseNode_GLTF(gltfLoader, gltfData, children[i], parentObject, parseContext);
         }
     }
+};
+
+const enqueueSkinIfPresent = (
+    mesh: Mesh,
+    nodeInfo: Node,
+    parseContext: GLTFParseContext
+) => {
     if ('skin' in nodeInfo && nodeInfo.skin !== undefined) {
         parseContext.pendingSkins.push({skinId: nodeInfo.skin, mesh});
     }
@@ -77,13 +84,27 @@ const parseNode_GLTF = (
         );
         parseContext.nodeMeshesMap.set(nodeGlTfId, meshes);
         const meshCount = meshes.length;
-        for (let i = 0; i < meshCount; i++) {
-            const mesh = meshes[i];
+        if (meshCount === 1) {
+            const mesh = meshes[0];
             mesh.visible = isVisible;
             parentMesh.addChild(mesh);
             parseContext.nodeObjectMap.set(nodeGlTfId, mesh);
             parseTRSAndMATRIX_GLTF(mesh, nodeInfo);
-            parseChildrenAndEnqueueSkin(gltfLoader, gltfData, mesh, nodeInfo, parseContext);
+            parseChildren(gltfLoader, gltfData, mesh, nodeInfo, parseContext);
+            enqueueSkinIfPresent(mesh, nodeInfo, parseContext);
+        } else if (meshCount > 1) {
+            const group = new Mesh(redGPUContext);
+            if (nodeInfo.name) group.name = nodeInfo.name;
+            group.visible = isVisible;
+            parentMesh.addChild(group);
+            parseContext.nodeObjectMap.set(nodeGlTfId, group);
+            parseTRSAndMATRIX_GLTF(group, nodeInfo);
+            for (let i = 0; i < meshCount; i++) {
+                const mesh = meshes[i];
+                group.addChild(mesh);
+                enqueueSkinIfPresent(mesh, nodeInfo, parseContext);
+            }
+            parseChildren(gltfLoader, gltfData, group, nodeInfo, parseContext);
         }
     } else {
         let targetGroup: Mesh;
@@ -98,7 +119,8 @@ const parseNode_GLTF = (
         parseContext.nodeObjectMap.set(nodeGlTfId, targetGroup);
         targetGroup.visible = isVisible;
         parseTRSAndMATRIX_GLTF(targetGroup, nodeInfo);
-        parseChildrenAndEnqueueSkin(gltfLoader, gltfData, targetGroup, nodeInfo, parseContext);
+        parseChildren(gltfLoader, gltfData, targetGroup, nodeInfo, parseContext);
+        enqueueSkinIfPresent(targetGroup, nodeInfo, parseContext);
     }
 };
 export default parseNode_GLTF;
