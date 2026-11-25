@@ -12,6 +12,7 @@ import calculateNormals from "../../../math/calculateNormals";
 import createUUID from "../../../utils/uuid/createUUID";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
+import expandFlatNormals from "../core/expandFlatNormals";
 import GLTFParseContext from "../core/GLTFParseContext";
 import {GLTF, GlTfId, Mesh as GltfMesh, MeshPrimitive} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
@@ -217,9 +218,35 @@ const parseMesh_GLTF = function (
                 indices = parseIndicesInfo_GLTF(accessorInfo);
             }
 
+            let normalData: Float32Array;
+            const isTriangleList = meshPrimitive.mode === undefined || meshPrimitive.mode === 4;
+            if (normals.length > 0) {
+                normalData = normals;
+            } else if (!hasMorph && isTriangleList) {
+                const expanded = expandFlatNormals(
+                    vertices,
+                    indices,
+                    verticesColor_0,
+                    uvs,
+                    uvs1,
+                    jointWeights,
+                    joints
+                );
+                vertices = expanded.vertices;
+                normalData = expanded.normals;
+                verticesColor_0 = expanded.verticesColor_0;
+                uvs = expanded.uvs;
+                uvs1 = expanded.uvs1;
+                jointWeights = expanded.jointWeights;
+                joints = expanded.joints;
+                indices = EMPTY_UINT32_ARRAY;
+                tangents = EMPTY_FLOAT32_ARRAY;
+            } else {
+                normalData = calculateNormals(vertices, indices);
+            }
+
             hasVertexColor = verticesColor_0.length > 0;
-            const normalData: Float32Array = normals.length ? normals : calculateNormals(vertices, indices);
-            if (!tangents.length) {
+            if (!tangents.length && uvs.length > 0) {
                 tangents = calculateTangents(vertices, normalData, uvs, indices);
             }
             hasVertexTangent = tangents.length > 0;
