@@ -38,7 +38,7 @@ RedGPU.init(
         // [EN] Load ground mesh and GLTF models
         addGround(redGPUContext, scene);
         loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -3, 3, 3);
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 3, 0, 3);
+        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Meshopt/BrainStem.gltf', 3, 0, 3);
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {

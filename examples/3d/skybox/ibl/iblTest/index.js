@@ -33,7 +33,7 @@ const MODEL_LIST = [
         position: [-6, -1.5, 0]
     },
     {
-        url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF-Binary/Corset.glb',
+        url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF-Draco/Corset.gltf',
         scale: 40,
         position: [0, -2, 2]
     }
