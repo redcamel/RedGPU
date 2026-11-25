@@ -40,7 +40,7 @@ RedGPU.init(
         {
             let i = redGPUContext.detector.isMobile ? 25 : 100
             while (i--) {
-                loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MorphStressTest/glTF/MorphStressTest.gltf');
+                loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MorphStressTest/glTF-Binary/MorphStressTest.glb');
             }
         }
         const renderer = new RedGPU.Renderer();
@@ -102,7 +102,7 @@ const renderTestPane = (redGPUContext, targetView) => {
             }).on('click', () => {
                 let i = moreNum;
                 while (i--) {
-                    loadGLTF(targetView, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MorphStressTest/glTF/MorphStressTest.gltf');
+                    loadGLTF(targetView, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MorphStressTest/glTF-Binary/MorphStressTest.glb');
                 }
             });
 

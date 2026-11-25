@@ -40,7 +40,7 @@ RedGPU.init(
         {
             let i = redGPUContext.detector.isMobile ? 200 : 500
             while (i--) {
-                loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf');
+                loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Draco/CesiumMan.gltf');
             }
         }
         const renderer = new RedGPU.Renderer();
@@ -73,7 +73,7 @@ const renderTestPane = (redGPUContext, targetView) => {
             }).on('click', () => {
                 let i = moreNum;
                 while (i--) {
-                    loadGLTF(targetView, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf');
+                    loadGLTF(targetView, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Draco/CesiumMan.gltf');
                 }
             });
 
