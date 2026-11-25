@@ -14,6 +14,7 @@ import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
 import expandFlatNormals from "../core/expandFlatNormals";
 import GLTFParseContext from "../core/GLTFParseContext";
+import {normalizePrimitiveTopology, resolveWebGPUTopology} from "../core/normalizePrimitiveTopology";
 import {GLTF, GlTfId, Mesh as GltfMesh, MeshPrimitive} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 import parseMaterialInfo_GLTF from "./material/parseMaterialInfo_GLTF";
@@ -43,27 +44,6 @@ const SKIN_WEIGHT_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     }
 );
 const PBR_VERTEX_FLOAT_STRIDE = PBR_INTERLEAVED_STRUCT.arrayStride / 4;
-
-const resolvePrimitiveTopology = (mode: number | undefined): {
-    topology: GPUPrimitiveTopology;
-    noIndexBuffer: boolean
-} => {
-    switch (mode) {
-        case 0:
-            return {topology: GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, noIndexBuffer: false};
-        case 1:
-        case 2:
-            return {topology: GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, noIndexBuffer: false};
-        case 3:
-            return {topology: GPU_PRIMITIVE_TOPOLOGY.LINE_STRIP, noIndexBuffer: true};
-        case 5:
-            return {topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_STRIP, noIndexBuffer: true};
-        case 4:
-        case 6:
-        default:
-            return {topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST, noIndexBuffer: false};
-    }
-};
 
 const bindMaterialVariants = (
     gltfLoader: GLTFLoader,
@@ -201,7 +181,7 @@ const parseMesh_GLTF = function (
     const primitivesLength = primitives.length;
     for (let i = 0; i < primitivesLength; i++) {
         const meshPrimitive: MeshPrimitive = primitives[i];
-        const {topology: tDrawMode, noIndexBuffer} = resolvePrimitiveTopology(meshPrimitive.mode);
+        let tDrawMode: GPUPrimitiveTopology = resolveWebGPUTopology(meshPrimitive.mode, 'indices' in meshPrimitive);
 
         const hasMorph = Boolean(meshPrimitive.targets && meshPrimitive.targets.length > 0);
         const hasSkinAttributes = Boolean(
@@ -287,8 +267,12 @@ const parseMesh_GLTF = function (
                 indices = parseIndicesInfo_GLTF(accessorInfo);
             }
 
+            const normalizedTopology = normalizePrimitiveTopology(meshPrimitive.mode, indices, (vertices.length / 3) | 0);
+            tDrawMode = normalizedTopology.topology;
+            indices = normalizedTopology.indices;
+
             let normalData: Float32Array;
-            const isTriangleList = meshPrimitive.mode === undefined || meshPrimitive.mode === 4;
+            const isTriangleList = tDrawMode === GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
             if (normals.length > 0) {
                 normalData = normals;
             } else if (!hasMorph && isTriangleList) {
@@ -340,7 +324,7 @@ const parseMesh_GLTF = function (
                     undefined,
                     vertexCacheKey
                 ),
-                !noIndexBuffer && indices.length ? new IndexBuffer(
+                indices.length ? new IndexBuffer(
                     redGPUContext,
                     indices,
                     undefined,

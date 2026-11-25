@@ -1,6 +1,6 @@
 {
   "name": "redgpu",
-  "version": "4.6.0-Alpha",
+  "version": "4.6.0",
   "description": "RedGPU",
   "repository": {
     "type": "git",
