@@ -1,5 +1,5 @@
 import Mesh from "../../../../display/mesh/Mesh";
-import parseAnimationInfo_GLTF from "../../cls/AnimationData_GLTF";
+import AnimationData_GLTF from "../../cls/AnimationData_GLTF";
 import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
 import GLTFParseContext from "../../core/GLTFParseContext";
 import {AnimationChannel, AnimationSampler, GLTF} from "../../GLTF";
@@ -32,17 +32,17 @@ const getOrCreateAnimationData = (
     gltfLoader: GLTFLoader,
     gltfData: GLTF,
     accessorGlTfId: number,
-    cache?: Map<number, parseAnimationInfo_GLTF>
-): parseAnimationInfo_GLTF => {
+    cache?: Map<number, AnimationData_GLTF>
+): AnimationData_GLTF => {
     if (cache) {
         let cached = cache.get(accessorGlTfId);
         if (!cached) {
-            cached = new parseAnimationInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
+            cached = new AnimationData_GLTF(gltfLoader, gltfData, accessorGlTfId);
             cache.set(accessorGlTfId, cached);
         }
         return cached;
     }
-    return new parseAnimationInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
+    return new AnimationData_GLTF(gltfLoader, gltfData, accessorGlTfId);
 };
 
 const parseAnimationChannel_GLTF = (
@@ -51,7 +51,7 @@ const parseAnimationChannel_GLTF = (
     animationChannel: AnimationChannel,
     animationSamplers: AnimationSampler[],
     gltfData: GLTF,
-    animationDataCache?: Map<number, parseAnimationInfo_GLTF>,
+    animationDataCache?: Map<number, AnimationData_GLTF>,
     parseContext?: GLTFParseContext
 ) => {
     let tMesh: Mesh;
