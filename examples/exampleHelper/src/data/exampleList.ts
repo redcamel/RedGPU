@@ -1403,6 +1403,38 @@ export const ExampleList: ExampleListType = [
                             en: 'Tests automatic vertex normal generation for models without normal data.'
                         },
                     },
+                    {
+                        name: 'Primitive Mode Normals Test',
+                        path: 'gltf/basic/primitiveModeNormalsTest',
+                        description: {
+                            ko: '토폴로지별 NORMAL·TANGENT 유무 및 플랫 노멀 전개 정확도를 검증합니다.',
+                            en: 'Verifies normal/tangent handling and flat normal generation across primitive modes.'
+                        },
+                    },
+                    {
+                        name: 'Mesh Primitive Modes',
+                        path: 'gltf/basic/meshPrimitiveModes',
+                        description: {
+                            ko: 'POINTS, LINES, LINE_STRIP, TRIANGLES, TRIANGLE_STRIP 등 프리미티브 토폴로지 렌더링을 검증합니다.',
+                            en: 'Verifies rendering across glTF primitive topology modes.'
+                        },
+                    },
+                    {
+                        name: 'Simple Sparse Accessor',
+                        path: 'gltf/basic/simpleSparseAccessor',
+                        description: {
+                            ko: 'Sparse Accessor를 사용한 부분 정점 치환 정확도를 검증합니다.',
+                            en: 'Verifies partial vertex substitution using glTF sparse accessors.'
+                        },
+                    },
+                    {
+                        name: 'Unicode Test (❤♻)',
+                        path: 'gltf/basic/unicodeTest',
+                        description: {
+                            ko: '유니코드·이모지가 포함된 파일명과 외부 리소스 URI 해석을 검증합니다.',
+                            en: 'Verifies UTF-8 filename and external resource URI resolution containing Unicode characters.'
+                        },
+                    },
                 ]
             },
             {
