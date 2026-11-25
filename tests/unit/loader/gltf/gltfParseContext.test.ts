@@ -1,11 +1,5 @@
 // GLTFParseContext 상태 관리, 2-Pass 스킨/조인트 동기 해석, 4-튜플 머티리얼 캐시 키, 포인터 바인딩 및 원본 JSON 불변성 단위 테스트
 import {describe, expect, it, vi} from 'vitest';
-
-vi.mock('wgsl_reflect', () => ({
-    WgslReflect: class {
-    }
-}));
-
 import ParsedSkinInfo_GLTF from '../../../../src/loader/gltf/cls/ParsedSkinInfo_GLTF';
 import GLTFParseContext from '../../../../src/loader/gltf/core/GLTFParseContext';
 import {GLTF, MeshPrimitive, Skin} from '../../../../src/loader/gltf/GLTF';
@@ -17,22 +11,23 @@ import {
 } from '../../../../src/loader/gltf/parsers/animation/resolveAnimationPointer_GLTF';
 import parseMaterialInfo_GLTF from '../../../../src/loader/gltf/parsers/material/parseMaterialInfo_GLTF';
 
+vi.mock('wgsl_reflect', () => ({
+    WgslReflect: class {
+    }
+}));
+
 describe('GLTFParseContext — lifecycle, 2-Pass skinning, 4-tuple material cache & JSON immutability', () => {
     it('stores runtime mappings and releases all references on clear()', () => {
         const ctx = new GLTFParseContext();
         const mockMesh = {name: 'Mesh0'} as any;
         const mockMaterial = {name: 'Mat0'} as any;
         const mockGeometry = {name: 'Geo0'} as any;
-        const mockWeightBuffer = {name: 'Weight0'} as any;
-        const mockJointBuffer = {name: 'Joint0'} as any;
 
         ctx.nodeObjectMap.set(0, mockMesh);
         ctx.nodeMeshesMap.set(0, [mockMesh]);
         ctx.materialCache.set('0_0_0_0', mockMaterial);
         ctx.geometryCache.set('0_0', {
             geometry: mockGeometry,
-            weightBuffer: mockWeightBuffer,
-            jointBuffer: mockJointBuffer,
             hasVertexColor: false,
             hasVertexTangent: true,
         });

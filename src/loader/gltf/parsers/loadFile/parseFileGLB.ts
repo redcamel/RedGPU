@@ -135,7 +135,9 @@ const parseArrayBuffer = async (
     }
     const gltfData: GLTF = JSON.parse(content);
     processImagesIfExist(gltfData, binaryChunk);
-    gltfData.buffers[0].uri = binaryChunk;
+    if (gltfData.buffers?.length > 0 && binaryChunk) {
+        gltfData.buffers[0].uri = binaryChunk;
+    }
     gltfLoader.gltfData = gltfData
     await parseGLTF(gltfLoader, gltfData, callBack, onProgress, signal)
 }
@@ -147,12 +149,12 @@ const parseArrayBuffer = async (
  * [KO] 파싱할 `ArrayBuffer`
  * [EN] `ArrayBuffer` to parse
  * @returns
- * [KO] 파싱된 JSON 문자열(`content`)과 바이너리 청크(`binaryChunk`)를 담은 객체
- * [EN] Object containing the parsed JSON string (`content`) and binary chunk (`binaryChunk`)
+ * [KO] 파싱된 JSON 문자열(`content`)과 Zero-Copy 바이너리 청크 뷰(`binaryChunk`)를 담은 객체
+ * [EN] Object containing the parsed JSON string (`content`) and Zero-Copy binary chunk view (`binaryChunk`)
  */
-const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any } => {
-    let content = null;
-    let body = null;
+const parseBuffer = (buffer: ArrayBuffer): { content: string | null, binaryChunk: Uint8Array<ArrayBuffer> | null } => {
+    let content: string | null = null;
+    let body: Uint8Array<ArrayBuffer> | null = null;
     const chunkView = new DataView(buffer, BINPACKER_HEADER_LENGTH);
     const byteLength = chunkView.byteLength;
     for (let chunkIndex = 0; chunkIndex < byteLength;) {
@@ -171,7 +173,7 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
                 break;
             case BINPACKER_CHUNK_TYPE_BINARY:
                 const byteOffset = BINPACKER_HEADER_LENGTH + chunkIndex;
-                body = buffer.slice(byteOffset, byteOffset + chunkLength);
+                body = new Uint8Array(buffer, byteOffset, chunkLength);
                 break;
         }
         chunkIndex += chunkLength;
@@ -186,16 +188,13 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
  * [KO] GLTF 데이터 객체
  * [EN] GLTF data object
  * @param binaryChunk -
- * [KO] 추출된 바이너리 청크 데이터
- * [EN] Extracted binary chunk data
- * @returns
- * [KO] 버퍼 키와 생성된 Object URL의 매핑(`Map<string, string>`)
- * [EN] Mapping of buffer keys to created Object URLs (`Map<string, string>`)
+ * [KO] 추출된 바이너리 청크 뷰 또는 버퍼
+ * [EN] Extracted binary chunk view or buffer
  */
-const processImagesIfExist = (gltfData: GLTF, binaryChunk: any): void => {
+const processImagesIfExist = (gltfData: GLTF, binaryChunk: Uint8Array<ArrayBuffer> | ArrayBuffer | null): void => {
     const {images, bufferViews} = gltfData;
     const bufferHashMap = new Map<string, string>();
-    if (images) {
+    if (images && binaryChunk) {
         for (let i = 0; i < images.length; i++) {
             const image = images[i];
             const {mimeType, bufferView: bufferViewGlTfId} = image;
@@ -206,7 +205,10 @@ const processImagesIfExist = (gltfData: GLTF, binaryChunk: any): void => {
                 if (bufferHashMap.has(bufferKey)) {
                     image.uri = bufferHashMap.get(bufferKey);
                 } else {
-                    const blob = new Blob([new Uint8Array(binaryChunk, sliceStartIndex, byteLength)], {type: mimeType});
+                    const imageBytes = binaryChunk instanceof Uint8Array
+                        ? binaryChunk.subarray(sliceStartIndex, sliceStartIndex + byteLength)
+                        : new Uint8Array(binaryChunk, sliceStartIndex, byteLength);
+                    const blob = new Blob([imageBytes], {type: mimeType});
                     const objectURL = URL.createObjectURL(blob);
                     bufferHashMap.set(bufferKey, objectURL);
                     image.uri = objectURL;

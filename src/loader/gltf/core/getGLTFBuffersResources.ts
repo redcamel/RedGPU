@@ -97,6 +97,9 @@ const getGLTFBuffersResources = (
         if (buffer.uri instanceof ArrayBuffer) {
             const uriDataView = new DataView(buffer.uri);
             processArrayBuffer(uriDataView);
+        } else if (ArrayBuffer.isView(buffer.uri)) {
+            const uriDataView = new DataView(buffer.uri.buffer, buffer.uri.byteOffset, buffer.uri.byteLength);
+            processArrayBuffer(uriDataView);
         } else if (typeof buffer.uri === 'string') {
             processNonArrayBuffer(buffer.uri);
         } else if (isMeshoptFallbackBuffer(buffer) || !buffer.uri) {

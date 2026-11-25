@@ -24,6 +24,24 @@ import calculateTangents from "../../../math/calculateTangents";
 
 const EMPTY_FLOAT32_ARRAY = new Float32Array(0);
 const EMPTY_UINT32_ARRAY = new Uint32Array(0);
+const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
+    {
+        aVertexPosition: VertexInterleaveType.float32x3,
+        aVertexNormal: VertexInterleaveType.float32x3,
+        aTexcoord: VertexInterleaveType.float32x2,
+        aTexcoord1: VertexInterleaveType.float32x2,
+        aVertexColor_0: VertexInterleaveType.float32x4,
+        aVertexTangent: VertexInterleaveType.float32x4,
+    },
+    'PBR'
+);
+const EMPTY_PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct({}, 'PBR');
+const SKIN_WEIGHT_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
+    {
+        aVertexWeight: VertexInterleaveType.float32x4,
+    }
+);
+const PBR_VERTEX_FLOAT_STRIDE = PBR_INTERLEAVED_STRUCT.arrayStride / 4;
 
 /**
  * [KO] glTF 메시 데이터를 파싱하여 프리미티브별 지오메트리, 재질, 모프 타겟이 적용된 `Mesh` 배열을 생성합니다.
@@ -116,13 +134,17 @@ const parseMesh_GLTF = function (
         }
 
         const hasMorph = Boolean(meshPrimitive.targets && meshPrimitive.targets.length > 0);
-        const canShareGeometry = !hasMorph && !isSkinned;
+        const hasSkinAttributes = Boolean(
+            meshPrimitive.attributes &&
+            (meshPrimitive.attributes['WEIGHTS_0'] !== undefined || meshPrimitive.attributes['JOINTS_0'] !== undefined)
+        );
+        const canShareGeometry = !hasMorph && !isSkinned && !hasSkinAttributes;
         const geoCacheKey = canShareGeometry ? `${meshGlTfId}_${i}` : '';
         const cachedGeoEntry = canShareGeometry ? parseContext.geometryCache.get(geoCacheKey) : undefined;
 
         let tGeo: Geometry;
-        let weightBuffer: VertexBuffer;
-        let jointBuffer: IndexBuffer;
+        let weightBuffer: VertexBuffer | null = null;
+        let jointBuffer: IndexBuffer | null = null;
         let hasVertexColor = false;
         let hasVertexTangent = false;
         let vertexCount = 0;
@@ -130,12 +152,9 @@ const parseMesh_GLTF = function (
         let joints: Float32Array = EMPTY_FLOAT32_ARRAY;
         let morphInfo: MorphInfo_GLTF;
         let hasVertexBuffer: any = null;
-        const tInterleaveInfoList: Record<string, any> = {};
 
         if (cachedGeoEntry) {
             tGeo = cachedGeoEntry.geometry;
-            weightBuffer = cachedGeoEntry.weightBuffer;
-            jointBuffer = cachedGeoEntry.jointBuffer;
             hasVertexColor = cachedGeoEntry.hasVertexColor;
             hasVertexTangent = cachedGeoEntry.hasVertexTangent;
             morphInfo = new MorphInfo_GLTF(gltfLoader, gltfData, meshPrimitive, gltfMesh.weights);
@@ -207,14 +226,6 @@ const parseMesh_GLTF = function (
 
             const interleaveData = parseInterleaveData_GLTF(vertices, verticesColor_0, normalData, uvs, uvs1, tangents);
             vertexCount = (vertices.length / 3) | 0;
-            if (vertexCount > 0) {
-                tInterleaveInfoList['aVertexPosition'] = VertexInterleaveType.float32x3;
-                tInterleaveInfoList['aVertexNormal'] = VertexInterleaveType.float32x3;
-                tInterleaveInfoList['aTexcoord'] = VertexInterleaveType.float32x2;
-                tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2;
-                tInterleaveInfoList['aVertexColor_0'] = VertexInterleaveType.float32x4;
-                tInterleaveInfoList['aVertexTangent'] = VertexInterleaveType.float32x4;
-            }
 
             morphInfo = new MorphInfo_GLTF(gltfLoader, gltfData, meshPrimitive, gltfMesh.weights);
             const vertexCacheKey = canShareGeometry
@@ -229,10 +240,7 @@ const parseMesh_GLTF = function (
                 hasVertexBuffer || new VertexBuffer(
                     redGPUContext,
                     interleaveData,
-                    new VertexInterleavedStruct(
-                        tInterleaveInfoList,
-                        'PBR'
-                    ),
+                    vertexCount > 0 ? PBR_INTERLEAVED_STRUCT : EMPTY_PBR_INTERLEAVED_STRUCT,
                     undefined,
                     vertexCacheKey
                 ),
@@ -244,37 +252,30 @@ const parseMesh_GLTF = function (
                 ) : null
             );
 
-            const weightData = packSkinWeights_GLTF(vertexCount, jointWeights);
-            const jointData = packSkinJoints_GLTF(vertexCount, joints);
-            const weightCacheKey = canShareGeometry
-                ? `Weight_${gltfLoader.url}_mesh${meshGlTfId}_${i}`
-                : `Weight_${gltfLoader.url}_${nodeGlTfId}_${i}`;
-            const jointCacheKey = canShareGeometry
-                ? `Joint_${gltfLoader.url}_mesh${meshGlTfId}_${i}`
-                : `Joint_${gltfLoader.url}_${nodeGlTfId}_${i}`;
-            weightBuffer = new VertexBuffer(
-                redGPUContext,
-                weightData,
-                new VertexInterleavedStruct(
-                    {
-                        aVertexWeight: VertexInterleaveType.float32x4,
-                    }
-                ),
-                undefined,
-                weightCacheKey
-            );
-            jointBuffer = new IndexBuffer(
-                redGPUContext,
-                jointData,
-                GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-                jointCacheKey
-            );
+            const needsSkinBuffers = isSkinned || jointWeights.length > 0 || joints.length > 0;
+            if (needsSkinBuffers) {
+                const weightData = packSkinWeights_GLTF(vertexCount, jointWeights);
+                const jointData = packSkinJoints_GLTF(vertexCount, joints);
+                const weightCacheKey = `Weight_${gltfLoader.url}_${nodeGlTfId}_${i}`;
+                const jointCacheKey = `Joint_${gltfLoader.url}_${nodeGlTfId}_${i}`;
+                weightBuffer = new VertexBuffer(
+                    redGPUContext,
+                    weightData,
+                    SKIN_WEIGHT_INTERLEAVED_STRUCT,
+                    undefined,
+                    weightCacheKey
+                );
+                jointBuffer = new IndexBuffer(
+                    redGPUContext,
+                    jointData,
+                    GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+                    jointCacheKey
+                );
+            }
 
             if (canShareGeometry) {
                 parseContext.geometryCache.set(geoCacheKey, {
                     geometry: tGeo,
-                    weightBuffer,
-                    jointBuffer,
                     hasVertexColor,
                     hasVertexTangent
                 });
@@ -357,11 +358,8 @@ const parseMesh_GLTF = function (
         const morphList = tMesh.animationInfo.morphInfo.morphInfoDataList;
         if (morphList.length > 0) {
             const targetGeometryData = tMesh.geometry.vertexBuffer.data;
-            let NUM = 0;
-            for (const k in tInterleaveInfoList) {
-                NUM += tInterleaveInfoList[k].numElements;
-            }
-            if (!hasVertexBuffer) {
+            const NUM = vertexCount > 0 ? PBR_VERTEX_FLOAT_STRIDE : 0;
+            if (!hasVertexBuffer && NUM > 0) {
                 const listLen = morphList.length;
                 const targetGeometryDataLen = targetGeometryData.length;
                 const morphVertexCount = targetGeometryDataLen / NUM;

@@ -125,7 +125,7 @@ class ParsedSkinInfo_GLTF {
     getUsedJointIndices(mesh: Mesh): number[] {
         const usedJoints = new Set<number>();
         const {jointBuffer} = mesh.animationInfo;
-        if (!jointBuffer.data.length) return [];
+        if (!jointBuffer || !jointBuffer.data.length) return [];
         const data = jointBuffer.data;
         const len = data.length;
         const maxJoints = this.joints.length;

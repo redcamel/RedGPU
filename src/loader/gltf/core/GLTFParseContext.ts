@@ -1,20 +1,16 @@
 import Mesh from "../../../display/mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
-import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
-import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import {GlTfId} from "../GLTF";
 
 /**
- * [KO] 정적 메쉬 프리미티브의 공유 지오메트리·더미 스킨 버퍼 및 정점 속성 플래그 캐시 항목입니다.
- * [EN] Cache entry holding a shared static primitive geometry, dummy skin buffers, and its vertex attribute flags.
+ * [KO] 정적 메쉬 프리미티브의 공유 지오메트리 및 정점 속성 플래그 캐시 항목입니다.
+ * [EN] Cache entry holding a shared static primitive geometry and its vertex attribute flags.
  *
  * @category GLTF
  */
 export interface CachedStaticGeometryEntry {
     geometry: Geometry;
-    weightBuffer: VertexBuffer;
-    jointBuffer: IndexBuffer;
     hasVertexColor: boolean;
     hasVertexTangent: boolean;
 }

@@ -366,7 +366,7 @@ export interface Buffer {
      * [KO] 버퍼 리소스의 URI 경로 또는 로드된 `ArrayBuffer` 데이터
      * [EN] URI path of the buffer resource or loaded `ArrayBuffer` data
      */
-    "uri"?: string | ArrayBuffer;
+    "uri"?: string | ArrayBuffer | ArrayBufferView;
     /**
      * [KO] 버퍼의 총 바이트 길이
      * [EN] Total byte length of the buffer
