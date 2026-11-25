@@ -94,7 +94,11 @@ const GuiPanel: React.FC = () => {
                                       view={firstView}
                                       expanded={typeof guiConfig.ibl === 'object' ? guiConfig.ibl.expanded : true}/>
                     )}
-                    {guiConfig.skybox && firstView && <GuiSkyBoxHelper gui={guiInstance} view={firstView}/>}
+                    {guiConfig.skybox && firstView && (
+                        <GuiSkyBoxHelper gui={guiInstance}
+                                         view={firstView}
+                                         expanded={typeof guiConfig.skybox === 'object' ? guiConfig.skybox.expanded : true}/>
+                    )}
                 </>
             )}
         </>
