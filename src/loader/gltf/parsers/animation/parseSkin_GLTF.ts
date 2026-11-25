@@ -1,6 +1,7 @@
 import Mesh from "../../../../display/mesh/Mesh";
 import AccessorInfo_GLTF from "../../cls/AccessorInfo_GLTF";
 import ParsedSkinInfo_GLTF from "../../cls/ParsedSkinInfo_GLTF";
+import {tryCopyAlignedFloat32} from "../../core/gltfBufferUtils";
 import GLTFParseContext from "../../core/GLTFParseContext";
 import {GLTF, Skin} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
@@ -62,18 +63,8 @@ const parseSkin_GLTF = (
         const baseByteOffset = bufferViewOffset + accessorBufferOffset;
         const packedByteStride = 16 * componentType_BYTES_PER_ELEMENT;
         const byteStride = bufferViewByteStride || packedByteStride;
-        const absoluteByteOffset = bufferURIDataView instanceof DataView
-            ? bufferURIDataView.byteOffset + baseByteOffset
-            : -1;
 
-        if (
-            byteStride === packedByteStride &&
-            componentType === Float32Array &&
-            absoluteByteOffset >= 0 &&
-            (absoluteByteOffset & 3) === 0
-        ) {
-            flatMatrices.set(new Float32Array(bufferURIDataView.buffer, absoluteByteOffset, count * 16));
-        } else {
+        if (!tryCopyAlignedFloat32(bufferURIDataView, baseByteOffset, byteStride, packedByteStride, componentType, count * 16, flatMatrices)) {
             let byteOffset = baseByteOffset;
             let outIdx = 0;
             for (let m = 0; m < count; m++) {

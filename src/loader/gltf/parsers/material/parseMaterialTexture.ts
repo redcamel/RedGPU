@@ -92,11 +92,12 @@ export const resolveTextureSourceId = (textureDef: Texture | undefined): GlTfId 
 const parseMaterialTexture = (
     gltfLoader: GLTFLoader,
     tMaterial: PBRMaterial,
-    textureInfo: TextureInfo | MaterialNormalTextureInfo | MaterialOcclusionTextureInfo,
+    textureInfo: TextureInfo | MaterialNormalTextureInfo | MaterialOcclusionTextureInfo | undefined,
     targetTextureKey: string,
     format?: string,
     useMipmap: boolean = true
 ) => {
+    if (!textureInfo) return;
     const {redGPUContext, gltfData} = gltfLoader;
     const textureRawList = getActiveParseContext(gltfLoader)?.textureRawList;
     if (!textureRawList) return;

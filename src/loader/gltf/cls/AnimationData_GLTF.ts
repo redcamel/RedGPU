@@ -1,4 +1,5 @@
 import dequantizeAccessorValue from "../core/dequantizeAccessorValue";
+import {tryCopyAlignedFloat32} from "../core/gltfBufferUtils";
 import {GLTF, GlTfId} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 import AccessorInfo_GLTF from "./AccessorInfo_GLTF";
@@ -74,16 +75,18 @@ class AnimationData_GLTF {
 
         if (
             !isNormalized &&
-            byteStride === packedByteStride &&
-            typedArrayCtor === Float32Array &&
-            bufferURIDataView instanceof DataView
+            tryCopyAlignedFloat32(
+                bufferURIDataView,
+                baseByteOffset,
+                byteStride,
+                packedByteStride,
+                typedArrayCtor,
+                total,
+                dataList
+            )
         ) {
-            const absoluteByteOffset = bufferURIDataView.byteOffset + baseByteOffset;
-            if ((absoluteByteOffset & 3) === 0) {
-                dataList.set(new Float32Array(bufferURIDataView.buffer, absoluteByteOffset, total));
-                this.dataList = dataList;
-                return;
-            }
+            this.dataList = dataList;
+            return;
         }
 
         let byteOffset = baseByteOffset;

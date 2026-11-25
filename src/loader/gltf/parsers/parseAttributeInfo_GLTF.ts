@@ -1,6 +1,7 @@
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import dequantizeAccessorValue from "../core/dequantizeAccessorValue";
+import {tryCopyAlignedFloat32} from "../core/gltfBufferUtils";
 
 const EMPTY_FLOAT32_ARRAY = new Float32Array(0);
 
@@ -87,24 +88,25 @@ const parseAttributeInfo_GLTF = (
     const byteStride = bufferViewByteStride || packedByteStride;
     const baseByteOffset = bufferViewOffset + accessorBufferOffset;
 
+    const result = new Float32Array(count * dstComponents);
+
     // Fast path: tightly packed Float32Array without normalization or RGBA expansion
     if (
         !isVec3Color &&
         !isNormalized &&
-        byteStride === packedByteStride &&
-        componentType === Float32Array &&
-        bufferURIDataView instanceof DataView
+        tryCopyAlignedFloat32(
+            bufferURIDataView,
+            baseByteOffset,
+            byteStride,
+            packedByteStride,
+            componentType,
+            count * srcComponents,
+            result
+        )
     ) {
-        const absoluteByteOffset = bufferURIDataView.byteOffset + baseByteOffset;
-        if ((absoluteByteOffset & 3) === 0) {
-            const totalElements = count * srcComponents;
-            const result = new Float32Array(totalElements);
-            result.set(new Float32Array(bufferURIDataView.buffer, absoluteByteOffset, totalElements));
-            return result;
-        }
+        return result;
     }
 
-    const result = new Float32Array(count * dstComponents);
     const elemBytes = componentType_BYTES_PER_ELEMENT;
     const elemBytes2 = elemBytes * 2;
     const elemBytes3 = elemBytes * 3;
