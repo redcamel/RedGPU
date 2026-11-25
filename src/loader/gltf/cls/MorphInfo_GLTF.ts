@@ -3,7 +3,24 @@ import GLTFLoader from "../GLTFLoader";
 import parseAttributeInfo_GLTF from "../parsers/parseAttributeInfo_GLTF";
 import parseSparse_GLTF from "../parsers/parseSparse_GLTF";
 import AccessorInfo_GLTF from "./AccessorInfo_GLTF";
-import MorphInfoData_GLTF from "./MorphInfoData_GLTF";
+
+const EMPTY_FLOAT32_ARRAY = new Float32Array(0);
+
+/**
+ * [KO] GLTF 모프 타겟(Morph Target)의 정점 위치 델타 데이터를 보관하는 클래스입니다.
+ * [EN] Class that stores vertex position delta data of a GLTF morph target.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Loader
+ */
+export class MorphInfoData_GLTF {
+    vertices: Float32Array = EMPTY_FLOAT32_ARRAY;
+    interleaveData: Float32Array;
+}
 
 /**
  * [KO] GLTF 메쉬 프리미티브의 모프 타겟(Morph Target) 목록과 가중치 정보를 관리하는 클래스입니다.

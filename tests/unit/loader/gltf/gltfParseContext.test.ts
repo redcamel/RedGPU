@@ -3,8 +3,7 @@ import {describe, expect, it, vi} from 'vitest';
 import ParsedSkinInfo_GLTF from '../../../../src/loader/gltf/cls/ParsedSkinInfo_GLTF';
 import GLTFParseContext from '../../../../src/loader/gltf/core/GLTFParseContext';
 import {GLTF, MeshPrimitive, Skin} from '../../../../src/loader/gltf/GLTF';
-import parseJoint_GLTF from '../../../../src/loader/gltf/parsers/animation/parseJoint_GLTF';
-import parseSkin_GLTF from '../../../../src/loader/gltf/parsers/animation/parseSkin_GLTF';
+import parseSkin_GLTF, {parseJoint_GLTF} from '../../../../src/loader/gltf/parsers/animation/parseSkin_GLTF';
 import {
     createPointerTargetBinding,
     parseAnimationPointerPath

@@ -1,3 +1,4 @@
+import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import TextureLoader, {TextureLoaderData} from "../../TextureLoader";
 import decodeDracoPrimitives, {hasDracoCompression} from "../core/decodeDracoPrimitives";
 import getGLTFBuffersResources from "../core/getGLTFBuffersResources";
@@ -7,9 +8,17 @@ import {extractMaterialVariantNames, MaterialVariantEntry} from "../core/materia
 import {GLTF} from "../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
 import parseAnimation_GLTF from "./animation/parseAnimations";
-import parseAssetVersion from "./parseAssetVersion";
 import parseCameras_GLTF from "./parseCameras_GLTF";
 import parseScene_GLTF from "./parseScene_GLTF";
+
+const validateAssetVersion = (gltfData: GLTF): void => {
+    const asset = gltfData?.asset;
+    if (!asset) consoleAndThrowError('GLTFLoader - asset must be defined');
+    if (!asset.version) consoleAndThrowError('GLTFLoader - asset version must be defined');
+    const versionNumber = parseFloat(asset.version);
+    if (isNaN(versionNumber)) consoleAndThrowError('GLTFLoader - asset version must be a numerical value');
+    if (versionNumber < 2) consoleAndThrowError('GLTFLoader - asset version must be 2.0 or higher');
+};
 
 export type GLTFOnParsedCallback = (
     gltfData: GLTF,
@@ -130,7 +139,7 @@ const parseGLTF = async (
         onParsed?.(gltfData, variantNames, parseContext.materialVariantEntries);
 
         await nextFrame(signal);
-        parseAssetVersion(gltfData);
+        validateAssetVersion(gltfData);
 
         await nextFrame(signal);
         await loadBuffersAsync(gltfLoader, gltfData, parseContext, onProgress, signal);

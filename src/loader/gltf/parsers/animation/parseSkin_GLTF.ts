@@ -3,9 +3,25 @@ import AccessorInfo_GLTF from "../../cls/AccessorInfo_GLTF";
 import ParsedSkinInfo_GLTF from "../../cls/ParsedSkinInfo_GLTF";
 import {tryCopyAlignedFloat32} from "../../core/gltfBufferUtils";
 import GLTFParseContext from "../../core/GLTFParseContext";
-import {GLTF, Skin} from "../../GLTF";
+import {GLTF, GlTfId, Skin} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
-import parseJoint_GLTF from "./parseJoint_GLTF";
+
+/**
+ * [KO] GLTF 스킨의 조인트(Joint) 노드를 `GLTFParseContext`에서 조회하여 스킨 정보의 조인트 목록에 등록합니다.
+ * [EN] Resolves a joint node of a GLTF skin from `GLTFParseContext` and registers it in the skin info's joint list.
+ */
+export const parseJoint_GLTF = (
+    skinInfo: ParsedSkinInfo_GLTF,
+    jointGlTfId: GlTfId,
+    parseContext: GLTFParseContext
+): void => {
+    const jointMesh = parseContext.nodeObjectMap.get(jointGlTfId);
+    if (jointMesh) {
+        skinInfo.joints.push(jointMesh);
+    } else {
+        console.warn(`[RedGPU GLTF] Joint node[${jointGlTfId}] was not found in scene nodeObjectMap.`);
+    }
+};
 
 /**
  * [KO] GLTF 스킨(Skin) 정보와 역바인드 행렬(Inverse Bind Matrices)을 파싱하여 메쉬에 할당합니다.
