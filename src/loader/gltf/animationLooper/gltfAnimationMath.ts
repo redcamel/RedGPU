@@ -28,6 +28,7 @@ const normalizeQuatInto = (
 };
 
 const TEMP_CUBIC_QUATS = new Float32Array(16);
+const TEMP_EULER_BUF = new Float32Array(3);
 
 /**
  * [KO] 키프레임 타임스탬프 배열에서 현재 시간에 해당하는 `[prevIdx, nextIdx]` 구간을 O(1) 힌트 검사 및 O(log N) 이진 탐색으로 찾아 `outIndices`에 기록합니다.
@@ -471,36 +472,8 @@ export const applyQuatToMeshRotation = (
     rZ: number,
     rW: number
 ): void => {
-    const x2 = rX + rX;
-    const y2 = rY + rY;
-    const z2 = rZ + rZ;
-    const xx = rX * x2;
-    const xy = rX * y2;
-    const xz = rX * z2;
-    const yy = rY * y2;
-    const yz = rY * z2;
-    const zz = rZ * z2;
-    const wx = rW * x2;
-    const wy = rW * y2;
-    const wz = rW * z2;
-    const m13 = xz + wy;
-    const m11 = 1 - (yy + zz);
-    const m12 = xy - wz;
-    const m23 = yz - wx;
-    const m33 = 1 - (xx + yy);
-    const m32 = yz + wx;
-    const m22 = 1 - (xx + zz);
-    const rotY = Math.asin(Math.max(-1, Math.min(1, m13)));
-    let rotX: number;
-    let rotZ: number;
-    if (Math.abs(m13) < 0.99999) {
-        rotX = Math.atan2(-m23, m33);
-        rotZ = Math.atan2(-m12, m11);
-    } else {
-        rotX = Math.atan2(m32, m22);
-        rotZ = 0;
-    }
-    mesh.rotationX = rotX * PI_180;
-    mesh.rotationY = rotY * PI_180;
-    mesh.rotationZ = rotZ * PI_180;
+    quatToEulerDeg(rX, rY, rZ, rW, TEMP_EULER_BUF);
+    mesh.rotationX = TEMP_EULER_BUF[0];
+    mesh.rotationY = TEMP_EULER_BUF[1];
+    mesh.rotationZ = TEMP_EULER_BUF[2];
 };

@@ -123,7 +123,11 @@ const parseGLTF = async (
     const parseContext = new GLTFParseContext();
     try {
         throwIfAborted(signal);
-        gltfLoader.parsingResult.materialVariants = extractMaterialVariantNames(gltfData);
+        const variantNames = extractMaterialVariantNames(gltfData);
+        gltfLoader.materialVariants.length = 0;
+        for (let i = 0, len = variantNames.length; i < len; i++) {
+            gltfLoader.materialVariants.push(variantNames[i]);
+        }
 
         await nextFrame(signal);
         parseAssetVersion(gltfData);

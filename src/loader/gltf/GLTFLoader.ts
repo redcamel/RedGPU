@@ -78,11 +78,6 @@ type GLTFParsingResult = {
      */
     animations: ClipAnimState[],
     /**
-     * [KO] `KHR_materials_variants` 확장에 정의된 재질 바리에이션 이름 목록
-     * [EN] List of material variant names defined in `KHR_materials_variants`
-     */
-    materialVariants: string[],
-    /**
      * [KO] 메쉬별 기본/변형 머티리얼 매핑 테이블
      * [EN] Per-mesh mapping table of default and variant materials
      */
@@ -177,6 +172,7 @@ class GLTFLoader extends RedGPUObject {
     #url: string
     #fileExtension: string
     #gltfData: GLTF
+    #materialVariants: string[] = []
     #activeMaterialVariant: string | null = null
     #isDestroyed: boolean = false
     #abortController: AbortController = new AbortController()
@@ -249,7 +245,6 @@ class GLTFLoader extends RedGPUObject {
             textureRawList: new Map(),
             cameras: [],
             animations: [],
-            materialVariants: [],
             materialVariantEntries: [],
             materialsById: new Map()
         };
@@ -377,7 +372,7 @@ class GLTFLoader extends RedGPUObject {
      * [EN] Array of variant name strings
      */
     get materialVariants(): string[] {
-        return this.parsingResult.materialVariants;
+        return this.#materialVariants;
     }
 
     /**
@@ -401,7 +396,8 @@ class GLTFLoader extends RedGPUObject {
      * [EN] Variant name (`string`), index (`number`), or `null` to restore defaults
      */
     applyMaterialVariant(variant: string | number | null): void {
-        const {materialVariants, materialVariantEntries} = this.parsingResult;
+        const materialVariants = this.#materialVariants;
+        const {materialVariantEntries} = this.parsingResult;
         const resolvedIdx = resolveMaterialVariantIndex(materialVariants, variant);
         if (resolvedIdx === undefined) {
             console.warn(`[GLTFLoader] Unknown material variant: ${variant}`);
@@ -504,10 +500,10 @@ class GLTFLoader extends RedGPUObject {
             }
             this.parsingResult.textureRawList?.clear();
             this.parsingResult.cameras = [];
-            this.parsingResult.materialVariants = [];
             this.parsingResult.materialVariantEntries = [];
             this.parsingResult.materialsById?.clear();
         }
+        this.#materialVariants = [];
 
         this.#activeMaterialVariant = null;
         this.#gltfData = null;
