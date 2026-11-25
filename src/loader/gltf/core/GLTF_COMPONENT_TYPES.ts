@@ -7,7 +7,15 @@
  *
  * @category GLTF
  */
-const GLTF_COMPONENT_TYPES = Object.freeze({
+export type GLTFComponentTypedArrayConstructor =
+    | Int8ArrayConstructor
+    | Uint8ArrayConstructor
+    | Int16ArrayConstructor
+    | Uint16ArrayConstructor
+    | Uint32ArrayConstructor
+    | Float32ArrayConstructor;
+
+const GLTF_COMPONENT_TYPES: Record<number, GLTFComponentTypedArrayConstructor> = Object.freeze({
     5120: Int8Array,
     5121: Uint8Array,
     5122: Int16Array,

@@ -2,7 +2,7 @@ import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
-import {GLTF, GlTfId, MaterialNormalTextureInfo, MaterialOcclusionTextureInfo, TextureInfo} from "../../GLTF";
+import {GLTF, GlTfId, MaterialNormalTextureInfo, MaterialOcclusionTextureInfo, Texture, TextureInfo} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import parse_KHR_texture_transform from "./extensions/parse_KHR_texture_transform";
 
@@ -55,7 +55,7 @@ export const getSRGBTextureFormat = (): string => {
  * [EN] Selected image source GLTF ID or `undefined`
  * @category GLTF
  */
-export const resolveTextureSourceId = (textureDef: any): GlTfId | undefined => {
+export const resolveTextureSourceId = (textureDef: Texture | undefined): GlTfId | undefined => {
     if (!textureDef) return undefined;
     return (
         textureDef.extensions?.KHR_texture_basisu?.source ??

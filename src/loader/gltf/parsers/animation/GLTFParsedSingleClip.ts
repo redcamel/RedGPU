@@ -1,3 +1,4 @@
+import Mesh from "../../../../display/mesh/Mesh";
 import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
 
 /**
@@ -61,7 +62,7 @@ export class GLTFParsedSingleClip {
      * [KO] 일치하는 `AniTrack_GLTF` 또는 `undefined`
      * [EN] Matching `AniTrack_GLTF` or `undefined`
      */
-    findTrack(mesh: any, keyType: number): AniTrack_GLTF | undefined {
+    findTrack(mesh: Mesh, keyType: number): AniTrack_GLTF | undefined {
         const tracks = this.tracks;
         if (!this.#trackLookup || this.#trackLookupSize !== tracks.length) {
             const lookup = new Map<any, (AniTrack_GLTF | undefined)[]>();

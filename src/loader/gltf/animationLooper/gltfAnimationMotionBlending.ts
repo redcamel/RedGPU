@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import Mesh from "../../../display/mesh/Mesh";
 import AniTrack_GLTF from "../cls/anitrack/AniTrack_GLTF";
 import {PlayAnimationInfo} from "../GLTFLoader";
 import {
@@ -95,7 +96,7 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number, out: Float32Array):
  * [EN] Applies a sampled single pose to the target mesh or morph target.
  */
 function applySinglePose(
-    mesh: any,
+    mesh: Mesh,
     keyType: number,
     pose: Float32Array,
     redGPUContext: RedGPUContext,
@@ -139,7 +140,7 @@ function applySinglePose(
  * [EN] Interpolates (LERP/SLERP) two sampled poses according to the blend weight and applies them to the target mesh.
  */
 function applyBlendedPose(
-    mesh: any,
+    mesh: Mesh,
     keyType: number,
     poseFrom: Float32Array,
     poseTo: Float32Array,

@@ -465,7 +465,7 @@ export const quatToEulerDeg = (
  * @category GLTF
  */
 export const applyQuatToMeshRotation = (
-    mesh: any,
+    mesh: { rotationX: number; rotationY: number; rotationZ: number },
     rX: number,
     rY: number,
     rZ: number,

@@ -52,7 +52,7 @@ const getGLTFBuffersResources = (
     gltfData: GLTF,
     callback?: () => void,
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
-    onError?: (error: any) => void,
+    onError?: (error: unknown) => void,
     signal?: AbortSignal
 ) => {
     const {parsingResult} = gltfLoader
@@ -64,7 +64,7 @@ const getGLTFBuffersResources = (
     let loadedBuffers = 0;
     let settled = false;
 
-    const fail = (error: any) => {
+    const fail = (error: unknown) => {
         if (settled) return;
         settled = true;
         if (onError) onError(error);

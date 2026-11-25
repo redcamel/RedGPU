@@ -29,7 +29,9 @@ export type MaterialVariantEntry = {
 export const extractMaterialVariantNames = (gltfData?: GLTF): string[] => {
     const variants = gltfData?.extensions?.KHR_materials_variants?.variants;
     if (!Array.isArray(variants)) return [];
-    return variants.map((v: any, index: number) => (typeof v?.name === 'string' && v.name.length > 0 ? v.name : `Variant_${index}`));
+    return variants.map((v: {
+        name?: string
+    }, index: number) => (typeof v?.name === 'string' && v.name.length > 0 ? v.name : `Variant_${index}`));
 };
 
 /**

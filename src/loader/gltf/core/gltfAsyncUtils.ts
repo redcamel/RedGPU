@@ -12,6 +12,16 @@ export const createAbortError = (message: string = 'GLTF loading was aborted.'):
 };
 
 /**
+ * [KO] 주어진 에러가 `AbortError`인지 판별합니다.
+ * [EN] Checks whether the given error is an `AbortError`.
+ */
+export const isAbortError = (error: unknown): boolean => {
+    return typeof error === 'object' && error !== null && 'name' in error && (error as {
+        name?: unknown
+    }).name === 'AbortError';
+};
+
+/**
  * [KO] `AbortSignal`이 이미 중단된 상태이면 즉시 `AbortError`를 발생시킵니다.
  * [EN] Throws an `AbortError` immediately if the provided `AbortSignal` is already aborted.
  */

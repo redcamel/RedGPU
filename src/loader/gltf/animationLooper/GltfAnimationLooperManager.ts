@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import Mesh from "../../../display/mesh/Mesh";
 import AniTrack_GLTF from "../cls/anitrack/AniTrack_GLTF";
 import {PlayAnimationInfo} from "../GLTFLoader";
 import {ClipAnimState} from "./AnimStateMachine";
@@ -63,7 +64,7 @@ class GltfAnimationLooperManager {
         let timeFrom: number;
         let targetAniTrackIDX: number;
         let trackFrom: AniTrack_GLTF;
-        let mesh: any;
+        let mesh: Mesh;
         let targetTimeDataList: Float32Array;
         let targetAnimationDataList: Float32Array;
         let targetTimeDataListLength: number;
@@ -72,7 +73,7 @@ class GltfAnimationLooperManager {
         let interpolationType: number;
         let isCUBICSPLINE: boolean;
         let interpolationValue: number;
-        let weightMeshes: any[];
+        let weightMeshes: Mesh[];
         let animationTargetIndex: number;
 
         while (playAnimationInfoIDX--) {

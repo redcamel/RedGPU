@@ -1,3 +1,5 @@
+import RedGPUObject from "../../base/RedGPUObject";
+import PerspectiveCamera from "../../camera/camera/PerspectiveCamera";
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
 import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
@@ -5,12 +7,12 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import getFileExtension from "../../utils/file/getFileExtension";
 import getFileName from "../../utils/file/getFileName";
 import getFilePath from "../../utils/file/getFilePath";
-import {GLTF} from "./GLTF";
-import {ClipAnimState} from "./animationLooper/AnimStateMachine";
+import {AnimStateMachine, ClipAnimState} from "./animationLooper/AnimStateMachine";
+import {isAbortError} from "./core/gltfAsyncUtils";
 import {MaterialVariantEntry, resolveMaterialVariantIndex} from "./core/materialVariantsHelper";
+import {GLTF} from "./GLTF";
 import parseFileGLB from "./parsers/loadFile/parseFileGLB";
 import parseFileGLTF from "./parsers/loadFile/parseFileGLTF";
-import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] `GLTFLoader.loadAsync()` 호출 시 전달할 수 있는 옵션 인터페이스입니다.
@@ -47,24 +49,24 @@ type GLTFParsingResult = {
      * [KO] GLTF 파일에 정의된 그룹 목록
      * [EN] Groups defined in the GLTF file
      */
-    groups: any[],
+    groups: Mesh[],
     /**
      * [KO] GLTF 파일에 정의된 재질 목록
      * [EN] Materials defined in the GLTF file
      */
-    materials: any[],
+    materials: PBRMaterial[],
     /**
      * [KO] GLTF 파일에 정의된 URI 버퍼 정보
      * [EN] URI buffer information defined in the GLTF file
      */
     uris: {
-        buffers: any[]
+        buffers: DataView[]
     },
     /**
      * [KO] GLTF 파일에 정의된 텍스처 맵
      * [EN] Textures defined in the GLTF file
      */
-    textures: Record<string, any>,
+    textures: Record<string, unknown>,
     /**
      * [KO] GLTF 파일에 정의된 원시 텍스처 목록
      * [EN] List of raw textures defined in the GLTF file
@@ -74,7 +76,7 @@ type GLTFParsingResult = {
      * [KO] GLTF 파일에 정의된 카메라 목록
      * [EN] Cameras defined in the GLTF file
      */
-    cameras: any[],
+    cameras: PerspectiveCamera[],
     /**
      * [KO] GLTF 파일에 정의된 파싱된 애니메이션 클립 목록
      * [EN] Parsed animation clips defined in the GLTF file
@@ -169,12 +171,12 @@ class GLTFLoader extends RedGPUObject {
      * [KO] GLTF 파싱 옵션
      * [EN] GLTF parsing options
      */
-    parsingOption
+    parsingOption?: Record<string, (mesh: Mesh) => void> | null
     /**
      * [KO] 현재 재생 중인 애니메이션 정보 목록
      * [EN] List of currently playing animation information
      */
-    activeAnimations: any[] = []
+    activeAnimations: PlayAnimationInfo[] = []
     #filePath: string
     #fileName: string
     #url: string
@@ -185,9 +187,9 @@ class GLTFLoader extends RedGPUObject {
     #abortController: AbortController = new AbortController()
     #externalSignal?: AbortSignal
     #externalAbortHandler?: () => void
-    #onLoad
-    #onError
-    #onProgress
+    #onLoad?: (loader: GLTFLoader) => void
+    #onError?: (error: unknown) => void
+    #onProgress?: (info: GLTFLoadingProgressInfo) => void
     #loadingProgressInfo: GLTFLoadingProgressInfo = {
         url: '',
         model: {loaded: 0, total: 0, lengthComputable: true, percent: 0, transferred: '0', totalSize: '0'},
@@ -216,7 +218,15 @@ class GLTFLoader extends RedGPUObject {
      * [KO] 로딩 취소를 제어할 `AbortSignal` (선택)
      * [EN] Optional `AbortSignal` to cancel loading
      */
-    constructor(redGPUContext: RedGPUContext, url: string, onLoad?, onProgress?, onError?, signal?: AbortSignal) {
+    constructor(
+        redGPUContext: RedGPUContext,
+        url: string,
+        onLoad?: (loader: GLTFLoader) => void,
+        onProgress?: (info: GLTFLoadingProgressInfo) => void,
+        onError?: (error: unknown) => void,
+        signal?: AbortSignal,
+        parsingOption?: Record<string, (mesh: Mesh) => void>
+    ) {
         super(redGPUContext);
         this.#url = url
         this.#filePath = getFilePath(url);
@@ -225,6 +235,7 @@ class GLTFLoader extends RedGPUObject {
         this.#onLoad = onLoad;
         this.#onProgress = onProgress;
         this.#onError = onError;
+        this.parsingOption = parsingOption;
         if (signal) {
             this.#externalSignal = signal;
             if (signal.aborted) {
@@ -287,17 +298,15 @@ class GLTFLoader extends RedGPUObject {
         options?: GLTFLoadAsyncOptions
     ): Promise<GLTFLoader> {
         return new Promise<GLTFLoader>((resolve, reject) => {
-            const loader = new GLTFLoader(
+            new GLTFLoader(
                 redGPUContext,
                 url,
                 (loaded) => resolve(loaded),
                 options?.onProgress,
                 (error) => reject(error),
-                options?.signal
+                options?.signal,
+                options?.parsingOption
             );
-            if (options?.parsingOption) {
-                loader.parsingOption = options.parsingOption;
-            }
         });
     }
 
@@ -544,7 +553,7 @@ class GLTFLoader extends RedGPUObject {
         } catch (error) {
             if (this.#onError) {
                 this.#onError(error);
-            } else if ((error as any)?.name !== 'AbortError') {
+            } else if (!isAbortError(error)) {
                 console.error(error);
             }
         } finally {
@@ -607,7 +616,7 @@ export class PlayAnimationInfo {
      * [KO] 연결된 애니메이션 상태 머신 인스턴스
      * [EN] Associated animation state machine instance
      */
-    animStateMachine?: any
+    animStateMachine?: AnimStateMachine
 
     /**
      * [KO] PlayAnimationInfo 인스턴스를 생성합니다.

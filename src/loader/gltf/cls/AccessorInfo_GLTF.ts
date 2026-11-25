@@ -1,5 +1,5 @@
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import GLTF_COMPONENT_TYPES from "../core/GLTF_COMPONENT_TYPES";
+import GLTF_COMPONENT_TYPES, {GLTFComponentTypedArrayConstructor} from "../core/GLTF_COMPONENT_TYPES";
 import {Accessor, GLTF, GlTfId} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 
@@ -24,12 +24,12 @@ class AccessorInfo_GLTF {
      * [KO] 버퍼 URI의 `DataView` 인스턴스
      * [EN] `DataView` instance of the buffer URI
      */
-    bufferURIDataView: any;
+    bufferURIDataView: DataView | null;
     /**
      * [KO] 컴포넌트 타입에 대응하는 TypedArray 생성자
      * [EN] TypedArray constructor corresponding to the component type
      */
-    componentType: any;
+    componentType: GLTFComponentTypedArrayConstructor;
     /**
      * [KO] 컴포넌트 타입 요소당 바이트 크기
      * [EN] Byte size per element of the component type

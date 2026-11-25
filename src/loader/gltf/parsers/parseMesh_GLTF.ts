@@ -151,7 +151,7 @@ const parseMesh_GLTF = function (
         let jointWeights: Float32Array = EMPTY_FLOAT32_ARRAY;
         let joints: Float32Array = EMPTY_FLOAT32_ARRAY;
         let morphInfo: MorphInfo_GLTF;
-        let hasVertexBuffer: any = null;
+        let hasVertexBuffer: VertexBuffer | undefined;
 
         if (cachedGeoEntry) {
             tGeo = cachedGeoEntry.geometry;
