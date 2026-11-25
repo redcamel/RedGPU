@@ -755,7 +755,7 @@
 
                     const modelURL = redGPUContext.detector.isMobile ?
                         'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoomBox/glTF-Binary/BoomBox.glb' :
-                        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/FlightHelmet/glTF/FlightHelmet.gltf';
+                        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/FlightHelmet/glTF-KTX-BasisU/FlightHelmet.gltf';
                     new RedGPU.GLTFLoader(redGPUContext, modelURL, (result) => {
                         const mesh = result.resultMesh;
                         mesh.y = -0.3;
