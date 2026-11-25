@@ -146,7 +146,7 @@ RedGPU.init(
         renderer.start(redGPUContext, (time) => {
         });
 
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -165,10 +165,6 @@ const updateSubtreeMatrix = (node, view) => {
     }
 };
 
-const renderTestPane = (redGPUContext, targetView) => {
-    new RedGPUExampleHelper(redGPUContext, {
-        RedGPU: RedGPU,
-        ibl: {expanded: false},
-        targetView: targetView,
-    });
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };

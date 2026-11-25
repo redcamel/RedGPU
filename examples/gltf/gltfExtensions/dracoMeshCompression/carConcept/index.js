@@ -42,7 +42,7 @@ RedGPU.init(
                     const variantState = {variant: result.materialVariants[0]};
                     result.applyMaterialVariant(variantState.variant);
                     helper.updateGui((pane) => {
-                        const folder = pane.addFolder({title: 'KHR_materials_variants', expanded: true});
+                        const folder = pane.addFolder({title: 'KHR_materials_variants', expanded: false});
                         const options = {};
                         result.materialVariants.forEach((name) => {
                             options[name] = name;
@@ -71,7 +71,8 @@ RedGPU.init(
 const renderTestPane = (redGPUContext, targetView) => {
     return new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
-        ibl: {expanded: false},
+        ibl: true,
+        skybox: true,
         targetView: targetView,
     });
 };

@@ -58,10 +58,8 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        const helper = renderTestPane(redGPUContext, view);
-
-        // [KO] 5종 포맷 CarConcept 모델을 반응형 그리드로 배치하고 Material Variants를 동시 전환합니다.
-        // [EN] Arranges all 5 CarConcept format variants in a responsive grid with synchronized Material Variants switching.
+        // [KO] 5종 포맷 CarConcept 모델을 반응형 그리드로 배치합니다.
+        // [EN] Arranges all 5 CarConcept format variants in a responsive grid.
         const container = new RedGPU.Display.Mesh(redGPUContext);
         scene.addChild(container);
 
@@ -70,8 +68,6 @@ RedGPU.init(
         const targetSize = 2.4;
         let currentCols = getGridCols(window.innerWidth, window.innerHeight);
         let loadedCount = 0;
-        let variantGuiRegistered = false;
-        const loaders = [];
 
         const slots = MODELS.map((item) => {
             const label = new RedGPU.Display.TextField3D(redGPUContext, item.label);
@@ -125,8 +121,6 @@ RedGPU.init(
                 redGPUContext,
                 item.url,
                 (result) => {
-                    loaders.push(result);
-
                     const mesh = result.resultMesh;
                     container.addChild(mesh);
 
@@ -141,25 +135,6 @@ RedGPU.init(
                     slots[index].offsetY = -aabb.minY * scale;
                     slots[index].offsetZ = -aabb.centerZ * scale;
 
-                    if (!variantGuiRegistered && result.materialVariants.length > 0) {
-                        variantGuiRegistered = true;
-                        const variantState = {variant: result.materialVariants[0]};
-                        helper.updateGui((pane) => {
-                            const folder = pane.addFolder({title: 'KHR_materials_variants', expanded: true});
-                            const options = {};
-                            result.materialVariants.forEach((name) => {
-                                options[name] = name;
-                            });
-                            folder.addBinding(variantState, 'variant', {options}).on('change', (ev) => {
-                                loaders.forEach((loader) => {
-                                    if (loader.materialVariants.includes(ev.value)) {
-                                        loader.applyMaterialVariant(ev.value);
-                                    }
-                                });
-                            });
-                        });
-                    }
-
                     loadedCount++;
                     layoutSlots(currentCols, loadedCount === slots.length);
                 },
@@ -170,6 +145,8 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
         });
+
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -188,10 +165,6 @@ const updateSubtreeMatrix = (node, view) => {
     }
 };
 
-const renderTestPane = (redGPUContext, targetView) => {
-    return new RedGPUExampleHelper(redGPUContext, {
-        RedGPU: RedGPU,
-        ibl: {expanded: false},
-        targetView: targetView,
-    });
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };

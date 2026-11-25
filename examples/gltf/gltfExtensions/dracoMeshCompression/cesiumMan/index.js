@@ -59,7 +59,8 @@ RedGPU.init(
 const renderTestPane = (redGPUContext, targetView) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
-        ibl: {expanded: false},
+        ibl: true,
+        skybox: true,
         targetView: targetView,
     });
 };

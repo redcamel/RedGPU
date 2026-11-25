@@ -39,7 +39,7 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
 
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext);
 
         // [KO] KHR_node_visibility 공식 모델 2종 로드 및 정규화 배치
         // [EN] Load two official KHR_node_visibility models and arrange them side by side
@@ -102,10 +102,6 @@ const updateSubtreeMatrix = (mesh, view) => {
     }
 };
 
-const renderTestPane = (redGPUContext, targetView) => {
-    new RedGPUExampleHelper(redGPUContext, {
-        RedGPU: RedGPU,
-        ibl: {expanded: false},
-        targetView: targetView,
-    });
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };

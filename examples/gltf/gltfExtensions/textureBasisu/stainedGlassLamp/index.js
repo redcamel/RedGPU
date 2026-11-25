@@ -59,7 +59,8 @@ RedGPU.init(
 const renderTestPane = (redGPUContext, targetView) => {
     return new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
-        ibl: {expanded: false},
+        ibl: true,
+        skybox: true,
         targetView: targetView,
     });
 };
@@ -73,7 +74,7 @@ const bindMaterialVariantsPane = (helper, gltfLoader) => {
     gltfLoader.applyMaterialVariant(config.materialVariant);
 
     helper.updateGui((pane) => {
-        const folder = pane.addFolder({title: 'KHR_materials_variants'});
+        const folder = pane.addFolder({title: 'KHR_materials_variants', expanded: false});
         folder.addBinding(config, 'materialVariant', {options}).on('change', (ev) => {
             gltfLoader.applyMaterialVariant(ev.value);
         });
