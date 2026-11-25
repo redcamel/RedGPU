@@ -2,6 +2,12 @@ import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 
 const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 
+/**
+ * [KO] WebGPU 네이티브 토폴로지와 정규화된 인덱스 배열을 담는 결과 인터페이스입니다.
+ * [EN] Result interface holding a WebGPU-native topology and normalized index array.
+ *
+ * @category GLTF
+ */
 export interface NormalizedPrimitiveTopologyResult {
     topology: GPUPrimitiveTopology;
     indices: Uint32Array;

@@ -38,7 +38,7 @@ const setMeshRotation = (tRotation: number[] | Float32Array, mesh: Mesh) => {
  * @param nodeInfo -
  * [KO] 변환 데이터를 포함하는 GLTF 노드 정보
  * [EN] GLTF node information containing transformation data
- * @category Loader
+ * @category GLTF
  */
 const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
     const {rotation: quaternion, translation, scale} = nodeInfo;

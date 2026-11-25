@@ -351,16 +351,36 @@ export const sampleVec3Track = (
  * [KO] 두 쿼터니언을 최단 호(Shortest Arc) SLERP로 보간하여 `outQuat[0..3]`에 기록합니다.
  * [EN] Performs shortest-arc SLERP between two quaternions and writes `[x, y, z, w]` into `outQuat[0..3]`.
  *
- * @param q1x - [KO] 시작 쿼터니언 X [EN] Source quaternion X
- * @param q1y - [KO] 시작 쿼터니언 Y [EN] Source quaternion Y
- * @param q1z - [KO] 시작 쿼터니언 Z [EN] Source quaternion Z
- * @param q1w - [KO] 시작 쿼터니언 W [EN] Source quaternion W
- * @param q2x - [KO] 목표 쿼터니언 X [EN] Target quaternion X
- * @param q2y - [KO] 목표 쿼터니언 Y [EN] Target quaternion Y
- * @param q2z - [KO] 목표 쿼터니언 Z [EN] Target quaternion Z
- * @param q2w - [KO] 목표 쿼터니언 W [EN] Target quaternion W
- * @param weight - [KO] 블렌딩 가중치 (`0.0 ~ 1.0`) [EN] Blend weight (`0.0` to `1.0`)
- * @param outQuat - [KO] 결과를 기록할 `Float32Array(4)` 버퍼 [EN] Reusable `Float32Array(4)` buffer
+ * @param q1x -
+ * [KO] 시작 쿼터니언 X
+ * [EN] Source quaternion X
+ * @param q1y -
+ * [KO] 시작 쿼터니언 Y
+ * [EN] Source quaternion Y
+ * @param q1z -
+ * [KO] 시작 쿼터니언 Z
+ * [EN] Source quaternion Z
+ * @param q1w -
+ * [KO] 시작 쿼터니언 W
+ * [EN] Source quaternion W
+ * @param q2x -
+ * [KO] 목표 쿼터니언 X
+ * [EN] Target quaternion X
+ * @param q2y -
+ * [KO] 목표 쿼터니언 Y
+ * [EN] Target quaternion Y
+ * @param q2z -
+ * [KO] 목표 쿼터니언 Z
+ * [EN] Target quaternion Z
+ * @param q2w -
+ * [KO] 목표 쿼터니언 W
+ * [EN] Target quaternion W
+ * @param weight -
+ * [KO] 블렌딩 가중치 (`0.0 ~ 1.0`)
+ * [EN] Blend weight (`0.0` to `1.0`)
+ * @param outQuat -
+ * [KO] 결과를 기록할 `Float32Array(4)` 버퍼
+ * [EN] Reusable `Float32Array(4)` buffer
  * @category GLTF
  */
 export const slerpQuat = (
@@ -406,11 +426,21 @@ export const slerpQuat = (
  * [KO] 쿼터니언을 오일러 각도(Degree)로 변환하여 `outEuler[0..2]`(`[rotX, rotY, rotZ]`)에 기록합니다.
  * [EN] Converts a quaternion to Euler angles in degrees and writes `[rotX, rotY, rotZ]` into `outEuler[0..2]`.
  *
- * @param rX - [KO] 쿼터니언 X [EN] Quaternion X
- * @param rY - [KO] 쿼터니언 Y [EN] Quaternion Y
- * @param rZ - [KO] 쿼터니언 Z [EN] Quaternion Z
- * @param rW - [KO] 쿼터니언 W [EN] Quaternion W
- * @param outEuler - [KO] 오일러 각도(Degree)를 기록할 `Float32Array(3)` 버퍼 [EN] Reusable `Float32Array(3)` buffer
+ * @param rX -
+ * [KO] 쿼터니언 X
+ * [EN] Quaternion X
+ * @param rY -
+ * [KO] 쿼터니언 Y
+ * [EN] Quaternion Y
+ * @param rZ -
+ * [KO] 쿼터니언 Z
+ * [EN] Quaternion Z
+ * @param rW -
+ * [KO] 쿼터니언 W
+ * [EN] Quaternion W
+ * @param outEuler -
+ * [KO] 오일러 각도(Degree)를 기록할 `Float32Array(3)` 버퍼
+ * [EN] Reusable `Float32Array(3)` buffer
  * @category GLTF
  */
 export const quatToEulerDeg = (
@@ -458,11 +488,21 @@ export const quatToEulerDeg = (
  * [KO] 쿼터니언을 오일러 각도(Degree)로 변환하여 대상 메쉬의 `rotationX/Y/Z`에 직접 적용합니다.
  * [EN] Converts a quaternion to Euler angles in degrees and assigns them directly to `mesh.rotationX/Y/Z`.
  *
- * @param mesh - [KO] 회전을 적용할 대상 메쉬 [EN] Target mesh to apply rotation to
- * @param rX - [KO] 쿼터니언 X [EN] Quaternion X
- * @param rY - [KO] 쿼터니언 Y [EN] Quaternion Y
- * @param rZ - [KO] 쿼터니언 Z [EN] Quaternion Z
- * @param rW - [KO] 쿼터니언 W [EN] Quaternion W
+ * @param mesh -
+ * [KO] 회전을 적용할 대상 메쉬
+ * [EN] Target mesh to apply rotation to
+ * @param rX -
+ * [KO] 쿼터니언 X
+ * [EN] Quaternion X
+ * @param rY -
+ * [KO] 쿼터니언 Y
+ * [EN] Quaternion Y
+ * @param rZ -
+ * [KO] 쿼터니언 Z
+ * [EN] Quaternion Z
+ * @param rW -
+ * [KO] 쿼터니언 W
+ * [EN] Quaternion W
  * @category GLTF
  */
 export const applyQuatToMeshRotation = (

@@ -20,6 +20,12 @@ const validateAssetVersion = (gltfData: GLTF): void => {
     if (versionNumber < 2) consoleAndThrowError('GLTFLoader - asset version must be 2.0 or higher');
 };
 
+/**
+ * [KO] glTF 파싱 완료 시 파싱된 데이터와 Material Variants 정보를 전달받는 내부 콜백 타입입니다.
+ * [EN] Internal callback type receiving parsed glTF data and Material Variants info upon completion.
+ *
+ * @category GLTF
+ */
 export type GLTFOnParsedCallback = (
     gltfData: GLTF,
     materialVariants: string[],
@@ -121,6 +127,9 @@ const releaseTemporaryBuffers = (gltfData: GLTF): void => {
  * @param signal -
  * [KO] 로딩 취소를 제어할 `AbortSignal` (선택)
  * [EN] Optional `AbortSignal` to cancel loading
+ * @param onParsed -
+ * [KO] 파싱 완료 메타데이터 전달 콜백 (선택)
+ * [EN] Optional callback receiving parsed metadata
  * @category GLTF
  */
 const parseGLTF = async (

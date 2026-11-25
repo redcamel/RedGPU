@@ -51,8 +51,8 @@ class GLTFParseContext {
      */
     nodeMeshesMap: Map<GlTfId, Mesh[]> = new Map();
     /**
-     * [KO] 4-튜플 키(`${materialId}_${useVC}_${useVT}_${isSkinned}`) 기반 `PBRMaterial` 공유 캐시
-     * [EN] Shared `PBRMaterial` cache keyed by `${materialId}_${useVC}_${useVT}_${isSkinned}`
+     * [KO] 5-튜플 키(`${materialId}_${useVC}_${useVT}_${isSkinned}_${forceUnlit}`) 기반 `PBRMaterial` 공유 캐시
+     * [EN] Shared `PBRMaterial` cache keyed by `${materialId}_${useVC}_${useVT}_${isSkinned}_${forceUnlit}`
      */
     materialCache: Map<string, PBRMaterial> = new Map();
     /**
@@ -105,14 +105,47 @@ class GLTFParseContext {
 
 const ACTIVE_PARSE_CONTEXT_MAP = new WeakMap<GLTFLoader, GLTFParseContext>();
 
+/**
+ * [KO] 지정된 `GLTFLoader`에 활성 `GLTFParseContext`를 바인딩합니다.
+ * [EN] Binds an active `GLTFParseContext` to the specified `GLTFLoader`.
+ *
+ * @param gltfLoader -
+ * [KO] 대상 `GLTFLoader` 인스턴스
+ * [EN] Target `GLTFLoader` instance
+ * @param parseContext -
+ * [KO] 바인딩할 `GLTFParseContext` 인스턴스
+ * [EN] `GLTFParseContext` instance to bind
+ * @category GLTF
+ */
 export const setActiveParseContext = (gltfLoader: GLTFLoader, parseContext: GLTFParseContext): void => {
     ACTIVE_PARSE_CONTEXT_MAP.set(gltfLoader, parseContext);
 };
 
+/**
+ * [KO] 지정된 `GLTFLoader`에 바인딩된 활성 `GLTFParseContext`를 조회합니다.
+ * [EN] Retrieves the active `GLTFParseContext` bound to the specified `GLTFLoader`.
+ *
+ * @param gltfLoader -
+ * [KO] 대상 `GLTFLoader` 인스턴스
+ * [EN] Target `GLTFLoader` instance
+ * @returns
+ * [KO] 바인딩된 `GLTFParseContext` 또는 `undefined`
+ * [EN] Bound `GLTFParseContext` or `undefined`
+ * @category GLTF
+ */
 export const getActiveParseContext = (gltfLoader: GLTFLoader): GLTFParseContext | undefined => {
     return ACTIVE_PARSE_CONTEXT_MAP.get(gltfLoader);
 };
 
+/**
+ * [KO] 지정된 `GLTFLoader`의 활성 `GLTFParseContext` 바인딩을 해제합니다.
+ * [EN] Clears the active `GLTFParseContext` binding for the specified `GLTFLoader`.
+ *
+ * @param gltfLoader -
+ * [KO] 대상 `GLTFLoader` 인스턴스
+ * [EN] Target `GLTFLoader` instance
+ * @category GLTF
+ */
 export const clearActiveParseContext = (gltfLoader: GLTFLoader): void => {
     ACTIVE_PARSE_CONTEXT_MAP.delete(gltfLoader);
 };

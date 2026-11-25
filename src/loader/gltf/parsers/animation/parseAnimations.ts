@@ -22,7 +22,7 @@ import {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
  * @returns
  * [KO] 애니메이션 파싱이 완료되면 해결되는 `Promise<void>`
  * [EN] `Promise<void>` that resolves when animation parsing is complete
- * @category Loader
+ * @category GLTF
  */
 const parseAnimations = async (
     gltfLoader: GLTFLoader,

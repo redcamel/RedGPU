@@ -17,7 +17,7 @@ import parseNode_GLTF from "./parseNode_GLTF";
  * @param parseContext -
  * [KO] 현재 파싱 세션의 `GLTFParseContext` 인스턴스
  * [EN] `GLTFParseContext` instance for the current parse session
- * @category Loader
+ * @category GLTF
  */
 const parseScene_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, parseContext: GLTFParseContext) => {
     const SCENE_INDEX = gltfData.scene ?? 0;

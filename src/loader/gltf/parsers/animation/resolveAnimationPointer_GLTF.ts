@@ -192,6 +192,9 @@ export const parseAnimationPointerPath = (pointer?: string): ParsedPointerDescri
  * @param componentCount -
  * [KO] 애니메이션 output accessor의 컴포넌트 개수 (`1`~`4`)
  * [EN] Component count (`1`~`4`) derived from the animation output accessor type
+ * @param parseContext -
+ * [KO] 현재 파싱 세션의 `GLTFParseContext` 인스턴스 (선택)
+ * [EN] Optional `GLTFParseContext` instance for the current parse session
  * @returns
  * [KO] 런타임 적용 바인딩 또는 대상이 없을 경우 `null`
  * [EN] Runtime binding object, or `null` if the target does not exist

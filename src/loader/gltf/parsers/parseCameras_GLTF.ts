@@ -17,6 +17,7 @@ import GLTFLoader from "../GLTFLoader";
  * @param gltfData -
  * [KO] 파싱할 GLTF 데이터
  * [EN] GLTF data to parse
+ * @category GLTF
  */
 const parseCameras_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
     const {cameras} = gltfData;

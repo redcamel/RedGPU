@@ -152,6 +152,17 @@ export const applyDecodedMeshoptBufferViews = (
 /**
  * [KO] `KHR_meshopt_compression` / `EXT_meshopt_compression`이 사용된 glTF의 `bufferView`를 온디맨드 WASM으로 일괄 복원합니다.
  * [EN] Decodes `KHR_meshopt_compression` / `EXT_meshopt_compression` `bufferView` entries on demand using WASM.
+ *
+ * @param gltfData -
+ * [KO] 파싱된 glTF 데이터 객체
+ * [EN] Parsed glTF data object
+ * @param bufferDataViews -
+ * [KO] 로드된 버퍼 `DataView` 배열
+ * [EN] Loaded buffer `DataView` array
+ * @returns
+ * [KO] 복원된 `bufferView` 개수
+ * [EN] Number of decoded `bufferView` entries
+ * @category GLTF
  */
 const decodeMeshoptBufferViews = async (gltfData: GLTF, bufferDataViews: DataView[]): Promise<number> => {
     if (!hasMeshoptCompression(gltfData)) return 0;

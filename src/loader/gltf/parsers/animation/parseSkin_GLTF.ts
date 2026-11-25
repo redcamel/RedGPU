@@ -7,8 +7,19 @@ import {GLTF, GlTfId, Skin} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 
 /**
- * [KO] GLTF 스킨의 조인트(Joint) 노드를 `GLTFParseContext`에서 조회하여 스킨 정보의 조인트 목록에 등록합니다.
- * [EN] Resolves a joint node of a GLTF skin from `GLTFParseContext` and registers it in the skin info's joint list.
+ * [KO] glTF 스킨의 조인트(Joint) 노드를 `GLTFParseContext`에서 조회하여 스킨 정보의 조인트 목록에 등록합니다.
+ * [EN] Resolves a joint node of a glTF skin from `GLTFParseContext` and registers it in the skin info's joint list.
+ *
+ * @param skinInfo -
+ * [KO] 대상 `ParsedSkinInfo_GLTF` 인스턴스
+ * [EN] Target `ParsedSkinInfo_GLTF` instance
+ * @param jointGlTfId -
+ * [KO] 조인트 노드의 glTF ID
+ * [EN] glTF node ID of the joint
+ * @param parseContext -
+ * [KO] 현재 파싱 세션의 `GLTFParseContext` 인스턴스
+ * [EN] `GLTFParseContext` instance for the current parse session
+ * @category GLTF
  */
 export const parseJoint_GLTF = (
     skinInfo: ParsedSkinInfo_GLTF,
@@ -42,7 +53,7 @@ export const parseJoint_GLTF = (
  * @param parseContext -
  * [KO] 현재 파싱 세션의 `GLTFParseContext` 인스턴스
  * [EN] `GLTFParseContext` instance for the current parse session
- * @category Loader
+ * @category GLTF
  */
 const parseSkin_GLTF = (
     gltfLoader: GLTFLoader,

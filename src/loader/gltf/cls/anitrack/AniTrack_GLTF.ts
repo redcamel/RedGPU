@@ -32,12 +32,12 @@ type MeshResources = {
 };
 
 /**
- * [KO] glTF 애니메이션의 개별 채널(회전, 이동, 스케일, 모프 가중치) 트랙 데이터와 보간 상태를 관리하는 클래스입니다.
- * [EN] Class that manages individual channel (rotation, translation, scale, morph weights) track data and interpolation states for glTF animations.
+ * [KO] glTF 애니메이션의 개별 채널(회전, 이동, 스케일, 모프 가중치, JSON Pointer) 트랙과 보간 상태를 관리하는 내부 클래스입니다.
+ * [EN] Internal class managing individual glTF animation channel tracks (rotation, translation, scale, morph weights, JSON Pointer) and interpolation states.
  *
  * ::: warning
- * [KO] 이 클래스는 GLTFLoader에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is internally created by GLTFLoader.<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category GLTF
@@ -120,12 +120,12 @@ class AniTrack_GLTF {
     #meshResourcesMap: Map<Mesh, MeshResources> = new Map();
 
     /**
-     * [KO] AniTrack_GLTF 인스턴스를 생성합니다.
-     * [EN] Creates an AniTrack_GLTF instance.
+     * [KO] `AniTrack_GLTF` 인스턴스를 생성합니다.
+     * [EN] Creates an `AniTrack_GLTF` instance.
      *
      * @param key -
-     * [KO] 애니메이션 속성 키 (`'rotation'`, `'translation'`, `'scale'`, `'weights'`)
-     * [EN] Animation property key (`'rotation'`, `'translation'`, `'scale'`, `'weights'`)
+     * [KO] 애니메이션 속성 키 (`'rotation'`, `'translation'`, `'scale'`, `'weights'`, `'pointer'`)
+     * [EN] Animation property key (`'rotation'`, `'translation'`, `'scale'`, `'weights'`, `'pointer'`)
      * @param time -
      * [KO] 키프레임 시간 데이터
      * [EN] Keyframe time data
@@ -141,6 +141,9 @@ class AniTrack_GLTF {
      * @param weightMeshes -
      * [KO] 모프 가중치 적용 대상 메쉬 배열
      * [EN] Array of target meshes for morph weight application
+     * @param pointerBinding -
+     * [KO] `KHR_animation_pointer` 런타임 바인딩 (선택)
+     * [EN] Optional `KHR_animation_pointer` runtime binding
      */
     constructor(key, time, data, interpolation, targetMesh: Mesh, weightMeshes, pointerBinding: PointerTargetBinding | null = null) {
         this.timeAnimationInfo = time

@@ -87,7 +87,7 @@ export const resolveTextureSourceId = (textureDef: Texture | undefined): GlTfId 
  * @param useMipmap -
  * [KO] 밉맵 사용 여부 (기본값: `true`)
  * [EN] Whether to use mipmaps (default: `true`)
- * @category Loader
+ * @category GLTF
  */
 const parseMaterialTexture = (
     gltfLoader: GLTFLoader,

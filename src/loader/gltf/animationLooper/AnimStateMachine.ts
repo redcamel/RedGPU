@@ -159,9 +159,25 @@ export interface AnimTransition {
 }
 
 /**
- * [KO] 애니메이션 상태 전이와 블렌딩 가중치를 관리하는 상태 머신 클래스입니다.
- * [EN] State machine class that manages animation state transitions and blending weights.
+ * [KO] 애니메이션 상태 전이와 크로스페이드 블렌딩 가중치를 관리하는 상태 머신 클래스입니다.
+ * [EN] State machine class that manages animation state transitions and crossfade blending weights.
  *
+ * ### Example
+ * ```typescript
+ * // [KO] 상태 등록 및 전이 규칙 추가
+ * // [EN] Register states and add transition rules
+ * const stateMachine = new RedGPU.GLTFLoader.AnimStateMachine(idleState);
+ * stateMachine.addState(runState);
+ * stateMachine.addTransition({
+ *     fromState: 'Idle',
+ *     toState: 'Run',
+ *     duration: 0.3,
+ *     conditions: () => isRunning
+ * });
+ * ```
+ *
+ * @see [Motion Blending example](/RedGPU/examples/gltf/animation/motionBlending/)
+ * @see [Keyboard Character Control example](/RedGPU/examples/gltf/animation/keyboardCharacterControl/)
  * @category Loader
  */
 export class AnimStateMachine {

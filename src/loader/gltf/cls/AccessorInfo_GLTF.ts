@@ -5,15 +5,15 @@ import {Accessor, GLTF, GlTfId} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 
 /**
- * [KO] GLTF 파일의 엑세서(Accessor) 및 버퍼 뷰 정보를 담는 클래스입니다.
- * [EN] Class that holds accessor and buffer view information in a GLTF file.
+ * [KO] glTF 엑세서(Accessor)와 버퍼 뷰 메타데이터를 보관하는 내부 클래스입니다.
+ * [EN] Internal class holding glTF accessor and buffer view metadata.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Loader
+ * @category GLTF
  */
 class AccessorInfo_GLTF {
     /**

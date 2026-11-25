@@ -10,7 +10,7 @@ import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Loader
+ * @category GLTF
  */
 export class GLTFParsedSingleClip {
     /**

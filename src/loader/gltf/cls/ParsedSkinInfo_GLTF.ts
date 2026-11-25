@@ -10,12 +10,12 @@ const SKIN_LAYOUT_CACHE = new WeakMap<GPUDevice, {
 }>();
 
 /**
- * [KO] glTF 스키닝 애니메이션을 위한 조인트, 역바인드 행렬 및 컴퓨트 파이프라인 리소스를 관리하는 클래스입니다.
- * [EN] Class that manages joints, inverse bind matrices, and compute pipeline resources for glTF skinning animation.
+ * [KO] glTF 스키닝 애니메이션을 위한 조인트, 역바인드 행렬 및 컴퓨트 파이프라인 리소스를 관리하는 내부 클래스입니다.
+ * [EN] Internal class that manages joints, inverse bind matrices, and compute pipeline resources for glTF skinning animation.
  *
  * ::: warning
- * [KO] 이 클래스는 GLTFLoader에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is internally created by GLTFLoader.<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category GLTF

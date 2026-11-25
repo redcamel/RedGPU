@@ -23,7 +23,7 @@ import GLTFLoader from "../GLTFLoader";
  * @param targetData -
  * [KO] 희소 데이터가 적용될 대상 속성 배열 (`Float32Array` 또는 `number[]`)
  * [EN] Target attribute array (`Float32Array` or `number[]`) to which sparse data will be applied
- * @category Loader
+ * @category GLTF
  */
 const parseSparse_GLTF = (
     gltfLoader: GLTFLoader,

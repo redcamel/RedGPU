@@ -91,32 +91,33 @@ export type GLTFLoadingProgressInfo = {
 };
 
 /**
- * [KO] GLTF 2.0 포맷(`.gltf`, `.glb`)의 3D 모델 파일을 로드하고 메쉬, 재질, 텍스처, 애니메이션, 스킨을 RedGPU 객체로 파싱하는 로더 클래스입니다.
- * [EN] Loader class that loads 3D model files in GLTF 2.0 format (`.gltf`, `.glb`) and parses meshes, materials, textures, animations, and skins into RedGPU objects.
+ * [KO] glTF 2.0(`.gltf`, `.glb`) 모델을 로드하여 메쉬, 재질, 텍스처, 애니메이션, 스킨을 RedGPU 객체로 파싱하는 로더 클래스입니다.
+ * [EN] Loader class that loads glTF 2.0 (`.gltf`, `.glb`) models and parses meshes, materials, textures, animations, and skins into RedGPU objects.
  *
  * ### Example
  * ```typescript
+ * // [KO] 콜백 방식 로드 및 애니메이션 재생
+ * // [EN] Callback-based loading and animation playback
  * const loader = new RedGPU.GLTFLoader(
  *     redGPUContext,
- *     'assets/gltf/models/DamagedHelmet/glTF/DamagedHelmet.gltf',
- *     (loader) => {
- *         scene.addChild(loader.resultMesh);
- *
- *         // [KO] 애니메이션 재생
- *         // [EN] Play animation
- *         if (loader.parsingResult.animations.length > 0) {
- *             loader.playAnimation(loader.parsingResult.animations[0]);
+ *     'assets/gltf/models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+ *     (loaded) => {
+ *         scene.addChild(loaded.resultMesh);
+ *         if (loaded.parsingResult.animations.length > 0) {
+ *             loaded.playAnimation(loaded.parsingResult.animations[0]);
  *         }
  *     },
- *     (progress) => {
- *         console.log('Loading Progress:', progress);
- *     },
- *     (error) => {
- *         console.error('Load Error:', error);
- *     }
+ *     (progress) => console.log(progress.model.percent),
+ *     (error) => console.error(error)
  * );
  * ```
  *
+ * <iframe src="/RedGPU/examples/gltf/formats/brainStemAllFormats/"></iframe>
+ *
+ * @see [Skinned Geometry Compression (Draco · Meshopt)](/RedGPU/examples/gltf/formats/brainStemAllFormats/)
+ * @see [PBR Texture Compression (KTX2 · WebP · JPG)](/RedGPU/examples/gltf/formats/carConceptAllFormats/)
+ * @see [Static Mesh Quantization (Quantized · Embedded)](/RedGPU/examples/gltf/formats/duckAllFormats/)
+ * @see [Motion Blending example](/RedGPU/examples/gltf/animation/motionBlending/)
  * @category Loader
  */
 class GLTFLoader extends RedGPUObject {
@@ -161,27 +162,30 @@ class GLTFLoader extends RedGPUObject {
     }
 
     /**
-     * [KO] GLTFLoader 인스턴스를 생성하고 파일 로딩을 시작합니다.
-     * [EN] Creates a GLTFLoader instance and starts file loading.
+     * [KO] `GLTFLoader` 인스턴스를 생성하고 파일 로딩을 시작합니다.
+     * [EN] Creates a `GLTFLoader` instance and starts loading the file.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param url -
-     * [KO] 로드할 GLTF/GLB 파일 경로
-     * [EN] Path to the GLTF/GLB file to load
+     * [KO] 로드할 `.gltf` 또는 `.glb` 파일 URL
+     * [EN] URL of the `.gltf` or `.glb` file to load
      * @param onLoad -
-     * [KO] 로딩 완료 시 호출될 콜백 함수
-     * [EN] Callback function called when loading is complete
+     * [KO] 로딩 완료 콜백 (선택)
+     * [EN] Load completion callback (optional)
      * @param onProgress -
-     * [KO] 로딩 진행 중 호출될 콜백 함수 (선택)
-     * [EN] Callback function called during loading progress (optional)
+     * [KO] 로딩 진행 콜백 (선택)
+     * [EN] Loading progress callback (optional)
      * @param onError -
-     * [KO] 에러 발생 시 호출될 콜백 함수 (선택)
-     * [EN] Callback function called when an error occurs (optional)
+     * [KO] 에러 발생 콜백 (선택)
+     * [EN] Error callback (optional)
      * @param signal -
-     * [KO] 로딩 취소를 제어할 `AbortSignal` (선택)
-     * [EN] Optional `AbortSignal` to cancel loading
+     * [KO] 로딩 취소용 `AbortSignal` (선택)
+     * [EN] `AbortSignal` to cancel loading (optional)
+     * @param parsingOption -
+     * [KO] 메쉬 이름별 커스텀 파싱 콜백 맵 (선택)
+     * [EN] Custom parsing callback map keyed by mesh name (optional)
      */
     constructor(
         redGPUContext: RedGPUContext,
