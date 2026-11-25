@@ -70,10 +70,11 @@ const bindMaterialVariantsPane = (helper, gltfLoader) => {
 
     const config = {materialVariant: '__default__'};
     const options = {Default: '__default__', ...Object.fromEntries(variants.map((v) => [v, v]))};
-
+    console.log(options)
     helper.updateGui((pane) => {
         const folder = pane.addFolder({title: 'KHR_materials_variants'});
         folder.addBinding(config, 'materialVariant', {options}).on('change', (ev) => {
+            console.log(ev)
             gltfLoader.applyMaterialVariant(ev.value === '__default__' ? null : ev.value);
         });
     });

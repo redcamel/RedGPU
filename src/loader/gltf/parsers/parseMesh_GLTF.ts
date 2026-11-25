@@ -44,6 +44,104 @@ const SKIN_WEIGHT_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
 );
 const PBR_VERTEX_FLOAT_STRIDE = PBR_INTERLEAVED_STRUCT.arrayStride / 4;
 
+const resolvePrimitiveTopology = (mode: number | undefined): {
+    topology: GPUPrimitiveTopology;
+    noIndexBuffer: boolean
+} => {
+    switch (mode) {
+        case 0:
+            return {topology: GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, noIndexBuffer: false};
+        case 1:
+        case 2:
+            return {topology: GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, noIndexBuffer: false};
+        case 3:
+            return {topology: GPU_PRIMITIVE_TOPOLOGY.LINE_STRIP, noIndexBuffer: true};
+        case 5:
+            return {topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_STRIP, noIndexBuffer: true};
+        case 4:
+        case 6:
+        default:
+            return {topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST, noIndexBuffer: false};
+    }
+};
+
+const bindMaterialVariants = (
+    gltfLoader: GLTFLoader,
+    gltfData: GLTF,
+    meshPrimitive: MeshPrimitive,
+    mesh: Mesh,
+    defaultMaterial: PBRMaterial,
+    parseContext: GLTFParseContext,
+    hasVertexColor: boolean,
+    hasVertexTangent: boolean,
+    isSkinned: boolean,
+    bypassMaterialCache: boolean
+): void => {
+    const variantMappings = meshPrimitive.extensions?.KHR_materials_variants?.mappings;
+    if (!Array.isArray(variantMappings) || variantMappings.length === 0) return;
+
+    const variantMaterials = new Map<number, PBRMaterial>();
+    const parsedByMaterialId = new Map<number, PBRMaterial>();
+    for (let m = 0, mLen = variantMappings.length; m < mLen; m++) {
+        const mapping = variantMappings[m];
+        if (!mapping || typeof mapping.material !== 'number' || !Array.isArray(mapping.variants)) continue;
+        let variantMat = parsedByMaterialId.get(mapping.material);
+        if (!variantMat) {
+            variantMat = parseMaterialInfo_GLTF(gltfLoader, gltfData, meshPrimitive, {
+                overrideMaterialId: mapping.material,
+                parseContext,
+                useVertexColor: hasVertexColor,
+                useVertexTangent: hasVertexTangent,
+                isSkinned,
+                bypassCache: bypassMaterialCache
+            });
+            if (variantMat instanceof PBRMaterial && !gltfLoader.parsingResult.materials.includes(variantMat)) {
+                gltfLoader.parsingResult.materials.push(variantMat);
+            }
+            parsedByMaterialId.set(mapping.material, variantMat);
+        }
+        for (let v = 0, vLen = mapping.variants.length; v < vLen; v++) {
+            variantMaterials.set(mapping.variants[v], variantMat);
+        }
+    }
+    parseContext.materialVariantEntries.push({
+        mesh,
+        defaultMaterial,
+        variantMaterials
+    });
+};
+
+const applyInitialMorphTargets = (
+    mesh: Mesh,
+    vertexCount: number,
+    hasVertexBuffer: VertexBuffer | undefined
+): void => {
+    const morphList = mesh.animationInfo.morphInfo.morphInfoDataList;
+    if (morphList.length === 0) return;
+
+    const targetGeometryData = mesh.geometry.vertexBuffer.data;
+    const stride = vertexCount > 0 ? PBR_VERTEX_FLOAT_STRIDE : 0;
+    if (!hasVertexBuffer && stride > 0) {
+        const listLen = morphList.length;
+        const morphVertexCount = targetGeometryData.length / stride;
+        for (let index = 0; index < listLen; index++) {
+            const morphVertices = morphList[index].vertices;
+            const tWeights = mesh.animationInfo.morphInfo.weights[index] == undefined
+                ? 0.5
+                : mesh.animationInfo.morphInfo.weights[index];
+            for (let vi = 0; vi < morphVertexCount; vi++) {
+                const base = vi * stride;
+                const v3 = vi * 3;
+                targetGeometryData[base] += morphVertices[v3] * tWeights;
+                targetGeometryData[base + 1] += morphVertices[v3 + 1] * tWeights;
+                targetGeometryData[base + 2] += morphVertices[v3 + 2] * tWeights;
+            }
+        }
+        mesh.geometry.vertexBuffer.updateAllData(targetGeometryData);
+    }
+    mesh.animationInfo.morphInfo.origin = new Float32Array(targetGeometryData);
+};
+
 /**
  * [KO] glTF 메시 데이터를 파싱하여 프리미티브별 지오메트리, 재질, 모프 타겟이 적용된 `Mesh` 배열을 생성합니다.
  * [EN] Parses glTF mesh data and creates an array of `Mesh` instances with geometry, material, and morph targets applied per primitive.
@@ -103,36 +201,7 @@ const parseMesh_GLTF = function (
     const primitivesLength = primitives.length;
     for (let i = 0; i < primitivesLength; i++) {
         const meshPrimitive: MeshPrimitive = primitives[i];
-        let tMesh: Mesh;
-        let tDrawMode: GPUPrimitiveTopology;
-        let noIndexBuffer = false;
-        if ('mode' in meshPrimitive) {
-            switch (meshPrimitive.mode) {
-                case 0:
-                    tDrawMode = GPU_PRIMITIVE_TOPOLOGY.POINT_LIST;
-                    break;
-                case 1:
-                    tDrawMode = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-                    break;
-                case 2:
-                    tDrawMode = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-                    break;
-                case 3:
-                    tDrawMode = GPU_PRIMITIVE_TOPOLOGY.LINE_STRIP;
-                    noIndexBuffer = true;
-                    break;
-                case 4:
-                    tDrawMode = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-                    break;
-                case 5:
-                    tDrawMode = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_STRIP;
-                    noIndexBuffer = true;
-                    break;
-                case 6:
-                    tDrawMode = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-                    break;
-            }
-        }
+        const {topology: tDrawMode, noIndexBuffer} = resolvePrimitiveTopology(meshPrimitive.mode);
 
         const hasMorph = Boolean(meshPrimitive.targets && meshPrimitive.targets.length > 0);
         const hasSkinAttributes = Boolean(
@@ -320,39 +389,19 @@ const parseMesh_GLTF = function (
             gltfLoader.parsingResult.materials.push(tMaterial);
         }
 
-        tMesh = new Mesh(redGPUContext, tGeo, tMaterial);
-        const variantMappings = meshPrimitive.extensions?.KHR_materials_variants?.mappings;
-        if (Array.isArray(variantMappings) && variantMappings.length > 0) {
-            const variantMaterials = new Map<number, PBRMaterial>();
-            const parsedByMaterialId = new Map<number, PBRMaterial>();
-            for (let m = 0, mLen = variantMappings.length; m < mLen; m++) {
-                const mapping = variantMappings[m];
-                if (!mapping || typeof mapping.material !== 'number' || !Array.isArray(mapping.variants)) continue;
-                let variantMat = parsedByMaterialId.get(mapping.material);
-                if (!variantMat) {
-                    variantMat = parseMaterialInfo_GLTF(gltfLoader, gltfData, meshPrimitive, {
-                        overrideMaterialId: mapping.material,
-                        parseContext,
-                        useVertexColor: hasVertexColor,
-                        useVertexTangent: hasVertexTangent,
-                        isSkinned,
-                        bypassCache: bypassMaterialCache
-                    });
-                    if (variantMat instanceof PBRMaterial && !gltfLoader.parsingResult.materials.includes(variantMat)) {
-                        gltfLoader.parsingResult.materials.push(variantMat);
-                    }
-                    parsedByMaterialId.set(mapping.material, variantMat);
-                }
-                for (let v = 0, vLen = mapping.variants.length; v < vLen; v++) {
-                    variantMaterials.set(mapping.variants[v], variantMat);
-                }
-            }
-            parseContext.materialVariantEntries.push({
-                mesh: tMesh,
-                defaultMaterial: tMaterial,
-                variantMaterials
-            });
-        }
+        const tMesh = new Mesh(redGPUContext, tGeo, tMaterial);
+        bindMaterialVariants(
+            gltfLoader,
+            gltfData,
+            meshPrimitive,
+            tMesh,
+            tMaterial,
+            parseContext,
+            hasVertexColor,
+            hasVertexTangent,
+            isSkinned,
+            bypassMaterialCache
+        );
         tMesh.animationInfo.weightBuffer = weightBuffer;
         tMesh.animationInfo.jointBuffer = jointBuffer;
         if (tName) {
@@ -365,8 +414,7 @@ const parseMesh_GLTF = function (
                 }
             }
         }
-        if (tDrawMode) tMesh.primitiveState.topology = tDrawMode;
-        else tMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        tMesh.primitiveState.topology = tDrawMode;
         if (tMesh.material.doubleSided) {
             tMesh.primitiveState.cullMode = GPU_CULL_MODE.NONE;
         }
@@ -382,31 +430,7 @@ const parseMesh_GLTF = function (
         }
         tMesh.animationInfo.morphInfo = morphInfo;
         if (!tMesh.gpuRenderInfo) tMesh.initGPURenderInfos();
-        const morphList = tMesh.animationInfo.morphInfo.morphInfoDataList;
-        if (morphList.length > 0) {
-            const targetGeometryData = tMesh.geometry.vertexBuffer.data;
-            const NUM = vertexCount > 0 ? PBR_VERTEX_FLOAT_STRIDE : 0;
-            if (!hasVertexBuffer && NUM > 0) {
-                const listLen = morphList.length;
-                const targetGeometryDataLen = targetGeometryData.length;
-                const morphVertexCount = targetGeometryDataLen / NUM;
-                for (let index = 0; index < listLen; index++) {
-                    const morphVertices = morphList[index].vertices;
-                    const tWeights = tMesh.animationInfo.morphInfo.weights[index] == undefined
-                        ? 0.5
-                        : tMesh.animationInfo.morphInfo.weights[index];
-                    for (let vi = 0; vi < morphVertexCount; vi++) {
-                        const base = vi * NUM;
-                        const v3 = vi * 3;
-                        targetGeometryData[base] += morphVertices[v3] * tWeights;
-                        targetGeometryData[base + 1] += morphVertices[v3 + 1] * tWeights;
-                        targetGeometryData[base + 2] += morphVertices[v3 + 2] * tWeights;
-                    }
-                }
-                tMesh.geometry.vertexBuffer.updateAllData(targetGeometryData);
-            }
-            tMesh.animationInfo.morphInfo.origin = new Float32Array(targetGeometryData);
-        }
+        applyInitialMorphTargets(tMesh, vertexCount, hasVertexBuffer);
         tMeshList.push(tMesh);
     }
     return tMeshList;
