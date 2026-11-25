@@ -92,6 +92,5 @@ const parseSkin_GLTF = (
         parsedSkinInfo.inverseBindMatrices[i] = flatMatrices.subarray(i * 16, i * 16 + 16);
     }
     mesh.animationInfo.skinInfo = parsedSkinInfo;
-    mesh.material.useSkin = true;
 };
 export default parseSkin_GLTF;

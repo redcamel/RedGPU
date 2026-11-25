@@ -106,9 +106,10 @@ const parseMaterialTexture = (
         const samplerGlTfId = targetTextureInfo.sampler;
         const option = getSamplerInfo(gltfData, samplerGlTfId);
         const {parsedURI, cacheKey, mimeType} = tURL
-        const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`
-        if (!textureRawList[key]) {
-            textureRawList[key] = ({
+        const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`;
+        const existing = textureRawList.get(key);
+        if (!existing) {
+            textureRawList.set(key, {
                 src: parsedURI,
                 cacheKey,
                 mimeType,
@@ -120,8 +121,8 @@ const parseMaterialTexture = (
                 useMipmap
             });
         } else {
-            textureRawList[key].materialList.push(tMaterial)
-            textureRawList[key].samplerList.push(new Sampler(redGPUContext, option))
+            existing.materialList.push(tMaterial);
+            existing.samplerList.push(new Sampler(redGPUContext, option));
         }
         tMaterial[`${targetTextureKey}_texCoord_index`] = textureInfo.texCoord || 0;
         if ('extensions' in textureInfo) {

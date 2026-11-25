@@ -137,13 +137,11 @@ describe('GLTFParseContext — lifecycle, 2-Pass skinning, 4-tuple material cach
         };
 
         const targetMesh = {
-            animationInfo: {skinInfo: null},
-            material: {useSkin: false}
+            animationInfo: {skinInfo: null}
         } as any;
 
         parseSkin_GLTF(mockLoader, gltfData, skin, targetMesh, ctx);
 
-        expect(targetMesh.material.useSkin).toBe(true);
         expect(targetMesh.animationInfo.skinInfo).toBeInstanceOf(ParsedSkinInfo_GLTF);
         expect(targetMesh.animationInfo.skinInfo.joints).toEqual([jointA, jointB]);
         expect(targetMesh.animationInfo.skinInfo.skeletonMesh).toBe(rootSkeleton);

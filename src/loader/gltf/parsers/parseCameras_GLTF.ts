@@ -36,15 +36,15 @@ const parseCameras_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
             } else {
                 const camera3D = new PerspectiveCamera();
                 if (camera.perspective) {
-                    const yfov = camera.perspective.yfov ?? camera.perspective.yfieldOfView;
+                    const {yfov, zfar, znear} = camera.perspective;
                     if (yfov !== undefined) {
                         camera3D.fieldOfView = yfov * 180 / Math.PI;
                     }
-                    if (camera.perspective.zfar !== undefined) {
-                        camera3D.farClipping = camera.perspective.zfar;
+                    if (zfar !== undefined) {
+                        camera3D.farClipping = zfar;
                     }
-                    if (camera.perspective.znear !== undefined) {
-                        camera3D.nearClipping = camera.perspective.znear;
+                    if (znear !== undefined) {
+                        camera3D.nearClipping = znear;
                     }
                 }
                 gltfLoader.parsingResult.cameras.push(camera3D);

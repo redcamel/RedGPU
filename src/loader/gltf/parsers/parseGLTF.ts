@@ -30,7 +30,7 @@ const loadTexturesAsync = (
     if (signal?.aborted) {
         return Promise.reject(createAbortError());
     }
-    const rawList = Object.values(gltfLoader.parsingResult.textureRawList);
+    const rawList = Array.from(gltfLoader.parsingResult.textureRawList.values());
     if (rawList.length === 0) {
         return Promise.resolve({textures: []});
     }
@@ -69,7 +69,7 @@ const loadTexturesAsync = (
 const revokeTextureBlobURLs = (gltfLoader: GLTFLoader): void => {
     const rawList = gltfLoader.parsingResult?.textureRawList;
     if (!rawList) return;
-    Object.values(rawList).forEach((item: any) => {
+    rawList.forEach((item) => {
         if (typeof item?.src === 'string' && item.src.startsWith('blob:')) {
             URL.revokeObjectURL(item.src);
         }
@@ -81,15 +81,7 @@ const releaseTemporaryBuffers = (gltfLoader: GLTFLoader, gltfData: GLTF): void =
     if (parsingResult?.uris?.buffers) {
         parsingResult.uris.buffers.length = 0;
     }
-    const rawList: any = parsingResult?.textureRawList;
-    if (rawList) {
-        for (const key in rawList) {
-            delete rawList[key];
-        }
-        if (Array.isArray(rawList)) {
-            rawList.length = 0;
-        }
-    }
+    parsingResult?.textureRawList?.clear();
     if (Array.isArray(gltfData?.buffers)) {
         for (let i = 0, len = gltfData.buffers.length; i < len; i++) {
             const buffer = gltfData.buffers[i];

@@ -496,11 +496,6 @@ export interface CameraPerspective {
      */
     "aspectRatio"?: number;
     /**
-     * [KO] 수직 시야각 (라디안 단위)
-     * [EN] Vertical field of view (in radians)
-     */
-    "yfieldOfView"?: number;
-    /**
      * [KO] 수직 시야각 (라디안 단위, `π` 미만 권장)
      * [EN] Vertical field of view (in radians, recommended to be less than `π`)
      */

@@ -217,12 +217,6 @@ export const createPointerTargetBinding = (
             }
         } else if (contextObj) {
             targetMeshes.push(contextObj);
-        } else if (Array.isArray(nodeInfo['Meshes']) && nodeInfo['Meshes'].length > 0) {
-            for (let i = 0; i < nodeInfo['Meshes'].length; i++) {
-                targetMeshes.push(nodeInfo['Meshes'][i]);
-            }
-        } else if (nodeInfo['Mesh']) {
-            targetMeshes.push(nodeInfo['Mesh']);
         } else if (gltfLoader.parsingResult.groups[descriptor.nodeIndex]) {
             targetMeshes.push(gltfLoader.parsingResult.groups[descriptor.nodeIndex]);
         }

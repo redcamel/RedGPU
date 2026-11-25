@@ -63,15 +63,10 @@ type GLTFParsingResult = {
         buffers: DataView[]
     },
     /**
-     * [KO] GLTF 파일에 정의된 텍스처 맵
-     * [EN] Textures defined in the GLTF file
+     * [KO] GLTF 파일에 정의된 원시 텍스처 로딩 대기 맵
+     * [EN] Map of raw texture loading entries defined in the GLTF file
      */
-    textures: Record<string, unknown>,
-    /**
-     * [KO] GLTF 파일에 정의된 원시 텍스처 목록
-     * [EN] List of raw textures defined in the GLTF file
-     */
-    textureRawList: any[],
+    textureRawList: Map<string, any>,
     /**
      * [KO] GLTF 파일에 정의된 카메라 목록
      * [EN] Cameras defined in the GLTF file
@@ -251,8 +246,7 @@ class GLTFLoader extends RedGPUObject {
             uris: {
                 buffers: []
             },
-            textures: {},
-            textureRawList: [],
+            textureRawList: new Map(),
             cameras: [],
             animations: [],
             materialVariants: [],
@@ -508,8 +502,7 @@ class GLTFLoader extends RedGPUObject {
             if (this.parsingResult.uris) {
                 this.parsingResult.uris.buffers = [];
             }
-            this.parsingResult.textures = {};
-            this.parsingResult.textureRawList = [];
+            this.parsingResult.textureRawList?.clear();
             this.parsingResult.cameras = [];
             this.parsingResult.materialVariants = [];
             this.parsingResult.materialVariantEntries = [];
