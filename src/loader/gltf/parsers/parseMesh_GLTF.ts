@@ -55,6 +55,7 @@ const bindMaterialVariants = (
     hasVertexColor: boolean,
     hasVertexTangent: boolean,
     isSkinned: boolean,
+    forceUnlit: boolean,
     bypassMaterialCache: boolean
 ): void => {
     const variantMappings = meshPrimitive.extensions?.KHR_materials_variants?.mappings;
@@ -73,6 +74,7 @@ const bindMaterialVariants = (
                 useVertexColor: hasVertexColor,
                 useVertexTangent: hasVertexTangent,
                 isSkinned,
+                forceUnlit,
                 bypassCache: bypassMaterialCache
             });
             if (variantMat instanceof PBRMaterial && !gltfLoader.parsingResult.materials.includes(variantMat)) {
@@ -362,11 +364,14 @@ const parseMesh_GLTF = function (
             }
         }
 
+        const forceUnlit = tDrawMode !== GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST &&
+            !(meshPrimitive.attributes && meshPrimitive.attributes['NORMAL'] !== undefined);
         const tMaterial = parseMaterialInfo_GLTF(gltfLoader, gltfData, meshPrimitive, {
             parseContext,
             useVertexColor: hasVertexColor,
             useVertexTangent: hasVertexTangent,
             isSkinned,
+            forceUnlit,
             bypassCache: bypassMaterialCache
         });
         if (tMaterial instanceof PBRMaterial && !gltfLoader.parsingResult.materials.includes(tMaterial)) {
@@ -384,6 +389,7 @@ const parseMesh_GLTF = function (
             hasVertexColor,
             hasVertexTangent,
             isSkinned,
+            forceUnlit,
             bypassMaterialCache
         );
         tMesh.animationInfo.weightBuffer = weightBuffer;

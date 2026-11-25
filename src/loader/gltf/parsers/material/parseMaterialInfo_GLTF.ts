@@ -20,6 +20,7 @@ export interface MaterialParseOptions {
     useVertexColor?: boolean;
     useVertexTangent?: boolean;
     isSkinned?: boolean;
+    forceUnlit?: boolean;
     bypassCache?: boolean;
 }
 
@@ -55,10 +56,11 @@ const parseMaterialInfo_GLTF = (
     const hasVertexColor = options?.useVertexColor ?? Object.hasOwn(meshPrimitive.attributes, 'COLOR_0');
     const hasVertexTangent = options?.useVertexTangent ?? false;
     const isSkinned = options?.isSkinned ?? false;
+    const forceUnlit = options?.forceUnlit ?? false;
     const parseContext = options?.parseContext;
     const useCache = Boolean(parseContext && !options?.bypassCache);
     const cacheKey = useCache
-        ? `${materialGlTfId ?? 'default'}_${hasVertexColor ? 1 : 0}_${hasVertexTangent ? 1 : 0}_${isSkinned ? 1 : 0}`
+        ? `${materialGlTfId ?? 'default'}_${hasVertexColor ? 1 : 0}_${hasVertexTangent ? 1 : 0}_${isSkinned ? 1 : 0}_${forceUnlit ? 1 : 0}`
         : '';
 
     if (useCache && parseContext) {
@@ -255,6 +257,9 @@ const parseMaterialInfo_GLTF = (
             blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE
             blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO
             currentMaterial.alphaBlend = 0;
+    }
+    if (forceUnlit) {
+        currentMaterial.useKHR_materials_unlit = true;
     }
     if (materialGlTfId !== undefined && parseContext) {
         const {materialsById} = parseContext;

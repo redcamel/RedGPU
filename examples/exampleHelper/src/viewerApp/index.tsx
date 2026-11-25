@@ -9,15 +9,11 @@ import updateObject3DMatrix from "@redgpu/src/math/updateObject3DMatrix";
 import {OrbitController} from "@redgpu/src/camera";
 
 const calcTargetMeshMatrix = (mesh: any, view: View3D) => {
-
     updateObject3DMatrix(mesh, view);
-    let len = mesh.children.length;
-    for (let i = 0; i < len; i++) {
-        const child = mesh.children[i];
-        if (child.constructor.name === 'Mesh' ) {
-            calcTargetMeshMatrix(child, view);
-        }
-
+    const children = mesh.children;
+    if (!children) return;
+    for (let i = 0, len = children.length; i < len; i++) {
+        calcTargetMeshMatrix(children[i], view);
     }
 }
 /**

@@ -155,32 +155,43 @@ describe('GLTFParseContext — lifecycle, 2-Pass skinning, 4-tuple material cach
         }
     });
 
-    it('resolves 4-tuple material cache keys separating static, skinned, vertexColor, and vertexTangent variants', () => {
+    it('resolves 5-tuple material cache keys separating static, skinned, vertexColor, vertexTangent, and forceUnlit variants', () => {
         const ctx = new GLTFParseContext();
         const staticMat = {id: 'mat0_static', useSkin: false} as any;
         const skinnedMat = {id: 'mat0_skinned', useSkin: true} as any;
         const vcMat = {id: 'mat0_vc', useSkin: false} as any;
         const vtMat = {id: 'mat0_vt', useSkin: false} as any;
+        const unlitMat = {id: 'mat0_unlit', useKHR_materials_unlit: true} as any;
         const defaultMat = {id: 'default_static', useSkin: false} as any;
 
-        ctx.materialCache.set('0_0_0_0', staticMat);
-        ctx.materialCache.set('0_0_0_1', skinnedMat);
-        ctx.materialCache.set('0_1_0_0', vcMat);
-        ctx.materialCache.set('0_0_1_0', vtMat);
-        ctx.materialCache.set('default_0_0_0', defaultMat);
+        ctx.materialCache.set('0_0_0_0_0', staticMat);
+        ctx.materialCache.set('0_0_0_1_0', skinnedMat);
+        ctx.materialCache.set('0_1_0_0_0', vcMat);
+        ctx.materialCache.set('0_0_1_0_0', vtMat);
+        ctx.materialCache.set('0_0_0_0_1', unlitMat);
+        ctx.materialCache.set('default_0_0_0_0', defaultMat);
 
         const mockLoader = {redGPUContext: {}} as any;
         const mockGltfData = {materials: [{}]} as unknown as GLTF;
         const basePrimitive: MeshPrimitive = {attributes: {POSITION: 0}, material: 0};
         const defaultPrimitive: MeshPrimitive = {attributes: {POSITION: 0}};
 
-        // 동일 4-튜플 요청 시 캐시된 인스턴스 공유 반환
+        // 동일 5-튜플 요청 시 캐시된 인스턴스 공유 반환
         expect(parseMaterialInfo_GLTF(mockLoader, mockGltfData, basePrimitive, {
             parseContext: ctx,
             useVertexColor: false,
             useVertexTangent: false,
             isSkinned: false
         })).toBe(staticMat);
+
+        // forceUnlit=true는 staticMat과 분리된 unlitMat 반환
+        expect(parseMaterialInfo_GLTF(mockLoader, mockGltfData, basePrimitive, {
+            parseContext: ctx,
+            useVertexColor: false,
+            useVertexTangent: false,
+            isSkinned: false,
+            forceUnlit: true
+        })).toBe(unlitMat);
 
         // isSkinned=true는 staticMat과 분리된 skinnedMat 반환 (useSkin 교차 오염 방지)
         expect(parseMaterialInfo_GLTF(mockLoader, mockGltfData, basePrimitive, {
