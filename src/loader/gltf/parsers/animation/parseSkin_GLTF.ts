@@ -1,6 +1,7 @@
 import Mesh from "../../../../display/mesh/Mesh";
 import AccessorInfo_GLTF from "../../cls/AccessorInfo_GLTF";
 import ParsedSkinInfo_GLTF from "../../cls/ParsedSkinInfo_GLTF";
+import GLTFParseContext from "../../core/GLTFParseContext";
 import {GLTF, Skin} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import parseJoint_GLTF from "./parseJoint_GLTF";
@@ -21,18 +22,26 @@ import parseJoint_GLTF from "./parseJoint_GLTF";
  * @param mesh -
  * [KO] 스킨 정보가 할당될 대상 메쉬
  * [EN] Target mesh to which skin information will be assigned
+ * @param parseContext -
+ * [KO] 현재 파싱 세션의 `GLTFParseContext` 인스턴스
+ * [EN] `GLTFParseContext` instance for the current parse session
  * @category Loader
  */
-const parseSkin_GLTF = (gltfLoader: GLTFLoader, scenesData: GLTF, skin: Skin, mesh: Mesh) => {
+const parseSkin_GLTF = (
+    gltfLoader: GLTFLoader,
+    scenesData: GLTF,
+    skin: Skin,
+    mesh: Mesh,
+    parseContext: GLTFParseContext
+) => {
     const parsedSkinInfo = new ParsedSkinInfo_GLTF();
-    const {nodes: NODES} = scenesData;
     const {joints, skeleton} = skin;
     const jointLen = joints.length;
     for (let j = 0; j < jointLen; j++) {
-        parseJoint_GLTF(parsedSkinInfo, NODES, joints[j]);
+        parseJoint_GLTF(parsedSkinInfo, joints[j], parseContext);
     }
-    if (skeleton) {
-        parsedSkinInfo.skeletonMesh = NODES[skeleton]['Mesh'];
+    if (skeleton !== undefined) {
+        parsedSkinInfo.skeletonMesh = parseContext.nodeObjectMap.get(skeleton) ?? null;
     }
     const accessorGlTfId = skin.inverseBindMatrices;
     const accessorInfo = new AccessorInfo_GLTF(gltfLoader, scenesData, accessorGlTfId);

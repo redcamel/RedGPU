@@ -2,6 +2,7 @@ import {GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import {ClipAnimState} from "../../animationLooper/AnimStateMachine";
 import AnimationData_GLTF from "../../cls/AnimationData_GLTF";
+import GLTFParseContext from "../../core/GLTFParseContext";
 import parseSingleChannel from "./parseAnimationChannel_GLTF";
 import {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
 
@@ -15,17 +16,23 @@ import {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
  * @param gltfData -
  * [KO] 애니메이션 정보를 포함한 GLTF 데이터 객체
  * [EN] GLTF data object containing animation information
+ * @param parseContext -
+ * [KO] 현재 파싱 세션의 `GLTFParseContext` 인스턴스 (선택)
+ * [EN] Optional `GLTFParseContext` instance for the current parse session
  * @returns
  * [KO] 애니메이션 파싱이 완료되면 해결되는 `Promise<void>`
  * [EN] `Promise<void>` that resolves when animation parsing is complete
  * @category Loader
  */
-const parseAnimations = async (gltfLoader: GLTFLoader, gltfData: GLTF): Promise<void> => {
-    if (!gltfData.animations) gltfData.animations = [];
+const parseAnimations = async (
+    gltfLoader: GLTFLoader,
+    gltfData: GLTF,
+    parseContext?: GLTFParseContext
+): Promise<void> => {
+    const allAnimations = gltfData.animations;
+    if (!allAnimations || !allAnimations.length) return;
     const {animations: parsedAnimations} = gltfLoader.parsingResult;
-    const {animations: allAnimations} = gltfData;
     const animLen = allAnimations.length;
-    if (!animLen) return;
 
     const animationDataCache = new Map<number, AnimationData_GLTF>();
     for (let i = 0; i < animLen; i++) {
@@ -35,7 +42,7 @@ const parseAnimations = async (gltfLoader: GLTFLoader, gltfData: GLTF): Promise<
         const clipState = new ClipAnimState(parsedSingleClip.name, parsedSingleClip);
         parsedAnimations.push(clipState);
         for (let c = 0, chLen = channels.length; c < chLen; c++) {
-            parseSingleChannel(gltfLoader, parsedSingleClip, channels[c], samplers, gltfData, animationDataCache);
+            parseSingleChannel(gltfLoader, parsedSingleClip, channels[c], samplers, gltfData, animationDataCache, parseContext);
         }
     }
     for (let i = 0, len = parsedAnimations.length; i < len; i++) {

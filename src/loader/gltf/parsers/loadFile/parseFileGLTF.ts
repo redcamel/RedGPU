@@ -1,4 +1,6 @@
 import getAbsoluteURL from "../../../../utils/file/getAbsoluteURL";
+import {hasDracoCompression} from "../../core/decodeDracoPrimitives";
+import {hasMeshoptCompression} from "../../core/decodeMeshoptBufferViews";
 import {nextFrame, throwIfAborted} from "../../core/gltfAsyncUtils";
 import {GLTF} from "../../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
@@ -7,22 +9,27 @@ import formatBytes from "../../../../utils/formatBytes";
 
 
 /**
- * [KO] 캐싱된 GLTF 데이터에서 메쉬 배열을 깊은 복사하여 반환합니다.
- * [EN] Deep copies the meshes array from cached GLTF data and returns a new GLTF data object.
+ * [KO] 캐싱된 GLTF 데이터를 반환합니다. Draco/Meshopt 디코딩이 필요한 경우에만 변형 대상 배열을 복제하여 원본 캐시를 보호합니다.
+ * [EN] Returns cached GLTF data, cloning mutable arrays only when Draco/Meshopt decoding requires bufferView/accessor remapping.
  *
  * @param gltfData -
  * [KO] 원본 GLTF 데이터 객체
  * [EN] Source GLTF data object
  * @returns
- * [KO] 복제된 GLTF 데이터 객체
- * [EN] Cloned GLTF data object
+ * [KO] 파싱에 사용할 GLTF 데이터 객체
+ * [EN] GLTF data object for parsing
  */
-const getData = (gltfData) => {
-    return {
-        ...gltfData,
-        meshes: JSON.parse(JSON.stringify(gltfData.meshes)),
+const getData = (gltfData: GLTF): GLTF => {
+    if (hasDracoCompression(gltfData) || hasMeshoptCompression(gltfData)) {
+        return {
+            ...gltfData,
+            meshes: gltfData.meshes ? JSON.parse(JSON.stringify(gltfData.meshes)) : gltfData.meshes,
+            accessors: gltfData.accessors ? JSON.parse(JSON.stringify(gltfData.accessors)) : gltfData.accessors,
+            bufferViews: gltfData.bufferViews ? JSON.parse(JSON.stringify(gltfData.bufferViews)) : gltfData.bufferViews,
+        };
     }
-}
+    return gltfData;
+};
 /**
  * [KO] GLTF(.gltf) JSON 파일을 로드 및 파싱하고 완료 시 콜백 함수를 호출합니다.
  * [EN] Loads and parses a GLTF (.gltf) JSON file and invokes the callback function upon completion.

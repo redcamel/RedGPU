@@ -1,6 +1,7 @@
 import Mesh from "../../../../display/mesh/Mesh";
 import parseAnimationInfo_GLTF from "../../cls/AnimationData_GLTF";
 import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
+import GLTFParseContext from "../../core/GLTFParseContext";
 import {AnimationChannel, AnimationSampler, GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
@@ -50,11 +51,12 @@ const parseAnimationChannel_GLTF = (
     animationChannel: AnimationChannel,
     animationSamplers: AnimationSampler[],
     gltfData: GLTF,
-    animationDataCache?: Map<number, parseAnimationInfo_GLTF>
+    animationDataCache?: Map<number, parseAnimationInfo_GLTF>,
+    parseContext?: GLTFParseContext
 ) => {
     let tMesh: Mesh;
     let aniTrack: AniTrack_GLTF;
-    const {nodes: NODES, meshes: MESHES} = gltfData
+    const {nodes: NODES} = gltfData
     const targetMeshes = [];
     const {sampler: channelSamplerGlTfId, target: channelTarget} = animationChannel
     const tSampler = animationSamplers[channelSamplerGlTfId];
@@ -72,7 +74,7 @@ const parseAnimationChannel_GLTF = (
             if (outputAccessor?.type === 'VEC2') componentCount = 2;
             else if (outputAccessor?.type === 'VEC3') componentCount = 3;
             else if (outputAccessor?.type === 'VEC4') componentCount = 4;
-            const binding = createPointerTargetBinding(gltfLoader, gltfData, descriptor, componentCount);
+            const binding = createPointerTargetBinding(gltfLoader, gltfData, descriptor, componentCount, parseContext);
             if (!binding) return;
             aniTrack = new AniTrack_GLTF(
                 'pointer',
@@ -94,17 +96,20 @@ const parseAnimationChannel_GLTF = (
     const tNode = NODES[channelTargetDataNodeGlTfId];
     if (!tNode) return;
     if ('mesh' in tNode) {
-        tMesh = tNode['Mesh'];
-        const {primitives} = MESHES[tNode.mesh];
-        let i = primitives.length;
-        while (i--) {
-            targetMeshes.push(primitives[i]['Mesh']);
+        tMesh = parseContext?.nodeObjectMap.get(channelTargetDataNodeGlTfId);
+        if (!tMesh) return;
+        const nodeMeshes = parseContext?.nodeMeshesMap.get(channelTargetDataNodeGlTfId);
+        if (nodeMeshes) {
+            let i = nodeMeshes.length;
+            while (i--) {
+                targetMeshes.push(nodeMeshes[i]);
+            }
         }
     } else {
-        let tGroup;
-        if (gltfLoader.parsingResult.groups[channelTargetDataNodeGlTfId]) {
-            tGroup = gltfLoader.parsingResult.groups[channelTargetDataNodeGlTfId];
-            tMesh = tGroup;
+        const groupMesh = parseContext?.nodeObjectMap.get(channelTargetDataNodeGlTfId)
+            ?? gltfLoader.parsingResult.groups[channelTargetDataNodeGlTfId];
+        if (groupMesh) {
+            tMesh = groupMesh;
         } else return;
     }
     if (

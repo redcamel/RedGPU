@@ -1,5 +1,6 @@
 import Mesh from "../../../../display/mesh/Mesh";
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
+import GLTFParseContext from "../../core/GLTFParseContext";
 import {GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 
@@ -201,13 +202,22 @@ export const createPointerTargetBinding = (
     gltfLoader: GLTFLoader,
     gltfData: GLTF,
     descriptor: ParsedPointerDescriptor,
-    componentCount: 1 | 2 | 3 | 4
+    componentCount: 1 | 2 | 3 | 4,
+    parseContext?: GLTFParseContext
 ): PointerTargetBinding | null => {
     if (descriptor.domain === 'node_visibility') {
         const nodeInfo = gltfData.nodes?.[descriptor.nodeIndex];
         if (!nodeInfo) return null;
         const targetMeshes: Mesh[] = [];
-        if (Array.isArray(nodeInfo['Meshes']) && nodeInfo['Meshes'].length > 0) {
+        const contextMeshes = parseContext?.nodeMeshesMap.get(descriptor.nodeIndex);
+        const contextObj = parseContext?.nodeObjectMap.get(descriptor.nodeIndex);
+        if (contextMeshes && contextMeshes.length > 0) {
+            for (let i = 0; i < contextMeshes.length; i++) {
+                targetMeshes.push(contextMeshes[i]);
+            }
+        } else if (contextObj) {
+            targetMeshes.push(contextObj);
+        } else if (Array.isArray(nodeInfo['Meshes']) && nodeInfo['Meshes'].length > 0) {
             for (let i = 0; i < nodeInfo['Meshes'].length; i++) {
                 targetMeshes.push(nodeInfo['Meshes'][i]);
             }

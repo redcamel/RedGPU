@@ -1,5 +1,6 @@
 import GPU_BLEND_FACTOR from "../../../../gpuConst/GPU_BLEND_FACTOR";
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
+import GLTFParseContext from "../../core/GLTFParseContext";
 import {GLTF, GlTfId, MeshPrimitive} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import parse_KHR_materials_anisotropy from "./extensions/parse_KHR_materials_anisotropy";
@@ -13,9 +14,18 @@ import parse_KHR_materials_transmission from "./extensions/parse_KHR_materials_t
 import parse_KHR_materials_volume from "./extensions/parse_KHR_materials_volume";
 import parseMaterialTexture, {getSRGBTextureFormat} from "./parseMaterialTexture";
 
+export interface MaterialParseOptions {
+    overrideMaterialId?: GlTfId;
+    parseContext?: GLTFParseContext;
+    useVertexColor?: boolean;
+    useVertexTangent?: boolean;
+    isSkinned?: boolean;
+    bypassCache?: boolean;
+}
+
 /**
- * [KO] GLTF 메쉬 프리미티브의 재질(Material) 정보 및 확장(Extensions)을 파싱하여 PBRMaterial 인스턴스를 생성합니다.
- * [EN] Parses material information and extensions of a GLTF mesh primitive to create a PBRMaterial instance.
+ * [KO] GLTF 메쉬 프리미티브의 재질(Material) 정보 및 확장(Extensions)을 파싱하여 PBRMaterial 인스턴스를 생성하거나 4-튜플 캐시에서 공유 반환합니다.
+ * [EN] Parses material information and extensions of a GLTF mesh primitive, creating or sharing a `PBRMaterial` instance via a 4-tuple cache key.
  *
  * @param gltfLoader -
  * [KO] GLTFLoader 인스턴스
@@ -26,6 +36,9 @@ import parseMaterialTexture, {getSRGBTextureFormat} from "./parseMaterialTexture
  * @param meshPrimitive -
  * [KO] 대상 GLTF 메쉬 프리미티브
  * [EN] Target GLTF mesh primitive
+ * @param options -
+ * [KO] 머티리얼 오버라이드·캐시·셰이더 변형 옵션 (선택)
+ * [EN] Optional material override, cache, and shader variant options
  * @returns
  * [KO] 파싱된 `PBRMaterial` 인스턴스
  * [EN] Parsed `PBRMaterial` instance
@@ -35,14 +48,30 @@ const parseMaterialInfo_GLTF = (
     gltfLoader: GLTFLoader,
     gltfData: GLTF,
     meshPrimitive: MeshPrimitive,
-    overrideMaterialId?: GlTfId
+    options?: MaterialParseOptions
 ) => {
-    const {redGPUContext} = gltfLoader
+    const {redGPUContext} = gltfLoader;
+    const materialGlTfId = options?.overrideMaterialId !== undefined ? options.overrideMaterialId : meshPrimitive.material;
+    const hasVertexColor = options?.useVertexColor ?? Object.hasOwn(meshPrimitive.attributes, 'COLOR_0');
+    const hasVertexTangent = options?.useVertexTangent ?? false;
+    const isSkinned = options?.isSkinned ?? false;
+    const parseContext = options?.parseContext;
+    const useCache = Boolean(parseContext && !options?.bypassCache);
+    const cacheKey = useCache
+        ? `${materialGlTfId ?? 'default'}_${hasVertexColor ? 1 : 0}_${hasVertexTangent ? 1 : 0}_${isSkinned ? 1 : 0}`
+        : '';
+
+    if (useCache && parseContext) {
+        const cached = parseContext.materialCache.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
+    }
+
     let currentMaterial: PBRMaterial;
     let doubleSided = false;
     let alphaMode = 'OPAQUE'
     let alphaCutoff = 0.5;
-    const materialGlTfId = overrideMaterialId !== undefined ? overrideMaterialId : meshPrimitive.material;
     if (materialGlTfId !== undefined) {
         currentMaterial = new PBRMaterial(redGPUContext);
         currentMaterial.metallicFactor = 1;
@@ -194,8 +223,11 @@ const parseMaterialInfo_GLTF = (
         currentMaterial.metallicFactor = 1;
         currentMaterial.roughnessFactor = 1;
     }
-    if (Object.hasOwn(meshPrimitive.attributes, 'COLOR_0')) {
-        currentMaterial.useVertexColor = true
+    if (hasVertexColor) {
+        currentMaterial.useVertexColor = true;
+    }
+    if (hasVertexTangent) {
+        currentMaterial.useVertexTangent = true;
     }
     currentMaterial.doubleSided = doubleSided
     currentMaterial.cutOff = alphaCutoff;
@@ -232,6 +264,9 @@ const parseMaterialInfo_GLTF = (
             materialsById.set(materialGlTfId, list);
         }
         list.push(currentMaterial);
+    }
+    if (useCache && parseContext) {
+        parseContext.materialCache.set(cacheKey, currentMaterial);
     }
     return currentMaterial;
 };

@@ -2,6 +2,7 @@ import TextureLoader, {TextureLoaderData} from "../../TextureLoader";
 import decodeDracoPrimitives, {hasDracoCompression} from "../core/decodeDracoPrimitives";
 import getGLTFBuffersResources from "../core/getGLTFBuffersResources";
 import {createAbortError, nextFrame, throwIfAborted} from "../core/gltfAsyncUtils";
+import GLTFParseContext from "../core/GLTFParseContext";
 import {extractMaterialVariantNames} from "../core/materialVariantsHelper";
 import {GLTF} from "../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
@@ -127,6 +128,7 @@ const parseGLTF = async (
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
     signal?: AbortSignal
 ): Promise<void> => {
+    const parseContext = new GLTFParseContext();
     try {
         throwIfAborted(signal);
         gltfLoader.parsingResult.materialVariants = extractMaterialVariantNames(gltfData);
@@ -143,7 +145,7 @@ const parseGLTF = async (
         }
 
         await nextFrame(signal);
-        parseScene_GLTF(gltfLoader, gltfData);
+        parseScene_GLTF(gltfLoader, gltfData, parseContext);
 
         await nextFrame(signal);
         parseCameras_GLTF(gltfLoader, gltfData);
@@ -169,10 +171,11 @@ const parseGLTF = async (
         }
 
         throwIfAborted(signal);
-        await parseAnimation_GLTF(gltfLoader, gltfData);
+        await parseAnimation_GLTF(gltfLoader, gltfData, parseContext);
 
         throwIfAborted(signal);
     } finally {
+        parseContext.clear();
         releaseTemporaryBuffers(gltfLoader, gltfData);
     }
 
