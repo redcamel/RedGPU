@@ -386,7 +386,7 @@ class Renderer {
                 );
                 view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
             });
-            mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, COMMAND_ENCODER_TYPE.MAIN)
+            mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, COMMAND_ENCODER_TYPE.MAIN, true)
 
             commandEncoderManager.addMainRenderPass({
                 label: `${view.name} 2Path Render Pass`,

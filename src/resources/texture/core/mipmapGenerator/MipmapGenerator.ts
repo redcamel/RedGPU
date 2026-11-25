@@ -175,9 +175,10 @@ class MipmapGenerator extends RedGPUObject {
      * [KO] 밉맵 GPURenderPipeline
      * [EN] Mipmap GPURenderPipeline
      */
-    getMipmapPipeline(format: GPUTextureFormat): GPURenderPipeline {
+    getMipmapPipeline(format: GPUTextureFormat, useKawaseKaris: boolean = false): GPURenderPipeline {
         const {gpuDevice, resourceManager} = this;
-        let pipeline = this.#pipelines[format];
+        const pipelineKey = useKawaseKaris ? `${format}_kawase_karis` : format;
+        let pipeline = this.#pipelines[pipelineKey];
         if (!pipeline) {
             if (!this.#mipmapShaderModule) {
                 this.#mipmapShaderModule = resourceManager.createGPUShaderModule(
@@ -201,7 +202,7 @@ class MipmapGenerator extends RedGPUObject {
                 )
             }
             pipeline = gpuDevice.createRenderPipeline({
-                label: `MIPMAP_GENERATOR_PIPELINE_${format}`,
+                label: `MIPMAP_GENERATOR_PIPELINE_${pipelineKey}`,
                 layout: this.#pipelineLayout,
                 vertex: {
                     module: this.#mipmapShaderModule,
@@ -209,11 +210,11 @@ class MipmapGenerator extends RedGPUObject {
                 },
                 fragment: {
                     module: this.#mipmapShaderModule,
-                    entryPoint: 'fragmentMain',
+                    entryPoint: useKawaseKaris ? 'fragmentMainKawaseKaris' : 'fragmentMain',
                     targets: [{format}],
                 }
             });
-            this.#pipelines[format] = pipeline;
+            this.#pipelines[pipelineKey] = pipeline;
         }
         return pipeline;
     }
@@ -234,6 +235,9 @@ class MipmapGenerator extends RedGPUObject {
      * @param encoderType -
      * [KO] 사용할 명령 인코더 유형 (기본값: COMMAND_ENCODER_TYPE.RESOURCE)
      * [EN] Command encoder type to use (default: COMMAND_ENCODER_TYPE.RESOURCE)
+     * @param useKawaseKaris -
+     * [KO] HDR 파이어플라이 및 지터 펄싱 억제를 위한 5-tap Kawase + Karis 다운샘플 사용 여부 (기본값: false)
+     * [EN] Whether to use 5-tap Kawase + Karis downsampling for HDR firefly and jitter suppression (default: false)
      * @returns
      * [KO] 밉맵이 생성된 GPUTexture
      * [EN] GPUTexture with generated mipmaps
@@ -242,13 +246,14 @@ class MipmapGenerator extends RedGPUObject {
         texture: GPUTexture,
         textureDescriptor: GPUTextureDescriptor,
         useCache: boolean = false,
-        encoderType: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
+        encoderType: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE,
+        useKawaseKaris: boolean = false
     ): GPUTexture {
         if (!useCache) {
             this.#clearTempCaches();
         }
         const {resourceManager, commandEncoderManager} = this;
-        const pipeline: GPURenderPipeline = this.getMipmapPipeline(textureDescriptor.format);
+        const pipeline: GPURenderPipeline = this.getMipmapPipeline(textureDescriptor.format, useKawaseKaris);
         if (textureDescriptor.dimension == '3d' || textureDescriptor.dimension == '1d') {
             throw new Error('Generating mipmaps for non-2d textures is currently unsupported!');
         }
