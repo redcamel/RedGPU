@@ -1234,6 +1234,35 @@ export const ExampleList: ExampleListType = [
         name: 'GLTF',
         list: [
             {
+                name: 'glTF · GLB · Draco · Meshopt',
+                list: [
+                    {
+                        name: 'Skinned Geometry Compression (Draco · Meshopt)',
+                        path: 'gltf/formats/brainStemAllFormats',
+                        description: {
+                            ko: 'glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT 6종 지오메트리 압축 및 스키닝 애니메이션을 비교합니다.',
+                            en: 'Compares 6 geometry compression and container formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT) with skinning animation.'
+                        },
+                    },
+                    {
+                        name: 'PBR Texture Compression (KTX2 · WebP · JPG)',
+                        path: 'gltf/formats/carConceptAllFormats',
+                        description: {
+                            ko: 'glTF, glTF-Binary, glTF-JPG, glTF-KTX-BasisU-Draco, glTF-WEBP 5종 텍스처 압축 포맷과 Material Variants를 한 화면에서 비교합니다.',
+                            en: 'Compares 5 texture compression formats (glTF, glTF-Binary, glTF-JPG, glTF-KTX-BasisU-Draco, glTF-WEBP) with synchronized Material Variants.'
+                        },
+                    },
+                    {
+                        name: 'Static Mesh Quantization (Quantized · Embedded)',
+                        path: 'gltf/formats/duckAllFormats',
+                        description: {
+                            ko: 'glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Quantized 5종 정적 메쉬 양자화 및 기본 포맷을 한 화면에서 비교합니다.',
+                            en: 'Compares 5 static mesh quantization and base formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Quantized) side by side.'
+                        },
+                    },
+                ]
+            },
+            {
                 name: 'Basic',
                 list: [
                     {
@@ -1488,14 +1517,6 @@ export const ExampleList: ExampleListType = [
                         },
                     },
 
-                    {
-                        name: 'Brain Stem',
-                        path: 'gltf/animation/brainStem',
-                        description: {
-                            ko: `복잡한 계층 구조와 스키닝을 가진 BrainStem 모델 애니메이션입니다.`,
-                            en: `BrainStem model animation with complex hierarchy and skinning.`
-                        },
-                    },
                     {
                         name: 'Morph Stress Test',
                         path: 'gltf/animation/morphStressTest',
