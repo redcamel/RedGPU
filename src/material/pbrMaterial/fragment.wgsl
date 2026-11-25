@@ -390,6 +390,8 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
         output.color = vec4<f32>(baseColor.rgb, baseColor.a);
+        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 0.0);
+        output.gBufferMotionVector = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
         return output;
     }
     #redgpu_endIf
