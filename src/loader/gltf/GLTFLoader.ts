@@ -46,27 +46,10 @@ export interface GLTFLoadAsyncOptions {
  */
 type GLTFParsingResult = {
     /**
-     * [KO] GLTF 파일에 정의된 그룹 목록
-     * [EN] Groups defined in the GLTF file
-     */
-    groups: Mesh[],
-    /**
      * [KO] GLTF 파일에 정의된 재질 목록
      * [EN] Materials defined in the GLTF file
      */
     materials: PBRMaterial[],
-    /**
-     * [KO] GLTF 파일에 정의된 URI 버퍼 정보
-     * [EN] URI buffer information defined in the GLTF file
-     */
-    uris: {
-        buffers: DataView[]
-    },
-    /**
-     * [KO] GLTF 파일에 정의된 원시 텍스처 로딩 대기 맵
-     * [EN] Map of raw texture loading entries defined in the GLTF file
-     */
-    textureRawList: Map<string, any>,
     /**
      * [KO] GLTF 파일에 정의된 카메라 목록
      * [EN] Cameras defined in the GLTF file
@@ -76,17 +59,7 @@ type GLTFParsingResult = {
      * [KO] GLTF 파일에 정의된 파싱된 애니메이션 클립 목록
      * [EN] Parsed animation clips defined in the GLTF file
      */
-    animations: ClipAnimState[],
-    /**
-     * [KO] 메쉬별 기본/변형 머티리얼 매핑 테이블
-     * [EN] Per-mesh mapping table of default and variant materials
-     */
-    materialVariantEntries: MaterialVariantEntry[],
-    /**
-     * [KO] glTF 머티리얼 ID별 생성된 `PBRMaterial` 인스턴스 맵 (`KHR_animation_pointer` 연동용)
-     * [EN] Map of glTF material ID to created `PBRMaterial` instances (for `KHR_animation_pointer`)
-     */
-    materialsById: Map<number, PBRMaterial[]>
+    animations: ClipAnimState[]
 }
 
 /**
@@ -173,6 +146,7 @@ class GLTFLoader extends RedGPUObject {
     #fileExtension: string
     #gltfData: GLTF
     #materialVariants: string[] = []
+    #materialVariantEntries: MaterialVariantEntry[] = []
     #activeMaterialVariant: string | null = null
     #isDestroyed: boolean = false
     #abortController: AbortController = new AbortController()
@@ -237,16 +211,9 @@ class GLTFLoader extends RedGPUObject {
             }
         }
         this.parsingResult = {
-            groups: [],
             materials: [],
-            uris: {
-                buffers: []
-            },
-            textureRawList: new Map(),
             cameras: [],
-            animations: [],
-            materialVariantEntries: [],
-            materialsById: new Map()
+            animations: []
         };
         this.resultMesh = new Mesh(redGPUContext);
         this.resultMesh.gltfLoaderInfo = this
@@ -324,19 +291,15 @@ class GLTFLoader extends RedGPUObject {
     }
 
     /**
-     * [KO] 원본 GLTF 데이터를 가져오거나 설정합니다.
-     * [EN] Gets or sets the raw GLTF data.
+     * [KO] 원본 GLTF 데이터를 반환합니다.
+     * [EN] Returns the parsed GLTF data object.
      *
      * @returns
      * [KO] 원본 GLTF 데이터 객체
-     * [EN] Raw GLTF data object
+     * [EN] Source GLTF data object
      */
     get gltfData(): GLTF {
         return this.#gltfData;
-    }
-
-    set gltfData(value: GLTF) {
-        this.#gltfData = value;
     }
 
     /**
@@ -397,7 +360,7 @@ class GLTFLoader extends RedGPUObject {
      */
     applyMaterialVariant(variant: string | number | null): void {
         const materialVariants = this.#materialVariants;
-        const {materialVariantEntries} = this.parsingResult;
+        const materialVariantEntries = this.#materialVariantEntries;
         const resolvedIdx = resolveMaterialVariantIndex(materialVariants, variant);
         if (resolvedIdx === undefined) {
             console.warn(`[GLTFLoader] Unknown material variant: ${variant}`);
@@ -493,17 +456,11 @@ class GLTFLoader extends RedGPUObject {
                 });
                 this.parsingResult.animations = [];
             }
-            this.parsingResult.groups = [];
             this.parsingResult.materials = [];
-            if (this.parsingResult.uris) {
-                this.parsingResult.uris.buffers = [];
-            }
-            this.parsingResult.textureRawList?.clear();
             this.parsingResult.cameras = [];
-            this.parsingResult.materialVariantEntries = [];
-            this.parsingResult.materialsById?.clear();
         }
         this.#materialVariants = [];
+        this.#materialVariantEntries = [];
 
         this.#activeMaterialVariant = null;
         this.#gltfData = null;
@@ -531,11 +488,16 @@ class GLTFLoader extends RedGPUObject {
 
     async #loadFile() {
         const signal = this.#abortController.signal;
+        const onParsed = (gltfData: GLTF, materialVariants: string[], materialVariantEntries: MaterialVariantEntry[]) => {
+            this.#gltfData = gltfData;
+            this.#materialVariants = materialVariants;
+            this.#materialVariantEntries = materialVariantEntries;
+        };
         try {
             if (this.#fileExtension === 'glb') {
-                await parseFileGLB(this, () => this.#onLoad?.(this), this.#onProgress, signal);
+                await parseFileGLB(this, () => this.#onLoad?.(this), this.#onProgress, signal, onParsed);
             } else if (this.#fileExtension === 'gltf') {
-                await parseFileGLTF(this, () => this.#onLoad?.(this), this.#onProgress, signal);
+                await parseFileGLTF(this, () => this.#onLoad?.(this), this.#onProgress, signal, onParsed);
             } else {
                 consoleAndThrowError('Unknown file extension: ' + this.#fileExtension);
             }

@@ -320,7 +320,7 @@ const parseMesh_GLTF = function (
                     variantMaterials.set(mapping.variants[v], variantMat);
                 }
             }
-            gltfLoader.parsingResult.materialVariantEntries.push({
+            parseContext.materialVariantEntries.push({
                 mesh: tMesh,
                 defaultMaterial: tMaterial,
                 variantMaterials

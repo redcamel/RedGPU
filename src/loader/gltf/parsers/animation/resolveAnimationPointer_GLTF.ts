@@ -1,5 +1,4 @@
 import Mesh from "../../../../display/mesh/Mesh";
-import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
 import GLTFParseContext from "../../core/GLTFParseContext";
 import {GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
@@ -217,8 +216,6 @@ export const createPointerTargetBinding = (
             }
         } else if (contextObj) {
             targetMeshes.push(contextObj);
-        } else if (gltfLoader.parsingResult.groups[descriptor.nodeIndex]) {
-            targetMeshes.push(gltfLoader.parsingResult.groups[descriptor.nodeIndex]);
         }
         if (targetMeshes.length === 0) return null;
         const count = targetMeshes.length;
@@ -261,7 +258,7 @@ export const createPointerTargetBinding = (
     }
 
     if (descriptor.domain === 'material_property') {
-        const materials: PBRMaterial[] = gltfLoader.parsingResult.materialsById.get(descriptor.materialIndex);
+        const materials = parseContext?.materialsById.get(descriptor.materialIndex);
         if (!materials || materials.length === 0) return null;
         const propKey = descriptor.propertyKey;
         if (!(propKey in materials[0])) return null;
@@ -320,7 +317,7 @@ export const createPointerTargetBinding = (
     }
 
     if (descriptor.domain === 'material_texture_transform') {
-        const materials: PBRMaterial[] = gltfLoader.parsingResult.materialsById.get(descriptor.materialIndex);
+        const materials = parseContext?.materialsById.get(descriptor.materialIndex);
         if (!materials || materials.length === 0) return null;
         const useKey = `use_${descriptor.textureKey}_KHR_texture_transform`;
         const targetKey = `${descriptor.textureKey}_KHR_texture_transform_${descriptor.transformProp}`;

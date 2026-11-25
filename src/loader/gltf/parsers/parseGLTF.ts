@@ -2,8 +2,8 @@ import TextureLoader, {TextureLoaderData} from "../../TextureLoader";
 import decodeDracoPrimitives, {hasDracoCompression} from "../core/decodeDracoPrimitives";
 import getGLTFBuffersResources from "../core/getGLTFBuffersResources";
 import {createAbortError, nextFrame, throwIfAborted} from "../core/gltfAsyncUtils";
-import GLTFParseContext from "../core/GLTFParseContext";
-import {extractMaterialVariantNames} from "../core/materialVariantsHelper";
+import GLTFParseContext, {clearActiveParseContext, setActiveParseContext} from "../core/GLTFParseContext";
+import {extractMaterialVariantNames, MaterialVariantEntry} from "../core/materialVariantsHelper";
 import {GLTF} from "../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
 import parseAnimation_GLTF from "./animation/parseAnimations";
@@ -11,26 +11,34 @@ import parseAssetVersion from "./parseAssetVersion";
 import parseCameras_GLTF from "./parseCameras_GLTF";
 import parseScene_GLTF from "./parseScene_GLTF";
 
+export type GLTFOnParsedCallback = (
+    gltfData: GLTF,
+    materialVariants: string[],
+    materialVariantEntries: MaterialVariantEntry[]
+) => void;
+
 const loadBuffersAsync = (
     gltfLoader: GLTFLoader,
     gltfData: GLTF,
+    parseContext: GLTFParseContext,
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
     signal?: AbortSignal
 ): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
-        getGLTFBuffersResources(gltfLoader, gltfData, resolve, onProgress, reject, signal);
+        getGLTFBuffersResources(gltfLoader, gltfData, resolve, onProgress, reject, signal, parseContext.buffers);
     });
 };
 
 const loadTexturesAsync = (
     gltfLoader: GLTFLoader,
+    parseContext: GLTFParseContext,
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
     signal?: AbortSignal
 ): Promise<any> => {
     if (signal?.aborted) {
         return Promise.reject(createAbortError());
     }
-    const rawList = Array.from(gltfLoader.parsingResult.textureRawList.values());
+    const rawList = Array.from(parseContext.textureRawList.values());
     if (rawList.length === 0) {
         return Promise.resolve({textures: []});
     }
@@ -66,22 +74,15 @@ const loadTexturesAsync = (
     });
 };
 
-const revokeTextureBlobURLs = (gltfLoader: GLTFLoader): void => {
-    const rawList = gltfLoader.parsingResult?.textureRawList;
-    if (!rawList) return;
-    rawList.forEach((item) => {
+const revokeTextureBlobURLs = (parseContext: GLTFParseContext): void => {
+    parseContext.textureRawList.forEach((item) => {
         if (typeof item?.src === 'string' && item.src.startsWith('blob:')) {
             URL.revokeObjectURL(item.src);
         }
     });
 };
 
-const releaseTemporaryBuffers = (gltfLoader: GLTFLoader, gltfData: GLTF): void => {
-    const parsingResult = gltfLoader.parsingResult;
-    if (parsingResult?.uris?.buffers) {
-        parsingResult.uris.buffers.length = 0;
-    }
-    parsingResult?.textureRawList?.clear();
+const releaseTemporaryBuffers = (gltfData: GLTF): void => {
     if (Array.isArray(gltfData?.buffers)) {
         for (let i = 0, len = gltfData.buffers.length; i < len; i++) {
             const buffer = gltfData.buffers[i];
@@ -118,25 +119,24 @@ const parseGLTF = async (
     gltfData: GLTF,
     callBack?: () => void,
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    onParsed?: GLTFOnParsedCallback
 ): Promise<void> => {
     const parseContext = new GLTFParseContext();
+    setActiveParseContext(gltfLoader, parseContext);
     try {
         throwIfAborted(signal);
         const variantNames = extractMaterialVariantNames(gltfData);
-        gltfLoader.materialVariants.length = 0;
-        for (let i = 0, len = variantNames.length; i < len; i++) {
-            gltfLoader.materialVariants.push(variantNames[i]);
-        }
+        onParsed?.(gltfData, variantNames, parseContext.materialVariantEntries);
 
         await nextFrame(signal);
         parseAssetVersion(gltfData);
 
         await nextFrame(signal);
-        await loadBuffersAsync(gltfLoader, gltfData, onProgress, signal);
+        await loadBuffersAsync(gltfLoader, gltfData, parseContext, onProgress, signal);
 
         if (hasDracoCompression(gltfData)) {
-            await decodeDracoPrimitives(gltfData, gltfLoader.parsingResult.uris.buffers);
+            await decodeDracoPrimitives(gltfData, parseContext.buffers);
             throwIfAborted(signal);
         }
 
@@ -147,7 +147,7 @@ const parseGLTF = async (
         parseCameras_GLTF(gltfLoader, gltfData);
 
         try {
-            const result = await loadTexturesAsync(gltfLoader, onProgress, signal);
+            const result = await loadTexturesAsync(gltfLoader, parseContext, onProgress, signal);
             throwIfAborted(signal);
             result.textures.forEach((textureLoaderData: TextureLoaderData) => {
                 const {
@@ -163,7 +163,7 @@ const parseGLTF = async (
                 });
             });
         } finally {
-            revokeTextureBlobURLs(gltfLoader);
+            revokeTextureBlobURLs(parseContext);
         }
 
         throwIfAborted(signal);
@@ -171,8 +171,9 @@ const parseGLTF = async (
 
         throwIfAborted(signal);
     } finally {
+        clearActiveParseContext(gltfLoader);
         parseContext.clear();
-        releaseTemporaryBuffers(gltfLoader, gltfData);
+        releaseTemporaryBuffers(gltfData);
     }
 
     callBack?.();

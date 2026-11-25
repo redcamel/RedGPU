@@ -2,6 +2,8 @@ import Mesh from "../../../display/mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
 import {GlTfId} from "../GLTF";
+import GLTFLoader from "../GLTFLoader";
+import {MaterialVariantEntry} from "./materialVariantsHelper";
 
 /**
  * [KO] 정적 메쉬 프리미티브의 공유 지오메트리 및 정점 속성 플래그 캐시 항목입니다.
@@ -63,6 +65,26 @@ class GLTFParseContext {
      * [EN] Queue of skin bindings collected in Pass 1 and resolved in Pass 2
      */
     pendingSkins: PendingSkinEntry[] = [];
+    /**
+     * [KO] 파싱 세션 동안 사용하는 바이너리 버퍼 `DataView` 목록
+     * [EN] Binary buffer `DataView` list used during the parse session
+     */
+    buffers: DataView[] = [];
+    /**
+     * [KO] 텍스처 로더에 전달할 원시 텍스처 대기 맵
+     * [EN] Pending raw texture loading map passed to `TextureLoader`
+     */
+    textureRawList: Map<string, any> = new Map();
+    /**
+     * [KO] `KHR_animation_pointer` 바인딩 연결용 머티리얼 ID별 `PBRMaterial[]` 맵
+     * [EN] Material ID to `PBRMaterial[]` map used to bind `KHR_animation_pointer`
+     */
+    materialsById: Map<number, PBRMaterial[]> = new Map();
+    /**
+     * [KO] `KHR_materials_variants` 메쉬별 변형 머티리얼 매핑 목록
+     * [EN] Per-mesh material variant mapping entries for `KHR_materials_variants`
+     */
+    materialVariantEntries: MaterialVariantEntry[] = [];
 
     /**
      * [KO] 파싱 완료 또는 중단 시 컨텍스트 내부의 모든 임시 매핑과 캐시 참조를 해제합니다.
@@ -74,7 +96,25 @@ class GLTFParseContext {
         this.materialCache.clear();
         this.geometryCache.clear();
         this.pendingSkins.length = 0;
+        this.buffers.length = 0;
+        this.textureRawList.clear();
+        this.materialsById.clear();
+        this.materialVariantEntries = [];
     }
 }
+
+const ACTIVE_PARSE_CONTEXT_MAP = new WeakMap<GLTFLoader, GLTFParseContext>();
+
+export const setActiveParseContext = (gltfLoader: GLTFLoader, parseContext: GLTFParseContext): void => {
+    ACTIVE_PARSE_CONTEXT_MAP.set(gltfLoader, parseContext);
+};
+
+export const getActiveParseContext = (gltfLoader: GLTFLoader): GLTFParseContext | undefined => {
+    return ACTIVE_PARSE_CONTEXT_MAP.get(gltfLoader);
+};
+
+export const clearActiveParseContext = (gltfLoader: GLTFLoader): void => {
+    ACTIVE_PARSE_CONTEXT_MAP.delete(gltfLoader);
+};
 
 export default GLTFParseContext;

@@ -1,5 +1,6 @@
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import GLTF_COMPONENT_TYPES, {GLTFComponentTypedArrayConstructor} from "../core/GLTF_COMPONENT_TYPES";
+import {getActiveParseContext} from "../core/GLTFParseContext";
 import {Accessor, GLTF, GlTfId} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 
@@ -82,7 +83,9 @@ class AccessorInfo_GLTF {
             : undefined;
         this.bufferURIDataView = null;
         if (bufferView) {
-            const bufferDataView = gltfLoader.parsingResult.uris.buffers[bufferView.buffer];
+            const buffers = getActiveParseContext(gltfLoader)?.buffers
+                ?? (gltfLoader as { parsingResult?: { uris?: { buffers?: DataView[] } } }).parsingResult?.uris?.buffers;
+            const bufferDataView = buffers?.[bufferView.buffer];
             if (bufferDataView) {
                 this.bufferURIDataView = bufferDataView;
             }

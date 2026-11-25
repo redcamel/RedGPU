@@ -39,7 +39,7 @@ describe('Phase 8-3 — GLB Zero-Copy View & Static Mesh Null Skin Buffer Guard'
         } as any;
 
         await new Promise<void>((resolve, reject) => {
-            getGLTFBuffersResources(mockLoader, gltfData, resolve, undefined, reject);
+            getGLTFBuffersResources(mockLoader, gltfData, resolve, undefined, reject, undefined, resultBuffers);
         });
 
         expect(resultBuffers.length).toBe(1);
@@ -78,7 +78,7 @@ describe('Phase 8-3 — GLB Zero-Copy View & Static Mesh Null Skin Buffer Guard'
         } as any;
 
         await new Promise<void>((resolve, reject) => {
-            getGLTFBuffersResources(mockLoader, gltfData, resolve, undefined, reject);
+            getGLTFBuffersResources(mockLoader, gltfData, resolve, undefined, reject, undefined, resultBuffers);
         });
 
         expect(resultBuffers.length).toBe(1);

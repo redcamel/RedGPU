@@ -256,8 +256,8 @@ const parseMaterialInfo_GLTF = (
             blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO
             currentMaterial.alphaBlend = 0;
     }
-    if (materialGlTfId !== undefined) {
-        const {materialsById} = gltfLoader.parsingResult;
+    if (materialGlTfId !== undefined && parseContext) {
+        const {materialsById} = parseContext;
         let list = materialsById.get(materialGlTfId);
         if (!list) {
             list = [];

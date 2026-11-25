@@ -53,12 +53,10 @@ const getGLTFBuffersResources = (
     callback?: () => void,
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
     onError?: (error: unknown) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    outBuffers?: DataView[]
 ) => {
-    const {parsingResult} = gltfLoader
-    const {uris} = parsingResult
-    const bufferKey = 'buffers';
-    const resultContainer = uris[bufferKey]
+    const resultContainer: DataView[] = outBuffers ?? [];
     const buffers = gltfData.buffers || []
     const totalBuffers = buffers.length;
     let loadedBuffers = 0;

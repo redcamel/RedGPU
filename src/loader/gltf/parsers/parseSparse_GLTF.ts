@@ -1,5 +1,6 @@
 import dequantizeAccessorValue from "../core/dequantizeAccessorValue";
 import GLTF_COMPONENT_TYPES from "../core/GLTF_COMPONENT_TYPES";
+import {getActiveParseContext} from "../core/GLTFParseContext";
 import {Accessor, GLTF} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 
@@ -59,8 +60,10 @@ const parseSparse_GLTF = (
     const indicesBufferView = bufferViewsData[sparseIndices.bufferView];
     if (!valuesBufferView || !indicesBufferView) return;
 
-    const valuesDataView = gltfLoader.parsingResult.uris.buffers[valuesBufferView.buffer] ?? null;
-    const indicesDataView = gltfLoader.parsingResult.uris.buffers[indicesBufferView.buffer] ?? null;
+    const buffers = getActiveParseContext(gltfLoader)?.buffers
+        ?? (gltfLoader as { parsingResult?: { uris?: { buffers?: DataView[] } } }).parsingResult?.uris?.buffers;
+    const valuesDataView = buffers?.[valuesBufferView.buffer] ?? null;
+    const indicesDataView = buffers?.[indicesBufferView.buffer] ?? null;
     if (!valuesDataView || !indicesDataView) return;
 
     const valueComponentType = GLTF_COMPONENT_TYPES[targetAccessor.componentType];

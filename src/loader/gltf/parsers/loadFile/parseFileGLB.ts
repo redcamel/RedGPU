@@ -3,7 +3,7 @@ import getArrayBufferFromSrc from "../../core/getArrayBufferFromSrc";
 import {throwIfAborted} from "../../core/gltfAsyncUtils";
 import {GLTF} from "../../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
-import parseGLTF from "../parseGLTF";
+import parseGLTF, {GLTFOnParsedCallback} from "../parseGLTF";
 
 /**
  * [KO] GLB 바이너리 헤더의 바이트 길이입니다.
@@ -44,7 +44,8 @@ const parseFileGLB = async (
     gltfLoader: GLTFLoader,
     callBack?: () => void,
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    onParsed?: GLTFOnParsedCallback
 ): Promise<void> => {
     throwIfAborted(signal);
 
@@ -67,14 +68,14 @@ const parseFileGLB = async (
     }
     if (cache.has(loadFilePath)) {
         progress()
-        await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress, signal);
+        await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress, signal, onParsed);
         return;
     }
     if (pending.has(loadFilePath)) {
         await pending.get(loadFilePath);
         throwIfAborted(signal);
         progress()
-        await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress, signal);
+        await parseArrayBuffer(gltfLoader, cache.get(loadFilePath), callBack, onProgress, signal, onParsed);
         return;
     }
     const promise = new Promise<ArrayBuffer>((resolve, reject) => {
@@ -102,7 +103,7 @@ const parseFileGLB = async (
 
     const buffer = await promise;
     throwIfAborted(signal);
-    await parseArrayBuffer(gltfLoader, buffer, callBack, onProgress, signal);
+    await parseArrayBuffer(gltfLoader, buffer, callBack, onProgress, signal, onParsed);
 }
 /**
  * [KO] GLB ArrayBuffer에서 JSON 데이터와 바이너리 청크를 추출하여 GLTF 파싱을 수행합니다.
@@ -126,7 +127,8 @@ const parseArrayBuffer = async (
     buffer: ArrayBuffer,
     callBack?: () => void,
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    onParsed?: GLTFOnParsedCallback
 ): Promise<void> => {
     throwIfAborted(signal);
     const {content, binaryChunk} = parseBuffer(buffer);
@@ -138,8 +140,7 @@ const parseArrayBuffer = async (
     if (gltfData.buffers?.length > 0 && binaryChunk) {
         gltfData.buffers[0].uri = binaryChunk;
     }
-    gltfLoader.gltfData = gltfData
-    await parseGLTF(gltfLoader, gltfData, callBack, onProgress, signal)
+    await parseGLTF(gltfLoader, gltfData, callBack, onProgress, signal, onParsed);
 }
 /**
  * [KO] GLB 버퍼를 분석하여 JSON 문자열과 바이너리 청크를 추출합니다.

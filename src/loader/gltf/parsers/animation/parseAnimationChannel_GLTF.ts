@@ -106,8 +106,7 @@ const parseAnimationChannel_GLTF = (
             }
         }
     } else {
-        const groupMesh = parseContext?.nodeObjectMap.get(channelTargetDataNodeGlTfId)
-            ?? gltfLoader.parsingResult.groups[channelTargetDataNodeGlTfId];
+        const groupMesh = parseContext?.nodeObjectMap.get(channelTargetDataNodeGlTfId);
         if (groupMesh) {
             tMesh = groupMesh;
         } else return;

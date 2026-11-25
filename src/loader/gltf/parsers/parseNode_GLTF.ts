@@ -64,9 +64,8 @@ const parseNode_GLTF = (
     parentMesh: Mesh,
     parseContext: GLTFParseContext
 ) => {
-    const {redGPUContext, parsingResult} = gltfLoader;
+    const {redGPUContext} = gltfLoader;
     const {nodes: nodeData, meshes: meshData} = gltfData;
-    const {groups: resultGroups} = parsingResult;
     const nodeInfo = nodeData[nodeGlTfId];
     const isVisible = resolveNodeVisibility(nodeInfo);
     const isSkinned = 'skin' in nodeInfo && nodeInfo.skin !== undefined;
@@ -107,14 +106,11 @@ const parseNode_GLTF = (
             parseChildren(gltfLoader, gltfData, group, nodeInfo, parseContext);
         }
     } else {
-        let targetGroup: Mesh;
-        if (resultGroups[nodeGlTfId]) {
-            targetGroup = resultGroups[nodeGlTfId];
-        } else {
+        let targetGroup = parseContext.nodeObjectMap.get(nodeGlTfId);
+        if (!targetGroup) {
             targetGroup = new Mesh(redGPUContext);
             parentMesh.addChild(targetGroup);
             targetGroup['name'] = nodeInfo['name'];
-            resultGroups[nodeGlTfId] = targetGroup;
         }
         parseContext.nodeObjectMap.set(nodeGlTfId, targetGroup);
         targetGroup.visible = isVisible;

@@ -4,7 +4,7 @@ import {hasMeshoptCompression} from "../../core/decodeMeshoptBufferViews";
 import {nextFrame, throwIfAborted} from "../../core/gltfAsyncUtils";
 import {GLTF} from "../../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
-import parseGLTF from "../parseGLTF";
+import parseGLTF, {GLTFOnParsedCallback} from "../parseGLTF";
 import formatBytes from "../../../../utils/formatBytes";
 
 
@@ -52,7 +52,8 @@ const parseFileGLTF = async (
     gltfLoader: GLTFLoader,
     callBack?: () => void,
     onProgress?: (info: GLTFLoadingProgressInfo) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    onParsed?: GLTFOnParsedCallback
 ): Promise<void> => {
     throwIfAborted(signal);
     const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName);
@@ -73,19 +74,19 @@ const parseFileGLTF = async (
         }
     }
     if (cache.has(loadFilePath)) {
-        gltfLoader.gltfData = getData(cache.get(loadFilePath))
-        cachedProgress()
+        const resolvedGltfData = getData(cache.get(loadFilePath));
+        cachedProgress();
         await nextFrame(signal);
-        await parseGLTF(gltfLoader, gltfLoader.gltfData, callBack, onProgress, signal);
+        await parseGLTF(gltfLoader, resolvedGltfData, callBack, onProgress, signal, onParsed);
         return;
     }
     if (pending.has(loadFilePath)) {
         await pending.get(loadFilePath);
         throwIfAborted(signal);
-        cachedProgress()
-        gltfLoader.gltfData = getData(cache.get(loadFilePath))
+        cachedProgress();
+        const resolvedGltfData = getData(cache.get(loadFilePath));
         await nextFrame(signal);
-        await parseGLTF(gltfLoader, gltfLoader.gltfData, callBack, onProgress, signal);
+        await parseGLTF(gltfLoader, resolvedGltfData, callBack, onProgress, signal, onParsed);
         return;
     }
     const promise = new Promise<GLTF>(async (resolve, reject) => {
@@ -128,9 +129,9 @@ const parseFileGLTF = async (
     pending.set(loadFilePath, promise);
     const gltfData = await promise;
     throwIfAborted(signal);
-    gltfLoader.gltfData = getData(gltfData)
+    const resolvedGltfData = getData(gltfData);
     await nextFrame(signal);
-    await parseGLTF(gltfLoader, gltfLoader.gltfData, callBack, onProgress, signal);
+    await parseGLTF(gltfLoader, resolvedGltfData, callBack, onProgress, signal, onParsed);
 };
 
 export default parseFileGLTF;

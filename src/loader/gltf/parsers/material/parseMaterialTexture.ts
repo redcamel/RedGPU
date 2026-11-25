@@ -2,6 +2,7 @@ import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
+import {getActiveParseContext} from "../../core/GLTFParseContext";
 import {GLTF, GlTfId, MaterialNormalTextureInfo, MaterialOcclusionTextureInfo, Texture, TextureInfo} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import parse_KHR_texture_transform from "./extensions/parse_KHR_texture_transform";
@@ -96,8 +97,9 @@ const parseMaterialTexture = (
     format?: string,
     useMipmap: boolean = true
 ) => {
-    const {redGPUContext, gltfData} = gltfLoader
-    const {textureRawList} = gltfLoader.parsingResult
+    const {redGPUContext, gltfData} = gltfLoader;
+    const textureRawList = getActiveParseContext(gltfLoader)?.textureRawList;
+    if (!textureRawList) return;
     const targetTextureInfoGlTfId = textureInfo.index;
     const targetTextureInfo = gltfData.textures[targetTextureInfoGlTfId];
     const targetSourceGlTfId = resolveTextureSourceId(targetTextureInfo);
