@@ -39,10 +39,9 @@ RedGPU.init(
                 RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view);
 
                 if (result.materialVariants.length > 0) {
-                    const variantState = {variant: result.materialVariants[0]};
-                    result.applyMaterialVariant(variantState.variant);
+                    const variantState = {variant: result.activeMaterialVariant ?? result.materialVariants[0]};
                     helper.updateGui((pane) => {
-                        const folder = pane.addFolder({title: 'KHR_materials_variants', expanded: false});
+                        const folder = pane.addFolder({title: 'KHR_materials_variants', expanded: true});
                         const options = {};
                         result.materialVariants.forEach((name) => {
                             options[name] = name;
@@ -71,8 +70,8 @@ RedGPU.init(
 const renderTestPane = (redGPUContext, targetView) => {
     return new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
-        ibl: true,
-        skybox: true,
+        ibl: {expanded: false},
+        skybox: {expanded: false},
         targetView: targetView,
     });
 };

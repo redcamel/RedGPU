@@ -496,12 +496,17 @@ class GLTFLoader extends RedGPUObject {
             this.#gltfData = gltfData;
             this.#materialVariants = materialVariants;
             this.#materialVariantEntries = materialVariantEntries;
+            this.#activeMaterialVariant = null;
+        };
+        const onComplete = () => {
+            this.#resolveInitialMaterialVariant();
+            this.#onLoad?.(this);
         };
         try {
             if (this.#fileExtension === 'glb') {
-                await parseFileGLB(this, () => this.#onLoad?.(this), this.#onProgress, signal, onParsed);
+                await parseFileGLB(this, onComplete, this.#onProgress, signal, onParsed);
             } else if (this.#fileExtension === 'gltf') {
-                await parseFileGLTF(this, () => this.#onLoad?.(this), this.#onProgress, signal, onParsed);
+                await parseFileGLTF(this, onComplete, this.#onProgress, signal, onParsed);
             } else {
                 consoleAndThrowError('Unknown file extension: ' + this.#fileExtension);
             }
@@ -513,6 +518,29 @@ class GLTFLoader extends RedGPUObject {
             }
         } finally {
             this.#cleanupAbortListener();
+        }
+    }
+
+    #resolveInitialMaterialVariant(): void {
+        const materialVariants = this.#materialVariants;
+        const materialVariantEntries = this.#materialVariantEntries;
+        this.#activeMaterialVariant = null;
+        if (materialVariants.length === 0 || materialVariantEntries.length === 0) return;
+
+        for (let vIdx = 0; vIdx < materialVariants.length; vIdx++) {
+            let allMatch = true;
+            for (let eIdx = 0; eIdx < materialVariantEntries.length; eIdx++) {
+                const entry = materialVariantEntries[eIdx];
+                const mapped = entry.variantMaterials.get(vIdx) ?? entry.defaultMaterial;
+                if (mapped !== entry.defaultMaterial) {
+                    allMatch = false;
+                    break;
+                }
+            }
+            if (allMatch) {
+                this.#activeMaterialVariant = materialVariants[vIdx];
+                return;
+            }
         }
     }
 }

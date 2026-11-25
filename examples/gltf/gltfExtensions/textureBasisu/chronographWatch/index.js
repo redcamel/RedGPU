@@ -62,8 +62,8 @@ RedGPU.init(
 const renderTestPane = (redGPUContext, targetView) => {
     return new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
-        ibl: true,
-        skybox: true,
+        ibl: {expanded: false},
+        skybox: {expanded: false},
         targetView: targetView,
     });
 };
@@ -72,12 +72,11 @@ const bindMaterialVariantsPane = (helper, gltfLoader) => {
     const variants = gltfLoader.materialVariants;
     if (!variants.length) return;
 
-    const config = {materialVariant: variants[0]};
+    const config = {materialVariant: gltfLoader.activeMaterialVariant ?? variants[0]};
     const options = Object.fromEntries(variants.map((v) => [v, v]));
-    gltfLoader.applyMaterialVariant(config.materialVariant);
 
     helper.updateGui((pane) => {
-        const folder = pane.addFolder({title: 'KHR_materials_variants', expanded: false});
+        const folder = pane.addFolder({title: 'KHR_materials_variants', expanded: true});
         folder.addBinding(config, 'materialVariant', {options}).on('change', (ev) => {
             gltfLoader.applyMaterialVariant(ev.value);
         });
