@@ -38,6 +38,7 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         renderTestPane(redGPUContext, view);
 

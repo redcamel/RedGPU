@@ -61,6 +61,7 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         // [KO] 6종 포맷 BrainStem 모델을 화면 비율에 맞는 반응형 그리드로 배치하고 스키닝 애니메이션을 동시 재생합니다.
         // [EN] Arranges all 6 BrainStem format variants in a responsive grid and plays skinning animations simultaneously.

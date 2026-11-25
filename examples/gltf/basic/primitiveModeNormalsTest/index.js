@@ -27,6 +27,7 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         // [KO] PrimitiveModeNormalsTest 모델 로드 및 화면 중앙 배치
         // [EN] Load PrimitiveModeNormalsTest model and fit to screen center

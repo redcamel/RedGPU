@@ -34,6 +34,7 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         // [KO] 순수 glTF-Quantized 4종 모델 로드 및 동일 크기로 정규화 배치
         // [EN] Load all four glTF-Quantized models and normalize their sizes side by side

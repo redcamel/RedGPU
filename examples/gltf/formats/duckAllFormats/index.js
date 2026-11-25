@@ -57,6 +57,7 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(view);
+        view.builtInEffectManager.useBloom = true;
 
         // [KO] 5종 포맷 Duck 모델을 화면 비율에 맞는 반응형 그리드로 배치합니다.
         // [EN] Arranges all 5 Duck format variants in a responsive grid based on viewport aspect ratio.
