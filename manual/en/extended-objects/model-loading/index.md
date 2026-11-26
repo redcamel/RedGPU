@@ -144,10 +144,43 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
-## 3. Supported glTF 2.0 Material Extensions
+## 3. Async Loading, Cancellation, and Material Variants
+
+In addition to callbacks, `GLTFLoader` supports `Promise`-based `loadAsync()`, cancellation via `abort()` /
+`AbortSignal`, and runtime switching for `KHR_materials_variants`.
+
+```javascript
+// 1. Promise-based async loading with cancellation support
+const controller = new AbortController();
+const loader = new RedGPU.GLTFLoader(
+    redGPUContext,
+    'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb'
+);
+
+await loader.loadAsync({signal: controller.signal});
+scene.addChild(loader.resultMesh);
+
+// 2. Inspect and switch KHR_materials_variants at runtime
+console.log('Available variants:', loader.materialVariants);
+console.log('Active variant:', loader.activeMaterialVariant);
+if (loader.materialVariants.length > 0) {
+    loader.applyMaterialVariant(loader.materialVariants[0]);
+}
+
+// Cancel in-flight loading or dispose resources during SPA route teardown
+// loader.abort();
+// loader.destroy();
+```
+
+---
+
+## 4. Supported glTF 2.0 Extensions
 
 In addition to the standard Metallic-Roughness workflow, `GLTFLoader` and `PBRMaterial` automatically parse and render
-official Khronos glTF 2.0 PBR extensions out of the box.
+23 official Khronos glTF 2.0 extensions out of the box. Compression decoders (`Draco`, `Meshopt`, `KTX2 BasisU`) are
+loaded on demand via WASM only when a model actually uses them, keeping the core bundle overhead at `0 KB`.
+
+### Material Extensions
 
 | glTF Extension                                  | Visual Effect & Role                                              | Live Sample                                                                                                        |
 |:------------------------------------------------|:------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------|
@@ -163,12 +196,29 @@ official Khronos glTF 2.0 PBR extensions out of the box.
 | `KHR_materials_diffuse_transmission`            | Translucent diffuse transmission for porcelain teacups and leaves | [Diffuse Transmission Teacup](/RedGPU/examples/gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup/) |
 | `KHR_materials_emissive_strength`               | High-intensity HDR emissive multiplier above `1.0`                | [Emissive Strength](/RedGPU/examples/gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/)                   |
 | `KHR_materials_unlit` / `KHR_texture_transform` | Unlit shading bypassing lighting and UV offset/rotation/scale     | [Texture Transform](/RedGPU/examples/gltf/gltfExtensions/textureTransform/textureTransformTest/)                   |
+| `KHR_materials_variants`                        | Runtime material preset switching and initial variant detection   | [Materials Variants Shoe](/RedGPU/examples/gltf/gltfExtensions/materialsVariants/)                                 |
+| `KHR_materials_pbrSpecularGlossiness`           | Legacy Specular-Glossiness PBR workflow compatibility             | [Sponza](/RedGPU/examples/gltf/models/sponza/)                                                                     |
+
+### Compression, Texture, Quantization, and Scene Extensions
+
+| glTF Extension                                        | Role & Features                                                       | Live Sample                                                                                        |
+|:------------------------------------------------------|:----------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------|
+| `KHR_draco_mesh_compression`                          | Google Draco geometry decompression (on-demand WASM)                  | [CarConcept (KTX2 + Draco)](/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/carConcept/) |
+| `KHR_meshopt_compression` / `EXT_meshopt_compression` | meshoptimizer vertex, index, and animation decompression (on-demand)  | [BrainStem (Meshopt)](/RedGPU/examples/gltf/gltfExtensions/meshoptCompression/brainStem/)          |
+| `KHR_texture_basisu` / `EXT_texture_webp`             | KTX2 BasisU GPU-compressed textures (on-demand WASM) and WebP images  | [Chronograph Watch](/RedGPU/examples/gltf/gltfExtensions/textureBasisu/chronographWatch/)          |
+| `KHR_mesh_quantization`                               | Integer-quantized vertex attribute decoding and normalization         | [Mesh Quantization](/RedGPU/examples/gltf/gltfExtensions/meshQuantization/)                        |
+| `KHR_lights_punctual`                                 | Automatic import of `Directional`, `Point`, and `Spot` lights         | —                                                                                                  |
+| `KHR_node_visibility`                                 | Initial node visibility and animation-driven visibility toggling      | [Node Visibility](/RedGPU/examples/gltf/gltfExtensions/nodeVisibility/)                            |
+| `KHR_animation_pointer`                               | Arbitrary JSON Pointer property animation (color, emissive, UV, etc.) | [Pot of Coals](/RedGPU/examples/gltf/gltfExtensions/animationPointer/potOfCoalsAnimationPointer/)  |
 
 ---
 
 ## Related Examples
 
 - [DamagedHelmet Model Loading](/RedGPU/examples/gltf/models/helmets/)
+- [glTF Format Comparison — BrainStem (6 Formats)](/RedGPU/examples/gltf/formats/brainStemAllFormats/)
+- [glTF Format Comparison — CarConcept (5 Formats)](/RedGPU/examples/gltf/formats/carConceptAllFormats/)
+- [glTF 7 Primitive Topologies](/RedGPU/examples/gltf/basic/meshPrimitiveModes/)
 - [glTF Basic Animations](/RedGPU/examples/gltf/animation/basicAnimations/)
 - [Animation Motion Blending](/RedGPU/examples/gltf/animation/motionBlending/)
 - [Sponza Scene Model](/RedGPU/examples/gltf/models/sponza/)

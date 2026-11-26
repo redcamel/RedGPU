@@ -124,6 +124,33 @@ const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
 ---
 
+## 5. 생명주기와 리소스 해제
+
+`RedGPUContext` 는 페이지 이탈(`pagehide`) 시 등록된 모든 뷰, GPU 버퍼·텍스처, 이벤트 리스너, 옵저버 및 물리 엔진을 자동으로 정리하며, 브라우저 뒤로·앞으로가기(BFCache) 복귀
+시에는 `pageshow` 이벤트를 감지해 안전하게 재초기화합니다.
+
+React · Vue 같은 SPA 환경에서 컴포넌트가 언마운트될 때는 `redGPUContext.destroy()` 를 명시적으로 호출해 GPU 메모리와 `window` 이벤트 리스너를 즉시 해제할 수 있습니다.
+`RedGPU.init()` 의 네 번째 인자로 `onDestroy` 콜백을 전달하면 디바이스 파기 완료 시점을 감지할 수 있습니다.
+
+```javascript
+RedGPU.init(
+        canvas,
+        (redGPUContext) => {
+          // SPA 컴포넌트 언마운트 시 명시적 해제
+          // redGPUContext.destroy();
+        },
+        (error) => {
+          console.error('RedGPU 초기화 실패:', error);
+        },
+        (deviceLostInfo) => {
+          // destroy() 완료 시 호출 (deviceLostInfo.reason === 'destroyed')
+          console.log('RedGPUContext 파기 완료:', deviceLostInfo.reason);
+        }
+);
+```
+
+---
+
 ## 관련 예제
 
 - [Hello World 3D](/RedGPU/examples/3d/helloWorld/)

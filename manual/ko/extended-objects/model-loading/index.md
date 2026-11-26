@@ -140,10 +140,43 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
-## 3. 지원되는 glTF 2.0 재질 확장
+## 3. 비동기 로딩 · 취소 및 재질 바리에이션
 
-`GLTFLoader` 와 `PBRMaterial` 은 기본 Metallic-Roughness 워크플로우 외에도 Khronos 공식 glTF 2.0 PBR 확장(Extensions)을 별도 설정 없이 자동으로
-파싱하여 렌더링합니다.
+콜백 방식 외에도 `Promise` 기반의 `loadAsync()` 와 로딩 취소(`abort()` · `AbortSignal`), 그리고 `KHR_materials_variants` 실시간 재질 전환 API를
+지원합니다.
+
+```javascript
+// 1. Promise 기반 비동기 로딩 및 취소 제어
+const controller = new AbortController();
+const loader = new RedGPU.GLTFLoader(
+    redGPUContext,
+    'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb'
+);
+
+await loader.loadAsync({signal: controller.signal});
+scene.addChild(loader.resultMesh);
+
+// 2. KHR_materials_variants 조회 및 실시간 전환
+console.log('지원 바리에이션:', loader.materialVariants);
+console.log('현재 활성 바리에이션:', loader.activeMaterialVariant);
+if (loader.materialVariants.length > 0) {
+    loader.applyMaterialVariant(loader.materialVariants[0]);
+}
+
+// SPA 페이지 이탈 시 로딩 취소 또는 리소스 해제
+// loader.abort();
+// loader.destroy();
+```
+
+---
+
+## 4. 지원되는 glTF 2.0 확장
+
+`GLTFLoader` 와 `PBRMaterial` 은 기본 Metallic-Roughness 워크플로우 외에도 Khronos 공식 glTF 2.0 확장(Extensions) 23종을 별도 설정 없이 자동으로
+파싱하여 렌더링합니다. 압축 확장(`Draco` · `Meshopt` · `KTX2 BasisU`)은 해당 확장이 포함된 모델을 로드할 때만 WASM 디코더를 온디맨드로 불러오므로 코어 번들 용량에 영향을 주지
+않습니다.
+
+### 재질 확장
 
 | glTF 확장 명칭                                  | 시각적 효과 및 역할                                        | 라이브 샘플                                                                                                        |
 |:------------------------------------------------|:-----------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------|
@@ -159,12 +192,29 @@ const scene = new RedGPU.Display.Scene ();
 | `KHR_materials_diffuse_transmission`            | 찻잔·나뭇잎·종이 등 반투명 확산 투과(Subsurface) 표현      | [Diffuse Transmission Teacup](/RedGPU/examples/gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup/) |
 | `KHR_materials_emissive_strength`               | `1.0` 이상의 고휘도 HDR 발광(Emissive) 강도 확장           | [Emissive Strength](/RedGPU/examples/gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/)                   |
 | `KHR_materials_unlit` / `KHR_texture_transform` | 조명 연산을 생략하는 Unlit 셰이딩 및 UV 오프셋·회전·스케일 | [Texture Transform](/RedGPU/examples/gltf/gltfExtensions/textureTransform/textureTransformTest/)                   |
+| `KHR_materials_variants`                        | 단일 모델의 다중 재질 프리셋 실시간 전환 및 초기 상태 감지 | [Materials Variants Shoe](/RedGPU/examples/gltf/gltfExtensions/materialsVariants/)                                 |
+| `KHR_materials_pbrSpecularGlossiness`           | 레거시 Specular-Glossiness PBR 워크플로우 호환             | [Sponza](/RedGPU/examples/gltf/models/sponza/)                                                                     |
+
+### 압축 · 텍스처 · 양자화 및 씬 확장
+
+| glTF 확장 명칭                                        | 역할 및 특징                                                   | 라이브 샘플                                                                                        |
+|:------------------------------------------------------|:---------------------------------------------------------------|:---------------------------------------------------------------------------------------------------|
+| `KHR_draco_mesh_compression`                          | Google Draco 지오메트리 압축 해제 (온디맨드 WASM)              | [CarConcept (KTX2 + Draco)](/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/carConcept/) |
+| `KHR_meshopt_compression` / `EXT_meshopt_compression` | meshoptimizer 정점·인덱스·애니메이션 압축 해제 (온디맨드 WASM) | [BrainStem (Meshopt)](/RedGPU/examples/gltf/gltfExtensions/meshoptCompression/brainStem/)          |
+| `KHR_texture_basisu` / `EXT_texture_webp`             | KTX2 BasisU GPU 압축 텍스처 (온디맨드 WASM) 및 WebP 텍스처     | [Chronograph Watch](/RedGPU/examples/gltf/gltfExtensions/textureBasisu/chronographWatch/)          |
+| `KHR_mesh_quantization`                               | 정수 양자화 정점 속성 디코딩 및 정규화                         | [Mesh Quantization](/RedGPU/examples/gltf/gltfExtensions/meshQuantization/)                        |
+| `KHR_lights_punctual`                                 | 씬 내 `Directional` · `Point` · `Spot` 광원 자동 임포트        | —                                                                                                  |
+| `KHR_node_visibility`                                 | 노드 초기 가시성 및 애니메이션 기반 가시성 토글                | [Node Visibility](/RedGPU/examples/gltf/gltfExtensions/nodeVisibility/)                            |
+| `KHR_animation_pointer`                               | 재질 색상·발광·UV 변환 등 임의 JSON Pointer 속성 애니메이션    | [Pot of Coals](/RedGPU/examples/gltf/gltfExtensions/animationPointer/potOfCoalsAnimationPointer/)  |
 
 ---
 
 ## 관련 예제
 
 - [DamagedHelmet 모델 로딩](/RedGPU/examples/gltf/models/helmets/)
+- [glTF 포맷 통합 비교 — BrainStem 6종](/RedGPU/examples/gltf/formats/brainStemAllFormats/)
+- [glTF 포맷 통합 비교 — CarConcept 5종](/RedGPU/examples/gltf/formats/carConceptAllFormats/)
+- [glTF 7종 프리미티브 토폴로지](/RedGPU/examples/gltf/basic/meshPrimitiveModes/)
 - [glTF 기본 애니메이션](/RedGPU/examples/gltf/animation/basicAnimations/)
 - [애니메이션 모션 블렌딩](/RedGPU/examples/gltf/animation/motionBlending/)
 - [Sponza 씬 모델](/RedGPU/examples/gltf/models/sponza/)
