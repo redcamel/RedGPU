@@ -123,6 +123,11 @@ test.describe('GPU Buffer Lifecycle & Readback', () => {
             const triangleCount = vb1.triangleCount;
             const vShared = vb1 === vb2;
 
+            // 런타임 changeData() 크기 변경 후에도 videoMemory 정합성 유지 확인
+            const vDataLarger = new Float32Array(18);
+            vb1.changeData(vDataLarger, struct);
+            const vMemAfterResize = rm.managedVertexBufferState.videoMemory;
+
             vb1.destroy();
             const vMemAfterDestroy = rm.managedVertexBufferState.videoMemory;
             const vRemoved = !rm.managedVertexBufferState.table.has(vKey);
@@ -136,6 +141,10 @@ test.describe('GPU Buffer Lifecycle & Readback', () => {
             const indexCount = ib1.indexCount;
             const iShared = ib1 === ib2;
 
+            const iDataLarger = new Uint32Array([0, 1, 2, 2, 1, 0, 0, 2, 1]);
+            ib1.changeData(iDataLarger);
+            const iMemAfterResize = rm.managedIndexBufferState.videoMemory;
+
             ib1.destroy();
             const iMemAfterDestroy = rm.managedIndexBufferState.videoMemory;
             const iRemoved = !rm.managedIndexBufferState.table.has(iKey);
@@ -144,13 +153,15 @@ test.describe('GPU Buffer Lifecycle & Readback', () => {
                 vShared,
                 vertexCount,
                 triangleCount,
-                vMemIncreased: vMemAfterCreate > vMemBefore,
-                vMemDecreased: vMemAfterDestroy < vMemAfterCreate,
+                vMemExactCreate: vMemAfterCreate === vMemBefore + vData.byteLength,
+                vMemExactResize: vMemAfterResize === vMemBefore + vDataLarger.byteLength,
+                vMemExactRelease: vMemAfterDestroy === vMemBefore,
                 vRemoved,
                 iShared,
                 indexCount,
-                iMemIncreased: iMemAfterCreate > iMemBefore,
-                iMemDecreased: iMemAfterDestroy < iMemAfterCreate,
+                iMemExactCreate: iMemAfterCreate === iMemBefore + iData.byteLength,
+                iMemExactResize: iMemAfterResize === iMemBefore + iDataLarger.byteLength,
+                iMemExactRelease: iMemAfterDestroy === iMemBefore,
                 iRemoved
             };
         });
@@ -159,13 +170,15 @@ test.describe('GPU Buffer Lifecycle & Readback', () => {
             vShared: true,
             vertexCount: 3,
             triangleCount: 1,
-            vMemIncreased: true,
-            vMemDecreased: true,
+            vMemExactCreate: true,
+            vMemExactResize: true,
+            vMemExactRelease: true,
             vRemoved: true,
             iShared: true,
             indexCount: 6,
-            iMemIncreased: true,
-            iMemDecreased: true,
+            iMemExactCreate: true,
+            iMemExactResize: true,
+            iMemExactRelease: true,
             iRemoved: true
         });
     });

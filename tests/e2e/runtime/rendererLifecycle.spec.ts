@@ -119,6 +119,35 @@ test.describe('Renderer & Multi-View Lifecycle', () => {
         expect(res.monotonic).toBe(true);
     });
 
+    // start() 콜백 내부에서 renderer.stop(ctx) 호출 시 다음 프레임 재예약 없이 즉시 중단 검증
+    test('stop() invoked inside start() callback immediately halts subsequent frames', async () => {
+        const res = await harness.page.evaluate(async () => {
+            const RedGPU = (window as any).RedGPU;
+            const ctx = (window as any).__REDGPU_CTX__;
+            const renderer = new RedGPU.Renderer();
+            const scene = new RedGPU.Display.Scene();
+            const cam = new RedGPU.Camera.PerspectiveCamera();
+            const view = new RedGPU.Display.View3D(ctx, scene, cam);
+            ctx.addView(view);
+
+            let frameCount = 0;
+            await new Promise<void>((resolve) => {
+                renderer.start(ctx, () => {
+                    frameCount++;
+                    renderer.stop(ctx);
+                    resolve();
+                });
+            });
+
+            await new Promise((r) => setTimeout(r, 100));
+            const countAfterWait = frameCount;
+            renderer.destroy(ctx);
+            return {countAfterWait};
+        });
+
+        expect(res.countAfterWait).toBe(1);
+    });
+
     // view.setSize() 및 ctx.renderScale 변경 시 pixelRectObject와 onResize(RedResizeEvent) 페이로드 정확도 검증
     test('updates pixelRectObject and fires onResize RedResizeEvent on setSize() and renderScale change', async () => {
         const res = await harness.page.evaluate(() => {
