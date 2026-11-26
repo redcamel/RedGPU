@@ -142,31 +142,40 @@ const parseGLTF = async (
 ): Promise<void> => {
     const parseContext = new GLTFParseContext();
     setActiveParseContext(gltfLoader, parseContext);
+    const isDestroyed = () => Boolean(gltfLoader.redGPUContext?.destroyed);
     try {
         throwIfAborted(signal);
+        if (isDestroyed()) return;
         const variantNames = extractMaterialVariantNames(gltfData);
         onParsed?.(gltfData, variantNames, parseContext.materialVariantEntries);
 
         await nextFrame(signal);
+        if (isDestroyed()) return;
         validateAssetVersion(gltfData);
 
         await nextFrame(signal);
+        if (isDestroyed()) return;
         await loadBuffersAsync(gltfLoader, gltfData, parseContext, onProgress, signal);
+        if (isDestroyed()) return;
 
         if (hasDracoCompression(gltfData)) {
             await decodeDracoPrimitives(gltfData, parseContext.buffers);
             throwIfAborted(signal);
+            if (isDestroyed()) return;
         }
 
         await nextFrame(signal);
+        if (isDestroyed()) return;
         parseScene_GLTF(gltfLoader, gltfData, parseContext);
 
         await nextFrame(signal);
+        if (isDestroyed()) return;
         parseCameras_GLTF(gltfLoader, gltfData);
 
         try {
             const result = await loadTexturesAsync(gltfLoader, parseContext, onProgress, signal);
             throwIfAborted(signal);
+            if (isDestroyed()) return;
             result.textures.forEach((textureLoaderData: TextureLoaderData) => {
                 const {
                     targetTextureKey,
@@ -185,15 +194,18 @@ const parseGLTF = async (
         }
 
         throwIfAborted(signal);
+        if (isDestroyed()) return;
         await parseAnimation_GLTF(gltfLoader, gltfData, parseContext);
 
         throwIfAborted(signal);
+        if (isDestroyed()) return;
     } finally {
         clearActiveParseContext(gltfLoader);
         parseContext.clear();
         releaseTemporaryBuffers(gltfData);
     }
 
+    if (isDestroyed()) return;
     callBack?.();
 };
 

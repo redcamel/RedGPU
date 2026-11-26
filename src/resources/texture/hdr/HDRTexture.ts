@@ -204,19 +204,24 @@ class HDRTexture extends ManagementResourceBase {
 
     async #loadHDRTexture(src: string) {
         try {
+            if (this.redGPUContext?.destroyed) return;
             const hdrData = await this.#hdrLoader.loadHDRFile(src);
+            if (this.redGPUContext?.destroyed) return;
             this.#width = hdrData.width;
             this.#height = hdrData.height;
             await this.#createGPUTexture(hdrData);
+            if (this.redGPUContext?.destroyed) return;
             this.#onLoad?.(this);
             this.notifyUpdate();
         } catch (error) {
+            if (this.redGPUContext?.destroyed) return;
             console.error('HDR loading error:', error);
             this.#onError?.(error);
         }
     }
 
     async #createGPUTexture(hdrData: HDRData) {
+        if (this.redGPUContext?.destroyed) return;
         const {gpuDevice} = this.redGPUContext;
         const oldTexture = this.#gpuTexture;
 
@@ -238,6 +243,14 @@ class HDRTexture extends ManagementResourceBase {
                 targetTexture: newGPUTexture
             }
         );
+
+        if (this.redGPUContext?.destroyed) {
+            try {
+                newGPUTexture?.destroy();
+            } catch {
+            }
+            return;
+        }
 
         this.#setGpuTexture(newGPUTexture);
 

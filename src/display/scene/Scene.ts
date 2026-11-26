@@ -206,6 +206,10 @@ class Scene extends Object3DContainer {
      */
     override destroy(): void {
         super.destroy();
+        if (this.#physicsEngine) {
+            this.#physicsEngine.destroy?.();
+            this.#physicsEngine = null as any;
+        }
         this.#landscape = null;
         this.#waterChildren.length = 0;
         this.#windManager = null as any;

@@ -233,17 +233,24 @@ async function initBasisTranscoder(): Promise<any> {
 
             if (typeof BASIS !== 'function') {
                 await new Promise<void>((resolve, reject) => {
-                    const existingScript = document.querySelector(`script[src="${BASIS_JS_CDN_URL}"]`);
+                    const existingScript = document.querySelector(`script[src="${BASIS_JS_CDN_URL}"]`) as HTMLScriptElement | null;
                     if (existingScript) {
-                        existingScript.addEventListener('load', () => resolve());
-                        existingScript.addEventListener('error', (e) => reject(e));
+                        if (existingScript.dataset.loaded === 'true') {
+                            resolve();
+                            return;
+                        }
+                        existingScript.addEventListener('load', () => resolve(), {once: true});
+                        existingScript.addEventListener('error', (e) => reject(e), {once: true});
                         return;
                     }
 
                     const script = document.createElement('script');
                     script.src = BASIS_JS_CDN_URL;
                     script.async = true;
-                    script.onload = () => resolve();
+                    script.onload = () => {
+                        script.dataset.loaded = 'true';
+                        resolve();
+                    };
                     script.onerror = () => {
                         script.remove();
                         reject(new Error(`[RedGPU KTX2] Failed to load Basis Universal Transcoder script (BinomialLLC/basis_universal): ${BASIS_JS_CDN_URL}`));

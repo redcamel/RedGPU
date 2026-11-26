@@ -338,15 +338,20 @@ class BitmapTexture extends ManagementResourceBase {
 
     async #loadBitmapTexture(src: string) {
         try {
+            if (this.redGPUContext?.destroyed) return;
             let imgBitmap: ImageBitmap;
             const premultiplyAlpha = this.#usePremultiplyAlpha ? 'premultiply' : 'none';
             const ext = getFileExtension(src).toLowerCase();
             const isKtx2 = ext === "ktx2" || src.endsWith(".ktx2") || this.#mimeType === "image/ktx2" || src.startsWith("data:image/ktx2");
             if (ext === "svg" || src.endsWith(".svg")) {
                 imgBitmap = await convertSvgToImageBitmap(src, premultiplyAlpha);
+                if (this.redGPUContext?.destroyed) {
+                    imgBitmap?.close?.();
+                    return;
+                }
             } else if (isKtx2) {
                 const {container} = await loadKtx2Container(src);
-
+                if (this.redGPUContext?.destroyed) return;
 
                 if (this.#gpuTexture) {
                     this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuTexture);
@@ -360,6 +365,13 @@ class BitmapTexture extends ManagementResourceBase {
                     container: container,
                     label: this.cacheKey,
                 });
+                if (this.redGPUContext?.destroyed) {
+                    try {
+                        newGPUTexture?.destroy();
+                    } catch {
+                    }
+                    return;
+                }
 
                 this.#format = newGPUTexture.format;
                 this.#width = container.pixelWidth;
@@ -371,15 +383,21 @@ class BitmapTexture extends ManagementResourceBase {
                 this.#setGpuTexture(newGPUTexture);
             } else {
                 imgBitmap = await loadImageToImageBitmap(src, "none", premultiplyAlpha);
+                if (this.redGPUContext?.destroyed) {
+                    imgBitmap?.close?.();
+                    return;
+                }
             }
             if (imgBitmap) {
                 this.#createGPUTextureFromImageBitmap(imgBitmap);
             }
 
+            if (this.redGPUContext?.destroyed) return;
             this.#isLoaded = true;
             const listeners = [...this.#onLoadListeners];
             listeners.forEach(cb => cb(this));
         } catch (error) {
+            if (this.redGPUContext?.destroyed) return;
             console.error(error);
             this.#loadError = error as Error;
             const listeners = [...this.#onErrorListeners];

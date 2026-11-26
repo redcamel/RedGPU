@@ -46,8 +46,12 @@ export default class RedGPUContextObserver extends RedGPUObject {
      */
     destroy() {
         this.#mutationObserver?.disconnect();
+        this.#mutationObserver = null;
         this.#resizeObserver?.disconnect();
+        this.#resizeObserver = null;
         this.#intersectionObserver?.disconnect();
+        this.#intersectionObserver = null;
+        this.#currentParent = null;
         if (this.#resizeHandler) {
             window.removeEventListener('resize', this.#resizeHandler);
             this.#resizeHandler = null;
@@ -83,6 +87,7 @@ export default class RedGPUContextObserver extends RedGPUObject {
     }
 
     #updateObservers() {
+        if (this.redGPUContext?.destroyed || !this.#htmlCanvas) return;
         const newParent = this.#htmlCanvas.parentElement;
         if (this.#currentParent !== newParent) {
             if (this.#resizeObserver) {
@@ -101,6 +106,7 @@ export default class RedGPUContextObserver extends RedGPUObject {
     }
 
     #handleLayoutChange() {
+        if (this.redGPUContext?.destroyed || !this.redGPUContext?.sizeManager) return;
         this.#updateCallback();
         this.redGPUContext.sizeManager.setSize();
     }

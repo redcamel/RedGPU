@@ -92,19 +92,26 @@ const initDracoDecoder = async (): Promise<any> => {
 
             if (typeof DracoDecoderModule !== 'function') {
                 await new Promise<void>((resolve, reject) => {
-                    const existingScript = document.querySelector(`script[src="${DRACO_JS_CDN_URL}"]`);
+                    const existingScript = document.querySelector(`script[src="${DRACO_JS_CDN_URL}"]`) as HTMLScriptElement | null;
                     if (existingScript) {
-                        existingScript.addEventListener('load', () => resolve());
+                        if (existingScript.dataset.loaded === 'true') {
+                            resolve();
+                            return;
+                        }
+                        existingScript.addEventListener('load', () => resolve(), {once: true});
                         existingScript.addEventListener('error', () =>
                             reject(new Error(`[RedGPU Draco] Failed to load Draco decoder script (Google Draco): ${DRACO_JS_CDN_URL}`))
-                        );
+                            , {once: true});
                         return;
                     }
 
                     const script = document.createElement('script');
                     script.src = DRACO_JS_CDN_URL;
                     script.async = true;
-                    script.onload = () => resolve();
+                    script.onload = () => {
+                        script.dataset.loaded = 'true';
+                        resolve();
+                    };
                     script.onerror = () => {
                         script.remove();
                         reject(new Error(`[RedGPU Draco] Failed to load Draco decoder script (Google Draco): ${DRACO_JS_CDN_URL}`));

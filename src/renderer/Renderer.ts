@@ -106,6 +106,7 @@ class Renderer {
     stop(redGPUContext: RedGPUContext) {
         cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
         redGPUContext.currentRequestAnimationFrame = null
+        this.#HD_render = null
     }
 
     /**

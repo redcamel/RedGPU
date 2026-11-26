@@ -321,10 +321,21 @@ class CubeTexture extends ManagementResourceBase {
 
     async #loadBitmapTexture(srcList: string[]) {
         try {
+            if (this.redGPUContext?.destroyed) return;
             const imgBitmaps = await loadAndCreateBitmapImages(srcList);
+            if (this.redGPUContext?.destroyed) {
+                imgBitmaps.forEach(bitmap => {
+                    try {
+                        bitmap?.close();
+                    } catch {
+                    }
+                });
+                return;
+            }
             this.#createGPUTextureFromImageBitmaps(imgBitmaps)
             this.#onLoad?.(this)
         } catch (error) {
+            if (this.redGPUContext?.destroyed) return;
             console.error(error);
             this.#onError?.(error)
         }
