@@ -1,5 +1,9 @@
 <script setup>
-import {onMounted, onUnmounted, ref} from 'vue'
+import {computed, onMounted, onUnmounted, ref} from 'vue'
+import {useData} from 'vitepress'
+
+const {page} = useData()
+const isKo = computed(() => page.value.relativePath?.startsWith('ko/'))
 
 const canvasRef = ref(null)
 const error = ref(null)
@@ -9,6 +13,7 @@ let RedGPU
 
 onMounted(async () => {
   if (!canvasRef.value) return
+  if (window.matchMedia('(max-width: 639px)').matches) return
 
   // 1. Initialize RedGPU
   RedGPU = await import(/* @vite-ignore */ `${window.location.origin}/RedGPU/dist/index.js?t=${Date.now()}`)
@@ -125,33 +130,69 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="hero-renderer-wrapper">
-    <div v-if="error" class="error-message">
-      {{ error }}
+  <section aria-label="RedGPU Live WebGPU Showcase" class="home-live-showcase">
+    <div class="container">
+      <div class="hero-renderer-wrapper">
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
+        <canvas ref="canvasRef" class="hero-canvas"></canvas>
+        <div class="showcase-hint">
+          {{ isKo ? '드래그하여 회전 · 스크롤하여 확대/축소' : 'Drag to orbit · Scroll to zoom' }}
+        </div>
+      </div>
     </div>
-    <canvas ref="canvasRef" class="hero-canvas"></canvas>
-  </div>
+  </section>
 </template>
 
 <style scoped>
+.home-live-showcase {
+  padding: 0 24px;
+  margin: 0 0 32px;
+}
+
+.container {
+  margin: 0 auto;
+  max-width: 1152px;
+}
+
 .hero-renderer-wrapper {
-  position: absolute;
-  width: 50%;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: -1;
+  position: relative;
+  width: 100%;
+  height: 360px;
+  border-radius: 16px;
   overflow: hidden;
-  transform:translate(0,20px);
+  background: radial-gradient(60% 80% at 50% 45%, rgba(235, 58, 42, 0.14) 0%, rgba(235, 58, 42, 0) 70%),
+  var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
 }
 
 .hero-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
   pointer-events: auto;
 }
 
 .hero-canvas:active {
   cursor: grabbing;
+}
+
+.showcase-hint {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  z-index: 2;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  color: var(--vp-c-text-2);
+  background: color-mix(in srgb, var(--vp-c-bg) 68%, transparent);
+  border: 1px solid var(--vp-c-divider);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
 }
 
 .error-message {
@@ -169,44 +210,31 @@ onUnmounted(() => {
   max-width: 300px;
 }
 
-
-/* 테블릿 및 작은 화면 대응 */
-@media (max-width: 1280px) {
-  .hero-renderer-wrapper {
-    width: 450px;
+@media (min-width: 640px) {
+  .home-live-showcase {
+    padding: 0 48px;
+    margin: 0 0 40px;
   }
-}
-@media (max-width: 1120px) {
+
   .hero-renderer-wrapper {
-    width: 400px;
+    height: 360px;
   }
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 960px) {
+  .home-live-showcase {
+    padding: 0 64px;
+    margin: 0 0 48px;
+  }
+
   .hero-renderer-wrapper {
-    width: 300px;
+    height: 380px;
   }
 }
-@media (max-width: 900px) {
-  .hero-renderer-wrapper {
-    width: 300px;
-    height:200px;
-    top:auto;
-    transform:translate(0,20px);
-  }
-}
-@media (max-width: 800px) {
-  .hero-renderer-wrapper {
-    width: 200px;
-    height:200px;
-    top:auto;
-    transform:translate(0,6px);
-  }
-}
-/* 모바일 사이즈: 영역을 그리지 않음 */
-@media (max-width: 640px) {
-  .hero-renderer-wrapper {
-    opacity:0
+
+@media (max-width: 639px) {
+  .home-live-showcase {
+    display: none;
   }
 }
 </style>

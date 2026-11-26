@@ -262,6 +262,12 @@
     border-color: rgba(100, 108, 255, 0.3);
 }
 
+.VPNavBarTitle .logo {
+    height: 15px !important;
+    width: auto !important;
+    margin-right: 6px !important;
+}
+
 .VPNavBarTitle a:hover {
     text-decoration: none !important;
 }
@@ -352,22 +358,173 @@
 /* ============================================================
    8. Home Hero Styles
    ============================================================ */
+:root {
+    --vp-home-hero-name-color: transparent;
+    --vp-home-hero-name-background: linear-gradient(120deg, #e55335 0%, #c82333 58%, #8f1428 100%);
+    --vp-home-hero-image-background-image: radial-gradient(
+            circle at 50% 50%,
+            rgba(235, 68, 44, 0.3) 0%,
+            rgba(168, 22, 42, 0.16) 48%,
+            rgba(168, 22, 42, 0) 75%
+    );
+    --vp-home-hero-image-filter: blur(48px);
+}
+
+.dark {
+    --vp-home-hero-name-background: linear-gradient(120deg, #ff855c 0%, #ea3d3e 52%, #b81d33 100%);
+    --vp-home-hero-image-background-image: radial-gradient(
+            circle at 50% 50%,
+            rgba(242, 92, 58, 0.34) 0%,
+            rgba(182, 24, 46, 0.22) 48%,
+            rgba(182, 24, 46, 0) 75%
+    );
+    --vp-home-hero-image-filter: blur(56px);
+}
+
+.VPHero .VPButton.brand {
+    border-color: transparent !important;
+    background: linear-gradient(135deg, #e8483c 0%, #c41f32 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 20px rgba(217, 43, 58, 0.32);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.VPHero .VPButton.brand:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 8px 24px rgba(232, 72, 60, 0.42);
+    transform: translateY(-1px);
+}
+
+.VPHero .VPButton.brand:active {
+    filter: brightness(0.95);
+    transform: translateY(0);
+}
+
 .VPHero .name {
     font-size: 22px !important;
     line-height: 40px !important;
 }
 
+/* 모바일 (< 640px) */
+.VPHero.has-image {
+    padding-bottom: 36px !important;
+}
+
+.VPHero.has-image .image {
+    margin: 0 0 20px !important;
+}
+
+.VPHero.has-image .image-container {
+    width: 188px !important;
+    height: 188px !important;
+    transform: none !important;
+}
+
+.VPHero.has-image .image-bg {
+    width: 176px !important;
+    height: 176px !important;
+}
+
+.VPHero.has-image .image-src {
+    max-width: 156px !important;
+    max-height: 156px !important;
+    filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.32));
+}
+
+/* 태블릿 / 패드 (640px ~ 959px) */
 @media (min-width: 640px) {
     .VPHero .name {
         font-size: 38px !important;
         line-height: 56px !important;
     }
+
+    .VPHero.has-image {
+        padding-bottom: 44px !important;
+    }
+
+    .VPHero.has-image .image {
+        margin: 0 0 28px !important;
+    }
+
+    .VPHero.has-image .image-container {
+        width: 244px !important;
+        height: 244px !important;
+    }
+
+    .VPHero.has-image .image-bg {
+        width: 224px !important;
+        height: 224px !important;
+    }
+
+    .VPHero.has-image .image-src {
+        max-width: 208px !important;
+        max-height: 208px !important;
+    }
 }
 
+/* 데스크톱 (960px+) */
 @media (min-width: 960px) {
     .VPHero .name {
         font-size: 42px !important;
         line-height: 64px !important;
+    }
+
+    .VPHero.has-image {
+        padding-top: calc(var(--vp-nav-height) + var(--vp-layout-top-height, 0px) + 56px) !important;
+        padding-bottom: 48px !important;
+    }
+
+    .VPHero.has-image .container {
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 32px;
+    }
+
+    .VPHero.has-image .image {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        padding-right: 16px;
+        margin: 0 !important;
+        min-height: 0 !important;
+    }
+
+    .VPHero.has-image .image-container {
+        width: 296px !important;
+        height: 296px !important;
+        transform: none !important;
+    }
+
+    .VPHero.has-image .image-bg {
+        width: 270px !important;
+        height: 270px !important;
+    }
+
+    .VPHero.has-image .image-src {
+        max-width: 268px !important;
+        max-height: 268px !important;
+    }
+}
+
+/* 와이드 데스크톱 (1280px+) */
+@media (min-width: 1280px) {
+    .VPHero.has-image .image {
+        padding-right: 28px;
+    }
+
+    .VPHero.has-image .image-container {
+        width: 320px !important;
+        height: 320px !important;
+    }
+
+    .VPHero.has-image .image-bg {
+        width: 296px !important;
+        height: 296px !important;
+    }
+
+    .VPHero.has-image .image-src {
+        max-width: 292px !important;
+        max-height: 292px !important;
     }
 }
 

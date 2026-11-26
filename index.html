@@ -8,7 +8,10 @@
           name="description">
     <meta content="RedGPU, WebGPU, 3D Engine, Graphics, JavaScript, TypeScript, WebGL, Computer Graphics"
           name="keywords">
-    <link rel="icon" type="image/svg+xml" href="manual/public/logo-dark.svg">
+    <link href="examples/assets/logo/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="examples/assets/logo/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+    <link href="examples/assets/logo/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+    <link href="examples/assets/logo/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
     <link href="https://redcamel.github.io/RedGPU/" rel="canonical">
 
     <!-- Open Graph / Facebook -->
@@ -83,6 +86,13 @@
     }</script>
 
     <style>
+        :root {
+            --brand-coral: #f26b46;
+            --brand-ruby: #d92b3a;
+            --brand-deep: #9e1528;
+            --brand-gradient: linear-gradient(135deg, #f26b46 0%, #d92b3a 55%, #a8172c 100%);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -104,9 +114,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 25% 25%, rgba(255, 0, 150, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 75% 75%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(255, 100, 0, 0.05) 0%, transparent 50%);
+            background: radial-gradient(circle at 22% 22%, rgba(217, 43, 58, 0.14) 0%, transparent 52%),
+            radial-gradient(circle at 78% 76%, rgba(242, 107, 70, 0.1) 0%, transparent 52%),
+            radial-gradient(circle at 50% 48%, rgba(158, 21, 40, 0.08) 0%, transparent 55%);
             z-index: -1;
         }
 
@@ -142,6 +152,24 @@
             line-height: 1.1;
             margin-bottom: 1.5rem;
             letter-spacing: -0.02em;
+        }
+
+        .hero-title-main {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.22em;
+        }
+
+        .hero-logo {
+            width: 0.78em;
+            height: 0.78em;
+            object-fit: contain;
+            flex-shrink: 0;
+            transform: translateY(0.03em);
+        }
+
+        .hero-title-text,
+        .hero-title-sub {
             background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
             -webkit-background-clip: text;
             background-clip: text;
@@ -295,7 +323,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: linear-gradient(135deg, #ff006e, #8338ec);
+            background: var(--brand-gradient);
             color: white;
             padding: 1rem 2rem;
             border-radius: 50px;
@@ -303,12 +331,13 @@
             font-weight: 600;
             font-size: 1.1rem;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(255, 0, 110, 0.3);
+            box-shadow: 0 10px 30px rgba(217, 43, 58, 0.32);
         }
 
         .cta-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(255, 0, 110, 0.4);
+            filter: brightness(1.06);
+            box-shadow: 0 15px 40px rgba(242, 107, 70, 0.38);
         }
 
         .cta-button-secondary {
@@ -343,7 +372,7 @@
             transform: translateX(-50%);
             width: 80%;
             height: 1px;
-            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 20%, rgba(255, 0, 110, 0.5) 50%, rgba(255, 255, 255, 0.2) 80%, transparent 100%);
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.16) 20%, rgba(235, 76, 62, 0.52) 50%, rgba(255, 255, 255, 0.16) 80%, transparent 100%);
         }
 
         .section:last-child::after {
@@ -358,7 +387,7 @@
             transform: translateX(-50%);
             width: 80%;
             height: 1px;
-            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 20%, rgba(255, 0, 110, 0.5) 50%, rgba(255, 255, 255, 0.2) 80%, transparent 100%);
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.16) 20%, rgba(235, 76, 62, 0.52) 50%, rgba(255, 255, 255, 0.16) 80%, transparent 100%);
         }
 
         .section:nth-child(even) {
@@ -369,7 +398,7 @@
         }
 
         .section:nth-child(odd) {
-            background: linear-gradient(135deg, rgba(255, 0, 110, 0.03) 0%, rgba(131, 56, 236, 0.03) 100%);
+            background: linear-gradient(135deg, rgba(217, 43, 58, 0.04) 0%, rgba(242, 107, 70, 0.025) 100%);
             border-radius: 0;
             margin: 0 -2rem;
             padding: 3rem 2rem 6rem;
@@ -411,20 +440,21 @@
 
         .feature-card:hover {
             transform: translateY(-10px);
-            border-color: rgba(255, 255, 110, 0.1);
-            box-shadow: 0 20px 40px rgba(255, 0, 110, 0.1);
+            border-color: rgba(242, 107, 70, 0.32);
+            box-shadow: 0 20px 40px rgba(217, 43, 58, 0.16);
         }
 
         .feature-icon {
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, #ff006e, #8338ec);
+            background: var(--brand-gradient);
             border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 1rem;
             font-size: 1.5rem;
+            box-shadow: 0 8px 20px rgba(217, 43, 58, 0.24);
         }
 
         .feature-icon img {
@@ -463,7 +493,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #ff006e;
+            color: var(--brand-coral);
             text-decoration: none;
             font-weight: 500;
             margin-top: 1rem;
@@ -471,7 +501,7 @@
         }
 
         .feature-link:hover {
-            color: #8338ec;
+            color: #ff8c66;
         }
 
         .release-section {
@@ -606,7 +636,7 @@
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #ff006e, #8338ec);
+            background: var(--brand-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -640,7 +670,7 @@
         }
 
         .footer-links a:hover {
-            color: #ff006e;
+            color: var(--brand-coral);
         }
 
         .footer-social {
@@ -662,8 +692,8 @@
         }
 
         .footer-social a:hover {
-            background: rgba(255, 0, 110, 0.1);
-            border-color: rgba(255, 0, 110, 0.3);
+            background: rgba(217, 43, 58, 0.14);
+            border-color: rgba(242, 107, 70, 0.38);
             transform: translateY(-2px);
         }
 
@@ -676,13 +706,13 @@
         }
 
         .footer-bottom a {
-            color: #ff006e;
+            color: var(--brand-coral);
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
         .footer-bottom a:hover {
-            color: #8338ec;
+            color: #ff8c66;
         }
 
         .footer-badges {
@@ -788,7 +818,10 @@
         <div class="hero-content-left">
             <a class="hero-version" hidden href="https://github.com/redcamel/RedGPU/releases" id="heroVersion"><span
                     class="hero-version-number"></span></a>
-            <h1 class="hero-title">RedGPU<span
+            <h1 class="hero-title"><span class="hero-title-main"><img alt="RedGPU" class="hero-logo" height="96"
+                                                                      src="examples/assets/logo/logo-256.png"
+                                                                      width="96"><span
+                    class="hero-title-text">RedGPU</span></span><span
                     class="hero-title-sub">WebGPU 3D Engine for JavaScript &amp; TypeScript</span></h1>
             <p class="hero-subtitle">A powerful JavaScript WebGPU library for creating stunning 2D/3D graphics and
                 high-performance web applications. Experience the next generation of web graphics today.</p>

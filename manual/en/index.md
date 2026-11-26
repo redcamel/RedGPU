@@ -6,6 +6,9 @@ hero:
   name: RedGPU
   text: High-Performance WebGPU Graphics Engine
   tagline: A modern WebGPU framework for building real-time 2D/3D graphics on the web.
+  image:
+    src: /logo-hero.png
+    alt: RedGPU Logo
   actions:
     - theme: brand
       text: Get Started

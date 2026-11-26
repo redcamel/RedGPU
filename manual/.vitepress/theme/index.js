@@ -18,7 +18,7 @@ export default {
     Layout() {
         return h(DefaultTheme.Layout, null, {
             'nav-bar-title-after': () => h('span', { class: 'version-tag' }, ` V${pkg.version}`),
-            'home-hero-info-before': () => h(HomeHeroRenderer),
+            'home-hero-after': () => h(HomeHeroRenderer),
             'home-features-after': () => h(HeroVideo),
             'layout-bottom': () => h(GlobalFooter),
         })
