@@ -87,10 +87,11 @@
 
     <style>
         :root {
-            --brand-coral: #f26b46;
-            --brand-ruby: #d92b3a;
-            --brand-deep: #9e1528;
-            --brand-gradient: linear-gradient(135deg, #f26b46 0%, #d92b3a 55%, #a8172c 100%);
+            --brand-coral: #f8906a;
+            --brand-coral-light: #fca887;
+            --brand-ruby: #df4b44;
+            --brand-deep: #a81c2e;
+            --brand-gradient: linear-gradient(135deg, #f8906a 0%, #e45e46 52%, #b52034 100%);
         }
 
         * {
@@ -114,9 +115,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 22% 22%, rgba(217, 43, 58, 0.14) 0%, transparent 52%),
-            radial-gradient(circle at 78% 76%, rgba(242, 107, 70, 0.1) 0%, transparent 52%),
-            radial-gradient(circle at 50% 48%, rgba(158, 21, 40, 0.08) 0%, transparent 55%);
+            background: radial-gradient(circle at 22% 22%, rgba(228, 94, 70, 0.13) 0%, transparent 52%),
+            radial-gradient(circle at 78% 76%, rgba(248, 144, 106, 0.11) 0%, transparent 52%),
+            radial-gradient(circle at 50% 48%, rgba(181, 32, 52, 0.08) 0%, transparent 55%);
             z-index: -1;
         }
 
@@ -501,7 +502,7 @@
         }
 
         .feature-link:hover {
-            color: #ff8c66;
+            color: var(--brand-coral-light);
         }
 
         .release-section {
@@ -712,7 +713,7 @@
         }
 
         .footer-bottom a:hover {
-            color: #ff8c66;
+            color: var(--brand-coral-light);
         }
 
         .footer-badges {
