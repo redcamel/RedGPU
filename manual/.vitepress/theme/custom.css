@@ -1,28 +1,4 @@
 /* ============================================================
-   0. RedGPU 브랜드 컬러 & 다크 테마 톤앤매너
-   ============================================================ */
-:root {
-    --vp-c-brand-1: #cf2e3a;
-    --vp-c-brand-2: #e6493d;
-    --vp-c-brand-3: #b01d2d;
-    --vp-c-brand-soft: rgba(207, 46, 58, 0.11);
-    --vp-c-brand-light: #e6493d;
-}
-
-.dark {
-    --vp-c-bg: #111114;
-    --vp-c-bg-alt: #0c0c0f;
-    --vp-c-bg-elv: #19191e;
-    --vp-c-bg-soft: #18181d;
-
-    --vp-c-brand-1: #f8906a;
-    --vp-c-brand-2: #fca887;
-    --vp-c-brand-3: #e45e46;
-    --vp-c-brand-soft: rgba(248, 144, 106, 0.14);
-    --vp-c-brand-light: #fca887;
-}
-
-/* ============================================================
    1. 전역 레이아웃 및 너비 설정
    (본문 영역을 100% 사용하여 넓은 화면 제공)
    ============================================================ */
@@ -282,8 +258,8 @@
 
 .dark .version-tag {
     color: var(--vp-c-brand-light);
-    background-color: rgba(248, 144, 106, 0.14);
-    border-color: rgba(248, 144, 106, 0.32);
+    background-color: rgba(100, 108, 255, 0.15);
+    border-color: rgba(100, 108, 255, 0.3);
 }
 
 .VPNavBarTitle .logo {
@@ -351,7 +327,7 @@
 
 .dark {
     --rp-feature-icon-color: var(--vp-c-brand-light);
-    --rp-feature-icon-bg: rgba(248, 144, 106, 0.15);
+    --rp-feature-icon-bg: rgba(100, 108, 255, 0.2);
 }
 
 .VPFeature .icon {
@@ -370,13 +346,13 @@
 .VPFeature .icon img {
     width: 24px;
     height: 24px;
-    /* 필터를 사용하여 SVG 이미지 색상을 브랜드 컬러(루비 레드)로 제어 */
-    filter: brightness(0) saturate(100%) invert(24%) sepia(84%) saturate(2650%) hue-rotate(340deg) brightness(88%) contrast(96%);
+    /* 필터를 사용하여 SVG 이미지 색상을 currentColor처럼 제어 (브랜드 컬러로 강제) */
+    filter: brightness(0) saturate(100%) invert(48%) sepia(89%) saturate(1487%) hue-rotate(130deg) brightness(95%) contrast(102%);
 }
 
-/* 다크모드에서 아이콘 필터 조정 (#f8906a 피치-코랄 믹스) */
+/* 다크모드에서 아이콘 필터 조정 (더 밝은 브랜드 컬러) */
 .dark .VPFeature .icon img {
-    filter: brightness(0) saturate(100%) invert(68%) sepia(56%) saturate(1050%) hue-rotate(326deg) brightness(102%) contrast(95%);
+    filter: brightness(0) saturate(100%) invert(75%) sepia(15%) saturate(2000%) hue-rotate(200deg) brightness(100%) contrast(105%);
 }
 
 /* ============================================================
