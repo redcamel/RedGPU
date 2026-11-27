@@ -7,14 +7,14 @@ type LoaderCallback = (buffer: ArrayBuffer) => void;
  * [KO] 로딩 중 에러 발생 시 호출되는 콜백 함수 타입입니다.
  * [EN] Callback function type invoked when an error occurs during loading.
  */
-type ErrorCallback = (err: any) => void;
+type ErrorCallback = (err: unknown) => void;
 /**
  * [KO] 로딩 진행 상태를 전달받는 콜백 함수 타입입니다.
  * [EN] Callback function type that receives loading progress status.
  *
  * @category GLTF
  */
-export type ProgressCallback = (event: {
+type ProgressCallback = (event: {
     loaded: number;
     total: number;
     lengthComputable: boolean;

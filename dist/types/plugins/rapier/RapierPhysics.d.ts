@@ -174,6 +174,11 @@ export declare class RapierPhysics implements IPhysicsEngine {
      */
     removeBody(body: RapierBody): void;
     /**
+     * [KO] 물리 월드와 이벤트 큐의 WASM 메모리를 명시적으로 해제하고 모든 바디 참조를 정리합니다.
+     * [EN] Explicitly frees WASM memory of the physics world and event queue, and clears all body references.
+     */
+    destroy(): void;
+    /**
      * [KO] 경사로 및 계단 오르기와 지면 밀착이 활성화된 캐릭터 컨트롤러를 생성하여 반환합니다.
      * [EN] Creates and returns a character controller with autostep and snap-to-ground enabled.
      *

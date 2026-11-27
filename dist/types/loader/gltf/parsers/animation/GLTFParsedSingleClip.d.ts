@@ -1,3 +1,4 @@
+import Mesh from "../../../../display/mesh/Mesh";
 import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
 /**
  * [KO] GLTF 단일 애니메이션 클립의 원시 파싱 데이터를 담는 클래스입니다.
@@ -8,9 +9,10 @@ import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Loader
+ * @category GLTF
  */
 export declare class GLTFParsedSingleClip {
+    #private;
     /**
      * [KO] 클립 내 최소 시간 (초 단위)
      * [EN] Minimum time in the clip (in seconds)
@@ -40,4 +42,19 @@ export declare class GLTFParsedSingleClip {
      * [EN] Animation clip name
      */
     constructor(name: string);
+    /**
+     * [KO] 대상 메쉬와 키 타입에 일치하는 첫 번째 애니메이션 트랙을 `O(1)` 캐시 맵에서 조회합니다.
+     * [EN] Looks up the first animation track matching the target mesh and key type via an `O(1)` cached map.
+     *
+     * @param mesh -
+     * [KO] 애니메이션 대상 메쉬
+     * [EN] Target mesh
+     * @param keyType -
+     * [KO] 정수 인코딩된 애니메이션 키 타입
+     * [EN] Integer-encoded animation key type
+     * @returns
+     * [KO] 일치하는 `AniTrack_GLTF` 또는 `undefined`
+     * [EN] Matching `AniTrack_GLTF` or `undefined`
+     */
+    findTrack(mesh: Mesh, keyType: number): AniTrack_GLTF | undefined;
 }

@@ -2,10 +2,117 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="../../../../assets/css/example.css" rel="stylesheet">
-    <script src="index.js" type="module"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Beautiful Game (GLB Draco + KTX2) - RedGPU WebGPU Example</title>
+    <meta name="description" content="Loads Khronos ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB to verify binary Draco and KTX2 combined rendering.">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, gltfExtensions, dracoMeshCompression, aBeautifulGame, A Beautiful Game (GLB Draco + KTX2)">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/">
+    <meta property="og:title" content="A Beautiful Game (GLB Draco + KTX2) - RedGPU WebGPU Example">
+    <meta property="og:description" content="Loads Khronos ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB to verify binary Draco and KTX2 combined rendering.">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/">
+    <meta property="twitter:title" content="A Beautiful Game (GLB Draco + KTX2) - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Loads Khronos ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB to verify binary Draco and KTX2 combined rendering.">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "A Beautiful Game (GLB Draco + KTX2)",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Loads Khronos ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB to verify binary Draco and KTX2 combined rendering.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "GLTF Extensions",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF&q=GLTF%20Extensions"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "KHR_draco_mesh_compression",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF&q=KHR_draco_mesh_compression"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "A Beautiful Game (GLB Draco + KTX2)",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/"
+        }
+      ]
+    }
+  ]
+}</script>
+
+    <!-- Module Preload -->
+    <link rel="modulepreload" href="../../../../../dist/index.js?t=1795745510092">
+    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1795745510092">
+
+    <!-- Assets -->
+    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1795745510092">
+    <script src="index.js?t=1795745510092" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>GLTF GLTF Extensions KHR_draco_mesh_compression</p>
+        <h1>A Beautiful Game (GLB Draco + KTX2) - RedGPU WebGPU Example</h1>
+        <p>Loads Khronos ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB to verify binary Draco and KTX2 combined rendering.</p>
+        <p lang="ko">Khronos 공식 ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB 모델로 바이너리 Draco + KTX2 복합 렌더링을 검증합니다.</p>
+        <img src="thumb.webp" alt="A Beautiful Game (GLB Draco + KTX2) - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/carConcept/">CarConcept (Draco + KTX2 + Variants)</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/cesiumMan/">CesiumMan (Draco Skinning)</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

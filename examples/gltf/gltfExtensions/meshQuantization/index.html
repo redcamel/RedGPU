@@ -2,10 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="../../../assets/css/example.css" rel="stylesheet">
-    <script src="index.js" type="module"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesh Quantization (4 Models) - RedGPU WebGPU Example</title>
+    <meta name="description" content="Displays all four official Khronos glTF-Quantized models (AnimatedMorphCube, Avocado, Duck, Lantern) side by side to verify quantized vertices and morph animation.">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, gltfExtensions, meshQuantization, Mesh Quantization (4 Models)">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/meshQuantization/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/meshQuantization/">
+    <meta property="og:title" content="Mesh Quantization (4 Models) - RedGPU WebGPU Example">
+    <meta property="og:description" content="Displays all four official Khronos glTF-Quantized models (AnimatedMorphCube, Avocado, Duck, Lantern) side by side to verify quantized vertices and morph animation.">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/meshQuantization/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/meshQuantization/">
+    <meta property="twitter:title" content="Mesh Quantization (4 Models) - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Displays all four official Khronos glTF-Quantized models (AnimatedMorphCube, Avocado, Duck, Lantern) side by side to verify quantized vertices and morph animation.">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/meshQuantization/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Mesh Quantization (4 Models)",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Displays all four official Khronos glTF-Quantized models (AnimatedMorphCube, Avocado, Duck, Lantern) side by side to verify quantized vertices and morph animation.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/meshQuantization/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/meshQuantization/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "GLTF Extensions",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF&q=GLTF%20Extensions"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "KHR_mesh_quantization",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF&q=KHR_mesh_quantization"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Mesh Quantization (4 Models)",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/meshQuantization/"
+        }
+      ]
+    }
+  ]
+}</script>
+
+    <!-- Module Preload -->
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1795745510092">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1795745510092">
+
+    <!-- Assets -->
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1795745510092">
+    <script src="index.js?t=1795745510092" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>GLTF GLTF Extensions KHR_mesh_quantization</p>
+        <h1>Mesh Quantization (4 Models) - RedGPU WebGPU Example</h1>
+        <p>Displays all four official Khronos glTF-Quantized models (AnimatedMorphCube, Avocado, Duck, Lantern) side by side to verify quantized vertices and morph animation.</p>
+        <p lang="ko">Khronos 공식 glTF-Quantized 4종 모델(AnimatedMorphCube, Avocado, Duck, Lantern)을 한 화면에 배치하여 정수 양자화 정점 및 모프 애니메이션을 검증합니다.</p>
+        <img src="thumb.webp" alt="Mesh Quantization (4 Models) - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

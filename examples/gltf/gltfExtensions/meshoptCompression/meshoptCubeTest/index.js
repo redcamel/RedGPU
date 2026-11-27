@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js?t=1795745510092";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1795745510092";
 
 /**
  * [KO] MeshoptCubeTest (KHR_meshopt_compression) 예제

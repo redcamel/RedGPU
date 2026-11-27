@@ -47,11 +47,11 @@
     }</script>
 
     <!-- JS Module Preloading (Resolve Critical Request Chain) -->
-    <link href="./exampleHelper/dist/LabelButton-DuQCE-0R.js" rel="modulepreload">
-    <link href="./exampleHelper/dist/exampleList-D-DOtPQq.js" rel="modulepreload">
-    <link href="./exampleHelper/dist/rolldown-runtime-BlsbPO0-.js" rel="modulepreload">
-    <link href="./exampleHelper/dist/store-BcCV6xbP.js" rel="modulepreload">
-    <link href="./exampleHelper/dist/vendor-react-NnurHtXr.js" rel="modulepreload">
+    <link rel="modulepreload" href="./exampleHelper/dist/LabelButton-DuQCE-0R.js?t=1795745510092">
+    <link rel="modulepreload" href="./exampleHelper/dist/exampleList-D1CCeiGh.js?t=1795745510092">
+    <link rel="modulepreload" href="./exampleHelper/dist/rolldown-runtime-BlsbPO0-.js?t=1795745510092">
+    <link rel="modulepreload" href="./exampleHelper/dist/store-BcCV6xbP.js?t=1795745510092">
+    <link rel="modulepreload" href="./exampleHelper/dist/vendor-react-NnurHtXr.js?t=1795745510092">
 
     <style>
         body {
@@ -384,6 +384,14 @@
             </ul>
         </section>
         <section>
+            <h2>GLTF glTF · GLB · Draco · Meshopt</h2>
+            <ul>
+                <li><a href="/RedGPU/examples/gltf/formats/brainStemAllFormats/">Skinned Geometry Compression (Draco · Meshopt)</a> — Compares 6 geometry compression and container formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT) with skinning animation. (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT 6종 지오메트리 압축 및 스키닝 애니메이션을 비교합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/formats/carConceptAllFormats/">PBR Texture Compression (KTX2 · WebP · JPG)</a> — Compares 5 texture compression formats (glTF, glTF-Binary, glTF-JPG, glTF-KTX-BasisU-Draco, glTF-WEBP) with synchronized Material Variants. (glTF, glTF-Binary, glTF-JPG, glTF-KTX-BasisU-Draco, glTF-WEBP 5종 텍스처 압축 포맷과 Material Variants를 한 화면에서 비교합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/formats/duckAllFormats/">Static Mesh Quantization (Quantized · Embedded)</a> — Compares 5 static mesh quantization and base formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Quantized) side by side. (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Quantized 5종 정적 메쉬 양자화 및 기본 포맷을 한 화면에서 비교합니다.)</li>
+            </ul>
+        </section>
+        <section>
             <h2>GLTF Basic</h2>
             <ul>
                 <li><a href="/RedGPU/examples/gltf/basic/textureEncodingTest/">Texture Encoding Test</a> — Verifies sRGB decoding and color space sampling for BaseColor and Emissive. (BaseColor와 Emissive 텍스처의 sRGB 디코딩 샘플링을 검증합니다.)</li>
@@ -403,6 +411,10 @@
                 <li><a href="/RedGPU/examples/gltf/basic/negativeScaleTest/">Negative Scale Test</a> — Tests rendering of nodes with negative scale (inversion) applied. (음수 스케일(반전)이 적용된 노드의 렌더링을 테스트합니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/basic/environmentTest/">Environment Test</a> — Tests environment map reflection effects on metallic surfaces. (금속 표면에서의 환경 맵 반사 효과를 테스트합니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/basic/generateNormalTest/">Generate Normal Vector Test</a> — Tests automatic vertex normal generation for models without normal data. (노멀 데이터가 없는 모델 로드 시 정점 노멀 자동 생성을 테스트합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/basic/primitiveModeNormalsTest/">Primitive Mode Normals Test</a> — Verifies normal/tangent handling and flat normal generation across primitive modes. (토폴로지별 NORMAL·TANGENT 유무 및 플랫 노멀 전개 정확도를 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/basic/meshPrimitiveModes/">Mesh Primitive Modes</a> — Verifies rendering across glTF primitive topology modes. (POINTS, LINES, LINE_STRIP, TRIANGLES, TRIANGLE_STRIP 등 프리미티브 토폴로지 렌더링을 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/basic/simpleSparseAccessor/">Simple Sparse Accessor</a> — Verifies partial vertex substitution using glTF sparse accessors. (Sparse Accessor를 사용한 부분 정점 치환 정확도를 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/basic/unicodeTest/">Unicode Test (❤♻)</a> — Verifies UTF-8 filename and external resource URI resolution containing Unicode characters. (유니코드·이모지가 포함된 파일명과 외부 리소스 URI 해석을 검증합니다.)</li>
             </ul>
         </section>
         <section>
@@ -426,7 +438,6 @@
                 <li><a href="/RedGPU/examples/gltf/animation/riggedFigure/">Rigged Figure</a> — Tests animation of a rigged humanoid character model. (리깅된 인간형 캐릭터 모델의 애니메이션을 테스트합니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/animation/interpolationTest/">Interpolation Test</a> — Compares animation keyframe interpolation (Step, Linear, CubicSpline). (키프레임 보간 방식(Step, Linear, CubicSpline)을 비교합니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/animation/cesiumMan/">Cesium Man &amp; Milk Truck</a> — Skinned CesiumMan and animated Milk Truck models. (스키닝된 CesiumMan과 애니메이션이 적용된 우유 트럭 모델입니다.)</li>
-                <li><a href="/RedGPU/examples/gltf/animation/brainStem/">Brain Stem</a> — BrainStem model animation with complex hierarchy and skinning. (복잡한 계층 구조와 스키닝을 가진 BrainStem 모델 애니메이션입니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/animation/morphStressTest/">Morph Stress Test</a> — Stress-tests morph target animation with up to 18 active attributes. (다수의 활성 정점 속성을 사용하는 모프 타겟 애니메이션 스트레스 테스트입니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/animation/recursiveSkeletons/">Recursive Skeletons</a> — Tests multi-skin binding and mesh reuse on a shared skeleton. (단일 스켈레톤의 다중 스킨 바인딩 및 메쉬 재사용 스키닝을 테스트합니다.)</li>
             </ul>
@@ -550,8 +561,6 @@
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/transmission/transmissionRoughnessTest/">Transmission Roughness Test</a> — Tests blurring effects on transparent materials with rough surfaces. (거친 표면을 가진 투명 재질의 흐림 효과를 테스트합니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/transmission/transmissionOrderTest/">Transmission Order Test</a> — Tests depth sorting order across overlapping transmissive objects. (다중 투과(Transmission) 및 반투명 객체 중첩 시의 정렬 순서를 검증합니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/transmission/transmissionThinwallTestGrid/">Transmission Thinwall Test Grid</a> — Tests transmission differences based on Thin-walled option activation. (얇은 벽(Thin-walled) 옵션 활성화 여부에 따른 투과 차이를 테스트합니다.)</li>
-                <li><a href="/RedGPU/examples/gltf/gltfExtensions/transmission/stainedGlassLamp/">Stained Glass Lamp</a> — Shows colored transmitted light through a stained glass lamp. (스테인드글라스 램프를 통해 색상이 있는 투과광을 보여줍니다.)</li>
-                <li><a href="/RedGPU/examples/gltf/gltfExtensions/transmission/chronographWatch/">Chronograph Watch</a> — High-quality model showing watch glass transparency and internal details. (시계 유리의 투명도와 내부 디테일을 보여주는 고품질 모델입니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/transmission/mosquitoInAmber/">Mosquito In Amber</a> — Showcases transmission, IOR, and volume attenuation with amber material. (호박 속 모기 모델로 투과, 굴절률(IOR), 볼륨 감쇠를 시연합니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/transmission/commercialRefrigerator/">Commercial Refrigerator</a> — Commercial refrigerator model with glass doors. (유리 문을 가진 상업용 냉장고 모델입니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/transmission/glassBrokenWindow/">Glass Broken Window</a> — Expresses the thickness and refraction of a broken window. (깨진 유리창의 두께감과 굴절을 표현합니다.)</li>
@@ -568,6 +577,49 @@
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/glassHurricaneCandleHolder/">Glass Hurricane Candle Holder</a> — Candle holder showing refraction and reflection of complex glass shapes. (복잡한 유리 형태의 굴절과 반사를 보여주는 캔들 홀더입니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/dragonAttenuation/">Dragon Attenuation</a> — Renders colored glass attenuation using transmission and volume extensions. (투과(Transmission)와 볼륨 감쇠로 두꺼운 색유리 재질을 표현합니다.)</li>
                 <li><a href="/RedGPU/examples/gltf/gltfExtensions/volume/usdShaderBallForGltf/">USD Shader Ball</a> — Standard USD Shader Ball showcasing transmission and volume PBR properties. (투과와 볼륨 등 고급 PBR 재질 속성을 검증하는 표준 USD 셰이더 볼입니다.)</li>
+            </ul>
+        </section>
+        <section>
+            <h2>GLTF GLTF Extensions KHR_mesh_quantization</h2>
+            <ul>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/meshQuantization/">Mesh Quantization (4 Models)</a> — Displays all four official Khronos glTF-Quantized models (AnimatedMorphCube, Avocado, Duck, Lantern) side by side to verify quantized vertices and morph animation. (Khronos 공식 glTF-Quantized 4종 모델(AnimatedMorphCube, Avocado, Duck, Lantern)을 한 화면에 배치하여 정수 양자화 정점 및 모프 애니메이션을 검증합니다.)</li>
+            </ul>
+        </section>
+        <section>
+            <h2>GLTF GLTF Extensions KHR_texture_basisu &amp; KHR_materials_variants</h2>
+            <ul>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/textureBasisu/chronographWatch/">Chronograph Watch (KTX2)</a> — Loads the official Khronos ChronographWatch (glTF-KTX-BasisU) model to verify automatic KTX2 texture loading and PBR fidelity. (Khronos 공식 ChronographWatch (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 PBR 색감 정합성을 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/">Stained Glass Lamp (KTX2 + Variants)</a> — Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 loading and real-time KHR_materials_variants switching. (Khronos 공식 StainedGlassLamp (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 KHR_materials_variants 실시간 전환을 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/materialsVariants/">Materials Variants Shoe</a> — Switches between the three material variants (Midnight, Beach, Street) of Khronos MaterialsVariantsShoe in real time. (Khronos 공식 MaterialsVariantsShoe 모델의 3종 재질 바리에이션(Midnight, Beach, Street)을 런타임에 실시간 전환합니다.)</li>
+            </ul>
+        </section>
+        <section>
+            <h2>GLTF GLTF Extensions KHR_node_visibility</h2>
+            <ul>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/nodeVisibility/">Node Visibility (2 Models)</a> — Verifies initial visible: false handling and visibility animation with Khronos NodeVisibilityTest and CubeVisibility. (Khronos 공식 NodeVisibilityTest와 CubeVisibility 모델로 초기 visible: false 반영 및 가시성 애니메이션을 검증합니다.)</li>
+            </ul>
+        </section>
+        <section>
+            <h2>GLTF GLTF Extensions KHR_animation_pointer</h2>
+            <ul>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/animationPointer/potOfCoalsAnimationPointer/">Pot Of Coals Animation Pointer</a> — Loads Khronos PotOfCoalsAnimationPointer to verify texture rotation and heat refraction animation. (Khronos 공식 PotOfCoalsAnimationPointer 모델로 텍스처 회전 및 열기 굴절 애니메이션을 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/animationPointer/animationPointerUVs/">Animation Pointer UVs</a> — Loads Khronos AnimationPointerUVs to verify UV offset, scale, and rotation pointer animations across PBR and extension textures. (Khronos 공식 AnimationPointerUVs 모델로 PBR 및 확장 텍스처의 UV 스크롤·스케일·회전 애니메이션을 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/animationPointer/animatedColorsCube/">Animated Colors Cube</a> — Loads Khronos AnimatedColorsCube to verify baseColorFactor color interpolation pointer animation. (Khronos 공식 AnimatedColorsCube 모델로 baseColorFactor 색상 보간 포인터 애니메이션을 검증합니다.)</li>
+            </ul>
+        </section>
+        <section>
+            <h2>GLTF GLTF Extensions KHR_meshopt_compression &amp; EXT_meshopt_compression</h2>
+            <ul>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/meshoptCompression/meshoptCubeTest/">Meshopt Cube Test (KHR)</a> — Loads Khronos MeshoptCubeTest to verify on-demand WASM decoding for KHR_meshopt_compression. (Khronos 공식 MeshoptCubeTest 모델로 KHR_meshopt_compression 온디맨드 WASM 디코딩을 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/meshoptCompression/brainStem/">BrainStem (KHR &amp; EXT)</a> — Loads Khronos BrainStem (glTF-Meshopt and glTF-Meshopt-EXT) side by side to compare KHR/EXT Meshopt skinning animation decoding. (Khronos 공식 BrainStem (glTF-Meshopt, glTF-Meshopt-EXT) 두 모델을 나란히 배치해 KHR/EXT 압축 스키닝 애니메이션을 비교 검증합니다.)</li>
+            </ul>
+        </section>
+        <section>
+            <h2>GLTF GLTF Extensions KHR_draco_mesh_compression</h2>
+            <ul>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/carConcept/">CarConcept (Draco + KTX2 + Variants)</a> — Loads Khronos CarConcept (glTF-KTX-BasisU-Draco) to verify combined Draco compression, KTX2 textures, and material variants. (Khronos 공식 CarConcept (glTF-KTX-BasisU-Draco) 모델로 Draco 압축·KTX2 텍스처·재질 바리에이션 복합 로딩을 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/cesiumMan/">CesiumMan (Draco Skinning)</a> — Loads Khronos CesiumMan (glTF-Draco) to verify Draco-compressed skinning (JOINTS_0/WEIGHTS_0) and animation playback. (Khronos 공식 CesiumMan (glTF-Draco) 모델로 Draco 압축 스키닝(JOINTS_0/WEIGHTS_0) 및 애니메이션 재생을 검증합니다.)</li>
+                <li><a href="/RedGPU/examples/gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame/">A Beautiful Game (GLB Draco + KTX2)</a> — Loads Khronos ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB to verify binary Draco and KTX2 combined rendering. (Khronos 공식 ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB 모델로 바이너리 Draco + KTX2 복합 렌더링을 검증합니다.)</li>
             </ul>
         </section>
         <section>
@@ -757,8 +809,8 @@
     </article>
 </main>
 <script type="module">
-    import * as RedGPU from '../dist/index.js?t=1794645384845';
-    import RedGPUExamples from './exampleHelper/dist/examples.js?t=1794645384845';
+    import * as RedGPU from '../dist/index.js?t=1795745510092';
+    import RedGPUExamples from './exampleHelper/dist/examples.js?t=1795745510092';
 
     new RedGPUExamples()
     const canvas = document.getElementById('bg-canvas');

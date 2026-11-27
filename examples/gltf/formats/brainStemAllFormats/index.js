@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../dist/index.js?t=1795745510092";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1795745510092";
 
 /**
  * [KO] BrainStem (glTF 6종 포맷 비교) 예제

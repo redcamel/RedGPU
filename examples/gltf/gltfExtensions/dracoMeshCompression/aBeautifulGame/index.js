@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js?t=1795745510092";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1795745510092";
 
 /**
  * [KO] ABeautifulGame (GLB + KHR_draco_mesh_compression + KHR_texture_basisu) 예제

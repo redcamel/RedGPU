@@ -2,10 +2,117 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="../../../../assets/css/example.css" rel="stylesheet">
-    <script src="index.js" type="module"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stained Glass Lamp (KTX2 + Variants) - RedGPU WebGPU Example</title>
+    <meta name="description" content="Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 loading and real-time KHR_materials_variants switching.">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, gltfExtensions, textureBasisu, stainedGlassLamp, Stained Glass Lamp (KTX2 + Variants)">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/">
+    <meta property="og:title" content="Stained Glass Lamp (KTX2 + Variants) - RedGPU WebGPU Example">
+    <meta property="og:description" content="Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 loading and real-time KHR_materials_variants switching.">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/">
+    <meta property="twitter:title" content="Stained Glass Lamp (KTX2 + Variants) - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 loading and real-time KHR_materials_variants switching.">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Stained Glass Lamp (KTX2 + Variants)",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 loading and real-time KHR_materials_variants switching.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "GLTF Extensions",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF&q=GLTF%20Extensions"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "KHR_texture_basisu & KHR_materials_variants",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF&q=KHR_texture_basisu%20%26%20KHR_materials_variants"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Stained Glass Lamp (KTX2 + Variants)",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/gltfExtensions/textureBasisu/stainedGlassLamp/"
+        }
+      ]
+    }
+  ]
+}</script>
+
+    <!-- Module Preload -->
+    <link rel="modulepreload" href="../../../../../dist/index.js?t=1795745510092">
+    <link rel="modulepreload" href="../../../../exampleHelper/dist/index.js?t=1795745510092">
+
+    <!-- Assets -->
+    <link rel="stylesheet" href="../../../../assets/css/example.css?t=1795745510092">
+    <script src="index.js?t=1795745510092" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>GLTF GLTF Extensions KHR_texture_basisu &amp; KHR_materials_variants</p>
+        <h1>Stained Glass Lamp (KTX2 + Variants) - RedGPU WebGPU Example</h1>
+        <p>Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 loading and real-time KHR_materials_variants switching.</p>
+        <p lang="ko">Khronos 공식 StainedGlassLamp (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 KHR_materials_variants 실시간 전환을 검증합니다.</p>
+        <img src="thumb.webp" alt="Stained Glass Lamp (KTX2 + Variants) - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/textureBasisu/chronographWatch/">Chronograph Watch (KTX2)</a></li>
+                    <li><a href="/RedGPU/examples/gltf/gltfExtensions/materialsVariants/">Materials Variants Shoe</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>

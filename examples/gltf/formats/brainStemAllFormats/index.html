@@ -2,10 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="../../../assets/css/example.css" rel="stylesheet">
-    <script src="index.js" type="module"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skinned Geometry Compression (Draco · Meshopt) - RedGPU WebGPU Example</title>
+    <meta name="description" content="Compares 6 geometry compression and container formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT) with skinning animation.">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, gltf, formats, brainStemAllFormats, Skinned Geometry Compression (Draco · Meshopt)">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/gltf/formats/brainStemAllFormats/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/gltf/formats/brainStemAllFormats/">
+    <meta property="og:title" content="Skinned Geometry Compression (Draco · Meshopt) - RedGPU WebGPU Example">
+    <meta property="og:description" content="Compares 6 geometry compression and container formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT) with skinning animation.">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/gltf/formats/brainStemAllFormats/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/gltf/formats/brainStemAllFormats/">
+    <meta property="twitter:title" content="Skinned Geometry Compression (Draco · Meshopt) - RedGPU WebGPU Example">
+    <meta property="twitter:description" content="Compares 6 geometry compression and container formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT) with skinning animation.">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/gltf/formats/brainStemAllFormats/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Skinned Geometry Compression (Draco · Meshopt)",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Compares 6 geometry compression and container formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT) with skinning animation.",
+      "url": "https://redcamel.github.io/RedGPU/examples/gltf/formats/brainStemAllFormats/",
+      "screenshot": "https://redcamel.github.io/RedGPU/examples/gltf/formats/brainStemAllFormats/thumb.webp",
+      "isPartOf": {
+        "@type": "CollectionPage",
+        "name": "RedGPU Examples",
+        "url": "https://redcamel.github.io/RedGPU/examples/"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "redcamel"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RedGPU",
+          "item": "https://redcamel.github.io/RedGPU/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Examples",
+          "item": "https://redcamel.github.io/RedGPU/examples/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "GLTF",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "glTF · GLB · Draco · Meshopt",
+          "item": "https://redcamel.github.io/RedGPU/examples/?tab=GLTF&q=glTF%20%C2%B7%20GLB%20%C2%B7%20Draco%20%C2%B7%20Meshopt"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Skinned Geometry Compression (Draco · Meshopt)",
+          "item": "https://redcamel.github.io/RedGPU/examples/gltf/formats/brainStemAllFormats/"
+        }
+      ]
+    }
+  ]
+}</script>
+
+    <!-- Module Preload -->
+    <link rel="modulepreload" href="../../../../dist/index.js?t=1795745510092">
+    <link rel="modulepreload" href="../../../exampleHelper/dist/index.js?t=1795745510092">
+
+    <!-- Assets -->
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1795745510092">
+    <script src="index.js?t=1795745510092" type="module"></script>
 </head>
 <body>
+<main id="seo-static-content" class="seo-static-content">
+    <article>
+        <p>GLTF glTF · GLB · Draco · Meshopt</p>
+        <h1>Skinned Geometry Compression (Draco · Meshopt) - RedGPU WebGPU Example</h1>
+        <p>Compares 6 geometry compression and container formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT) with skinning animation.</p>
+        <p lang="ko">glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT 6종 지오메트리 압축 및 스키닝 애니메이션을 비교합니다.</p>
+        <img src="thumb.webp" alt="Skinned Geometry Compression (Draco · Meshopt) - RedGPU WebGPU Example" width="600" height="450" loading="eager">
+        <nav aria-label="Example Navigation">
+            <ul>
+                <li><a href="/RedGPU/examples/">All RedGPU Examples</a></li>
+                <li><a href="/RedGPU/manual/">RedGPU Manual</a></li>
+                    <li><a href="/RedGPU/examples/gltf/formats/carConceptAllFormats/">PBR Texture Compression (KTX2 · WebP · JPG)</a></li>
+                    <li><a href="/RedGPU/examples/gltf/formats/duckAllFormats/">Static Mesh Quantization (Quantized · Embedded)</a></li>
+            </ul>
+        </nav>
+    </article>
+</main>
 </body>
 </html>
