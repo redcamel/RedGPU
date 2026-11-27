@@ -14,9 +14,9 @@
  * [KO] 삼각형 정점 인덱스 배열 (비어 있을 경우 정점 순서대로 처리)
  * [EN] Triangle vertex index array (processed in vertex order if empty)
  * @returns
- * [KO] 정규화된 정점 법선 벡터 배열 (`[nx, ny, nz, ...]`)
- * [EN] Normalized vertex normal vector array (`[nx, ny, nz, ...]`)
+ * [KO] 정규화된 정점 법선 벡터 배열 (`Float32Array`, `[nx, ny, nz, ...]`)
+ * [EN] Normalized vertex normal vector array (`Float32Array`, `[nx, ny, nz, ...]`)
  * @category Math
  */
-declare const calculateNormals: (vertexArray: number[], indexArray: number[]) => number[];
+declare const calculateNormals: (vertexArray: number[] | Float32Array, indexArray: number[] | Uint32Array | Uint16Array) => Float32Array;
 export default calculateNormals;

@@ -1,15 +1,16 @@
-import { Accessor, Buffer, BufferView, GLTF, GlTfId } from "../GLTF";
+import { GLTFComponentTypedArrayConstructor } from "../core/GLTF_COMPONENT_TYPES";
+import { Accessor, GLTF, GlTfId } from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 /**
- * [KO] GLTF 파일의 엑세서(Accessor) 및 버퍼 뷰 정보를 담는 클래스입니다.
- * [EN] Class that holds accessor and buffer view information in a GLTF file.
+ * [KO] glTF 엑세서(Accessor)와 버퍼 뷰 메타데이터를 보관하는 내부 클래스입니다.
+ * [EN] Internal class holding glTF accessor and buffer view metadata.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Loader
+ * @category GLTF
  */
 declare class AccessorInfo_GLTF {
     /**
@@ -18,30 +19,15 @@ declare class AccessorInfo_GLTF {
      */
     accessor: Accessor;
     /**
-     * [KO] GLTF 버퍼 뷰 객체
-     * [EN] GLTF buffer view object
-     */
-    bufferView: BufferView;
-    /**
-     * [KO] 버퍼의 GLTF 식별자
-     * [EN] GLTF identifier of the buffer
-     */
-    bufferGlTfId: GlTfId;
-    /**
-     * [KO] GLTF 버퍼 객체
-     * [EN] GLTF buffer object
-     */
-    buffer: Buffer;
-    /**
      * [KO] 버퍼 URI의 `DataView` 인스턴스
      * [EN] `DataView` instance of the buffer URI
      */
-    bufferURIDataView: any;
+    bufferURIDataView: DataView | null;
     /**
      * [KO] 컴포넌트 타입에 대응하는 TypedArray 생성자
      * [EN] TypedArray constructor corresponding to the component type
      */
-    componentType: any;
+    componentType: GLTFComponentTypedArrayConstructor;
     /**
      * [KO] 컴포넌트 타입 요소당 바이트 크기
      * [EN] Byte size per element of the component type

@@ -1,3 +1,5 @@
+import Mesh from "../../../display/mesh/Mesh";
+import GLTFParseContext from "../core/GLTFParseContext";
 import { GLTF, GlTfId, Mesh as GltfMesh } from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 /**
@@ -13,13 +15,22 @@ import GLTFLoader from "../GLTFLoader";
  * @param gltfMesh -
  * [KO] 파싱할 glTF 메시 데이터
  * [EN] glTF mesh data to parse
+ * @param meshGlTfId -
+ * [KO] 파싱할 glTF 메시의 식별자
+ * [EN] glTF identifier of the mesh to parse
  * @param nodeGlTfId -
  * [KO] 메시가 속한 노드의 glTF 식별자
  * [EN] glTF identifier of the node to which the mesh belongs
+ * @param isSkinned -
+ * [KO] 노드가 스킨(`skin`)을 참조하는지 여부
+ * [EN] Whether the owning node references a skin
+ * @param parseContext -
+ * [KO] 현재 파싱 세션의 `GLTFParseContext` 인스턴스
+ * [EN] `GLTFParseContext` instance for the current parse session
  * @returns
  * [KO] 생성된 `Mesh` 인스턴스 배열
  * [EN] Array of created `Mesh` instances
  * @category GLTF
  */
-declare const parseMesh_GLTF: (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMesh: GltfMesh, nodeGlTfId: GlTfId) => any[];
+declare const parseMesh_GLTF: (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMesh: GltfMesh, meshGlTfId: GlTfId, nodeGlTfId: GlTfId, isSkinned: boolean, parseContext: GLTFParseContext) => Mesh[];
 export default parseMesh_GLTF;

@@ -73,7 +73,7 @@ declare class MipmapGenerator extends RedGPUObject {
      * [KO] 밉맵 GPURenderPipeline
      * [EN] Mipmap GPURenderPipeline
      */
-    getMipmapPipeline(format: GPUTextureFormat): GPURenderPipeline;
+    getMipmapPipeline(format: GPUTextureFormat, useKawaseKaris?: boolean): GPURenderPipeline;
     /**
      * [KO] 입력 텍스처에 대한 밉맵 체인을 생성합니다.
      * [EN] Generates a mipmap chain for the input texture.
@@ -90,11 +90,14 @@ declare class MipmapGenerator extends RedGPUObject {
      * @param encoderType -
      * [KO] 사용할 명령 인코더 유형 (기본값: COMMAND_ENCODER_TYPE.RESOURCE)
      * [EN] Command encoder type to use (default: COMMAND_ENCODER_TYPE.RESOURCE)
+     * @param useKawaseKaris -
+     * [KO] HDR 파이어플라이 및 지터 펄싱 억제를 위한 5-tap Kawase + Karis 다운샘플 사용 여부 (기본값: false)
+     * [EN] Whether to use 5-tap Kawase + Karis downsampling for HDR firefly and jitter suppression (default: false)
      * @returns
      * [KO] 밉맵이 생성된 GPUTexture
      * [EN] GPUTexture with generated mipmaps
      */
-    generateMipmap(texture: GPUTexture, textureDescriptor: GPUTextureDescriptor, useCache?: boolean, encoderType?: CommandEncoderType): GPUTexture;
+    generateMipmap(texture: GPUTexture, textureDescriptor: GPUTextureDescriptor, useCache?: boolean, encoderType?: CommandEncoderType, useKawaseKaris?: boolean): GPUTexture;
     /**
      * [KO] 모든 캐시 및 밉맵 생성용 파이프라인 리소스를 해제합니다.
      * [EN] Releases all caches and mipmap generation pipeline resources.

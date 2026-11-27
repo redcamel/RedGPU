@@ -53,33 +53,13 @@ export declare class TextureLoaderData {
      */
     constructor(src: any, srcInfo: any, idx: number);
 }
-/**
- * [KO] 다수의 2D 비트맵 텍스처(`BitmapTexture`) 및 큐브 텍스처(`CubeTexture`)를 일괄 비동기 로드하고 진행률을 추적하는 로더 클래스입니다.
- * [EN] Loader class that asynchronously batch-loads multiple 2D bitmap textures (`BitmapTexture`) and cube textures (`CubeTexture`) and tracks loading progress.
- *
- * ### Example
- * ```typescript
- * const textureLoader = new RedGPU.TextureLoader(
- *     redGPUContext,
- *     ['assets/diffuse.png', 'assets/normal.png'],
- *     (loader) => {
- *         const diffuseTexture = loader.getTextureByIndex(0);
- *     },
- *     (progress) => {
- *         console.log(progress.percent);
- *     }
- * );
- * ```
- *
- * @category Loader
- */
 export default class TextureLoader extends RedGPUObject {
     #private;
     /**
      * [KO] 로드 대상 텍스처 데이터(`TextureLoaderData`) 목록
      * [EN] List of target texture data (`TextureLoaderData`)
      */
-    textures: any[];
+    textures: TextureLoaderData[];
     /**
      * [KO] 새로운 TextureLoader 인스턴스를 생성하고 텍스처 목록 로딩을 시작합니다.
      * [EN] Creates a new TextureLoader instance and starts loading the texture list.
@@ -96,8 +76,11 @@ export default class TextureLoader extends RedGPUObject {
      * @param progressCallback -
      * [KO] 개별 텍스처 로딩 진행 시 호출되는 진행률 콜백 함수 (선택)
      * [EN] Progress callback function invoked as individual textures load (optional)
+     * @param maxConcurrency -
+     * [KO] 이 로더 인스턴스에서 동시에 로드할 최대 텍스처 수 (기본값: `4`, 동일 `RedGPUContext` 전역 상한과 함께 적용)
+     * [EN] Maximum number of textures to load concurrently in this loader instance (default: `4`, also bounded by the per-`RedGPUContext` shared limit)
      */
-    constructor(redGPUContext: RedGPUContext, srcInfoList: any[], callback: Function, progressCallback?: Function);
+    constructor(redGPUContext: RedGPUContext, srcInfoList: any[], callback: Function, progressCallback?: Function, maxConcurrency?: number);
     /**
      * [KO] 지정된 인덱스에 해당하는 로드된 텍스처 인스턴스를 반환합니다.
      * [EN] Returns the loaded texture instance corresponding to the specified index.
@@ -109,5 +92,5 @@ export default class TextureLoader extends RedGPUObject {
      * [KO] 텍스처 인스턴스 (`BitmapTexture` 또는 `CubeTexture`)
      * [EN] Texture instance (`BitmapTexture` or `CubeTexture`)
      */
-    getTextureByIndex(index: number): any;
+    getTextureByIndex(index: number): null;
 }

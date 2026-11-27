@@ -1,8 +1,9 @@
+import GLTFParseContext from "../core/GLTFParseContext";
 import { GLTF } from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 /**
- * [KO] GLTF 데이터의 기본 씬(Scene)을 파싱하고 포함된 노드들을 순회합니다.
- * [EN] Parses the default scene of GLTF data and traverses its nodes.
+ * [KO] GLTF 데이터의 기본 씬(Scene)을 2-Pass(Pass 1: 노드·메쉬 생성, Pass 2: 스킨 일괄 링크)로 파싱합니다.
+ * [EN] Parses the default scene of GLTF data in 2 passes (Pass 1: node/mesh construction, Pass 2: deferred skin binding).
  *
  * @param gltfLoader -
  * [KO] GLTFLoader 인스턴스
@@ -10,10 +11,10 @@ import GLTFLoader from "../GLTFLoader";
  * @param gltfData -
  * [KO] GLTF 데이터 객체
  * [EN] GLTF data object
- * @param callback -
- * [KO] 씬 파싱 완료 후 호출될 콜백 함수
- * [EN] Optional callback function invoked after parsing the scene
- * @category Loader
+ * @param parseContext -
+ * [KO] 현재 파싱 세션의 `GLTFParseContext` 인스턴스
+ * [EN] `GLTFParseContext` instance for the current parse session
+ * @category GLTF
  */
-declare const parseScene_GLTF: (gltfLoader: GLTFLoader, gltfData: GLTF, callback?: Function) => void;
+declare const parseScene_GLTF: (gltfLoader: GLTFLoader, gltfData: GLTF, parseContext: GLTFParseContext) => void;
 export default parseScene_GLTF;

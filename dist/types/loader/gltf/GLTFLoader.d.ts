@@ -1,8 +1,33 @@
+import RedGPUObject from "../../base/RedGPUObject";
+import PerspectiveCamera from "../../camera/camera/PerspectiveCamera";
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
+import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
+import { AnimStateMachine, ClipAnimState } from "./animationLooper/AnimStateMachine";
 import { GLTF } from "./GLTF";
-import { ClipAnimState } from "./animationLooper/AnimStateMachine";
-import RedGPUObject from "../../base/RedGPUObject";
+/**
+ * [KO] `GLTFLoader.loadAsync()` 호출 시 전달할 수 있는 옵션 인터페이스입니다.
+ * [EN] Options interface for `GLTFLoader.loadAsync()`.
+ *
+ * @category Loader
+ */
+export interface GLTFLoadAsyncOptions {
+    /**
+     * [KO] 로딩 진행 중 호출될 콜백 함수
+     * [EN] Optional callback function called during loading progress
+     */
+    onProgress?: (info: GLTFLoadingProgressInfo) => void;
+    /**
+     * [KO] 로딩 취소를 제어할 `AbortSignal`
+     * [EN] Optional `AbortSignal` to cancel loading
+     */
+    signal?: AbortSignal;
+    /**
+     * [KO] 노드/메쉬별 커스텀 파싱 옵션
+     * [EN] Optional custom parsing options per mesh name
+     */
+    parsingOption?: Record<string, (mesh: Mesh) => void>;
+}
 /**
  * [KO] GLTF 파일 파싱 결과 정보를 담고 있는 타입입니다.
  * [EN] Represents the result of parsing a GLTF file.
@@ -11,37 +36,15 @@ import RedGPUObject from "../../base/RedGPUObject";
  */
 type GLTFParsingResult = {
     /**
-     * [KO] GLTF 파일에 정의된 그룹 목록
-     * [EN] Groups defined in the GLTF file
-     */
-    groups: any[];
-    /**
      * [KO] GLTF 파일에 정의된 재질 목록
      * [EN] Materials defined in the GLTF file
      */
-    materials: any[];
-    /**
-     * [KO] GLTF 파일에 정의된 URI 버퍼 정보
-     * [EN] URI buffer information defined in the GLTF file
-     */
-    uris: {
-        buffers: any[];
-    };
-    /**
-     * [KO] GLTF 파일에 정의된 텍스처 맵
-     * [EN] Textures defined in the GLTF file
-     */
-    textures: Record<string, any>;
-    /**
-     * [KO] GLTF 파일에 정의된 원시 텍스처 목록
-     * [EN] List of raw textures defined in the GLTF file
-     */
-    textureRawList: any[];
+    materials: PBRMaterial[];
     /**
      * [KO] GLTF 파일에 정의된 카메라 목록
      * [EN] Cameras defined in the GLTF file
      */
-    cameras: any[];
+    cameras: PerspectiveCamera[];
     /**
      * [KO] GLTF 파일에 정의된 파싱된 애니메이션 클립 목록
      * [EN] Parsed animation clips defined in the GLTF file
@@ -76,32 +79,33 @@ export type GLTFLoadingProgressInfo = {
     };
 };
 /**
- * [KO] GLTF 2.0 포맷(`.gltf`, `.glb`)의 3D 모델 파일을 로드하고 메쉬, 재질, 텍스처, 애니메이션, 스킨을 RedGPU 객체로 파싱하는 로더 클래스입니다.
- * [EN] Loader class that loads 3D model files in GLTF 2.0 format (`.gltf`, `.glb`) and parses meshes, materials, textures, animations, and skins into RedGPU objects.
+ * [KO] glTF 2.0(`.gltf`, `.glb`) 모델을 로드하여 메쉬, 재질, 텍스처, 애니메이션, 스킨을 RedGPU 객체로 파싱하는 로더 클래스입니다.
+ * [EN] Loader class that loads glTF 2.0 (`.gltf`, `.glb`) models and parses meshes, materials, textures, animations, and skins into RedGPU objects.
  *
  * ### Example
  * ```typescript
+ * // [KO] 콜백 방식 로드 및 애니메이션 재생
+ * // [EN] Callback-based loading and animation playback
  * const loader = new RedGPU.GLTFLoader(
  *     redGPUContext,
- *     'assets/gltf/models/DamagedHelmet/glTF/DamagedHelmet.gltf',
- *     (loader) => {
- *         scene.addChild(loader.resultMesh);
- *
- *         // [KO] 애니메이션 재생
- *         // [EN] Play animation
- *         if (loader.parsingResult.animations.length > 0) {
- *             loader.playAnimation(loader.parsingResult.animations[0]);
+ *     'assets/gltf/models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+ *     (loaded) => {
+ *         scene.addChild(loaded.resultMesh);
+ *         if (loaded.parsingResult.animations.length > 0) {
+ *             loaded.playAnimation(loaded.parsingResult.animations[0]);
  *         }
  *     },
- *     (progress) => {
- *         console.log('Loading Progress:', progress);
- *     },
- *     (error) => {
- *         console.error('Load Error:', error);
- *     }
+ *     (progress) => console.log(progress.model.percent),
+ *     (error) => console.error(error)
  * );
  * ```
  *
+ * <iframe src="/RedGPU/examples/gltf/formats/brainStemAllFormats/"></iframe>
+ *
+ * @see [Skinned Geometry Compression (Draco · Meshopt)](/RedGPU/examples/gltf/formats/brainStemAllFormats/)
+ * @see [PBR Texture Compression (KTX2 · WebP · JPG)](/RedGPU/examples/gltf/formats/carConceptAllFormats/)
+ * @see [Static Mesh Quantization (Quantized · Embedded)](/RedGPU/examples/gltf/formats/duckAllFormats/)
+ * @see [Motion Blending example](/RedGPU/examples/gltf/animation/motionBlending/)
  * @category Loader
  */
 declare class GLTFLoader extends RedGPUObject {
@@ -120,15 +124,51 @@ declare class GLTFLoader extends RedGPUObject {
      * [KO] GLTF 파싱 옵션
      * [EN] GLTF parsing options
      */
-    parsingOption: any;
+    parsingOption?: Record<string, (mesh: Mesh) => void> | null;
     /**
      * [KO] 현재 재생 중인 애니메이션 정보 목록
      * [EN] List of currently playing animation information
      */
-    activeAnimations: any[];
+    activeAnimations: PlayAnimationInfo[];
     /**
-     * [KO] GLTFLoader 인스턴스를 생성하고 파일 로딩을 시작합니다.
-     * [EN] Creates a GLTFLoader instance and starts file loading.
+     * [KO] `GLTFLoader` 인스턴스를 생성하고 파일 로딩을 시작합니다.
+     * [EN] Creates a `GLTFLoader` instance and starts loading the file.
+     *
+     * @param redGPUContext -
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
+     * @param url -
+     * [KO] 로드할 `.gltf` 또는 `.glb` 파일 URL
+     * [EN] URL of the `.gltf` or `.glb` file to load
+     * @param onLoad -
+     * [KO] 로딩 완료 콜백 (선택)
+     * [EN] Load completion callback (optional)
+     * @param onProgress -
+     * [KO] 로딩 진행 콜백 (선택)
+     * [EN] Loading progress callback (optional)
+     * @param onError -
+     * [KO] 에러 발생 콜백 (선택)
+     * [EN] Error callback (optional)
+     * @param signal -
+     * [KO] 로딩 취소용 `AbortSignal` (선택)
+     * [EN] `AbortSignal` to cancel loading (optional)
+     * @param parsingOption -
+     * [KO] 메쉬 이름별 커스텀 파싱 콜백 맵 (선택)
+     * [EN] Custom parsing callback map keyed by mesh name (optional)
+     */
+    constructor(redGPUContext: RedGPUContext, url: string, onLoad?: (loader: GLTFLoader) => void, onProgress?: (info: GLTFLoadingProgressInfo) => void, onError?: (error: unknown) => void, signal?: AbortSignal, parsingOption?: Record<string, (mesh: Mesh) => void>);
+    /**
+     * [KO] GLTF/GLB 파일을 비동기 `Promise`로 로드합니다. `AbortSignal`을 통한 로딩 취소를 지원합니다.
+     * [EN] Asynchronously loads a GLTF/GLB file returning a `Promise`. Supports cancellation via `AbortSignal`.
+     *
+     * ### Example
+     * ```typescript
+     * const controller = new AbortController();
+     * const result = await RedGPU.GLTFLoader.loadAsync(redGPUContext, url, {
+     *     onProgress: (info) => console.log(info.model.percent),
+     *     signal: controller.signal
+     * });
+     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -136,17 +176,14 @@ declare class GLTFLoader extends RedGPUObject {
      * @param url -
      * [KO] 로드할 GLTF/GLB 파일 경로
      * [EN] Path to the GLTF/GLB file to load
-     * @param onLoad -
-     * [KO] 로딩 완료 시 호출될 콜백 함수
-     * [EN] Callback function called when loading is complete
-     * @param onProgress -
-     * [KO] 로딩 진행 중 호출될 콜백 함수 (선택)
-     * [EN] Callback function called during loading progress (optional)
-     * @param onError -
-     * [KO] 에러 발생 시 호출될 콜백 함수 (선택)
-     * [EN] Callback function called when an error occurs (optional)
+     * @param options -
+     * [KO] 진행 콜백, `AbortSignal`, `parsingOption` 등 추가 옵션 (선택)
+     * [EN] Optional progress callback, `AbortSignal`, and `parsingOption`
+     * @returns
+     * [KO] 로딩 완료된 `GLTFLoader` 인스턴스를 반환하는 `Promise`
+     * [EN] `Promise` resolving to the loaded `GLTFLoader` instance
      */
-    constructor(redGPUContext: RedGPUContext, url: string, onLoad: any, onProgress: any, onError: any);
+    static loadAsync(redGPUContext: RedGPUContext, url: string, options?: GLTFLoadAsyncOptions): Promise<GLTFLoader>;
     /**
      * [KO] 현재 로딩 진행 정보를 반환합니다.
      * [EN] Returns the current loading progress information.
@@ -166,15 +203,14 @@ declare class GLTFLoader extends RedGPUObject {
      */
     get filePath(): string;
     /**
-     * [KO] 원본 GLTF 데이터를 가져오거나 설정합니다.
-     * [EN] Gets or sets the raw GLTF data.
+     * [KO] 원본 GLTF 데이터를 반환합니다.
+     * [EN] Returns the parsed GLTF data object.
      *
      * @returns
      * [KO] 원본 GLTF 데이터 객체
-     * [EN] Raw GLTF data object
+     * [EN] Source GLTF data object
      */
     get gltfData(): GLTF;
-    set gltfData(value: GLTF);
     /**
      * [KO] 파일 이름을 반환합니다.
      * [EN] Returns the file name.
@@ -193,6 +229,33 @@ declare class GLTFLoader extends RedGPUObject {
      * [EN] File URL string
      */
     get url(): string;
+    /**
+     * [KO] 모델에 정의된 `KHR_materials_variants` 바리에이션 이름 목록을 반환합니다.
+     * [EN] Returns the list of `KHR_materials_variants` variant names defined in the model.
+     *
+     * @returns
+     * [KO] 바리에이션 이름 문자열 배열
+     * [EN] Array of variant name strings
+     */
+    get materialVariants(): string[];
+    /**
+     * [KO] 현재 적용 중인 `KHR_materials_variants` 바리에이션 이름을 반환합니다. 기본 재질 상태이면 `null`입니다.
+     * [EN] Returns the currently active `KHR_materials_variants` variant name, or `null` when default materials are active.
+     *
+     * @returns
+     * [KO] 활성 바리에이션 이름 또는 `null`
+     * [EN] Active variant name or `null`
+     */
+    get activeMaterialVariant(): string | null;
+    /**
+     * [KO] 지정된 `KHR_materials_variants` 바리에이션을 모델 전체 메쉬에 적용합니다. `null`을 전달하면 기본 재질로 복원합니다.
+     * [EN] Applies the specified `KHR_materials_variants` variant across all meshes in the model. Pass `null` to restore default materials.
+     *
+     * @param variant -
+     * [KO] 바리에이션 이름(`string`), 인덱스(`number`), 또는 기본 복원용 `null`
+     * [EN] Variant name (`string`), index (`number`), or `null` to restore defaults
+     */
+    applyMaterialVariant(variant: string | number | null): void;
     /**
      * [KO] 모든 활성화된 애니메이션을 중지합니다.
      * [EN] Stops all active animations.
@@ -219,8 +282,22 @@ declare class GLTFLoader extends RedGPUObject {
      */
     playAnimation(clipState: ClipAnimState): void;
     /**
-     * [KO] GLTFLoader 인스턴스와 파싱된 애니메이션 트랙 및 참조 리소스를 해제합니다.
-     * [EN] Releases and destroys the GLTFLoader instance, parsed animation tracks, and referenced resources.
+     * [KO] 진행 중인 GLTF/GLB 로딩 및 파싱을 즉시 중단합니다.
+     * [EN] Immediately aborts any in-flight GLTF/GLB loading and parsing.
+     */
+    abort(): void;
+    /**
+     * [KO] `GLTFLoader` 인스턴스가 해제(`destroy()`)되었는지 여부를 반환합니다.
+     * [EN] Returns whether this `GLTFLoader` instance has been destroyed.
+     *
+     * @returns
+     * [KO] 해제 여부 (`true`이면 이미 해제됨)
+     * [EN] Whether the loader has been destroyed
+     */
+    get isDestroyed(): boolean;
+    /**
+     * [KO] GLTFLoader 인스턴스와 파싱된 애니메이션 트랙, 씬 부착 루트 메쉬 및 내부 참조 리소스를 안전하게 해제합니다.
+     * [EN] Safely releases the GLTFLoader instance, parsed animation tracks, attached root mesh, and internal referenced resources.
      */
     destroy(): void;
 }
@@ -276,7 +353,7 @@ export declare class PlayAnimationInfo {
      * [KO] 연결된 애니메이션 상태 머신 인스턴스
      * [EN] Associated animation state machine instance
      */
-    animStateMachine?: any;
+    animStateMachine?: AnimStateMachine;
     /**
      * [KO] PlayAnimationInfo 인스턴스를 생성합니다.
      * [EN] Creates a PlayAnimationInfo instance.

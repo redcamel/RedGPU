@@ -9,7 +9,8 @@ import { KTX2Container } from "ktx-parse";
  */
 export type BitmapSrcInfo = string | {
     src: string;
-    cacheKey: string;
+    cacheKey?: string;
+    mimeType?: string;
 };
 /**
  * [KO] 일반 이미지(PNG, JPG, WebP, SVG) 및 KTX2 압축 텍스처를 로드하여 GPU 2D 텍스처로 관리하는 클래스입니다.
@@ -177,19 +178,17 @@ export interface KTX2ParseResult {
     arrayBuffer: ArrayBuffer;
 }
 /**
- * [KO] 지정된 경로에서 KTX2 파일을 비동기로 로드하고 헤더 및 컨테이너 구조를 파싱합니다.
- * [EN] Asynchronously loads a KTX2 file from the specified path and parses its header and container structure.
+ * [KO] 바이너리 버퍼의 앞 12바이트가 KTX2 공식 매직 넘버(`«KTX 20»\r\n\x1A\n`)와 일치하는지 판별합니다.
+ * [EN] Checks whether the first 12 bytes of a binary buffer match the official KTX2 magic identifier (`«KTX 20»\r\n\x1A\n`).
  *
- * @param src -
- * [KO] KTX2 파일 URL 경로
- * [EN] KTX2 file URL path
+ * @param bytes -
+ * [KO] 검사할 바이트 배열(`Uint8Array`)
+ * [EN] Byte array (`Uint8Array`) to inspect
  * @returns
- * [KO] 파싱된 `KTX2ParseResult` 객체를 담은 `Promise<KTX2ParseResult>`
- * [EN] `Promise<KTX2ParseResult>` containing the parsed `KTX2ParseResult` object
- * @throws
- * [KO] 네트워크 요청 실패, 잘못된 KTX2 매직 식별자, 또는 유효하지 않은 해상도일 경우 `Error` 발생
- * [EN] Throws `Error` if network request fails, KTX2 magic identifier is invalid, or dimensions are invalid
+ * [KO] KTX2 파일 여부
+ * [EN] Whether the buffer starts with the KTX2 magic identifier
  * @category Texture
  */
+export declare function isKtx2Magic(bytes: Uint8Array): boolean;
 export declare function loadKtx2Container(src: string): Promise<KTX2ParseResult>;
 export default BitmapTexture;

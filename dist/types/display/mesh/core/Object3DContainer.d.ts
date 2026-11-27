@@ -28,6 +28,24 @@ declare class Object3DContainer extends BaseObject {
      */
     constructor();
     /**
+     * [KO] 객체 및 하위 자식 계층의 렌더링 가시성 여부를 반환합니다.
+     * [EN] Returns whether this object and its descendant hierarchy are visible during rendering.
+     *
+     * @returns
+     * [KO] 가시성 여부 (기본값: `true`)
+     * [EN] Visibility flag (default: `true`)
+     */
+    get visible(): boolean;
+    /**
+     * [KO] 객체 및 하위 자식 계층의 렌더링 가시성 여부를 설정합니다. `false`로 설정하면 자신과 모든 자식의 렌더링·섀도우·피킹이 스킵됩니다.
+     * [EN] Sets whether this object and its descendant hierarchy are visible during rendering. Setting to `false` skips rendering, shadow casting, and picking for this object and all descendants.
+     *
+     * @param value -
+     * [KO] 설정할 가시성 불리언 값
+     * [EN] Boolean visibility value to set
+     */
+    set visible(value: boolean);
+    /**
      * [KO] 자식 객체 배열을 반환합니다.
      * [EN] Returns the array of child objects.
      *

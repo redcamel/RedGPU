@@ -2,21 +2,18 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import Mesh from "../../../display/mesh/Mesh";
-import Sphere from "../../../primitive/Sphere";
-import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
 /**
- * [KO] glTF 스키닝 애니메이션을 위한 조인트, 역바인드 행렬 및 컴퓨트 파이프라인 리소스를 관리하는 클래스입니다.
- * [EN] Class that manages joints, inverse bind matrices, and compute pipeline resources for glTF skinning animation.
+ * [KO] glTF 스키닝 애니메이션을 위한 조인트, 역바인드 행렬 및 컴퓨트 파이프라인 리소스를 관리하는 내부 클래스입니다.
+ * [EN] Internal class that manages joints, inverse bind matrices, and compute pipeline resources for glTF skinning animation.
  *
  * ::: warning
- * [KO] 이 클래스는 GLTFLoader에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is internally created by GLTFLoader.<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category GLTF
  */
 declare class ParsedSkinInfo_GLTF {
-    #private;
     /**
      * [KO] 스키닝에 참여하는 조인트 메쉬 배열
      * [EN] Array of joint meshes participating in skinning
@@ -73,16 +70,6 @@ declare class ParsedSkinInfo_GLTF {
      */
     uniformBuffer: GPUBuffer;
     /**
-     * [KO] 조인트 슬롯 인덱스 GPU 버퍼
-     * [EN] Joint slot indices GPU buffer
-     */
-    jointSlotIndicesBuffer: GPUBuffer;
-    /**
-     * [KO] 마지막으로 적용된 메쉬 모델 행렬
-     * [EN] Last applied mesh model matrix
-     */
-    lastMeshModelMatrix: any;
-    /**
      * [KO] 스키닝 연산용 컴퓨트 셰이더 모듈
      * [EN] Compute shader module for skinning calculation
      */
@@ -112,24 +99,6 @@ declare class ParsedSkinInfo_GLTF {
      * [EN] Creates a ParsedSkinInfo_GLTF instance.
      */
     constructor();
-    /**
-     * [KO] 디버그용 구체 지오메트리를 반환합니다.
-     * [EN] Returns the sphere geometry for debugging.
-     *
-     * @returns
-     * [KO] 구체 지오메트리 인스턴스
-     * [EN] Sphere geometry instance
-     */
-    get geometry(): Sphere;
-    /**
-     * [KO] 디버그용 컬러 머티리얼을 반환합니다.
-     * [EN] Returns the color material for debugging.
-     *
-     * @returns
-     * [KO] 컬러 머티리얼 인스턴스
-     * [EN] Color material instance
-     */
-    get material(): ColorMaterial;
     /**
      * [KO] 대상 메쉬의 조인트 버퍼에서 실제로 사용되는 조인트 인덱스 목록을 추출합니다.
      * [EN] Extracts the list of joint indices actually used from the target mesh's joint buffer.

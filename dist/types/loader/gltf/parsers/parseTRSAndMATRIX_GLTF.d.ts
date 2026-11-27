@@ -10,7 +10,7 @@ import { Node } from "../GLTF";
  * @param nodeInfo -
  * [KO] 변환 데이터를 포함하는 GLTF 노드 정보
  * [EN] GLTF node information containing transformation data
- * @category Loader
+ * @category GLTF
  */
 declare const parseTRSAndMATRIX_GLTF: (mesh: Mesh, nodeInfo: Node) => void;
 export default parseTRSAndMATRIX_GLTF;
