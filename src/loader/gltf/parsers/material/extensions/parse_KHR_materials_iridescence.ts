@@ -23,31 +23,29 @@ const parse_KHR_materials_iridescence = (currentMaterial: PBRMaterial, KHR_mater
     currentMaterial.KHR_iridescenceThicknessMinimum = KHR_materials_iridescence.iridescenceThicknessMinimum || 100
     currentMaterial.KHR_iridescenceThicknessMaximum = KHR_materials_iridescence.iridescenceThicknessMaximum || 400
     currentMaterial.transparent = true
-    {
-        const {
-            iridescenceTexture: iridescenceTextureInfo,
-            iridescenceThicknessTexture: iridescenceThicknessTextureInfo
-        } = KHR_materials_iridescence;
-        if (iridescenceTextureInfo) {
-            parseMaterialTexture(
-                gltfLoader,
-                currentMaterial,
-                iridescenceTextureInfo,
-                'KHR_iridescenceTexture',
-                null,
-                false
-            )
-        }
-        if (iridescenceThicknessTextureInfo) {
-            parseMaterialTexture(
-                gltfLoader,
-                currentMaterial,
-                iridescenceThicknessTextureInfo,
-                'KHR_iridescenceThicknessTexture',
-                null,
-                false
-            )
-        }
+    const {
+        iridescenceTexture: iridescenceTextureInfo,
+        iridescenceThicknessTexture: iridescenceThicknessTextureInfo
+    } = KHR_materials_iridescence;
+    if (iridescenceTextureInfo) {
+        parseMaterialTexture(
+            gltfLoader,
+            currentMaterial,
+            iridescenceTextureInfo,
+            'KHR_iridescenceTexture',
+            null,
+            false
+        )
+    }
+    if (iridescenceThicknessTextureInfo) {
+        parseMaterialTexture(
+            gltfLoader,
+            currentMaterial,
+            iridescenceThicknessTextureInfo,
+            'KHR_iridescenceThicknessTexture',
+            null,
+            false
+        )
     }
 }
 export default parse_KHR_materials_iridescence

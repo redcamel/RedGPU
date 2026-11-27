@@ -1021,6 +1021,7 @@ class Mesh extends MeshBase {
      * [EN] Render view state data
      */
     render(renderViewStateData: RenderViewStateData) {
+        if (!this.visible) return;
         const {redGPUContext,} = this
         const {
             view,

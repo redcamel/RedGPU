@@ -1,7 +1,13 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import Mesh from "../../../../display/mesh/Mesh";
 import AnimationData_GLTF from "../AnimationData_GLTF";
+import {PointerTargetBinding} from "../../parsers/animation/resolveAnimationPointer_GLTF";
 import shaderCode from './compute.wgsl'
+
+const MORPH_COMPUTE_CACHE = new WeakMap<GPUDevice, {
+    shaderModule: GPUShaderModule;
+    pipeline: GPUComputePipeline;
+}>();
 
 /**
  * [KO] 모프 타겟 애니메이션 연산에 사용되는 메쉬별 GPU 리소스 구조체입니다.
@@ -26,12 +32,12 @@ type MeshResources = {
 };
 
 /**
- * [KO] glTF 애니메이션의 개별 채널(회전, 이동, 스케일, 모프 가중치) 트랙 데이터와 보간 상태를 관리하는 클래스입니다.
- * [EN] Class that manages individual channel (rotation, translation, scale, morph weights) track data and interpolation states for glTF animations.
+ * [KO] glTF 애니메이션의 개별 채널(회전, 이동, 스케일, 모프 가중치, JSON Pointer) 트랙과 보간 상태를 관리하는 내부 클래스입니다.
+ * [EN] Internal class managing individual glTF animation channel tracks (rotation, translation, scale, morph weights, JSON Pointer) and interpolation states.
  *
  * ::: warning
- * [KO] 이 클래스는 GLTFLoader에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is internally created by GLTFLoader.<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category GLTF
@@ -81,20 +87,15 @@ class AniTrack_GLTF {
     cacheTable = {};
 
     /**
-     * [KO] 애니메이션 대상 속성 키 (`'rotation'`, `'translation'`, `'scale'`, `'weights'`)
-     * [EN] Animation target property key (`'rotation'`, `'translation'`, `'scale'`, `'weights'`)
-     */
-    key;
-    /**
-     * [KO] 정수형으로 인코딩된 애니메이션 키 타입 (1: 회전, 2: 이동, 3: 스케일, 4: 모프 가중치)
-     * [EN] Integer-encoded animation key type (1: rotation, 2: translation, 3: scale, 4: morph weights)
+     * [KO] 정수형으로 인코딩된 애니메이션 키 타입 (1: 회전, 2: 이동, 3: 스케일, 4: 모프 가중치, 5: JSON Pointer)
+     * [EN] Integer-encoded animation key type (1: rotation, 2: translation, 3: scale, 4: morph weights, 5: JSON Pointer)
      */
     keyType: number;
     /**
-     * [KO] 보간 방식 문자열 (`'CUBICSPLINE'`, `'STEP'`, `'LINEAR'`)
-     * [EN] Interpolation mode string (`'CUBICSPLINE'`, `'STEP'`, `'LINEAR'`)
+     * [KO] `KHR_animation_pointer` 트랙의 런타임 프로퍼티 적용 바인딩
+     * [EN] Runtime property binding for a `KHR_animation_pointer` track
      */
-    interpolation: "CUBICSPLINE" | "STEP" | "LINEAR" | string;
+    pointerBinding: PointerTargetBinding | null = null;
     /**
      * [KO] 정수형으로 인코딩된 보간 방식 (0: STEP, 1: LINEAR, 2: CUBICSPLINE)
      * [EN] Integer-encoded interpolation mode (0: STEP, 1: LINEAR, 2: CUBICSPLINE)
@@ -119,12 +120,12 @@ class AniTrack_GLTF {
     #meshResourcesMap: Map<Mesh, MeshResources> = new Map();
 
     /**
-     * [KO] AniTrack_GLTF 인스턴스를 생성합니다.
-     * [EN] Creates an AniTrack_GLTF instance.
+     * [KO] `AniTrack_GLTF` 인스턴스를 생성합니다.
+     * [EN] Creates an `AniTrack_GLTF` instance.
      *
      * @param key -
-     * [KO] 애니메이션 속성 키 (`'rotation'`, `'translation'`, `'scale'`, `'weights'`)
-     * [EN] Animation property key (`'rotation'`, `'translation'`, `'scale'`, `'weights'`)
+     * [KO] 애니메이션 속성 키 (`'rotation'`, `'translation'`, `'scale'`, `'weights'`, `'pointer'`)
+     * [EN] Animation property key (`'rotation'`, `'translation'`, `'scale'`, `'weights'`, `'pointer'`)
      * @param time -
      * [KO] 키프레임 시간 데이터
      * [EN] Keyframe time data
@@ -140,14 +141,16 @@ class AniTrack_GLTF {
      * @param weightMeshes -
      * [KO] 모프 가중치 적용 대상 메쉬 배열
      * [EN] Array of target meshes for morph weight application
+     * @param pointerBinding -
+     * [KO] `KHR_animation_pointer` 런타임 바인딩 (선택)
+     * [EN] Optional `KHR_animation_pointer` runtime binding
      */
-    constructor(key, time, data, interpolation, targetMesh: Mesh, weightMeshes) {
-        this.key = key
+    constructor(key, time, data, interpolation, targetMesh: Mesh, weightMeshes, pointerBinding: PointerTargetBinding | null = null) {
         this.timeAnimationInfo = time
         this.aniDataAnimationInfo = data
-        this.interpolation = interpolation
         this.animationTargetMesh = targetMesh
         this.weightMeshes = weightMeshes
+        this.pointerBinding = pointerBinding
         this.#uniformData = new Float32Array(8);
 
         switch (key) {
@@ -162,6 +165,9 @@ class AniTrack_GLTF {
                 break;
             case 'weights':
                 this.keyType = 4;
+                break;
+            case 'pointer':
+                this.keyType = 5;
                 break;
             default:
                 this.keyType = 0;
@@ -207,9 +213,9 @@ class AniTrack_GLTF {
      * [KO] 다음 키프레임 인덱스
      * [EN] Next keyframe index
      */
-    async renderWeight(redGPUContext: RedGPUContext,
-                       computePassEncoder: GPUComputePassEncoder,
-                       targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number) {
+    renderWeight(redGPUContext: RedGPUContext,
+                 computePassEncoder: GPUComputePassEncoder,
+                 targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number) {
         const {gpuDevice} = redGPUContext;
         if (!this.#computeShader) {
             this.#initCommonCompute(redGPUContext);
@@ -217,18 +223,18 @@ class AniTrack_GLTF {
         if (!this.#meshResourcesMap.has(targetMesh)) {
             this.#initMeshResources(redGPUContext, targetMesh);
         }
-        const resources = this.#meshResourcesMap.get(targetMesh)!;
-        this.#uniformData.set([
-            interpolationValue,
-            prevIDX,
-            nextIDX,
-            targetMesh.animationInfo.morphInfo.morphInfoDataList.length,
-            targetMesh.geometry.vertexBuffer.stride,
-            targetMesh.geometry.vertexBuffer.vertexCount,
-            0,
-            0
-        ]);
-        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
+        const resources = this.#meshResourcesMap.get(targetMesh);
+        if (!resources) return;
+        const uniformData = this.#uniformData;
+        uniformData[0] = interpolationValue;
+        uniformData[1] = prevIDX;
+        uniformData[2] = nextIDX;
+        uniformData[3] = targetMesh.animationInfo.morphInfo.morphInfoDataList.length;
+        uniformData[4] = targetMesh.geometry.vertexBuffer.stride;
+        uniformData[5] = targetMesh.geometry.vertexBuffer.vertexCount;
+        uniformData[6] = 0;
+        uniformData[7] = 0;
+        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, uniformData as BufferSource);
         computePassEncoder.setPipeline(this.#computePipeline);
         computePassEncoder.setBindGroup(0, resources.bindGroup);
         const workgroupCount = Math.ceil(targetMesh.geometry.vertexBuffer.vertexCount / 64);
@@ -237,14 +243,21 @@ class AniTrack_GLTF {
 
     #initCommonCompute(redGPUContext: RedGPUContext) {
         const {gpuDevice} = redGPUContext;
-        this.#computeShader = gpuDevice.createShaderModule({code: shaderCode});
-        this.#computePipeline = gpuDevice.createComputePipeline({
-            layout: 'auto',
-            compute: {
-                module: this.#computeShader,
-                entryPoint: 'main'
-            }
-        });
+        let cached = MORPH_COMPUTE_CACHE.get(gpuDevice);
+        if (!cached) {
+            const shaderModule = gpuDevice.createShaderModule({code: shaderCode});
+            const pipeline = gpuDevice.createComputePipeline({
+                layout: 'auto',
+                compute: {
+                    module: shaderModule,
+                    entryPoint: 'main'
+                }
+            });
+            cached = {shaderModule, pipeline};
+            MORPH_COMPUTE_CACHE.set(gpuDevice, cached);
+        }
+        this.#computeShader = cached.shaderModule;
+        this.#computePipeline = cached.pipeline;
         this.#animationDataListBuffer = gpuDevice.createBuffer({
             size: this.aniDataAnimationInfo.dataList.length * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
@@ -268,14 +281,24 @@ class AniTrack_GLTF {
             size: morphInfo.origin.length * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
-        const morphInterleavedData = morphInfo.morphInfoDataList
-            .flatMap(m => Array.from(m.interleaveData));
+        const morphList = morphInfo.morphInfoDataList;
+        let totalMorphFloats = 0;
+        for (let i = 0, len = morphList.length; i < len; i++) {
+            totalMorphFloats += morphList[i].interleaveData.length;
+        }
+        const morphInterleavedData = new Float32Array(totalMorphFloats);
+        let writeOffset = 0;
+        for (let i = 0, len = morphList.length; i < len; i++) {
+            const src = morphList[i].interleaveData;
+            morphInterleavedData.set(src, writeOffset);
+            writeOffset += src.length;
+        }
         const morphInterleavedBuffer = gpuDevice.createBuffer({
-            size: morphInterleavedData.length * 4,
+            size: morphInterleavedData.byteLength,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
         gpuDevice.queue.writeBuffer(originBuffer, 0, morphInfo.origin);
-        gpuDevice.queue.writeBuffer(morphInterleavedBuffer, 0, new Float32Array(morphInterleavedData));
+        gpuDevice.queue.writeBuffer(morphInterleavedBuffer, 0, morphInterleavedData);
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#computePipeline.getBindGroupLayout(0),
             entries: [

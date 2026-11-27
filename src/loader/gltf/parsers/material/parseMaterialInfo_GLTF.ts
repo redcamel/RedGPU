@@ -1,6 +1,7 @@
 import GPU_BLEND_FACTOR from "../../../../gpuConst/GPU_BLEND_FACTOR";
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
-import {GLTF, MeshPrimitive} from "../../GLTF";
+import GLTFParseContext from "../../core/GLTFParseContext";
+import {GLTF, GlTfId, MeshPrimitive} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import parse_KHR_materials_anisotropy from "./extensions/parse_KHR_materials_anisotropy";
 import parse_KHR_materials_clearcoat from "./extensions/parse_KHR_materials_clearcoat";
@@ -11,37 +12,78 @@ import parse_KHR_materials_sheen from "./extensions/parse_KHR_materials_sheen";
 import parse_KHR_materials_specular from "./extensions/parse_KHR_materials_specular";
 import parse_KHR_materials_transmission from "./extensions/parse_KHR_materials_transmission";
 import parse_KHR_materials_volume from "./extensions/parse_KHR_materials_volume";
-import parseMaterialTexture from "./parseMaterialTexture";
+import parseMaterialTexture, {getSRGBTextureFormat} from "./parseMaterialTexture";
 
 /**
- * [KO] GLTF 메쉬 프리미티브의 재질(Material) 정보 및 확장(Extensions)을 파싱하여 PBRMaterial 인스턴스를 생성합니다.
- * [EN] Parses material information and extensions of a GLTF mesh primitive to create a PBRMaterial instance.
+ * [KO] `parseMaterialInfo_GLTF` 호출 시 머티리얼 오버라이드·캐시·셰이더 변형을 제어하는 옵션 인터페이스입니다.
+ * [EN] Options interface controlling material overrides, caching, and shader variants in `parseMaterialInfo_GLTF`.
+ *
+ * @category GLTF
+ */
+export interface MaterialParseOptions {
+    overrideMaterialId?: GlTfId;
+    parseContext?: GLTFParseContext;
+    useVertexColor?: boolean;
+    useVertexTangent?: boolean;
+    isSkinned?: boolean;
+    forceUnlit?: boolean;
+    bypassCache?: boolean;
+}
+
+/**
+ * [KO] glTF 메쉬 프리미티브의 재질 정보 및 확장을 파싱하여 `PBRMaterial` 인스턴스를 생성하거나 5-튜플 캐시에서 공유 반환합니다.
+ * [EN] Parses material information and extensions of a glTF mesh primitive, creating or sharing a `PBRMaterial` instance via a 5-tuple cache key.
  *
  * @param gltfLoader -
- * [KO] GLTFLoader 인스턴스
- * [EN] GLTFLoader instance
+ * [KO] `GLTFLoader` 인스턴스
+ * [EN] `GLTFLoader` instance
  * @param gltfData -
- * [KO] GLTF 데이터 객체
- * [EN] GLTF data object
+ * [KO] glTF 데이터 객체
+ * [EN] glTF data object
  * @param meshPrimitive -
- * [KO] 대상 GLTF 메쉬 프리미티브
- * [EN] Target GLTF mesh primitive
+ * [KO] 대상 glTF 메쉬 프리미티브
+ * [EN] Target glTF mesh primitive
+ * @param options -
+ * [KO] 머티리얼 오버라이드·캐시·셰이더 변형 옵션 (선택)
+ * [EN] Optional material override, cache, and shader variant options
  * @returns
  * [KO] 파싱된 `PBRMaterial` 인스턴스
  * [EN] Parsed `PBRMaterial` instance
- * @category Loader
+ * @category GLTF
  */
-const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrimitive: MeshPrimitive) => {
-    const {redGPUContext} = gltfLoader
+const parseMaterialInfo_GLTF = (
+    gltfLoader: GLTFLoader,
+    gltfData: GLTF,
+    meshPrimitive: MeshPrimitive,
+    options?: MaterialParseOptions
+) => {
+    const {redGPUContext} = gltfLoader;
+    const materialGlTfId = options?.overrideMaterialId !== undefined ? options.overrideMaterialId : meshPrimitive.material;
+    const hasVertexColor = options?.useVertexColor ?? Object.hasOwn(meshPrimitive.attributes, 'COLOR_0');
+    const hasVertexTangent = options?.useVertexTangent ?? false;
+    const isSkinned = options?.isSkinned ?? false;
+    const forceUnlit = options?.forceUnlit ?? false;
+    const parseContext = options?.parseContext;
+    const useCache = Boolean(parseContext && !options?.bypassCache);
+    const cacheKey = useCache
+        ? `${materialGlTfId ?? 'default'}_${hasVertexColor ? 1 : 0}_${hasVertexTangent ? 1 : 0}_${isSkinned ? 1 : 0}_${forceUnlit ? 1 : 0}`
+        : '';
+
+    if (useCache && parseContext) {
+        const cached = parseContext.materialCache.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
+    }
+
     let currentMaterial: PBRMaterial;
     let doubleSided = false;
     let alphaMode = 'OPAQUE'
     let alphaCutoff = 0.5;
-    if ('material' in meshPrimitive) {
+    if (materialGlTfId !== undefined) {
         currentMaterial = new PBRMaterial(redGPUContext);
         currentMaterial.metallicFactor = 1;
         currentMaterial.roughnessFactor = 1;
-        const materialGlTfId = meshPrimitive.material;
         const materialInfo = gltfData.materials[materialGlTfId];
         doubleSided = !!materialInfo.doubleSided;
         alphaMode = materialInfo.alphaMode ?? alphaMode;
@@ -74,7 +116,7 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
                     currentMaterial,
                     baseColorTextureInfo,
                     'baseColorTexture',
-                    `${navigator.gpu.getPreferredCanvasFormat()}-srgb`,
+                    getSRGBTextureFormat(),
                 )
             }
             if (metallicRoughnessTextureInfo) {
@@ -104,7 +146,7 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
                 currentMaterial,
                 emissiveTextureInfo,
                 'emissiveTexture',
-                `${navigator.gpu.getPreferredCanvasFormat()}-srgb`
+                getSRGBTextureFormat()
             )
         }
         if (occlusionTextureInfo) {
@@ -189,8 +231,11 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
         currentMaterial.metallicFactor = 1;
         currentMaterial.roughnessFactor = 1;
     }
-    if (Object.hasOwn(meshPrimitive.attributes, 'COLOR_0')) {
-        currentMaterial.useVertexColor = true
+    if (hasVertexColor) {
+        currentMaterial.useVertexColor = true;
+    }
+    if (hasVertexTangent) {
+        currentMaterial.useVertexTangent = true;
     }
     currentMaterial.doubleSided = doubleSided
     currentMaterial.cutOff = alphaCutoff;
@@ -218,6 +263,21 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
             blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE
             blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO
             currentMaterial.alphaBlend = 0;
+    }
+    if (forceUnlit) {
+        currentMaterial.useKHR_materials_unlit = true;
+    }
+    if (materialGlTfId !== undefined && parseContext) {
+        const {materialsById} = parseContext;
+        let list = materialsById.get(materialGlTfId);
+        if (!list) {
+            list = [];
+            materialsById.set(materialGlTfId, list);
+        }
+        list.push(currentMaterial);
+    }
+    if (useCache && parseContext) {
+        parseContext.materialCache.set(cacheKey, currentMaterial);
     }
     return currentMaterial;
 };

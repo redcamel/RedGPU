@@ -85,13 +85,38 @@ export class TextureLoaderData {
  *
  * @category Loader
  */
+const DEFAULT_MAX_CONCURRENCY = 4;
+const CONTEXT_SHARED_MAX_CONCURRENCY = 4;
+
+interface SharedTextureQueue {
+    activeCount: number;
+    waiters: Array<() => void>;
+}
+
+const CONTEXT_TEXTURE_QUEUES = new WeakMap<RedGPUContext, SharedTextureQueue>();
+
+const getSharedTextureQueue = (redGPUContext: RedGPUContext): SharedTextureQueue => {
+    let queue = CONTEXT_TEXTURE_QUEUES.get(redGPUContext);
+    if (!queue) {
+        queue = {activeCount: 0, waiters: []};
+        CONTEXT_TEXTURE_QUEUES.set(redGPUContext, queue);
+    }
+    return queue;
+};
+
 export default class TextureLoader extends RedGPUObject {
     /**
      * [KO] 로드 대상 텍스처 데이터(`TextureLoaderData`) 목록
      * [EN] List of target texture data (`TextureLoaderData`)
      */
-    textures = [];
+    textures: TextureLoaderData[] = [];
     #loaded = 0;
+    #nextIndex = 0;
+    #activeCount = 0;
+    #maxConcurrency = DEFAULT_MAX_CONCURRENCY;
+    #isPumping = false;
+    #isQueuedForSharedSlot = false;
+    #sharedQueue: SharedTextureQueue;
     #srcInfoList;
     #callback;
     #progressCallback;
@@ -112,15 +137,27 @@ export default class TextureLoader extends RedGPUObject {
      * @param progressCallback -
      * [KO] 개별 텍스처 로딩 진행 시 호출되는 진행률 콜백 함수 (선택)
      * [EN] Progress callback function invoked as individual textures load (optional)
+     * @param maxConcurrency -
+     * [KO] 이 로더 인스턴스에서 동시에 로드할 최대 텍스처 수 (기본값: `4`, 동일 `RedGPUContext` 전역 상한과 함께 적용)
+     * [EN] Maximum number of textures to load concurrently in this loader instance (default: `4`, also bounded by the per-`RedGPUContext` shared limit)
      */
-    constructor(redGPUContext: RedGPUContext, srcInfoList = [], callback: Function, progressCallback?: Function) {
+    constructor(
+        redGPUContext: RedGPUContext,
+        srcInfoList = [],
+        callback: Function,
+        progressCallback?: Function,
+        maxConcurrency: number = DEFAULT_MAX_CONCURRENCY
+    ) {
         super(redGPUContext);
         this.#srcInfoList = srcInfoList;
         this.#callback = callback;
         this.#progressCallback = progressCallback;
+        this.#maxConcurrency = Math.max(1, Math.floor(maxConcurrency) || DEFAULT_MAX_CONCURRENCY);
+        this.#sharedQueue = getSharedTextureQueue(redGPUContext);
         if (this.#srcInfoList.length) {
+            this.textures = new Array(this.#srcInfoList.length);
             this.#checkProgress();
-            this.#srcInfoList.forEach((srcInfo, index: number) => this.#loadTexture(srcInfo, index));
+            this.#pumpQueue();
         } else {
             this.#reportCompletion();
         }
@@ -141,6 +178,55 @@ export default class TextureLoader extends RedGPUObject {
         if (this.textures[index]) return this.textures[index].texture;
     }
 
+    #wakeSharedWaiters(): void {
+        const sharedQueue = this.#sharedQueue;
+        if (this.redGPUContext?.destroyed) {
+            sharedQueue.waiters.length = 0;
+            return;
+        }
+        while (
+            sharedQueue.activeCount < CONTEXT_SHARED_MAX_CONCURRENCY &&
+            sharedQueue.waiters.length > 0
+            ) {
+            const nextWake = sharedQueue.waiters.shift();
+            nextWake?.();
+        }
+    }
+
+    #pumpQueue(): void {
+        if (this.#isPumping) return;
+        this.#isPumping = true;
+        try {
+            const total = this.#srcInfoList.length;
+            const sharedQueue = this.#sharedQueue;
+            while (
+                this.#activeCount < this.#maxConcurrency &&
+                sharedQueue.activeCount < CONTEXT_SHARED_MAX_CONCURRENCY &&
+                this.#nextIndex < total &&
+                !this.redGPUContext?.destroyed
+                ) {
+                const index = this.#nextIndex++;
+                this.#activeCount++;
+                sharedQueue.activeCount++;
+                this.#loadTexture(this.#srcInfoList[index], index);
+            }
+            if (
+                this.#nextIndex < total &&
+                this.#activeCount < this.#maxConcurrency &&
+                !this.#isQueuedForSharedSlot &&
+                !this.redGPUContext?.destroyed
+            ) {
+                this.#isQueuedForSharedSlot = true;
+                sharedQueue.waiters.push(() => {
+                    this.#isQueuedForSharedSlot = false;
+                    this.#pumpQueue();
+                });
+            }
+        } finally {
+            this.#isPumping = false;
+        }
+    }
+
     #loadTexture(srcInfo, index: number): void {
         const {redGPUContext} = this;
         let targetTexture, srcTarget;
@@ -154,28 +240,45 @@ export default class TextureLoader extends RedGPUObject {
             targetClass = CubeTexture;
         }
         targetTexture = new TextureLoaderData(srcTarget, srcInfo, index);
-        const onLoadHandler = () => {
-            targetTexture.loadSuccess = true;
+        this.textures[index] = targetTexture;
+
+        let settled = false;
+        const onSettled = (success: boolean) => {
+            if (settled) return;
+            settled = true;
+            this.#activeCount = Math.max(0, this.#activeCount - 1);
+            this.#sharedQueue.activeCount = Math.max(0, this.#sharedQueue.activeCount - 1);
+            targetTexture.loadSuccess = success;
             targetTexture.loadEnd = true;
+            if (this.redGPUContext?.destroyed) {
+                this.#sharedQueue.waiters.length = 0;
+                return;
+            }
             this.#checkCompletion();
+            if (this.#nextIndex < this.#srcInfoList.length) {
+                this.#pumpQueue();
+            }
+            this.#wakeSharedWaiters();
         };
-        const onErrorHandler = () => {
-            targetTexture.loadSuccess = false;
-            targetTexture.loadEnd = true;
-            this.#checkCompletion();
-        };
-        if (targetClass === BitmapTexture) {
-            targetTexture.texture = new targetClass(redGPUContext, {
-                src: srcInfo.src,
-                cacheKey: srcInfo.cacheKey
-            }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format, false);
-        } else {
-            targetTexture.texture = new targetClass(redGPUContext, {
-                src: srcInfo.src,
-                cacheKey: srcInfo.cacheKey
-            }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format);
+        const onLoadHandler = () => onSettled(true);
+        const onErrorHandler = () => onSettled(false);
+
+        try {
+            if (targetClass === BitmapTexture) {
+                targetTexture.texture = new targetClass(redGPUContext, {
+                    src: srcInfo.src,
+                    cacheKey: srcInfo.cacheKey,
+                    mimeType: srcInfo.mimeType
+                }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format, false);
+            } else {
+                targetTexture.texture = new targetClass(redGPUContext, {
+                    src: srcInfo.src,
+                    cacheKey: srcInfo.cacheKey
+                }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format);
+            }
+        } catch {
+            onSettled(false);
         }
-        this.textures.push(targetTexture);
     }
 
     #checkProgress() {
@@ -198,6 +301,7 @@ export default class TextureLoader extends RedGPUObject {
 
     #reportCompletion() {
         requestAnimationFrame(() => {
+            if (this.redGPUContext?.destroyed) return;
             if (this.#callback) this.#callback.call(this, this);
         });
     }

@@ -68,8 +68,8 @@ export interface GuiConfig {
     viewList?: boolean;
     scene?: boolean;
     directionalShadow?: boolean;
-    ibl?: boolean;
-    skybox?: boolean;
+    ibl?: boolean | { expanded?: boolean };
+    skybox?: boolean | { expanded?: boolean };
     globalWind?: boolean | { expanded?: boolean };
     compareLabel?: CompareLabelConfig;
     topBar?: TopBarConfig;

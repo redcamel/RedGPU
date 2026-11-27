@@ -1,5 +1,8 @@
-# RedGPU
-A powerful JavaScript WebGPU library for creating stunning 2D/3D graphics and high-performance web
+<h1>
+  <img src="examples/assets/logo/logo-128.png" alt="RedGPU Logo" width="40" align="absmiddle" />
+  RedGPU
+</h1>
+<p>A powerful JavaScript WebGPU library for creating stunning 2D/3D graphics and high-performance web
 applications. Built for the next generation of web graphics.</p>
 
 <p>

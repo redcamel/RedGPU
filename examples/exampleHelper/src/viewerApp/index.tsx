@@ -9,15 +9,11 @@ import updateObject3DMatrix from "@redgpu/src/math/updateObject3DMatrix";
 import {OrbitController} from "@redgpu/src/camera";
 
 const calcTargetMeshMatrix = (mesh: any, view: View3D) => {
-
     updateObject3DMatrix(mesh, view);
-    let len = mesh.children.length;
-    for (let i = 0; i < len; i++) {
-        const child = mesh.children[i];
-        if (child.constructor.name === 'Mesh' ) {
-            calcTargetMeshMatrix(child, view);
-        }
-
+    const children = mesh.children;
+    if (!children) return;
+    for (let i = 0, len = children.length; i < len; i++) {
+        calcTargetMeshMatrix(children[i], view);
     }
 }
 /**
@@ -35,6 +31,11 @@ class RedGPUExampleHelper {
 
     public setShowCompareLabel(value: boolean): void {
         useExampleHelperStore.getState().setShowCompareLabel(value);
+    }
+
+    public updateGui(gui: (pane: any) => void): void {
+        const prev = useExampleHelperStore.getState().guiConfig || {};
+        useExampleHelperStore.getState().setGuiConfig({...prev, gui});
     }
 
     /**
@@ -130,27 +131,27 @@ class RedGPUExampleHelper {
 
         this.init();
 
-        // [KO] 브라우징이 변경되거나 리로드/언로드될 때 자동으로 리소스 해제
-        // [EN] Automatically release resources when browsing changes or page reloads/unloads
-        window.addEventListener('beforeunload', this.handleUnload);
+        // [KO] 페이지 이탈(pagehide) 시 UI/스토어 리소스 정리 (RedGPUContext는 자체 pagehide/BFCache 라이프사이클에서 안전 처리)
+        // [EN] Release UI/store resources on pagehide (RedGPUContext manages its own pagehide/BFCache lifecycle)
         window.addEventListener('pagehide', this.handleUnload);
     }
 
-    public destroy() {
+    public destroy(destroyContext: boolean = true) {
         if (this.isDestroyed) return;
         this.isDestroyed = true;
 
-        window.removeEventListener('beforeunload', this.handleUnload);
         window.removeEventListener('pagehide', this.handleUnload);
 
-        // [KO] RedGPUContext의 실질적인 하드웨어 및 리소스 디스트로이 명시적 호출
-        // [EN] Explicitly call destroy on RedGPUContext to release GPU resources and device
-        const redGPUContext = useExampleHelperStore.getState().redGPUContext;
-        if (redGPUContext) {
-            try {
-                redGPUContext.destroy();
-            } catch (e) {
-                console.error("Failed to destroy RedGPUContext:", e);
+        // [KO] 명시적 destroy() 호출 시에만 RedGPUContext 파괴 (pagehide 시에는 RedGPUContext 자체 핸들러가 BFCache 호환 정리 수행)
+        // [EN] Destroy RedGPUContext only on explicit destroy() call (on pagehide, RedGPUContext handles BFCache-safe teardown)
+        if (destroyContext) {
+            const redGPUContext = useExampleHelperStore.getState().redGPUContext;
+            if (redGPUContext) {
+                try {
+                    redGPUContext.destroy();
+                } catch (e) {
+                    console.error("Failed to destroy RedGPUContext:", e);
+                }
             }
         }
 
@@ -169,7 +170,7 @@ class RedGPUExampleHelper {
     }
 
     private handleUnload = () => {
-        this.destroy();
+        this.destroy(false);
     };
 
     private async init() {

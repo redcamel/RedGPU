@@ -10,15 +10,16 @@ import {ExampleHelperState, useExampleHelperStore} from '../../store';
 interface GuiIBLHelperProps {
     gui: any;
     view: any;
+    expanded?: boolean;
 }
 
-const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
+const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view, expanded = true}) => {
     const RedGPU = useExampleHelperStore((state: ExampleHelperState) => state.RedGPU);
 
     useEffect(() => {
         if (!view) return;
 
-        const lightingFolder = gui.addFolder({title: 'Lighting', expanded: true});
+        const lightingFolder = gui.addFolder({title: 'Lighting', expanded});
 
         const settings = {
             texture: hdrImages[0].name,
@@ -157,7 +158,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         });
 
         // 2. IBL Controls
-        const iblFolder = lightingFolder.addFolder({title: 'IBL Settings', expanded: true});
+        const iblFolder = lightingFolder.addFolder({title: 'IBL Settings', expanded});
 
         iblFolder.addBinding(settings, 'texture', {options: hdrOptions})
             .on('change', (ev: any) => updateIBL(ev.value));

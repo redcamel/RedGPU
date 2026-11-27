@@ -28,7 +28,7 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SunglassesKhronos/glTF-Binary/SunglassesKhronos.glb');
+        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SunglassesKhronos/glTF-Draco/SunglassesKhronos.gltf');
 
         const renderer = new RedGPU.Renderer();
         const render = () => {

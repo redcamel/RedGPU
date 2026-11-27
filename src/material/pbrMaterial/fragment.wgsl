@@ -390,6 +390,8 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
         output.color = vec4<f32>(baseColor.rgb, baseColor.a);
+        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 0.0);
+        output.gBufferMotionVector = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
         return output;
     }
     #redgpu_endIf
@@ -560,8 +562,8 @@ fn main(inputData:InputData) -> OutputFragment {
 
         #redgpu_if useKHR_materials_volume
         if (u_useKHR_materials_volume) {
-            let localNodeScale = inputData.localNodeScale_volumeScale[0];
-            let scaledThickness = thicknessParameter * localNodeScale;
+            let volumeScale = inputData.localNodeScale_volumeScale[1];
+            let scaledThickness = thicknessParameter * volumeScale;
             let safeAttenuationColor = clamp(u_KHR_attenuationColor, vec3<f32>(EPSILON), vec3<f32>(1.0));
             let safeAttenuationDistance = max(u_KHR_attenuationDistance, EPSILON);
             let attenuationCoefficient = -log(safeAttenuationColor) / safeAttenuationDistance;

@@ -463,12 +463,17 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Destroys the RedGPUContext instance and releases all registered views, managers, event listeners, and WebGPU device resources.
      */
     destroy(): void {
-        window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
-        this.#deviceEventController.abort();
+        this.#destroyInternal(false);
+    }
+
+    #destroyInternal(keepPageShowForBFCache: boolean): void {
         if (this.#destroyed) return;
         this.#destroyed = true;
 
-        this.targetRenderer?.destroy(this)
+        window?.cancelAnimationFrame(this.currentRequestAnimationFrame);
+        this.#deviceEventController.abort();
+
+        this.targetRenderer?.destroy(this);
         if (this.#gpuContext) {
             try {
                 this.gpuContext.unconfigure();
@@ -476,10 +481,13 @@ class RedGPUContext extends RedGPUContextViewContainer {
                 console.warn('⚠️ Canvas Context unconfigure 실패:', e);
             }
         }
-        this.#observer?.destroy()
-        this.#observer = null
-        this.#sizeManager.destroy()
-        this.#sizeManager = null
+        this.#observer?.destroy();
+        this.#observer = null;
+        this.#sizeManager?.destroy();
+        this.#sizeManager = null;
+
+        this.#clearEvent();
+
         if (this.#htmlCanvas) {
             this.#htmlCanvas.width = 0;
             this.#htmlCanvas.height = 0;
@@ -489,7 +497,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
             this.#htmlCanvas.remove();
         }
 
-
         for (const view of this.viewList) {
             view.destroy();
         }
@@ -497,12 +504,12 @@ class RedGPUContext extends RedGPUContextViewContainer {
 
         if (this.#drawBufferManager) {
             this.#drawBufferManager.destroy();
-            this.#drawBufferManager = null
+            this.#drawBufferManager = null;
         }
 
         if (this.#resourceManager) {
             this.#resourceManager.destroy();
-            this.#resourceManager = null
+            this.#resourceManager = null;
         }
 
         if (this.#commandEncoderManager) {
@@ -511,33 +518,35 @@ class RedGPUContext extends RedGPUContextViewContainer {
         }
 
         if (this.#globalVertexSSBO) {
-            this.#globalVertexSSBO.destroy()
-            this.#globalVertexSSBO = null
+            this.#globalVertexSSBO.destroy();
+            this.#globalVertexSSBO = null;
         }
         if (this.#globalFragmentSSBO_PBR) {
-            this.#globalFragmentSSBO_PBR.destroy()
-            this.#globalFragmentSSBO_PBR = null
+            this.#globalFragmentSSBO_PBR.destroy();
+            this.#globalFragmentSSBO_PBR = null;
         }
         if (this.#globalFragmentSSBO_BuiltIn) {
-            this.#globalFragmentSSBO_BuiltIn.destroy()
-            this.#globalFragmentSSBO_BuiltIn = null
+            this.#globalFragmentSSBO_BuiltIn.destroy();
+            this.#globalFragmentSSBO_BuiltIn = null;
         }
 
-        this.#clearEvent()
-
-        this.#deviceEventController.abort();
         this.#pageHideEventController.abort();
+        if (!keepPageShowForBFCache) {
+            this.#pageShowEventController.abort();
+        }
 
-
-        this.#onDestroy = null;
-        this.detector.destroy()
-        this.#detector = null
-        this.#gpuDevice.destroy()
-        this.#gpuAdapter = null
-        this.#gpuDevice = null
-        this.#gpuContext = null
-        this.#configurationDescription = null
-        this.#htmlCanvas = null
+        this.detector?.destroy();
+        this.#detector = null;
+        if (this.#gpuDevice) {
+            this.#gpuDevice.destroy();
+        } else {
+            this.#onDestroy = null;
+        }
+        this.#gpuAdapter = null;
+        this.#gpuDevice = null;
+        this.#gpuContext = null;
+        this.#configurationDescription = null;
+        this.#htmlCanvas = null;
     }
 
     /**
@@ -563,9 +572,11 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#onKeyDown = null
         this.#onBlur = null
 
-        this.#canvasListeners.forEach(({eventName, listener}) => {
-            this.#htmlCanvas.removeEventListener(eventName, listener);
-        });
+        if (this.#htmlCanvas) {
+            this.#canvasListeners.forEach(({eventName, listener}) => {
+                this.#htmlCanvas.removeEventListener(eventName, listener);
+            });
+        }
         this.#canvasListeners = [];
 
         this.onResize = null;
@@ -585,12 +596,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
             console.warn(info);
             console.warn(`Device lost occurred: ${info.message}`);
             this.#deviceEventController.abort();
-            if (info.reason === 'destroyed') this.#onDestroy?.(info);
+            if (info.reason === 'destroyed') {
+                const onDestroy = this.#onDestroy;
+                this.#onDestroy = null;
+                onDestroy?.(info);
+            }
         });
 
         const pageShowHandler = (event: PageTransitionEvent) => {
             if (event.persisted) {
-                this.destroy();
+                this.#destroyInternal(false);
                 this.#deviceEventController.abort();
                 this.#pageHideEventController.abort();
                 this.#pageShowEventController.abort();
@@ -599,21 +614,14 @@ class RedGPUContext extends RedGPUContextViewContainer {
         };
         const pageHideHandler = () => {
             this.#pageHideEventController.abort();
-            this.destroy();
-            this.htmlCanvas.remove();
-            this.#htmlCanvas = null
-
-        };
-        const beforeUnloadHandler = () => {
-            this.destroy();
+            this.#destroyInternal(true);
         };
         window?.addEventListener('pageshow', pageShowHandler, {signal: this.#pageShowEventController.signal});
         window?.addEventListener('pagehide', pageHideHandler, {signal: this.#pageHideEventController.signal});
-        window?.addEventListener('beforeunload', beforeUnloadHandler, {signal: this.#pageHideEventController.signal});
-
     }
 
     #updateBoundingClientRect() {
+        if (this.#destroyed || !this.#htmlCanvas) return;
         this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
     }
 

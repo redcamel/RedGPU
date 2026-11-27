@@ -9,18 +9,24 @@ const Logo: React.FC = () => {
             <div style={{
                 display: 'flex',
                 flexDirection: 'row',
-                alignItems: 'center',
+                alignItems: 'baseline',
                 gap: isNarrow ? '8px' : '12px',
                 whiteSpace: 'nowrap',
             }}>
-                <h1 style={{...titleStyle, fontSize: isNarrow ? '16px' : '18px', lineHeight: '1.2', margin: 0}}>
+                <h1 style={{...titleStyle, fontSize: isNarrow ? '16px' : '18px', lineHeight: 1, margin: 0}}>
                     <a href="../" style={titleLinkStyle}>
-                        RedGPU
+                        <img
+                            src="./assets/logo/logo-64.png"
+                            alt=""
+                            style={logoImageStyle}
+                        />
+                        <span>RedGPU</span>
                     </a>
                 </h1>
                 <span style={{
                     ...subTitleStyle,
                     fontSize: isNarrow ? '16px' : '18px',
+                    lineHeight: 1,
                 }}>
                     Examples
                 </span>
@@ -41,9 +47,21 @@ const titleStyle: React.CSSProperties = {
 };
 
 const titleLinkStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'baseline',
+    gap: '6px',
     color: 'inherit',
     textDecoration: 'none',
     cursor: 'pointer',
+};
+
+const logoImageStyle: React.CSSProperties = {
+    display: 'block',
+    width: '0.78em',
+    height: '0.78em',
+    objectFit: 'contain',
+    flexShrink: 0,
+    transform: 'translateY(0.03em)',
 };
 
 const subTitleStyle: React.CSSProperties = {

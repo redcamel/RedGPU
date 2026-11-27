@@ -444,6 +444,7 @@ class Group3D extends Object3DContainer {
      * [EN] Render state data of the current view
      */
     render(renderViewStateData: RenderViewStateData) {
+        if (!this.visible) return;
         const {} = this
         const {
             view,

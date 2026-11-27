@@ -1,5 +1,5 @@
 import PBRMaterial from "../../../../../material/pbrMaterial/PBRMaterial";
-import parseMaterialTexture from "../parseMaterialTexture";
+import parseMaterialTexture, {getSRGBTextureFormat} from "../parseMaterialTexture";
 
 /**
  * [KO] glTF의 `KHR_materials_specular` 확장을 파싱하여 재질에 적용합니다.
@@ -38,7 +38,7 @@ const parse_KHR_materials_specular = (currentMaterial: PBRMaterial, KHR_material
             currentMaterial,
             specularColorTextureInfo,
             'KHR_specularColorTexture',
-            `${navigator.gpu.getPreferredCanvasFormat()}-srgb`
+            getSRGBTextureFormat()
         )
     }
 }

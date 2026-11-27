@@ -1,18 +1,19 @@
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import WEBGL_COMPONENT_TYPES from "../core/WEBGL_COMPONENT_TYPES";
-import {Accessor, Buffer, BufferView, GLTF, GlTfId} from "../GLTF";
+import GLTF_COMPONENT_TYPES, {GLTFComponentTypedArrayConstructor} from "../core/GLTF_COMPONENT_TYPES";
+import {getActiveParseContext} from "../core/GLTFParseContext";
+import {Accessor, GLTF, GlTfId} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 
 /**
- * [KO] GLTF 파일의 엑세서(Accessor) 및 버퍼 뷰 정보를 담는 클래스입니다.
- * [EN] Class that holds accessor and buffer view information in a GLTF file.
+ * [KO] glTF 엑세서(Accessor)와 버퍼 뷰 메타데이터를 보관하는 내부 클래스입니다.
+ * [EN] Internal class holding glTF accessor and buffer view metadata.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Loader
+ * @category GLTF
  */
 class AccessorInfo_GLTF {
     /**
@@ -21,30 +22,15 @@ class AccessorInfo_GLTF {
      */
     accessor: Accessor;
     /**
-     * [KO] GLTF 버퍼 뷰 객체
-     * [EN] GLTF buffer view object
-     */
-    bufferView: BufferView;
-    /**
-     * [KO] 버퍼의 GLTF 식별자
-     * [EN] GLTF identifier of the buffer
-     */
-    bufferGlTfId: GlTfId;
-    /**
-     * [KO] GLTF 버퍼 객체
-     * [EN] GLTF buffer object
-     */
-    buffer: Buffer;
-    /**
      * [KO] 버퍼 URI의 `DataView` 인스턴스
      * [EN] `DataView` instance of the buffer URI
      */
-    bufferURIDataView: any;
+    bufferURIDataView: DataView | null;
     /**
      * [KO] 컴포넌트 타입에 대응하는 TypedArray 생성자
      * [EN] TypedArray constructor corresponding to the component type
      */
-    componentType: any;
+    componentType: GLTFComponentTypedArrayConstructor;
     /**
      * [KO] 컴포넌트 타입 요소당 바이트 크기
      * [EN] Byte size per element of the component type
@@ -92,14 +78,19 @@ class AccessorInfo_GLTF {
      */
     constructor(gltfLoader: GLTFLoader, gltfData: GLTF, accessorGlTfId: GlTfId) {
         this.accessor = gltfData.accessors[accessorGlTfId];
-        this.bufferView = gltfData.bufferViews[this.accessor.bufferView];
-        this.bufferGlTfId = this.bufferView.buffer;
-        this.buffer = gltfData.buffers[this.bufferGlTfId];
+        const bufferView = this.accessor.bufferView !== undefined
+            ? gltfData.bufferViews[this.accessor.bufferView]
+            : undefined;
         this.bufferURIDataView = null;
-        if (this.buffer.uri) {
-            this.bufferURIDataView = gltfLoader.parsingResult.uris.buffers[this.bufferGlTfId]
+        if (bufferView) {
+            const buffers = getActiveParseContext(gltfLoader)?.buffers
+                ?? (gltfLoader as { parsingResult?: { uris?: { buffers?: DataView[] } } }).parsingResult?.uris?.buffers;
+            const bufferDataView = buffers?.[bufferView.buffer];
+            if (bufferDataView) {
+                this.bufferURIDataView = bufferDataView;
+            }
         }
-        this.componentType = WEBGL_COMPONENT_TYPES[this.accessor.componentType];
+        this.componentType = GLTF_COMPONENT_TYPES[this.accessor.componentType];
         this.componentType_BYTES_PER_ELEMENT = this.componentType.BYTES_PER_ELEMENT;
         switch (this.componentType) {
             case Float32Array:
@@ -124,8 +115,8 @@ class AccessorInfo_GLTF {
                 consoleAndThrowError('파싱할수없는 타입', this.componentType);
         }
         this.accessorBufferOffset = this.accessor.byteOffset || 0;
-        this.bufferViewOffset = this.bufferView.byteOffset || 0;
-        this.bufferViewByteStride = this.bufferView.byteStride || 0;
+        this.bufferViewOffset = bufferView?.byteOffset || 0;
+        this.bufferViewByteStride = bufferView?.byteStride || 0;
         this.startIndex = (this.bufferViewOffset + this.accessorBufferOffset) / this.componentType_BYTES_PER_ELEMENT;
     }
 }

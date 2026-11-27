@@ -16,7 +16,8 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 8;
+        controller.distance = 14;
+        controller.tilt = -20;
         controller.speedDistance = 0.3;
 
         const scene = new RedGPU.Display.Scene();
@@ -34,24 +35,39 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        // [KO] Indirect Draw 검증을 위한 다양한 3D 객체 및 GLTF 모델 배치
-        // [EN] Place various 3D objects and GLTF models for Indirect Draw verification
-        const glbUrls = [
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoxVertexColors/glTF-Binary/BoxVertexColors.glb',
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf',
-            'https://redcamel.github.io/RedGL2/asset/glTF/breakDance/scene.gltf',
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb',
+        // [KO] Indirect Draw 검증을 위한 다양한 3D 객체 및 GLTF 모델을 겹침 없이 배치
+        // [EN] Place various 3D objects and GLTF models without overlap for Indirect Draw verification
+        const gltfItems = [
+            {
+                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoxVertexColors/glTF-Binary/BoxVertexColors.glb',
+                position: [-5.5, 0.5, 2.5],
+            },
+            {
+                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Draco/CesiumMan.gltf',
+                position: [-2.5, 0, 2.5],
+            },
+            {
+                url: 'https://redcamel.github.io/RedGL2/asset/glTF/breakDance/scene.gltf',
+                position: [0.5, 0, 2.5],
+                scale: 0.001,
+            },
+            {
+                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMilkTruck/glTF-Draco/CesiumMilkTruck.gltf',
+                position: [4.8, 0, 2.5],
+            },
         ];
 
-        loadGLTFGrid(view, glbUrls);
+        loadGLTFItems(view, gltfItems);
         createSampleObjects(redGPUContext, scene);
         const testParticleWrap = createSampleParticle(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            testParticleWrap.x += Math.sin(time / 500) * 0.5;
-            testParticleWrap.y += Math.cos(time / 500) * 0.5;
-            testParticleWrap.z += Math.sin(time / 500) * 0.5;
+            testParticleWrap.setPosition(
+                Math.sin(time / 700) * 5,
+                4.2 + Math.cos(time / 500) * 0.6,
+                Math.cos(time / 700) * 1.5
+            );
         });
 
         renderTestPane(redGPUContext);
@@ -70,7 +86,7 @@ const createSampleObjects = (redGPUContext, scene) => {
         new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
     );
-    box.z = -20;
+    box.setPosition(-6, 1, -2.8);
     scene.addChild(box);
 
     const sphere = new RedGPU.Display.Mesh(
@@ -78,16 +94,8 @@ const createSampleObjects = (redGPUContext, scene) => {
         new RedGPU.Primitive.Sphere(redGPUContext),
         new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
     );
-    sphere.x = -5;
-    sphere.z = -20;
+    sphere.setPosition(-3, 1, -2.8);
     scene.addChild(sphere);
-
-    const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
-    textField3D.text = textField3D.name.split(' ').join('<br/>');
-    textField3D.color = 'red';
-    textField3D.y = 2;
-    textField3D.z = -2;
-    scene.addChild(textField3D);
 
     const sprite3D = new RedGPU.Display.Sprite3D(
         redGPUContext,
@@ -96,7 +104,7 @@ const createSampleObjects = (redGPUContext, scene) => {
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../assets/UV_Grid_Sm.jpg')
         )
     );
-    sprite3D.z = -3;
+    sprite3D.setPosition(0, 1, -2.8);
     scene.addChild(sprite3D);
 
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(
@@ -105,8 +113,14 @@ const createSampleObjects = (redGPUContext, scene) => {
         5, 3, 15, 0, true, 24
     );
     const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
-    spriteSheet.z = -5;
+    spriteSheet.setPosition(3, 1, -2.8);
     scene.addChild(spriteSheet);
+
+    const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
+    textField3D.text = textField3D.name.split(' ').join('<br/>');
+    textField3D.color = 'red';
+    textField3D.setPosition(6, 1.5, -2.8);
+    scene.addChild(textField3D);
 };
 
 const createSampleParticle = (redGPUContext, scene) => {
@@ -128,25 +142,13 @@ const createSampleParticle = (redGPUContext, scene) => {
     return testParticleWrap;
 };
 
-const loadGLTFGrid = (view, urls, gridSize = 3, spacing = 3) => {
+const loadGLTFItems = (view, items) => {
     const {redGPUContext, scene} = view;
-    const totalCols = Math.min(gridSize, urls.length);
-    const totalRows = Math.ceil(urls.length / gridSize);
-    const totalWidth = (totalCols - 1) * spacing;
-    const totalDepth = (totalRows - 1) * spacing;
-
-    urls.forEach((url, index) => {
+    items.forEach(({url, position, scale}) => {
         new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
             const mesh = result.resultMesh;
-            const row = Math.floor(index / gridSize);
-            const col = index % gridSize;
-
-            if (url.includes('breakDance')) mesh.setScale(0.001);
-            mesh.setPosition(
-                col * spacing - totalWidth / 2,
-                -0.5,
-                row * spacing - totalDepth / 2
-            );
+            if (scale !== undefined) mesh.setScale(scale);
+            mesh.setPosition(position[0], position[1], position[2]);
             scene.addChild(mesh);
         });
     });

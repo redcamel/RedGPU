@@ -106,6 +106,7 @@ class Renderer {
     stop(redGPUContext: RedGPUContext) {
         cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
         redGPUContext.currentRequestAnimationFrame = null
+        this.#HD_render = null
     }
 
     /**
@@ -307,11 +308,13 @@ class Renderer {
             }
         }
         scene.shadowManager?.directionalShadowManager?.resetCastingList();
-        const {children} = scene;
-        let i = 0;
-        const len = children.length;
-        for (i; i < len; i++) {
-            children[i].render(renderViewStateData);
+        if (scene.visible) {
+            const {children} = scene;
+            let i = 0;
+            const len = children.length;
+            for (i; i < len; i++) {
+                children[i].render(renderViewStateData);
+            }
         }
         redGPUContext.drawBufferManager.flushAllCommands(renderViewStateData);
     }
@@ -384,7 +387,7 @@ class Renderer {
                 );
                 view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
             });
-            mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, COMMAND_ENCODER_TYPE.MAIN)
+            mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, COMMAND_ENCODER_TYPE.MAIN, true)
 
             commandEncoderManager.addMainRenderPass({
                 label: `${view.name} 2Path Render Pass`,

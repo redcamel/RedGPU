@@ -38,6 +38,7 @@ export class RapierPhysics implements IPhysicsEngine {
     #world: RAPIER.World;
     #bodies: Map<number, RapierBody> = new Map();
     #eventQueue: RAPIER.EventQueue;
+    #destroyed: boolean = false;
 
     /**
      * [KO] 물리 엔진의 원본 월드(World) 객체를 반환합니다.
@@ -132,7 +133,9 @@ export class RapierPhysics implements IPhysicsEngine {
      * [EN] `Promise` that resolves when initialization is complete
      */
     async init(): Promise<void> {
+        if (this.#destroyed) return;
         await RAPIER.init();
+        if (this.#destroyed) return;
         this.#world = new RAPIER.World({x: 0, y: -9.81, z: 0});
         this.#eventQueue = new RAPIER.EventQueue(true);
     }
@@ -218,8 +221,34 @@ export class RapierPhysics implements IPhysicsEngine {
      * [EN] `RapierBody` instance to remove
      */
     removeBody(body: RapierBody): void {
+        if (!this.#world || !body) return;
         this.#world.removeRigidBody(body.nativeBody);
         this.#bodies.delete(body.nativeCollider.handle);
+    }
+
+    /**
+     * [KO] 물리 월드와 이벤트 큐의 WASM 메모리를 명시적으로 해제하고 모든 바디 참조를 정리합니다.
+     * [EN] Explicitly frees WASM memory of the physics world and event queue, and clears all body references.
+     */
+    destroy(): void {
+        if (this.#destroyed) return;
+        this.#destroyed = true;
+        this.#bodies.clear();
+        this.onCollisionStarted = null;
+        if (this.#eventQueue) {
+            try {
+                this.#eventQueue.free();
+            } catch {
+            }
+            this.#eventQueue = null;
+        }
+        if (this.#world) {
+            try {
+                this.#world.free();
+            } catch {
+            }
+            this.#world = null;
+        }
     }
 
     /**

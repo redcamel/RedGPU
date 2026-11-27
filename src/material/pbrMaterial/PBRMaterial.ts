@@ -188,6 +188,7 @@ interface PBRMaterial {
      * [EN] Whether to use vertex color
      */
     useVertexColor: boolean
+    useVertexTangent: boolean
     /**
      * [KO] 알파 컷오프(MASK) 사용 여부
      * [EN] Whether to use alpha cutoff (MASK)

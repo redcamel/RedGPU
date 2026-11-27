@@ -155,7 +155,7 @@ const setupOpticalBenchScene = (redGPUContext, scene) => {
         );
     });
 
-    const cesiumManUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf';
+    const cesiumManUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Draco/CesiumMan.gltf';
     new RedGPU.GLTFLoader(redGPUContext, cesiumManUrl, (result) => {
         const heroMesh = scene.addChild(result.resultMesh);
         heroMesh.setPosition(0.0, -1.6, 0.0);

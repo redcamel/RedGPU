@@ -142,8 +142,11 @@ class IndexBuffer extends ABaseBuffer {
         if (Array.isArray(data)) {
             data = new Uint32Array(data);
         }
+        const isRegistered = this.targetResourceManagedState.table.has(this.cacheKey);
         if (this[GPU_BUFFER_SYMBOL]) {
-            this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+            if (isRegistered) {
+                this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+            }
             this.redGPUContext.commandEncoderManager.addDeferredDestroy(this[GPU_BUFFER_SYMBOL]);
             this[GPU_BUFFER_SYMBOL] = null;
         }
@@ -155,7 +158,9 @@ class IndexBuffer extends ABaseBuffer {
             label: this.name
         }
         this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
-        this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+        if (isRegistered) {
+            this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+        }
         this.#triangleCount = this.#indexCount / 3;
         gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL] as BufferSource);
     }

@@ -122,23 +122,35 @@ body.applyImpulse([0, 10, 0]);
 
 ---
 
-## 5. 라이브 예제
+## 5. 리소스 해제
+
+`RapierPhysics` 는 내부적으로 Rust/WASM 힙 메모리에 물리 월드와 이벤트 큐를 유지합니다. `scene.destroy()` 또는 `redGPUContext.destroy()` 가 호출되면 연결된
+물리 엔진의 `destroy()` 가 자동으로 실행되어 WASM 메모리를 해제하며, 물리 엔진만 단독으로 종료할 때는 직접 호출할 수도 있습니다.
+
+```javascript
+// 물리 월드 및 이벤트 큐의 WASM 메모리 명시적 해제
+physicsEngine.destroy();
+```
+
+---
+
+## 6. 라이브 예제
 
 분야별 예제를 통해 물리 엔진의 실제 활용법을 확인해 보세요.
 
-### 5.1 기초 및 형상
+### 6.1 기초 및 형상
 
 - [기본 시뮬레이션 및 중력 테스트](https://redcamel.github.io/RedGPU/examples/physics/basic/)
 - [다양한 충돌체 형상 (Shapes)](https://redcamel.github.io/RedGPU/examples/physics/shapes/)
 - [지형 (Heightfield) 시뮬레이션](https://redcamel.github.io/RedGPU/examples/physics/heightField/)
 
-### 5.2 컨트롤러 및 상호작용
+### 6.2 컨트롤러 및 상호작용
 
 - [키네마틱 (Kinematic) 캐릭터 제어](https://redcamel.github.io/RedGPU/examples/physics/characterController/)
 - [고급 캐릭터 컨트롤러 (계단/경사로)](https://redcamel.github.io/RedGPU/examples/physics/advancedCharacterController/)
 - [마우스 클릭 및 레이캐스트 상호작용](https://redcamel.github.io/RedGPU/examples/physics/raycast/)
 
-### 5.3 조인트 및 고급 물리
+### 6.3 조인트 및 고급 물리
 
 - [기본 조인트 (Joints)](https://redcamel.github.io/RedGPU/examples/physics/joints/)
 - [회전 조인트 (Revolute)](https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/)

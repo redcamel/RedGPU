@@ -3,18 +3,43 @@ import GLTFLoader from "../GLTFLoader";
 import parseAttributeInfo_GLTF from "../parsers/parseAttributeInfo_GLTF";
 import parseSparse_GLTF from "../parsers/parseSparse_GLTF";
 import AccessorInfo_GLTF from "./AccessorInfo_GLTF";
-import MorphInfoData_GLTF from "./MorphInfoData_GLTF";
+
+const EMPTY_FLOAT32_ARRAY = new Float32Array(0);
 
 /**
- * [KO] GLTF 메쉬 프리미티브의 모프 타겟(Morph Target) 목록과 가중치 정보를 관리하는 클래스입니다.
- * [EN] Class that manages morph target list and weight information for a GLTF mesh primitive.
+ * [KO] glTF 모프 타겟(Morph Target)의 정점 위치 델타 데이터를 보관하는 내부 클래스입니다.
+ * [EN] Internal class storing vertex position delta data of a glTF morph target.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Loader
+ * @category GLTF
+ */
+export class MorphInfoData_GLTF {
+    /**
+     * [KO] 모프 타겟 정점 위치 델타 배열
+     * [EN] Morph target vertex position delta array
+     */
+    vertices: Float32Array = EMPTY_FLOAT32_ARRAY;
+    /**
+     * [KO] GPU 업로드용 모프 인터리브 데이터
+     * [EN] Interleaved morph data for GPU upload
+     */
+    interleaveData: Float32Array;
+}
+
+/**
+ * [KO] glTF 메쉬 프리미티브의 모프 타겟 목록과 가중치를 관리하는 내부 클래스입니다.
+ * [EN] Internal class managing the morph target list and weights of a glTF mesh primitive.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category GLTF
  */
 class MorphInfo_GLTF {
     /**
@@ -27,11 +52,6 @@ class MorphInfo_GLTF {
      * [EN] Morph target weights array
      */
     weights: number[]
-    /**
-     * [KO] 모프 데이터 캐시 객체
-     * [EN] Morph data cache object
-     */
-    cacheData = {}
     /**
      * [KO] 원본 인터리브 정점 데이터
      * [EN] Original interleaved vertex data
@@ -58,34 +78,22 @@ class MorphInfo_GLTF {
     constructor(gltfLoader: GLTFLoader, gltfData: GLTF, meshPrimitive: MeshPrimitive, weightsValue: number[]) {
         if (meshPrimitive.targets) {
             this.morphInfoDataList = meshPrimitive.targets.map((target) => {
-                const morphData = new MorphInfoData_GLTF()
-                for (let key in target) {
-                    const {
-                        vertices,
-                        verticesColor_0,
-                        normals,
-                        uvs,
-                        uvs1,
-                        uvs2,
-                        jointWeights,
-                        joints,
-                        tangents,
-                    } = morphData;
-                    const accessorGlTfId = target[key];
-                    const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
-                    const {accessor} = accessorInfo
-                    parseAttributeInfo_GLTF(
-                        key, accessorInfo,
-                        vertices, uvs, uvs1, uvs2, normals,
-                        jointWeights, joints,
-                        verticesColor_0, tangents
-                    );
-                    if (accessor.sparse) parseSparse_GLTF(gltfLoader, key, accessor, gltfData, vertices);
+                const morphData = new MorphInfoData_GLTF();
+                if ('POSITION' in target) {
+                    const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, target.POSITION);
+                    const {accessor} = accessorInfo;
+                    const parsed = parseAttributeInfo_GLTF('POSITION', accessorInfo);
+                    if (parsed) {
+                        morphData.vertices = parsed;
+                        if (accessor.sparse) {
+                            parseSparse_GLTF(gltfLoader, 'POSITION', accessor, gltfData, parsed);
+                        }
+                    }
                 }
-                if (weightsValue.length) {
-                    morphData.interleaveData = new Float32Array(morphData.vertices);
+                if (weightsValue?.length) {
+                    morphData.interleaveData = morphData.vertices;
                 }
-                return morphData
+                return morphData;
             });
         }
         this.weights = weightsValue || [];

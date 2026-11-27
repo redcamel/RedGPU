@@ -89,8 +89,16 @@ const GuiPanel: React.FC = () => {
                                              windManager={firstView.scene.windManager}
                                              expanded={typeof guiConfig.globalWind === 'object' ? guiConfig.globalWind.expanded : false}/>
                     )}
-                    {guiConfig.ibl && firstView && <GuiIBLHelper gui={guiInstance} view={firstView}/>}
-                    {guiConfig.skybox && firstView && <GuiSkyBoxHelper gui={guiInstance} view={firstView}/>}
+                    {guiConfig.ibl && firstView && (
+                        <GuiIBLHelper gui={guiInstance}
+                                      view={firstView}
+                                      expanded={typeof guiConfig.ibl === 'object' ? guiConfig.ibl.expanded : true}/>
+                    )}
+                    {guiConfig.skybox && firstView && (
+                        <GuiSkyBoxHelper gui={guiInstance}
+                                         view={firstView}
+                                         expanded={typeof guiConfig.skybox === 'object' ? guiConfig.skybox.expanded : true}/>
+                    )}
                 </>
             )}
         </>

@@ -382,6 +382,9 @@ export default withMermaid(defineConfig({
         }
     },
     head: [
+        ['link', {rel: 'icon', type: 'image/x-icon', href: '/RedGPU/manual/favicon.ico'}],
+        ['link', {rel: 'icon', type: 'image/png', sizes: '32x32', href: '/RedGPU/manual/favicon-32x32.png'}],
+        ['link', {rel: 'apple-touch-icon', sizes: '180x180', href: '/RedGPU/manual/apple-touch-icon.png'}],
         ['meta', { name: 'keywords', content: 'WebGPU, RedGPU, 3D Engine, Graphics, Javascript, Typescript' }],
         ['meta', { name: 'author', content: 'RedCamel' }],
         ['meta', { property: 'og:type', content: 'website' }],
@@ -722,7 +725,7 @@ export default withMermaid(defineConfig({
     },
     // 공통 테마 설정
     themeConfig: {
-        // logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
+        logo: '/logo.png',
 
         // 공통 사이드바 (finalSidebar 내부의 키가 /ko/, /en/로 나뉘어 있어 자동 매칭됨)
         sidebar: finalSidebar,

@@ -121,6 +121,8 @@ const processAnimationsAndSkinning = (
                 }
             }
 
+            if (!mesh.animationInfo.weightBuffer || !mesh.animationInfo.jointBuffer) return;
+
             if (!skinInfo.computeShader) {
                 skinInfo.createCompute(
                     redGPUContext,

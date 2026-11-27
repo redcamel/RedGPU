@@ -14,67 +14,69 @@
  * [KO] 삼각형 정점 인덱스 배열 (비어 있을 경우 정점 순서대로 처리)
  * [EN] Triangle vertex index array (processed in vertex order if empty)
  * @returns
- * [KO] 정규화된 정점 법선 벡터 배열 (`[nx, ny, nz, ...]`)
- * [EN] Normalized vertex normal vector array (`[nx, ny, nz, ...]`)
+ * [KO] 정규화된 정점 법선 벡터 배열 (`Float32Array`, `[nx, ny, nz, ...]`)
+ * [EN] Normalized vertex normal vector array (`Float32Array`, `[nx, ny, nz, ...]`)
  * @category Math
  */
-const calculateNormals = (vertexArray: number[], indexArray: number[]): number[] => {
-    let i, j;
-    let x = 0;
-    let y = 1;
-    let z = 2;
-    let result: number[] = [];
-    let indices = indexArray;
-    const numVertices = vertexArray.length / 3;
-    if (!indexArray || indexArray.length === 0) {
-        indexArray = [];
+const calculateNormals = (
+    vertexArray: number[] | Float32Array,
+    indexArray: number[] | Uint32Array | Uint16Array
+): Float32Array => {
+    const vertexLen = vertexArray.length;
+    const result = new Float32Array(vertexLen);
+    const numVertices = vertexLen / 3;
+    let indices: number[] | Uint32Array | Uint16Array = indexArray;
+    if (!indices || indices.length === 0) {
+        const sequential = new Uint32Array(numVertices);
         for (let i = 0; i < numVertices; i++) {
-            indices.push(i);
+            sequential[i] = i;
         }
+        indices = sequential;
     }
-    for (i = 0; i < vertexArray.length; i = i + 3) {
-        result[i + x] = 0.0;
-        result[i + y] = 0.0;
-        result[i + z] = 0.0;
+
+    const indicesLen = indices.length;
+    for (let i = 0; i < indicesLen; i += 3) {
+        const index0 = 3 * indices[i];
+        const index1 = 3 * indices[i + 1];
+        const index2 = 3 * indices[i + 2];
+
+        const v1x = vertexArray[index2] - vertexArray[index1];
+        const v1y = vertexArray[index2 + 1] - vertexArray[index1 + 1];
+        const v1z = vertexArray[index2 + 2] - vertexArray[index1 + 2];
+
+        const v2x = vertexArray[index0] - vertexArray[index1];
+        const v2y = vertexArray[index0 + 1] - vertexArray[index1 + 1];
+        const v2z = vertexArray[index0 + 2] - vertexArray[index1 + 2];
+
+        const nx = v1y * v2z - v1z * v2y;
+        const ny = v1z * v2x - v1x * v2z;
+        const nz = v1x * v2y - v1y * v2x;
+
+        result[index0] += nx;
+        result[index0 + 1] += ny;
+        result[index0 + 2] += nz;
+
+        result[index1] += nx;
+        result[index1 + 1] += ny;
+        result[index1 + 2] += nz;
+
+        result[index2] += nx;
+        result[index2 + 1] += ny;
+        result[index2 + 2] += nz;
     }
-    for (i = 0; i < indices.length; i = i + 3) {
-        let v1 = [];
-        let v2 = [];
-        let normal = [];
-        let index0, index1, index2, indexJ;
-        index0 = 3 * indices[i];
-        index1 = 3 * indices[i + 1];
-        index2 = 3 * indices[i + 2];
-        v1[x] = vertexArray[index2 + x] - vertexArray[index1 + x];
-        v1[y] = vertexArray[index2 + y] - vertexArray[index1 + y];
-        v1[z] = vertexArray[index2 + z] - vertexArray[index1 + z];
-        v2[x] = vertexArray[index0 + x] - vertexArray[index1 + x];
-        v2[y] = vertexArray[index0 + y] - vertexArray[index1 + y];
-        v2[z] = vertexArray[index0 + z] - vertexArray[index1 + z];
-        normal[x] = v1[y] * v2[z] - v1[z] * v2[y];
-        normal[y] = v1[z] * v2[x] - v1[x] * v2[z];
-        normal[z] = v1[x] * v2[y] - v1[y] * v2[x];
-        for (j = 0; j < 3; j++) {
-            indexJ = 3 * indices[i + j];
-            result[indexJ + x] = result[indexJ + x] + normal[x];
-            result[indexJ + y] = result[indexJ + y] + normal[y];
-            result[indexJ + z] = result[indexJ + z] + normal[z];
-        }
-    }
-    for (i = 0; i < vertexArray.length; i = i + 3) {
-        let nn = [];
-        nn[x] = result[i + x];
-        nn[y] = result[i + y];
-        nn[z] = result[i + z];
-        let len = Math.sqrt((nn[x] * nn[x]) + (nn[y] * nn[y]) + (nn[z] * nn[z]));
+
+    for (let i = 0; i < vertexLen; i += 3) {
+        const nx = result[i];
+        const ny = result[i + 1];
+        const nz = result[i + 2];
+        let len = Math.sqrt(nx * nx + ny * ny + nz * nz);
         if (len === 0) len = 1.0;
-        nn[x] = nn[x] / len;
-        nn[y] = nn[y] / len;
-        nn[z] = nn[z] / len;
-        result[i + x] = nn[x];
-        result[i + y] = nn[y];
-        result[i + z] = nn[z];
+        const invLen = 1.0 / len;
+        result[i] = nx * invLen;
+        result[i + 1] = ny * invLen;
+        result[i + 2] = nz * invLen;
     }
+
     return result;
-}
-export default calculateNormals
+};
+export default calculateNormals;

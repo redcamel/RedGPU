@@ -181,7 +181,7 @@ export class OBB {
         const axes = this.#getAxes();
         for (let i = 0; i < 3; i++) {
             const projection = vec3.dot(localPoint, axes[i]);
-            if (Math.abs(projection) > this.halfExtents[i]) {
+            if (!(Math.abs(projection) <= this.halfExtents[i])) {
                 return false;
             }
         }

@@ -1234,6 +1234,35 @@ export const ExampleList: ExampleListType = [
         name: 'GLTF',
         list: [
             {
+                name: 'glTF · GLB · Draco · Meshopt',
+                list: [
+                    {
+                        name: 'Skinned Geometry Compression (Draco · Meshopt)',
+                        path: 'gltf/formats/brainStemAllFormats',
+                        description: {
+                            ko: 'glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT 6종 지오메트리 압축 및 스키닝 애니메이션을 비교합니다.',
+                            en: 'Compares 6 geometry compression and container formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Meshopt, glTF-Meshopt-EXT) with skinning animation.'
+                        },
+                    },
+                    {
+                        name: 'PBR Texture Compression (KTX2 · WebP · JPG)',
+                        path: 'gltf/formats/carConceptAllFormats',
+                        description: {
+                            ko: 'glTF, glTF-Binary, glTF-JPG, glTF-KTX-BasisU-Draco, glTF-WEBP 5종 텍스처 압축 포맷과 Material Variants를 한 화면에서 비교합니다.',
+                            en: 'Compares 5 texture compression formats (glTF, glTF-Binary, glTF-JPG, glTF-KTX-BasisU-Draco, glTF-WEBP) with synchronized Material Variants.'
+                        },
+                    },
+                    {
+                        name: 'Static Mesh Quantization (Quantized · Embedded)',
+                        path: 'gltf/formats/duckAllFormats',
+                        description: {
+                            ko: 'glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Quantized 5종 정적 메쉬 양자화 및 기본 포맷을 한 화면에서 비교합니다.',
+                            en: 'Compares 5 static mesh quantization and base formats (glTF, glTF-Binary, glTF-Embedded, glTF-Draco, glTF-Quantized) side by side.'
+                        },
+                    },
+                ]
+            },
+            {
                 name: 'Basic',
                 list: [
                     {
@@ -1374,6 +1403,38 @@ export const ExampleList: ExampleListType = [
                             en: 'Tests automatic vertex normal generation for models without normal data.'
                         },
                     },
+                    {
+                        name: 'Primitive Mode Normals Test',
+                        path: 'gltf/basic/primitiveModeNormalsTest',
+                        description: {
+                            ko: '토폴로지별 NORMAL·TANGENT 유무 및 플랫 노멀 전개 정확도를 검증합니다.',
+                            en: 'Verifies normal/tangent handling and flat normal generation across primitive modes.'
+                        },
+                    },
+                    {
+                        name: 'Mesh Primitive Modes',
+                        path: 'gltf/basic/meshPrimitiveModes',
+                        description: {
+                            ko: 'POINTS, LINES, LINE_STRIP, TRIANGLES, TRIANGLE_STRIP 등 프리미티브 토폴로지 렌더링을 검증합니다.',
+                            en: 'Verifies rendering across glTF primitive topology modes.'
+                        },
+                    },
+                    {
+                        name: 'Simple Sparse Accessor',
+                        path: 'gltf/basic/simpleSparseAccessor',
+                        description: {
+                            ko: 'Sparse Accessor를 사용한 부분 정점 치환 정확도를 검증합니다.',
+                            en: 'Verifies partial vertex substitution using glTF sparse accessors.'
+                        },
+                    },
+                    {
+                        name: 'Unicode Test (❤♻)',
+                        path: 'gltf/basic/unicodeTest',
+                        description: {
+                            ko: '유니코드·이모지가 포함된 파일명과 외부 리소스 URI 해석을 검증합니다.',
+                            en: 'Verifies UTF-8 filename and external resource URI resolution containing Unicode characters.'
+                        },
+                    },
                 ]
             },
             {
@@ -1488,14 +1549,6 @@ export const ExampleList: ExampleListType = [
                         },
                     },
 
-                    {
-                        name: 'Brain Stem',
-                        path: 'gltf/animation/brainStem',
-                        description: {
-                            ko: `복잡한 계층 구조와 스키닝을 가진 BrainStem 모델 애니메이션입니다.`,
-                            en: `BrainStem model animation with complex hierarchy and skinning.`
-                        },
-                    },
                     {
                         name: 'Morph Stress Test',
                         path: 'gltf/animation/morphStressTest',
@@ -2046,24 +2099,6 @@ export const ExampleList: ExampleListType = [
                                 },
                             },
                             {
-                                name: 'Stained Glass Lamp',
-                                path: 'gltf/gltfExtensions/transmission/stainedGlassLamp',
-                                extensionList: ['KHR_materials_transmission'],
-                                description: {
-                                    ko: `스테인드글라스 램프를 통해 색상이 있는 투과광을 보여줍니다.`,
-                                    en: `Shows colored transmitted light through a stained glass lamp.`
-                                },
-                            },
-                            {
-                                name: 'Chronograph Watch',
-                                path: 'gltf/gltfExtensions/transmission/chronographWatch',
-                                extensionList: ['KHR_materials_transmission', 'KHR_materials_variants'],
-                                description: {
-                                    ko: `시계 유리의 투명도와 내부 디테일을 보여주는 고품질 모델입니다.`,
-                                    en: `High-quality model showing watch glass transparency and internal details.`
-                                },
-                            },
-                            {
                                 name: 'Mosquito In Amber',
                                 path: 'gltf/gltfExtensions/transmission/mosquitoInAmber',
                                 extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
@@ -2165,6 +2200,153 @@ export const ExampleList: ExampleListType = [
                                 description: {
                                     ko: '투과와 볼륨 등 고급 PBR 재질 속성을 검증하는 표준 USD 셰이더 볼입니다.',
                                     en: 'Standard USD Shader Ball showcasing transmission and volume PBR properties.'
+                                },
+                            },
+                        ]
+                    },
+                    {
+                        name: 'KHR_mesh_quantization',
+                        list: [
+                            {
+                                name: 'Mesh Quantization (4 Models)',
+                                path: 'gltf/gltfExtensions/meshQuantization',
+                                extensionList: ['KHR_mesh_quantization', 'KHR_texture_transform'],
+                                description: {
+                                    ko: 'Khronos 공식 glTF-Quantized 4종 모델(AnimatedMorphCube, Avocado, Duck, Lantern)을 한 화면에 배치하여 정수 양자화 정점 및 모프 애니메이션을 검증합니다.',
+                                    en: 'Displays all four official Khronos glTF-Quantized models (AnimatedMorphCube, Avocado, Duck, Lantern) side by side to verify quantized vertices and morph animation.'
+                                },
+                            },
+                        ]
+                    },
+                    {
+                        name: 'KHR_texture_basisu & KHR_materials_variants',
+                        list: [
+                            {
+                                name: 'Chronograph Watch (KTX2)',
+                                path: 'gltf/gltfExtensions/textureBasisu/chronographWatch',
+                                extensionList: ['KHR_texture_basisu', 'KHR_materials_transmission', 'KHR_materials_specular'],
+                                description: {
+                                    ko: 'Khronos 공식 ChronographWatch (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 PBR 색감 정합성을 검증합니다.',
+                                    en: 'Loads the official Khronos ChronographWatch (glTF-KTX-BasisU) model to verify automatic KTX2 texture loading and PBR fidelity.'
+                                },
+                            },
+                            {
+                                name: 'Stained Glass Lamp (KTX2 + Variants)',
+                                path: 'gltf/gltfExtensions/textureBasisu/stainedGlassLamp',
+                                extensionList: ['KHR_texture_basisu', 'KHR_materials_variants', 'KHR_materials_transmission', 'KHR_materials_volume'],
+                                description: {
+                                    ko: 'Khronos 공식 StainedGlassLamp (glTF-KTX-BasisU) 모델로 다중 KTX2 텍스처 자동 로딩과 KHR_materials_variants 실시간 전환을 검증합니다.',
+                                    en: 'Loads the official Khronos StainedGlassLamp (glTF-KTX-BasisU) model to verify automatic KTX2 loading and real-time KHR_materials_variants switching.'
+                                },
+                            },
+                            {
+                                name: 'Materials Variants Shoe',
+                                path: 'gltf/gltfExtensions/materialsVariants',
+                                extensionList: ['KHR_materials_variants'],
+                                description: {
+                                    ko: 'Khronos 공식 MaterialsVariantsShoe 모델의 3종 재질 바리에이션(Midnight, Beach, Street)을 런타임에 실시간 전환합니다.',
+                                    en: 'Switches between the three material variants (Midnight, Beach, Street) of Khronos MaterialsVariantsShoe in real time.'
+                                },
+                            },
+                        ]
+                    },
+                    {
+                        name: 'KHR_node_visibility',
+                        list: [
+                            {
+                                name: 'Node Visibility (2 Models)',
+                                path: 'gltf/gltfExtensions/nodeVisibility',
+                                extensionList: ['KHR_node_visibility', 'KHR_animation_pointer'],
+                                description: {
+                                    ko: 'Khronos 공식 NodeVisibilityTest와 CubeVisibility 모델로 초기 visible: false 반영 및 가시성 애니메이션을 검증합니다.',
+                                    en: 'Verifies initial visible: false handling and visibility animation with Khronos NodeVisibilityTest and CubeVisibility.'
+                                },
+                            },
+                        ]
+                    },
+                    {
+                        name: 'KHR_animation_pointer',
+                        list: [
+                            {
+                                name: 'Pot Of Coals Animation Pointer',
+                                path: 'gltf/gltfExtensions/animationPointer/potOfCoalsAnimationPointer',
+                                extensionList: ['KHR_animation_pointer', 'KHR_texture_transform', 'KHR_materials_volume'],
+                                description: {
+                                    ko: 'Khronos 공식 PotOfCoalsAnimationPointer 모델로 텍스처 회전 및 열기 굴절 애니메이션을 검증합니다.',
+                                    en: 'Loads Khronos PotOfCoalsAnimationPointer to verify texture rotation and heat refraction animation.'
+                                },
+                            },
+                            {
+                                name: 'Animation Pointer UVs',
+                                path: 'gltf/gltfExtensions/animationPointer/animationPointerUVs',
+                                extensionList: ['KHR_animation_pointer', 'KHR_texture_transform'],
+                                description: {
+                                    ko: 'Khronos 공식 AnimationPointerUVs 모델로 PBR 및 확장 텍스처의 UV 스크롤·스케일·회전 애니메이션을 검증합니다.',
+                                    en: 'Loads Khronos AnimationPointerUVs to verify UV offset, scale, and rotation pointer animations across PBR and extension textures.'
+                                },
+                            },
+                            {
+                                name: 'Animated Colors Cube',
+                                path: 'gltf/gltfExtensions/animationPointer/animatedColorsCube',
+                                extensionList: ['KHR_animation_pointer'],
+                                description: {
+                                    ko: 'Khronos 공식 AnimatedColorsCube 모델로 baseColorFactor 색상 보간 포인터 애니메이션을 검증합니다.',
+                                    en: 'Loads Khronos AnimatedColorsCube to verify baseColorFactor color interpolation pointer animation.'
+                                },
+                            },
+                        ]
+                    },
+                    {
+                        name: 'KHR_meshopt_compression & EXT_meshopt_compression',
+                        list: [
+                            {
+                                name: 'Meshopt Cube Test (KHR)',
+                                path: 'gltf/gltfExtensions/meshoptCompression/meshoptCubeTest',
+                                extensionList: ['KHR_meshopt_compression', 'KHR_mesh_quantization'],
+                                description: {
+                                    ko: 'Khronos 공식 MeshoptCubeTest 모델로 KHR_meshopt_compression 온디맨드 WASM 디코딩을 검증합니다.',
+                                    en: 'Loads Khronos MeshoptCubeTest to verify on-demand WASM decoding for KHR_meshopt_compression.'
+                                },
+                            },
+                            {
+                                name: 'BrainStem (KHR & EXT)',
+                                path: 'gltf/gltfExtensions/meshoptCompression/brainStem',
+                                extensionList: ['KHR_meshopt_compression', 'EXT_meshopt_compression', 'KHR_mesh_quantization'],
+                                description: {
+                                    ko: 'Khronos 공식 BrainStem (glTF-Meshopt, glTF-Meshopt-EXT) 두 모델을 나란히 배치해 KHR/EXT 압축 스키닝 애니메이션을 비교 검증합니다.',
+                                    en: 'Loads Khronos BrainStem (glTF-Meshopt and glTF-Meshopt-EXT) side by side to compare KHR/EXT Meshopt skinning animation decoding.'
+                                },
+                            },
+                        ]
+                    },
+                    {
+                        name: 'KHR_draco_mesh_compression',
+                        list: [
+                            {
+                                name: 'CarConcept (Draco + KTX2 + Variants)',
+                                path: 'gltf/gltfExtensions/dracoMeshCompression/carConcept',
+                                extensionList: ['KHR_draco_mesh_compression', 'KHR_texture_basisu', 'KHR_materials_variants', 'KHR_materials_clearcoat', 'KHR_materials_transmission'],
+                                description: {
+                                    ko: 'Khronos 공식 CarConcept (glTF-KTX-BasisU-Draco) 모델로 Draco 압축·KTX2 텍스처·재질 바리에이션 복합 로딩을 검증합니다.',
+                                    en: 'Loads Khronos CarConcept (glTF-KTX-BasisU-Draco) to verify combined Draco compression, KTX2 textures, and material variants.'
+                                },
+                            },
+                            {
+                                name: 'CesiumMan (Draco Skinning)',
+                                path: 'gltf/gltfExtensions/dracoMeshCompression/cesiumMan',
+                                extensionList: ['KHR_draco_mesh_compression'],
+                                description: {
+                                    ko: 'Khronos 공식 CesiumMan (glTF-Draco) 모델로 Draco 압축 스키닝(JOINTS_0/WEIGHTS_0) 및 애니메이션 재생을 검증합니다.',
+                                    en: 'Loads Khronos CesiumMan (glTF-Draco) to verify Draco-compressed skinning (JOINTS_0/WEIGHTS_0) and animation playback.'
+                                },
+                            },
+                            {
+                                name: 'A Beautiful Game (GLB Draco + KTX2)',
+                                path: 'gltf/gltfExtensions/dracoMeshCompression/aBeautifulGame',
+                                extensionList: ['KHR_draco_mesh_compression', 'KHR_texture_basisu', 'KHR_materials_transmission', 'KHR_materials_volume'],
+                                description: {
+                                    ko: 'Khronos 공식 ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB 모델로 바이너리 Draco + KTX2 복합 렌더링을 검증합니다.',
+                                    en: 'Loads Khronos ABeautifulGame (glTF-Binary-KTX-ETC1S-Draco) GLB to verify binary Draco and KTX2 combined rendering.'
                                 },
                             },
                         ]

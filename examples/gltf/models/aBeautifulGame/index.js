@@ -26,7 +26,7 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb';
+        const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary-KTX-ETC1S-Draco/ABeautifulGame.glb';
         loadGLTF(view, MODEL_URL);
 
         const renderer = new RedGPU.Renderer();

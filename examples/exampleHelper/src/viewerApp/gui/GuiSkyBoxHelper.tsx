@@ -10,15 +10,16 @@ import {ExampleHelperState, useExampleHelperStore} from '../../store';
 interface GuiSkyBoxHelperProps {
     gui: any;
     view: any;
+    expanded?: boolean;
 }
 
-const GuiSkyBoxHelper: React.FC<GuiSkyBoxHelperProps> = ({gui, view}) => {
+const GuiSkyBoxHelper: React.FC<GuiSkyBoxHelperProps> = ({gui, view, expanded = true}) => {
     const RedGPU = useExampleHelperStore((state: ExampleHelperState) => state.RedGPU);
 
     useEffect(() => {
         if (!view) return;
 
-        const skyboxFolder = gui.addFolder({title: 'SkyBox', expanded: true});
+        const skyboxFolder = gui.addFolder({title: 'SkyBox', expanded});
 
         const settings = {
             useSkyBox: true,

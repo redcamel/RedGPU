@@ -1,3 +1,4 @@
+import Mesh from "../../../../display/mesh/Mesh";
 import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
 
 /**
@@ -9,7 +10,7 @@ import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @category Loader
+ * @category GLTF
  */
 export class GLTFParsedSingleClip {
     /**
@@ -32,6 +33,8 @@ export class GLTFParsedSingleClip {
      * [EN] List of parsed animation tracks
      */
     tracks: AniTrack_GLTF[] = [];
+    #trackLookup: Map<any, (AniTrack_GLTF | undefined)[]> | null = null;
+    #trackLookupSize: number = -1;
 
     /**
      * [KO] GLTFParsedSingleClip 인스턴스를 생성합니다.
@@ -43,5 +46,41 @@ export class GLTFParsedSingleClip {
      */
     constructor(name: string) {
         this.name = name;
+    }
+
+    /**
+     * [KO] 대상 메쉬와 키 타입에 일치하는 첫 번째 애니메이션 트랙을 `O(1)` 캐시 맵에서 조회합니다.
+     * [EN] Looks up the first animation track matching the target mesh and key type via an `O(1)` cached map.
+     *
+     * @param mesh -
+     * [KO] 애니메이션 대상 메쉬
+     * [EN] Target mesh
+     * @param keyType -
+     * [KO] 정수 인코딩된 애니메이션 키 타입
+     * [EN] Integer-encoded animation key type
+     * @returns
+     * [KO] 일치하는 `AniTrack_GLTF` 또는 `undefined`
+     * [EN] Matching `AniTrack_GLTF` or `undefined`
+     */
+    findTrack(mesh: Mesh, keyType: number): AniTrack_GLTF | undefined {
+        const tracks = this.tracks;
+        if (!this.#trackLookup || this.#trackLookupSize !== tracks.length) {
+            const lookup = new Map<any, (AniTrack_GLTF | undefined)[]>();
+            for (let i = 0, len = tracks.length; i < len; i++) {
+                const track = tracks[i];
+                const targetMesh = track.animationTargetMesh;
+                let byKey = lookup.get(targetMesh);
+                if (!byKey) {
+                    byKey = [];
+                    lookup.set(targetMesh, byKey);
+                }
+                if (!byKey[track.keyType]) {
+                    byKey[track.keyType] = track;
+                }
+            }
+            this.#trackLookup = lookup;
+            this.#trackLookupSize = tracks.length;
+        }
+        return this.#trackLookup.get(mesh)?.[keyType];
     }
 }

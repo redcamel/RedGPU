@@ -133,23 +133,36 @@ All options that can be passed as the second argument when calling `createBody()
 
 ---
 
-## 5. Live Examples
+## 5. Resource Cleanup
+
+`RapierPhysics` allocates its physics world and event queue on the Rust/WASM heap. Calling `scene.destroy()` or
+`redGPUContext.destroy()` automatically invokes `physicsEngine.destroy()` to free WASM memory, and you can also call it
+directly when shutting down physics independently.
+
+```javascript
+// Explicitly free WASM memory for the physics world and event queue
+physicsEngine.destroy();
+```
+
+---
+
+## 6. Live Examples
 
 Explore practical use cases of the physics engine through these categorized examples.
 
-### 5.1 Basics & Shapes
+### 6.1 Basics & Shapes
 
 - [Basic Simulation & Gravity Test](https://redcamel.github.io/RedGPU/examples/physics/basic/)
 - [Various Collider Shapes](https://redcamel.github.io/RedGPU/examples/physics/shapes/)
 - [Terrain (Heightfield) Simulation](https://redcamel.github.io/RedGPU/examples/physics/heightField/)
 
-### 5.2 Controllers & Interaction
+### 6.2 Controllers & Interaction
 
 - [Kinematic Character Control](https://redcamel.github.io/RedGPU/examples/physics/characterController/)
 - [Advanced Character Controller (Stairs/Slopes)](https://redcamel.github.io/RedGPU/examples/physics/advancedCharacterController/)
 - [Mouse Click & Raycast Interaction](https://redcamel.github.io/RedGPU/examples/physics/raycast/)
 
-### 5.3 Joints & Advanced Physics
+### 6.3 Joints & Advanced Physics
 
 - [Basic Joints](https://redcamel.github.io/RedGPU/examples/physics/joints/)
 - [Revolute Joint](https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/)

@@ -2,9 +2,68 @@ import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
-import {GLTF, GlTfId, MaterialNormalTextureInfo, MaterialOcclusionTextureInfo, TextureInfo} from "../../GLTF";
+import {getActiveParseContext} from "../../core/GLTFParseContext";
+import {GLTF, GlTfId, MaterialNormalTextureInfo, MaterialOcclusionTextureInfo, Texture, TextureInfo} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import parse_KHR_texture_transform from "./extensions/parse_KHR_texture_transform";
+
+const SAMPLER_WRAP_TABLE = Object.freeze({
+    33071: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+    33648: GPU_ADDRESS_MODE.MIRRORED_REPEAT,
+    10497: GPU_ADDRESS_MODE.REPEAT
+});
+
+const SAMPLER_FILTER_TABLE = Object.freeze({
+    9728: GPU_MIPMAP_FILTER_MODE.NEAREST,
+    9729: GPU_MIPMAP_FILTER_MODE.LINEAR
+});
+
+let cachedPreferredCanvasFormat: GPUTextureFormat | null = null;
+let cachedSRGBTextureFormat: string | null = null;
+
+const getPreferredCanvasFormatCached = (): GPUTextureFormat => {
+    if (!cachedPreferredCanvasFormat) {
+        cachedPreferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
+    }
+    return cachedPreferredCanvasFormat;
+};
+
+/**
+ * [KO] 현재 WebGPU 캔버스 선호 포맷에 대응하는 sRGB 텍스처 포맷 문자열을 반환합니다.
+ * [EN] Returns the sRGB texture format string corresponding to the current preferred WebGPU canvas format.
+ *
+ * @returns
+ * [KO] sRGB 텍스처 포맷 문자열
+ * [EN] sRGB texture format string
+ * @category GLTF
+ */
+export const getSRGBTextureFormat = (): string => {
+    if (!cachedSRGBTextureFormat) {
+        cachedSRGBTextureFormat = `${getPreferredCanvasFormatCached()}-srgb`;
+    }
+    return cachedSRGBTextureFormat;
+};
+
+/**
+ * [KO] GLTF 텍스처 정의에서 확장 우선순위(`KHR_texture_basisu` -> `EXT_texture_webp` -> 기본 `source`)에 따라 이미지 소스 ID를 결정합니다.
+ * [EN] Resolves the image source ID from a GLTF texture definition following extension priority (`KHR_texture_basisu` -> `EXT_texture_webp` -> default `source`).
+ *
+ * @param textureDef -
+ * [KO] GLTF `textures[]` 항목 객체
+ * [EN] GLTF `textures[]` entry object
+ * @returns
+ * [KO] 선택된 이미지 소스 GLTF ID 또는 `undefined`
+ * [EN] Selected image source GLTF ID or `undefined`
+ * @category GLTF
+ */
+export const resolveTextureSourceId = (textureDef: Texture | undefined): GlTfId | undefined => {
+    if (!textureDef) return undefined;
+    return (
+        textureDef.extensions?.KHR_texture_basisu?.source ??
+        textureDef.extensions?.EXT_texture_webp?.source ??
+        textureDef.source
+    );
+};
 
 /**
  * [KO] GLTF 재질의 텍스처 정보 및 샘플러 옵션을 파싱하여 로더의 텍스처 로드 목록에 등록합니다.
@@ -28,41 +87,45 @@ import parse_KHR_texture_transform from "./extensions/parse_KHR_texture_transfor
  * @param useMipmap -
  * [KO] 밉맵 사용 여부 (기본값: `true`)
  * [EN] Whether to use mipmaps (default: `true`)
- * @category Loader
+ * @category GLTF
  */
 const parseMaterialTexture = (
     gltfLoader: GLTFLoader,
     tMaterial: PBRMaterial,
-    textureInfo: TextureInfo | MaterialNormalTextureInfo | MaterialOcclusionTextureInfo,
+    textureInfo: TextureInfo | MaterialNormalTextureInfo | MaterialOcclusionTextureInfo | undefined,
     targetTextureKey: string,
     format?: string,
     useMipmap: boolean = true
 ) => {
-    const {redGPUContext, gltfData} = gltfLoader
-    const {textureRawList} = gltfLoader.parsingResult
+    if (!textureInfo) return;
+    const {redGPUContext, gltfData} = gltfLoader;
+    const textureRawList = getActiveParseContext(gltfLoader)?.textureRawList;
+    if (!textureRawList) return;
     const targetTextureInfoGlTfId = textureInfo.index;
     const targetTextureInfo = gltfData.textures[targetTextureInfoGlTfId];
-    const targetSourceGlTfId = targetTextureInfo.extensions?.EXT_texture_webp?.source || targetTextureInfo.source;
-    const tURL = getURL(gltfLoader, gltfData, targetSourceGlTfId);
+    const targetSourceGlTfId = resolveTextureSourceId(targetTextureInfo);
+    const tURL = targetSourceGlTfId !== undefined ? getURL(gltfLoader, gltfData, targetSourceGlTfId) : null;
     if (tURL) {
         const samplerGlTfId = targetTextureInfo.sampler;
-        const option = getSamplerInfo(gltfLoader, gltfData, samplerGlTfId);
-        const {parsedURI, cacheKey} = tURL
-        const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`
-        if (!textureRawList[key]) {
-            textureRawList[key] = ({
+        const option = getSamplerInfo(gltfData, samplerGlTfId);
+        const {parsedURI, cacheKey, mimeType} = tURL
+        const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`;
+        const existing = textureRawList.get(key);
+        if (!existing) {
+            textureRawList.set(key, {
                 src: parsedURI,
                 cacheKey,
+                mimeType,
                 targetTextureKey: targetTextureKey,
                 targetSamplerKey: `${targetTextureKey}Sampler`,
                 materialList: [tMaterial],
                 samplerList: [new Sampler(redGPUContext, option)],
-                format: format || navigator.gpu.getPreferredCanvasFormat(),
+                format: format || getPreferredCanvasFormatCached(),
                 useMipmap
             });
         } else {
-            textureRawList[key].materialList.push(tMaterial)
-            textureRawList[key].samplerList.push(new Sampler(redGPUContext, option))
+            existing.materialList.push(tMaterial);
+            existing.samplerList.push(new Sampler(redGPUContext, option));
         }
         tMaterial[`${targetTextureKey}_texCoord_index`] = textureInfo.texCoord || 0;
         if ('extensions' in textureInfo) {
@@ -89,14 +152,17 @@ export default parseMaterialTexture
  * [KO] 대상 이미지 소스의 GLTF ID
  * [EN] GLTF ID of the target image source
  * @returns
- * [KO] 파싱된 URI(`parsedURI`)와 캐시 키(`cacheKey`)를 담은 객체 또는 `null`
- * [EN] Object containing the parsed URI (`parsedURI`) and cache key (`cacheKey`), or `null`
+ * [KO] 파싱된 URI(`parsedURI`), 캐시 키(`cacheKey`), MIME 타입(`mimeType`)을 담은 객체 또는 `null`
+ * [EN] Object containing the parsed URI (`parsedURI`), cache key (`cacheKey`), and MIME type (`mimeType`), or `null`
  */
 const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId: GlTfId) {
-    if (!scenesData.images[sourceGlTfId]) {
+    if (!scenesData.images?.[sourceGlTfId]) {
         return null
     }
-    const {uri} = scenesData.images[sourceGlTfId]
+    const {uri, mimeType} = scenesData.images[sourceGlTfId]
+    if (!uri) {
+        return null
+    }
     let parsedURI
     const cacheKey = `${gltfLoader.url}_${sourceGlTfId}`
     if (uri.indexOf('blob:http') > -1) {
@@ -106,16 +172,14 @@ const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId:
     }
     return {
         parsedURI,
-        cacheKey
+        cacheKey,
+        mimeType
     }
 };
 /**
  * [KO] GLTF 샘플러 ID로부터 WebGPU 샘플러 디스크립터(`GPUSamplerDescriptor`)를 생성합니다.
  * [EN] Creates a WebGPU sampler descriptor (`GPUSamplerDescriptor`) from a GLTF sampler ID.
  *
- * @param gltfLoader -
- * [KO] GLTFLoader 인스턴스
- * [EN] GLTFLoader instance
  * @param scenesData -
  * [KO] GLTF 데이터 객체
  * [EN] GLTF data object
@@ -126,7 +190,7 @@ const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId:
  * [KO] 변환된 `GPUSamplerDescriptor` 객체
  * [EN] Converted `GPUSamplerDescriptor` object
  */
-const getSamplerInfo = function (gltfLoader: GLTFLoader, scenesData: GLTF, samplerGlTfId: GlTfId): GPUSamplerDescriptor {
+const getSamplerInfo = function (scenesData: GLTF, samplerGlTfId: GlTfId): GPUSamplerDescriptor {
     const result: GPUSamplerDescriptor = {
         magFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
         minFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
@@ -135,29 +199,14 @@ const getSamplerInfo = function (gltfLoader: GLTFLoader, scenesData: GLTF, sampl
         addressModeV: GPU_ADDRESS_MODE.REPEAT,
         addressModeW: GPU_ADDRESS_MODE.REPEAT
     };
-    const wrapTable = {
-        33071: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-        33648: GPU_ADDRESS_MODE.MIRRORED_REPEAT,
-        10497: GPU_ADDRESS_MODE.REPEAT
-    };
-    const magFilterTable = {
-        9728: GPU_MIPMAP_FILTER_MODE.NEAREST,
-        9729: GPU_MIPMAP_FILTER_MODE.LINEAR
-    };
-    const minFilterTable = {
-        9728: GPU_MIPMAP_FILTER_MODE.NEAREST,
-        9729: GPU_MIPMAP_FILTER_MODE.LINEAR
-    };
     if (scenesData.samplers) {
-        let t0 = scenesData.samplers[samplerGlTfId];
+        const t0 = scenesData.samplers[samplerGlTfId];
         if (t0) {
-            if ('magFilter' in t0) result.magFilter = magFilterTable[t0.magFilter] || GPU_MIPMAP_FILTER_MODE.LINEAR;
-            if ('minFilter' in t0) result.minFilter = minFilterTable[t0.minFilter] || GPU_MIPMAP_FILTER_MODE.LINEAR;
-            if ('wrapS' in t0) result.addressModeU = wrapTable[t0.wrapS];
-            if ('wrapT' in t0) result.addressModeV = wrapTable[t0.wrapT];
+            if ('magFilter' in t0) result.magFilter = SAMPLER_FILTER_TABLE[t0.magFilter] || GPU_MIPMAP_FILTER_MODE.LINEAR;
+            if ('minFilter' in t0) result.minFilter = SAMPLER_FILTER_TABLE[t0.minFilter] || GPU_MIPMAP_FILTER_MODE.LINEAR;
+            if ('wrapS' in t0) result.addressModeU = SAMPLER_WRAP_TABLE[t0.wrapS];
+            if ('wrapT' in t0) result.addressModeV = SAMPLER_WRAP_TABLE[t0.wrapT];
         }
-    } else {
     }
-    result['string'] = JSON.stringify(result);
     return result;
 };

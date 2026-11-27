@@ -188,4 +188,10 @@ export interface IPhysicsEngine {
      * [EN] Created character controller instance
      */
     createCharacterController(offset: number): any;
+
+    /**
+     * [KO] 물리 월드와 내부 리소스(WASM 힙 등)를 해제하고 파괴합니다.
+     * [EN] Releases and destroys the physics world and internal resources (such as WASM heap memory).
+     */
+    destroy?(): void;
 }

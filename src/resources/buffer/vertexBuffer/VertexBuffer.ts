@@ -159,17 +159,18 @@ class VertexBuffer extends ABaseBuffer {
         if (Array.isArray(data)) {
             data = new Float32Array(data);
         }
+        const prevByteLength = this[GPU_BUFFER_DATA_SYMBOL]?.byteLength || 0;
+        const isRegistered = this.targetResourceManagedState.table.has(this.cacheKey);
+        if (this[GPU_BUFFER_SYMBOL]) {
+            if (isRegistered) {
+                this.targetResourceManagedState.videoMemory -= prevByteLength;
+            }
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this[GPU_BUFFER_SYMBOL]);
+            this[GPU_BUFFER_SYMBOL] = null;
+        }
         this[GPU_BUFFER_DATA_SYMBOL] = data;
         if (interleavedStruct) {
             this.#updateInterleavedStruct(interleavedStruct);
-        }
-        if (this[GPU_BUFFER_SYMBOL]) {
-            this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
-            let temp = this[GPU_BUFFER_SYMBOL]
-            requestAnimationFrame(() => {
-                temp.destroy();
-            })
-            this[GPU_BUFFER_SYMBOL] = null;
         }
         const bufferDescriptor: GPUBufferDescriptor = {
             size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
@@ -177,7 +178,9 @@ class VertexBuffer extends ABaseBuffer {
             label: this.name
         };
         this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
-        this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+        if (isRegistered) {
+            this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+        }
         this.#triangleCount = (this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride) / 3;
         gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL] as BufferSource);
     }

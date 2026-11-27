@@ -1,6 +1,8 @@
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
+import decodeMeshoptBufferViews, {hasMeshoptCompression, isMeshoptFallbackBuffer} from "./decodeMeshoptBufferViews";
+import {createAbortError} from "./gltfAsyncUtils";
 
 /**
  * [KO] glTF 버퍼 로딩 진행률을 계산하여 로더의 진행 상태 정보를 갱신합니다.
@@ -32,39 +34,88 @@ const checkProgress = (gltfLoader: GLTFLoader, gltfData: GLTF, loadedBuffers: nu
  * [EN] Loads all buffer resources defined in the glTF data, converts them into `DataView` instances, and stores them.
  *
  * @param gltfLoader -
- * [KO] 대상 GLTF 로더 인스턴스
- * [EN] Target GLTF loader instance
+ * [KO] 대상 `GLTFLoader` 인스턴스
+ * [EN] Target `GLTFLoader` instance
  * @param gltfData -
  * [KO] 파싱된 glTF 데이터 객체
  * [EN] Parsed glTF data object
  * @param callback -
- * [KO] 모든 버퍼 로드가 완료되었을 때 호출될 콜백 함수
- * [EN] Callback function invoked when all buffers have finished loading
+ * [KO] 모든 버퍼 로드 완료 콜백 (선택)
+ * [EN] Callback invoked when all buffers finish loading (optional)
  * @param onProgress -
- * [KO] 버퍼 로딩 진행 상태가 갱신될 때 호출될 콜백 함수
- * [EN] Callback function invoked when buffer loading progress updates
+ * [KO] 버퍼 로딩 진행률 갱신 콜백 (선택)
+ * [EN] Callback invoked when buffer loading progress updates (optional)
+ * @param onError -
+ * [KO] 로드 에러 콜백 (선택)
+ * [EN] Error callback (optional)
+ * @param signal -
+ * [KO] 로딩 취소용 `AbortSignal` (선택)
+ * [EN] `AbortSignal` to cancel loading (optional)
+ * @param outBuffers -
+ * [KO] 로드된 `DataView`를 기록할 대상 배열 (선택)
+ * [EN] Target array to store loaded `DataView` instances (optional)
  * @category GLTF
  */
-const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callback, onProgress: (info: GLTFLoadingProgressInfo) => void) => {
-    const {parsingResult} = gltfLoader
-    const {uris} = parsingResult
-    const bufferKey = 'buffers';
-    const resultContainer = uris[bufferKey]
-    const buffers = gltfData.buffers
+const getGLTFBuffersResources = (
+    gltfLoader: GLTFLoader,
+    gltfData: GLTF,
+    callback?: () => void,
+    onProgress?: (info: GLTFLoadingProgressInfo) => void,
+    onError?: (error: unknown) => void,
+    signal?: AbortSignal,
+    outBuffers?: DataView[]
+) => {
+    const resultContainer: DataView[] = outBuffers ?? [];
+    const buffers = gltfData.buffers || []
     const totalBuffers = buffers.length;
     let loadedBuffers = 0;
+    let settled = false;
+
+    const fail = (error: unknown) => {
+        if (settled) return;
+        settled = true;
+        if (onError) onError(error);
+        else console.error(error);
+    };
+
+    const complete = () => {
+        if (settled) return;
+        if (signal?.aborted) {
+            fail(createAbortError());
+            return;
+        }
+        settled = true;
+        callback?.();
+    };
+
+    if (signal?.aborted) {
+        fail(createAbortError());
+        return;
+    }
+
+    if (totalBuffers === 0) {
+        complete();
+        return;
+    }
+
     checkProgress(gltfLoader, gltfData, loadedBuffers)
 
-
     buffers.forEach((buffer, bufferIndex) => {
-        buffer['_redURIkey'] = bufferKey;
-        buffer['_redURIIndex'] = bufferIndex;
         if (buffer.uri instanceof ArrayBuffer) {
             const uriDataView = new DataView(buffer.uri);
             processArrayBuffer(uriDataView);
-        } else processNonArrayBuffer(buffer.uri);
+        } else if (ArrayBuffer.isView(buffer.uri)) {
+            const uriDataView = new DataView(buffer.uri.buffer, buffer.uri.byteOffset, buffer.uri.byteLength);
+            processArrayBuffer(uriDataView);
+        } else if (typeof buffer.uri === 'string') {
+            processNonArrayBuffer(buffer.uri);
+        } else if (isMeshoptFallbackBuffer(buffer) || !buffer.uri) {
+            loadedBuffers++;
+            checkLoadingStatus();
+        }
 
         function processArrayBuffer(uriDataView: DataView) {
+            if (settled) return;
             loadedBuffers++;
             resultContainer[bufferIndex] = uriDataView;
             checkLoadingStatus();
@@ -76,22 +127,41 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
                 gltfLoader,
                 tSrc,
                 function (request) {
+                    if (settled) return;
+                    if (signal?.aborted) {
+                        fail(createAbortError());
+                        return;
+                    }
                     loadedBuffers++;
                     resultContainer[bufferIndex] = new DataView(request);
                     checkLoadingStatus()
                 },
-                function (request, error) {
-                    console.error(request, error);
+                function (error) {
+                    fail(error);
                 }
             );
         }
 
         function checkLoadingStatus() {
-
+            if (settled) return;
+            if (signal?.aborted) {
+                fail(createAbortError());
+                return;
+            }
             checkProgress(gltfLoader, gltfData, loadedBuffers)
             onProgress?.(gltfLoader.loadingProgressInfo);
             if (loadedBuffers === totalBuffers) {
-                if (callback) callback();
+                if (hasMeshoptCompression(gltfData)) {
+                    decodeMeshoptBufferViews(gltfData, resultContainer)
+                        .then(() => {
+                            complete();
+                        })
+                        .catch((error) => {
+                            fail(error);
+                        });
+                } else {
+                    complete();
+                }
             }
         }
     });
@@ -119,12 +189,14 @@ const arrayBufferLoader = (gltfLoader: GLTFLoader, url: string, onSuccess, onErr
     const {cache, pending} = gltfLoader.redGPUContext.resourceManager.gltfCacheManager.bufferCache;
 
     url = getAbsoluteURL(window.location.href, url)
-    if (cache.has(url)) {
-        onSuccess?.(cache.get(url)!);
+    const cachedBuffer = cache.get(url);
+    if (cachedBuffer) {
+        onSuccess?.(cachedBuffer);
         return;
     }
-    if (pending.has(url)) {
-        pending.get(url)!.then(data => onSuccess?.(data)).catch(err => onError?.(err));
+    const pendingPromise = pending.get(url);
+    if (pendingPromise) {
+        pendingPromise.then(data => onSuccess?.(data)).catch(err => onError?.(err));
         return;
     }
     const promise = fetch(url)

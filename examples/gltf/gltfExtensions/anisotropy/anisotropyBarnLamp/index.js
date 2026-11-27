@@ -26,7 +26,7 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnisotropyBarnLamp/glTF-Binary/AnisotropyBarnLamp.glb';
+        const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnisotropyBarnLamp/glTF-KTX-BasisU/AnisotropyBarnLamp.gltf';
         loadGLTF(view, MODEL_URL);
 
         const renderer = new RedGPU.Renderer();

@@ -134,6 +134,35 @@ const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
 ---
 
+## 5. Lifecycle and Resource Cleanup
+
+`RedGPUContext` automatically releases all registered views, GPU buffers and textures, event listeners, observers, and
+attached physics engines on page exit (`pagehide`), and safely re-initializes on browser Back/Forward Cache (`pageshow`)
+restoration.
+
+In SPA frameworks such as React or Vue, call `redGPUContext.destroy()` explicitly on component unmount to immediately
+free GPU memory and `window` listeners. You can also pass an `onDestroy` callback as the fourth argument of
+`RedGPU.init()` to handle teardown completion.
+
+```javascript
+RedGPU.init(
+    canvas,
+    (redGPUContext) => {
+        // Explicitly release resources on SPA component unmount
+        // redGPUContext.destroy();
+    },
+    (error) => {
+        console.error('RedGPU initialization failed:', error);
+    },
+    (deviceLostInfo) => {
+        // Invoked once destroy() completes (deviceLostInfo.reason === 'destroyed')
+        console.log('RedGPUContext destroyed:', deviceLostInfo.reason);
+    }
+);
+```
+
+---
+
 ## Related Examples
 
 - [Hello World 3D](/RedGPU/examples/3d/helloWorld/)

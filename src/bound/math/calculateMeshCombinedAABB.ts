@@ -36,6 +36,7 @@ const calculateMeshCombinedAABB = (mesh: Mesh): AABB => {
  * [EN] Array to store collected AABBs
  */
 const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
+    if (!mesh.visible) return;
     if (mesh._geometry) {
         const aabb = mesh.boundingAABB
         aabbs.push(aabb);
